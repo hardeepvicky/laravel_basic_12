@@ -1,0 +1,2 @@
+Query,Time-In-MilliSeconds
+update `users` set `is_active` = '1', `users`.`updated_at` = '2025-03-12 06:11:58' where `id` = '5', 2.21

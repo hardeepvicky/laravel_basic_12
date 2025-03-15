@@ -1,0 +1,5 @@
+Query,Time-In-MilliSeconds
+select * from `users` where `id` = '1' limit 1, 7.88
+select * from `users` where `users`.`id` = '5' limit 1, 1.65
+select column_name as `column_name` from information_schema.columns where table_schema = 'laravel_basic' and table_name = 'users', 6.95
+update `users` set `is_active` = '1', `users`.`updated_at` = '2025-03-12 06:11:58' where `id` = '5', 2.21

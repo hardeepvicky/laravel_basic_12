@@ -1,0 +1,16 @@
+Query,Time-In-MilliSeconds
+select * from `sessions` where `id` = 'PpByTj447RKd8EUxDKt0e4Kh3U6LVjw3cxzZZrKl' limit 1, 3.07
+select * from `users` where `id` = '2' limit 1, 0.81
+select * from `users` where `users`.`id` = '3' limit 1, 0.87
+select * from `user_roles` where `user_roles`.`user_id` in (3), 0.67
+select * from `cache` where `key` in ('laravel_cache_table-info-users'), 0.75
+select count(*) as aggregate from `users` where `email` = 'vicky@gmail.com' and `id` <> '3', 0.63
+select column_name as `name`, data_type as `type_name`, column_type as `type`, collation_name as `collation`, is_nullable as `nullable`, column_default as `default`, column_comment as `comment`, generation_expression as `expression`, extra as `extra` from information_schema.columns where table_schema = schema() and table_name = 'users' order by ordinal_position asc, 4.25
+update `users` set `profile_image` = 'files/users/3.jpg?1742011147', `users`.`updated_at` = '2025-03-15 03:59:07' where `id` = '3', 0.47
+select * from `cache` where `key` in ('laravel_cache_User'), 0.38
+select * from `cache` where `key` in ('laravel_cache_User'), 0.34
+delete from `cache` where `key` in ('laravel_cache_User-id-display_name_with_id', 'laravel_cache_illuminate:cache:flexible:created:User-id-display_name_with_id'), 0.74
+delete from `cache` where `key` in ('laravel_cache_User', 'laravel_cache_illuminate:cache:flexible:created:User'), 0.47
+select * from `roles` where `roles`.`id` in (2), 0.59
+select * from `user_roles` where `user_roles`.`user_id` = '3', 0.6
+select * from `cache` where `key` in ('laravel_cache_menu_user_3'), 0.43

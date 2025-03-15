@@ -1,0 +1,2 @@
+Query,Time-In-MilliSeconds
+update `roles` set `is_active` = '0', `roles`.`updated_at` = '2025-03-05 11:49:30' where `id` = '14', 2.8

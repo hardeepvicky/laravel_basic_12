@@ -1,0 +1,4 @@
+Query,Time-In-MilliSeconds
+select * from `sessions` where `id` = 'PpByTj447RKd8EUxDKt0e4Kh3U6LVjw3cxzZZrKl' limit 1, 18.54
+select * from `users` where `id` = '2' limit 1, 0.89
+select * from `users` where `users`.`id` = '3' limit 1, 0.7

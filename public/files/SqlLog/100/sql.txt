@@ -1,0 +1,4 @@
+Query,Time-In-MilliSeconds
+select * from `users` where `id` = '1' limit 1, 7.65
+select * from `roles` where `roles`.`id` = '14' limit 1, 1.28
+update `roles` set `is_active` = '1', `roles`.`updated_at` = '2025-03-05 11:49:32' where `id` = '14', 2.01

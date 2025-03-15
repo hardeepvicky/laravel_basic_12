@@ -1,0 +1,4 @@
+Query,Time-In-MilliSeconds
+update `users` set `profile_image` = 'files/users/3.jpg?1742011147', `users`.`updated_at` = '2025-03-15 03:59:07' where `id` = '3', 0.47
+delete from `cache` where `key` in ('laravel_cache_User-id-display_name_with_id', 'laravel_cache_illuminate:cache:flexible:created:User-id-display_name_with_id'), 0.74
+delete from `cache` where `key` in ('laravel_cache_User', 'laravel_cache_illuminate:cache:flexible:created:User'), 0.47

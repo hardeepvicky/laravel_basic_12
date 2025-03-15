@@ -1,0 +1,9 @@
+Query,Time-In-MilliSeconds
+select * from `users` where `id` = '1' limit 1, 3.22
+select * from `users` where `users`.`id` = '3' limit 1, 0.62
+select * from `user_roles` where `user_roles`.`user_id` in (3), 0.66
+select count(*) as aggregate from `users` where `email` = 'hardeepvicky@gmail.com' and `id` <> '3', 0.53
+select column_name as `column_name` from information_schema.columns where table_schema = 'laravel_basic' and table_name = 'users', 2.49
+update `users` set `profile_image` = 'files/users/3.jpg?1741233136', `updated_by` = '1', `users`.`updated_at` = '2025-03-06 03:52:16' where `id` = '3', 0.52
+select * from `roles` where `roles`.`id` in ('2', '6', '8'), 0.73
+select * from `user_roles` where `user_roles`.`user_id` = '3', 0.46
