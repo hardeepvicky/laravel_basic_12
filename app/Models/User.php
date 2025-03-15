@@ -175,7 +175,8 @@ class User extends Authenticatable
 
         foreach($this->roles as $role)
         {
-            $list[$role->id] = $role->display_name;
+            $arr = $role->toArray();
+            $list[$arr['id']] = $arr['display_name'];
         }
 
         return $list;

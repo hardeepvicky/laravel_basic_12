@@ -25,8 +25,25 @@ class AccessControl
     {
         $route_name = trim($route_name);
 
-        if (in_array($route_name, SectionRoutes::ALLOW_ROUTES_FOR_ANY_LOGIN_USER)) {
-            return true;
+        foreach(SectionRoutes::ALLOW_ROUTES_FOR_ANY_LOGIN_USER as $allowed_route)
+        {
+            if ($route_name == $allowed_route)
+            {
+                return true;
+            }
+
+            $pos = strpos($allowed_route, "*.");
+            if ($pos >= 0)
+            {
+                $str = substr($allowed_route, $pos + 2);
+                
+                $matched = preg_match("/$str/", $route_name);
+
+                if ($matched)
+                {
+                    return true;
+                }
+            }
         }
 
         if ($role_id_list)
@@ -49,7 +66,7 @@ class AccessControl
                 return true;
             }
 
-            $system_role_count = Role::where("id", $role_id_list)->where('is_system_admin', 1)->count();
+            $system_role_count = Role::where("id", $role_id_list)->where('code', Role::TYPE_SYSTEM_ADMIN)->count();
 
             if ($system_role_count > 0 && in_array($route_name, SectionRoutes::ALLOW_ROUTES_FOR_SYSTEM_ADMIN)) {
                 return true;

@@ -36,6 +36,8 @@ class Role extends BaseModel
         ],
     ];
 
+    const TYPE_SYSTEM_ADMIN = "system_admin";    
+
     public function userRole()
     {
         return $this->hasMany(UserRole::class, 'role_id');

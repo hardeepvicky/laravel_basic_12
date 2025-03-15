@@ -33,7 +33,7 @@ class PermissionController extends BackendController
 
             $records = RoleRouteName::where($conditions)->with([
                 "role" => function ($query) {
-                    $query->select(["id", "name", "is_system_admin"]);
+                    $query->select(["id", "name", "code"]);
                 },
                 "routeName" => function ($query) {
                     $query->select(["id", "name"]);
@@ -53,7 +53,7 @@ class PermissionController extends BackendController
                         $records[$k]['role']['name'] = "Allow For All Login User";
                     }
 
-                    if ($record['role']['is_system_admin'] && in_array($record['route_name']['name'], SectionRoutes::ALLOW_ROUTES_FOR_SYSTEM_ADMIN)) {
+                    if ($record['role']['code'] == Role::TYPE_SYSTEM_ADMIN && in_array($record['route_name']['name'], SectionRoutes::ALLOW_ROUTES_FOR_SYSTEM_ADMIN)) {
                         $records[$k]['can_be_delete'] = false;
                         $records[$k]['role']['name'] = "Allow For All System Admin";
                     }
@@ -101,7 +101,7 @@ class PermissionController extends BackendController
             if ($conditions && isset($conditions["role_id"]) && $conditions["role_id"])
             {
                 $role = Role::findOrFail($conditions["role_id"]); 
-                if ($role->is_system_admin)
+                if ($role->code)
                 {
                     foreach(SectionRoutes::ALLOW_ROUTES_FOR_SYSTEM_ADMIN as $route_name)
                     {
