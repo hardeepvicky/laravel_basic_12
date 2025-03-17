@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Backend\CityController;
 use App\Http\Controllers\Backend\DashboardController;
 use App\Http\Controllers\Backend\DepartmentController;
 use App\Http\Controllers\Backend\DesignationController;
@@ -8,6 +9,7 @@ use App\Http\Controllers\Backend\PermissionController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Backend\PublicController;
 use App\Http\Controllers\Backend\RoleController;
+use App\Http\Controllers\Backend\StateController;
 use App\Http\Controllers\Backend\UserController;
 use App\Http\Controllers\HomeController;
 use GuzzleHttp\Middleware;
@@ -69,6 +71,22 @@ Route::group(['middleware' => ['auth']], function () {
         $name = "de_activate";
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
     });
+
+// state
+$route_prefix = "state";
+$controllerClass = StateController::class;
+Route::resource($route_prefix, $controllerClass);
+Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use($controllerClass) {
+    
+});
+
+// City
+$route_prefix = "city";
+$controllerClass = CityController::class;
+Route::resource($route_prefix, $controllerClass);
+Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use($controllerClass) {
+    
+});
 
 // Department
     $route_prefix = "department";

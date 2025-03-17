@@ -38,6 +38,7 @@ class Menu
         self::$menus[] = (new HomeMenu)->get();
         self::$menus[] = (new MemberMenu)->get();
         self::$menus[] = (new EmployeeMenu)->get();
+        self::$menus[] = (new GeneralMenu)->get();
         self::$menus[] = (new SystemMenu)->get();
         self::$menus[] = (new LogMenu)->get();
         self::$menus[] = (new DeveloperMenu)->get();
@@ -457,6 +458,36 @@ class EmployeeMenu extends BaseMenu
         $routePrefix = "designation";
 
         $links = self::getControllerDefaultLinks($routePrefix, "Designation", self::ICON_MENU_ROOT_CHILD);
+
+        return $links;
+    }
+}
+
+class GeneralMenu extends BaseMenu
+{
+    public static function get(): array
+    {
+        $links = [];
+
+        $links[] = self::state();
+        $links[] = self::city();
+
+        return self::getModule("General Menu", 'fas fa-users', $links);
+    }
+
+    private static function state()
+    {
+        $routePrefix = "state";
+
+        $links = self::getControllerDefaultLinks($routePrefix, "State", self::ICON_MENU_ROOT_CHILD);
+
+        return $links;
+    }
+    private static function city()
+    {
+        $routePrefix = "city";
+
+        $links = self::getControllerDefaultLinks($routePrefix, "city", self::ICON_MENU_ROOT_CHILD);
 
         return $links;
     }
