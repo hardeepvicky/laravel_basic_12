@@ -80,7 +80,7 @@ $(document).ready(function () {
         error_span.hide();
     });
 
-    $("form.summary-delete-form").submit(function () {
+    $(document).on("submit", "form.summary-delete-form", function () {
         var _form = $(this);
 
         var is_confirm = _form.attr("data-confirm");
