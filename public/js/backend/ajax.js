@@ -9,4 +9,10 @@ $(document).ready(function()
         placeHolder : "Please Select",
         theme : "bootstrap-5",
     });
+
+    $(".css-toggler").cssClassToggle();
+
+    $(".ajax-load").ajaxLoad();
+
+    $(".fancybox").fancybox();
 });
