@@ -33,7 +33,6 @@ class DepartmentController extends BackendController
 
         $conditions = $this->getConditions($cache_key, [
             ["field" => "name", "type" => "string", "view_field" => "name"],
-            ["field" => "is_admin", "type" => "", "view_field" => "is_admin"],
             ["field" => "is_active", "type" => "", "view_field" => "is_active"],
         ]);
 
@@ -75,7 +74,6 @@ class DepartmentController extends BackendController
     private function _common_validation_rules()
     {
         return [
-            "is_admin" => "",
             "is_active" => ""
         ];
     }
@@ -83,8 +81,8 @@ class DepartmentController extends BackendController
     private function _common_validation_messages()
     {
         return [
-            "name.required" => "Role name is required",
-            "name.unique" => "Role name already exist",
+            "name.required" => "Departname name is required",
+            "name.unique" => "Departname name already exist",
         ];
     }
 

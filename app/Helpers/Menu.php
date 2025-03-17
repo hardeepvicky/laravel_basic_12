@@ -439,6 +439,7 @@ class EmployeeMenu extends BaseMenu
         $links = [];
 
         $links[] = self::department();
+        $links[] = self::designation();
 
         return self::getModule("Employee Manager", 'fas fa-users', $links);
     }
@@ -448,6 +449,14 @@ class EmployeeMenu extends BaseMenu
         $routePrefix = "department";
 
         $links = self::getControllerDefaultLinks($routePrefix, "Department", self::ICON_MENU_ROOT_CHILD);
+
+        return $links;
+    }
+    private static function designation()
+    {
+        $routePrefix = "designation";
+
+        $links = self::getControllerDefaultLinks($routePrefix, "Designation", self::ICON_MENU_ROOT_CHILD);
 
         return $links;
     }

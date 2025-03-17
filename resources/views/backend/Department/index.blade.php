@@ -19,12 +19,7 @@ $page_header_links = [
                 <div class="col-md-3">
                     <x-inputs.text-field name="name" label="Name" :value="$search['name']" autocomplete="off" />
                 </div>
-                <div class="col-md-3">
-                    <x-inputs.drop-down name="is_admin" label="Admin"
-                        :value="$search['is_admin']"
-                        :list="$yes_no_list"
-                        class="select2" />
-                </div>
+               
                 <div class="col-md-3">
                     <x-inputs.drop-down name="is_active" label="Active"
                         :value="$search['is_active']"
