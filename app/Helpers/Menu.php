@@ -37,6 +37,7 @@ class Menu
 
         self::$menus[] = (new HomeMenu)->get();
         self::$menus[] = (new MemberMenu)->get();
+        self::$menus[] = (new EmployeeMenu)->get();
         self::$menus[] = (new SystemMenu)->get();
         self::$menus[] = (new LogMenu)->get();
         self::$menus[] = (new DeveloperMenu)->get();
@@ -425,6 +426,28 @@ class MemberMenu extends BaseMenu
         $routePrefix = "role";
 
         $links = self::getControllerDefaultLinks($routePrefix, "Roles", self::ICON_MENU_ROOT_CHILD);
+
+        return $links;
+    }
+}
+
+
+class EmployeeMenu extends BaseMenu
+{
+    public static function get(): array
+    {
+        $links = [];
+
+        $links[] = self::department();
+
+        return self::getModule("Employee Manager", 'fas fa-users', $links);
+    }
+
+    private static function department()
+    {
+        $routePrefix = "department";
+
+        $links = self::getControllerDefaultLinks($routePrefix, "Department", self::ICON_MENU_ROOT_CHILD);
 
         return $links;
     }

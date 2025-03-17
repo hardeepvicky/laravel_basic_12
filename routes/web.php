@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Backend\DashboardController;
+use App\Http\Controllers\Backend\DepartmentController;
 use App\Http\Controllers\Backend\DeveloperController;
 use App\Http\Controllers\Backend\PermissionController;
 use Illuminate\Support\Facades\Route;
@@ -69,6 +70,18 @@ Route::group(['middleware' => ['auth']], function () {
     });
 
 
+    $route_prefix = "department";
+    $controllerClass = DepartmentController::class;
+    Route::resource($route_prefix, $controllerClass);
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use($controllerClass) {
+        
+        $name = "activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "de_activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+    });
+
     Route::group(['prefix' => 'permissions', 'as' => 'permissions.'], function () {
 
         $name = "index";
@@ -107,4 +120,3 @@ Route::group(['middleware' => ['auth']], function () {
     
 });
 Route::get('verify-otp/{email}',[UserController::class,'otp_verified_view'])->name('verify.otp')->middleware('auth');
-
