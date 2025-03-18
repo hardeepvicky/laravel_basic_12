@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Backend\PublicController;
 use App\Http\Controllers\Backend\RoleController;
 use App\Http\Controllers\Backend\StateController;
+use App\Http\Controllers\Backend\TypeController;
 use App\Http\Controllers\Backend\UserController;
 use App\Http\Controllers\HomeController;
 use GuzzleHttp\Middleware;
@@ -104,6 +105,19 @@ Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function 
     // Designation
     $route_prefix = "designation";
     $controllerClass = DesignationController::class;
+    Route::resource($route_prefix, $controllerClass);
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use($controllerClass) {
+        
+        $name = "activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "de_activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+    });
+
+    // Type
+    $route_prefix = "type";
+    $controllerClass = TypeController::class;
     Route::resource($route_prefix, $controllerClass);
     Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use($controllerClass) {
         
