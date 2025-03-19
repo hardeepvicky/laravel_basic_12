@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Backend\CityController;
 use App\Http\Controllers\Backend\DashboardController;
 use App\Http\Controllers\Backend\DepartmentController;
@@ -166,3 +167,6 @@ Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function 
     
 });
 Route::get('verify-otp/{email}',[UserController::class,'otp_verified_view'])->name('verify.otp')->middleware('auth');
+
+Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+Route::post('forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
