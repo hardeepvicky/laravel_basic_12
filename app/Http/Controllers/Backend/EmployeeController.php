@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Models\State;
+use App\Models\EmployeeDocumentFile;
 use App\Models\DocumentFile;
 use App\Models\City;
 use App\Models\Department;
@@ -156,6 +157,14 @@ class EmployeeController extends BackendController
                 ];
 
                 $documentFile = DocumentFile::create($documentData);
+
+                // insert in employee document files
+                $employeeDocumentData = [
+                    'employee_id' => $model->id,
+                    'document_file_id' => $documentFile->id,
+                ];
+
+                EmployeeDocumentFile::create($employeeDocumentData);
 
             }
 
