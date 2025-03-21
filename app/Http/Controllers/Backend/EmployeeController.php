@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Models\State;
+use App\Models\DocumentFile;
 use App\Models\City;
 use App\Models\Department;
 use App\Models\Designation;
 use App\Models\Employee;
+use App\Models\Type;
 use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Support\Facades\DB;
@@ -73,7 +75,8 @@ class EmployeeController extends BackendController
         $departments = Department::where('is_active', 1)->get()->toArray();
         $designations = Designation::where('is_active', '=', 1)->get()->toArray();
         $states = State::get()->toArray();
-        $cities = City::get()->toArray();        
+        $cities = City::get()->toArray();      
+        $dtypes = Type::get()->toArray();      
         $types = ['Manager', 'Clerk', 'Helper', 'Peon'];
 
         $records = [
@@ -82,11 +85,8 @@ class EmployeeController extends BackendController
            'states' =>  $states,
            'cities' =>  $cities,
            'types' =>  $types,
+           'dtypes' =>  $dtypes,
         ];
-
-
-
-        // dd($records);
 
         $this->setForView(compact("model", 'form', 'records'));
 
@@ -110,8 +110,6 @@ class EmployeeController extends BackendController
 
     public function store(Request $request)
     {
-        // dd($request->all());
-
         $this->beforeCreate();
 
         $rules = $this->_common_validation_rules();
@@ -119,14 +117,15 @@ class EmployeeController extends BackendController
         $messages = $this->_common_validation_messages();
 
         $rules = array_merge($rules, [
-            'name' => 'required|min:2|unique:' . $this->tableName,
-            'type' => 'required|min:2|unique:' . $this->tableName,
+            'name' => 'required',
+            'type' => 'required',
             'department_id' => 'required|exists:departments,id',
             'designation_id' => 'required|exists:designations,id',
             'current_state_id' => 'required',
             'current_city_id' => 'required',
             'permanent_state_id' => 'required',
             'permanent_city_id' => 'required',
+            'image' => 'required|file|mimes:pdf,jpg,jpeg,png,doc,docx|max:10240',
         ]);
 
         $messages = array_merge($messages, [
@@ -141,6 +140,25 @@ class EmployeeController extends BackendController
         {
             $model = $this->modelClass::create($validatedData);
             
+            // file table record
+            if($request->hasFile('image')){
+
+                $file = $request->file('image');
+                $filepath = $file->store('documents');
+
+                // create record for document table
+                $documentData = [
+                    'type_id' => $request->type_id,
+                    'file' => $filepath,
+                    'filename' => $file->getClientOriginalName(),
+                    'ext' => $file->extension(),
+                    'file_size_in_mb' => $file->getSize() / 1024 / 1024,
+                ];
+
+                $documentFile = DocumentFile::create($documentData);
+
+            }
+
             $this->updateUserInfoAfterSave($model);
             
             DB::commit();
@@ -170,7 +188,23 @@ class EmployeeController extends BackendController
             'method' => 'PUT',
         ];
 
-        $this->setForView(compact("model", "form"));
+        $departments = Department::where('is_active', 1)->get()->toArray();
+        $designations = Designation::where('is_active', '=', 1)->get()->toArray();
+        $states = State::get()->toArray();
+        $cities = City::get()->toArray();      
+        $dtypes = Type::get()->toArray();      
+        $types = ['Manager', 'Clerk', 'Helper', 'Peon'];
+
+        $records = [
+           'departments' =>  $departments, 
+           'designations' =>  $designations,
+           'states' =>  $states,
+           'cities' =>  $cities,
+           'types' =>  $types,
+           'dtypes' =>  $dtypes,
+        ];
+
+        $this->setForView(compact("model", "form", 'records'));
 
         return $this->view("form");
     }

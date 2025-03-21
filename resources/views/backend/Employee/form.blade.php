@@ -9,7 +9,7 @@
 
     <x-backend.form-errors />
 
-    <form action="{{ $form['url'] }}" method="POST" class="">
+    <form action="{{ $form['url'] }}" method="POST" class="" enctype="multipart/form-data">
         {!! csrf_field() !!}
         {{ method_field($form['method']) }}
 
@@ -36,7 +36,7 @@
                                 <div class="form-group mb-3">
                                     <x-inputs.text-field name="name" label="Name" :value="$model->name"
                                         placeholder="Enter Name" autocomplete="off" mandatory="true" />
-                                </div>
+                                    </div>
                             </div>
                             <div class="col-lg-6">
                                 <div class="form-group mb-3">
@@ -56,7 +56,7 @@
                                         <option value="">Select</option>
                                         @foreach ($records['designations'] as $designation)
                                             <option value="{{ $designation['id'] }}">{{ $designation['name'] }}</option>
-                                        @endforeach
+                                            @endforeach
                                     </select>
                                 </div>
                             </div>
@@ -66,7 +66,7 @@
                                     <select name="current_state_id" id="cState" class="select2">
                                         <option value="">Select</option>
                                         @foreach ($records['states'] as $state)
-                                            <option value="{{ $state['id'] }}">{{ $state['name'] }}</option>
+                                        <option value="{{ $state['id'] }}">{{ $state['name'] }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -86,7 +86,7 @@
                                     <select name="permanent_state_id" id="pState" class="select2">
                                         <option value="">Select</option>
                                         @foreach ($records['states'] as $state)
-                                            <option value="{{ $state['id'] }}">{{ $state['name'] }}</option>
+                                        <option value="{{ $state['id'] }}">{{ $state['name'] }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -97,9 +97,26 @@
                                     <select name="permanent_city_id" id="pCity" class="select2">
                                         <option value="">Select</option>
                                         {{-- @foreach ($records['cities'] as $city)
-                                            <option value="{{ $city['id'] }}">{{ $city['name'] }}</option>
+                                        <option value="{{ $city['id'] }}">{{ $city['name'] }}</option>
                                         @endforeach --}}
                                     </select>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group mb-3">
+                                    <label for="">Type</label>
+                                    <select name="type_id" id="" class="select2">
+                                        <option value="">Select</option>
+                                        @foreach ($records['dtypes'] as $dtype)
+                                        <option value="{{ $dtype['id'] }}">{{ $dtype['name'] }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <label for="">Image</label>
+                                <div class="form-group mb-3">
+                                   <input type="file" name="image">
                                 </div>
                             </div>
                         </div>
