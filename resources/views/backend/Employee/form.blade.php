@@ -27,7 +27,7 @@
                                     <select name="type" id="" class="select2">
                                         <option value="">Select</option>
                                         @foreach ($records['types'] as $type)
-                                            <option value="{{ $type }}">{{ $type }}</option>
+                                            <option value="{{ $type }}" @if ($model->type == $type) selected @endif>{{ $type }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -44,7 +44,7 @@
                                     <select name="department_id" id="" class="select2">
                                         <option value="">Select</option>
                                         @foreach ($records['departments'] as $department)
-                                            <option value="{{ $department['id'] }}">{{ $department['name'] }}</option>
+                                            <option value="{{ $department['id'] }}" @if($model->department_id == $department['id']) selected @endif>{{ $department['name'] }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -55,7 +55,7 @@
                                     <select name="designation_id" id="" class="select2">
                                         <option value="">Select</option>
                                         @foreach ($records['designations'] as $designation)
-                                            <option value="{{ $designation['id'] }}">{{ $designation['name'] }}</option>
+                                            <option value="{{ $designation['id'] }}" @if($model->designation_id == $designation['id']) selected @endif>{{ $designation['name'] }}</option>
                                             @endforeach
                                     </select>
                                 </div>
@@ -66,7 +66,7 @@
                                     <select name="current_state_id" id="cState" class="select2">
                                         <option value="">Select</option>
                                         @foreach ($records['states'] as $state)
-                                        <option value="{{ $state['id'] }}">{{ $state['name'] }}</option>
+                                        <option value="{{ $state['id'] }}" @if($model->current_state_id == $state['id']) selected @endif>{{ $state['name'] }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -86,7 +86,7 @@
                                     <select name="permanent_state_id" id="pState" class="select2">
                                         <option value="">Select</option>
                                         @foreach ($records['states'] as $state)
-                                        <option value="{{ $state['id'] }}">{{ $state['name'] }}</option>
+                                        <option value="{{ $state['id'] }}" @if($model->permanent_state_id == $state['id']) selected @endif>{{ $state['name'] }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -96,9 +96,7 @@
                                     <label for="">Permanent City</label>
                                     <select name="permanent_city_id" id="pCity" class="select2">
                                         <option value="">Select</option>
-                                        {{-- @foreach ($records['cities'] as $city)
-                                        <option value="{{ $city['id'] }}">{{ $city['name'] }}</option>
-                                        @endforeach --}}
+                                        {{-- dynamic with selected states --}}
                                     </select>
                                 </div>
                             </div>
