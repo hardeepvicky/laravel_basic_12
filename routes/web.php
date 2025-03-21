@@ -17,6 +17,8 @@ use App\Http\Controllers\Backend\UserController;
 use App\Http\Controllers\HomeController;
 use GuzzleHttp\Middleware;
 use Illuminate\Http\Request;
+use App\Models\City;
+
 
 Route::get('/', function () {
     return redirect()->route("home");
@@ -185,3 +187,12 @@ Route::get('verify-otp/{email}',[UserController::class,'otp_verified_view'])->na
 
 Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
 Route::post('forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+
+// show cities based on selected state //
+Route::get('/cities/{stateId}', function ($stateId) {
+    
+    $cities = City::where('state_id', $stateId)->pluck('name', 'id');
+    
+    return response()->json(['cities' => $cities]);
+});
+// show cities based on selected state //

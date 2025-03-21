@@ -73,14 +73,17 @@ class EmployeeController extends BackendController
         $departments = Department::where('is_active', 1)->get()->toArray();
         $designations = Designation::where('is_active', '=', 1)->get()->toArray();
         $states = State::get()->toArray();
-        $cities = City::get()->toArray();
+        $cities = City::get()->toArray();        
+        $types = ['Manager', 'Clerk', 'Helper', 'Peon'];
 
         $records = [
            'departments' =>  $departments, 
            'designations' =>  $designations,
            'states' =>  $states,
            'cities' =>  $cities,
+           'types' =>  $types,
         ];
+
 
 
         // dd($records);

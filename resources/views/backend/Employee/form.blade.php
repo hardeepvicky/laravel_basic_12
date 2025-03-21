@@ -23,8 +23,13 @@
                         <div class="row">
                             <div class="col-lg-6">
                                 <div class="form-group mb-3">
-                                    <x-inputs.text-field name="type" label="Type" :value="$model->name"
-                                        placeholder="Enter Type" autocomplete="off" mandatory="true" />
+                                    <label for="">Type</label>
+                                    <select name="type" id="" class="select2">
+                                        <option value="">Select</option>
+                                        @foreach ($records['types'] as $type)
+                                            <option value="{{ $type }}">{{ $type }}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
                             </div>
                             <div class="col-lg-6">
@@ -58,10 +63,10 @@
                             <div class="col-lg-6">
                                 <div class="form-group mb-3">
                                     <label for="">Current State</label>
-                                    <select name="current_state_id" id="" class="select2">
+                                    <select name="current_state_id" id="cState" class="select2">
                                         <option value="">Select</option>
                                         @foreach ($records['states'] as $state)
-                                        <option value="{{ $state['id'] }}">{{ $state['name'] }}</option>
+                                            <option value="{{ $state['id'] }}">{{ $state['name'] }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -69,18 +74,16 @@
                             <div class="col-lg-6">
                                 <div class="form-group mb-3">
                                     <label for="">Current City</label>
-                                    <select name="current_city_id" id="" class="select2">
+                                    <select name="current_city_id" id="cCity" class="select2">
                                         <option value="">Select</option>
-                                        @foreach ($records['cities'] as $city)
-                                        <option value="{{ $city['id'] }}">{{ $city['name'] }}</option>
-                                        @endforeach
+                                        {{-- as per states --}}
                                     </select>
                                 </div>
                             </div>
                             <div class="col-lg-6">
                                 <div class="form-group mb-3">
                                     <label for="">Permanent State</label>
-                                    <select name="permanent_state_id" id="" class="select2">
+                                    <select name="permanent_state_id" id="pState" class="select2">
                                         <option value="">Select</option>
                                         @foreach ($records['states'] as $state)
                                             <option value="{{ $state['id'] }}">{{ $state['name'] }}</option>
@@ -91,11 +94,11 @@
                             <div class="col-lg-6">
                                 <div class="form-group mb-3">
                                     <label for="">Permanent City</label>
-                                    <select name="permanent_city_id" id="" class="select2">
+                                    <select name="permanent_city_id" id="pCity" class="select2">
                                         <option value="">Select</option>
-                                        @foreach ($records['cities'] as $city)
+                                        {{-- @foreach ($records['cities'] as $city)
                                             <option value="{{ $city['id'] }}">{{ $city['name'] }}</option>
-                                        @endforeach
+                                        @endforeach --}}
                                     </select>
                                 </div>
                             </div>
@@ -115,3 +118,54 @@
         </div>
     </form>
 @endsection
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+
+        // state city dropdown
+        function updateCities(stateId, selectedId) {
+
+            $('#' + selectedId).html('<option value="">Select</option>');
+
+            $.ajax({
+                url: '/cities/' + stateId,
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    if (data.cities) {
+                        $.each(data.cities, function(id, name) {
+                            $('#' + selectedId).append('<option value="' + id + '">' +
+                                name + '</option>');
+                        });
+                    } else {
+                        $('#' + selectedId).append('<option value="">No Records Found</option>')
+                    }
+                },
+            })
+
+        }
+
+        // current state city
+        $('#cState').on('change', function() {
+            var stateId = $(this).val();
+            if (stateId) {
+                updateCities(stateId, 'cCity');
+            } else {
+                $('#cCity').html('<option value="">Select</option>');
+            }
+        });
+        
+        // permanent state city
+        $('#pState').on('change', function() {
+            var stateId = $(this).val();
+            if (stateId) {
+                updateCities(stateId, 'pCity');
+            } else {
+                $('#pCity').html('<option value="">Select</option>');
+            }
+        });
+
+    })
+</script>
