@@ -6,6 +6,7 @@ use App\Http\Controllers\Backend\DashboardController;
 use App\Http\Controllers\Backend\DepartmentController;
 use App\Http\Controllers\Backend\DesignationController;
 use App\Http\Controllers\Backend\DeveloperController;
+use App\Http\Controllers\Backend\EmployeeController;
 use App\Http\Controllers\Backend\PermissionController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Backend\PublicController;
@@ -90,6 +91,7 @@ Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function 
     
 });
 
+
 // Department
     $route_prefix = "department";
     $controllerClass = DepartmentController::class;
@@ -119,6 +121,19 @@ Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function 
     // Type
     $route_prefix = "type";
     $controllerClass = TypeController::class;
+    Route::resource($route_prefix, $controllerClass);
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use($controllerClass) {
+        
+        $name = "activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "de_activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+    });
+
+    // Employee
+    $route_prefix = "employee";
+    $controllerClass = EmployeeController::class;
     Route::resource($route_prefix, $controllerClass);
     Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use($controllerClass) {
         
