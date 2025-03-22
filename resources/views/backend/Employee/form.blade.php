@@ -73,7 +73,7 @@
                             <div class="col-lg-6">
                                 <div class="form-group mb-3">
                                     <x-inputs.drop-down name="permanent_city_id" id="pCity" label="Permanent City"
-                                        class="select2" mandatory="true" />
+                                        class="select2" mandatory="true" :data-id="$model->permanent_city_id" />
                                 </div>
                             </div>
                             <div class="col-lg-6">
@@ -83,9 +83,8 @@
                                 </div>
                             </div>
                             <div class="col-lg-6">
-                                <label for="">Image</label>
                                 <div class="form-group mb-3">
-                                    <input type="file" name="image">
+                                    <x-inputs.file-field type="file" label="Image" name="image" />
                                 </div>
                             </div>
                         </div>
@@ -114,7 +113,7 @@
 
     if(cId && cId != '' && cId != 'undefined'){
 
-        $('#cCity').html();
+        $('#cCity option:eq(0)').remove();
 
         $.ajax({
             url: '/cityname/' + cId,
@@ -128,6 +127,30 @@
                         });
                     } else {
                         $('#cCity').append('<option value="">No Records Found</option>')
+                    }
+            }
+        })
+
+    }
+
+    var pId = $('#pCity').data('id');
+
+    if(pId && pId != '' && pId != 'undefined'){
+
+        $('#pCity option:eq(0)').remove();
+
+        $.ajax({
+            url: '/cityname/' + pId,
+            type: 'GET',
+            dataType: 'json',
+            success:function(data){
+                if (data.cities) {
+                        $.each(data.cities, function(id, name) {
+                            $('#pCity').append('<option value="' + id + '">' +
+                                name + '</option>');
+                        });
+                    } else {
+                        $('#pCity').append('<option value="">No Records Found</option>')
                     }
             }
         })
