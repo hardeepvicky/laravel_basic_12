@@ -27,7 +27,9 @@
                                     <select name="type" id="" class="select2">
                                         <option value="">Select</option>
                                         @foreach ($records['types'] as $type)
-                                            <option value="{{ $type }}" @if ($model->type == $type) selected @endif>{{ $type }}</option>
+                                            <option value="{{ $type }}"
+                                                @if ($model->type == $type) selected @endif>{{ $type }}
+                                            </option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -36,85 +38,54 @@
                                 <div class="form-group mb-3">
                                     <x-inputs.text-field name="name" label="Name" :value="$model->name"
                                         placeholder="Enter Name" autocomplete="off" mandatory="true" />
-                                    </div>
-                            </div>
-                            <div class="col-lg-6">
-                                <div class="form-group mb-3">
-                                    <label for="">Departments</label>
-                                    <select name="department_id" id="" class="select2">
-                                        <option value="">Select</option>
-                                        @foreach ($records['departments'] as $department)
-                                            <option value="{{ $department['id'] }}" @if($model->department_id == $department['id']) selected @endif>{{ $department['name'] }}</option>
-                                        @endforeach
-                                    </select>
                                 </div>
                             </div>
                             <div class="col-lg-6">
                                 <div class="form-group mb-3">
-                                    <label for="">Designation</label>
-                                    <select name="designation_id" id="" class="select2">
-                                        <option value="">Select</option>
-                                        @foreach ($records['designations'] as $designation)
-                                            <option value="{{ $designation['id'] }}" @if($model->designation_id == $designation['id']) selected @endif>{{ $designation['name'] }}</option>
-                                            @endforeach
-                                    </select>
+                                    <x-inputs.drop-down name="department_id" label="Department" :list="$records['departments']"
+                                        class="select2" mandatory="true" :value="$model->department_id" />
                                 </div>
                             </div>
                             <div class="col-lg-6">
                                 <div class="form-group mb-3">
-                                    <label for="">Current State</label>
-                                    <select name="current_state_id" id="cState" class="select2">
-                                        <option value="">Select</option>
-                                        @foreach ($records['states'] as $state)
-                                        <option value="{{ $state['id'] }}" @if($model->current_state_id == $state['id']) selected @endif>{{ $state['name'] }}</option>
-                                        @endforeach
-                                    </select>
+                                    <x-inputs.drop-down name="designation_id" label="Designation" :list="$records['designations']"
+                                        class="select2" mandatory="true" :value="$model->designation_id" />
                                 </div>
                             </div>
                             <div class="col-lg-6">
                                 <div class="form-group mb-3">
-                                    <label for="">Current City</label>
-                                    <select name="current_city_id" id="cCity" class="select2">
-                                        <option value="">Select</option>
-                                        {{-- as per states --}}
-                                    </select>
+                                    <x-inputs.drop-down name="current_state_id" id="cState" label="Current State" :list="$records['states']"
+                                        class="select2" mandatory="true" :value="$model->current_state_id" />
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group mb-3 editCity">
+                                    <x-inputs.drop-down name="current_city_id" id="cCity" label="Current City"
+                                        class="select2" mandatory="true" :data-id="$model->current_city_id" />
                                 </div>
                             </div>
                             <div class="col-lg-6">
                                 <div class="form-group mb-3">
-                                    <label for="">Permanent State</label>
-                                    <select name="permanent_state_id" id="pState" class="select2">
-                                        <option value="">Select</option>
-                                        @foreach ($records['states'] as $state)
-                                        <option value="{{ $state['id'] }}" @if($model->permanent_state_id == $state['id']) selected @endif>{{ $state['name'] }}</option>
-                                        @endforeach
-                                    </select>
+                                    <x-inputs.drop-down name="permanent_state_id" id="pState" label="Permanent State" :list="$records['states']"
+                                        class="select2" mandatory="true" :value="$model->permanent_state_id" />
                                 </div>
                             </div>
                             <div class="col-lg-6">
                                 <div class="form-group mb-3">
-                                    <label for="">Permanent City</label>
-                                    <select name="permanent_city_id" id="pCity" class="select2">
-                                        <option value="">Select</option>
-                                        {{-- dynamic with selected states --}}
-                                    </select>
+                                    <x-inputs.drop-down name="permanent_city_id" id="pCity" label="Permanent City"
+                                        class="select2" mandatory="true" />
                                 </div>
                             </div>
                             <div class="col-lg-6">
                                 <div class="form-group mb-3">
-                                    <label for="">Type</label>
-                                    <select name="type_id" id="" class="select2">
-                                        <option value="">Select</option>
-                                        @foreach ($records['dtypes'] as $dtype)
-                                        <option value="{{ $dtype['id'] }}">{{ $dtype['name'] }}</option>
-                                        @endforeach
-                                    </select>
+                                    <x-inputs.drop-down name="type_id" label="Type" :list="$records['dtypes']"
+                                        class="select2" mandatory="true" :value="$model->type_id" />
                                 </div>
                             </div>
                             <div class="col-lg-6">
                                 <label for="">Image</label>
                                 <div class="form-group mb-3">
-                                   <input type="file" name="image">
+                                    <input type="file" name="image">
                                 </div>
                             </div>
                         </div>
@@ -139,6 +110,29 @@
 <script>
     $(document).ready(function() {
 
+    var cId = $('#cCity').data('id');
+
+    if(cId && cId != '' && cId != 'undefined'){
+
+        $('#cCity').html();
+
+        $.ajax({
+            url: '/cityname/' + cId,
+            type: 'GET',
+            dataType: 'json',
+            success:function(data){
+                if (data.cities) {
+                        $.each(data.cities, function(id, name) {
+                            $('#cCity').append('<option value="' + id + '">' +
+                                name + '</option>');
+                        });
+                    } else {
+                        $('#cCity').append('<option value="">No Records Found</option>')
+                    }
+            }
+        })
+
+    }
         // state city dropdown
         function updateCities(stateId, selectedId) {
 
@@ -171,7 +165,7 @@
                 $('#cCity').html('<option value="">Select</option>');
             }
         });
-        
+
         // permanent state city
         $('#pState').on('change', function() {
             var stateId = $(this).val();

@@ -73,18 +73,17 @@ class EmployeeController extends BackendController
             'method' => 'POST',
         ];
 
-        $departments = Department::where('is_active', 1)->get()->toArray();
-        $designations = Designation::where('is_active', '=', 1)->get()->toArray();
-        $states = State::get()->toArray();
-        $cities = City::get()->toArray();      
-        $dtypes = Type::get()->toArray();      
         $types = ['Manager', 'Clerk', 'Helper', 'Peon'];
 
+        $departments = Department::getList("id", "name");
+        $designations = Designation::getList("id", "name");
+        $states = State::getList("id", "name");
+        $dtypes = Type::getList("id", "name");
+        
         $records = [
-           'departments' =>  $departments, 
+            'departments' =>  $departments, 
            'designations' =>  $designations,
            'states' =>  $states,
-           'cities' =>  $cities,
            'types' =>  $types,
            'dtypes' =>  $dtypes,
         ];
@@ -197,18 +196,22 @@ class EmployeeController extends BackendController
             'method' => 'PUT',
         ];
 
-        $departments = Department::where('is_active', 1)->get()->toArray();
-        $designations = Designation::where('is_active', '=', 1)->get()->toArray();
-        $states = State::get()->toArray();
-        $cities = City::get()->toArray();      
-        $dtypes = Type::get()->toArray();      
+        $cityName = City::findOrFail($model->current_city_id);
+
+        $cities = $cityName->name;
+        
         $types = ['Manager', 'Clerk', 'Helper', 'Peon'];
+
+        $departments = Department::getList("id", "name");
+        $designations = Designation::getList("id", "name");
+        $states = State::getList("id", "name");
+        $dtypes = Type::getList("id", "name");
 
         $records = [
            'departments' =>  $departments, 
            'designations' =>  $designations,
            'states' =>  $states,
-           'cities' =>  $cities,
+           'cities' =>  $cityName,
            'types' =>  $types,
            'dtypes' =>  $dtypes,
         ];

@@ -196,3 +196,12 @@ Route::get('/cities/{stateId}', function ($stateId) {
     return response()->json(['cities' => $cities]);
 });
 // show cities based on selected state //
+
+// show cities based on Saved Records in edit case //
+Route::get('/cityname/{cityId}', function ($cityId) {
+    
+    $cities = City::where('id', $cityId)->pluck('name', 'id');
+    
+    return response()->json(['cities' => $cities]);
+});
+// show cities based on Saved Records in edit case //
