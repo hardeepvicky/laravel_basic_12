@@ -40,6 +40,7 @@ class EmployeeController extends BackendController
 
         $conditions = $this->getConditions($cache_key, [
             ["field" => "name", "type" => "string", "view_field" => "name"],
+            ["field" => "type", "type" => "string", "view_field" => "type"],
             ["field" => "is_active", "type" => "", "view_field" => "is_active"],
         ]);
 

@@ -9,6 +9,7 @@
                 <thead>
                     <tr class="border-bottom-primary">
                         <th><?= sortable_anchor('id', 'ID') ?></th>
+                        <th><?= sortable_anchor('type', 'Type') ?></th>
                         <th><?= sortable_anchor('name', 'Name') ?></th>
                         <th><?= sortable_anchor('is_active', 'Active / De-Active') ?></th>
                         <th>Info</th>
@@ -20,8 +21,8 @@
                     @foreach ($records as $record)
                         <tr>
                             <th scope="row">{{ $record->id }}</th>
+                            <td>{{ $record->type }}</td>
                             <td>{{ $record->name }}</td>
-
                             <td>
                                 <x-backend.active_deactive :isActive="$record->is_active" :id="$record->id" :routePrefix="$routePrefix" />
                             </td>
