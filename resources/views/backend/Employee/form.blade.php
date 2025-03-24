@@ -54,8 +54,8 @@
                             </div>
                             <div class="col-lg-6">
                                 <div class="form-group mb-3">
-                                    <x-inputs.drop-down name="current_state_id" id="cState" label="Current State" :list="$records['states']"
-                                        class="select2" mandatory="true" :value="$model->current_state_id" />
+                                    <x-inputs.drop-down name="current_state_id" id="cState" label="Current State"
+                                        :list="$records['states']" class="select2" mandatory="true" :value="$model->current_state_id" />
                                 </div>
                             </div>
                             <div class="col-lg-6">
@@ -66,8 +66,8 @@
                             </div>
                             <div class="col-lg-6">
                                 <div class="form-group mb-3">
-                                    <x-inputs.drop-down name="permanent_state_id" id="pState" label="Permanent State" :list="$records['states']"
-                                        class="select2" mandatory="true" :value="$model->permanent_state_id" />
+                                    <x-inputs.drop-down name="permanent_state_id" id="pState" label="Permanent State"
+                                        :list="$records['states']" class="select2" mandatory="true" :value="$model->permanent_state_id" />
                                 </div>
                             </div>
                             <div class="col-lg-6">
@@ -78,8 +78,8 @@
                             </div>
                             <div class="col-lg-6">
                                 <div class="form-group mb-3">
-                                    <x-inputs.drop-down name="type_id" label="Type" :list="$records['dtypes']"
-                                        class="select2" mandatory="true" :value="$model->type_id" />
+                                    <x-inputs.drop-down name="type_id" label="Type" :list="$records['dtypes']" class="select2"
+                                        mandatory="true" :value="$model->type_id" />
                                 </div>
                             </div>
                             <div class="col-lg-6">
@@ -109,18 +109,18 @@
 <script>
     $(document).ready(function() {
 
-    var cId = $('#cCity').data('id');
+        var cId = $('#cCity').data('id');
 
-    if(cId && cId != '' && cId != 'undefined'){
+        if (cId && cId != '' && cId != 'undefined') {
 
-        $('#cCity option:eq(0)').remove();
+            $('#cCity option:eq(0)').remove();
 
-        $.ajax({
-            url: '/cityname/' + cId,
-            type: 'GET',
-            dataType: 'json',
-            success:function(data){
-                if (data.cities) {
+            $.ajax({
+                url: '/cityname/' + cId,
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    if (data.cities) {
                         $.each(data.cities, function(id, name) {
                             $('#cCity').append('<option value="' + id + '">' +
                                 name + '</option>');
@@ -128,23 +128,23 @@
                     } else {
                         $('#cCity').append('<option value="">No Records Found</option>')
                     }
-            }
-        })
+                }
+            })
 
-    }
+        }
 
-    var pId = $('#pCity').data('id');
+        var pId = $('#pCity').data('id');
 
-    if(pId && pId != '' && pId != 'undefined'){
+        if (pId && pId != '' && pId != 'undefined') {
 
-        $('#pCity option:eq(0)').remove();
+            $('#pCity option:eq(0)').remove();
 
-        $.ajax({
-            url: '/cityname/' + pId,
-            type: 'GET',
-            dataType: 'json',
-            success:function(data){
-                if (data.cities) {
+            $.ajax({
+                url: '/cityname/' + pId,
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    if (data.cities) {
                         $.each(data.cities, function(id, name) {
                             $('#pCity').append('<option value="' + id + '">' +
                                 name + '</option>');
@@ -152,10 +152,10 @@
                     } else {
                         $('#pCity').append('<option value="">No Records Found</option>')
                     }
-            }
-        })
+                }
+            })
 
-    }
+        }
         // state city dropdown
         function updateCities(stateId, selectedId) {
 
