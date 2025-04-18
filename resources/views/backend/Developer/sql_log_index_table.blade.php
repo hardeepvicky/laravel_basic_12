@@ -1,6 +1,6 @@
 <div class="card" id="page-summary">
     <div class="card-header">
-        <x-backend.pagination-links :records="$records" />
+        <x-Backend.pagination-links :records="$records" />
     </div>
 
     <div class="card-body p-1">
@@ -38,6 +38,6 @@
         </div>
     </div>
     <div class="card-footer">
-        <x-backend.pagination-links :records="$records" />
+        <x-Backend.pagination-links :records="$records" />
     </div>
 </div>

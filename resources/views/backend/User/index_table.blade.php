@@ -5,7 +5,7 @@ use App\Helpers\FileUtility;
 
 <div class="card" id="page-summary">
     <div class="card-header">
-        <x-backend.pagination-links :records="$records" />
+        <x-Backend.pagination-links :records="$records" />
     </div>
 
     <div class="card-body p-1">
@@ -39,10 +39,10 @@ use App\Helpers\FileUtility;
                             @endif
                         </td>
                         <td>
-                            <x-backend.active_deactive :isActive="$record->is_active" :id="$record->id" :routePrefix="$routePrefix" />
+                            <x-Backend.active_deactive :isActive="$record->is_active" :id="$record->id" :routePrefix="$routePrefix" />
                         </td>
                         <td>
-                            <x-backend.summary-comman-actions :id="$record->id" :routePrefix="$routePrefix" />
+                            <x-Backend.summary-comman-actions :id="$record->id" :routePrefix="$routePrefix" />
 
                             <span class="btn btn-info btn-sm css-toggler mt-1 mb-1"
                                 data-sr-css-class-toggle-target="#record-{{ $record->id }}"
@@ -63,11 +63,11 @@ use App\Helpers\FileUtility;
                                         <div class="card-body">
                                             <label class="info">
                                                 Don't Send Email :
-                                                <x-backend.yes-no-label :value="$record->dont_send_email" />
+                                                <x-Backend.yes-no-label :value="$record->dont_send_email" />
                                             </label>
                                             <label class="info">
                                                 Pre Defined :
-                                                <x-backend.yes-no-label :value="$record->is_pre_defined" />
+                                                <x-Backend.yes-no-label :value="$record->is_pre_defined" />
                                             </label>
 
                                             <hr>
@@ -109,7 +109,7 @@ use App\Helpers\FileUtility;
                                     </div>
                                 </div>
                                 <div class="col-md-8">
-                                    <x-backend.index-table-info :record="$record" :userList="$userListCache" />
+                                    <x-Backend.index-table-info :record="$record" :userList="$userListCache" />
                                 </div>
                             </div>
                         </td>
@@ -120,6 +120,6 @@ use App\Helpers\FileUtility;
         </div>
     </div>
     <div class="card-footer">
-        <x-backend.pagination-links :records="$records" />
+        <x-Backend.pagination-links :records="$records" />
     </div>
 </div>

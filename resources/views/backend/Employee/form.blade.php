@@ -7,7 +7,7 @@
 
     @include($partial_path . '.page_header')
 
-    <x-backend.form-errors />
+    <x-Backend.form-errors />
 
     <form action="{{ $form['url'] }}" method="POST" class="" enctype="multipart/form-data">
         {!! csrf_field() !!}
@@ -36,69 +36,69 @@
                             </div>
                             <div class="col-lg-6">
                                 <div class="form-group mb-3">
-                                    <x-inputs.text-field name="name" label="Name" :value="$model->name"
+                                    <x-Inputs.text-field name="name" label="Name" :value="$model->name"
                                         placeholder="Enter Name" autocomplete="off" mandatory="true" />
                                 </div>
                             </div>
                             <div class="col-lg-6">
                                 <div class="form-group mb-3">
-                                    <x-inputs.drop-down name="department_id" label="Department" :list="$records['departments']"
+                                    <x-Inputs.drop-down name="department_id" label="Department" :list="$records['departments']"
                                         class="select2" mandatory="true" :value="$model->department_id" />
                                 </div>
                             </div>
                             <div class="col-lg-6">
                                 <div class="form-group mb-3">
-                                    <x-inputs.drop-down name="designation_id" label="Designation" :list="$records['designations']"
+                                    <x-Inputs.drop-down name="designation_id" label="Designation" :list="$records['designations']"
                                         class="select2" mandatory="true" :value="$model->designation_id" />
                                 </div>
                             </div>
                             <div class="col-lg-6">
                                 <div class="form-group mb-3">
-                                    <x-inputs.drop-down name="current_state_id" id="cState" label="Current State"
+                                    <x-Inputs.drop-down name="current_state_id" id="cState" label="Current State"
                                         :list="$records['states']" class="select2" mandatory="true" :value="$model->current_state_id" />
                                 </div>
                             </div>
                             <div class="col-lg-6">
                                 <div class="form-group mb-3 editCity">
-                                    <x-inputs.drop-down name="current_city_id" id="cCity" label="Current City"
+                                    <x-Inputs.drop-down name="current_city_id" id="cCity" label="Current City"
                                         class="select2" mandatory="true" :data-id="$model->current_city_id" />
                                 </div>
                             </div>
                             <div class="col-lg-6">
                                 <div class="form-group mb-3">
-                                    <x-inputs.drop-down name="permanent_state_id" id="pState" label="Permanent State"
+                                    <x-Inputs.drop-down name="permanent_state_id" id="pState" label="Permanent State"
                                         :list="$records['states']" class="select2" mandatory="true" :value="$model->permanent_state_id" />
                                 </div>
                             </div>
                             <div class="col-lg-6">
                                 <div class="form-group mb-3">
-                                    <x-inputs.drop-down name="permanent_city_id" id="pCity" label="Permanent City"
+                                    <x-Inputs.drop-down name="permanent_city_id" id="pCity" label="Permanent City"
                                         class="select2" mandatory="true" :data-id="$model->permanent_city_id" />
                                 </div>
                             </div>
                             <div class="col-lg-6">
                                 <div class="form-group mb-3">
-                                    <x-inputs.drop-down name="type_id" label="Type" :list="$records['dtypes']" class="select2"
+                                    <x-Inputs.drop-down name="type_id" label="Type" :list="$records['dtypes']" class="select2"
                                         mandatory="true" :value="$model->type_id" />
                                 </div>
                             </div>
                             <div class="col-lg-6">
                                 <div class="form-group mb-3">
-                                    <x-inputs.file-field type="file" label="Image" name="image" />
+                                    <x-Inputs.file-field type="file" label="Image" name="image" />
                                 </div>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-lg-6">
                                 <div class="form-group mb-3 checkbox-checked">
-                                    <x-inputs.checkbox name="is_active" label="Active" :value="$model->is_active" />
+                                    <x-Inputs.checkbox name="is_active" label="Active" :value="$model->is_active" />
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <x-backend.form-common-footer-buttons />
+                <x-Backend.form-common-footer-buttons />
             </div>
         </div>
     </form>

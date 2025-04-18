@@ -15,7 +15,7 @@
         <form method="GET" action="{{ route($routePrefix . '.index') }}">
             <div class="row mb-4">
                 <div class="col-md-3">
-                    <x-inputs.drop-down name="section_name" 
+                    <x-Inputs.drop-down name="section_name" 
                         label="Sections" 
                         :list="$section_list" 
                         :value="$search['section_name']" 
@@ -23,10 +23,10 @@
                         />
                 </div>
                 <div class="col-md-3">
-                    <x-inputs.text-field name="action_name" :value="$search['action_name']" label="Action" />
+                    <x-Inputs.text-field name="action_name" :value="$search['action_name']" label="Action" />
                 </div>
                 <div class="col-md-3">
-                    <x-inputs.drop-down name="role_id" 
+                    <x-Inputs.drop-down name="role_id" 
                         label="Roles" 
                         :list="$role_list"
                         :value="$search['role_id']" 

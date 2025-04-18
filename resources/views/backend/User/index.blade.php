@@ -21,25 +21,25 @@ $page_header_links = [
         <input type="hidden" name="is_sort_clear" value="1"/>
             <div class="row mb-4">
                 <div class="col-md-3">
-                    <x-inputs.text-field name="name" label="Name" :value="$search['name']" autocomplete="off" />
+                    <x-Inputs.text-field name="name" label="Name" :value="$search['name']" autocomplete="off" />
                 </div>  
                 <div class="col-md-3">
-                    <x-inputs.text-field name="email" label="Email" :value="$search['email']" autocomplete="off" />
+                    <x-Inputs.text-field name="email" label="Email" :value="$search['email']" autocomplete="off" />
                 </div>   
                 <div class="col-md-3">
-                    <x-inputs.drop-down name="role_id" label="Role"
+                    <x-Inputs.drop-down name="role_id" label="Role"
                         :value="$search['role_id']"
                         :list="$role_list"
                         class="select2" />
                 </div>            
                 <div class="col-md-3">
-                    <x-inputs.drop-down name="is_active" label="Active"
+                    <x-Inputs.drop-down name="is_active" label="Active"
                         :value="$search['is_active']"
                         :list="$yes_no_list"
                         class="select2" />
                 </div>
             </div>
-            <x-backend.summary-search-form-footer :selectedPaginationLimit="$pagination_limit" />
+            <x-Backend.summary-search-form-footer :selectedPaginationLimit="$pagination_limit" />
         </form>
     </div>
 </div>

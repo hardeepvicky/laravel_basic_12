@@ -17,10 +17,10 @@ $page_header_links = [
             <input type="hidden" name="is_sort_clear" value="1"/>
             <div class="row mb-4">
                 <div class="col-md-3">
-                    <x-inputs.text-field name="name" label="Name" :value="$search['name']" autocomplete="off" />
+                    <x-Inputs.text-field name="name" label="Name" :value="$search['name']" autocomplete="off" />
                 </div>
             </div>
-            <x-backend.summary-search-form-footer :selectedPaginationLimit="$pagination_limit" />
+            <x-Backend.summary-search-form-footer :selectedPaginationLimit="$pagination_limit" />
         </form>
     </div>
 </div>

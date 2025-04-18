@@ -19,16 +19,16 @@
                     </div>
                     <form class="mt-4 pt-2" action="index.html">
                         <div class="mb-3">
-                            <x-inputs.text-field type="text" name="name" label="Name" placeholder="Enter Name" />
+                            <x-Inputs.text-field type="text" name="name" label="Name" placeholder="Enter Name" />
                         </div>
                         <div class="mb-3">
-                            <x-inputs.text-field type="email" name="email" label="Email" placeholder="Enter Email" />
+                            <x-Inputs.text-field type="email" name="email" label="Email" placeholder="Enter Email" />
                         </div>
                         <div class="mb-3">
-                            <x-inputs.text-field type="password" name="password" label="Password" placeholder="Enter Password" />
+                            <x-Inputs.text-field type="password" name="password" label="Password" placeholder="Enter Password" />
                         </div>
                         <div class="mb-3">
-                            <x-inputs.text-field type="password" name="password_confirmation" label="Confirm Password" placeholder="Enter Confirm Password" />
+                            <x-Inputs.text-field type="password" name="password_confirmation" label="Confirm Password" placeholder="Enter Confirm Password" />
                         </div>
                         <div class="mb-3">
                             <button class="btn btn-primary w-100 waves-effect waves-light" type="submit">Log In</button>

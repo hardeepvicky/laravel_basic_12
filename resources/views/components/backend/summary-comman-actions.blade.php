@@ -18,7 +18,7 @@
 
     @if(in_array("delete", $buttonList))
     <li>
-        <x-backend.summary-delete-button url="{{ route($routePrefix . '.destroy', [$id]) }}" />
+        <x-Backend.summary-delete-button url="{{ route($routePrefix . '.destroy', [$id]) }}" />
     </li>
     @endif
 

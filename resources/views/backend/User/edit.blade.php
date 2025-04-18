@@ -31,7 +31,7 @@ $page_header_links = [
 
 @include($partial_path . ".page_header")
 
-<x-backend.form-errors />
+<x-Backend.form-errors />
 
 <form action="{{ $form['url'] }}" method="POST">
     {!! csrf_field() !!}
@@ -47,13 +47,13 @@ $page_header_links = [
                     <div class="row">
                         <div class="col-lg-6">
                             <div class="form-group mb-3">
-                                <x-inputs.text-field name="name" label="Name"
+                                <x-Inputs.text-field name="name" label="Name"
                                     :value="$model->name" placeholder="Enter Name" />
                             </div>
                         </div>
                         <div class="col-lg-6">
                             <div class="form-group mb-3">
-                                <x-inputs.text-field type="email" name="email" label="Email"
+                                <x-Inputs.text-field type="email" name="email" label="Email"
                                     :value="$model->email"
                                     placeholder="Enter Email" />
                             </div>
@@ -65,7 +65,7 @@ $page_header_links = [
                                 <?php 
                                 $value = implode(',', $model->userRole->pluck('role_id')->toArray()); 
                                 ?>
-                                <x-inputs.drop-down name="roles[]" label="Roles"
+                                <x-Inputs.drop-down name="roles[]" label="Roles"
                                     :list="$role_list"
                                     :value="$value"
                                     class="select2"
@@ -93,15 +93,15 @@ $page_header_links = [
                     <div class="row">
                         <div class="col-lg-6">
                             <div class="form-group mb-3 checkbox-checked">
-                                <x-inputs.checkbox name="dont_send_email" label="Don't Send Email" :value="$model->dont_send_email" />
-                                <x-inputs.checkbox name="is_active" label="Active" :value="$model->is_active" />
+                                <x-Inputs.checkbox name="dont_send_email" label="Don't Send Email" :value="$model->dont_send_email" />
+                                <x-Inputs.checkbox name="is_active" label="Active" :value="$model->is_active" />
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <x-backend.form-common-footer-buttons />
+            <x-Backend.form-common-footer-buttons />
         </div>
     </div>
 </form>

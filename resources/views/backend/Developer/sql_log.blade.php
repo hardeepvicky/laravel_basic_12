@@ -15,12 +15,12 @@ $page_header_links = [];
             <input type="hidden" name="is_sort_clear" value="1"/>
             <div class="row mb-4">
                 <div class="col-md-4">
-                    <x-inputs.text-field name="route_name_or_url"
+                    <x-Inputs.text-field name="route_name_or_url"
                         label="Route Name or URL"
                         :value="$search['route_name_or_url']" />
                 </div>
                 <div class="col-md-4">
-                    <x-inputs.text-field id="from_date" name="from_date"
+                    <x-Inputs.text-field id="from_date" name="from_date"
                         label="From Created Date"
                         :value="$search['from_date']"
                         class="form-control date-picker"
@@ -28,7 +28,7 @@ $page_header_links = [];
                         autocomplete="off" />
                 </div>
                 <div class="col-md-4">
-                    <x-inputs.text-field id="to_date" name="to_date"
+                    <x-Inputs.text-field id="to_date" name="to_date"
                         label="To Created Date"
                         :value="$search['to_date']"
                         class="form-control date-picker"
@@ -36,7 +36,7 @@ $page_header_links = [];
                         autocomplete="off" />
                 </div>
             </div>
-            <x-backend.summary-search-form-footer :selectedPaginationLimit="$pagination_limit" />
+            <x-Backend.summary-search-form-footer :selectedPaginationLimit="$pagination_limit" />
         </form>
     </div>
 </div>

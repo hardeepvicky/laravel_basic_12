@@ -31,7 +31,7 @@
         <div class="page-content">
             <div class="container-fluid">
 
-                <x-backend.session-flash />
+                <x-Backend.session-flash />
 
                 @yield('content')
 

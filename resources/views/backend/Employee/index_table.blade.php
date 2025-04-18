@@ -1,6 +1,6 @@
 <div class="card" id="page-summary">
     <div class="card-header">
-        <x-backend.pagination-links :records="$records" />
+        <x-Backend.pagination-links :records="$records" />
     </div>
 
     <div class="card-body p-1">
@@ -24,14 +24,14 @@
                             <td>{{ $record->type }}</td>
                             <td>{{ $record->name }}</td>
                             <td>
-                                <x-backend.active_deactive :isActive="$record->is_active" :id="$record->id" :routePrefix="$routePrefix" />
+                                <x-Backend.active_deactive :isActive="$record->is_active" :id="$record->id" :routePrefix="$routePrefix" />
                             </td>
 
                             <td>
-                                <x-backend.index-table-info :record="$record" :userList="$userListCache" />
+                                <x-Backend.index-table-info :record="$record" :userList="$userListCache" />
                             </td>
                             <td>
-                                <x-backend.summary-comman-actions :id="$record->id" :routePrefix="$routePrefix" />
+                                <x-Backend.summary-comman-actions :id="$record->id" :routePrefix="$routePrefix" />
                             </td>
                         </tr>
                     @endforeach
@@ -40,6 +40,6 @@
         </div>
     </div>
     <div class="card-footer">
-        <x-backend.pagination-links :records="$records" />
+        <x-Backend.pagination-links :records="$records" />
     </div>
 </div>

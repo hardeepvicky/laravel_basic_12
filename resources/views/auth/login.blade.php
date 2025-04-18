@@ -8,9 +8,9 @@
         <h2 class="text-center">Sign in to account</h2>
         <p class="text-center">Enter your email &amp; password to login</p>
 
-        <x-backend.session-flash />
+        <x-Backend.session-flash />
 
-        <x-inputs.text-field type="email" name="email" label="Email" placeholder="Enter Email" />
+        <x-Inputs.text-field type="email" name="email" label="Email" placeholder="Enter Email" />
         <div class="form-group">
             <label class="col-form-label">Password</label>
             <div class="form-input position-relative">

@@ -10,7 +10,7 @@ $page_header_links = [
 
 @include($partial_path . ".page_header")
 
-<x-backend.form-errors />
+<x-Backend.form-errors />
 
 <form action="{{ $form['url'] }}" method="POST" class="">
     {!! csrf_field() !!}
@@ -26,7 +26,7 @@ $page_header_links = [
                     <div class="row">
                         <div class="col-lg-6">
                             <div class="form-group mb-3">
-                                <x-inputs.text-field name="name" label="Name" 
+                                <x-Inputs.text-field name="name" label="Name" 
                                     :value="$model->name"
                                     placeholder="Enter Name" 
                                     autocomplete="off"
@@ -36,7 +36,7 @@ $page_header_links = [
                         </div>
                         <div class="col-lg-6">
                             <div class="form-group mb-3">
-                                <x-inputs.text-field name="code" label="Code" 
+                                <x-Inputs.text-field name="code" label="Code" 
                                     :value="$model->code"
                                     placeholder="Enter Code" 
                                     autocomplete="off"
@@ -48,7 +48,7 @@ $page_header_links = [
                 </div>
             </div>
 
-            <x-backend.form-common-footer-buttons />
+            <x-Backend.form-common-footer-buttons />
         </div>
     </div>
 </form>
