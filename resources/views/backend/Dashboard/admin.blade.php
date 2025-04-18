@@ -19,10 +19,12 @@
             <h1>Hello, Amirreza <img src="../assets/images/dashboard-1/hand.png" alt="" /></h1>
           </div>
           <p> Welcome back! Let’s start from where you left.</p>
-          <div class="d-flex align-center justify-content-between"><a class="btn btn-pill btn-primary" href="">Whats New!</a><span>
+          <div class="d-flex align-center justify-content-between"><a class="btn btn-pill btn-primary" href="">Whats New!</a>
+            <span class="cTime">
               <svg class="stroke-icon">
                 <use href="../assets/svg/icon-sprite.svg#watch"></use>
-              </svg> 11:14 AM</span></div>
+              {{-- </svg>11:14 AM</span></div> --}}
+              </svg>Loading...</span></div>
         </div>
       </div>
     </div>
@@ -959,3 +961,21 @@
 </div>
 
 @endsection
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script>
+  function updateTime(){
+    var currentTime = new Date().toLocaleString();
+
+    $('.cTime').text(currentTime);
+
+  }
+
+  $(document).ready(function(){
+
+    updateTime();
+
+    setInterval(updateTime, 1000);
+
+  })
+
+  </script>

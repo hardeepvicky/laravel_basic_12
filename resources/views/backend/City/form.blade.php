@@ -34,14 +34,14 @@ $page_header_links = [
                                     />
                             </div>
                         </div>
-                        <div class="col-lg-6">
-                            <div class="form-group mb-3">
-                                <x-inputs.drop-down name="state_id" label="States"
-                                :list="$state_list"
-                                :value="$model->state_id"
-                                class="select2"/>
+                            <div class="col-lg-6">
+                                <div class="form-group mb-3">
+                                    <x-inputs.drop-down name="state_id" label="States"
+                                    :list="$state_list"
+                                    :value="$model->state_id"
+                                    class="select2"/>
+                                </div>
                             </div>
-                        </div>
                     </div>
                 </div>
             </div>

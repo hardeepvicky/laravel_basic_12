@@ -54,7 +54,7 @@
             <div class="col-12 p-0">
                 <div class="login-card login-dark">
                     <div>
-                        <div><a class="logo" href="index.html"><img class="img-fluid for-light m-auto"
+                        <div><a class="logo" href="{{ route('home') }}"><img class="img-fluid for-light m-auto"
                                     src="../assets/images/logo/logo1.png" alt="looginpage"><img
                                     class="img-fluid for-dark" src="../assets/images/logo/logo-dark.png" alt="logo"></a>
                         </div>

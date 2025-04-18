@@ -1,19 +1,24 @@
 <?php
 
+use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Backend\CityController;
 use App\Http\Controllers\Backend\DashboardController;
 use App\Http\Controllers\Backend\DepartmentController;
 use App\Http\Controllers\Backend\DesignationController;
 use App\Http\Controllers\Backend\DeveloperController;
+use App\Http\Controllers\Backend\EmployeeController;
 use App\Http\Controllers\Backend\PermissionController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Backend\PublicController;
 use App\Http\Controllers\Backend\RoleController;
 use App\Http\Controllers\Backend\StateController;
+use App\Http\Controllers\Backend\TypeController;
 use App\Http\Controllers\Backend\UserController;
 use App\Http\Controllers\HomeController;
 use GuzzleHttp\Middleware;
 use Illuminate\Http\Request;
+use App\Models\City;
+
 
 Route::get('/', function () {
     return redirect()->route("home");
@@ -88,6 +93,7 @@ Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function 
     
 });
 
+
 // Department
     $route_prefix = "department";
     $controllerClass = DepartmentController::class;
@@ -104,6 +110,32 @@ Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function 
     // Designation
     $route_prefix = "designation";
     $controllerClass = DesignationController::class;
+    Route::resource($route_prefix, $controllerClass);
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use($controllerClass) {
+        
+        $name = "activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "de_activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+    });
+
+    // Type
+    $route_prefix = "type";
+    $controllerClass = TypeController::class;
+    Route::resource($route_prefix, $controllerClass);
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use($controllerClass) {
+        
+        $name = "activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "de_activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+    });
+
+    // Employee
+    $route_prefix = "employee";
+    $controllerClass = EmployeeController::class;
     Route::resource($route_prefix, $controllerClass);
     Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use($controllerClass) {
         
@@ -152,3 +184,24 @@ Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function 
     
 });
 Route::get('verify-otp/{email}',[UserController::class,'otp_verified_view'])->name('verify.otp')->middleware('auth');
+
+Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+Route::post('forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+
+// show cities based on selected state //
+Route::get('/cities/{stateId}', function ($stateId) {
+    
+    $cities = City::where('state_id', $stateId)->pluck('name', 'id');
+    
+    return response()->json(['cities' => $cities]);
+});
+// show cities based on selected state //
+
+// show cities based on Saved Records in edit case //
+Route::get('/cityname/{cityId}', function ($cityId) {
+    
+    $cities = City::where('id', $cityId)->pluck('name', 'id');
+    
+    return response()->json(['cities' => $cities]);
+});
+// show cities based on Saved Records in edit case //
