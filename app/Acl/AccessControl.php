@@ -84,9 +84,9 @@ class AccessControl
         // check for system admin
         foreach($role_id_list as $role_id)
         {
-            $role = Role::select('id', 'is_system_admin')->findOrFail($role_id);
+            $role = Role::where('code', Role::TYPE_SYSTEM_ADMIN)->findOrFail($role_id);
 
-            if ($role->is_system_admin)
+            if ($role)
             {
                 $allow_route_list = array_merge($allow_route_list, SectionRoutes::ALLOW_ROUTES_FOR_SYSTEM_ADMIN);
             }
