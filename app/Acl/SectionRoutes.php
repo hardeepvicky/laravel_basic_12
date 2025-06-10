@@ -30,10 +30,10 @@ class SectionRoutes
     {
         $sections = [];
 
-        $sections["Home"] = self::home();
-        $sections["User"] = self::user();
-        $sections["Role"] = self::role();        
-        $sections["Developer"] = self::developer();
+        $sections[]["Home"] = self::home();
+        $sections["Member Management"]["User"] = self::user();
+        $sections["Member Management"]["Role"] = self::role();        
+        $sections[]["Developer"] = self::developer();
 
         return $sections;
     }

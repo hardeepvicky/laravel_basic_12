@@ -46,7 +46,7 @@ class PermissionController extends BackendController
                 if (isset($record['role']) && isset($record['route_name'])) {
 
                     $records[$k]['section'] = "Section is not set in SectionRoutes.php";
-                    $records[$k]['can_be_delete'] = true;                    
+                    $records[$k]['can_be_delete'] = true;
 
                     if (in_array($record['route_name']['name'], SectionRoutes::ALLOW_ROUTES_FOR_ANY_LOGIN_USER)) {
                         $records[$k]['can_be_delete'] = false;
@@ -74,23 +74,20 @@ class PermissionController extends BackendController
                     if (isset($section_conditions['action_name']) && $section_conditions['action_name'] != $records[$k]['action']) {
                         unset($records[$k]);
                     }
-
                 } else {
                     unset($records[$k]);
                 }
-
             }
 
             usort($records, function ($a, $b) {
                 return strcmp($a['role']["name"], $b['role']["name"]);
             });
 
-            foreach(SectionRoutes::ALLOW_ROUTES_FOR_ANY_LOGIN_USER as $route_name)
-            {
+            foreach (SectionRoutes::ALLOW_ROUTES_FOR_ANY_LOGIN_USER as $route_name) {
                 $records[] = [
                     'section' => '',
                     'action' => $route_name,
-                    'can_be_delete' => false,                    
+                    'can_be_delete' => false,
                     'role' => [
                         'name' => 'Allow For All Login User'
                     ]
@@ -98,17 +95,14 @@ class PermissionController extends BackendController
             }
 
             //d($conditions); exit;
-            if ($conditions && isset($conditions["role_id"]) && $conditions["role_id"])
-            {
-                $role = Role::findOrFail($conditions["role_id"]); 
-                if ($role->code)
-                {
-                    foreach(SectionRoutes::ALLOW_ROUTES_FOR_SYSTEM_ADMIN as $route_name)
-                    {
+            if ($conditions && isset($conditions["role_id"]) && $conditions["role_id"]) {
+                $role = Role::findOrFail($conditions["role_id"]);
+                if ($role->code) {
+                    foreach (SectionRoutes::ALLOW_ROUTES_FOR_SYSTEM_ADMIN as $route_name) {
                         $records[] = [
                             'section' => '',
                             'action' => $route_name,
-                            'can_be_delete' => false,                    
+                            'can_be_delete' => false,
                             'role' => [
                                 'name' => 'Allow For All System Admin User'
                             ]
@@ -207,21 +201,26 @@ class PermissionController extends BackendController
 
         $sections = SectionRoutes::get();
 
-        foreach ($sections as $section_name => $actions) {
-            foreach ($actions as $action_name => $route_list) {
-                unset($actions[$action_name]);
+        foreach ($sections as $section_name => $sub_sections) {
+            // d([
+            //     $section_name, is_string($section_name), is_numeric($section_name)
+            // ]);
 
-                $is_checked = false;
-                foreach ($route_list as $route_name) {
-                    if (in_array($route_name, $saved_route_list)) {
-                        $is_checked = true;
+            foreach ($sub_sections as $sub_section_name => $actions) {
+                foreach ($actions as $action_name => $route_list) {                    
+
+                    $is_checked = false;
+                    foreach ($route_list as $route_name) {
+                        if (in_array($route_name, $saved_route_list)) {
+                            $is_checked = true;
+                        }
                     }
+
+                    $actions[$action_name]['is_checked'] = $is_checked;
                 }
 
-                $actions[$action_name]['is_checked'] = $is_checked;
+                $sections[$section_name][$sub_section_name] = $actions;
             }
-
-            $sections[$section_name] = $actions;
         }
 
         $this->setForView(compact("sections"));

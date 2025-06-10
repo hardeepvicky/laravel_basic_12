@@ -1,0 +1,57 @@
+
+.dark-only .select2-container--bootstrap-5.select2-container--focus .select2-selection, .select2-container--bootstrap-5.select2-container--open .select2-selection
+{
+    border-color: var(--theme-default);
+    box-shadow: none;
+}
+
+.dark-only .select2-search {
+    background-color: #181919 !important;
+}
+
+/* Change the appearence of the search input field */
+.dark-only .select2-search input {
+    color: #ffffff !important;
+    background-color: #181919 !important;
+}
+
+/* Change the appearence of the search results container */
+.dark-only .select2-results {
+    background-color: #181919 !important;
+}
+
+/* Change the appearence of the dropdown select container */
+.dark-only .select2-container--bootstrap-5 .select2-selection {
+    border-color: #6c757d !important;
+    color: #ffffff !important;
+    background-color: #181919 !important;
+}
+
+/* Change the caret down arrow symbol to white */
+.dark-only .select2-container--bootstrap-5 .select2-selection--single {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='white' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") !important;
+}
+
+/* Change the color of the default selected item i.e. the first option */
+.dark-only .select2-container--bootstrap-5
+    .select2-selection--single
+    .select2-selection__rendered {
+    color: #ffffff !important;
+}
+
+.dark-only .select2-container--bootstrap-5 .select2-dropdown .select2-results__options .select2-results__option.select2-results__option--highlighted
+{
+    color: #fff;
+    background-color: var(--theme-default);
+}
+
+.dark-only .select2-container--bootstrap-5 .select2-dropdown .select2-results__options .select2-results__option.select2-results__option--selected, .select2-container--bootstrap-5 .select2-dropdown .select2-results__options .select2-results__option[aria-selected="true"]:not(.select2-results__option--highlighted)
+{
+    color: #fff;
+    background-color: var(--theme-default);
+}
+
+.dark-only .select2-container--bootstrap-5 .select2-dropdown
+{
+    color: #fff;
+}

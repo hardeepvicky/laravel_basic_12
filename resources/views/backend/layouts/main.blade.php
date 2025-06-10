@@ -28,6 +28,7 @@
     <link rel="stylesheet" type="text/css" href="/assets/css/vendors/slick-theme.css" />
     <link rel="stylesheet" type="text/css" href="/assets/libs/select2/select2.min.css" />
     <link rel="stylesheet" type="text/css" href="/assets/libs/select2/select2-bootstrap-5-theme.min.css" />
+    <link rel="stylesheet" type="text/css" href="/assets/libs/select2/select2-dark.css?<?= BACKEND_CSS_VERSION ?>" />
     <link rel="stylesheet" type="text/css" href="/assets/libs/Croppie-2.6.4/croppie.css" />
     <link rel="stylesheet" type="text/css" href="/assets/libs/fancybox/dist/jquery.fancybox.min.css" />
     <link rel="stylesheet" type="text/css" href="/assets/css/vendors/flatpickr/flatpickr.min.css">
