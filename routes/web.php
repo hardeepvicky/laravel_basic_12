@@ -44,7 +44,7 @@ Route::group(['prefix' => 'public', 'as' => 'public.'], function () {
     Route::post('ajax_upload_base64', [PublicController::class, 'ajax_upload_base64']);
 });
 
-Route::group(['middleware' => ['auth', '']], function () {
+Route::group(['middleware' => ['auth', 'role_permission']], function () {
 
     $name = "dashboard";
     Route::get($name, [DashboardController::class, 'index'])->name($name);

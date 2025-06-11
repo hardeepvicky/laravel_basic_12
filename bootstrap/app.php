@@ -20,10 +20,6 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role_permission' => RolePermission::class            
         ]);
-
-        $middleware->web(append: [
-            RolePermission::class
-        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         
