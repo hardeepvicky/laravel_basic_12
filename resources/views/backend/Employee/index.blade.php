@@ -20,10 +20,23 @@ $page_header_links = [
                     <x-Inputs.text-field name="name" label="Name" :value="$search['name']" autocomplete="off" />
                 </div>
                
+               <div class="col-md-3">
+                    <x-Inputs.drop-down name="department_id" label="Department"
+                        :list="$department_list"
+                        :value="$search['department_id']"
+                        class="select2" />
+                </div>
+                <div class="col-md-3">
+                    <x-Inputs.drop-down name="designation_id" label="Designation"
+                        :list="$designation_list"
+                        :value="$search['designation_id']"
+                        class="select2" />
+                </div>
+
                 <div class="col-md-3">
                     <x-Inputs.drop-down name="is_active" label="Active"
-                        :value="$search['is_active']"
                         :list="$yes_no_list"
+                        :value="$search['is_active']"
                         class="select2" />
                 </div>
             </div>

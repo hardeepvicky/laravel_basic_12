@@ -10,6 +10,7 @@ use App\Models\Department;
 use App\Models\Designation;
 use App\Models\Employee;
 use App\Models\Type;
+use App\Rules\IndianMobileNumber;
 use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Support\Facades\DB;
@@ -49,8 +50,7 @@ class EmployeeController extends BackendController
 
         $builder = $this->modelClass::where($conditions);
 
-        if ($apply_sort)
-        {
+        if ($apply_sort) {
             $cache_key_for_sort = $cache_key_prefix . "-index-extra-params";
 
             $clear_cache = request('is_sort_clear', false);
@@ -89,27 +89,35 @@ class EmployeeController extends BackendController
         $department_list = Department::getList("id", "name");
         $designation_list = Designation::getList("id", "name");
         $state_list = State::getList("id", "name");
-        
+
         $this->setForView(compact('department_list', 'designation_list', 'state_list'));
     }
 
     private function _common_validation_rules()
     {
         return [
-            'name' => 'required',            
+            'name' => 'required|min:3',
             'department_id' => 'required|exists:departments,id',
             'designation_id' => 'required|exists:designations,id',
+            'permanent_address' => 'required|min:20',
+            'current_address' => 'required|min:20',
             'current_state_id' => 'required',
             'current_city_id' => 'required',
             'permanent_state_id' => 'required',
             'permanent_city_id' => 'required',
+            "mobile" => ["required", new IndianMobileNumber()],
+            "mobile2" => ["nullable", new IndianMobileNumber()],
+            "whatsapp_mobile" => ["required", new IndianMobileNumber()],
+            "email" => ["nullable", "email"],
+            "dob" => ["required"],
+            "doj" => ["required"],
+            "is_active" => ""
         ];
     }
 
     private function _common_validation_messages()
     {
-        return [
-        ];
+        return [];
     }
 
     public function store(Request $request)
@@ -120,34 +128,33 @@ class EmployeeController extends BackendController
 
         $messages = $this->_common_validation_messages();
 
-        $rules = array_merge($rules, [
-            
-        ]);
+        $rules = array_merge($rules, []);
 
-        $messages = array_merge($messages, [
+        $table_name = (new $this->modelClass)->getTable();
+        $rules['mobile'][] = "unique:$table_name,mobile";
+        $rules['whatsapp_mobile'][] = "unique:$table_name,whatsapp_mobile";
 
-        ]);
+        // d($rules, true);
+
+        $messages = array_merge($messages, []);
 
         $validatedData = $request->validate($rules, $messages);
 
         DB::beginTransaction();
 
-        try
-        {
+        try {
             $model = $this->modelClass::create($validatedData);
-            
+
             $this->updateUserInfoAfterSave($model);
-            
+
             DB::commit();
 
             $this->saveSqlLog();
 
             return $this->afterSave($model);
-        }
-        catch(Exception $ex)
-        {
+        } catch (Exception $ex) {
             DB::rollBack();
-            
+
             $this->saveSqlLog();
 
             return back()->withInput()->with('fail', $ex->getMessage());
@@ -180,18 +187,21 @@ class EmployeeController extends BackendController
 
         $rules = $this->_common_validation_rules();
 
+        $table_name = (new $this->modelClass)->getTable();
+        $rules['mobile'][] = "unique:$table_name,mobile,$id";
+        $rules['whatsapp_mobile'][] = "unique:$table_name,whatsapp_mobile, $id";
+
+        // d($rules, true);
+
         $messages = $this->_common_validation_messages();
 
-        $messages = array_merge($messages, [
-
-        ]);
+        $messages = array_merge($messages, []);
 
         $validatedData = $request->validate($rules, $messages);
 
         DB::beginTransaction();
 
-        try
-        {
+        try {
             $model = $this->modelClass::findOrFail($id);
 
             $model->fill($validatedData);
@@ -205,9 +215,7 @@ class EmployeeController extends BackendController
             $this->saveSqlLog();
 
             return $this->afterSave($model);
-        }
-        catch(Exception $ex)
-        {
+        } catch (Exception $ex) {
             DB::rollBack();
 
             $this->saveSqlLog();
