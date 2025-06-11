@@ -16,9 +16,9 @@ class CreateSettingsTable extends Migration
         Schema::create('settings', function (Blueprint $table) {
             $table->charset = 'utf8mb4';
             $table->collation = 'utf8mb4_unicode_ci';
-            $table->id();
+            $table->id();            
             $table->string("name", 255);
-            $table->text("value");
+            $table->text("value");            
             $table->timestamps();
             $table->bigInteger("created_by")->nullable();
             $table->bigInteger("updated_by")->nullable();

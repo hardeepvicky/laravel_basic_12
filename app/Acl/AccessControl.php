@@ -25,29 +25,24 @@ class AccessControl
     {
         $route_name = trim($route_name);
 
-        foreach(SectionRoutes::ALLOW_ROUTES_FOR_ANY_LOGIN_USER as $allowed_route)
-        {
-            if ($route_name == $allowed_route)
-            {
+        foreach (SectionRoutes::ALLOW_ROUTES_FOR_ANY_LOGIN_USER as $allowed_route) {
+            if ($route_name == $allowed_route) {
                 return true;
             }
 
             $pos = strpos($allowed_route, "*.");
-            if ($pos >= 0)
-            {
+            if ($pos >= 0) {
                 $str = substr($allowed_route, $pos + 2);
-                
+
                 $matched = preg_match("/$str/", $route_name);
 
-                if ($matched)
-                {
+                if ($matched) {
                     return true;
                 }
             }
         }
 
-        if ($role_id_list)
-        {
+        if ($role_id_list) {
             $role_ids = implode(",", $role_id_list);
 
             $q = "
@@ -82,12 +77,10 @@ class AccessControl
         $allow_route_list = SectionRoutes::ALLOW_ROUTES_FOR_ANY_LOGIN_USER;
 
         // check for system admin
-        foreach($role_id_list as $role_id)
-        {
-            $role = Role::where('code', Role::TYPE_SYSTEM_ADMIN)->findOrFail($role_id);
+        foreach ($role_id_list as $role_id) {
+            $role = Role::where('code', Role::TYPE_SYSTEM_ADMIN)->find($role_id);
 
-            if ($role)
-            {
+            if ($role) {
                 $allow_route_list = array_merge($allow_route_list, SectionRoutes::ALLOW_ROUTES_FOR_SYSTEM_ADMIN);
             }
         }

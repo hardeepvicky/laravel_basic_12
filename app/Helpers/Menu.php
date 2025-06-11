@@ -346,6 +346,7 @@ class SystemMenu extends BaseMenu
         $links = [];
 
         $links[] = self::permission();
+        $links[] = self::setting();
         $links[] = self::state();
         $links[] = self::city();
         $links[] = self::type();
@@ -364,6 +365,17 @@ class SystemMenu extends BaseMenu
         ];
 
         return self::getModule("Permission", self::ICON_MENU_ROOT_CHILD, $links);
+    }
+
+    public static function setting()
+    {
+        $routePrefix = "setting";
+
+        $links = [
+            self::getLink($routePrefix . ".general", "General", 'fa-solid fa-gear'),
+        ];
+
+        return self::getModule("Setting", self::ICON_MENU_ROOT_CHILD, $links);
     }
 
     private static function state()
@@ -418,6 +430,7 @@ class DeveloperMenu extends BaseMenu
 
         $routePrefix = "developer";
 
+        $links[] = self::getLink($routePrefix . ".email_log", null, self::ICON_MENU_SUMMARY, [], self::LINK_TYPE_SUMMARY);
         $links[] = self::getLink($routePrefix . ".sql_log", null, self::ICON_MENU_SUMMARY, [], self::LINK_TYPE_SUMMARY);
         $links[] = self::getLink($routePrefix . ".laravel_routes_index", null, self::ICON_MENU_SUMMARY, [], self::LINK_TYPE_SUMMARY);
 

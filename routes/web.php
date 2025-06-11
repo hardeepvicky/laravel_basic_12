@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Backend\CityController;
 use App\Http\Controllers\Backend\DashboardController;
 use App\Http\Controllers\Backend\DepartmentController;
@@ -11,6 +12,7 @@ use App\Http\Controllers\Backend\PermissionController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Backend\PublicController;
 use App\Http\Controllers\Backend\RoleController;
+use App\Http\Controllers\Backend\SettingsController;
 use App\Http\Controllers\Backend\StateController;
 use App\Http\Controllers\Backend\TypeController;
 use App\Http\Controllers\Backend\UserController;
@@ -37,6 +39,13 @@ Route::get('/home', [HomeController::class, 'index'])->name('home');
 Route::get('/theme', [HomeController::class, 'theme']);
 Route::get('/developer-components', [HomeController::class, 'developer_components']);
 Route::get('/test', [HomeController::class, 'test']);
+
+Route::get('/ajax_send_email_otp/{id}', [RegisterController::class, 'ajax_send_email_otp']);
+Route::get('/email_otp_verify/{uid}', [RegisterController::class, 'email_otp_verify'])->name("email_otp_verify");
+Route::post('/ajax_email_otp_verify', [RegisterController::class, 'ajax_email_otp_verify']);
+
+Route::any('/create_password/{uid}', [RegisterController::class, 'create_password'])->name("create_password");
+Route::any('/forgot_password', [RegisterController::class, 'forgot_password'])->name("forgot_password");
 
 
 Route::group(['prefix' => 'public', 'as' => 'public.'], function () {
@@ -167,6 +176,11 @@ Route::group(['middleware' => ['auth', 'role_permission']], function () {
         Route::any($name . "/{route_name}", [PermissionController::class, $name])->name($name);
     });
 
+    $controller_prefix = "setting";
+    $controllerClass = SettingsController::class;
+    $name = "general";
+    Route::any($controller_prefix . "/" . $name, [$controllerClass, $name])->name($controller_prefix . "." . $name);
+
     Route::group(['prefix' => 'logs', 'as' => 'logs.'], function () {
         $name = "email";
         Route::get($name, [DeveloperController::class, $name])->name($name);
@@ -178,6 +192,9 @@ Route::group(['middleware' => ['auth', 'role_permission']], function () {
         Route::get($name, [DeveloperController::class, $name])->name($name);
 
         $name = "laravel_routes_index";
+        Route::get($name, [DeveloperController::class, $name])->name($name);
+
+        $name = "email_log";
         Route::get($name, [DeveloperController::class, $name])->name($name);
     });
 });

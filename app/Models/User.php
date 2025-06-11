@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Acl\AccessControl;
+use App\Helpers\FileUtility;
+use App\Helpers\Util;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,7 +15,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
 use Laravel\Sanctum\HasApiTokens;
 
-class User extends Authenticatable 
+class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
@@ -71,7 +73,8 @@ class User extends Authenticatable
         return $this->name;
     }
 
-    public function state(){
+    public function state()
+    {
         return $this->belongsTo(State::class);
     }
 
@@ -91,12 +94,13 @@ class User extends Authenticatable
 
         self::creating(function ($model) {
 
-            if (Schema::hasColumn($model->getTable(), "created_by")) 
-            {
+            if (Schema::hasColumn($model->getTable(), "created_by")) {
                 $auth_user = Auth::user();
                 if ($auth_user) {
                     $model->created_by = $auth_user->id;
                 }
+
+                $model->uid = self::generateUID();
             }
         });
 
@@ -106,12 +110,15 @@ class User extends Authenticatable
 
         self::updating(function ($model) {
 
-            if (Schema::hasColumn($model->getTable(), "updated_by")) 
-            {
+            if (Schema::hasColumn($model->getTable(), "updated_by")) {
                 $auth_user = Auth::user();
                 if ($auth_user) {
                     $model->updated_by = $auth_user->id;
                 }
+            }
+
+            if (!$model->uid) {
+                $model->uid = self::generateUID();
             }
         });
 
@@ -119,27 +126,25 @@ class User extends Authenticatable
             static::forgotCache();
         });
 
-        self::deleting(function ($model) {
-
-        });
+        self::deleting(function ($model) {});
 
         self::deleted(function ($model) {
             static::forgotCache();
         });
     }
 
+
+
     public static function addCache($cache_key, $data)
     {
         Cache::put($cache_key, $data, laravel_constant("cache_time.model"));
 
         $list_of_cache_keys = [];
-        if (Cache::has(static::$model_cache_key))
-        {
+        if (Cache::has(static::$model_cache_key)) {
             $list_of_cache_keys = Cache::get(static::$model_cache_key);
         }
 
-        if (!in_array($cache_key, $list_of_cache_keys))
-        {
+        if (!in_array($cache_key, $list_of_cache_keys)) {
             $list_of_cache_keys[] = $cache_key;
         }
 
@@ -148,12 +153,10 @@ class User extends Authenticatable
 
     public static function forgotCache()
     {
-        if (static::$model_cache_key && Cache::has(static::$model_cache_key))
-        {
+        if (static::$model_cache_key && Cache::has(static::$model_cache_key)) {
             $list_of_cache_keys = Cache::get(static::$model_cache_key);
 
-            foreach($list_of_cache_keys as $cache_key)
-            {
+            foreach ($list_of_cache_keys as $cache_key) {
                 Cache::forget($cache_key);
             }
 
@@ -177,8 +180,7 @@ class User extends Authenticatable
     {
         $list = [];
 
-        foreach($this->roles as $role)
-        {
+        foreach ($this->roles as $role) {
             $arr = $role->toArray();
             $list[$arr['id']] = $arr['display_name'];
         }
@@ -197,8 +199,7 @@ class User extends Authenticatable
     {
         $auth_user = Auth::user();
 
-        if ($auth_user && $auth_user->id == $this->id)
-        {
+        if ($auth_user && $auth_user->id == $this->id) {
             throw new \Exception("You can not de-activate your self");
         }
 
@@ -207,9 +208,8 @@ class User extends Authenticatable
     }
 
     public static function fetchList(Builder $builder, String $key_field, String $value_field, String $table_name)
-    {       
-        if (Schema::hasColumn($table_name, $key_field) && Schema::hasColumn($table_name, $value_field))
-        {
+    {
+        if (Schema::hasColumn($table_name, $key_field) && Schema::hasColumn($table_name, $value_field)) {
             return $builder->pluck($value_field, $key_field)->toArray();
         }
 
@@ -217,14 +217,10 @@ class User extends Authenticatable
 
         $list = [];
 
-        foreach($records as $record)
-        {
-            if ($value_field == "display_name_with_id")
-            {
+        foreach ($records as $record) {
+            if ($value_field == "display_name_with_id") {
                 $list[$record->{$key_field}] = $record->display_name . "-" . $record->id;
-            }
-            else
-            {
+            } else {
                 $list[$record->{$key_field}] = $record->{$value_field};
             }
         }
@@ -240,19 +236,14 @@ class User extends Authenticatable
         $table_name = $model->getTable();
 
         $builder->orWhere(function ($query) use ($conditions) {
-            if (isset($conditions['or_id']))
-            {
+            if (isset($conditions['or_id'])) {
                 $v = $conditions['or_id'];
 
-                if (is_array($v))
-                {
-                    if (!empty($v))
-                    {
+                if (is_array($v)) {
+                    if (!empty($v)) {
                         $query->whereIn("id", $v);
                     }
-                }
-                else
-                {
+                } else {
                     $query->where("id", $v);
                 }
             }
@@ -260,29 +251,22 @@ class User extends Authenticatable
 
         unset($conditions['or_id']);
 
-        if (static::tableHaveField($table_name, 'is_active'))
-        {
-            if (!isset($conditions['is_active']))
-            {
+        if (static::tableHaveField($table_name, 'is_active')) {
+            if (!isset($conditions['is_active'])) {
                 $conditions['is_active'] = 1;
             }
         }
 
         $builder->orWhere(function ($query) use ($conditions) {
-            foreach($conditions as $k => $v)
-            {
-                if (is_array($v))
-                {
-                    if (!empty($v))
-                    {
+            foreach ($conditions as $k => $v) {
+                if (is_array($v)) {
+                    if (!empty($v)) {
                         $query->whereIn($k, $v);
                     }
-                }
-                else
-                {
+                } else {
                     $query->where($k, $v);
                 }
-            }            
+            }
         });
 
         if ($order_by && $order_dir) {
@@ -296,16 +280,14 @@ class User extends Authenticatable
 
     public static function getListCache(String $key_field = "id", String $value_field = "display_name_with_id", $order_by = "name", $order_dir = "ASC")
     {
-        if (!static::$model_cache_key)
-        {
+        if (!static::$model_cache_key) {
             throw_exception("model_cache_key is not set in Model");
         }
 
         $cache_key = static::$model_cache_key . "-" . $key_field . "-" . $value_field;
         //d($cache_key);
 
-        if (Cache::has($cache_key))
-        {
+        if (Cache::has($cache_key)) {
             return Cache::get($cache_key);
         }
 
@@ -314,8 +296,7 @@ class User extends Authenticatable
         $model = new static();
         $table_name = $model->getTable();
 
-        if ($order_by && $order_dir)
-        {
+        if ($order_by && $order_dir) {
             $builder->orderBy($order_by, $order_dir);
         }
 
@@ -328,25 +309,20 @@ class User extends Authenticatable
 
     private function _updateUsageJson($json, $table, $label, $counter, $extra = [])
     {
-        if (!is_array($json))
-        {
+        if (!is_array($json)) {
             $json = [];
         }
 
         $is_found = false;
-        foreach($json as $k => $arr)
-        {
-            if (isset($arr['table']) && $arr['table'] == $table)
-            {
-                if (!isset($arr['counter']))
-                {
+        foreach ($json as $k => $arr) {
+            if (isset($arr['table']) && $arr['table'] == $table) {
+                if (!isset($arr['counter'])) {
                     $arr['counter'] = 0;
                 }
 
                 $arr['counter'] += $counter;
 
-                if ($arr['counter'] < 0)
-                {
+                if ($arr['counter'] < 0) {
                     $arr['counter'] = 0;
                 }
 
@@ -358,8 +334,7 @@ class User extends Authenticatable
             }
         }
 
-        if (!$is_found && $counter >= 0)
-        {
+        if (!$is_found && $counter >= 0) {
             $arr = array_merge([
                 "table" => $table,
                 "label" => $label,
@@ -379,24 +354,22 @@ class User extends Authenticatable
         $this->used_in_other_table_created_by = $this->_updateUsageJson($json, $model->getTable(), $model->getClassDisplayName(), $counter, [
             "last_id" => $model->id
         ]);
-        
+
         $this->save();
     }
 
-    public function changeCreatedByUsageBulk(Array $models)
+    public function changeCreatedByUsageBulk(array $models)
     {
         $json = $this->used_in_other_table_created_by;
 
-        foreach($models as $model)
-        {
-            if ($model instanceof Model)
-            {
+        foreach ($models as $model) {
+            if ($model instanceof Model) {
                 $this->used_in_other_table_created_by = $this->_updateUsageJson($json, $model->getTable(), $model->getClassDisplayName(), 1, [
                     "last_id" => $model->id
                 ]);
             }
         }
-        
+
         $this->save();
     }
 
@@ -413,18 +386,13 @@ class User extends Authenticatable
 
     private function _parseJsonBeforeUpdateByUsage(BaseModel $model, $json)
     {
-        if ($json && is_array($json))
-        {
+        if ($json && is_array($json)) {
             $model_table = $model->getTable();
 
-            foreach($json as $k => $arr)
-            {
-                if (isset($arr['table']) && $arr['table'] == $model_table)
-                {
-                    if (isset($arr['last_id']) && $arr['last_id'])
-                    {
-                        if ($arr['last_id'] == $model->id)
-                        {
+            foreach ($json as $k => $arr) {
+                if (isset($arr['table']) && $arr['table'] == $model_table) {
+                    if (isset($arr['last_id']) && $arr['last_id']) {
+                        if ($arr['last_id'] == $model->id) {
                             $arr['counter'] -= 1;
                         }
                     }
@@ -441,10 +409,8 @@ class User extends Authenticatable
     {
         $json = $this->used_in_other_table_updated_by;
 
-        foreach($models as $model)
-        {
-            if ($model instanceof Model)
-            {
+        foreach ($models as $model) {
+            if ($model instanceof Model) {
                 $json = $this->_parseJsonBeforeUpdateByUsage($model, $json);
                 $this->used_in_other_table_updated_by = $this->_updateUsageJson($json, $model->getTable(), $model->getClassDisplayName(), 1, [
                     "last_id" => $model->id
@@ -453,5 +419,23 @@ class User extends Authenticatable
         }
 
         $this->save();
+    }
+
+    public function getProfileImage()
+    {
+        if ($this->profile_image) {
+            return FileUtility::get($this->profile_image);
+        }
+
+        if ($this->avatar) {
+            return $this->avatar;
+        }
+
+        return null;
+    }
+
+    public static function generateUID()
+    {
+        return Util::getRandomString(10) . time();
     }
 }

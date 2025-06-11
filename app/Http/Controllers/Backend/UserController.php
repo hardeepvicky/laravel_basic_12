@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Backend;
 
 use App\Acl\AccessControl;
 use App\Helpers\FileUtility;
+use App\Helpers\LaravelExtend;
 use App\Mail\NewUserRegistered;
 use Illuminate\Http\Request;
 use App\Models\User;
@@ -145,9 +146,20 @@ class UserController extends BackendController
         DB::beginTransaction();
         try {
             $save_data = $validatedData;
+
             unset($save_data['roles']);
+
             $model = $this->modelClass::create($save_data);
+
             $this->_saveOthers($model, $validatedData);
+
+            if (!$validatedData['dont_send_email']) {
+                LaravelExtend::send_email_otp($model);
+            } else {
+                $model->is_active = true;
+                $model->save();
+            }
+
             DB::commit();
             $this->saveSqlLog();
             return $this->afterSave($model);

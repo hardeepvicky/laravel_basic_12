@@ -1,6 +1,11 @@
-<?php 
+<?php
 
 namespace App\Helpers;
+
+use App\Jobs\backend\JobForgotPassword;
+use App\Jobs\backend\JobSendEmailOnRegisration;
+use App\Models\User;
+use Exception;
 
 class LaravelExtend
 {
@@ -10,19 +15,11 @@ class LaravelExtend
 
         $routes = [];
         foreach ($routeCollections as $routeObj) {
-            
-            // d(get_class_methods($routeObj));
-            // d($routeObj->getActionName()); 
-            // d($routeObj->getActionMethod()); 
-            // d($routeObj->getName()); 
-            // d($routeObj->uri); 
-            
-            // exit;
 
             $route = [
                 'url' => $routeObj->uri,
                 'route_name' => $routeObj->getName(),
-                "action" => $routeObj->getActionName(),                
+                "action" => $routeObj->getActionName(),
             ];
 
             $routes[] = $route;
@@ -31,5 +28,34 @@ class LaravelExtend
         //d($routes); exit;
 
         return $routes;
+    }
+
+    public static function send_email_otp(User $user)
+    {
+        $user->otp = Util::getRandomString(4, "1234567890");
+        $user->otp_sent_datetime = date("Y-m-d H:i:s");
+
+        if (!$user->save()) {
+            throw_exception("User Save Failed");
+        }
+
+        $link =  config("url") . "/email_otp_verify/" . $user->uid;
+
+        $job = new JobSendEmailOnRegisration($user->name, $user->email, $user->otp, $link);
+
+        dispatch($job);
+    }
+
+    public static function send_forgot_password_link(User $user)
+    {
+        if (!$user->uid) {
+            throw new Exception("UId is not generated");
+        }
+
+        $link =  config("url") . "/create_password/" . $user->uid;
+
+        $job = new JobForgotPassword($user->name, $user->email, $link);
+
+        dispatch($job);
     }
 }

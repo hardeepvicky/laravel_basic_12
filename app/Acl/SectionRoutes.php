@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Acl;
 
 class SectionRoutes
@@ -37,15 +38,16 @@ class SectionRoutes
         $sections["HR"] = [
             "Department" => self::department(),
             "Designation" => self::designation(),
-            "Employee" => self::employee(),            
+            "Employee" => self::employee(),
         ];
 
-        $sections["Members"] = [            
+        $sections["Members"] = [
             "User" => self::user(),
             "Role" => self::role()
         ];
 
-        $sections["System Management"] = [            
+        $sections["System Management"] = [
+            "Setting" => self::setting(),
             "State" => self::state(),
             "City" => self::city(),
             "Type" => self::type(),
@@ -164,6 +166,16 @@ class SectionRoutes
         return $routes;
     }
 
+    private static function setting()
+    {
+        $routePrefix = "setting";
+
+        $routes = [];
+
+        $routes["General"] = [$routePrefix . ".general"];
+
+        return $routes;
+    }
 
     private static function developer()
     {
@@ -171,10 +183,10 @@ class SectionRoutes
 
         $routes = [];
 
-        $routes["SQL Log Summary"] = [$routePrefix . ".sql_log"];
+        $routes["Email Logs"] = [$routePrefix . ".email_log"];
+        $routes["SQL Logs"] = [$routePrefix . ".sql_log"];
         $routes["Laravel Routes Summary"] = [$routePrefix . ".laravel_routes_index"];
-        
+
         return $routes;
     }
-
 }

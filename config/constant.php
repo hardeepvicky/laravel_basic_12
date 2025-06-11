@@ -26,4 +26,14 @@ return [
         "model" => 60 * 24,
         "summary_search" => 60 * 24 * 30
     ],
+
+    'email_type' => [
+        'registration' => 'registration',
+        'forgot_password' => 'forgot_password',
+
+        'list' => [
+            'registration' => 'User Registration',
+            'forgot_password' => 'Forgot Password',
+        ]
+    ],
 ];
