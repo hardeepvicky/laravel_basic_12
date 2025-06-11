@@ -31,6 +31,8 @@ class EmployeeController extends BackendController
 
         $this->setForView(compact("records"));
 
+        $this->_set_data_for_add_and_edit();
+
         return $this->viewIndex(__FUNCTION__);
     }
 
@@ -39,9 +41,10 @@ class EmployeeController extends BackendController
         $cache_key = $cache_key_prefix . "-index";
 
         $conditions = $this->getConditions($cache_key, [
-            ["field" => "name", "type" => "string", "view_field" => "name"],
-            ["field" => "type", "type" => "string", "view_field" => "type"],
-            ["field" => "is_active", "type" => "", "view_field" => "is_active"],
+            ["field" => "name", "type" => "string"],
+            ["field" => "department_id", "type" => "int"],
+            ["field" => "designation_id", "type" => "int"],
+            ["field" => "is_active", "type" => ""],
         ]);
 
         $builder = $this->modelClass::where($conditions);
@@ -74,38 +77,38 @@ class EmployeeController extends BackendController
             'method' => 'POST',
         ];
 
-        $types = ['Manager', 'Clerk', 'Helper', 'Peon'];
+        $this->_set_data_for_add_and_edit();
 
-        $departments = Department::getList("id", "name");
-        $designations = Designation::getList("id", "name");
-        $states = State::getList("id", "name");
-        $dtypes = Type::getList("id", "name");
-        
-        $records = [
-            'departments' =>  $departments, 
-           'designations' =>  $designations,
-           'states' =>  $states,
-           'types' =>  $types,
-           'dtypes' =>  $dtypes,
-        ];
-
-        $this->setForView(compact("model", 'form', 'records'));
+        $this->setForView(compact("model", 'form'));
 
         return $this->view("form");
+    }
+
+    private function _set_data_for_add_and_edit($model = null)
+    {
+        $department_list = Department::getList("id", "name");
+        $designation_list = Designation::getList("id", "name");
+        $state_list = State::getList("id", "name");
+        
+        $this->setForView(compact('department_list', 'designation_list', 'state_list'));
     }
 
     private function _common_validation_rules()
     {
         return [
-            "is_active" => ""
+            'name' => 'required',            
+            'department_id' => 'required|exists:departments,id',
+            'designation_id' => 'required|exists:designations,id',
+            'current_state_id' => 'required',
+            'current_city_id' => 'required',
+            'permanent_state_id' => 'required',
+            'permanent_city_id' => 'required',
         ];
     }
 
     private function _common_validation_messages()
     {
         return [
-            "name.required" => "Departname name is required",
-            "name.unique" => "Departname name already exist",
         ];
     }
 
@@ -118,15 +121,7 @@ class EmployeeController extends BackendController
         $messages = $this->_common_validation_messages();
 
         $rules = array_merge($rules, [
-            'name' => 'required',
-            'type' => 'required',
-            'department_id' => 'required|exists:departments,id',
-            'designation_id' => 'required|exists:designations,id',
-            'current_state_id' => 'required',
-            'current_city_id' => 'required',
-            'permanent_state_id' => 'required',
-            'permanent_city_id' => 'required',
-            'image' => 'required|file|mimes:pdf,jpg,jpeg,png,doc,docx|max:10240',
+            
         ]);
 
         $messages = array_merge($messages, [
@@ -141,33 +136,6 @@ class EmployeeController extends BackendController
         {
             $model = $this->modelClass::create($validatedData);
             
-            // file table record
-            if($request->hasFile('image')){
-
-                $file = $request->file('image');
-                $filepath = $file->store('documents');
-
-                // create record for document table
-                $documentData = [
-                    'type_id' => $request->type_id,
-                    'file' => $filepath,
-                    'filename' => $file->getClientOriginalName(),
-                    'ext' => $file->extension(),
-                    'file_size_in_mb' => $file->getSize() / 1024 / 1024,
-                ];
-
-                $documentFile = DocumentFile::create($documentData);
-
-                // insert in employee document files
-                $employeeDocumentData = [
-                    'employee_id' => $model->id,
-                    'document_file_id' => $documentFile->id,
-                ];
-
-                EmployeeDocumentFile::create($employeeDocumentData);
-
-            }
-
             $this->updateUserInfoAfterSave($model);
             
             DB::commit();
@@ -197,27 +165,9 @@ class EmployeeController extends BackendController
             'method' => 'PUT',
         ];
 
-        $cityName = City::findOrFail($model->current_city_id);
+        $this->_set_data_for_add_and_edit($model);
 
-        $cities = $cityName->name;
-        
-        $types = ['Manager', 'Clerk', 'Helper', 'Peon'];
-
-        $departments = Department::getList("id", "name");
-        $designations = Designation::getList("id", "name");
-        $states = State::getList("id", "name");
-        $dtypes = Type::getList("id", "name");
-
-        $records = [
-           'departments' =>  $departments, 
-           'designations' =>  $designations,
-           'states' =>  $states,
-           'cities' =>  $cityName,
-           'types' =>  $types,
-           'dtypes' =>  $dtypes,
-        ];
-
-        $this->setForView(compact("model", "form", 'records'));
+        $this->setForView(compact("model", "form"));
 
         return $this->view("form");
     }
@@ -234,12 +184,6 @@ class EmployeeController extends BackendController
 
         $messages = array_merge($messages, [
 
-        ]);
-
-        $table_name = $this->tableName;
-
-        $rules = array_merge($rules, [
-            'name' => "required|min:3|unique:$table_name,name,$model->id",
         ]);
 
         $validatedData = $request->validate($rules, $messages);

@@ -10,6 +10,13 @@ $.ajaxSetup({
         "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
     },
     cache: false,
+    beforeSend : function(xhr)
+    {
+        $.loader.init().setInfo("Loading...").show();
+    },
+    complete : function (xhr, status) {
+        $.loader.hide();
+    }
 });
 
 $(document).ajaxError(function (event, xhr, settings, errorString) {

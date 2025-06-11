@@ -9,7 +9,9 @@ class SectionRoutes
     public const ALLOW_ROUTES_FOR_ANY_LOGIN_USER = [
         "dashboard",
         "user.my-profile",
-        "user.change-password"
+        "user.change-password",
+
+        "*.ajax_get_list",
     ];
 
     /**

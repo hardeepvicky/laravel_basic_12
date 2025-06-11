@@ -220,4 +220,13 @@ class CityController extends BackendController
             return back()->withInput()->with('fail', $ex->getMessage());
         }
     }
+
+    public function ajax_get_list($state_id)
+    {
+        $response = ["status" => 1];
+
+        $response['data'] = $this->modelClass::where("state_id", $state_id)->select("id", "name")->get()->toArray();
+
+        return $this->responseJson($response);
+    }
 }

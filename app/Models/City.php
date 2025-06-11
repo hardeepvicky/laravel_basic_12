@@ -2,13 +2,19 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
 class City extends BaseModel
 {
-    
-    public function state(){
-        return $this->belongsTo(State::class);
-    }    
+    public array $child_model_class = [
+        Employee::class => [
+            "label" => "Employee",
+            "foreignKey" => ["current_city_id", "permanent_city_id"],
+            "preventDelete" => true
+        ]
+    ];
 
+
+    public function state()
+    {
+        return $this->belongsTo(State::class);
+    }
 }

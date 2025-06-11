@@ -2,7 +2,6 @@
  * @created 07-Oct-2023
  * @author Hardeep Singh
  */
-
 $.blackdrop = {
     obj: null,
     events: [],
@@ -168,7 +167,7 @@ $.sr.csv = {
 };
 
 /** ------------------------ BASIC EXTEND ----------------------- */
-jQuery.fn.extend({
+jQuery.fn.extend({   
     tagName: function () {
         return this.prop("tagName").toLowerCase();
     },

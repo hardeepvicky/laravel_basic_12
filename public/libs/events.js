@@ -1,4 +1,9 @@
 $.events = {
+    lastCallbacks : [],
+    execAtLast : function (callback)
+    {
+        this.lastCallbacks.push(callback);
+    },
     onAjaxError: function (title, responseHtml, extra) {
         var config = {
             title: title,

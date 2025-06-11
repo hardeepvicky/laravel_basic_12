@@ -47,6 +47,7 @@
     <link rel="stylesheet" type="text/css" href="/css/backend.css?<?= BACKEND_CSS_VERSION ?>" />
 
     <script src="/assets/js/vendors/jquery/jquery.min.js"></script>
+    <script src="/libs/events.js?<?= BACKEND_JS_VERSION ?>"></script>
 </head>
 
 <body>
@@ -111,7 +112,7 @@
 
     <!-- Project Lib -->
     <script src="/libs/constants.js?<?= BACKEND_JS_VERSION ?>"></script>
-    <script src="/libs/events.js?<?= BACKEND_JS_VERSION ?>"></script>
+    
     <script src="/libs/loader/loader.js?<?= BACKEND_JS_VERSION ?>"></script>
     <script src="/libs/date-util.js?<?= BACKEND_JS_VERSION ?>"></script>
     <script src="/libs/jquery-input-validate.js?<?= BACKEND_JS_VERSION ?>"></script>
@@ -122,6 +123,14 @@
     <script src="/js/common_funtions.js?<?= BACKEND_JS_VERSION ?>"></script>
     <script src="/js/common_script_for_all_non_ajax_layout.js?<?= BACKEND_JS_VERSION ?>"></script>
     <script src="/js/backend/backend_non_ajax.js?<?= BACKEND_JS_VERSION ?>"></script>
+    <script>
+        $(function(){
+            console.log($.events.lastCallbacks);
+            $.events.lastCallbacks.map(function(cb){
+                cb();
+            });
+        });
+    </script>
 </body>
 
 </html>

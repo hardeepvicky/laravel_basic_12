@@ -54,6 +54,8 @@ $(document).ready(function () {
 
     $(".i-data-table").idataTable();
 
+    $(".cascade-drop-down").cascade();
+
 
 
     /** -------------------------------------------------------- */

@@ -87,7 +87,11 @@ Route::group(['middleware' => ['auth', 'role_permission']], function () {
     $route_prefix = "city";
     $controllerClass = CityController::class;
     Route::resource($route_prefix, $controllerClass);
-    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {});
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
+        $name = "ajax_get_list";
+        Route::get($name . "/{state_id}", [$controllerClass, $name])->name($name);
+    });
 
 
     // Department
