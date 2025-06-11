@@ -137,7 +137,7 @@ class RegisterController extends Controller
             "user_id" => $user->id,
             "user_email" => $user->email,
             "company_name" => $company_name,
-            "redirect_to" => "/admin/dashboard"
+            "redirect_to" => "/home"
         ]);
     }
 
@@ -165,7 +165,7 @@ class RegisterController extends Controller
                 throw new Exception("OTP has expired");
             }
 
-            if ($data['otp'] != $user->email_otp) {
+            if ($data['otp'] != $user->otp) {
                 throw new Exception("Wrong OTP");
             }
 

@@ -16,7 +16,8 @@
     <!-- Google font-->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,200;6..12,300;6..12,400;6..12,500;6..12,600;6..12,700;6..12,800;6..12,900;6..12,1000&amp;display=swap" />
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,200;6..12,300;6..12,400;6..12,500;6..12,600;6..12,700;6..12,800;6..12,900;6..12,1000&amp;display=swap" />
     <link rel="stylesheet" type="text/css" href="/assets/css/fontawesome-min.css" />
     <link rel="stylesheet" type="text/css" href="/assets/css/vendors/flag-icon.css" />
     <link rel="stylesheet" type="text/css" href="/assets/css/iconly-icon.css" />
@@ -43,7 +44,7 @@
     <!-- Project related CSS -->
     <link rel="stylesheet" type="text/css" href="/libs/loader/loader.css?<?= BACKEND_CSS_VERSION ?>" />
     <link rel="stylesheet" type="text/css" href="/libs/i-data-table/style.css?<?= BACKEND_CSS_VERSION ?>" />
-    <link rel="stylesheet" type="text/css" href="/libs/style-for-custom-lib.css?<?= BACKEND_CSS_VERSION ?>" />    
+    <link rel="stylesheet" type="text/css" href="/libs/style-for-custom-lib.css?<?= BACKEND_CSS_VERSION ?>" />
     <link rel="stylesheet" type="text/css" href="/css/backend.css?<?= BACKEND_CSS_VERSION ?>" />
 
     <script src="/assets/js/vendors/jquery/jquery.min.js"></script>
@@ -60,20 +61,20 @@
         <div class="loader"><span></span><span></span><span></span><span></span><span></span></div>
     </div>
     <div class="page-wrapper compact-wrapper" id="pageWrapper">
-        @include ($partial_path . ".header")
+        @include ($partial_path . '.header')
         <!-- Page Body Start-->
         <div class="page-body-wrapper">
             <!-- Page sidebar start-->
-            @include($partial_path . ".sidebar")
+            @include($partial_path . '.sidebar')
             <!-- Page sidebar end-->
             <div class="page-body">
                 @yield('content')
             </div>
-            @include($partial_path . ".footer")
+            @include($partial_path . '.footer')
         </div>
     </div>
 
-    
+
     <script src="/assets/js/vendors/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/assets/js/vendors/bootstrap/dist/js/popper.min.js"></script>
     <script src="/assets/js/vendors/font-awesome/fontawesome-min.js"></script>
@@ -112,7 +113,7 @@
 
     <!-- Project Lib -->
     <script src="/libs/constants.js?<?= BACKEND_JS_VERSION ?>"></script>
-    
+
     <script src="/libs/loader/loader.js?<?= BACKEND_JS_VERSION ?>"></script>
     <script src="/libs/date-util.js?<?= BACKEND_JS_VERSION ?>"></script>
     <script src="/libs/jquery-input-validate.js?<?= BACKEND_JS_VERSION ?>"></script>
@@ -124,9 +125,9 @@
     <script src="/js/common_script_for_all_non_ajax_layout.js?<?= BACKEND_JS_VERSION ?>"></script>
     <script src="/js/backend/backend_non_ajax.js?<?= BACKEND_JS_VERSION ?>"></script>
     <script>
-        $(function(){
-            console.log($.events.lastCallbacks);
-            $.events.lastCallbacks.map(function(cb){
+        $(function() {
+            $.loader.init();
+            $.events.lastCallbacks.map(function(cb) {
                 cb();
             });
         });

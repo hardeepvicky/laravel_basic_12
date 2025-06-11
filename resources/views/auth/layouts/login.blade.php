@@ -12,7 +12,7 @@
     <meta name="author" content="pixelstrap">
     <title>Admiro - Premium Admin Template</title>
     <!-- Favicon icon-->
-    <link rel="icon" href="../assets/images/favicon.png" type="image/x-icon">
+    <link rel="icon" href="/assets/images/favicon.png" type="image/x-icon">
     <link rel="shortcut icon" href="/assets/images/favicon.png" type="image/x-icon">
     <!-- Google font-->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -30,14 +30,19 @@
     <!--fontawesome-->
     <link rel="stylesheet" href="/assets/css/fontawesome-min.css">
     <!-- Whether Icon css-->
-    <link rel="stylesheet" type="text/css" href="../assets/css/vendors/weather-icons/weather-icons.min.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/vendors/weather-icons/weather-icons.min.css">
     <!-- App css -->
     <link rel="stylesheet" href="/assets/css/style.css">
+
     <link id="color" rel="stylesheet" href="/assets/css/color-1.css" media="screen">
 
+    <link rel="stylesheet" type="text/css" href="/libs/loader/loader.css?<?= BACKEND_CSS_VERSION ?>" />
+    <link rel="stylesheet" type="text/css" href="/libs/style-for-custom-lib.css?<?= BACKEND_CSS_VERSION ?>" />
     <link rel="stylesheet" type="text/css" href="/css/backend.css?<?= BACKEND_CSS_VERSION ?>" />
 
     <script src="/assets/js/vendors/jquery/jquery.min.js"></script>
+    <script src="/libs/events.js?<?= BACKEND_JS_VERSION ?>"></script>
+
 </head>
 
 <body>
@@ -54,9 +59,11 @@
             <div class="col-12 p-0">
                 <div class="login-card login-dark">
                     <div>
-                        <div><a class="logo" href="{{ route('home') }}"><img class="img-fluid for-light m-auto"
-                                    src="../assets/images/logo/logo1.png" alt="looginpage"><img
-                                    class="img-fluid for-dark" src="../assets/images/logo/logo-dark.png" alt="logo"></a>
+                        <div>
+                            <a class="logo" href="{{ route('home') }}">
+                                <img class="img-fluid for-light m-auto" src="/assets/images/logo/logo.png"
+                                    alt="looginpage">
+                                <img class="img-fluid for-dark" src="/assets/images/logo/logo.png" alt="logo"></a>
                         </div>
                         @yield('content')
                     </div>
@@ -69,10 +76,25 @@
         <script src="/assets/js/vendors/bootstrap/dist/js/popper.min.js" defer=""></script>
         <!--fontawesome-->
         <script src="/assets/js/vendors/font-awesome/fontawesome-min.js"></script>
+        <script src="/assets/js/sweetalert/sweetalert2.min.js"></script>
         <!-- password_show-->
         <script src="/assets/js/password.js"></script>
         <!-- custom script -->
         <script src="/assets/js/script.js"></script>
+
+        <script src="/libs/loader/loader.js?<?= BACKEND_JS_VERSION ?>"></script>
+        <script src="/libs/jquery_extend.js?<?= BACKEND_JS_VERSION ?>"></script>
+        <script src="/js/common_funtions.js?<?= BACKEND_JS_VERSION ?>"></script>
+        <script src="/js/common_script_for_all_non_ajax_layout.js?<?= BACKEND_JS_VERSION ?>"></script>
+
+        <script>
+            $(function() {
+                $.loader.init();
+                $.events.lastCallbacks.map(function(cb) {
+                    cb();
+                });
+            });
+        </script>
     </div>
 </body>
 

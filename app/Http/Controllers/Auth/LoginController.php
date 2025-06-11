@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\WebController;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Illuminate\Http\Request;
 
 class LoginController extends WebController
 {
@@ -47,8 +48,7 @@ class LoginController extends WebController
 
     protected function beforeViewRender()
     {
-        if (!parent::beforeViewRender())
-        {
+        if (!parent::beforeViewRender()) {
             return false;
         }
 
@@ -57,5 +57,16 @@ class LoginController extends WebController
         $this->viewPrefix = "auth";
 
         $this->layout = "auth.layouts.login";
+    }
+
+    protected function authenticated(Request $request, $user)
+    {
+        if (!$user->dont_send_email && is_null($user->email_verified_at)) {
+            if (!$user->uid) {
+                throw_exception("UID is not set");
+            }
+
+            return redirect(route("email_otp_verify", ["uid" => $user->uid]));
+        }
     }
 }

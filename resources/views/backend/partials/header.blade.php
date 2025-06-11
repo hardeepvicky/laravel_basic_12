@@ -5,7 +5,8 @@ use App\Helpers\FileUtility;
 ?>
 <header class="page-header row">
     <div class="logo-wrapper d-flex align-items-center col-auto">
-        <a href="{{ route('home') }}"><img class="light-logo img-fluid" src="/assets/images/logo/logo1.png" alt="logo" /><img class="dark-logo img-fluid" src="/assets/images/logo/logo-dark.png" alt="logo" /></a>
+        <a href="{{ route('home') }}"><img class="light-logo img-fluid" src="/assets/images/logo/logo.png"
+                alt="logo" /><img class="dark-logo img-fluid" src="/assets/images/logo/logo.png" alt="logo" /></a>
         <a class="close-btn toggle-sidebar" href="javascript:void(0)">
             <svg class="svg-color">
                 <use href="/assets/svg/iconly-sprite.svg#Category"></use>
@@ -18,8 +19,10 @@ use App\Helpers\FileUtility;
                 <div class="form-group w-100">
                     <div class="Typeahead Typeahead--twitterUsers">
                         <div class="u-posRelative">
-                            <input class="demo-input Typeahead-input form-control-plaintext w-100" type="text" placeholder="Search Admiro .." name="q" title="" autofocus="autofocus" />
-                            <div class="spinner-border Typeahead-spinner" role="status"><span class="sr-only">Loading...</span></div>
+                            <input class="demo-input Typeahead-input form-control-plaintext w-100" type="text"
+                                placeholder="Search Admiro .." name="q" title="" autofocus="autofocus" />
+                            <div class="spinner-border Typeahead-spinner" role="status"><span
+                                    class="sr-only">Loading...</span></div>
                             <i class="close-search" data-feather="x"></i>
                         </div>
                         <div class="Typeahead-menu"></div>
@@ -29,7 +32,9 @@ use App\Helpers\FileUtility;
             <div class="form-group-header d-lg-block d-none">
                 <div class="Typeahead Typeahead--twitterUsers">
                     <div class="u-posRelative d-flex align-items-center">
-                        <input class="demo-input py-0 Typeahead-input form-control-plaintext w-100" type="text" placeholder="Type to Search..." name="q" title="" /><i class="search-bg iconly-Search icli"></i>
+                        <input class="demo-input py-0 Typeahead-input form-control-plaintext w-100" type="text"
+                            placeholder="Type to Search..." name="q" title="" /><i
+                            class="search-bg iconly-Search icli"></i>
                     </div>
                 </div>
             </div>
@@ -58,7 +63,8 @@ use App\Helpers\FileUtility;
                     </a>
                     <span class="badge rounded-pill badge-primary">4</span>
                     <div class="custom-menu notification-dropdown py-0 overflow-hidden">
-                        <h3 class="title bg-primary-light dropdown-title">Notification <span class="font-primary">View all</span></h3>
+                        <h3 class="title bg-primary-light dropdown-title">Notification <span class="font-primary">View
+                                all</span></h3>
                         <ul class="activity-timeline">
                             <li class="d-flex align-items-start">
                                 <div class="activity-line"></div>
@@ -130,59 +136,60 @@ use App\Helpers\FileUtility;
                             <use href="/assets/svg/iconly-sprite.svg#scanfull"></use>
                         </svg>
                     </a>
-                </li>                
-                @auth
-                @php
-                $user = Auth::user();
-                @endphp
-                <li class="profile-nav custom-dropdown">
-                    <div class="user-wrap">
-                        @if(isset($user->profile_image) && $user->profile_image)
-                        <div class="user-img"><img src="{{ FileUtility::get($user->profile_image) }}" alt="user" /></div>
-                        @endif
-                        <div class="user-content">
-                            <!-- <h6>Ava Davis</h6> -->
-                            <p class="mb-0">{{ $user->name }}<i class="fa-solid fa-chevron-down"></i></p>
-                        </div>
-                    </div>
-                    <div class="custom-menu overflow-hidden">
-                        <ul class="profile-body">
-                            <li class="d-flex">
-                                <svg class="svg-color">
-                                    <use href="/assets/svg/iconly-sprite.svg#Profile"></use>
-                                </svg>
-                                @if (Route::has('user.change.password'))
-                                <a class="ms-2" href="{{ route('user.change.password') }}">Change Password</a>
-                                @else
-                                Route not exist : user.change.password
-                                @endif
-                            </li>
-                            <!-- <li class="d-flex">
-                                <svg class="svg-color">
-                                    <use href="../assets/svg/iconly-sprite.svg#Message"></use>
-                                </svg>
-                                <a class="ms-2" href="letter-box.html">Inbox</a>
-                            </li>
-                            <li class="d-flex">
-                                <svg class="svg-color">
-                                    <use href="../assets/svg/iconly-sprite.svg#Document"></use>
-                                </svg>
-                                <a class="ms-2" href="to-do.html">Task</a>
-                            </li> -->
-
-                            <li class="d-flex">
-                                <svg class="svg-color">
-                                    <use href="/assets/svg/iconly-sprite.svg#Login"></use>
-                                </svg>
-                                <form action="{{ route('logout') }}" method="POST">
-                                    @csrf
-                                    <button type="submit" class="dropdown-item">Logout</button>
-                                </form>
-
-                            </li>
-                        </ul>
-                    </div>
                 </li>
+                @auth
+                    @php
+                        $user = Auth::user();
+                    @endphp
+                    <li class="profile-nav custom-dropdown">
+                        <div class="user-wrap">
+                            @if (isset($user->profile_image) && $user->profile_image)
+                                <div class="user-img"><img src="{{ FileUtility::get($user->profile_image) }}"
+                                        alt="user" /></div>
+                            @endif
+                            <div class="user-content">
+                                <!-- <h6>Ava Davis</h6> -->
+                                <p class="mb-0">{{ $user->name }}<i class="fa-solid fa-chevron-down"></i></p>
+                            </div>
+                        </div>
+                        <div class="custom-menu overflow-hidden">
+                            <ul class="profile-body">
+                                <li class="d-flex">
+                                    <svg class="svg-color">
+                                        <use href="/assets/svg/iconly-sprite.svg#Profile"></use>
+                                    </svg>
+                                    @if (Route::has('user.change.password'))
+                                        <a class="ms-2" href="{{ route('user.change.password') }}">Change Password</a>
+                                    @else
+                                        Route not exist : user.change.password
+                                    @endif
+                                </li>
+                                <!-- <li class="d-flex">
+                                        <svg class="svg-color">
+                                            <use href="../assets/svg/iconly-sprite.svg#Message"></use>
+                                        </svg>
+                                        <a class="ms-2" href="letter-box.html">Inbox</a>
+                                    </li>
+                                    <li class="d-flex">
+                                        <svg class="svg-color">
+                                            <use href="../assets/svg/iconly-sprite.svg#Document"></use>
+                                        </svg>
+                                        <a class="ms-2" href="to-do.html">Task</a>
+                                    </li> -->
+
+                                <li class="d-flex">
+                                    <svg class="svg-color">
+                                        <use href="/assets/svg/iconly-sprite.svg#Login"></use>
+                                    </svg>
+                                    <form action="{{ route('logout') }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="dropdown-item">Logout</button>
+                                    </form>
+
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
                 @endauth
             </ul>
         </div>
