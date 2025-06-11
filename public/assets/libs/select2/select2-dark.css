@@ -1,8 +1,35 @@
-
-.dark-only .select2-container--bootstrap-5.select2-container--focus .select2-selection, .select2-container--bootstrap-5.select2-container--open .select2-selection
+.select2-container--bootstrap-5 .select2-dropdown
 {
     border-color: var(--theme-default);
-    box-shadow: none;
+}
+
+.select2-container--bootstrap-5 .select2-dropdown .select2-results__options .select2-results__option.select2-results__option--selected, .select2-container--bootstrap-5 .select2-dropdown .select2-results__options .select2-results__option[aria-selected="true"]:not(.select2-results__option--highlighted)
+{    
+    background-color: var(--theme-default);
+}
+
+.select2-container--bootstrap-5 .select2-dropdown .select2-results__options .select2-results__option.select2-results__option--highlighted
+{
+    color: #fff;
+    background-color: var(--theme-default);
+    opacity: 0.8;
+}
+
+.select2-container--bootstrap-5.select2-container--focus .select2-selection, .select2-container--bootstrap-5.select2-container--open .select2-selection
+{
+    border-color: var(--theme-default);
+}
+
+.select2-container--bootstrap-5 .select2-dropdown .select2-search .select2-search__field:focus
+{
+    box-shadow : none;
+    border-color: var(--theme-default);
+}
+
+.select2-container--bootstrap-5.select2-container--focus .select2-selection, .select2-container--bootstrap-5.select2-container--open .select2-selection
+{
+    box-shadow : none;
+    border-color: var(--theme-default);
 }
 
 .dark-only .select2-search {
@@ -39,19 +66,7 @@
     color: #ffffff !important;
 }
 
-.dark-only .select2-container--bootstrap-5 .select2-dropdown .select2-results__options .select2-results__option.select2-results__option--highlighted
-{
-    color: #fff;
-    background-color: var(--theme-default);
-}
-
-.dark-only .select2-container--bootstrap-5 .select2-dropdown .select2-results__options .select2-results__option.select2-results__option--selected, .select2-container--bootstrap-5 .select2-dropdown .select2-results__options .select2-results__option[aria-selected="true"]:not(.select2-results__option--highlighted)
-{
-    color: #fff;
-    background-color: var(--theme-default);
-}
-
 .dark-only .select2-container--bootstrap-5 .select2-dropdown
 {
     color: #fff;
-}
+} 

@@ -45,6 +45,7 @@
 
     <script type="text/javascript">
         $(document).ready(function() {
+
             $("select#role_id").change(function() {
                 var id = $(this).val();
 

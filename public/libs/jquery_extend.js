@@ -248,8 +248,58 @@ jQuery.fn.extend({
             }
         });
     },
-    chkSelectAll: function () {
+    chkSelectAll: function (opt) {
         var feature = "sr-chkselect";
+
+        var default_opt = {
+            onChildChange : function() {},
+            onParentChange : function() {},
+        }
+
+        function check_nested_child(grant_parent, parents, checked) {                        
+            $(parents).each(function() {
+                $(this).prop("checked", checked);
+                opt.onChildChange(grant_parent, $(this));
+                var children = $(this).attr("data-sr-chkselect-children");
+                if (children) {
+                    check_nested_child($(this), $(children), checked);
+                }
+            });
+        }
+
+        function check_nested_parent(target, parent, checked) {                        
+
+            var t_c = $(target).length;
+            var c_c = $(target).filter(":checked").length;
+            var checked = t_c == c_c;
+            parent.prop("checked", checked);  
+
+            opt.onParentChange(target, parent);
+            
+            var target = $(target).attr("data-sr-chkselect-parent");
+            if (target)
+            {
+                var target = $(this).attr("data-sr-chkselect-children");
+                check_nested_parent(target, )
+            }
+
+            $(parents).each(function() {
+                $(this).prop("checked", checked);
+                
+                
+                if (children) {
+                    check_nested($(this), $(children), checked);
+                }
+            });
+        }
+
+
+        if (typeof opt == "undefined")
+        {
+            opt = {};
+        }
+
+        opt = {...default_opt, ...opt};
 
         var events = {
             childCheck: feature + ".childcheck",
@@ -269,25 +319,19 @@ jQuery.fn.extend({
             }
 
             if (_this.applyOnce(feature)) {
-                _this.on(events.childCheck, function () {
-                    $(target).prop("checked", _this.prop("checked"));
-
-                    $(target).each(function () {
-                        if ($(this).hasEvent(events.childCheck)) {
-                            $(this).trigger(events.childCheck);
-                        }
-                    });
+                _this.on(events.childCheck, function () {                    
+                    check_nested_child($(this), $(target), _this.prop("checked"));                    
                 });
 
                 $(target).on(events.parentCheck, function () {
-                    var t_c = $(target).length;
+                    
+                     var t_c = $(target).length;
                     var c_c = $(target).filter(":checked").length;
                     var checked = t_c == c_c;
-                    _this.prop("checked", checked);
+                    _this.prop("checked", checked);  
+                    opt.onParentChange($(this), target);
 
-                    if (_this.hasEvent(events.parentCheck)) {
-                        _this.trigger(events.parentCheck);
-                    }
+                    //check_nested_parent();
                 });
 
                 _this.change(function () {
