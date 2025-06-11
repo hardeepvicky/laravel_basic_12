@@ -39,9 +39,11 @@
     visibility: hidden;
 }
 
-.i-data-table-applied th
+.i-data-table-applied th[data-search],
+.i-data-table-applied th[data-sort]
 {
     position: relative;
+    min-width: 180px;
 }
 
 .i-data-table-applied .search-block
@@ -75,7 +77,8 @@
 
 .i-data-table-applied .search-block .search-right-icons
 {
-    display: flex;    
+    display: flex;   
+    justify-content: flex-end; 
     width: 60px;
     margin-left: 4px;
 }

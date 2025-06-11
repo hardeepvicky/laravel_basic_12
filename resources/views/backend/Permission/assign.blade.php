@@ -104,6 +104,15 @@
                     return false;
                 }
             });
+
+            $('form').on('keydown', function(event) {
+                // Check if the pressed key is the Enter key (keyCode 13 or event.key 'Enter')
+                if (event.keyCode === 13 || event.key === 'Enter') {
+                    event.preventDefault(); // Prevent the default form submission                    
+                    console.log("Enter key pressed. Form submission prevented.");
+                    // Optionally, you could focus the next input or trigger other logic here.
+                }
+            });
         });
     </script>
 @endsection

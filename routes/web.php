@@ -44,7 +44,7 @@ Route::group(['prefix' => 'public', 'as' => 'public.'], function () {
     Route::post('ajax_upload_base64', [PublicController::class, 'ajax_upload_base64']);
 });
 
-Route::group(['middleware' => ['auth']], function () {
+Route::group(['middleware' => ['auth', '']], function () {
 
     $name = "dashboard";
     Route::get($name, [DashboardController::class, 'index'])->name($name);
@@ -52,7 +52,7 @@ Route::group(['middleware' => ['auth']], function () {
     $route_prefix = "user";
     $controllerClass = UserController::class;
     Route::resource($route_prefix, $controllerClass)->except("show");
-    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use($controllerClass) {
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
 
         $name = "activate";
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
@@ -68,8 +68,8 @@ Route::group(['middleware' => ['auth']], function () {
     $route_prefix = "role";
     $controllerClass = RoleController::class;
     Route::resource($route_prefix, $controllerClass);
-    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use($controllerClass) {
-        
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
         $name = "activate";
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
 
@@ -77,29 +77,25 @@ Route::group(['middleware' => ['auth']], function () {
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
     });
 
-// state
-$route_prefix = "state";
-$controllerClass = StateController::class;
-Route::resource($route_prefix, $controllerClass);
-Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use($controllerClass) {
-    
-});
+    // state
+    $route_prefix = "state";
+    $controllerClass = StateController::class;
+    Route::resource($route_prefix, $controllerClass);
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {});
 
-// City
-$route_prefix = "city";
-$controllerClass = CityController::class;
-Route::resource($route_prefix, $controllerClass);
-Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use($controllerClass) {
-    
-});
+    // City
+    $route_prefix = "city";
+    $controllerClass = CityController::class;
+    Route::resource($route_prefix, $controllerClass);
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {});
 
 
-// Department
+    // Department
     $route_prefix = "department";
     $controllerClass = DepartmentController::class;
     Route::resource($route_prefix, $controllerClass);
-    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use($controllerClass) {
-        
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
         $name = "activate";
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
 
@@ -111,8 +107,8 @@ Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function 
     $route_prefix = "designation";
     $controllerClass = DesignationController::class;
     Route::resource($route_prefix, $controllerClass);
-    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use($controllerClass) {
-        
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
         $name = "activate";
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
 
@@ -124,8 +120,8 @@ Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function 
     $route_prefix = "type";
     $controllerClass = TypeController::class;
     Route::resource($route_prefix, $controllerClass);
-    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use($controllerClass) {
-        
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
         $name = "activate";
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
 
@@ -137,8 +133,8 @@ Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function 
     $route_prefix = "employee";
     $controllerClass = EmployeeController::class;
     Route::resource($route_prefix, $controllerClass);
-    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use($controllerClass) {
-        
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
         $name = "activate";
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
 
@@ -180,28 +176,26 @@ Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function 
         $name = "laravel_routes_index";
         Route::get($name, [DeveloperController::class, $name])->name($name);
     });
-   
-    
 });
-Route::get('verify-otp/{email}',[UserController::class,'otp_verified_view'])->name('verify.otp')->middleware('auth');
+Route::get('verify-otp/{email}', [UserController::class, 'otp_verified_view'])->name('verify.otp')->middleware('auth');
 
 Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
 Route::post('forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
 
 // show cities based on selected state //
 Route::get('/cities/{stateId}', function ($stateId) {
-    
+
     $cities = City::where('state_id', $stateId)->pluck('name', 'id');
-    
+
     return response()->json(['cities' => $cities]);
 });
 // show cities based on selected state //
 
 // show cities based on Saved Records in edit case //
 Route::get('/cityname/{cityId}', function ($cityId) {
-    
+
     $cities = City::where('id', $cityId)->pluck('name', 'id');
-    
+
     return response()->json(['cities' => $cities]);
 });
 // show cities based on Saved Records in edit case //

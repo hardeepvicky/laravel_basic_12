@@ -13,13 +13,13 @@
         </div>
     </div>
 
-    <table class="table table-striped table-bordered table-hover mt-2 mb-2">
+    <table class="table table-striped table-bordered table-hover mt-2 mb-2 i-data-table">
         <thead>
             <tr>
                 <th class="text-center">#</th>
-                <th>Section</th>
-                <th>Sub Section</th>
-                <th>Action</th>
+                <th data-search="like" data-sort="text">Section</th>
+                <th data-search="like" data-sort="text">Sub Section</th>
+                <th data-search="like" data-sort="text">Action</th>
             </tr>
         </thead>
         <tbody>

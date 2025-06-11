@@ -31,8 +31,24 @@ class SectionRoutes
         $sections = [];
 
         $sections[]["Home"] = self::home();
-        $sections["Member Management"]["User"] = self::user();
-        $sections["Member Management"]["Role"] = self::role();        
+
+        $sections["HR"] = [
+            "Department" => self::department(),
+            "Designation" => self::designation(),
+            "Employee" => self::employee(),            
+        ];
+
+        $sections["Members"] = [            
+            "User" => self::user(),
+            "Role" => self::role()
+        ];
+
+        $sections["System Management"] = [            
+            "State" => self::state(),
+            "City" => self::city(),
+            "Type" => self::type(),
+        ];
+
         $sections[]["Developer"] = self::developer();
 
         return $sections;
@@ -65,11 +81,46 @@ class SectionRoutes
         return $routes;
     }
 
+    private static function department()
+    {
+        $routePrefix = "department";
+
+        $routes = self::commonRoutes($routePrefix);
+
+        $routes['Activate / Deactivate'] = [$routePrefix . ".activate", $routePrefix . ".de_activate"];
+
+        return $routes;
+    }
+
+    private static function designation()
+    {
+        $routePrefix = "designation";
+
+        $routes = self::commonRoutes($routePrefix);
+
+        $routes['Activate / Deactivate'] = [$routePrefix . ".activate", $routePrefix . ".de_activate"];
+
+        return $routes;
+    }
+
+    private static function employee()
+    {
+        $routePrefix = "employee";
+
+        $routes = self::commonRoutes($routePrefix);
+
+        $routes['Activate / Deactivate'] = [$routePrefix . ".activate", $routePrefix . ".de_activate"];
+
+        return $routes;
+    }
+
+
     private static function user()
     {
         $routePrefix = "user";
 
         $routes = self::commonRoutes($routePrefix);
+        $routes['Activate / Deactivate'] = [$routePrefix . ".activate", $routePrefix . ".de_activate"];
 
         return $routes;
     }
@@ -79,9 +130,38 @@ class SectionRoutes
         $routePrefix = "role";
 
         $routes = self::commonRoutes($routePrefix);
+        $routes['Activate / Deactivate'] = [$routePrefix . ".activate", $routePrefix . ".de_activate"];
 
         return $routes;
     }
+
+    private static function state()
+    {
+        $routePrefix = "state";
+
+        $routes = self::commonRoutes($routePrefix);
+
+        return $routes;
+    }
+
+    private static function city()
+    {
+        $routePrefix = "city";
+
+        $routes = self::commonRoutes($routePrefix);
+
+        return $routes;
+    }
+
+    private static function type()
+    {
+        $routePrefix = "type";
+
+        $routes = self::commonRoutes($routePrefix);
+
+        return $routes;
+    }
+
 
     private static function developer()
     {

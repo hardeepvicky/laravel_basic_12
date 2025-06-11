@@ -1,6 +1,7 @@
 <?php
 
 use App\Helpers\Menu;
+use App\Http\Middleware\RolePermission;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -16,7 +17,13 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        //
+        $middleware->alias([
+            'role_permission' => RolePermission::class            
+        ]);
+
+        $middleware->web(append: [
+            RolePermission::class
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         

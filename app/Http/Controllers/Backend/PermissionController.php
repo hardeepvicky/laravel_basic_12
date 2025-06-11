@@ -42,6 +42,9 @@ class PermissionController extends BackendController
 
             //d($section_conditions); exit;
 
+
+
+
             foreach ($records as $k => $record) {
                 if (isset($record['role']) && isset($record['route_name'])) {
 
@@ -58,11 +61,20 @@ class PermissionController extends BackendController
                         $records[$k]['role']['name'] = "Allow For All System Admin";
                     }
 
-                    foreach ($sections as $section_name => $actions) {
-                        foreach ($actions as $action_name => $route_list) {
-                            if (in_array($record['route_name']['name'], $route_list)) {
-                                $records[$k]['section'] = $section_name;
-                                $records[$k]['action'] = $action_name;
+                    foreach ($sections as $section_name => $sub_sections) {
+                        foreach ($sub_sections as $sub_section_name => $actions) {
+                            foreach ($actions as $action_name => $route_list) {
+                                if (in_array($record['route_name']['name'], $route_list)) {
+
+                                    $name = $sub_section_name;
+                                    if (!is_numeric($section_name)) {
+                                        $name = $section_name . " | " . $sub_section_name;
+                                    }
+
+                                    $records[$k]['section'] = $name;
+
+                                    $records[$k]['action'] = $action_name;
+                                }
                             }
                         }
                     }
@@ -117,8 +129,20 @@ class PermissionController extends BackendController
 
         $role_list = Role::getList();
 
-        $keys = array_keys($sections);
-        $section_list = array_combine($keys, $keys);
+        $section_list = [];
+
+        foreach ($sections as $section_name => $sub_sections) {
+            foreach ($sub_sections as $sub_section_name => $actions) {
+                foreach ($actions as $action_name => $route_list) {
+                    $name = $sub_section_name;
+                    if (!is_numeric($section_name)) {
+                        $name = $section_name . " | " . $sub_section_name;
+                    }
+
+                    $section_list[$name] = $name;
+                }
+            }
+        }
 
         $this->setForView(compact("role_list", "section_list"));
 
@@ -137,20 +161,26 @@ class PermissionController extends BackendController
 
             $role = Role::findOrFail($data['role_id']);
 
-            //d($sections);
+            // d($sections);
 
             $choosen_route_list = [];
-            foreach ($data['data'] as $section_name => $data_actions) {
-                if (isset($sections[$section_name])) {
-                    foreach ($data_actions as $action_name) {
-                        if (isset($sections[$section_name][$action_name])) {
-                            $choosen_route_list = array_merge($choosen_route_list, $sections[$section_name][$action_name]);
+
+            // dd($data['data']);
+            foreach ($data['data'] as $section_name => $sub_sections) {
+                foreach ($sub_sections as $sub_name => $data_actions) {
+                    if (isset($sections[$section_name][$sub_name])) {
+                        foreach ($data_actions as $action_name) {
+                            if (isset($sections[$section_name][$sub_name][$action_name])) {
+                                $choosen_route_list = array_merge($choosen_route_list, $sections[$section_name][$sub_name][$action_name]);
+                            }
                         }
                     }
                 }
             }
 
             $choosen_route_list = array_unique($choosen_route_list);
+
+            // dd($choosen_route_list);
 
             $roleRouteName = new RoleRouteName();
 
@@ -207,7 +237,7 @@ class PermissionController extends BackendController
             // ]);
 
             foreach ($sub_sections as $sub_section_name => $actions) {
-                foreach ($actions as $action_name => $route_list) {                    
+                foreach ($actions as $action_name => $route_list) {
 
                     $is_checked = false;
                     foreach ($route_list as $route_name) {

@@ -20,20 +20,7 @@
                         <h3>Basic</h3>
                     </div>
                     <div class="card-body">
-                        <div class="row">
-                            <div class="col-lg-6">
-                                <div class="form-group mb-3">
-                                    <label for="">Type</label>
-                                    <select name="type" id="" class="select2">
-                                        <option value="">Select</option>
-                                        @foreach ($records['types'] as $type)
-                                            <option value="{{ $type }}"
-                                                @if ($model->type == $type) selected @endif>{{ $type }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
+                        <div class="row">                            
                             <div class="col-lg-6">
                                 <div class="form-group mb-3">
                                     <x-Inputs.text-field name="name" label="Name" :value="$model->name"

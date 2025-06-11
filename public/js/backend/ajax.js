@@ -15,4 +15,6 @@ $(document).ready(function()
     $(".ajax-load").ajaxLoad();
 
     $(".fancybox").fancybox();
+
+    $(".i-data-table").idataTable();
 });
