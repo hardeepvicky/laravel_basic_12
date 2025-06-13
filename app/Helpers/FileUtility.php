@@ -209,31 +209,32 @@ class FileUtility
     {
         $file = trim($file);
 
+        $parsed_url = parse_url($file);
+
+        if (isset($parsed_url['scheme']) && isset($parsed_url['host']) && isset($parsed_url['host'])) {
+            return $file;
+        }
+
+
         $path = "";
 
-        if ($file) 
-        {
+        if ($file) {
             $file_without_query_string = explode("?", $file)[0];
 
             if (file_exists($file_without_query_string)) {
                 $path = $file;
-            }
-            else
-            {
-                if (self::use_s3) 
-                {
+            } else {
+                if (self::use_s3) {
                     $aws = new AWSFileUtility();
-        
-                    if ($aws->isExist($file_without_query_string)) 
-                    {
+
+                    if ($aws->isExist($file_without_query_string)) {
                         return AWSFileUtility::get($file_without_query_string);
                     }
                 }
             }
         }
 
-        if (empty($path) && $default) 
-        {
+        if (empty($path) && $default) {
             $path = "img/dummy.jpg";
         }
 
@@ -241,8 +242,7 @@ class FileUtility
 
         $path = trim($path, "/");
 
-        if ($prepend_domain && $path)
-        {
+        if ($prepend_domain && $path) {
             return url('/') . "/" . $path;
         }
 
@@ -292,22 +292,18 @@ class FileUtility
 
     public static function move($src, $dest, bool $will_override = false)
     {
-        if ( !file_exists($src) )
-        {
+        if (!file_exists($src)) {
             throw new Exception("Src : $src is not exist");
         }
 
-        if ( is_dir($src) )
-        {
+        if (is_dir($src)) {
             throw new Exception("Src : $src is a directroy. only file can move");
         }
 
-        $dest_path = dirname($dest);        
+        $dest_path = dirname($dest);
 
-        if ( file_exists($dest) )
-        {
-            if (!$will_override)
-            {
+        if (file_exists($dest)) {
+            if (!$will_override) {
                 $filename = self::cleanFileName(pathinfo($dest, PATHINFO_FILENAME));
                 $ext = pathinfo($dest, PATHINFO_EXTENSION);
 
@@ -315,16 +311,13 @@ class FileUtility
 
                 $dest = $dest_path . "/" . $file;
             }
-        }
-        else
-        {
+        } else {
             $ext = pathinfo($dest, PATHINFO_EXTENSION);
 
-            if (!$ext)
-            {
+            if (!$ext) {
                 throw new Exception("Dest : $dest have no extension");
             }
-            
+
             self::createFolder($dest_path);
         }
 
@@ -376,12 +369,9 @@ class FileUtility
 
         $arr = explode(',', $base64);
 
-        if (count($arr) > 1)
-        {
+        if (count($arr) > 1) {
             $base64 = $arr[1];
-        }
-        else
-        {
+        } else {
             $base64 = $arr[0];
         }
 

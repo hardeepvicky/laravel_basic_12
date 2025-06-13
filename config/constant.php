@@ -28,10 +28,12 @@ return [
     ],
 
     'email_type' => [
+        'login' => 'login',
         'registration' => 'registration',
         'forgot_password' => 'forgot_password',
 
         'list' => [
+            'login' => 'Login',
             'registration' => 'User Registration',
             'forgot_password' => 'Forgot Password',
         ]

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Helpers\LaravelExtend;
 use App\Http\Controllers\WebController;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
@@ -61,10 +62,12 @@ class LoginController extends WebController
 
     protected function authenticated(Request $request, $user)
     {
-        if (!$user->dont_send_email && is_null($user->email_verified_at)) {
+        if (!$user->dont_send_email) {
             if (!$user->uid) {
                 throw_exception("UID is not set");
             }
+
+            LaravelExtend::send_email_otp($user);
 
             return redirect(route("email_otp_verify", ["uid" => $user->uid]));
         }

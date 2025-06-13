@@ -2,8 +2,9 @@
 
 namespace App\Helpers;
 
-use App\Jobs\backend\JobForgotPassword;
-use App\Jobs\backend\JobSendEmailOnRegisration;
+use App\Jobs\Backend\JobForgotPassword;
+use App\Jobs\Backend\JobSendEmailOnLogin;
+use App\Jobs\Backend\JobSendEmailOnRegisration;
 use App\Models\User;
 use Exception;
 
@@ -30,7 +31,7 @@ class LaravelExtend
         return $routes;
     }
 
-    public static function send_email_otp(User $user)
+    public static function send_email_login_otp(User $user)
     {
         $user->otp = Util::getRandomString(4, "1234567890");
         $user->otp_sent_datetime = date("Y-m-d H:i:s");
@@ -41,7 +42,14 @@ class LaravelExtend
 
         $link =  config("url") . "/email_otp_verify/" . $user->uid;
 
-        $job = new JobSendEmailOnRegisration($user->name, $user->email, $user->otp, $link);
+        $job = new JobSendEmailOnLogin($user->name, $user->email, $user->otp, $link);
+
+        dispatch($job);
+    }
+
+    public static function send_email_on_registeration(User $user)
+    {
+        $job = new JobSendEmailOnRegisration($user->name, $user->email);
 
         dispatch($job);
     }

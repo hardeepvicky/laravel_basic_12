@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Jobs\backend;
+namespace App\Jobs\Backend;
 
 use App\Helpers\EmailHelper;
 use App\Models\Setting;
@@ -15,20 +15,13 @@ class JobSendEmailOnRegisration implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    protected String $name, $email, $otp, $verify_screen_link;
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct(String $name, String $email, String $otp, String $verify_screen_link)
-    {
-        $this->name = $name;
-        $this->email = $email;
-        $this->otp = $otp;
-        $this->verify_screen_link = $verify_screen_link;
-    }
+    public function __construct(public String $name, public String $email) {}
 
     /**
      * Execute the job.
@@ -61,9 +54,10 @@ class JobSendEmailOnRegisration implements ShouldQueue
             "company_name" => $company_name,
             "company_email" => $company_email,
             "name" => $this->name,
-            "otp" => $this->otp,
-            "verify_link" => $this->verify_screen_link
         ]);
+
+        // echo $html;
+        // exit;
 
         $emaiHelper->setBody((string) $html);
 

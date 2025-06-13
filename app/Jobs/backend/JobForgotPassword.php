@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Jobs\backend;
+namespace App\Jobs\Backend;
 
 use App\Helpers\EmailHelper;
 use App\Models\Setting;

@@ -146,6 +146,8 @@ class EmailHelper
                 throw new Exception("Email Log Save Failed");
             }
         }
+
+        return $result;
     }
 
     public function sendToMany(array $to_list)

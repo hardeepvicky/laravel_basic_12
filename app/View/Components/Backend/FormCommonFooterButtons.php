@@ -1,9 +1,8 @@
 <?php
 
-namespace App\View\Components\backend;
+namespace App\View\Components\Backend;
 
 use App\View\Components\BackendComponent;
-use Illuminate\View\Component;
 
 class FormCommonFooterButtons extends BackendComponent
 {
@@ -14,20 +13,15 @@ class FormCommonFooterButtons extends BackendComponent
      */
     public function __construct(
         public $buttons = null
-    )
-    {
+    ) {
         parent::__construct();
 
         $buttonList = ["submit", "submit_and_redirect_to_summary", "reset"];
 
-        if ($buttons)
-        {
-            if (is_string($buttons))
-            {
+        if ($buttons) {
+            if (is_string($buttons)) {
                 $buttonList = explode(",", $buttons);
-            }
-            else if (is_array($buttons))
-            {
+            } else if (is_array($buttons)) {
                 $buttonList = $buttons;
             }
         }

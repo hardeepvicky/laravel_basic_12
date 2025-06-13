@@ -153,9 +153,7 @@ class UserController extends BackendController
 
             $this->_saveOthers($model, $validatedData);
 
-            if (!$validatedData['dont_send_email']) {
-                LaravelExtend::send_email_otp($model);
-            } else {
+            if ($validatedData['dont_send_email']) {
                 $model->is_active = true;
                 $model->save();
             }

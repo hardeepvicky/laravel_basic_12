@@ -24,6 +24,23 @@
                 </div>
             </div>
 
+            <div class="d-flex align-items-center my-4">
+                <hr class="flex-grow-1">
+                <span class="px-3 text-muted text-sm">OR</span>
+                <hr class="flex-grow-1">
+            </div>
+
+            <a href="{{ route('auth.google.redirect') }}"
+                class="btn btn-lg google-btn d-flex align-items-center justify-content-center">
+                <i class="fa-brands fa-google"></i>
+                Login with Google
+            </a>
         </form>
+
+
+        <div class="mt-4 text-center text-sm text-gray-500">
+            By signing in, you agree to our <a href="#" class="font-medium text-blue-600 hover:text-blue-500">Terms of
+                Service</a> and <a href="#" class="font-medium text-blue-600 hover:text-blue-500">Privacy Policy</a>.
+        </div>
     </div>
 @endsection

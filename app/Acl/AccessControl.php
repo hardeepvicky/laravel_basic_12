@@ -85,23 +85,25 @@ class AccessControl
             }
         }
 
-        $role_ids = implode(",", $role_id_list);
+        if ($role_id_list) {
+            $role_ids = implode(",", $role_id_list);
 
-        $q = "
-            SELECT DISTINCT
-                RR.name
-            FROM
-                role_route_names RRN
-                INNER JOIN route_names RR ON RR.id = RRN.route_name_id
-            WHERE
-                RRN.role_id IN ($role_ids)
-        ";
+            $q = "
+                SELECT DISTINCT
+                    RR.name
+                FROM
+                    role_route_names RRN
+                    INNER JOIN route_names RR ON RR.id = RRN.route_name_id
+                WHERE
+                    RRN.role_id IN ($role_ids)
+            ";
 
-        $records = DB::select($q);
+            $records = DB::select($q);
 
 
-        foreach ($records as $record) {
-            $allow_route_list[] = $record->name;
+            foreach ($records as $record) {
+                $allow_route_list[] = $record->name;
+            }
         }
 
         return $allow_route_list;

@@ -1,6 +1,9 @@
 <?php
 
+use App\Helpers\EmailHelper;
+use App\Helpers\Util;
 use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Backend\CityController;
 use App\Http\Controllers\Backend\DashboardController;
@@ -30,6 +33,33 @@ Route::get('/phpinfo', function () {
     phpinfo();
 });
 
+Route::get("/test/whatsapp", function () {
+    curl_post_request("https://api.interakt.ai/v1/public/message/", [
+        "countryCode" => "+91",
+        "phoneNumber" => "9814040490",
+        "type" => "Template",
+        "template" => [
+            "name" => "OTP",
+            "languageCode" => "en_GB",
+        ],
+        "bodyValues" => [
+            "1" => "1234"
+        ]
+    ]);
+});
+
+Route::get("/test/email", function () {
+    $EmailHelper = new EmailHelper(EmailHelper::EMAIL_VIA_MAILJET);
+    $EmailHelper->setSubject("Testing Email");
+    $EmailHelper->setBody("This is test Email");
+    $EmailHelper->setTo("hardeepvicky1@gmail.com", "Hardeep Singh");
+    $EmailHelper->setType("test");
+    $response = $EmailHelper->send();
+
+    dump($response);
+});
+
+
 Auth::routes();
 
 Route::get('/', [HomeController::class, 'index']);
@@ -46,6 +76,12 @@ Route::post('/ajax_email_otp_verify', [RegisterController::class, 'ajax_email_ot
 
 Route::any('/create_password/{uid}', [RegisterController::class, 'create_password'])->name("create_password");
 Route::any('/forgot_password', [RegisterController::class, 'forgot_password'])->name("forgot_password");
+
+// Route to redirect to Google's OAuth page
+Route::get('/auth/google/redirect', [GoogleAuthController::class, 'redirect'])->name('auth.google.redirect');
+
+// Route to handle the callback from Google
+Route::get('/auth/google/callback', [GoogleAuthController::class, 'callback'])->name('auth.google.callback');
 
 
 Route::group(['prefix' => 'public', 'as' => 'public.'], function () {

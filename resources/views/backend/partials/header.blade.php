@@ -165,23 +165,24 @@ use App\Helpers\FileUtility;
                                     @endif
                                 </li>
                                 <!-- <li class="d-flex">
-                                        <svg class="svg-color">
-                                            <use href="../assets/svg/iconly-sprite.svg#Message"></use>
-                                        </svg>
-                                        <a class="ms-2" href="letter-box.html">Inbox</a>
-                                    </li>
-                                    <li class="d-flex">
-                                        <svg class="svg-color">
-                                            <use href="../assets/svg/iconly-sprite.svg#Document"></use>
-                                        </svg>
-                                        <a class="ms-2" href="to-do.html">Task</a>
-                                    </li> -->
+                                            <svg class="svg-color">
+                                                <use href="../assets/svg/iconly-sprite.svg#Message"></use>
+                                            </svg>
+                                            <a class="ms-2" href="letter-box.html">Inbox</a>
+                                        </li>
+                                        <li class="d-flex">
+                                            <svg class="svg-color">
+                                                <use href="../assets/svg/iconly-sprite.svg#Document"></use>
+                                            </svg>
+                                            <a class="ms-2" href="to-do.html">Task</a>
+                                        </li> -->
 
                                 <li class="d-flex">
                                     <svg class="svg-color">
                                         <use href="/assets/svg/iconly-sprite.svg#Login"></use>
                                     </svg>
-                                    <form action="{{ route('logout') }}" method="POST">
+                                    <form class="ms-2" action="{{ route('logout') }}" method="POST"
+                                        style="margin-block-end:0">
                                         @csrf
                                         <button type="submit" class="dropdown-item">Logout</button>
                                     </form>
