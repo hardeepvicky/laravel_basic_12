@@ -32,28 +32,20 @@ function d($arg, $will_exit = false)
     echo "<pre>";
     echo "<b>" . $callBy['file'] . "</b> At Line : " . $callBy['line'];
     echo "<br/>";
-    
-    if (is_string($arg))
-    {
+
+    if (is_string($arg)) {
         echo htmlspecialchars($arg);
-    }    
-    else if (is_bool($arg))
-    {
+    } else if (is_bool($arg)) {
         echo $arg ? "True" : "False";
-    }
-    else if (is_null($arg))
-    {
+    } else if (is_null($arg)) {
         echo "NULL";
-    }
-    else
-    {
+    } else {
         print_r($arg);
     }
-    
+
     echo "</pre>";
 
-    if ($will_exit)
-    {
+    if ($will_exit) {
         exit;
     }
 }
@@ -62,8 +54,8 @@ function getSubdomain()
 {
     $host = $_SERVER['APP_URL'] ?? "";
     $hostParts = explode('.', $host); // Remove the last two parts (domain and TLD) 
-    $subdomain = implode('.', array_slice($hostParts, 0, -2)); 
-    return $subdomain; 
+    $subdomain = implode('.', array_slice($hostParts, 0, -2));
+    return $subdomain;
 }
 
 
@@ -72,16 +64,14 @@ function get_query_params_of_current_url_in_array()
     $urlComponents = parse_url($_SERVER['REQUEST_URI']);
 
     $query_params = [];
-    if (isset($urlComponents['query']) && $urlComponents['query']) 
-    {
+    if (isset($urlComponents['query']) && $urlComponents['query']) {
         $query_list = explode("&", $urlComponents['query']);
 
         foreach ($query_list as $str) {
 
             $arr3 = explode("=", $str);
 
-            if ($arr3[0])
-            {
+            if ($arr3[0]) {
                 $query_params[$arr3[0]] = $arr3[1];
             }
         }
@@ -117,26 +107,20 @@ function get_current_path_url($extra_params = [])
 
 function sortable_url($sort_by)
 {
-    $query_params = get_query_params_of_current_url_in_array();    
+    $query_params = get_query_params_of_current_url_in_array();
     unset($query_params['is_sort_clear']);
 
     $query_params['sort_by'] = $sort_by;
-    
-    if ( isset($query_params['sort_dir']) )
-    {
+
+    if (isset($query_params['sort_dir'])) {
         $query_params['sort_dir'] = strtoupper($query_params['sort_dir']);
 
-        if ($query_params['sort_dir'] == 'ASC')
-        {
+        if ($query_params['sort_dir'] == 'ASC') {
             $query_params['sort_dir'] = 'DESC';
-        }
-        else if ($query_params['sort_dir'] == 'DESC')
-        {
+        } else if ($query_params['sort_dir'] == 'DESC') {
             $query_params['sort_dir'] = 'ASC';
         }
-    }
-    else
-    {
+    } else {
         $query_params['sort_dir'] = 'ASC';
     }
 
@@ -189,8 +173,7 @@ function sortable_anchor(String $sort_by, String $title, array $attrs = [])
 
 function if_date_time($datetime)
 {
-    if ($datetime)
-    {
+    if ($datetime) {
         return DateUtility::getDate($datetime, DateUtility::DATETIME_OUT_FORMAT, 'Asia/Kolkata');
     }
 
@@ -199,8 +182,7 @@ function if_date_time($datetime)
 
 function if_date($datetime)
 {
-    if ($datetime)
-    {
+    if ($datetime) {
         return DateUtility::getDate($datetime, DateUtility::DATE_OUT_FORMAT, 'Asia/Kolkata');
     }
 
@@ -217,48 +199,55 @@ function download_start($file, $content_type, $delete_after_download = true)
     header('Pragma: public');
     header('Content-Length: ' . filesize($file));
     readfile($file);
-    if ($delete_after_download)
-    {
+    if ($delete_after_download) {
         unlink($file);
     }
     exit;
 }
 
-function curl_get_request($url)
+function curl_get_request($url, $headers = [])
 {
     $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $url); 
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER , false);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); 
-    $res = curl_exec($ch); 
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    $res = curl_exec($ch);
     curl_close($ch);
-    
+
+    if (curl_errno($ch)) {
+        throw new Exception(curl_error($ch));
+    }
+
     return $res;
 }
 
 function curl_post_request($url, $params, $headers = [])
 {
     $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $url); 
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER , false);
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
     curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
     curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); 
-    $res = curl_exec($ch); 
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    $res = curl_exec($ch);
+
+    if (curl_errno($ch)) {
+        throw new Exception(curl_error($ch));
+    }
+
     curl_close($ch);
-    
+
     return $res;
 }
 
 function str_class_name_without_namespace($class_name)
 {
-    if(strpos($class_name, "\\") >= 0)
-    {
+    if (strpos($class_name, "\\") >= 0) {
         $arr = explode("\\", $class_name);
 
-        if ($arr)
-        {
+        if ($arr) {
             $class_name = end($arr);
         }
     }
@@ -285,7 +274,7 @@ function str_function_name_to_human_text($class_name)
     $str = str_class_name_without_namespace($class_name);
 
     $str = str_space_before_every_capital_letter($str);
-    
+
     $str = str_replace("_", " ", $str);
 
     return $str;
@@ -293,15 +282,12 @@ function str_function_name_to_human_text($class_name)
 
 function array_check_key_and_throw_error($arr, $keys, $msg = "")
 {
-    if (!$msg)
-    {
+    if (!$msg) {
         $msg = "Key : {key} not found in array";
     }
 
-    foreach($keys as $key)
-    {
-        if (!array_key_exists($key, $arr))
-        {
+    foreach ($keys as $key) {
+        if (!array_key_exists($key, $arr)) {
             $msg = str_replace("{key}", "key : " . $key, $msg);
             throw_exception($msg);
         }
@@ -310,23 +296,21 @@ function array_check_key_and_throw_error($arr, $keys, $msg = "")
 
 function array_check_value_and_throw_error($arr, $keys, $msg = "")
 {
-    if (!$msg)
-    {
+    if (!$msg) {
         $msg = "Key : {key} is empty in array ";
     }
 
-    foreach($keys as $key)
-    {
-        if ( !isset($arr[$key]) || empty($arr[$key]))
-        {
+    foreach ($keys as $key) {
+        if (!isset($arr[$key]) || empty($arr[$key])) {
             $msg = str_replace("{key}", "key : " . $key, $msg);
             throw_exception($msg);
         }
     }
 }
 
-function print_var_name($var) {
-    foreach($GLOBALS as $var_name => $value) {
+function print_var_name($var)
+{
+    foreach ($GLOBALS as $var_name => $value) {
         if ($value === $var) {
             return $var_name;
         }
@@ -339,8 +323,7 @@ function laravel_constant($name)
 {
     $key = "constant." . $name;
 
-    if ( !config()->has($key) )
-    {
+    if (!config()->has($key)) {
         throw_exception("Constant : $name is not exist in config->constant.php file");
     }
 
@@ -350,12 +333,9 @@ function laravel_constant($name)
 
 function amount_with_dr_cr($amount)
 {
-    if ($amount > 0)
-    {
+    if ($amount > 0) {
         return "Dr. " . $amount;
-    }
-    else if ($amount < 0)
-    {
+    } else if ($amount < 0) {
         return "Cr. " . $amount;
     }
 
@@ -364,37 +344,29 @@ function amount_with_dr_cr($amount)
 
 function str_check_char_array_exist(string $str, $to_check)
 {
-    if( is_array($to_check) )
-    {
-        foreach($to_check as $needle)
-        {
+    if (is_array($to_check)) {
+        foreach ($to_check as $needle) {
             $pos = strpos($str, $needle);
 
-            if (is_int($pos) && $pos >= 0)
-            {
+            if (is_int($pos) && $pos >= 0) {
                 return true;
             }
         }
-    }
-    else
-    {
+    } else {
         $pos = strpos($str, $to_check);
 
-        if (is_int($pos) && $pos >= 0)
-        {
+        if (is_int($pos) && $pos >= 0) {
             return true;
         }
     }
 
-    return false;    
+    return false;
 }
 
 function array_make_all_values_zero_if_null($arr)
 {
-    foreach($arr as $k => $v)
-    {
-        if (is_null($v))
-        {
+    foreach ($arr as $k => $v) {
+        if (is_null($v)) {
             $arr[$k] = 0;
         }
     }
@@ -406,16 +378,11 @@ function array_extract_only_of_keys(array $arr, array $keys, bool $throw_excepti
 {
     $ret_arr = [];
 
-    foreach($keys as $key)
-    {
-        if (isset($arr[$key]))
-        {
+    foreach ($keys as $key) {
+        if (isset($arr[$key])) {
             $ret_arr[$key] = $arr[$key];
-        }
-        else
-        {
-            if ($throw_exception_on_key_not_found)
-            {
+        } else {
+            if ($throw_exception_on_key_not_found) {
                 throw_exception("$key not found in arr");
             }
         }
@@ -426,12 +393,10 @@ function array_extract_only_of_keys(array $arr, array $keys, bool $throw_excepti
 
 function array_make_empty_string_if_keys_not_found(array $arr, array $keys)
 {
-    foreach($keys as $key)
-    {
-        if (!isset($arr[$key]))
-        {
+    foreach ($keys as $key) {
+        if (!isset($arr[$key])) {
             $arr[$key] = "";
-        }        
+        }
     }
 
     return $arr;

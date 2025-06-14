@@ -34,18 +34,40 @@ Route::get('/phpinfo', function () {
 });
 
 Route::get("/test/whatsapp", function () {
-    curl_post_request("https://api.interakt.ai/v1/public/message/", [
+
+    $request_params = [
         "countryCode" => "+91",
         "phoneNumber" => "9814040490",
         "type" => "Template",
         "template" => [
-            "name" => "OTP",
-            "languageCode" => "en_GB",
-        ],
-        "bodyValues" => [
-            "1" => "1234"
+            "name" => "sample_issue_resolution",
+            "languageCode" => "es",
+            "bodyValues" => [
+                "Hardeep"
+            ]
         ]
-    ]);
+    ];
+
+    d($request_params);
+
+    $request_params = json_encode($request_params);
+
+    d($request_params);
+
+    $headers = [
+        'Authorization : Basic ' . env("INTERAKT_API_TOKEN"),
+        'Content-Type : application/json'
+    ];
+
+    d($headers);
+
+    d(json_encode($headers));
+
+
+    $response = curl_post_request("https://api.interakt.ai/v1/public/message/", $request_params, $headers);
+
+
+    d($response);
 });
 
 Route::get("/test/email", function () {
