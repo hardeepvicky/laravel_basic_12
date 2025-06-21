@@ -1,0 +1,151 @@
+.error-card {
+    background-color: #ffffff;
+    border-radius: 1.5rem; /* More rounded corners */
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+        0 8px 10px -6px rgba(0, 0, 0, 0.1); /* Deeper shadow */
+    padding: 3rem; /* More padding */
+    text-align: center;
+    max-width: 650px;
+    width: 100%;
+    transition: transform 0.3s ease-in-out; /* Add subtle hover effect */
+}
+
+.error-card:hover {
+    transform: scale(1.02); /* Slightly enlarge on hover */
+}
+.error-code {
+    color: #4f46e5; /* Indigo-600 */
+    font-size: 6rem; /* Large font size */
+    font-weight: 800; /* Extra bold */
+    margin-bottom: 1rem;
+    animation: pulse 2s infinite cubic-bezier(0.4, 0, 0.6, 1); /* Subtle pulse animation */
+}
+.error-title {
+    font-size: 2.5rem; /* H1 size */
+    font-weight: 700; /* Bold */
+    color: #212529; /* Dark text */
+    margin-bottom: 1rem;
+    line-height: 1.2;
+}
+.error-description {
+    font-size: 1.25rem; /* Larger paragraph text */
+    color: #495057; /* Muted text */
+    margin-bottom: 2rem;
+}
+
+.info-for-developer {
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1;
+    margin-top: 0.5rem;
+    border: 1px solid #ccc;
+    padding: 0.5rem;
+}
+
+.list-container {
+    background-color: #ffffff;
+    border-radius: 1.5rem; /* More pronounced rounded corners */
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15), 0 5px 10px rgba(0, 0, 0, 0.1); /* Deeper shadow */
+    padding: 2.5rem; /* Generous internal padding */
+    max-width: 600px;
+    width: 100%;
+}
+.list-title {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #343a40;
+    margin-bottom: 1.8rem;
+    text-align: center;
+    position: relative;
+    padding-bottom: 0.8rem;
+}
+.list-title::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 4px;
+    background: linear-gradient(
+        to right,
+        #6a11cb,
+        #2575fc
+    ); /* Underline matching background gradient */
+    border-radius: 2px;
+}
+.custom-list-group {
+    list-style: none; /* Remove default bullet points */
+    padding: 0;
+    margin: 0;
+}
+.custom-list-group-item {
+    background-color: #f8f9fa; /* Light background for items */
+    color: #495057;
+    border: none; /* Remove default Bootstrap list-group-item border */
+    border-radius: 0.8rem; /* Rounded corners for each item */
+    margin-bottom: 1rem; /* Space between items */
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.3s ease-in-out; /* Smooth transitions for hover effects */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05); /* Subtle shadow for items */
+}
+
+.custom-list-group-item.selected {
+    background-color: var(--theme-default);
+    color: #fff;
+}
+
+.custom-list-group-item:last-child {
+    margin-bottom: 0; /* No margin after the last item */
+}
+.custom-list-group-item:hover {
+    transform: translateY(-3px); /* Lift effect on hover */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1); /* More pronounced shadow on hover */
+    cursor: pointer;
+}
+.item-text {
+    font-size: 1.1rem;
+    font-weight: 500;
+    flex-grow: 1; /* Allow text to take up available space */
+}
+.item-icon {
+    color: var(--theme-default); /* Icon color matching gradient */
+    font-size: 1.3rem;
+    margin-left: 1rem;
+}
+
+.selected .item-icon {
+    color: #fff;
+}
+
+/* Icon styling (Font Awesome - example) */
+.fa-check-circle {
+    color: #28a745;
+} /* Green for completed tasks */
+.fa-clock {
+    color: #ffc107;
+} /* Amber for pending tasks */
+.fa-star {
+    color: #dc3545;
+} /* Red for important items */
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 576px) {
+    .list-container {
+        padding: 1.5rem;
+        border-radius: 1rem;
+    }
+    .list-title {
+        font-size: 1.8rem;
+        margin-bottom: 1.5rem;
+    }
+    .item-text {
+        font-size: 1rem;
+    }
+    .custom-list-group-item {
+        padding: 1rem 1.2rem;
+    }
+}

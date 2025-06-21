@@ -11,7 +11,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class JobSendEmailOnLogin implements ShouldQueue
+class JobSendEmailUserOtp implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -30,9 +30,9 @@ class JobSendEmailOnLogin implements ShouldQueue
      */
     public function handle()
     {
-        $emaiHelper = new EmailHelper(EmailHelper::EMAIL_VIA_MAILJET);
+        $emaiHelper = new EmailHelper();
 
-        $emaiHelper->setType(laravel_constant("email_type.login"));
+        $emaiHelper->setType(laravel_constant("msg_type.otp"));
 
         $emaiHelper->setTo($this->email, $this->name);
 

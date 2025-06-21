@@ -2,8 +2,10 @@
 
 namespace App\Helpers;
 
+use App\Exceptions\ApiException;
 use App\Models\EmailLog;
 use Exception;
+use Illuminate\Support\Facades\App;
 use Mailjet\Resources;
 
 class EmailHelper
@@ -11,12 +13,52 @@ class EmailHelper
     const EMAIL_VIA_BREVO = 'brevo';
     const EMAIL_VIA_MAILJET = 'mailjet';
 
-    private String $email_via, $from_email, $from_name, $to_email, $to_name, $subject, $html, $type;
-    private $from_user_id, $to_user_id;
+    private static $enabled_api_platforms = [self::EMAIL_VIA_MAILJET];
 
-    public function __construct(String $email_via)
+    private String $email_via, $from_email, $from_name, $subject, $html, $type;
+    private array $cc_list = [], $to_list = [], $attachments = [];
+
+    private $api_key, $api_secret;
+
+    private $emailLog;
+
+    public function __construct()
     {
-        $this->email_via = $email_via;
+        $this->email_via = env("EMAIL_API_PLATFORM");
+
+        if (!$this->email_via) {
+            throw_exception("env : EMAIL_API_PLATFORM not set");
+        }
+
+        if (!in_array($this->email_via, self::$enabled_api_platforms)) {
+            throw_exception("email_via : $this->email_via is not enabled");
+        }
+
+        if ($this->email_via == self::EMAIL_VIA_MAILJET) {
+            $api_key = env('MAILJET_API_KEY');
+
+            if (!$api_key) {
+                throw_exception("env : MAILJET_API_KEY is not set");
+            }
+
+            $this->api_key = $api_key;
+
+            $api_secret = env('MAILJET_API_SECRET');
+
+            if (!$api_secret) {
+                throw_exception("env : MAILJET_API_SECRET is not set");
+            }
+
+            $this->api_secret = $api_secret;
+        } else if ($this->email_via == self::EMAIL_VIA_BREVO) {
+            $api_key = env('BREVO_API_KEY');
+
+            if (!$api_key) {
+                throw_exception("env : BREVO_API_KEY is not set");
+            }
+
+            $this->api_key = $api_key;
+        }
 
         $this->from_email = env("EMAIL_FROM");
         $this->from_name = env("EMAIL_NAME");
@@ -29,11 +71,15 @@ class EmailHelper
         }
 
         $this->subject = $subject;
+
+        return $this;
     }
 
     public function setBody(String $html)
     {
         $this->html = $html;
+
+        return $this;
     }
 
     public function setType(String $type)
@@ -43,23 +89,150 @@ class EmailHelper
         }
 
         $this->type = $type;
+
+        return $this;
     }
 
-    public function setFrom(String $from_email, String $from_name, $from_user_id = null)
+    public function setFrom(String $from_email, String $from_name)
     {
         $this->from_email = $from_email;
         $this->from_name = $from_name;
-        $this->from_user_id = $from_user_id;
+
+        return $this;
     }
 
-    public function setTo(String $to_email, String $to_name, $to_user_id = null)
+    public function addTo(String $email, String $name)
     {
-        $this->to_email = $to_email;
-        $this->to_name = $to_name;
-        $this->to_user_id = $to_user_id;
+        foreach ($this->to_list as $to) {
+            if (isset($to['email']) && $to['email'] == $email) {
+                return $this;
+            }
+        }
+
+        $this->to_list[] = [
+            "email" => $email,
+            "name" => $name
+        ];
+
+        return $this;
     }
 
-    public function saveToLog()
+    public function addCc(String $email, String $name)
+    {
+        foreach ($this->cc_list as $cc) {
+            if (isset($cc['email']) && $cc['email'] == $email) {
+                return $this;
+            }
+        }
+
+        $this->cc_list[] = [
+            "email" => $email,
+            "name" => $name
+        ];
+
+        return $this;
+    }
+
+    public function addAttachment($file, $filename = "")
+    {
+        if (!FileUtility::isExist($file)) {
+            throw new Exception("file $file is not exist");
+        }
+
+        if (!$filename) {
+            $filename = pathinfo($file, PATHINFO_FILENAME);
+        }
+
+        $ext = pathinfo($file, PATHINFO_EXTENSION);
+
+        $filename = $filename . "." . $ext;
+
+        foreach ($this->attachments as $attachment) {
+            if ($attachment['filename'] == $filename) {
+                return $this;
+            }
+        }
+
+        $this->attachments[] = [
+            "filename" => $filename,
+            "mime_type" => get_mime_type_from_extension($ext),
+            "base64" => base64_encode(file_get_contents($file))
+        ];
+
+        return $this;
+    }
+
+    public function saveToLog($log_extras = [])
+    {
+        $this->validate();
+
+        $this->emailLog = new EmailLog();
+
+        $path = EmailLog::getFileSavePath();
+
+        FileUtility::createFolder($path);
+
+        $file = $this->emailLog->getNextId() . ".html";
+
+        file_put_contents($path . $file, $this->html);
+
+        $to_names = $to_emails = [];
+        foreach ($this->to_list as $to) {
+            $to_names[] = $to['name'];
+            $to_emails[] = $to['email'];
+        }
+
+        $cc_names = $cc_emails = [];
+        foreach ($this->cc_list as $to) {
+            $cc_names[] = $to['name'];
+            $cc_emails[] = $to['email'];
+        }
+
+        $log = array_merge($log_extras, [
+            "type" => $this->type,
+            "from_name" => $this->from_name,
+            "from_email" => $this->from_email,
+            "to_name" => implode(",", $to_names),
+            "to_email" => implode(",", $to_emails),
+            "cc_name" => implode(",", $cc_names),
+            "cc_email" => implode(",", $cc_emails),
+            "subject" => $this->subject,
+            "content_file" => $path . $file
+        ]);
+
+        $this->emailLog->fill($log);
+
+        if (!$this->emailLog->save()) {
+            throw new Exception("Email Log Save Failed");
+        }
+
+        return $this->emailLog->id;
+    }
+
+    public function updateLog($log)
+    {
+        if (!$this->emailLog) {
+            throw_exception("you forgot to call saveToLog()");
+        }
+
+        $this->emailLog->fill($log);
+
+        if (!$this->emailLog->save()) {
+            throw_exception("Email Log Save Failed");
+        }
+    }
+
+    public function setApiKey(String $api_key)
+    {
+        $this->api_key = $api_key;
+    }
+
+    public function setApiSecret(String $api_secret)
+    {
+        $this->api_secret = $api_secret;
+    }
+
+    public function validate()
     {
         if (!$this->from_email) {
             throw_exception("from_email is not set");
@@ -69,12 +242,8 @@ class EmailHelper
             throw_exception("from_name is not set");
         }
 
-        if (!$this->to_email) {
-            throw_exception("to_email is not set");
-        }
-
-        if (!$this->to_name) {
-            throw_exception("to_name is not set");
+        if (!$this->to_list) {
+            throw_exception("to email list is not set");
         }
 
         if (!$this->subject) {
@@ -84,140 +253,76 @@ class EmailHelper
         if (!$this->html) {
             throw_exception("html is not set");
         }
-
-        $emailLog = new EmailLog();
-
-        $path = EmailLog::getFileSavePath();
-
-        FileUtility::createFolder($path);
-
-        $file = $emailLog->getNextId() . ".html";
-
-        file_put_contents($path . $file, $this->html);
-
-        $emailLog->fill([
-            "type" => $this->type,
-            "from_name" => $this->from_name,
-            "from_email" => $this->from_email,
-            "to_name" => $this->to_name,
-            "to_email" => $this->to_email,
-            "subject" => $this->subject,
-            "content_file" => $path . $file
-        ]);
-
-        if (!$emailLog->save()) {
-            throw new Exception("Email Log Save Failed");
-        }
-
-        return $emailLog->id;
     }
 
-    public function send()
+    public function send(array $log_extras = [])
     {
-        $save_log_id = $this->saveToLog();
+        $result = [
+            "total" => 0,
+            "success" => 0,
+            "fail" => 0,
+            "errors" => []
+        ];
 
-        switch ($this->email_via) {
-            case self::EMAIL_VIA_BREVO:
-                $result = $this->_sendViaBrevo([
-                    [
-                        'email' => $this->to_email,
-                        'name' => $this->to_name
-                    ]
-                ]);
-                break;
+        try {
+            $this->saveToLog($log_extras);
 
-            case self::EMAIL_VIA_MAILJET:
-                $result = $this->_sendViaMailjet([
-                    [
-                        'Email' => $this->to_email,
-                        'Name' => $this->to_name
-                    ]
-                ]);
-                break;
+            switch ($this->email_via) {
+                case self::EMAIL_VIA_BREVO:
+                    $api_result = $this->_sendViaBrevo();
+                    $result = array_merge($result, $api_result);
+                    break;
 
-            default:
-                throw new Exception("No Email-Via found");
-        }
+                case self::EMAIL_VIA_MAILJET:
+                    $api_result = $this->_sendViaMailjet();
+                    $result = array_merge($result, $api_result);
+                    break;
 
-        if ($result) {
-            $emailLog = EmailLog::findOrFail($save_log_id);
-            $emailLog->is_sent = true;
-            if (!$emailLog->save()) {
-                throw new Exception("Email Log Save Failed");
+                default:
+                    throw new Exception("No Email Via found");
             }
+        } catch (ApiException $ex) {
+            $this->updateLog([
+                "is_sent" => false,
+                "error_msg" => $ex->api_error_msg,
+                "api_response_code" => $ex->api_error_code
+            ]);
+
+            $result['errors'][] = $ex->getMessage();
+        } catch (Exception $ex) {
+            $this->updateLog([
+                "is_sent" => false,
+                "error_msg" => $ex->getMessage()
+            ]);
         }
 
         return $result;
     }
 
-    public function sendToMany(array $to_list)
+    private function _sendViaBrevo()
     {
-        foreach ($to_list as $k => $t) {
-            if (!isset($t['name'])) {
-                throw new Exception("name is not set in to->$k");
-            }
-
-            if (!isset($t['email'])) {
-                throw new Exception("email is not set in to->$k");
-            }
-
-            if (!isset($t['user_id'])) {
-                $t['user_id'] = null;
-            }
-
-            $this->setTo($t['email'], $t['name'], $t['user_id']);
-
-            $this->saveToLog();
-        }
-
-        switch ($this->email_via) {
-            case self::EMAIL_VIA_BREVO:
-                return $this->_sendViaBrevo($to_list);
-                break;
-
-            default:
-                throw new Exception("No Email Via found");
-        }
-    }
-
-    private function _sendViaBrevo($to_list)
-    {
-        $api_key = env('BREVO_API_KEY');
-
-        if (!$api_key) {
-            throw_exception("Brevo APi Key is not set in env");
-        }
-
-        //Request payload
-
         $data = array(
             'sender' => [
                 'email' => $this->from_email,
                 'name' => $this->from_name
             ],
-            'to' => $to_list,
+            'to' => $this->to_list,
             'subject' => $this->subject,
             'htmlContent' => $this->html
         );
 
-        $config = \Brevo\Client\Configuration::getDefaultConfiguration()->setApiKey('api-key', $api_key);
+        $config = \Brevo\Client\Configuration::getDefaultConfiguration()->setApiKey('api-key', $this->api_key);
 
         $apiInstance = new \Brevo\Client\Api\TransactionalEmailsApi(new \GuzzleHttp\Client(), $config);
 
-        $sendSmtpEmail = new \Brevo\Client\Model\SendSmtpEmail([
-            'subject' => $this->subject,
-            'sender' => ['name' => $this->from_name, 'email' => $this->from_email],
-            'replyTo' => ['name' => $this->from_name, 'email' => $this->from_email],
-            'to' => $to_list,
-            'htmlContent' => $this->html,
-        ]);
+        $sendSmtpEmail = new \Brevo\Client\Model\SendSmtpEmail($data);
 
         try {
             $result = $apiInstance->sendTransacEmail($sendSmtpEmail);
 
             $msg_id = $result->getMessageId();
             if ($msg_id) {
-                return true;
+                return $msg_id;
             }
         } catch (Exception $ex) {
             throw $ex;
@@ -226,31 +331,56 @@ class EmailHelper
         return false;
     }
 
-    private function _sendViaMailjet($to_list)
+    private function _sendViaMailjet()
     {
-        $api_key = env('MAILJET_API_KEY');
+        $result = [
+            "total" => 0,
+            "success" => 0,
+            "fail" => 0,
+            "errors" => []
+        ];
 
-        if (!$api_key) {
-            throw_exception("Mailjet APi Key is not set in env");
+        $to_list = [];
+
+        foreach ($this->to_list as $to) {
+            array_check_key_and_throw_error($to, ["name", "email"]);
+
+            $to_list[] = [
+                "Email" => $to['email'],
+                "Name" => $to['name'],
+            ];
         }
 
-        $api_secret = env('MAILJET_API_SECRET');
+        $result['total'] = count($to_list);
 
-        if (!$api_key) {
-            throw_exception("Mailjet APi Secret is not set in env");
+        if (!$result['total']) {
+            return $result;
         }
 
-        $data = array(
-            'sender' => [
-                'email' => $this->from_email,
-                'name' => $this->from_name
-            ],
-            'to' => $to_list,
-            'subject' => $this->subject,
-            'htmlContent' => $this->html
-        );
+        $cc_list = [];
 
-        $mj = new \Mailjet\Client($api_key, $api_secret, true, ['version' => 'v3.1']);
+        foreach ($this->cc_list as $to) {
+            array_check_key_and_throw_error($to, ["name", "email"]);
+
+            $cc_list[] = [
+                "Email" => $to['email'],
+                "Name" => $to['name'],
+            ];
+        }
+
+        $attachments = [];
+
+        foreach ($this->attachments as $attachment) {
+            array_check_key_and_throw_error($attachment, ["filename", "mime_type", "base64"]);
+
+            $attachments[] = [
+                'Filename' => $attachment['filename'],
+                'ContentType' => $attachment['mime_type'],
+                'Base64Content' => $attachment['base64'],
+            ];
+        }
+
+        $mj = new \Mailjet\Client($this->api_key, $this->api_secret, true, ['version' => 'v3.1']);
 
         $body = [
             'Messages' => [
@@ -260,21 +390,63 @@ class EmailHelper
                         'Name' => $this->from_name
                     ],
                     'To' => $to_list,
+                    "Cc" => $cc_list,
                     'Subject' => $this->subject,
-                    'HTMLPart' => $this->html
+                    'HTMLPart' => $this->html,
+                    "Attachments" => $attachments
                 ]
-            ]
+            ],
+            "SandboxMode" => App::isProduction()
         ];
 
         // All resources are located in the Resources class
         $response = $mj->post(Resources::$Email, ['body' => $body]);
 
+        //d(get_class_info(get_class($response)), true);
+
+        $api_response = $response->getData();
+
+        $this->updateLog([
+            "is_sandbox" => $body['SandboxMode'],
+            "is_sent" => (int) $response->success(),
+            "api_response" => $api_response
+        ]);
+
         if ($response->success()) {
-            return true;
+            if (!$api_response) {
+                throw new ApiException('API : No Response on success', $response->getStatus());
+            } else if (is_array($api_response) && !isset($api_response['Messages'])) {
+                throw new ApiException('API : Response->Messages on success', $response->getStatus());
+            } else {
+                foreach ($api_response['Messages'] as $message) {
+                    $log = [
+                        "api_response" => $message,
+                    ];
+
+                    if ($message['Status'] == "success") {
+
+                        foreach ($message['To'] as $to) {
+
+                            $result['success']++;
+
+                            if ($to['MessageID']) {
+                                $log['is_sent'] = true;
+                            } else {
+                                $log['is_sent'] = false;
+                            }
+                        }
+                    } else if ($message['Status'] == "error") {
+                        foreach ($to_list as $t) {
+                            $result['fail']++;
+                        }
+                    }
+                }
+            }
         } else {
-            return false;
+            $data = $response->getData();
+            throw new ApiException($data['ErrorMessage'], $data['StatusCode'], $data);
         }
 
-        // dlod($response->getData());
+        return $result;
     }
 }

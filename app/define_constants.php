@@ -4,15 +4,12 @@ if (!defined('IT_COMPANY_NAME')) {
     define("IT_COMPANY_NAME", "Celec");
     define("IT_COMPANY_ICON", "");
 
-    if (env('APP_ENV') == 'production')
-    {
-        define("BACKEND_CSS_VERSION", "05-feb-2025");
-        define("BACKEND_JS_VERSION", "05-Feb-2025");
-    }
-    else
-    {
-        define("BACKEND_CSS_VERSION", time());
-        define("BACKEND_JS_VERSION", time());
+    if (env('APP_ENV') == 'production') {
+        define("CSS_VERSION", "05-feb-2025");
+        define("JS_VERSION", "05-Feb-2025");
+    } else {
+        define("CSS_VERSION", time());
+        define("JS_VERSION", time());
     }
 
     define("ACTION_NOT_PROCEED", 406);

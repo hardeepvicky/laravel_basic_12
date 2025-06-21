@@ -27,13 +27,13 @@ return [
         "summary_search" => 60 * 24 * 30
     ],
 
-    'email_type' => [
-        'login' => 'login',
+    'msg_type' => [
+        'otp' => 'otp',
         'registration' => 'registration',
         'forgot_password' => 'forgot_password',
 
         'list' => [
-            'login' => 'Login',
+            'otp' => 'OTP',
             'registration' => 'User Registration',
             'forgot_password' => 'Forgot Password',
         ]

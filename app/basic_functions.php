@@ -28,6 +28,10 @@ function throw_exception($msg)
 
 function d($arg, $will_exit = false)
 {
+    if (!env("APP_DEBUG")) {
+        return;
+    }
+
     $callBy = debug_backtrace()[0];
     echo "<pre>";
     echo "<b>" . $callBy['file'] . "</b> At Line : " . $callBy['line'];
@@ -50,7 +54,7 @@ function d($arg, $will_exit = false)
     }
 }
 
-function getSubdomain()
+function get_sub_domain()
 {
     $host = $_SERVER['APP_URL'] ?? "";
     $hostParts = explode('.', $host); // Remove the last two parts (domain and TLD) 
@@ -301,7 +305,7 @@ function array_check_value_and_throw_error($arr, $keys, $msg = "")
     }
 
     foreach ($keys as $key) {
-        if (!isset($arr[$key]) || empty($arr[$key])) {
+        if (!isset($arr[$key]) || strlen($arr[$key]) == 0 || is_null($arr[$key])) {
             $msg = str_replace("{key}", "key : " . $key, $msg);
             throw_exception($msg);
         }
@@ -352,7 +356,7 @@ function str_check_char_array_exist(string $str, $to_check)
                 return true;
             }
         }
-    } else {
+    } else if (is_string($to_check)) {
         $pos = strpos($str, $to_check);
 
         if (is_int($pos) && $pos >= 0) {
@@ -406,4 +410,195 @@ function array_make_empty_string_if_keys_not_found(array $arr, array $keys)
 function get_cache_prefix()
 {
     return "";
+}
+
+function str_protected($str)
+{
+    if (!is_string($str)) {
+        return "";
+    }
+
+    $len = strlen($str);
+
+    $first_part = substr($str, 0, 3);
+
+    $email_pos = strpos($str, "@");
+
+    if ($email_pos !== false) {
+        $last_part = substr($str, $email_pos);
+    } else {
+        $last_part = substr($str, -3);
+    }
+
+    return $first_part . "*****" . $last_part;
+}
+
+function get_reflection_method_human_list()
+{
+    $class = new ReflectionClass(ReflectionMethod::class);
+
+    $constants = $class->getConstants();
+
+    $list = [];
+
+    foreach ($constants as $constant => $code) {
+        $str = str_replace("IS_", "", $constant);
+
+        $str = ucfirst(strtolower($str));
+
+        $list[$code] = $str;
+    }
+
+    return $list;
+}
+
+
+function get_reflection_property_human_list()
+{
+    $class = new ReflectionClass(ReflectionProperty::class);
+
+    $constants = $class->getConstants();
+
+    $list = [];
+
+    foreach ($constants as $constant => $code) {
+        $str = str_replace("IS_", "", $constant);
+
+        $str = ucfirst(strtolower($str));
+
+        $list[$code] = $str;
+    }
+
+    return $list;
+}
+
+function get_class_info($class_name)
+{
+    if (is_string($class_name)) {
+        if (!class_exists($class_name)) {
+            throw_exception("class $class_name does not exit");
+        }
+    }
+
+    $class = new ReflectionClass($class_name);
+    $file = $class->getFileName();
+    $class_short_name = $class->getShortName();
+    $all_properties = $class->getProperties();
+    $constants = $class->getConstants();
+    $all_methods = $class->getMethods();
+
+    $properties = [];
+    $property_modifier_list = get_reflection_property_human_list();
+
+    foreach ($all_properties as $property) {
+        $modifier = $property->getModifiers();
+        $properties[] = [
+            "name" => $property->name,
+            "modifier" => $property_modifier_list[$modifier] ?? $modifier,
+        ];
+    }
+
+    $methods = [];
+
+    $method_modifier_list = get_reflection_method_human_list();
+
+    foreach ($all_methods as $method) {
+        $modifier = $method->getModifiers();
+        $methods[] = [
+            "name" => $method->name,
+            "modifier" => $method_modifier_list[$modifier] ?? $modifier,
+        ];
+    }
+
+    return compact("file", 'class_short_name', "constants", "properties", "methods");
+}
+
+
+function get_mime_type_from_extension(string $extension): string
+{
+    $extension = strtolower(ltrim($extension, '.')); // Clean and lowercase the extension
+
+    // A comprehensive, though not exhaustive, list of common MIME types by extension.
+    // This list can be expanded as needed.
+    $mimeTypes = [
+        // Text
+        'txt'  => 'text/plain',
+        'html' => 'text/html',
+        'htm'  => 'text/html',
+        'css'  => 'text/css',
+        'js'   => 'application/javascript',
+        'json' => 'application/json',
+        'xml'  => 'application/xml',
+        'csv'  => 'text/csv',
+        'php'  => 'application/x-php', // or text/html depending on server config
+
+        // Images
+        'png'  => 'image/png',
+        'jpg'  => 'image/jpeg',
+        'jpeg' => 'image/jpeg',
+        'gif'  => 'image/gif',
+        'bmp'  => 'image/bmp',
+        'webp' => 'image/webp',
+        'ico'  => 'image/x-icon',
+        'svg'  => 'image/svg+xml',
+        'tiff' => 'image/tiff',
+        'tif'  => 'image/tiff',
+        'psd'  => 'image/vnd.adobe.photoshop',
+
+        // Audio
+        'mp3'  => 'audio/mpeg',
+        'wav'  => 'audio/wav',
+        'ogg'  => 'audio/ogg',
+        'oga'  => 'audio/ogg',
+        'flac' => 'audio/flac',
+        'aac'  => 'audio/aac',
+
+        // Video
+        'mp4'  => 'video/mp4',
+        'mpeg' => 'video/mpeg',
+        'mpg'  => 'video/mpeg',
+        'webm' => 'video/webm',
+        'avi'  => 'video/x-msvideo',
+        'mov'  => 'video/quicktime',
+        'wmv'  => 'video/x-ms-wmv',
+        'flv'  => 'video/x-flv',
+
+        // Documents
+        'pdf'  => 'application/pdf',
+        'doc'  => 'application/msword',
+        'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'xls'  => 'application/vnd.ms-excel',
+        'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'ppt'  => 'application/vnd.ms-powerpoint',
+        'pptx' => 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        'odt'  => 'application/vnd.oasis.opendocument.text',
+        'ods'  => 'application/vnd.oasis.opendocument.spreadsheet',
+        'odp'  => 'application/vnd.oasis.opendocument.presentation',
+        'rtf'  => 'application/rtf',
+
+        // Archives
+        'zip'  => 'application/zip',
+        'rar'  => 'application/x-rar-compressed',
+        'tar'  => 'application/x-tar',
+        'gz'   => 'application/gzip',
+        '7z'   => 'application/x-7z-compressed',
+
+        // Fonts
+        'ttf'  => 'font/ttf',
+        'woff' => 'font/woff',
+        'woff2' => 'font/woff2',
+        'eot'  => 'application/vnd.ms-fontobject',
+        'otf'  => 'font/otf',
+
+        // Web/Application
+        'xml'  => 'application/xml',
+        'apk'  => 'application/vnd.android.package-archive',
+        'dmg'  => 'application/x-apple-diskimage',
+        'exe'  => 'application/x-ms-dos-executable',
+        'bin'  => 'application/octet-stream',
+        'dll'  => 'application/x-msdownload',
+    ];
+
+    // Return the MIME type if found, otherwise return a generic binary stream type.
+    return $mimeTypes[$extension] ?? 'application/octet-stream';
 }

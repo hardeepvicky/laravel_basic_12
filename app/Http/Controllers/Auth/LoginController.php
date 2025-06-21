@@ -2,11 +2,16 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Exceptions\UserException;
 use App\Helpers\LaravelExtend;
 use App\Http\Controllers\WebController;
 use App\Providers\RouteServiceProvider;
+use Exception;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
+use ReflectionClass;
+use ReflectionMethod;
 
 class LoginController extends WebController
 {
@@ -38,8 +43,6 @@ class LoginController extends WebController
     public function __construct()
     {
         parent::__construct();
-
-        // $this->middleware('guest')->except('logout');
     }
 
     public function showLoginForm()
@@ -62,14 +65,26 @@ class LoginController extends WebController
 
     protected function authenticated(Request $request, $user)
     {
-        if (!$user->dont_send_email) {
-            if (!$user->uid) {
-                throw_exception("UID is not set");
-            }
+        return redirect($this->redirectTo);
+    }
 
-            LaravelExtend::send_email_otp($user);
+    public function check_before_login(Request $request)
+    {
+        $guard = $this->guard();
 
-            return redirect(route("email_otp_verify", ["uid" => $user->uid]));
+        if (!$guard->once($request->only(["email", "password"]))) {
+
+            //login failed
+            throw ValidationException::withMessages([
+                $this->username() => [trans('auth.failed')],
+            ]);
+        }
+
+        $user = $guard->getUser();
+        if ($user->isRquireOTPVerificationOnLogin()) {
+            return redirect(route("otp_verify", ["uid" => $user->uid]));
+        } else {
+            return $this->login($request);
         }
     }
 }

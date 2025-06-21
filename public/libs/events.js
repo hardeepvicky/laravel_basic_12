@@ -6,12 +6,12 @@ $.events = {
     },
     onAjaxError: function (title, responseHtml, extra) {
         var config = {
-            title: title,
-            message: responseHtml,
-            size: "extra-large",
+            icon: "error",
+            showCloseButton: true,
+            html: title + responseHtml,
         };
 
-        bootbox.alert(config);
+        Swal.fire(config);
     },
     onUserError: function (html, extra) {
         var config = {

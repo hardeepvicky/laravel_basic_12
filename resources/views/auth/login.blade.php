@@ -2,9 +2,9 @@
 
 @section('content')
     <div class="login-main">
-        <form class="theme-form" method="POST" action="{{ route('login') }}">
+        <form class="theme-form" method="POST" action="{{ route('check_before_login') }}">
             @csrf
-            <h2 class="text-center">Sign in to account</h2>
+            <h2 class="text-center">Login to account</h2>
             <p class="text-center">Enter your email &amp; password to login</p>
 
             <x-Backend.session-flash />
@@ -18,9 +18,13 @@
                 </div>
             </div>
             <div class="form-group mb-0 checkbox-checked">
-                <a class="link" href="{{ route('forgot_password') }}">Forgot password?</a>
+                <div class="d-flex justify-content-between">
+                    <x-Inputs.checkbox name="remember" label="Remember" />
+                    <a class="link" href="{{ route('forgot_password') }}">Forgot password?</a>
+                </div>
+
                 <div class="text-end mt-3">
-                    <button class="btn btn-primary btn-block w-100" type="submit">Sign in </button>
+                    <button class="btn btn-primary btn-block w-100" type="submit">Login</button>
                 </div>
             </div>
 

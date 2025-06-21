@@ -133,7 +133,12 @@ class User extends Authenticatable
         });
     }
 
-
+    public function isRquireOTPVerificationOnLogin()
+    {
+        if (!$this->dont_send_email) {
+            return false;
+        }
+    }
 
     public static function addCache($cache_key, $data)
     {

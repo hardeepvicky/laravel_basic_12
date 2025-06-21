@@ -3,7 +3,7 @@
 namespace App\Helpers;
 
 use App\Jobs\Backend\JobForgotPassword;
-use App\Jobs\Backend\JobSendEmailOnLogin;
+use App\Jobs\Backend\JobSendEmailUserOtp;
 use App\Jobs\Backend\JobSendEmailOnRegisration;
 use App\Models\User;
 use Exception;
@@ -31,18 +31,34 @@ class LaravelExtend
         return $routes;
     }
 
-    public static function send_email_login_otp(User $user)
+    public static function send_email_user_otp(User $user)
     {
-        $user->otp = Util::getRandomString(4, "1234567890");
+        $user->otp = Util::getRandomString(6, "1234567890");
         $user->otp_sent_datetime = date("Y-m-d H:i:s");
 
         if (!$user->save()) {
             throw_exception("User Save Failed");
         }
 
-        $link =  config("url") . "/email_otp_verify/" . $user->uid;
+        $link =  config("url") . "/otp_verify/" . $user->uid;
 
-        $job = new JobSendEmailOnLogin($user->name, $user->email, $user->otp, $link);
+        $job = new JobSendEmailUserOtp($user->name, $user->email, $user->otp, $link);
+
+        dispatch($job);
+    }
+
+    public static function send_whatsapp_user_otp(User $user)
+    {
+        $user->otp = Util::getRandomString(6, "1234567890");
+        $user->otp_sent_datetime = date("Y-m-d H:i:s");
+
+        if (!$user->save()) {
+            throw_exception("User Save Failed");
+        }
+
+        $link =  config("url") . "/otp_verify/" . $user->uid;
+
+        $job = new JobSendEmailUserOtp($user->name, $user->email, $user->otp, $link);
 
         dispatch($job);
     }

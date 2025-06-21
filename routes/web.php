@@ -4,6 +4,8 @@ use App\Helpers\EmailHelper;
 use App\Helpers\Util;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\GoogleAuthController;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\OtpVerifyController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Backend\CityController;
 use App\Http\Controllers\Backend\DashboardController;
@@ -23,7 +25,7 @@ use App\Http\Controllers\HomeController;
 use GuzzleHttp\Middleware;
 use Illuminate\Http\Request;
 use App\Models\City;
-
+use Mailjet\Resources;
 
 Route::get('/', function () {
     return redirect()->route("home");
@@ -33,64 +35,21 @@ Route::get('/phpinfo', function () {
     phpinfo();
 });
 
-Route::get("/test/whatsapp", function () {
-
-    $request_params = [
-        "countryCode" => "+91",
-        "phoneNumber" => "9814040490",
-        "type" => "Template",
-        "template" => [
-            "name" => "sample_issue_resolution",
-            "languageCode" => "es",
-            "bodyValues" => [
-                "Hardeep"
-            ]
-        ]
-    ];
-
-    d($request_params);
-
-    $request_params = json_encode($request_params);
-
-    d($request_params);
-
-    $headers = [
-        'Authorization : Basic ' . env("INTERAKT_API_TOKEN"),
-        'Content-Type : application/json'
-    ];
-
-    d($headers);
-
-    d(json_encode($headers));
-
-
-    $response = curl_post_request("https://api.interakt.ai/v1/public/message/", $request_params, $headers);
-
-
-    d($response);
-});
-
-Route::get("/test/email", function () {
-    $EmailHelper = new EmailHelper(EmailHelper::EMAIL_VIA_MAILJET);
-    $EmailHelper->setSubject("Testing Email");
-    $EmailHelper->setBody("This is test Email");
-    $EmailHelper->setTo("hardeepvicky1@gmail.com", "Hardeep Singh");
-    $EmailHelper->setType("test");
-    $response = $EmailHelper->send();
-
-    dump($response);
-});
-
-
 Auth::routes();
 
 Route::get('/', [HomeController::class, 'index']);
 Route::get('/home', [HomeController::class, 'index'])->name('home');
 
+Route::post('/check_before_login', [LoginController::class, 'check_before_login'])->name('check_before_login');
+
 
 Route::get('/theme', [HomeController::class, 'theme']);
 Route::get('/developer-components', [HomeController::class, 'developer_components']);
 Route::get('/test', [HomeController::class, 'test']);
+
+Route::get('/otp_verify/{uid}', [OtpVerifyController::class, 'index'])->name("otp_verify");
+Route::get('/send_email_user_otp/{uid}', [OtpVerifyController::class, 'send_email_user_otp'])->name("send_email_user_otp");
+Route::get('/send_whatsapp_user_otp/{uid}', [OtpVerifyController::class, 'send_whatsapp_user_otp'])->name("send_whatsapp_user_otp");
 
 Route::get('/ajax_send_email_otp/{id}', [RegisterController::class, 'ajax_send_email_otp']);
 Route::get('/email_otp_verify/{uid}', [RegisterController::class, 'email_otp_verify'])->name("email_otp_verify");
@@ -256,25 +215,137 @@ Route::group(['middleware' => ['auth', 'role_permission']], function () {
         Route::get($name, [DeveloperController::class, $name])->name($name);
     });
 });
-Route::get('verify-otp/{email}', [UserController::class, 'otp_verified_view'])->name('verify.otp')->middleware('auth');
 
-Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
-Route::post('forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
 
-// show cities based on selected state //
-Route::get('/cities/{stateId}', function ($stateId) {
 
-    $cities = City::where('state_id', $stateId)->pluck('name', 'id');
+/* -------------------------------------------------------------------------*/
+Route::get("/test/whatsapp", function () {
 
-    return response()->json(['cities' => $cities]);
+    $request_params = [
+        "countryCode" => "+91",
+        "phoneNumber" => ["7888698831", "9814040490"],
+        "type" => "Template",
+        "template" => [
+            "name" => "otp",
+            "languageCode" => "en_GB",
+            "bodyValues" => [
+                "123456"
+            ],
+            "buttonValues" => [
+                "1" => [
+                    "Copy"
+                ]
+            ]
+        ]
+    ];
+
+    d($request_params);
+
+    $request_params = json_encode($request_params);
+
+    d($request_params);
+
+    $headers = [
+        'Authorization : Basic ' . env("INTERAKT_API_TOKEN"),
+        'Content-Type : application/json'
+    ];
+
+    d($headers);
+
+    d(json_encode($headers));
+
+
+    $response = curl_post_request("https://api.interakt.ai/v1/public/message/", $request_params, $headers);
+
+
+    d($response);
 });
-// show cities based on selected state //
 
-// show cities based on Saved Records in edit case //
-Route::get('/cityname/{cityId}', function ($cityId) {
 
-    $cities = City::where('id', $cityId)->pluck('name', 'id');
+Route::get("/test/sms/viop", function () {
 
-    return response()->json(['cities' => $cities]);
+    $user_pwd = env('DINSTAR_USER') . ":" . env('DINSTAR_PASSWORD');
+
+    d($user_pwd);
+
+    $api_url = env('DINSTAR_API_URL');
+
+    d($api_url);
+
+    $post = [
+        "text" => "Hello World",
+        "param" => [
+            [
+                "number" => "9814040490",
+                "user_id" => "1"
+            ]
+        ],
+        "port" => [env("DINSTAR_DEFAULT_PORT"),],
+        "encoding" => "unicode"
+    ];
+
+    d($post);
+
+    $curl = curl_init();
+    curl_setopt_array($curl, array(
+        CURLOPT_URL => $api_url,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_ENCODING => 'unicode',
+        CURLOPT_USERPWD => $user_pwd,
+        CURLOPT_HTTPAUTH => CURLAUTH_ANY,
+        CURLOPT_MAXREDIRS => 10,
+        CURLOPT_TIMEOUT => 0,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        CURLOPT_CUSTOMREQUEST => 'POST',
+        CURLOPT_POSTFIELDS => json_encode($post),
+        CURLOPT_HTTPHEADER => array(
+            'Content-Type: application/json'
+        ),
+    ));
+    $response = curl_exec($curl);
+    curl_close($curl);
+
+    if ($response) {
+        d($response);
+        $data = json_decode($response);
+        d($data);
+
+        if ($data['error_code'] >= 200 && $data['error_code'] < 300) {
+            d("No Error");
+        } else if ($data['error_code'] == 400) {
+            d("Request format is not valid");
+        } else if ($data['error_code'] == 413) {
+            d("the count of telephone numbers is more than 32");
+        } else if ($data['error_code'] >= 500) {
+            d("other errors");
+        }
+    } else {
+        d("No Response");
+    }
 });
-// show cities based on Saved Records in edit case //
+
+Route::get("/test/sms", function () {
+    $mj = new \Mailjet\Client(env("MAILJET_API_KEY"), env("MAILJET_API_SECRET"), true, ['url' => "api.mailjet.com", 'version' => 'v4', 'call' => false]);
+    $body = [
+        'From' => "MJPilot",
+        'To' => "+919814040490",
+        'Text' => "Have a nice SMS flight with Mailjet!"
+    ];
+    $response = $mj->post(Resources::$SmsSend, ['body' => $body]);
+    d($response->getData());
+    d($response->success());
+});
+
+Route::get("/test/email", function () {
+
+    $EmailHelper = new EmailHelper();
+    $EmailHelper->setSubject("Testing Email");
+    $EmailHelper->setBody("This is test Email");
+    $EmailHelper->setType("test");
+    $EmailHelper->addTo("hardeepvicky1@gmail.com", "Hardeep Singh");
+    $EmailHelper->addCc("hardeep.singh417@gmail.com", "Hardeep Singh");
+    $EmailHelper->addAttachment("img/dummy.jpg");
+    $response = $EmailHelper->send();
+    dump($response);
+});

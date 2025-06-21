@@ -8,6 +8,10 @@ class EmailLog extends BaseModel
 {
     use HasFactory;
 
+    protected $casts = [
+        'api_response' => 'array'
+    ];
+
     public static function getFileSavePath()
     {
         return "files/EmailLog/";

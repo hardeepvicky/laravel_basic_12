@@ -8,3 +8,4 @@
         Route : {{ $current_route_name }}
     </h6>
 </div>
+@include ('errors.ajax.footer')

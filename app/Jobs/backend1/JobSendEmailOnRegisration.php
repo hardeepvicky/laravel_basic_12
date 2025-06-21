@@ -11,16 +11,17 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class JobForgotPassword implements ShouldQueue
+class JobSendEmailOnRegisration implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct(public String $name, public String $email, private String $link) {}
+    public function __construct(public String $name, public String $email) {}
 
     /**
      * Execute the job.
@@ -29,9 +30,9 @@ class JobForgotPassword implements ShouldQueue
      */
     public function handle()
     {
-        $emaiHelper = new EmailHelper(EmailHelper::EMAIL_VIA_MAILJET);
+        $emaiHelper = new EmailHelper();
 
-        $emaiHelper->setType(config("constant.email_type.forgot_password"));
+        $emaiHelper->setType(laravel_constant("msg_type.registration"));
 
         $emaiHelper->setTo($this->email, $this->name);
 
@@ -41,15 +42,23 @@ class JobForgotPassword implements ShouldQueue
             throw new Exception("Setting : Company Name is not set yet");
         }
 
-        $emaiHelper->setSubject("Forgot Password");
+        $company_email = Setting::getValue("company_email");
 
-        $html = view("mail.backend.forgot_password", [
+        if (!$company_email) {
+            throw new Exception("Setting : Company Email is not set yet");
+        }
+
+        $emaiHelper->setSubject("Registeration");
+
+        $html = view("mail.backend.registration", [
             "company_name" => $company_name,
+            "company_email" => $company_email,
             "name" => $this->name,
-            "link" => $this->link
         ]);
 
-        // dd((string) $html);
+        // echo $html;
+        // exit;
+
         $emaiHelper->setBody((string) $html);
 
         $emaiHelper->send();

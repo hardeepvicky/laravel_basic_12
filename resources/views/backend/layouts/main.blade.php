@@ -29,7 +29,7 @@
     <link rel="stylesheet" type="text/css" href="/assets/css/vendors/slick-theme.css" />
     <link rel="stylesheet" type="text/css" href="/assets/libs/select2/select2.min.css" />
     <link rel="stylesheet" type="text/css" href="/assets/libs/select2/select2-bootstrap-5-theme.min.css" />
-    <link rel="stylesheet" type="text/css" href="/assets/libs/select2/select2-dark.css?<?= BACKEND_CSS_VERSION ?>" />
+    <link rel="stylesheet" type="text/css" href="/assets/libs/select2/select2-dark.css?<?= CSS_VERSION ?>" />
     <link rel="stylesheet" type="text/css" href="/assets/libs/Croppie-2.6.4/croppie.css" />
     <link rel="stylesheet" type="text/css" href="/assets/libs/fancybox/dist/jquery.fancybox.min.css" />
     <link rel="stylesheet" type="text/css" href="/assets/css/vendors/flatpickr/flatpickr.min.css">
@@ -38,17 +38,18 @@
     <!-- <link rel="stylesheet" type="text/css" href="/assets/libs/bootstrap-datetimepicker/css/bootstrap-datetimepicker.css" /> -->
 
     <!-- Theme Specfic -->
-    <link rel="stylesheet" type="text/css" href="/assets/css/style.css?<?= BACKEND_CSS_VERSION ?>" />
-    <link id="color" rel="stylesheet" href="/assets/css/color-1.css?<?= BACKEND_CSS_VERSION ?>" media="screen" />
+    <link rel="stylesheet" type="text/css" href="/assets/css/style.css?<?= CSS_VERSION ?>" />
+    <link id="color" rel="stylesheet" href="/assets/css/color-1.css?<?= CSS_VERSION ?>" media="screen" />
 
     <!-- Project related CSS -->
-    <link rel="stylesheet" type="text/css" href="/libs/loader/loader.css?<?= BACKEND_CSS_VERSION ?>" />
-    <link rel="stylesheet" type="text/css" href="/libs/i-data-table/style.css?<?= BACKEND_CSS_VERSION ?>" />
-    <link rel="stylesheet" type="text/css" href="/libs/style-for-custom-lib.css?<?= BACKEND_CSS_VERSION ?>" />
-    <link rel="stylesheet" type="text/css" href="/css/backend.css?<?= BACKEND_CSS_VERSION ?>" />
+    <link rel="stylesheet" type="text/css" href="/libs/loader/loader.css?<?= CSS_VERSION ?>" />
+    <link rel="stylesheet" type="text/css" href="/libs/i-data-table/style.css?<?= CSS_VERSION ?>" />
+    <link rel="stylesheet" type="text/css" href="/libs/style-for-custom-lib.css?<?= CSS_VERSION ?>" />
+    <link rel="stylesheet" type="text/css" href="/css/common.css?<?= CSS_VERSION ?>" />
+    <link rel="stylesheet" type="text/css" href="/css/backend.css?<?= CSS_VERSION ?>" />
 
     <script src="/assets/js/vendors/jquery/jquery.min.js"></script>
-    <script src="/libs/events.js?<?= BACKEND_JS_VERSION ?>"></script>
+    <script src="/libs/events.js?<?= JS_VERSION ?>"></script>
 </head>
 
 <body>
@@ -102,28 +103,28 @@
     <script src="/assets/libs/ejs.min.js"></script>
     <script src="/assets/libs/jquery.form.min.js"></script>
 
-    <script src="/assets/js/config.js?<?= BACKEND_JS_VERSION ?>"></script>
-    <script src="/assets/js/script.js?<?= BACKEND_JS_VERSION ?>"></script>
-    <script src="/assets/js/height-equal.js?<?= BACKEND_JS_VERSION ?>"></script>
-    <script src="/assets/js/sidebar.js?<?= BACKEND_JS_VERSION ?>"></script>
+    <script src="/assets/js/config.js?<?= JS_VERSION ?>"></script>
+    <script src="/assets/js/script.js?<?= JS_VERSION ?>"></script>
+    <script src="/assets/js/height-equal.js?<?= JS_VERSION ?>"></script>
+    <script src="/assets/js/sidebar.js?<?= JS_VERSION ?>"></script>
     <script src="/assets/js/scrollbar/simplebar.js"></script>
-    <script src="/assets/js/scrollbar/custom.js?<?= BACKEND_JS_VERSION ?>"></script>
+    <script src="/assets/js/scrollbar/custom.js?<?= JS_VERSION ?>"></script>
 
-    <script src="/assets/js/theme-customizer/customizer.js?<?= BACKEND_JS_VERSION ?>"></script>
+    <script src="/assets/js/theme-customizer/customizer.js?<?= JS_VERSION ?>"></script>
 
     <!-- Project Lib -->
-    <script src="/libs/constants.js?<?= BACKEND_JS_VERSION ?>"></script>
+    <script src="/libs/constants.js?<?= JS_VERSION ?>"></script>
 
-    <script src="/libs/loader/loader.js?<?= BACKEND_JS_VERSION ?>"></script>
-    <script src="/libs/date-util.js?<?= BACKEND_JS_VERSION ?>"></script>
-    <script src="/libs/jquery-input-validate.js?<?= BACKEND_JS_VERSION ?>"></script>
-    <script src="/libs/jquery_extend.js?<?= BACKEND_JS_VERSION ?>"></script>
-    <script src="/libs/i-data-table/script.js?<?= BACKEND_JS_VERSION ?>"></script>
+    <script src="/libs/loader/loader.js?<?= JS_VERSION ?>"></script>
+    <script src="/libs/date-util.js?<?= JS_VERSION ?>"></script>
+    <script src="/libs/jquery-input-validate.js?<?= JS_VERSION ?>"></script>
+    <script src="/libs/jquery_extend.js?<?= JS_VERSION ?>"></script>
+    <script src="/libs/i-data-table/script.js?<?= JS_VERSION ?>"></script>
 
     <!-- Project JS -->
-    <script src="/js/common_funtions.js?<?= BACKEND_JS_VERSION ?>"></script>
-    <script src="/js/common_script_for_all_non_ajax_layout.js?<?= BACKEND_JS_VERSION ?>"></script>
-    <script src="/js/backend/backend_non_ajax.js?<?= BACKEND_JS_VERSION ?>"></script>
+    <script src="/js/common_funtions.js?<?= JS_VERSION ?>"></script>
+    <script src="/js/common_script_for_all_non_ajax_layout.js?<?= JS_VERSION ?>"></script>
+    <script src="/js/backend/backend_non_ajax.js?<?= JS_VERSION ?>"></script>
     <script>
         $(function() {
             $.loader.init();

@@ -36,12 +36,13 @@
 
     <link id="color" rel="stylesheet" href="/assets/css/color-1.css" media="screen">
 
-    <link rel="stylesheet" type="text/css" href="/libs/loader/loader.css?<?= BACKEND_CSS_VERSION ?>" />
-    <link rel="stylesheet" type="text/css" href="/libs/style-for-custom-lib.css?<?= BACKEND_CSS_VERSION ?>" />
-    <link rel="stylesheet" type="text/css" href="/css/backend.css?<?= BACKEND_CSS_VERSION ?>" />
+    <link rel="stylesheet" type="text/css" href="/libs/loader/loader.css?<?= CSS_VERSION ?>" />
+    <link rel="stylesheet" type="text/css" href="/libs/style-for-custom-lib.css?<?= CSS_VERSION ?>" />
+    <link rel="stylesheet" type="text/css" href="/css/common.css?<?= CSS_VERSION ?>" />
+    <link rel="stylesheet" type="text/css" href="/css/backend.css?<?= CSS_VERSION ?>" />
 
     <script src="/assets/js/vendors/jquery/jquery.min.js"></script>
-    <script src="/libs/events.js?<?= BACKEND_JS_VERSION ?>"></script>
+    <script src="/libs/events.js?<?= JS_VERSION ?>"></script>
 
 </head>
 
@@ -82,10 +83,10 @@
         <!-- custom script -->
         <script src="/assets/js/script.js"></script>
 
-        <script src="/libs/loader/loader.js?<?= BACKEND_JS_VERSION ?>"></script>
-        <script src="/libs/jquery_extend.js?<?= BACKEND_JS_VERSION ?>"></script>
-        <script src="/js/common_funtions.js?<?= BACKEND_JS_VERSION ?>"></script>
-        <script src="/js/common_script_for_all_non_ajax_layout.js?<?= BACKEND_JS_VERSION ?>"></script>
+        <script src="/libs/loader/loader.js?<?= JS_VERSION ?>"></script>
+        <script src="/libs/jquery_extend.js?<?= JS_VERSION ?>"></script>
+        <script src="/js/common_funtions.js?<?= JS_VERSION ?>"></script>
+        <script src="/js/common_script_for_all_non_ajax_layout.js?<?= JS_VERSION ?>"></script>
 
         <script>
             $(function() {

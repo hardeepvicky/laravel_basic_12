@@ -12,10 +12,12 @@ class Menu
     private static $menus = [];
     private static $current_route_name = "";
 
-    public static function setCurrentRouteName(String $current_route_name)
+    public static function setCurrentRouteName($current_route_name)
     {
-        self::$current_route_name = strtolower(trim($current_route_name));
-        BaseMenu::setCurrentRouteName(self::$current_route_name);
+        if ($current_route_name && is_string($current_route_name)) {
+            self::$current_route_name = strtolower(trim($current_route_name));
+            BaseMenu::setCurrentRouteName(self::$current_route_name);
+        }
     }
 
     public static function get($auth_user_id)
