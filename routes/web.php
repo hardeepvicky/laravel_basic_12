@@ -25,6 +25,7 @@ use App\Http\Controllers\HomeController;
 use GuzzleHttp\Middleware;
 use Illuminate\Http\Request;
 use App\Models\City;
+use App\Models\EmailLog;
 use Mailjet\Resources;
 
 Route::get('/', function () {
@@ -346,6 +347,12 @@ Route::get("/test/email", function () {
     $EmailHelper->addTo("hardeepvicky1@gmail.com", "Hardeep Singh");
     $EmailHelper->addCc("hardeep.singh417@gmail.com", "Hardeep Singh");
     $EmailHelper->addAttachment("img/dummy.jpg");
+    $EmailHelper->setSandbox(false);
     $response = $EmailHelper->send();
     dump($response);
+});
+
+Route::get("/test/mongo", function () {
+    $records = EmailLog::limit(100)->get()->toArray();
+    d($records);
 });

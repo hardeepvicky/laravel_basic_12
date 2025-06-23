@@ -4,14 +4,12 @@ namespace App\Models;
 
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 
-class BaseModel extends Model
+class BaseModel extends Model implements BaseModelInterface
 {
     /**
      * name of table fields which uniquly identify the record
@@ -28,10 +26,10 @@ class BaseModel extends Model
 
     private static $tableInfo = [];
 
-    public static function classDisplayName() : string
+    public static function classDisplayName(): string
     {
         $class_name = str_class_name_to_human_text(static::class);
-        
+
         return $class_name;
     }
 
@@ -58,22 +56,19 @@ class BaseModel extends Model
             if (static::tableHaveField($model->getTable(), 'updated_by')) {
                 $auth_user = Auth::user();
                 if ($auth_user) {
-                    $model->updated_by = $auth_user->id;                    
+                    $model->updated_by = $auth_user->id;
                 }
             }
         });
 
         self::updated(function ($model) {
             $model->forgotCache();
-            
         });
 
-        self::deleting(function ($model) {
-
-        });
+        self::deleting(function ($model) {});
 
         self::deleted(function ($model) {
-            $model->forgotCache();           
+            $model->forgotCache();
         });
     }
 
@@ -100,7 +95,7 @@ class BaseModel extends Model
             $columns = DB::select('SHOW COLUMNS FROM ' . $table_name);
 
             foreach ($columns as $column) {
-                $table_info['columns'][$column->Field] = (array) $column;                
+                $table_info['columns'][$column->Field] = (array) $column;
             }
 
             Cache::put($cache_key, $table_info);
@@ -117,15 +112,14 @@ class BaseModel extends Model
 
         $info = static::$tableInfo[$table_name];
 
-        if (isset($info["columns"][$field]))
-        {
+        if (isset($info["columns"][$field])) {
             return true;
         }
 
         return false;
     }
-    
-    public static function getModelCacheKey() : string
+
+    public static function getModelCacheKey(): string
     {
         $str = get_called_class();
         $arr = explode("\\", $str);
@@ -137,14 +131,14 @@ class BaseModel extends Model
         return  static::optimizeCacheKey($key);
     }
 
-    public static function optimizeCacheKey($key) : string
+    public static function optimizeCacheKey($key): string
     {
         $key = str_replace(".", "-", $key);
 
         $key = preg_replace('!\s+!', '-', $key);
 
         $key = trim($key, "-");
-        
+
         $key = trim($key);
 
         return $key;
@@ -156,8 +150,7 @@ class BaseModel extends Model
 
         $cache_key = $model_cache_key . "-" . $key;
 
-        if (Cache::has($cache_key))
-        {
+        if (Cache::has($cache_key)) {
             return Cache::get($cache_key);
         }
 
@@ -175,18 +168,15 @@ class BaseModel extends Model
 
         //make refrence to cache keys 
         $list_of_cache_keys = [];
-        if (Cache::has($model_cache_key))
-        {
+        if (Cache::has($model_cache_key)) {
             $list_of_cache_keys = Cache::get($list_of_cache_keys);
         }
 
-        if (!in_array($cache_key, $list_of_cache_keys))
-        {
+        if (!in_array($cache_key, $list_of_cache_keys)) {
             $list_of_cache_keys[] = $cache_key;
         }
 
-        if (!Cache::put($model_cache_key, $list_of_cache_keys, laravel_constant("cache_time.model")))
-        {
+        if (!Cache::put($model_cache_key, $list_of_cache_keys, laravel_constant("cache_time.model"))) {
             throw_exception("Fail To Put Cache");
         }
     }
@@ -194,13 +184,11 @@ class BaseModel extends Model
     protected function forgotCache()
     {
         $model_cache_key = static::getModelCacheKey();
-        
-        if (Cache::has($model_cache_key))
-        {
+
+        if (Cache::has($model_cache_key)) {
             $list_of_cache_keys = Cache::get($model_cache_key);
 
-            foreach($list_of_cache_keys as $cache_key)
-            {
+            foreach ($list_of_cache_keys as $cache_key) {
                 Cache::forget($cache_key);
             }
 
@@ -214,9 +202,8 @@ class BaseModel extends Model
     }
 
     public static function fetchList(Builder $builder, String $key_field, String $value_field, String $table_name)
-    {    
-        if (self::tableHaveField($table_name, $key_field) && self::tableHaveField($table_name, $value_field))   
-        {
+    {
+        if (self::tableHaveField($table_name, $key_field) && self::tableHaveField($table_name, $value_field)) {
             return $builder->pluck($value_field, $key_field)->toArray();
         }
 
@@ -226,9 +213,8 @@ class BaseModel extends Model
 
         $list = [];
 
-        foreach($records as $record)
-        {
-            $arr = $record->toArray();            
+        foreach ($records as $record) {
+            $arr = $record->toArray();
             $list[$arr[$key_field]] = $arr[$value_field];
         }
 
@@ -243,19 +229,14 @@ class BaseModel extends Model
         $table_name = $model->getTable();
 
         $builder->orWhere(function ($query) use ($conditions) {
-            if (isset($conditions['or_id']))
-            {
+            if (isset($conditions['or_id'])) {
                 $v = $conditions['or_id'];
 
-                if (is_array($v))
-                {
-                    if (!empty($v))
-                    {
+                if (is_array($v)) {
+                    if (!empty($v)) {
                         $query->whereIn("id", $v);
                     }
-                }
-                else
-                {
+                } else {
                     $query->where("id", $v);
                 }
             }
@@ -263,29 +244,22 @@ class BaseModel extends Model
 
         unset($conditions['or_id']);
 
-        if (static::tableHaveField($table_name, 'is_active'))
-        {
-            if (!isset($conditions['is_active']))
-            {
+        if (static::tableHaveField($table_name, 'is_active')) {
+            if (!isset($conditions['is_active'])) {
                 $conditions['is_active'] = 1;
             }
         }
 
         $builder->orWhere(function ($query) use ($conditions) {
-            foreach($conditions as $k => $v)
-            {
-                if (is_array($v))
-                {
-                    if (!empty($v))
-                    {
+            foreach ($conditions as $k => $v) {
+                if (is_array($v)) {
+                    if (!empty($v)) {
                         $query->whereIn($k, $v);
                     }
-                }
-                else
-                {
+                } else {
                     $query->where($k, $v);
                 }
-            }            
+            }
         });
 
         if ($order_by && $order_dir) {
@@ -303,15 +277,13 @@ class BaseModel extends Model
 
         $list = static::getCache($key);
 
-        if ($list)
-        {
+        if ($list) {
             return $list;
         }
 
         $builder = static::query();
 
-        if ($order_by && $order_dir)
-        {
+        if ($order_by && $order_dir) {
             $builder->orderBy($order_by, $order_dir);
         }
 
@@ -337,7 +309,7 @@ class BaseModel extends Model
     public function getClassDisplayName()
     {
         $class_name = static::classDisplayName();
-        
+
         return $class_name;
     }
 
@@ -366,14 +338,10 @@ class BaseModel extends Model
 
         if ($model) {
             $model->fill($data);
-            if ($model->isDirty())
-            {
-                if ( $model->save() )
-                {
+            if ($model->isDirty()) {
+                if ($model->save()) {
                     $is_update = true;
-                }
-                else
-                {
+                } else {
                     $is_update = false;
                     throw new \Exception("Fail To Save");
                 }
@@ -381,12 +349,9 @@ class BaseModel extends Model
         } else {
             $model = static::create($data);
 
-            if ($model)
-            {
+            if ($model) {
                 $is_insert = true;
-            }
-            else
-            {
+            } else {
                 $is_insert = false;
                 return null;
             }

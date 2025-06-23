@@ -17,6 +17,7 @@ class EmailHelper
 
     private String $email_via, $from_email, $from_name, $subject, $html, $type;
     private array $cc_list = [], $to_list = [], $attachments = [];
+    private bool $is_sandbox = true;
 
     private $api_key, $api_secret;
 
@@ -62,6 +63,8 @@ class EmailHelper
 
         $this->from_email = env("EMAIL_FROM");
         $this->from_name = env("EMAIL_NAME");
+
+        $this->is_sandbox = !App::isProduction();
     }
 
     public function setSubject(String $subject)
@@ -160,6 +163,11 @@ class EmailHelper
         ];
 
         return $this;
+    }
+
+    public function setSandbox(bool $value)
+    {
+        $this->is_sandbox = $value;
     }
 
     public function saveToLog($log_extras = [])
@@ -283,7 +291,7 @@ class EmailHelper
             }
         } catch (ApiException $ex) {
             $this->updateLog([
-                "is_sent" => false,
+                "is_sent" => 0,
                 "error_msg" => $ex->api_error_msg,
                 "api_response_code" => $ex->api_error_code
             ]);
@@ -291,9 +299,11 @@ class EmailHelper
             $result['errors'][] = $ex->getMessage();
         } catch (Exception $ex) {
             $this->updateLog([
-                "is_sent" => false,
+                "is_sent" => 0,
                 "error_msg" => $ex->getMessage()
             ]);
+
+            throw $ex;
         }
 
         return $result;
@@ -396,7 +406,7 @@ class EmailHelper
                     "Attachments" => $attachments
                 ]
             ],
-            "SandboxMode" => App::isProduction()
+            "SandboxMode" => $this->is_sandbox
         ];
 
         // All resources are located in the Resources class
@@ -407,7 +417,7 @@ class EmailHelper
         $api_response = $response->getData();
 
         $this->updateLog([
-            "is_sandbox" => $body['SandboxMode'],
+            "is_sandbox" => (int) $body['SandboxMode'],
             "is_sent" => (int) $response->success(),
             "api_response" => $api_response
         ]);

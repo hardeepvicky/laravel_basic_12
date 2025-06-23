@@ -2,18 +2,14 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-
-class EmailLog extends BaseModel
+class EmailLog extends BaseMongoModel
 {
-    use HasFactory;
+    protected $connection = 'mongodb';
 
-    protected $casts = [
-        'api_response' => 'array'
-    ];
+    protected $guarded = ["id"];
 
     public static function getFileSavePath()
     {
-        return "files/EmailLog/";
+        return "files/" . str_class_name_without_namespace(__CLASS__) . "/";
     }
 }
