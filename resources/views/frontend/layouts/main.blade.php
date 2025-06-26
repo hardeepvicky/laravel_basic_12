@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>
+        {{ $page_title ?? config('app.name') }}
+    </title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{{ $page_description ?? config('app.description') }}" />
+    <meta name="description" content="{{ $page_author ?? config('app.author') }}" />
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
+    <!-- App favicon -->
+    <link rel="icon" href="/assets/images/favicon.png" type="image/x-icon" />
+    <link rel="shortcut icon" href="/assets/images/favicon.png" type="image/x-icon" />
+    <!-- Google font-->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,200;6..12,300;6..12,400;6..12,500;6..12,600;6..12,700;6..12,800;6..12,900;6..12,1000&amp;display=swap" />
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        xintegrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+    <link rel="stylesheet" type="text/css" href="/assets/css/fontawesome-min.css" />
+    <link rel="stylesheet" type="text/css" href="/assets/css/vendors/flag-icon.css" />
+    <link rel="stylesheet" type="text/css" href="/assets/libs/select2/select2.min.css" />
+    <link rel="stylesheet" type="text/css" href="/assets/libs/select2/select2-bootstrap-5-theme.min.css" />
+    <link rel="stylesheet" type="text/css" href="/assets/libs/fancybox/dist/jquery.fancybox.min.css" />
+    <link rel="stylesheet" type="text/css" href="/assets/css/vendors/flatpickr/flatpickr.min.css">
+
+    <!-- Project related CSS -->
+    <link rel="stylesheet" type="text/css" href="/libs/loader/loader.css?<?= CSS_VERSION ?>" />
+    <link rel="stylesheet" type="text/css" href="/libs/i-data-table/style.css?<?= CSS_VERSION ?>" />
+    <link rel="stylesheet" type="text/css" href="/libs/style-for-custom-lib.css?<?= CSS_VERSION ?>" />
+    <link rel="stylesheet" type="text/css" href="/css/common.css?<?= CSS_VERSION ?>" />
+
+    <script src="/assets/js/vendors/jquery/jquery.min.js"></script>
+    <script src="/libs/events.js?<?= JS_VERSION ?>"></script>
+</head>
+
+<body class="bg-light">
+
+    <div class="container">
+        @include ($partial_path . '.header')
+        @yield('content')
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        xintegrity="sha384-YvpcrYf0tY3lHB60NNkmXcWpG9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous">
+    </script>
+    <script src="/assets/js/vendors/font-awesome/fontawesome-min.js"></script>
+    <script src="/assets/js/sweetalert/sweetalert2.min.js"></script>
+    <script src="/assets/libs/select2/select2.min.js"></script>
+    <script src="/assets/js/flat-pickr/flatpickr.js"></script>
+    <script src="/assets/libs/fancybox/dist/jquery.fancybox.min.js"></script>
+    <script src="/assets/libs/jquery.form.min.js"></script>
+    <script src="/assets/libs/jquery-file-validator/js/file-validator.js"></script>
+    <script src="/assets/frontend/form-validation.js"></script>
+
+    <!-- Project Lib -->
+    <script src="/libs/constants.js?<?= JS_VERSION ?>"></script>
+
+    <script src="/libs/loader/loader.js?<?= JS_VERSION ?>"></script>
+    <script src="/libs/date-util.js?<?= JS_VERSION ?>"></script>
+    <script src="/libs/jquery-input-validate.js?<?= JS_VERSION ?>"></script>
+    <script src="/libs/jquery_extend.js?<?= JS_VERSION ?>"></script>
+    <script src="/libs/i-data-table/script.js?<?= JS_VERSION ?>"></script>
+
+    <!-- Project JS -->
+    <script src="/js/common_funtions.js?<?= JS_VERSION ?>"></script>
+    <script src="/js/common_script_for_all_non_ajax_layout.js?<?= JS_VERSION ?>"></script>
+    <script src="/js/frontend/frontend_non_ajax.js?<?= JS_VERSION ?>"></script>
+    <script>
+        $(function() {
+            $.loader.init();
+            $.events.lastCallbacks.map(function(cb) {
+                cb();
+            });
+        });
+    </script>
+</body>
+
+</html>

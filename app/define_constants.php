@@ -13,4 +13,7 @@ if (!defined('IT_COMPANY_NAME')) {
     }
 
     define("ACTION_NOT_PROCEED", 406);
+
+    define("DEFAULT_DISK", "public_external");
+    define("NOT_FOUND_IMAGE_PATH", "img/not-found.png");
 }

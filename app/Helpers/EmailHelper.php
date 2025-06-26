@@ -176,13 +176,13 @@ class EmailHelper
 
         $this->emailLog = new EmailLog();
 
-        $path = EmailLog::getFileSavePath();
-
-        FileUtility::createFolder($path);
+        $path =  $this->emailLog->getFilePath();
 
         $file = $this->emailLog->getNextId() . ".html";
 
-        file_put_contents($path . $file, $this->html);
+        $disk = EmailLog::getStorageDisk();
+
+        $disk->put($path . $file, $this->html);
 
         $to_names = $to_emails = [];
         foreach ($this->to_list as $to) {

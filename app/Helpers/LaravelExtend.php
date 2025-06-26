@@ -7,6 +7,8 @@ use App\Jobs\Backend\JobSendEmailUserOtp;
 use App\Jobs\Backend\JobSendEmailOnRegisration;
 use App\Models\User;
 use Exception;
+use Illuminate\Support\Facades\DB;
+use PDOException;
 
 class LaravelExtend
 {
@@ -81,5 +83,31 @@ class LaravelExtend
         $job = new JobForgotPassword($user->name, $user->email, $link);
 
         dispatch($job);
+    }
+
+    public static function checkDatabaseConnection($connectionName = 'mysql', bool $should_throw_error = false)
+    {
+        try {
+            // Attempt to get the PDO instance for the specified connection
+            DB::connection($connectionName)->getPdo();
+
+            // If no exception is thrown, the connection is successful
+            $databaseName = DB::connection($connectionName)->getDatabaseName();
+
+            if ($databaseName) {
+                return $databaseName;
+            }
+        } catch (PDOException $e) {
+            if ($should_throw_error) {
+                throw $e;
+            }
+            // If a PDOException occurs, the connection failed
+        } catch (\Exception $e) {
+            if ($should_throw_error) {
+                throw $e;
+            }
+        }
+
+        return false;
     }
 }

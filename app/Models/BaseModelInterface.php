@@ -12,9 +12,11 @@ interface BaseModelInterface
 
     public static function addCache($key, $data);
 
+    public static function getStorageDisk();
+
     public function forgotCache();
 
-    public function getNextId(): int;
+    public function getNextId();
 
     public function getClassDisplayName();
 

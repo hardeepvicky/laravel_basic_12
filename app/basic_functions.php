@@ -193,7 +193,7 @@ function if_date($datetime)
     return "";
 }
 
-function download_start($file, $content_type, $delete_after_download = true)
+function download_start($file, $content_type, $delete_after_download = false)
 {
     header('Content-Description: File Transfer');
     header("Content-Type: $content_type");
@@ -292,8 +292,8 @@ function array_check_key_and_throw_error($arr, $keys, $msg = "")
 
     foreach ($keys as $key) {
         if (!array_key_exists($key, $arr)) {
-            $msg = str_replace("{key}", "key : " . $key, $msg);
-            throw_exception($msg);
+            $msg = str_replace("{key}", $key, $msg);
+            throw new Exception($msg);
         }
     }
 }
@@ -306,8 +306,8 @@ function array_check_value_and_throw_error($arr, $keys, $msg = "")
 
     foreach ($keys as $key) {
         if (!isset($arr[$key]) || strlen($arr[$key]) == 0 || is_null($arr[$key])) {
-            $msg = str_replace("{key}", "key : " . $key, $msg);
-            throw_exception($msg);
+            $msg = str_replace("{key}", $key, $msg);
+            throw new Exception($msg);
         }
     }
 }
@@ -378,8 +378,12 @@ function array_make_all_values_zero_if_null($arr)
     return $arr;
 }
 
-function array_extract_only_of_keys(array $arr, array $keys, bool $throw_exception_on_key_not_found = false)
+function array_extract_only_of_keys(array $arr, array $keys, bool $throw_exception_on_key_not_found = false, $msg = "")
 {
+    if (!$msg) {
+        $msg = "Key : {key} is not found in array ";
+    }
+
     $ret_arr = [];
 
     foreach ($keys as $key) {
@@ -387,7 +391,8 @@ function array_extract_only_of_keys(array $arr, array $keys, bool $throw_excepti
             $ret_arr[$key] = $arr[$key];
         } else {
             if ($throw_exception_on_key_not_found) {
-                throw_exception("$key not found in arr");
+                $msg = str_replace("{key}", $key, $msg);
+                throw new Exception($msg);
             }
         }
     }
@@ -601,4 +606,92 @@ function get_mime_type_from_extension(string $extension): string
 
     // Return the MIME type if found, otherwise return a generic binary stream type.
     return $mimeTypes[$extension] ?? 'application/octet-stream';
+}
+
+
+function array_json_normatlized($array)
+{
+    foreach ($array as $key => $value) {
+        if (is_object($value)) {
+            $value = (array) $value;
+        }
+        if (is_array($value)) {
+            $array[$key] = array_json_normatlized($value);
+        } else if (is_string($value)) {
+            $array[$key] = stripslashes($value);
+        }
+    }
+
+    return $array;
+}
+
+function my_json_encode($array, $options = [])
+{
+    $default_options = [
+        'halt_on_error' => true,
+    ];
+
+    $options = array_merge($default_options, $options);
+
+    $array = array_json_normatlized($array, $options);
+
+    $json = json_encode($array, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
+    if ($json === null && json_last_error() !== JSON_ERROR_NONE) {
+        if ($options['halt_on_error']) {
+            throw_exception("Error encoding JSON: " . json_last_error_msg());
+        }
+    }
+
+    return $json;
+}
+
+function decode_potentially_double_escaped_json($jsonString, $assoc = false, $depth = 512, $flags = 0)
+{
+    // Attempt to decode directly first.
+    // This covers cases where the JSON string is already correctly escaped.
+    $decoded = json_decode($jsonString, $assoc, $depth, $flags);
+
+    // If initial decode fails and the string contains escaped double quotes,
+    // it might be double-escaped. Try stripping slashes.
+    if ($decoded === null && json_last_error() !== JSON_ERROR_NONE) {
+        // If the string starts and ends with a double quote that is also escaped
+        // this is a strong indication of double escaping.
+        // For example: "{\"key\":\"value\"}"
+        // The outer quotes and inner escaped quotes need stripping.
+        $tempString = $jsonString;
+        if (substr($tempString, 0, 1) === '"' && substr($tempString, -1, 1) === '"') {
+            // Remove the outer quotes, as stripslashes won't touch them directly.
+            $tempString = substr($tempString, 1, -1);
+        }
+
+        $strippedString = stripslashes($tempString);
+        $decoded = json_decode($strippedString, $assoc, $depth, $flags);
+    }
+
+    return $decoded;
+}
+
+function my_json_decode($str)
+{
+    return decode_potentially_double_escaped_json($str);
+}
+
+function array_escape_for_sql($str)
+{
+    if (is_array($str)) { // Handle arrays recursively if necessary (CI's insert/update handles this)
+        foreach ($str as $key => $val) {
+            $str[$key] = array_escape_for_sql($val);
+        }
+        return $str;
+    }
+    // This is a simplified mock. In a real scenario, this would use the actual DB connection.
+    // For a true demonstration of escaping without a live DB, it's hard.
+    // We'll just replace problematic characters for illustrative purposes.
+    $escaped_str = str_replace(
+        ["\\", "\0", "\n", "\r", "\x1a", "'", '"'],
+        ["\\\\", "\\0", "\\n", "\\r", "\Z", "\'", '\"'],
+        $str
+    );
+    return $escaped_str;
 }

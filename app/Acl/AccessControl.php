@@ -63,8 +63,16 @@ class AccessControl
 
             $system_role_count = Role::where("id", $role_id_list)->where('code', Role::TYPE_SYSTEM_ADMIN)->count();
 
-            if ($system_role_count > 0 && in_array($route_name, SectionRoutes::ALLOW_ROUTES_FOR_SYSTEM_ADMIN)) {
-                return true;
+            if ($system_role_count > 0) {
+                $is_allow_all_routes = env("ACL_IS_SYSTEM_ADMIN_ALLOW_ALL_ROUTES", false);
+
+                if ($is_allow_all_routes) {
+                    return true;
+                }
+
+                if (in_array($route_name, SectionRoutes::ALLOW_ROUTES_FOR_SYSTEM_ADMIN)) {
+                    return true;
+                }
             }
         }
 

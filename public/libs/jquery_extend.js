@@ -10,7 +10,8 @@ $.blackdrop = {
         _this.obj = $("body").find(".black_drop_container:first");
 
         if (this.obj.length == 0) {
-            var html = '<div class="black_drop_container" style="display:none;"></div>';
+            var html =
+                '<div class="black_drop_container" style="display:none;"></div>';
             $("body").prepend(html);
             _this.obj = $("body").find(".black_drop_container:first");
         }
@@ -21,7 +22,9 @@ $.blackdrop = {
     },
     onClick: function (fn) {
         if (typeof fn != "function") {
-            console.error("blackDrop -> onClick() : argument should be function type");
+            console.error(
+                "blackDrop -> onClick() : argument should be function type"
+            );
         }
 
         this.obj.click(fn);
@@ -31,7 +34,7 @@ $.blackdrop = {
     },
     hide: function () {
         this.obj.hide();
-    }
+    },
 };
 
 $.sr = {
@@ -42,22 +45,16 @@ $.sr = {
      */
     wait: function (seconds, callback, onStopCallback) {
         var inverval_wait = setInterval(function () {
-
-            if (seconds >= 0)
-            {
+            if (seconds >= 0) {
                 callback(seconds);
                 seconds = seconds - 1;
-            }
-            else
-            {
+            } else {
                 clearInterval(inverval_wait);
-                if (typeof(onStopCallback) == "function")
-                {
+                if (typeof onStopCallback == "function") {
                     onStopCallback();
                 }
                 return;
             }
-
         }, 1000);
 
         return inverval_wait;
@@ -167,7 +164,7 @@ $.sr.csv = {
 };
 
 /** ------------------------ BASIC EXTEND ----------------------- */
-jQuery.fn.extend({   
+jQuery.fn.extend({
     tagName: function () {
         return this.prop("tagName").toLowerCase();
     },
@@ -251,12 +248,12 @@ jQuery.fn.extend({
         var feature = "sr-chkselect";
 
         var default_opt = {
-            onChildChange : function() {},
-            onParentChange : function() {},
-        }
+            onChildChange: function () {},
+            onParentChange: function () {},
+        };
 
-        function check_nested_child(grant_parent, parents, checked) {                        
-            $(parents).each(function() {
+        function check_nested_child(grant_parent, parents, checked) {
+            $(parents).each(function () {
                 $(this).prop("checked", checked);
                 opt.onChildChange(grant_parent, $(this));
                 var children = $(this).attr("data-sr-chkselect-children");
@@ -266,39 +263,34 @@ jQuery.fn.extend({
             });
         }
 
-        function check_nested_parent(target, parent, checked) {                        
-
+        function check_nested_parent(target, parent, checked) {
             var t_c = $(target).length;
             var c_c = $(target).filter(":checked").length;
             var checked = t_c == c_c;
-            parent.prop("checked", checked);  
+            parent.prop("checked", checked);
 
             opt.onParentChange(target, parent);
-            
+
             var target = $(target).attr("data-sr-chkselect-parent");
-            if (target)
-            {
+            if (target) {
                 var target = $(this).attr("data-sr-chkselect-children");
-                check_nested_parent(target, )
+                check_nested_parent(target);
             }
 
-            $(parents).each(function() {
+            $(parents).each(function () {
                 $(this).prop("checked", checked);
-                
-                
+
                 if (children) {
                     check_nested($(this), $(children), checked);
                 }
             });
         }
 
-
-        if (typeof opt == "undefined")
-        {
+        if (typeof opt == "undefined") {
             opt = {};
         }
 
-        opt = {...default_opt, ...opt};
+        opt = { ...default_opt, ...opt };
 
         var events = {
             childCheck: feature + ".childcheck",
@@ -318,16 +310,19 @@ jQuery.fn.extend({
             }
 
             if (_this.applyOnce(feature)) {
-                _this.on(events.childCheck, function () {                    
-                    check_nested_child($(this), $(target), _this.prop("checked"));                    
+                _this.on(events.childCheck, function () {
+                    check_nested_child(
+                        $(this),
+                        $(target),
+                        _this.prop("checked")
+                    );
                 });
 
                 $(target).on(events.parentCheck, function () {
-                    
-                     var t_c = $(target).length;
+                    var t_c = $(target).length;
                     var c_c = $(target).filter(":checked").length;
                     var checked = t_c == c_c;
-                    _this.prop("checked", checked);  
+                    _this.prop("checked", checked);
                     opt.onParentChange($(this), target);
 
                     //check_nested_parent();
@@ -394,16 +389,11 @@ jQuery.fn.extend({
 
                 if ($(this).applyOnce(feature)) {
                     if (tag == "input") {
-                        if ($(this).is(":checkbox"))
-                        {
-                            $(this).on(events.toggleClass, function ()
-                            {
-                                if ($(this).prop("checked"))
-                                {
+                        if ($(this).is(":checkbox")) {
+                            $(this).on(events.toggleClass, function () {
+                                if ($(this).prop("checked")) {
                                     $(target).addClass(class_name);
-                                }
-                                else
-                                {
+                                } else {
                                     $(target).removeClass(class_name);
                                 }
                             });
@@ -772,7 +762,7 @@ jQuery.fn.extend({
         };
 
         var dataKeys = {
-            last_id : "data-sr-last-id",
+            last_id: "data-sr-last-id",
         };
 
         var placeholder = {
@@ -783,9 +773,9 @@ jQuery.fn.extend({
         var settings = $.extend(
             {
                 brace_type: "(",
-                highlightTrClass : "highlight",                
-                highlightDangerTrClass : "highlight-danger",                
-                highlightSeconds : 1,
+                highlightTrClass: "highlight",
+                highlightDangerTrClass: "highlight-danger",
+                highlightSeconds: 1,
                 beforeRowAdd: function () {
                     return true;
                 },
@@ -894,11 +884,10 @@ jQuery.fn.extend({
                 settings.afterRowDel(_table, last_id);
             });
 
-            function perform_up_down (_tr, callback)
-            {
+            function perform_up_down(_tr, callback) {
                 _tr.addClass(settings.highlightTrClass);
 
-                var ms = settings.highlightSeconds * 1000 / 2;
+                var ms = (settings.highlightSeconds * 1000) / 2;
 
                 _tr.fadeOut(ms, "swing", () => {
                     callback();
@@ -910,8 +899,7 @@ jQuery.fn.extend({
                 });
             }
 
-            function perform_delete (_tr, callback)
-            {
+            function perform_delete(_tr, callback) {
                 _tr.addClass(settings.highlightDangerTrClass);
 
                 var ms = settings.highlightSeconds * 1000;
@@ -929,7 +917,7 @@ jQuery.fn.extend({
 
                     selected_tr = _table.find("> tbody > tr:eq(" + index + ")");
 
-                    perform_up_down(_tr,  () => {
+                    perform_up_down(_tr, () => {
                         _tr.insertBefore(selected_tr);
                     });
                 }
@@ -978,15 +966,13 @@ jQuery.fn.extend({
 
             var last_id = 0;
 
-            _table.find(selector.row).each(function(){
+            _table.find(selector.row).each(function () {
                 var id = $(this).attr(placeholder.id);
 
-                if (id)
-                {
+                if (id) {
                     id = parseInt(id);
 
-                    if (id > last_id)
-                    {
+                    if (id > last_id) {
                         last_id = id;
                     }
                 }
@@ -1008,10 +994,10 @@ jQuery.fn.extend({
         var settings = $.extend(
             {
                 placeholder: "{v}",
-                key : 'id',
-                text : 'name',
+                key: "id",
+                text: "name",
                 onError: function (title, msg) {
-                    $.sr.error.detail(title, msg);
+                    $.events.onError(title, msg);
                 },
                 beforeGet: function (src, url) {
                     return url;
@@ -1061,7 +1047,6 @@ jQuery.fn.extend({
             }
 
             if (_this.applyOnce(feature)) {
-
                 $(target).on(events.setValue, function (e, args) {
                     var v = settings.beforeValueSet(_this, $(this), args.value);
                     if (v) {
@@ -1073,8 +1058,7 @@ jQuery.fn.extend({
                 _this.on(events.change, function (e, event_opt) {
                     var v = $(this).val();
 
-                    if (v)
-                    {
+                    if (v) {
                         var new_url = settings.beforeGet(_this, url);
 
                         if (new_url === false) {
@@ -1084,11 +1068,9 @@ jQuery.fn.extend({
                         new_url = new_url.replaceAll(settings.placeholder, v);
 
                         console.log(feature + " : get : " + new_url);
-                        $.get(new_url, function (response)
-                        {
+                        $.get(new_url, function (response) {
                             try {
-                                if (typeof response == "string")
-                                {
+                                if (typeof response == "string") {
                                     response = JSON.parse(response);
                                 }
                             } catch (e) {
@@ -1120,17 +1102,22 @@ jQuery.fn.extend({
                                 );
                             }
 
-                            var html = '';
+                            var html = "";
                             var multiple = $(target).attr("multiple");
-                            if (!multiple)
-                            {
-                                var html = "<option value=''>Please Select</option>";
+                            if (!multiple) {
+                                var html =
+                                    "<option value=''>Please Select</option>";
                             }
 
                             for (var i in new_response["data"]) {
                                 var k = new_response["data"][i][settings.key];
                                 var v = new_response["data"][i][settings.text];
-                                html += '<option value="' + k + '">' + v + "</option>";
+                                html +=
+                                    '<option value="' +
+                                    k +
+                                    '">' +
+                                    v +
+                                    "</option>";
                             }
 
                             $(target).html(html);
@@ -1168,7 +1155,7 @@ jQuery.fn.extend({
                             );
                         });
                     } else {
-                        $(target).html('');
+                        $(target).html("");
 
                         $(target).each(function () {
                             if ($(this).hasEvent(events.change)) {
@@ -1284,7 +1271,7 @@ jQuery.fn.extend({
             {
                 onRead: function (data) {},
                 onError: function (msg) {
-                    $.sr.error.msg(msg);
+                    $.events.onError("srReadCSV", msg);
                 },
             },
             opt

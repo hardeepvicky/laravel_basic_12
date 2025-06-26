@@ -10,12 +10,9 @@ class HomeController extends WebController
 {
     public function index()
     {
-        if (Auth::check())
-        {
+        if (Auth::check()) {
             return Redirect::route("dashboard");
-        }
-        else
-        {
+        } else {
             return Redirect::route("login");
         }
     }

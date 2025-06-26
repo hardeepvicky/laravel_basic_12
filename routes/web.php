@@ -1,8 +1,6 @@
 <?php
 
 use App\Helpers\EmailHelper;
-use App\Helpers\Util;
-use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\OtpVerifyController;
@@ -13,6 +11,7 @@ use App\Http\Controllers\Backend\DepartmentController;
 use App\Http\Controllers\Backend\DesignationController;
 use App\Http\Controllers\Backend\DeveloperController;
 use App\Http\Controllers\Backend\EmployeeController;
+use App\Http\Controllers\Backend\EnquiryController as BackendEnquiryController;
 use App\Http\Controllers\Backend\PermissionController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Backend\PublicController;
@@ -21,28 +20,24 @@ use App\Http\Controllers\Backend\SettingsController;
 use App\Http\Controllers\Backend\StateController;
 use App\Http\Controllers\Backend\TypeController;
 use App\Http\Controllers\Backend\UserController;
+use App\Http\Controllers\Frontend\EnquiryController;
+use App\Http\Controllers\Frontend\FrontendController;
 use App\Http\Controllers\HomeController;
-use GuzzleHttp\Middleware;
-use Illuminate\Http\Request;
-use App\Models\City;
 use App\Models\EmailLog;
+use Illuminate\Support\Facades\Storage;
 use Mailjet\Resources;
 
-Route::get('/', function () {
-    return redirect()->route("home");
+
+Route::get("/", function () {
+    return redirect("/home");
 });
 
-Route::get('/phpinfo', function () {
-    phpinfo();
-});
+// Route::get('/', [FrontendController::class, "index"]);
+Route::get('/home', [HomeController::class, 'index'])->name('home');
 
 Auth::routes();
 
-Route::get('/', [HomeController::class, 'index']);
-Route::get('/home', [HomeController::class, 'index'])->name('home');
-
 Route::post('/check_before_login', [LoginController::class, 'check_before_login'])->name('check_before_login');
-
 
 Route::get('/theme', [HomeController::class, 'theme']);
 Route::get('/developer-components', [HomeController::class, 'developer_components']);
@@ -65,10 +60,26 @@ Route::get('/auth/google/redirect', [GoogleAuthController::class, 'redirect'])->
 // Route to handle the callback from Google
 Route::get('/auth/google/callback', [GoogleAuthController::class, 'callback'])->name('auth.google.callback');
 
-
 Route::group(['prefix' => 'public', 'as' => 'public.'], function () {
     Route::post('ajax_upload', [PublicController::class, 'ajax_upload']);
     Route::post('ajax_upload_base64', [PublicController::class, 'ajax_upload_base64']);
+});
+
+Route::get("/get_file_url", [PublicController::class, "get_file_url"])->name("get_file_url");
+
+$route_prefix = "enquiry";
+$controllerClass = EnquiryController::class;
+Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
+    Route::get("/", [EnquiryController::class, "index"])->name("index");
+
+    Route::post("/store", [EnquiryController::class, "store"])->name("store");
+
+    $name = "ajax_get_state_list";
+    Route::any("$name/{country_id}", [$controllerClass, $name])->name($name);
+
+    $name = "ajax_get_city_list";
+    Route::any("$name/{state_id}", [$controllerClass, $name])->name($name);
 });
 
 Route::group(['middleware' => ['auth', 'role_permission']], function () {
@@ -173,6 +184,13 @@ Route::group(['middleware' => ['auth', 'role_permission']], function () {
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
     });
 
+
+    $route_prefix = "enquiries";
+    $controllerClass = EnquiryController::class;
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+        Route::get("/", [BackendEnquiryController::class, "index"])->name("index");
+    });
+
     Route::group(['prefix' => 'permissions', 'as' => 'permissions.'], function () {
 
         $name = "index";
@@ -216,8 +234,6 @@ Route::group(['middleware' => ['auth', 'role_permission']], function () {
         Route::get($name, [DeveloperController::class, $name])->name($name);
     });
 });
-
-
 
 /* -------------------------------------------------------------------------*/
 Route::get("/test/whatsapp", function () {
@@ -355,4 +371,37 @@ Route::get("/test/email", function () {
 Route::get("/test/mongo", function () {
     $records = EmailLog::limit(100)->get()->toArray();
     d($records);
+});
+
+Route::get("/test/external_drive", function () {
+
+    // d(get_class_info(Storage::disk(DEFAULT_DISK)), true);
+
+    Storage::disk(DEFAULT_DISK)->put('temp.txt', "Hi external drive working from laravel");
+
+    d(Storage::disk(DEFAULT_DISK)->exists("temp.txt"));
+
+    d(Storage::disk(DEFAULT_DISK)->get('temp.txt'));
+
+    d(Storage::disk(DEFAULT_DISK)->url('temp.txt'));
+});
+
+Route::get("/test/external_drive/get", function () {
+
+    $file = "temp.txt";
+
+    if (!Storage::disk(DEFAULT_DISK)->fileExists($file)) {
+        die("$file not exist");
+    }
+
+    $path = Storage::disk(DEFAULT_DISK)->path($file);
+
+    $ext = pathinfo($file, PATHINFO_EXTENSION);
+
+    download_start($path, get_mime_type_from_extension($ext));
+});
+
+
+Route::get('/phpinfo', function () {
+    phpinfo();
 });

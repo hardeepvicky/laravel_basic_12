@@ -2,23 +2,14 @@
 
 namespace App\Http\Controllers\Backend;
 
-use App\Acl\AccessControl;
 use App\Helpers\FileUtility;
-use App\Helpers\LaravelExtend;
-use App\Mail\NewUserRegistered;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Role;
-use App\Models\UserRole;
 use Exception;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Crypt;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Str;
 
 class UserController extends BackendController
 {

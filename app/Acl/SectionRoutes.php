@@ -34,6 +34,7 @@ class SectionRoutes
         $sections = [];
 
         $sections[]["Home"] = self::home();
+        $sections[]["General"] = self::general();
 
         $sections["HR"] = [
             "Department" => self::department(),
@@ -80,6 +81,15 @@ class SectionRoutes
     {
         $routes =  [
             "Dashbaord" => ["dashboard"],
+        ];
+
+        return $routes;
+    }
+
+    private static function general()
+    {
+        $routes =  [
+            "Enquiry" => ["enquiries.index"],
         ];
 
         return $routes;

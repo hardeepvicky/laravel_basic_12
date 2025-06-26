@@ -35,6 +35,7 @@ class Menu
         }
 
         self::$menus[] = (new HomeMenu)->get();
+        self::$menus[] = (new GeneralMenu)->get();
         self::$menus[] = (new MemberMenu)->get();
         self::$menus[] = (new HRMenu)->get();
         self::$menus[] = (new SystemMenu)->get();
@@ -338,6 +339,28 @@ class HomeMenu extends BaseMenu
         $links[] = self::getLink("dashboard", "Dashboard", 'fa-solid fa-gauge');
 
         return self::getModule("Home", 'fas fa-home', $links);
+    }
+}
+
+class GeneralMenu extends BaseMenu
+{
+    public static function get(): array
+    {
+        $links = [];
+
+        $links[] = self::enquiry();
+
+        return self::getModule("General", self::ICON_MENU_ROOT, $links);
+    }
+
+    public static function enquiry()
+    {
+        $routePrefix = "enquiries";
+
+        $links = [];
+        $links[] = self::getLink($routePrefix . ".index", "Summary", self::ICON_MENU_SUMMARY);
+
+        return self::getModule("Enquiry", self::ICON_MENU_ROOT_CHILD, $links);;
     }
 }
 

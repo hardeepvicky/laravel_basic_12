@@ -325,8 +325,12 @@ class WebController extends Controller
 
         switch ($type) {
             case "string":
-                $parse_value = "%" . $value . "%";
+                $parse_value = "%" . (string) $value . "%";
                 $op = 'LIKE';
+                break;
+
+            case "string_equal":
+                $parse_value = (string) $value;
                 break;
 
             case "date":
@@ -394,7 +398,15 @@ class WebController extends Controller
 
     protected function getPaginagteRecords(Builder $builder, $cache_key_prefix)
     {
-        $cache_key = BaseModel::optimizeCacheKey( get_cache_prefix() . "-pagination_limit-" . $cache_key_prefix . "_" . auth()->id() );
+        $cache_key = get_cache_prefix() . "-pagination_limit-";
+
+        $auth_user = Auth::user();
+
+        if ($auth_user) {
+            $cache_key .= "user-" . $auth_user->id;
+        }
+
+        $cache_key = BaseModel::optimizeCacheKey($cache_key);
 
         $params = $this->getRequestData($cache_key, [
             ["key" => "pagination_limit", "default" => $this->paginationLimit],
@@ -439,22 +451,17 @@ class WebController extends Controller
 
     protected function updateUserInfoAfterSave(Model $model)
     {
-        if (App::environment('production'))
-        {
+        if (App::environment('production')) {
             return false;
         }
 
         $auth_user = Auth::user();
-        
-        if ($auth_user)
-        {
+
+        if ($auth_user) {
             // dd($model->wasRecentlyCreated);
-            if ($model->wasRecentlyCreated) 
-            {
+            if ($model->wasRecentlyCreated) {
                 $auth_user->changeCreatedByUsage($model, 1);
-            }
-            else 
-            {
+            } else {
                 $auth_user->changeUpdatedByUsage($model, 1);
             }
 
@@ -473,8 +480,7 @@ class WebController extends Controller
 
     protected function updateUserInfoForCreateBulk(array $models)
     {
-        if (App::environment('production'))
-        {
+        if (App::environment('production')) {
             return false;
         }
 
@@ -487,8 +493,7 @@ class WebController extends Controller
 
     protected function updateUserInfoForUpdateBulk(array $models)
     {
-        if (App::environment('production'))
-        {
+        if (App::environment('production')) {
             return false;
         }
 
@@ -501,11 +506,10 @@ class WebController extends Controller
 
     protected function updateUserInfoForDeleteBulk(array $models)
     {
-        if (App::environment('production'))
-        {
+        if (App::environment('production')) {
             return false;
         }
-        
+
         $auth_user = Auth::user();
         // $auth_user = (User) $auth_user;
 
@@ -519,7 +523,7 @@ class WebController extends Controller
         $method_name = $this->getMethodName();
 
         if (is_null($prefix)) {
-            $prefix = str_class_name_to_human_text(get_class($model));
+            $prefix = $model->getClassDisplayName();
         }
 
         if (!$msg) {

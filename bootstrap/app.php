@@ -70,7 +70,12 @@ return Application::configure(basePath: dirname(__DIR__))
 
                     $data = array_merge($data, compact("menus", "header_menu_list", "partial_path", "breadcums"));
                 } else {
-                    $data['layout'] = 'backend.layouts.default';
+
+                    $partial_path = "frontend.partials";
+
+                    $data = array_merge($data, compact("partial_path"));
+
+                    $data['layout'] = 'frontend.layouts.main';
                 }
 
                 return response()->view($view_name, $data, $error_code);

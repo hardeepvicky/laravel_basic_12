@@ -1,14 +1,13 @@
 $.events = {
-    lastCallbacks : [],
-    execAtLast : function (callback)
-    {
+    lastCallbacks: [],
+    execAtLast: function (callback) {
         this.lastCallbacks.push(callback);
     },
     onAjaxError: function (title, responseHtml, extra) {
         var config = {
             icon: "error",
             showCloseButton: true,
-            html: title + responseHtml,
+            html: title + "<br/>" + responseHtml,
         };
 
         Swal.fire(config);
@@ -28,7 +27,7 @@ $.events = {
 
         Swal.fire(config);
     },
-    onUserWarning : function(html, extra) {
+    onUserWarning: function (html, extra) {
         var config = {
             icon: "warning",
             showCloseButton: true,
@@ -42,5 +41,14 @@ $.events = {
         }
 
         Swal.fire(config);
-    }
+    },
+    onError: function (title, html, extra) {
+        var config = {
+            icon: "error",
+            showCloseButton: true,
+            html: title + "<br/>" + html,
+        };
+
+        Swal.fire(config);
+    },
 };

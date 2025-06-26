@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class BaseModel extends Model implements BaseModelInterface
 {
@@ -72,6 +73,11 @@ class BaseModel extends Model implements BaseModelInterface
         });
     }
 
+    public static function getStorageDisk()
+    {
+        return Storage::disk(DEFAULT_DISK);
+    }
+
     public static function getTableInfo($table_name)
     {
         if (!isset(static::$tableInfo[$table_name])) {
@@ -126,9 +132,13 @@ class BaseModel extends Model implements BaseModelInterface
         $str = end($arr);
         $str = trim(preg_replace('/(?<!\ )[A-Z]/', ' $0', $str));
 
-        $key = get_cache_prefix() . "-" . $str;
+        if (function_exists("get_cache_prefix")) {
+            $key = get_cache_prefix() . "-" . $str;
+        } else {
+            $key = $str;
+        }
 
-        return  static::optimizeCacheKey($key);
+        return static::optimizeCacheKey($key);
     }
 
     public static function optimizeCacheKey($key): string
@@ -181,7 +191,7 @@ class BaseModel extends Model implements BaseModelInterface
         }
     }
 
-    protected function forgotCache()
+    public function forgotCache()
     {
         $model_cache_key = static::getModelCacheKey();
 
@@ -297,6 +307,11 @@ class BaseModel extends Model implements BaseModelInterface
         return $list;
     }
 
+    public static function getFilePath()
+    {
+        return "files/" . str_class_name_without_namespace(get_called_class()) . "/";
+    }
+
     /*------------------------------------------------------------------*/
     /**------------------------Member Functions ----------------------- */
     /*------------------------------------------------------------------*/
@@ -313,14 +328,9 @@ class BaseModel extends Model implements BaseModelInterface
         return $class_name;
     }
 
-    public function getFilePath()
-    {
-        return "files/" . str_class_name_without_namespace(get_class($this)) . "/";
-    }
-
     public function getFilePathForRecord()
     {
-        return $this->getFilePath() . $this->id . "/";
+        return self::getFilePath() . $this->id . "/";
     }
 
     public function getNextId()

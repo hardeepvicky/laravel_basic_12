@@ -4,11 +4,14 @@ namespace App\Models;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
 use MongoDB\Laravel\Eloquent\Builder;
 use MongoDB\Laravel\Eloquent\Model;
 
 class BaseMongoModel extends Model implements BaseModelInterface
 {
+    protected $connection = 'mongodb';
+
     /**
      * name of table fields which uniquly identify the record
      */
@@ -60,6 +63,11 @@ class BaseMongoModel extends Model implements BaseModelInterface
         self::deleted(function ($model) {
             $model->forgotCache();
         });
+    }
+
+    public static function getStorageDisk()
+    {
+        return Storage::disk(DEFAULT_DISK);
     }
 
     public static function getModelCacheKey(): string
@@ -123,6 +131,8 @@ class BaseMongoModel extends Model implements BaseModelInterface
             throw_exception("Fail To Put Cache");
         }
     }
+
+
 
     public function forgotCache()
     {
@@ -241,9 +251,9 @@ class BaseMongoModel extends Model implements BaseModelInterface
     /**
      * @return int The next ID.
      */
-    public function getNextId(): int
+    public function getNextId()
     {
-        return rand(0, 1000000000);
+        return uniqid();
     }
 
     public function hasAttribute($key)
@@ -260,12 +270,12 @@ class BaseMongoModel extends Model implements BaseModelInterface
 
     public function getFilePath()
     {
-        return "files/" . str_class_name_without_namespace(get_class($this)) . "/";
+        return "files/" . str_class_name_without_namespace(get_class($this));
     }
 
     public function getFilePathForRecord()
     {
-        return $this->getFilePath() . $this->id . "/";
+        return $this->getFilePath() . $this->id;
     }
 
     public function insertOrUpdate(array $data, &$is_insert = null, &$is_update = null)
