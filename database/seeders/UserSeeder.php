@@ -19,22 +19,20 @@ class UserSeeder extends Seeder
     {
         $role = Role::where("code", "system_admin")->first();
 
-        if (!$role)
-        {
+        if (!$role) {
             throw new Exception("System Admin Role Not Found");
         }
 
         $user = User::where("name", "Admin")->first();
 
-        if (!$user)
-        {
+        if (!$user) {
             $user = User::create([
                 'name' => 'Admin',
                 'email' => 'admin@admin.com',
                 'password' => bcrypt('admin@123'),
                 'dont_send_email' => 1,
                 'is_active' => 1,
-                'is_pre_defined' => 1,
+                'is_pre_defined' => 0,
             ]);
 
             UserRole::create([

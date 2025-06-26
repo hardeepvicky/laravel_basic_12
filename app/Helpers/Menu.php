@@ -35,20 +35,18 @@ class Menu
         }
 
         self::$menus[] = (new HomeMenu)->get();
-        self::$menus[] = (new GeneralMenu)->get();
-        self::$menus[] = (new MemberMenu)->get();
-        self::$menus[] = (new HRMenu)->get();
-        self::$menus[] = (new SystemMenu)->get();
-        self::$menus[] = (new LogMenu)->get();
+        // self::$menus[] = (new HRMenu)->get();
+        // self::$menus[] = (new MasterMenu)->get();
+        self::$menus[] = (new AdminMenu)->get();
         self::$menus[] = (new DeveloperMenu)->get();
 
         //d(self::$menus); exit;
 
-        if (isset($cache_key)) {
-            self::_filterMenuForUser();
+        // if (isset($cache_key)) {
+        //     self::_filterMenuForUser();
 
-            Cache::put($cache_key, self::$menus, laravel_constant("cache_time.menu"));
-        }
+        //     Cache::put($cache_key, self::$menus, laravel_constant("cache_time.menu"));
+        // }
 
         return self::checkForActive(self::$menus);;
     }
@@ -207,7 +205,7 @@ class BaseMenu
 {
     const ICON_MENU_ROOT = 'fas fa-layer-group';
     const ICON_MENU_ROOT_CHILD = 'fas fa-cube';
-    const ICON_MENU_SUMMARY = 'fas fa-table';
+    const ICON_MENU_LIST = 'fas fa-table';
     const ICON_MENU_CREATE = 'fas fa-plus-circle';
 
     private static $current_route_name = "";
@@ -295,7 +293,7 @@ class BaseMenu
             "title" => $title,
             "icon" => $icon,
             "links" => [
-                self::getLink($routePrefix . ".index", "Summary", self::ICON_MENU_SUMMARY, [
+                self::getLink($routePrefix . ".index", "List", self::ICON_MENU_LIST, [
                     self::addRelatedLink($routePrefix . ".edit", "Edit"),
                     self::addRelatedLink($routePrefix . ".view", "View"),
                 ]),
@@ -342,41 +340,19 @@ class HomeMenu extends BaseMenu
     }
 }
 
-class GeneralMenu extends BaseMenu
+
+class AdminMenu extends BaseMenu
 {
     public static function get(): array
     {
         $links = [];
 
-        $links[] = self::enquiry();
-
-        return self::getModule("General", self::ICON_MENU_ROOT, $links);
-    }
-
-    public static function enquiry()
-    {
-        $routePrefix = "enquiries";
-
-        $links = [];
-        $links[] = self::getLink($routePrefix . ".index", "Summary", self::ICON_MENU_SUMMARY);
-
-        return self::getModule("Enquiry", self::ICON_MENU_ROOT_CHILD, $links);;
-    }
-}
-
-class SystemMenu extends BaseMenu
-{
-    public static function get(): array
-    {
-        $links = [];
-
+        $links[] = self::user();
+        $links[] = self::role();
         $links[] = self::permission();
         $links[] = self::setting();
-        $links[] = self::state();
-        $links[] = self::city();
-        $links[] = self::type();
 
-        return self::getModule("System Manager", 'fas fa-cogs', $links);
+        return self::getModule("Admin", self::ICON_MENU_ROOT, $links);
     }
 
     public static function permission()
@@ -384,9 +360,8 @@ class SystemMenu extends BaseMenu
         $routePrefix = "permissions";
 
         $links = [
-            self::getLink($routePrefix . ".index", "Summary", self::ICON_MENU_SUMMARY),
+            self::getLink($routePrefix . ".index", "List", self::ICON_MENU_LIST),
             self::getLink($routePrefix . ".assign", "Assign", 'fa-solid fa-gear'),
-            // self::getLink($routePrefix . ".assign_to_many", "Assign To Many", 'bx bx-grid-alt'),
         ];
 
         return self::getModule("Permission", self::ICON_MENU_ROOT_CHILD, $links);
@@ -401,6 +376,66 @@ class SystemMenu extends BaseMenu
         ];
 
         return self::getModule("Setting", self::ICON_MENU_ROOT_CHILD, $links);
+    }
+
+
+    private static function user()
+    {
+        $routePrefix = "user";
+
+        $links = self::getControllerDefaultLinks($routePrefix, "User", "fas fa-users");
+
+        return $links;
+    }
+
+    private static function role()
+    {
+        $routePrefix = "role";
+
+        $links = self::getControllerDefaultLinks($routePrefix, "Role", self::ICON_MENU_ROOT_CHILD);
+
+        return $links;
+    }
+}
+
+class DeveloperMenu extends BaseMenu
+{
+    public static function get(): array
+    {
+        $links = [];
+
+        $routePrefix = "developer";
+
+        $links[] = self::getLink($routePrefix . ".email_log", null, self::ICON_MENU_LIST, [], self::LINK_TYPE_SUMMARY);
+        $links[] = self::getLink($routePrefix . ".sql_log", null, self::ICON_MENU_LIST, [], self::LINK_TYPE_SUMMARY);
+        $links[] = self::getLink($routePrefix . ".laravel_routes_index", null, self::ICON_MENU_LIST, [], self::LINK_TYPE_SUMMARY);
+
+        return self::getModule("Developer", null, $links);
+    }
+}
+
+class MasterMenu extends BaseMenu
+{
+    public static function get(): array
+    {
+        $links = [];
+
+        $links[] = self::country();
+        $links[] = self::state();
+        $links[] = self::city();
+        $links[] = self::type();
+
+        return self::getModule("Master", self::ICON_MENU_ROOT, $links);
+    }
+
+
+    private static function country()
+    {
+        $routePrefix = "country";
+
+        $links = self::getControllerDefaultLinks($routePrefix, "Country", self::ICON_MENU_ROOT_CHILD);
+
+        return $links;
     }
 
     private static function state()
@@ -426,69 +461,6 @@ class SystemMenu extends BaseMenu
         $routePrefix = "type";
 
         $links = self::getControllerDefaultLinks($routePrefix, "Type", self::ICON_MENU_ROOT_CHILD);
-
-        return $links;
-    }
-}
-
-class LogMenu extends BaseMenu
-{
-    public static function get(): array
-    {
-        $links = [];
-
-        $routePrefix = "logs";
-
-        $links = [
-            // self::getLink($routePrefix . ".sql", "SQL", self::ICON_MENU_SUMMARY)
-        ];
-
-        return self::getModule("Logs", null, $links);
-    }
-}
-
-class DeveloperMenu extends BaseMenu
-{
-    public static function get(): array
-    {
-        $links = [];
-
-        $routePrefix = "developer";
-
-        $links[] = self::getLink($routePrefix . ".email_log", null, self::ICON_MENU_SUMMARY, [], self::LINK_TYPE_SUMMARY);
-        $links[] = self::getLink($routePrefix . ".sql_log", null, self::ICON_MENU_SUMMARY, [], self::LINK_TYPE_SUMMARY);
-        $links[] = self::getLink($routePrefix . ".laravel_routes_index", null, self::ICON_MENU_SUMMARY, [], self::LINK_TYPE_SUMMARY);
-
-        return self::getModule("Developer", null, $links);
-    }
-}
-
-class MemberMenu extends BaseMenu
-{
-    public static function get(): array
-    {
-        $links = [];
-
-        $links[] = self::role();
-        $links[] = self::user();
-
-        return self::getModule("Members", 'fas fa-users', $links);
-    }
-
-    private static function user()
-    {
-        $routePrefix = "user";
-
-        $links = self::getControllerDefaultLinks($routePrefix, "User", "fas fa-users");
-
-        return $links;
-    }
-
-    private static function role()
-    {
-        $routePrefix = "role";
-
-        $links = self::getControllerDefaultLinks($routePrefix, "Role", self::ICON_MENU_ROOT_CHILD);
 
         return $links;
     }

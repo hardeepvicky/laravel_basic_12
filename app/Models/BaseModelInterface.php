@@ -14,6 +14,8 @@ interface BaseModelInterface
 
     public static function getStorageDisk();
 
+    public static function getStoragePath();
+
     public function forgotCache();
 
     public function getNextId();

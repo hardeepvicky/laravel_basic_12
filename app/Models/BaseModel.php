@@ -8,10 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 
 class BaseModel extends Model implements BaseModelInterface
 {
+    use StorageTrait, CacheTrait;
+
     /**
      * name of table fields which uniquly identify the record
      */
@@ -94,11 +95,6 @@ class BaseModel extends Model implements BaseModelInterface
 
     public function beforeDelete() {}
 
-    public static function getStorageDisk()
-    {
-        return Storage::disk(DEFAULT_DISK);
-    }
-
     public static function getTableInfo($table_name)
     {
         if (!isset(static::$tableInfo[$table_name])) {
@@ -144,87 +140,6 @@ class BaseModel extends Model implements BaseModelInterface
         }
 
         return false;
-    }
-
-    public static function getModelCacheKey(): string
-    {
-        $str = get_called_class();
-        $arr = explode("\\", $str);
-        $str = end($arr);
-        $str = trim(preg_replace('/(?<!\ )[A-Z]/', ' $0', $str));
-
-        if (function_exists("get_cache_prefix")) {
-            $key = get_cache_prefix() . "-" . $str;
-        } else {
-            $key = $str;
-        }
-
-        return static::optimizeCacheKey($key);
-    }
-
-    public static function optimizeCacheKey($key): string
-    {
-        $key = str_replace(".", "-", $key);
-
-        $key = preg_replace('!\s+!', '-', $key);
-
-        $key = trim($key, "-");
-
-        $key = trim($key);
-
-        return $key;
-    }
-
-    public static function getCache($key)
-    {
-        $model_cache_key = static::getModelCacheKey();
-
-        $cache_key = $model_cache_key . "-" . $key;
-
-        if (Cache::has($cache_key)) {
-            return Cache::get($cache_key);
-        }
-
-        return null;
-    }
-
-    public static function addCache($key, $data)
-    {
-        $model_cache_key = static::getModelCacheKey();
-
-        $cache_key = $model_cache_key . "-" . static::optimizeCacheKey($key);
-
-        //put cache
-        Cache::put($cache_key, $data, laravel_constant("cache_time.model"));
-
-        //make refrence to cache keys 
-        $list_of_cache_keys = [];
-        if (Cache::has($model_cache_key)) {
-            $list_of_cache_keys = Cache::get($list_of_cache_keys);
-        }
-
-        if (!in_array($cache_key, $list_of_cache_keys)) {
-            $list_of_cache_keys[] = $cache_key;
-        }
-
-        if (!Cache::put($model_cache_key, $list_of_cache_keys, laravel_constant("cache_time.model"))) {
-            throw_exception("Fail To Put Cache");
-        }
-    }
-
-    public function forgotCache()
-    {
-        $model_cache_key = static::getModelCacheKey();
-
-        if (Cache::has($model_cache_key)) {
-            $list_of_cache_keys = Cache::get($model_cache_key);
-
-            foreach ($list_of_cache_keys as $cache_key) {
-                Cache::forget($cache_key);
-            }
-
-            Cache::forget($model_cache_key);
-        }
     }
 
     public static function parseValueBeforeUseInDBQuery($field, $value)
@@ -302,9 +217,9 @@ class BaseModel extends Model implements BaseModelInterface
         return $list;
     }
 
-    public static function getListCache(String $id = "id", String $value = "display_name", $order_by = "name", $order_dir = "ASC")
+    public static function getListCache(String $key_field = "id", String $value_field = "display_name", $order_by = "name", $order_dir = "ASC")
     {
-        $key = "list-" . $id . "-" . $value;
+        $key = "list-" . $key_field . "-" . $value_field;
 
         $list = static::getCache($key);
 
@@ -321,16 +236,11 @@ class BaseModel extends Model implements BaseModelInterface
         $model = new static();
         $table_name = $model->getTable();
 
-        $list = static::fetchList($builder, $id, $value, $table_name);
+        $list = static::fetchList($builder, $key_field, $value_field, $table_name);
 
         self::addCache($key, $list);
 
         return $list;
-    }
-
-    public static function getFilePath()
-    {
-        return "files/" . str_class_name_without_namespace(get_called_class()) . "/";
     }
 
     /*------------------------------------------------------------------*/
@@ -347,11 +257,6 @@ class BaseModel extends Model implements BaseModelInterface
         $class_name = static::classDisplayName();
 
         return $class_name;
-    }
-
-    public function getFilePathForRecord()
-    {
-        return self::getFilePath() . $this->id . "/";
     }
 
     public function getNextId()

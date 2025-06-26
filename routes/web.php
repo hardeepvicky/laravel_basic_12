@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\OtpVerifyController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Backend\CityController;
+use App\Http\Controllers\Backend\CountryController;
 use App\Http\Controllers\Backend\DashboardController;
 use App\Http\Controllers\Backend\DepartmentController;
 use App\Http\Controllers\Backend\DesignationController;
@@ -115,11 +116,20 @@ Route::group(['middleware' => ['auth', 'role_permission']], function () {
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
     });
 
+    // country
+    $route_prefix = "country";
+    $controllerClass = CountryController::class;
+    Route::resource($route_prefix, $controllerClass);
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {});
+
     // state
     $route_prefix = "state";
     $controllerClass = StateController::class;
     Route::resource($route_prefix, $controllerClass);
-    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {});
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+        $name = "ajax_get_list";
+        Route::get($name . "/{country_id}", [$controllerClass, $name])->name($name);
+    });
 
     // City
     $route_prefix = "city";

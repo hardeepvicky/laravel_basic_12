@@ -3,110 +3,13 @@
 namespace App\Helpers;
 
 use Exception;
+use Illuminate\Filesystem\LocalFilesystemAdapter;
 
 class FileUtility
 {
     const use_s3 = false;
-    public $maxSize, $ext, $path, $errors;
-    public $filename, $extension, $file;
-    // static variables
-    public static $FIRST = 1, $LAST = 2;
-    /**
-     * Constructor
-     * 
-     * @param int $maxSize
-     * @param array $extensions
-     * @param array $options
-     */
-    public function __construct($maxSize, $extensions = array())
-    {
-        $this->maxSize = $maxSize;
-        $this->ext = $extensions;
 
-        foreach ($this->ext as $k => $ext) {
-            $this->ext[$k] = strtolower(trim($ext));
-        }
-    }
-
-    /**
-     * 
-     * upload a file to destination
-     * @param array $file
-     * @param string $dest_path
-     * @return boolean
-     */
-    public function uploadFile($file, $dest_path, $filename = "")
-    {
-        //validating file
-        $this->errors = array();
-        $file["name"] = trim($file["name"]);
-        if (!$this->validateFile($file)) {
-            return false;
-        }
-
-        //creating folder
-        $dest_path = static::removePathSlashs($dest_path);
-        $dest_path .= "/";
-
-        self::createFolder($dest_path);
-
-        $this->path = $dest_path;
-
-        $temp = pathinfo($file["name"]);
-
-        $this->filename = static::cleanFileName($temp['filename']);
-        $this->extension = $temp['extension'];
-
-        if ($filename) {
-            $this->filename = static::cleanFileName($filename);
-            if (strlen($this->filename) > 100) {
-                $this->filename = substr($this->filename, 0, 100);
-            }
-
-            $this->file = $this->filename . "." . $this->extension;
-        } else {
-            if (strlen($this->filename) > 100) {
-                $this->filename = substr($this->filename, 0, 100);
-            }
-
-            $this->file = self::getAutoincreamentFileName($this->filename, $this->extension, $dest_path);
-            $this->filename = pathinfo($this->file, PATHINFO_FILENAME);
-        }
-
-        return move_uploaded_file($file['tmp_name'], $this->path . $this->file);
-    }
-
-    /**
-     * validate the file
-     * @param string $file
-     * @return boolean
-     */
-    public function validateFile($file)
-    {
-        $result = true;
-
-        if ($file['size'] > $this->maxSize) {
-            $this->errors[] = "File size must not exceeds " . round($this->maxSize / 1024) . " kb";
-            $result = false;
-        }
-
-        $temp = pathinfo($file["name"]);
-
-        $this->filename = $temp['filename'];
-        if (!isset($temp['extension']) || !$temp['extension']) {
-            $this->errors[] = "Could not find type of file";
-            $result = false;
-        } else {
-            $this->extension = strtolower($temp['extension']);
-
-            if (!empty($this->ext) && !in_array($this->extension, $this->ext)) {
-                $this->errors[] = "Invalid file Type : " . $this->extension;
-                $result = false;
-            }
-        }
-
-        return $result;
-    }
+    public function __construct(protected LocalFilesystemAdapter $disk) {}
 
     /**
      * return filename which which will be save 
@@ -328,25 +231,6 @@ class FileUtility
         return false;
     }
 
-    public static function removePathSlashs($path, $side = '')
-    {
-        $side = strtoupper($side);
-        $path = trim(str_replace('\\', '/', $path));
-
-        if ($side == 'FIRST' || $side == 'START' || empty($side)) {
-            if (substr($path, 0, 1) == "/") {
-                $path = substr($path, 1, strlen($path));
-            }
-        }
-
-        if ($side == 'LAST' || $side == 'END' || empty($side)) {
-            if (substr($path, -1) == "/") {
-                $path = substr($path, 0, strrpos($path, "/"));
-            }
-        }
-        return $path;
-    }
-
     public static function cleanFileName($string)
     {
         $string = str_replace(' ', '-', $string); // Replaces all spaces with hyphens.
@@ -383,5 +267,31 @@ class FileUtility
         fclose($ifp);
 
         return $file;
+    }
+
+
+    public function writeFile(string $filepath, $contents, $options = [])
+    {
+        if (!$this->disk->put($filepath, $contents)) {
+            throw_exception("Fail To Write File at $filepath");
+        }
+
+        return false;
+    }
+
+    public function writeLog(string $path, string $file, $contents)
+    {
+        $path = str_path_normalize_to_save_to_data_base($path);
+
+        return $this->writeFile($path . "/" . $file, $contents);
+    }
+
+    public function getUrl($file)
+    {
+        if ($this->disk->fileExists($file)) {
+            return route("get_file_url", ["file_path" => urlencode($file)]);
+        }
+
+        return null;
     }
 }

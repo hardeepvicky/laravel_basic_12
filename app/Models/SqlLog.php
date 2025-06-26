@@ -2,14 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-
-class SqlLog extends BaseModel
+class SqlLog extends BaseMongoModel
 {
-    use HasFactory;
+    protected static array $file_fields = ["sql_log_file", "sql_dml_log_file"];
 
-    public static function getFileSavePath()
+    public static function getStoragePath()
     {
-        return "files/SqlLog/";
+        return "logs/sql/";
     }
 }

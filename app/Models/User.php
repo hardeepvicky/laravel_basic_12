@@ -17,9 +17,7 @@ use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
-
-    protected static $model_cache_key = "User";
+    use HasApiTokens, HasFactory, Notifiable, StorageTrait, CacheTrait;
 
     /**
      * The attributes that are mass assignable.
@@ -140,35 +138,6 @@ class User extends Authenticatable
         }
     }
 
-    public static function addCache($cache_key, $data)
-    {
-        Cache::put($cache_key, $data, laravel_constant("cache_time.model"));
-
-        $list_of_cache_keys = [];
-        if (Cache::has(static::$model_cache_key)) {
-            $list_of_cache_keys = Cache::get(static::$model_cache_key);
-        }
-
-        if (!in_array($cache_key, $list_of_cache_keys)) {
-            $list_of_cache_keys[] = $cache_key;
-        }
-
-        Cache::put(static::$model_cache_key, $list_of_cache_keys, laravel_constant("cache_time.model"));
-    }
-
-    public static function forgotCache()
-    {
-        if (static::$model_cache_key && Cache::has(static::$model_cache_key)) {
-            $list_of_cache_keys = Cache::get(static::$model_cache_key);
-
-            foreach ($list_of_cache_keys as $cache_key) {
-                Cache::forget($cache_key);
-            }
-
-            Cache::forget(static::$model_cache_key);
-        }
-    }
-
     public function assignRoles(array $new_role_id_list)
     {
         $user_id = $this->id;
@@ -285,29 +254,29 @@ class User extends Authenticatable
 
     public static function getListCache(String $key_field = "id", String $value_field = "display_name_with_id", $order_by = "name", $order_dir = "ASC")
     {
-        if (!static::$model_cache_key) {
-            throw_exception("model_cache_key is not set in Model");
-        }
+        $model = new static();
+        $table_name = $model->getTable();
 
-        $cache_key = static::$model_cache_key . "-" . $key_field . "-" . $value_field;
-        //d($cache_key);
+        $key = "list-" . $key_field . "-" . $value_field;
 
-        if (Cache::has($cache_key)) {
-            return Cache::get($cache_key);
+        $list = static::getCache($key);
+
+        if ($list) {
+            return $list;
         }
 
         $builder = static::query();
-
-        $model = new static();
-        $table_name = $model->getTable();
 
         if ($order_by && $order_dir) {
             $builder->orderBy($order_by, $order_dir);
         }
 
+        $model = new static();
+        $table_name = $model->getTable();
+
         $list = static::fetchList($builder, $key_field, $value_field, $table_name);
 
-        self::addCache($cache_key, $list);
+        self::addCache($key, $list);
 
         return $list;
     }

@@ -1,8 +1,9 @@
 <?php
 
+use App\Helpers\ConsoleOutput;
 use App\Helpers\DateUtility;
 use App\Helpers\Util;
-
+use Illuminate\Support\Facades\App;
 
 function throw_exception($msg)
 {
@@ -28,26 +29,38 @@ function throw_exception($msg)
 
 function d($arg, $will_exit = false)
 {
+    $callBy = debug_backtrace()[0];
+
     if (!env("APP_DEBUG")) {
         return;
     }
 
-    $callBy = debug_backtrace()[0];
-    echo "<pre>";
-    echo "<b>" . $callBy['file'] . "</b> At Line : " . $callBy['line'];
-    echo "<br/>";
+    if (App::runningInConsole()) {
+        $console = new ConsoleOutput();
 
-    if (is_string($arg)) {
-        echo htmlspecialchars($arg);
-    } else if (is_bool($arg)) {
-        echo $arg ? "True" : "False";
-    } else if (is_null($arg)) {
-        echo "NULL";
+        $console->addLogMessage("File : " . $callBy['file']);
+        $console->addLogMessage("Line : " . $callBy['line']);
+        $console->writeLogToConsole();
+
+        dump($arg);
     } else {
-        print_r($arg);
-    }
 
-    echo "</pre>";
+        echo "<pre>";
+        echo "<b>" . $callBy['file'] . "</b> At Line : " . $callBy['line'];
+        echo "<br/>";
+
+        if (is_string($arg)) {
+            echo htmlspecialchars($arg);
+        } else if (is_bool($arg)) {
+            echo $arg ? "True" : "False";
+        } else if (is_null($arg)) {
+            echo "NULL";
+        } else {
+            print_r($arg);
+        }
+
+        echo "</pre>";
+    }
 
     if ($will_exit) {
         exit;
@@ -819,4 +832,22 @@ function array_human_keys(array $array, bool $recursive = false)
     }
 
     return $ret_array;
+}
+
+
+function str_path_normalize_to_save_to_data_base($path)
+{
+    $path = str_convert_multi_space_to_single_space($path);
+    $path = str_replace(" ", "-", $path);
+    $path = str_replace("\\", "/", $path);
+    $path = trim($path, "/");
+
+    return $path;
+}
+
+function date_get_for_file_name()
+{
+    $dt = new DateTime();
+
+    return $dt->format("Y-m-d_H-i-s-u");
 }

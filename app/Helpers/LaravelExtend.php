@@ -110,4 +110,15 @@ class LaravelExtend
 
         return false;
     }
+
+    public static function writeFile(string $file, $contents)
+    {
+        if ($contents) {
+            if (file_put_contents($file, $contents, FILE_APPEND)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

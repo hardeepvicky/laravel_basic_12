@@ -16,9 +16,9 @@ class TextField extends Component
         public String $label,
         public $value = "",
         public $mandatory = false,
+        public $preventCssClassAddToInput = false,
         public $errorName = ""
-    )
-    {
+    ) {
         //
 
     }

@@ -15,23 +15,26 @@
 
                 </thead>
                 <tbody>
-                    @foreach($records as $record)
-                    <tr>
-                        <td>{{ $record->id }}</td>
-                        <td>{{ $record->route_name_or_url }}</td>
-                        <td>
-                            <a download="sql_{{ $record->id }}.txt" href="/{{ $record->sql_log_file }}" class="btn btn-outline-secondary">
-                                <i class="fas fa-download"></i>
-                                SQL Log
-                            </a>
-                            @if($record->sql_dml_log_file)
-                            <a download="sql_dml_{{ $record->id }}.txt" href="/{{ $record->sql_dml_log_file }}" class="btn btn-outline-secondary">
-                                <i class="fas fa-download"></i>
-                                DML SQL Log
-                            </a>
-                            @endif
-                        </td>
-                    </tr>
+                    @foreach ($records as $record)
+                        <tr>
+                            <td>{{ $record->id }}</td>
+                            <td>{{ $record->route_name_or_url }}</td>
+                            <td>
+                                @if ($record->sql_log_file_url)
+                                    <a href="{{ $record->sql_log_file_url }}" class="btn btn-outline-secondary">
+                                        <i class="fas fa-download"></i>
+                                        SQL Log
+                                    </a>
+                                @endif
+
+                                @if ($record->sql_dml_log_file_url)
+                                    <a href="{{ $record->sql_log_file_url }}" class="btn btn-outline-secondary">
+                                        <i class="fas fa-download"></i>
+                                        DML SQL Log
+                                    </a>
+                                @endif
+                            </td>
+                        </tr>
                     @endforeach
                 </tbody>
             </table>
