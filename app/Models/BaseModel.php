@@ -46,6 +46,8 @@ class BaseModel extends Model implements BaseModelInterface
                     $model->created_by = $auth_user->id;
                 }
             }
+
+            $model->beforeSave();
         });
 
         self::created(function ($model) {
@@ -60,18 +62,37 @@ class BaseModel extends Model implements BaseModelInterface
                     $model->updated_by = $auth_user->id;
                 }
             }
+
+            $model->beforeSave();
         });
 
         self::updated(function ($model) {
             $model->forgotCache();
         });
 
-        self::deleting(function ($model) {});
+        self::deleting(function ($model) {
+            $model->beforeDelete();
+        });
 
         self::deleted(function ($model) {
             $model->forgotCache();
         });
     }
+
+    public function beforeSave()
+    {
+        foreach ($this->getAttributes() as $field => $value) {
+            if (is_null($value)) {
+                continue;
+            }
+
+            if (is_string($value) && strlen($value) > 0) {
+                $this->{$field} = utf8_encode($value);
+            }
+        }
+    }
+
+    public function beforeDelete() {}
 
     public static function getStorageDisk()
     {

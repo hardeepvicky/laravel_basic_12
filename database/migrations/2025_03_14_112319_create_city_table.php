@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateCitiesTable extends Migration
+class CreateCityTable extends Migration
 {
     /**
      * Run the migrations.
@@ -14,16 +14,14 @@ class CreateCitiesTable extends Migration
     public function up()
     {
         Schema::create('cities', function (Blueprint $table) {
-            $table->charset = 'utf8mb4';
-            $table->collation = 'utf8mb4_unicode_ci';
             $table->id();
-            $table->string("name", 120);
+            $table->string("name", 255);
+            $table->string("short_name", 10)->nullable();
             $table->unsignedBigInteger("state_id");
+            $table->boolean("is_active")->default(1);
             $table->timestamps();
             $table->bigInteger("created_by")->nullable();
             $table->bigInteger("updated_by")->nullable();
-
-            $table->foreign('state_id')->references('id')->on('states')->onDelete('restrict');
         });
     }
 

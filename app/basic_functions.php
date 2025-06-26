@@ -695,3 +695,128 @@ function array_escape_for_sql($str)
     );
     return $escaped_str;
 }
+
+function str_get_first_chars($string)
+{
+    $string = str_convert_multi_space_to_single_space($string);
+    $words = explode(' ', $string); // Split the string by space
+    $firstChars = [];
+
+    foreach ($words as $word) {
+        if (!empty($word)) { // Ensure the word is not empty (handles multiple spaces)
+            $firstChars[] = $word[0]; // Get the first character (index 0)
+        }
+    }
+
+    return $firstChars;
+}
+
+function str_convert_multi_space_to_single_space($string)
+{
+    $string = preg_replace('/\s+/', ' ', $string);
+    $string = trim($string);
+    return $string;
+}
+
+function array_find_duplicates(array $array): array
+{
+    // Count the occurrences of each value in the array
+    $counts = array_count_values($array);
+
+    // Filter the counts to keep only values that appear more than once
+    $duplicates = array_filter($counts, function ($count) {
+        return $count > 1;
+    });
+
+    // Return the keys of the filtered array, which are the duplicate values
+    return array_keys($duplicates);
+}
+
+function array_check_data_type_and_throw_error(array $array, array $valid_data_types, bool $recursive = false, $msg = "", $msg_prefix = "")
+{
+    if (!$msg) {
+        $msg = "Key : {key} : data type is {data_type}, only {valid_data_types} are allowed";
+    }
+
+    foreach ($array as $k => $v) {
+
+        if ($recursive && is_array($v)) {
+            array_check_data_type_and_throw_error($v, $valid_data_types, $recursive, $msg, $msg_prefix . "->" . $k);
+        } else {
+            $data_type = gettype($v);
+
+            if (!in_array($data_type, $valid_data_types)) {
+                $msg = str_replace("{key}", $msg_prefix . $k, $msg);
+
+                $msg = str_replace("{data_type}", $data_type, $msg);
+
+                $msg = str_replace("{valid_data_types}", implode(",", $valid_data_types), $msg);
+
+                throw new Exception($msg);
+            }
+        }
+    }
+}
+
+
+function array_check_value_is_scaler_and_throw_error(array $array, bool $recursive = false, $msg = "", $msg_prefix = "")
+{
+    if (!$msg) {
+        $msg = "Key : {key} : variable should be scaler";
+    }
+
+    foreach ($array as $k => $v) {
+        if ($recursive) {
+            if (is_object($v)) {
+                $v = (array) $v;
+            }
+        }
+
+        if ($recursive && is_array($v)) {
+            array_check_value_is_scaler_and_throw_error($v, $recursive, $msg, $msg_prefix . "->" . $k);
+        } else {
+            if (!is_scalar($v)) {
+                $msg = str_replace("{key}", $msg_prefix . $k, $msg);
+
+                throw new Exception($msg);
+            }
+        }
+    }
+}
+
+function array_except(array $array, array $except_values, bool $recursive = false)
+{
+    array_check_value_is_scaler_and_throw_error($except_values);
+
+    foreach ($array as $k => $v) {
+        if ($recursive && is_array($v)) {
+            $array[$k] = array_except($v, $except_values);
+        } else {
+            foreach ($except_values as $except_value) {
+                if ($v == $except_value) {
+                    unset($array[$k]);
+                }
+            }
+        }
+    }
+
+    return $array;
+}
+
+function array_human_keys(array $array, bool $recursive = false)
+{
+    $ret_array = [];
+    foreach ($array as $k => $v) {
+        $k = strtolower($k);
+        $k = str_function_name_to_human_text($k);
+        $k = ucwords($k);
+
+        if ($recursive && is_array($v)) {
+            $ret_array[$k] = array_human_keys($v);
+        } else {
+            $ret_array[$k] = $v;
+        }
+    }
+
+    return $ret_array;
+}

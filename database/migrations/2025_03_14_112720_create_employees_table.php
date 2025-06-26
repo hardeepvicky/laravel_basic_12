@@ -16,7 +16,7 @@ class CreateEmployeesTable extends Migration
         Schema::create('employees', function (Blueprint $table) {
             $table->id();
             $table->string("type", 45);
-            $table->string("name", 80);            
+            $table->string("name", 80);
             $table->string("mobile", 15)->nullable();
             $table->string("whatsapp_mobile", 15)->nullable();
             $table->string("email", 80)->nullable();
@@ -29,8 +29,8 @@ class CreateEmployeesTable extends Migration
             $table->unsignedBigInteger("current_city_id");
             $table->unsignedBigInteger("current_address");
             $table->unsignedBigInteger("permanent_state_id");
-            $table->unsignedBigInteger("permanen_city_id");
-            $table->unsignedBigInteger("permanen_address");            
+            $table->unsignedBigInteger("permanent_city_id");
+            $table->unsignedBigInteger("permanent_address");
             $table->string("salary_type", 45)->nullable();
             $table->string("salary_payment_mode", 45)->nullable();
             $table->boolean("dont_send_sms")->default(0);
@@ -46,7 +46,7 @@ class CreateEmployeesTable extends Migration
             $table->foreign('current_state_id')->references('id')->on('states')->onDelete('restrict');
             $table->foreign('current_city_id')->references('id')->on('states')->onDelete('restrict');
             $table->foreign('permanent_state_id')->references('id')->on('states')->onDelete('restrict');
-            $table->foreign('permanen_city_id')->references('id')->on('cities')->onDelete('restrict');
+            $table->foreign('permanent_city_id')->references('id')->on('cities')->onDelete('restrict');
         });
     }
 
