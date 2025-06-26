@@ -34,11 +34,8 @@ class UserSeeder extends Seeder
                 'is_active' => 1,
                 'is_pre_defined' => 0,
             ]);
-
-            UserRole::create([
-                "user_id" => $user->id,
-                "role_id" => $role->id,
-            ]);
         }
+
+        $user->assignRoles([$role->id]);
     }
 }

@@ -16,12 +16,10 @@ class RoleSeeder extends Seeder
     {
         $role = Role::where("code", "system_admin")->first();
 
-        if (!$role)
-        {
+        if (!$role) {
             Role::create([
                 'code' => 'system_admin',
-                'name' => 'System Admin',
-                'is_admin' => 1,
+                'name' => 'Admin',
                 'is_active' => 1,
                 'is_pre_defined' => 1
             ]);
@@ -29,12 +27,10 @@ class RoleSeeder extends Seeder
 
         $role = Role::where("code", "developer")->first();
 
-        if (!$role)
-        {
+        if (!$role) {
             Role::create([
                 'code' => 'developer',
                 'name' => 'Developer',
-                'is_admin' => 0,
                 'is_active' => 1,
                 'is_pre_defined' => 1
             ]);

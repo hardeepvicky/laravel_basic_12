@@ -103,7 +103,7 @@ class User extends Authenticatable
         });
 
         self::created(function ($model) {
-            static::forgotCache();
+            $model->forgotCache();
         });
 
         self::updating(function ($model) {

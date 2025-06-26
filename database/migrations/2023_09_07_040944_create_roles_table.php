@@ -19,7 +19,6 @@ class CreateRolesTable extends Migration
             $table->id();
             $table->string("name", 45)->unique();
             $table->string("code", 45)->nullable();
-            $table->boolean("is_admin")->default(0);
             $table->boolean("is_active")->default(0);
             $table->boolean("is_pre_defined")->default(0);
             $table->timestamps();

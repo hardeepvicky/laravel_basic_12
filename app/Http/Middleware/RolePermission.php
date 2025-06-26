@@ -21,31 +21,25 @@ class RolePermission
     {
         $route_name = $request->route()->getName();
 
-        if (!$route_name)
-        {
+        if (!$route_name) {
             die("Current Url has no Route Name. Please Assign Route name.");
         }
 
         $user = Auth::user();
 
         $role_id_list = [];
-        foreach($user->userRole->toArray() as $user_role)
-        {
+        foreach ($user->userRole->toArray() as $user_role) {
             $role_id_list[] = $user_role['role_id'];
         }
 
         $accessControl = AccessControl::init();
 
-        if (!$accessControl->isAllow($route_name, $role_id_list))
-        {
+        if (!$accessControl->isAllow($route_name, $role_id_list)) {
             abort(401);
         }
 
         return $next($request);
     }
 
-    public function terminate(Request $request, Response $response): void
-    {
-        
-    }
+    public function terminate(Request $request, Response $response): void {}
 }
