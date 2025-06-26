@@ -66,26 +66,7 @@ class User extends Authenticatable
         ],
     ];
 
-    protected function getDisplayNameAttribute()
-    {
-        return $this->name;
-    }
-
-    public function state()
-    {
-        return $this->belongsTo(State::class);
-    }
-
-    public function userRole()
-    {
-        return $this->hasMany(UserRole::class, 'user_id');
-    }
-
-    public function roles()
-    {
-        return $this->belongsToMany(Role::class, UserRole::class);
-    }
-
+    
     public static function boot()
     {
         parent::boot();
@@ -131,6 +112,26 @@ class User extends Authenticatable
         });
     }
 
+    protected function getDisplayNameAttribute()
+    {
+        return $this->name;
+    }
+
+    public function state()
+    {
+        return $this->belongsTo(State::class);
+    }
+
+    public function userRole()
+    {
+        return $this->hasMany(UserRole::class, 'user_id');
+    }
+
+    public function roles()
+    {
+        return $this->belongsToMany(Role::class, UserRole::class);
+    }
+
     public function isRquireOTPVerificationOnLogin()
     {
         if (!$this->dont_send_email) {
@@ -160,6 +161,20 @@ class User extends Authenticatable
         }
 
         return $list;
+    }
+
+    public function hasRole($role_id_code_name)
+    {
+        $role = $this->roles()->where(function($q) use ($role_id_code_name){
+            $q->orWhere("roles.code", $role_id_code_name)->orWhere("roles.name", $role_id_code_name);
+        })->first();
+
+        if ($role)
+        {
+            return true;
+        }
+
+        return false;
     }
 
 

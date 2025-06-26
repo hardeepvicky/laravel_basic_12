@@ -1,39 +1,50 @@
-<?php
-if (!isset($mandatory)) {
-    $mandatory = false;
+<?php 
+if (!isset($value)){
+    $value = "";
+} 
+
+if (!isset($secondaryTextPosition))
+{
+    $secondaryTextPosition = "";
 }
 
-if (!isset($is_disabled)) {
-    $is_disabled = false;
+if (!isset($secondaryText))
+{
+    $secondaryText = "";
 }
 
-if (!isset($value)) {
-    $value = '';
-}
-
-if (!isset($errorName) || empty($errorName)) {
+if (!isset($errorName)){
     $errorName = $name;
 }
 
-if ($is_disabled) {
-    $mandatory = false;
+if (!isset($mandatory))
+{
+    $mandatory = $attributes->get("required", false);
 }
 
-$cls = $attributes->get('class', 'form-control invalid-char');
+if (!isset($is_disabled))
+{
+    $is_disabled = $attributes->get("disabled", false);
+}
 
-$attr = '';
+$my_attributes = [
+    'type' => 'text',
+];
+
+if (isset($preventCssClassAddToInput) && $preventCssClassAddToInput) {
+} else {
+    $my_attributes['class'] = 'form-control invalid-char';
+}
 
 if ($mandatory) {
-    $attr .= ' required="true"';
+    $my_attributes['required'] = 'true';
 }
 
-if ($is_disabled) {
-    $attr .= ' disabled="true"';
+if (!$mandatory && $is_disabled) {
+    $my_attributes['disabled'] = "true";
 }
-
-// d($attr);
-
 ?>
+
 
 @if (isset($label) && $label)
     <label class="form-label">
@@ -49,8 +60,7 @@ if ($is_disabled) {
     @if ($secondaryTextPosition == 'first')
         {!! $secondaryText !!}
     @endif
-    <input name="{{ $name }}" value="{{ old($name, $value) }}" class="{{ $cls }}"
-        {{ $attributes->merge(['type' => 'text']) }} {!! $attr !!} />
+    <input name="{{ $name }}" value="{{ old($name, $value) }}" {{ $attributes->merge($my_attributes) }} />
 
     @if ($secondaryTextPosition == 'last')
         {!! $secondaryText !!}

@@ -69,6 +69,17 @@ body > .black_drop_container {
     margin-right: 1rem;
 }
 
+.form-check .form-check-input{
+    width : 1.3em;
+    height: 1.3em;
+}
+
+.form-check .form-check-label{
+    font-size: 1.1rem;
+    margin-left: 5px;
+
+}
+
 .mandatory {
     color: red;
     font-size: 1rem;

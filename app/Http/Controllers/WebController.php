@@ -157,8 +157,10 @@ class WebController extends Controller
 
     protected function getRequestData($cache_prefix, array $array, bool $is_cache_clear = false)
     {
-        if ($cache_prefix) {
-            $cache_key = BaseModel::optimizeCacheKey(get_cache_prefix() . "-request_" . $cache_prefix . "_" . auth()->id());
+        if (is_string($cache_prefix) && $cache_prefix) {
+            $cache_key = get_cache_prefix() . "-request_" . $cache_prefix . "_user_" . $this->getAuthUserId();
+            
+            $cache_key = BaseModel::optimizeCacheKey($cache_key);
 
             if (Cache::has($cache_key)) {
                 $cache_params = Cache::get($cache_key);
@@ -207,8 +209,10 @@ class WebController extends Controller
         $conditions = [];
         $search_variables = [];
 
-        if ($cache_prefix) {
-            $cache_key = BaseModel::optimizeCacheKey(get_cache_prefix() . "-search_" . $cache_prefix . "_" . auth()->id());
+        if (is_string($cache_prefix) && $cache_prefix) {
+
+            $cache_key = get_cache_prefix() . "-search_" . $cache_prefix  . "_user_" . $this->getAuthUserId();
+            $cache_key = BaseModel::optimizeCacheKey($cache_key);
         }
 
         $request_params = request()->all();
@@ -398,15 +402,13 @@ class WebController extends Controller
 
     protected function getPaginagteRecords(Builder $builder, $cache_key_prefix)
     {
-        $cache_key = get_cache_prefix() . "-pagination_limit-";
+        $cache_key = null;
 
-        $auth_user = Auth::user();
-
-        if ($auth_user) {
-            $cache_key .= "user-" . $auth_user->id;
+        if (is_string($cache_key_prefix) && $cache_key_prefix)
+        {
+            $cache_key = get_cache_prefix() . "-pagination_limit-user-" . $this->getAuthUserId();
+            $cache_key = BaseModel::optimizeCacheKey($cache_key);
         }
-
-        $cache_key = BaseModel::optimizeCacheKey($cache_key);
 
         $params = $this->getRequestData($cache_key, [
             ["key" => "pagination_limit", "default" => $this->paginationLimit],
@@ -420,8 +422,6 @@ class WebController extends Controller
             "pagination_limit" => $params['pagination_limit']
         ]);
 
-        // d($params['pagination_limit']); exit;
-
         return $builder->paginate($params['pagination_limit']);
     }
 
@@ -430,7 +430,7 @@ class WebController extends Controller
     protected function beforeEdit($model)
     {
         if (BaseModel::tableHaveField($model->getTable(), "is_pre_defined")) {
-            if ($model->is_pre_defined) {
+            if ($model->is_pre_defined) {                
                 abort(ACTION_NOT_PROCEED, "Pre-Defined Record can not be edit");
             }
         }
@@ -522,7 +522,7 @@ class WebController extends Controller
     {
         $method_name = $this->getMethodName();
 
-        if (is_null($prefix)) {
+        if (!$prefix) {
             $prefix = $model->getClassDisplayName();
         }
 
@@ -592,12 +592,12 @@ class WebController extends Controller
         }
     }
 
-    protected function afterDestroy(Model $model, $prefix = null, $msg = null)
+    protected function afterDestroy($model, $prefix = null, $msg = null)
     {
         $request = request();
 
-        if (is_null($prefix)) {
-            $prefix = str_class_name_without_namespace(get_class($model));
+        if (!$prefix) {
+            $prefix = $model->getClassDisplayName();
         }
 
         if (!$msg) {

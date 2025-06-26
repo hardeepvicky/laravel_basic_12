@@ -14,7 +14,8 @@ class FileField extends Component
     public function __construct(
         public String $name,
         public String $label,      
-        public $mandatory = false,        
+        public $mandatory = false,      
+        public $preventCssClassAddToInput = false,  
     )
     {
         //

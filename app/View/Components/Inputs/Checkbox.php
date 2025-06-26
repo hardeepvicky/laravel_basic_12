@@ -14,7 +14,8 @@ class Checkbox extends Component
     public function __construct(
         public String $name,
         public String $label,        
-        public $value = ""
+        public $value = "",
+        public $preventCssClassAddToInput = false,
     )
     {
         //

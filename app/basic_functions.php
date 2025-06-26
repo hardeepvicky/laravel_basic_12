@@ -3,7 +3,9 @@
 use App\Helpers\ConsoleOutput;
 use App\Helpers\DateUtility;
 use App\Helpers\Util;
+use App\Models\Role;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Auth;
 
 function throw_exception($msg)
 {
@@ -850,4 +852,17 @@ function date_get_for_file_name()
     $dt = new DateTime();
 
     return $dt->format("Y-m-d_H-i-s-u");
+}
+
+
+function is_developer_role_login()
+{
+    $auth_user = Auth::user();
+
+    if ($auth_user)
+    {
+        return $auth_user->hasRole(Role::TYPE_DEVELOPER);
+    }
+
+    return false;
 }

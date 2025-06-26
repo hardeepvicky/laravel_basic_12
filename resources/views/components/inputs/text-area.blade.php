@@ -1,8 +1,4 @@
 <?php 
-if (!isset($mandatory)){
-    $mandatory = false;
-} 
-
 if (!isset($value)){
     $value = "";
 } 
@@ -11,7 +7,32 @@ if (!isset($errorName) || empty($errorName)){
     $errorName = $name;
 }
 
-$cls = $attributes->get("class", 'form-control invalid-char');
+if (!isset($mandatory))
+{
+    $mandatory = $attributes->get("required", false);
+}
+
+if (!isset($is_disabled))
+{
+    $is_disabled = $attributes->get("disabled", false);
+}
+
+$my_attributes = [
+    'rows' => 4
+];
+
+if (isset($preventCssClassAddToInput) && $preventCssClassAddToInput) {
+} else {
+    $my_attributes['class'] = 'form-control invalid-char';
+}
+
+if ($mandatory) {
+    $my_attributes['required'] = 'true';
+}
+
+if (!$mandatory && $is_disabled) {
+    $my_attributes['disabled'] = "true";
+}
 ?>
 
 <label class="form-label">
@@ -22,7 +43,7 @@ $cls = $attributes->get("class", 'form-control invalid-char');
     @endif
 </label>
 
-<textarea name="{{ $name }}" <?= $mandatory ? "required" : "" ?> {{ $attributes->merge(['rows' => 4]) }} class="{{ $cls }}" >{{ old($name, $value) }}</textarea>
+<textarea name="{{ $name }}" {{ $attributes->merge($my_attributes) }}>{{ old($name, $value) }}</textarea>
 
 @error($errorName)
     <div class="input-error">{{ $message }}</div>

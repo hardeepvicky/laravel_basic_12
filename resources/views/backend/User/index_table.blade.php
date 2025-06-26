@@ -4,7 +4,7 @@ use App\Helpers\FileUtility;
 ?>
 
 <div class="card" id="page-summary">
-    <div class="card-header">
+    <div class="card-header border-t-info">
         <x-Backend.pagination-links :records="$records" />
     </div>
 
@@ -78,10 +78,10 @@ use App\Helpers\FileUtility;
                                             @endforeach
                                             </ol>
 
-                                            
+                                            @if(is_developer_role_login())
                                             @if(is_array($record->used_in_other_table_created_by))
                                             <hr>
-                                            <h5>This User created records Of Other Modules</h5>
+                                            <h5>This User create records Of Other Modules</h5>
                                             <ol>
                                                 @foreach($record->used_in_other_table_created_by as $arr)                                        
                                                 <li>
@@ -95,7 +95,7 @@ use App\Helpers\FileUtility;
                                             
                                             @if(is_array($record->used_in_other_table_updated_by))
                                             <hr>
-                                            <h5>This User updated records Of Other Modules</h5>
+                                            <h5>This User update records Of Other Modules</h5>
                                             <ol>
                                                 @foreach($record->used_in_other_table_updated_by as $arr)                                        
                                                 <li>
@@ -104,6 +104,7 @@ use App\Helpers\FileUtility;
                                                 </li>
                                                 @endforeach
                                             </ol>
+                                            @endif
                                             @endif
                                         </div>
                                     </div>

@@ -1,5 +1,5 @@
 <div class="card" id="page-summary">
-    <div class="card-header">
+    <div class="card-header border-t-info">
         <x-Backend.pagination-links :records="$records" />
     </div>
 

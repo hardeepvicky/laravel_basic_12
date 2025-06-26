@@ -1,2 +1,2 @@
 @yield('content')
-<script src="/js/backend/ajax.js?<?= CSS_VERSION ?>"></script>
+<script src="{{ asset('js/backend/ajax.js') }}"></script>

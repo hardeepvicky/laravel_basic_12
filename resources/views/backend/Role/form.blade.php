@@ -9,10 +9,7 @@
 
     <x-Backend.form-errors />
 
-    <form action="{{ $form['url'] }}" method="POST" class="">
-        {!! csrf_field() !!}
-        {{ method_field($form['method']) }}
-
+    <x-Form.start action="{{ $form['url'] }}" method="{{ $form['method'] }}" />
         <div class="row">
             <div class="offset-md-2 col-md-8">
                 <div class="card">

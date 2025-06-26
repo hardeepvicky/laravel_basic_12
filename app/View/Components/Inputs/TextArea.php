@@ -15,7 +15,8 @@ class TextArea extends Component
         public String $name,
         public String $label,        
         public $value = "" ,
-        public $mandatory = false,  
+        public $mandatory = false, 
+        public $preventCssClassAddToInput = false, 
         public $errorName = ""      
     )
     {

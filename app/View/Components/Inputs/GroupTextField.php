@@ -18,6 +18,7 @@ class GroupTextField extends Component
         public String $secondaryTextPosition = "first",
         public $value = "",
         public $mandatory = false,
+        public $preventCssClassAddToInput = false,
         public $errorName = ""
     ) {
         //

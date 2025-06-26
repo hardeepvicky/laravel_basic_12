@@ -41,7 +41,7 @@
     </div>
 
     <div class="card">
-        <div class="card-header">
+        <div class="card-header border-t-info">
             <x-backend.pagination-links :records="$records" />
         </div>
 

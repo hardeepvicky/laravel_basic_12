@@ -10,6 +10,9 @@ class Role extends BaseModel
 {
     use HasFactory;
 
+    const TYPE_SYSTEM_ADMIN = "system_admin"; 
+    const TYPE_DEVELOPER = "developer"; 
+
     /**
      * name of table fields which uniquly identify the record
      */
@@ -36,7 +39,7 @@ class Role extends BaseModel
         ],
     ];
 
-    const TYPE_SYSTEM_ADMIN = "system_admin";    
+       
 
     public function userRole()
     {

@@ -1,37 +1,37 @@
 <?php 
-if (!isset($mandatory)){
-    $mandatory = false;
-} 
-
-if (!isset($is_disabled)){
-    $is_disabled = false;
-}
-
 if (!isset($value)){
     $value = "";
-} 
+}
 
-if (!isset($errorName) || empty($errorName)){
+if (!isset($errorName)){
     $errorName = $name;
 }
 
-if ($is_disabled)
+if (!isset($mandatory))
 {
-    $mandatory = false;
+    $mandatory = $attributes->get("required", false);
 }
 
-$attr = "";
-
-if ($mandatory)
+if (!isset($is_disabled))
 {
-    $attr .= ' required="true"';
+    $is_disabled = $attributes->get("disabled", false);
 }
 
-if ($is_disabled)
-{
-    $attr .= ' disabled="true"';
+$my_attributes = [
+];
+
+if (isset($preventCssClassAddToInput) && $preventCssClassAddToInput) {
+} else {
+    $my_attributes['class'] = 'form-control';
 }
 
+if ($mandatory) {
+    $my_attributes['required'] = 'true';
+}
+
+if (!$mandatory && $is_disabled) {
+    $my_attributes['disabled'] = "true";
+}
 ?>
 
 @if(isset($label) && $label)
@@ -43,7 +43,7 @@ if ($is_disabled)
 </label>
 @endif
 
-@php
+<?php
    $value_list = [];
 
    $name_without_square_braces = str_replace("[]", "", $name);
@@ -63,8 +63,9 @@ if ($is_disabled)
         $value_list[] = $v;
    }
 
-@endphp
-<select name="{{ $name }}" {{ $attributes->merge(['class' => 'form-control']) }} {!! $attr !!}>
+?>
+
+<select name="{{ $name }}" {{ $attributes->merge($my_attributes) }}>
     @if (!$attributes->has('multiple')) 
         @if($pleaseSelect)
             <option value="">Please Select</option>

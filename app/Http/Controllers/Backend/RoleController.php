@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers\Backend;
 
+use App\Exceptions\UserException;
 use Illuminate\Http\Request;
 use App\Models\Role;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class RoleController extends BackendController
 {
@@ -15,7 +17,7 @@ class RoleController extends BackendController
     protected $modelClass = Role::class;
 
     public function index()
-    {
+    {   
         $cache_key_prefix = Route::currentRouteName();
 
         $builder = $this->_getBuildeForIndex($cache_key_prefix);

@@ -19,6 +19,7 @@ class DropDown extends Component
         public $mandatory = false,  
         public $is_disabled = false,  
         public $pleaseSelect = true,
+        public $preventCssClassAddToInput = false,
         public $errorName = ""
     )
     {

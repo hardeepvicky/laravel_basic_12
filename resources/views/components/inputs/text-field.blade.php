@@ -1,26 +1,23 @@
-<?php
-if (!isset($mandatory)) {
-    $mandatory = false;
+<?php 
+if (!isset($value)){
+    $value = "";
 }
 
-if (!isset($is_disabled)) {
-    $is_disabled = false;
-}
-
-if (!isset($value)) {
-    $value = '';
-}
-
-if (!isset($errorName) || empty($errorName)) {
+if (!isset($errorName)){
     $errorName = $name;
 }
 
-if ($is_disabled) {
-    $mandatory = false;
+if (!isset($mandatory))
+{
+    $mandatory = $attributes->get("required", false);
+}
+
+if (!isset($is_disabled))
+{
+    $is_disabled = $attributes->get("disabled", false);
 }
 
 $my_attributes = [
-    'type' => 'text',
 ];
 
 if (isset($preventCssClassAddToInput) && $preventCssClassAddToInput) {
@@ -32,10 +29,9 @@ if ($mandatory) {
     $my_attributes['required'] = 'true';
 }
 
-if ($is_disabled) {
-    $my_attributes['disabled'] = true;
+if (!$mandatory && $is_disabled) {
+    $my_attributes['disabled'] = "true";
 }
-
 ?>
 
 @if (isset($label) && $label)

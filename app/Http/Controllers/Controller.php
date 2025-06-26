@@ -7,6 +7,7 @@ use App\Helpers\LaravelExtend;
 use App\Models\SqlLog;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
@@ -186,5 +187,16 @@ abstract class Controller
         $this->saveSqlLog();
 
         return response()->json($response);
+    }
+
+    protected function getAuthUserId() : string
+    {
+        $auth_user = Auth::user();
+        if ($auth_user)
+        {
+            return (string) $auth_user->id;
+        }
+
+        return "";
     }
 }
