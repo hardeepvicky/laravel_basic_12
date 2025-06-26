@@ -24,12 +24,17 @@ if ($is_disabled) {
     $my_attributes['disabled'] = "true";
 }
 
+if (old($name, $value))
+{
+    $my_attributes['checked'] =  "true";
+}
+
 $id = $attributes->get("id", $name);
 ?> 
 
 <label class="form-check">
     @php
-        $attr = old($name, $value) ? 'checked="checked"' : '';
+        
     @endphp
     <input type="hidden" name="{{ $name }}" value="0" />
     <input type="checkbox" name="{{ $name }}" value="1" id="{{ $id }}" {{ $attributes->merge($my_attributes) }} />

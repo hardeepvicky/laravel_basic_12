@@ -105,11 +105,9 @@ class CountryController extends BackendController
 
         $model = new $this->modelClass();
 
-        $rules = array_merge($rules, $model->getUniqueValidationRules());
+        $rules = array_merge_recursive($rules, $model->getUniqueValidationRules());
 
         $messages = $this->_common_validation_messages();
-
-        $messages = array_merge($messages, []);
 
         $validatedData = $request->validate($rules, $messages);
 
@@ -158,7 +156,7 @@ class CountryController extends BackendController
 
         $rules = $this->_common_validation_rules();
 
-        $rules = array_merge($rules, $model->getUniqueValidationRules());
+        $rules = array_merge_recursive($rules, $model->getUniqueValidationRules());
 
         $messages = $this->_common_validation_messages();
 

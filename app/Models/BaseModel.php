@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Helpers\FileUtility;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -13,10 +14,9 @@ class BaseModel extends Model implements BaseModelInterface
 {
     use StorageTrait, CacheTrait;
 
-    /**
-     * name of table fields which uniquly identify the record
-     */
     protected static array $unique_fields = [];
+
+    protected static array $file_fields = [];
 
     /**
      * set extra relationship array to overcome problem of accidential delete
@@ -78,6 +78,11 @@ class BaseModel extends Model implements BaseModelInterface
         self::deleted(function ($model) {
             $model->forgotCache();
         });
+    }
+
+    public function getFileFields()
+    {
+        return static::$file_fields;
     }
 
     public function beforeSave()

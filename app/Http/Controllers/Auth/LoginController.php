@@ -72,6 +72,17 @@ class LoginController extends WebController
     {
         $guard = $this->guard();
 
+        $form_fields = $request->only(["email", "password"]);
+
+        // d($form_fields, true);
+
+        if (filter_var($form_fields['email'], FILTER_VALIDATE_EMAIL)) {
+            
+        } else {
+            $form_fields['mobile'] = $form_fields['email'];
+            unset($form_fields['email']);
+        }
+
         if (!$guard->once($request->only(["email", "password"]))) {
 
             //login failed

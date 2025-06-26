@@ -10,6 +10,7 @@ use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class UserController extends BackendController
 {
@@ -24,6 +25,8 @@ class UserController extends BackendController
         $builder = $this->_getBuildeForIndex($cache_key_prefix);
 
         $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
+
+        // d($records->toArray(), true);
 
         $role_list = Role::getListCache();
 
@@ -80,9 +83,11 @@ class UserController extends BackendController
             'method' => 'POST',
         ];
 
+        $is_add_form = true;
+
         $this->_set_for_create_and_edit($model);
-        $this->setForView(compact("model", 'form'));
-        return $this->view("add");
+        $this->setForView(compact("model", 'form', "is_add_form"));
+        return $this->view("form");
     }
 
     private function _set_for_create_and_edit($model)
@@ -101,9 +106,12 @@ class UserController extends BackendController
     private function _common_validation_rules()
     {
         return [
-            'name' => 'required',
-            'roles' => "required",
+            'name' => ['required'],
+            'email' => ['required'],
+            'mobile' => ['nullable'],
+            'roles' => ["required"],
             "dont_send_email" => "",
+            "profile_image" => "",
             "is_active" => "",
         ];
     }
@@ -118,13 +126,18 @@ class UserController extends BackendController
         $rules = $this->_common_validation_rules();
         $messages = $this->_common_validation_messages();
 
-        $rules = array_merge($rules, [
+        $model = new $this->modelClass();
+
+        $rules = array_merge_recursive($rules, $model->getUniqueValidationRules());
+
+        // d($rules, true);
+
+        $rules = array_merge_recursive($rules, [
             'password' => 'required|min:5',
             'password_confirm' => ['required', 'same:password'],
-            'email' => "required|email|unique:users",
         ]);
 
-        $messages = array_merge($messages, [
+        $messages = array_merge_recursive($messages, [
             'confirm_password.same' => 'Confirm password is not matched with password',
             'email.email' => 'Email must be valid email address.',
             'email.unique' => 'Email already exist',
@@ -136,6 +149,11 @@ class UserController extends BackendController
 
         DB::beginTransaction();
         try {
+
+            $validatedData = $this->_saveProfilePhoto(new $this->modelClass(), $validatedData);
+
+            // d($validatedData); exit;
+
             $save_data = $validatedData;
 
             unset($save_data['roles']);
@@ -168,6 +186,7 @@ class UserController extends BackendController
     public function edit($id)
     {
         $model = $this->modelClass::with("userRole")->findOrFail($id);
+        $model->afterFind();
 
         $this->beforeEdit($model);
 
@@ -176,11 +195,13 @@ class UserController extends BackendController
             'method' => 'PUT',
         ];
 
+        $is_add_form = false;
+
         $this->_set_for_create_and_edit($model);
 
-        $this->setForView(compact("model", "form"));
+        $this->setForView(compact("model", "form", "is_add_form"));
 
-        return $this->view("edit");
+        return $this->view("form");
     }
 
     public function update($id, Request $request)
@@ -192,11 +213,7 @@ class UserController extends BackendController
         $rules = $this->_common_validation_rules();
         $messages = $this->_common_validation_messages();
 
-        $rules = array_merge($rules, [
-            'name' => 'required',
-            'email' => "required|email|unique:users,email," . $model->id,
-            'profile_image' => ''
-        ]);
+        $rules = array_merge($rules, $model->getUniqueValidationRules());
 
         $messages = array_merge($messages, [
             'email.email' => 'Email must be valid email address.',
@@ -208,20 +225,9 @@ class UserController extends BackendController
         DB::beginTransaction();
 
         try {
-            $validatedData['profile_image'] = trim($validatedData['profile_image']);
-            if ($validatedData['profile_image']) {
-                $ext = pathinfo($validatedData['profile_image'], PATHINFO_EXTENSION);
-                $dest = laravel_constant("path.user") . $id . "." . $ext;
+            $validatedData = $this->_saveProfilePhoto($model, $validatedData);
 
-                $new_file = FileUtility::move($validatedData['profile_image'], $dest, TRUE);
-                if ($new_file === false) {
-                    throw_exception("Fail To move file from temp folder to users folder");
-                }
-
-                $validatedData['profile_image'] = $new_file . "?" . time();
-            } else {
-                unset($validatedData['profile_image']);
-            }
+            // d($validatedData, true);
 
             $save_data = $validatedData;
             unset($save_data['roles']);
@@ -243,6 +249,42 @@ class UserController extends BackendController
 
             return back()->with('fail', $ex->getMessage())->withInput();
         }
+    }
+
+    private function _saveProfilePhoto($model, array $validatedData)
+    {
+        $validatedData['profile_image'] = trim($validatedData['profile_image']);
+        if ($validatedData['profile_image']) {
+            $ext = pathinfo($validatedData['profile_image'], PATHINFO_EXTENSION);
+
+            $disk = $model->getStorageDisk();
+            $path = $model->getStoragePath();
+            if ($model->id)
+            {
+                $filename = $model->id . "." . $ext;
+            }
+            else
+            {
+                $filename = $model->getNextId() . "." . $ext;
+            }
+
+            $dest = $disk->path($path . $filename);
+
+            $new_file = FileUtility::move($validatedData['profile_image'], $dest, TRUE);
+
+            if ($new_file === false) {
+                throw_exception("Fail To move file from temp folder to users folder");
+            }
+
+            $new_file = pathinfo($new_file, PATHINFO_BASENAME);
+
+            $validatedData['profile_image'] = $path . $new_file;
+
+        } else {
+            unset($validatedData['profile_image']);
+        }
+
+        return $validatedData;
     }
 
     public function destroy($id)

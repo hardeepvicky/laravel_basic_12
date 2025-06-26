@@ -422,7 +422,14 @@ class WebController extends Controller
             "pagination_limit" => $params['pagination_limit']
         ]);
 
-        return $builder->paginate($params['pagination_limit']);
+        $records = $builder->paginate($params['pagination_limit']);
+
+        foreach($records as $record)
+        {
+            $record->afterFind();
+        }
+
+        return $records;
     }
 
     protected function beforeCreate() {}

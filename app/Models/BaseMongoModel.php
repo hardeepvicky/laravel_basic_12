@@ -44,6 +44,8 @@ class BaseMongoModel extends Model implements BaseModelInterface
             if ($auth_user) {
                 $model->created_by = $auth_user->id;
             }
+
+            $model->beforeSave();
         });
 
         self::created(function ($model) {
@@ -55,6 +57,8 @@ class BaseMongoModel extends Model implements BaseModelInterface
             if ($auth_user) {
                 $model->updated_by = $auth_user->id;
             }
+
+            $model->beforeSave();
         });
 
         self::updated(function ($model) {
@@ -79,6 +83,19 @@ class BaseMongoModel extends Model implements BaseModelInterface
                 }
             }
         });
+    }
+
+    public function beforeSave()
+    {
+        foreach ($this->getAttributes() as $field => $value) {
+            if (is_null($value)) {
+                continue;
+            }
+
+            if (is_string($value) && strlen($value) > 0) {
+                $this->{$field} = utf8_encode($value);
+            }
+        }
     }
 
     public function getFileFields()

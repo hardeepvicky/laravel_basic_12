@@ -73,8 +73,7 @@ $page_header_links = [
                     </div>
                     <div class="row">
                         <div class="col-lg-6">
-                            <div class="form-group mb-3 checkbox-checked">
-                                <x-Inputs.checkbox name="dont_send_email" label="Don't Send Email" :value="$model->dont_send_email" />
+                            <div class="form-group mb-3 checkbox-checked">                                
                                 <x-Inputs.checkbox name="is_active" label="Active" :value="$model->is_active" />
                             </div>
                         </div>

@@ -11,11 +11,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Unique;
 use Laravel\Sanctum\HasApiTokens;
 
-class User extends Authenticatable
+class User extends Authenticatable implements BaseModelInterface
 {
     use HasApiTokens, HasFactory, Notifiable, StorageTrait, CacheTrait;
 
@@ -27,6 +29,8 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'mobile',
+        'whatsapp_mobile',
         'password',
         'profile_image',
         'dont_send_email',
@@ -46,6 +50,10 @@ class User extends Authenticatable
     protected $appends = [
         'display_name',
     ];
+
+    protected static array $unique_fields = ["email"];
+
+    protected static array $file_fields = ["profile_image"];
 
     /**
      * The attributes that should be cast.
@@ -112,6 +120,24 @@ class User extends Authenticatable
         });
     }
 
+    public function afterFind()
+    {
+        $fileUtility = new FileUtility(static::getStorageDisk());
+
+        foreach ($this->getFileFields() as $field) {
+            if (isset($this->{$field}) && $this->{$field}) {
+                $field_url_field = $field . "_url";
+
+                $this->{$field_url_field} = $fileUtility->getUrl($this->{$field});
+            }
+        }
+    }
+
+    public function getFileFields()
+    {
+        return static::$file_fields;
+    }
+
     protected function getDisplayNameAttribute()
     {
         return $this->name;
@@ -130,6 +156,26 @@ class User extends Authenticatable
     public function roles()
     {
         return $this->belongsToMany(Role::class, UserRole::class);
+    }
+
+    public function getUniqueValidationRules()
+    {
+        $field_rules = [
+            "email" => [Rule::unique($this->connection . "." . $this->getTable(), "email")],
+            "mobile" => [Rule::unique($this->connection . "." . $this->getTable(), "mobile")],
+        ];
+
+        if ($this->id) {
+            foreach ($field_rules as $field => $rules) {
+                foreach ($rules as $rule) {
+                    if ($rule instanceof Unique) {
+                        $rule->ignore($this->id, $this->primaryKey);
+                    }
+                }
+            }
+        }
+
+        return $field_rules;
     }
 
     public function isRquireOTPVerificationOnLogin()
@@ -177,6 +223,83 @@ class User extends Authenticatable
         return false;
     }
 
+    public function getNextId()
+    {
+        $table = $this->getTable();
+        $statement = DB::select("SHOW TABLE STATUS LIKE '" . $table . "'");
+        $nextId = $statement[0]->Auto_increment;
+
+        return $nextId;
+    }
+
+    public function insertOrUpdate(array $data, &$is_insert = null, &$is_update = null)
+    {
+        $model = $this->getUniqueId($data);
+
+        if ($model) {
+            $model->fill($data);
+            if ($model->isDirty()) {
+                if ($model->save()) {
+                    $is_update = true;
+                } else {
+                    $is_update = false;
+                    throw new \Exception("Fail To Save");
+                }
+            }
+        } else {
+            $model = static::create($data);
+
+            if ($model) {
+                $is_insert = true;
+            } else {
+                $is_insert = false;
+                return null;
+            }
+        }
+
+        return $model->id;
+    }
+
+    public function insertIgnoreIfExist(array $data)
+    {
+        $record = $this->getUniqueId($data);
+
+        if (!$record) {
+            $record = static::create($data);
+        }
+
+        return $record->id;
+    }
+
+    public function getUniqueId(array $data)
+    {
+        if (!static::$unique_fields) {
+            throw_exception("unique_fields is not set yet");
+        }
+
+        $conditions = [];
+        foreach (static::$unique_fields as $unique_field) {
+            if (!isset($data[$unique_field])) {
+                throw_exception("field $unique_field missing in argument array");
+            }
+
+            $conditions[] = [$unique_field, '=', self::parseValueBeforeUseInDBQuery($unique_field, $data[$unique_field])];
+        }
+
+        $count = static::where($conditions)->count();
+
+        if ($count == 0) {
+            return false;
+        }
+
+        if ($count > 1) {
+            throw_exception("more than 1 records found");
+        }
+
+        $record = static::where($conditions)->first(["id"]);
+
+        return $record;
+    }
 
     public function activate()
     {
@@ -194,6 +317,20 @@ class User extends Authenticatable
 
         $this->is_active = 0;
         $this->save();
+    }
+
+    public function getClassDisplayName()
+    {
+        $class_name = static::classDisplayName();
+
+        return $class_name;
+    }
+
+    public static function classDisplayName(): string
+    {
+        $class_name = str_class_name_to_human_text(static::class);
+
+        return $class_name;
     }
 
     public static function fetchList(Builder $builder, String $key_field, String $value_field, String $table_name)

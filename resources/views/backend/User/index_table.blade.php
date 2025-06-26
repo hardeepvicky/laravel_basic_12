@@ -1,8 +1,3 @@
-<?php
-
-use App\Helpers\FileUtility;
-?>
-
 <div class="card" id="page-summary">
     <div class="card-header border-t-info">
         <x-Backend.pagination-links :records="$records" />
@@ -20,6 +15,7 @@ use App\Helpers\FileUtility;
                         <th><?= sortable_anchor('id', 'ID') ?></th>
                         <th><?= sortable_anchor('name', 'Name') ?></th>
                         <th><?= sortable_anchor('email', 'Email') ?></th>
+                        <th>Mobile</th>
                         <th>Profile Photo</th>
                         <th><?= sortable_anchor('is_active', 'Active / De-Active') ?></th>
                         <th>Actions</th>
@@ -31,10 +27,11 @@ use App\Helpers\FileUtility;
                         <td>{{ $record->id }}</td>
                         <td>{{ $record->name }}</td>
                         <td>{{ $record->email }}</td>
+                        <td>{{ $record->mobile }}</td>
                         <td>
-                            @if($record->profile_image)
-                            <a class="fancybox" data-fancybox="group-{{ $record->id }}" href="{{ FileUtility::get($record->profile_image) }}">
-                                <img class="img-thumbnail rounded-circle small-img" src="{{ FileUtility::get($record->profile_image) }}" />
+                            @if($record->profile_image_url)
+                            <a class="fancybox" data-fancybox="group-{{ $record->id }}" href="{{ $record->profile_image_url }}">
+                                <img class="img-thumbnail rounded-circle small-img" src="{{ $record->profile_image_url }}" />
                             </a>
                             @endif
                         </td>
