@@ -49,7 +49,7 @@ return [
 
         'public_external' => [
             'driver' => 'local',
-            'root' => env('EXTERNAL_STORAGE_PATH', false),
+            'root' => env('EXTERNAL_STORAGE_PATH', storage_path('app/public')),
             'url' => env('APP_URL') . '/storage',
             'visibility' => 'public',
             'throw' => false,

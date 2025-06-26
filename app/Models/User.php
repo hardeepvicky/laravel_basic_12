@@ -121,13 +121,13 @@ class User extends Authenticatable
         });
 
         self::updated(function ($model) {
-            static::forgotCache();
+            $model->forgotCache();
         });
 
         self::deleting(function ($model) {});
 
         self::deleted(function ($model) {
-            static::forgotCache();
+            $model->forgotCache();
         });
     }
 
