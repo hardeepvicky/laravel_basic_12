@@ -16,4 +16,6 @@ if (!defined('IT_COMPANY_NAME')) {
 
     define("DEFAULT_DISK", "public_external");
     define("NOT_FOUND_IMAGE_PATH", "img/not-found.png");
+
+    define("ICON_SUMMARY_DELETE", "icon-trash");
 }

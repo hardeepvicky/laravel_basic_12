@@ -62,6 +62,8 @@ class PermissionController extends BackendController
 
             $data = $request->all();
 
+            // d($data);
+
             $role = Role::findOrFail($data['role_id']);
 
             // d($sections);
@@ -69,16 +71,10 @@ class PermissionController extends BackendController
             $choosen_route_list = [];
 
             // dd($data['data']);
-            foreach ($data['data'] as $section_name => $sub_sections) {
-                foreach ($sub_sections as $sub_name => $data_actions) {
-                    if (isset($sections[$section_name][$sub_name])) {
-                        foreach ($data_actions as $action_name) {
-                            if (isset($sections[$section_name][$sub_name][$action_name])) {
-                                $choosen_route_list = array_merge($choosen_route_list, $sections[$section_name][$sub_name][$action_name]);
-                            }
-                        }
-                    }
-                }
+            foreach ($data['route_keys'] as $route_key) {
+                $routes = SectionRoutes::getRoutesFromKey($route_key, $sections);
+
+                $choosen_route_list = array_merge($routes, $choosen_route_list);
             }
 
             $choosen_route_list = array_unique($choosen_route_list);
@@ -135,15 +131,11 @@ class PermissionController extends BackendController
         $sections = SectionRoutes::get();
 
         foreach ($sections as $section_name => $sub_sections) {
-            // d([
-            //     $section_name, is_string($section_name), is_numeric($section_name)
-            // ]);
-
             foreach ($sub_sections as $sub_section_name => $actions) {
-                foreach ($actions as $action_name => $route_list) {
+                foreach ($actions as $action_name => $action_arr) {
 
                     $is_checked = false;
-                    foreach ($route_list as $route_name) {
+                    foreach ($action_arr['routes'] as $route_name) {
                         if (in_array($route_name, $saved_route_list)) {
                             $is_checked = true;
                         }

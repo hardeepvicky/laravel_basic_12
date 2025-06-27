@@ -45,43 +45,44 @@
                             $i++;
                             $j++;
                             $a++;
-                            
+
                             $tr_cls = $a == 1 ? 'first-row' : '';
                         @endphp
                         <tr class="{{ $tr_cls }}">
                             <td class="text-center">{{ $i }}</td>
                             <?php if (!is_numeric($section_group)): ?>
-                            <td>                                
+                            <td>
                                 <?php if ($j == 1): ?>
-                                    <label class="pointer">
-                                        <input type="checkbox" class="chk-select-all section_group_parent"
-                                            data-sr-chkselect-children="input.sub_section-<?= $section_group_str ?>">
-                                        <b><?= $section_group ?></b>
-                                    </label>
-                                <?php else: ?>                  
-                                    <?= $section_group ?>                  
-                                <?php endif; ?>                                
+                                <label class="pointer">
+                                    <input type="checkbox" class="chk-select-all section_group_parent"
+                                        data-sr-chkselect-children="input.sub_section-<?= $section_group_str ?>">
+                                    <b><?= $section_group ?></b>
+                                </label>
+                                <?php else: ?>
+                                <?= $section_group ?>
+                                <?php endif; ?>
                             </td>
                             <?php endif; ?>
                             <td>
                                 <?php if ($a == 1): ?>
-                                    <label class="pointer">
-                                        <input type="checkbox" class="chk-select-all section_sub_group_parent sub_section-<?= $section_group_str ?>"
-                                            data-sr-chkselect-children="input.action-<?= $section_group_str . $section_sub_group_str ?>">
-                                        <b><?= $section_sub_group ?></b>
-                                    </label>
+                                <label class="pointer">
+                                    <input type="checkbox"
+                                        class="chk-select-all section_sub_group_parent sub_section-<?= $section_group_str ?>"
+                                        data-sr-chkselect-children="input.action-<?= $section_group_str . $section_sub_group_str ?>">
+                                    <b><?= $section_sub_group ?></b>
+                                </label>
                                 <?php else: ?>
-                                    <?= $section_sub_group ?>
+                                <?= $section_sub_group ?>
                                 <?php endif; ?>
                             </td>
                             <?php if (is_numeric($section_group)): ?>
-                                <td></td>
+                            <td></td>
                             <?php endif; ?>
                             <td>
                                 <label class="pointer">
                                     <input type="checkbox" <?= $action_arr['is_checked'] ? 'checked' : '' ?>
                                         class="action-<?= $section_group_str . $section_sub_group_str ?> chk-action"
-                                        name="data[<?= $section_group ?>][<?= $section_sub_group ?>][]" value="<?= $action_name ?>" />
+                                        name="route_keys[]" value="<?= $action_arr['list_key'] ?>" />
                                     <?= $action_name ?>
                                 </label>
                             </td>
@@ -103,7 +104,8 @@
     <script type="text/javascript">
         $(document).ready(function() {
             $("#select-all").change(function() {
-                $("input.section_group_parent, input.section_sub_group_parent, input.chk-action").prop("checked", $(this).prop("checked"));                
+                $("input.section_group_parent, input.section_sub_group_parent, input.chk-action").prop(
+                    "checked", $(this).prop("checked"));
             });
         });
     </script>

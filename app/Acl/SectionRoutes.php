@@ -124,8 +124,12 @@ class SectionRoutes
 
         foreach ($sections as $section_name => $sub_sections) {
             foreach ($sub_sections as $sub_section_name => $actions) {
-                foreach ($actions as $action_name => $route_list) {
-                    $key = self::getListKey($section_name, $sub_section_name, $action_name);
+                foreach ($actions as $action_name => $action_arr) {
+                    if (isset($action_arr['list_key'])) {
+                        $key = $action_arr['list_key'];
+                    } else {
+                        $key = self::getListKey($section_name, $sub_section_name, $action_name);
+                    }
 
                     if (array_key_exists($key, $section_list)) {
                         throw new UserException("duplicate key generated for section_list");
@@ -137,6 +141,29 @@ class SectionRoutes
         }
 
         return $section_list;
+    }
+
+    public static function getRoutesFromKey($key, $sections = null)
+    {
+        if (!$sections) {
+            $sections = self::get();
+        }
+
+        if (!is_array($sections)) {
+            throw new UserException("argument 1 should be array", UserException::ERROR_GENERAL);
+        }
+
+        foreach ($sections as $section_name => $sub_sections) {
+            foreach ($sub_sections as $sub_section_name => $actions) {
+                foreach ($actions as $action_name => $action_arr) {
+                    if (isset($action_arr['list_key']) && $action_arr['list_key'] == $key) {
+                        return $action_arr['routes'];
+                    }
+                }
+            }
+        }
+
+        return [];
     }
 
 

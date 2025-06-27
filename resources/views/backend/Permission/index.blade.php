@@ -54,7 +54,7 @@
                                 <td>
                                     @if ($record['can_be_delete'])
                                         <button class="btn btn-danger delete-btn" data-id="{{ $record['id'] }}">
-                                            <i class="bx bx-trash label-icon"></i>
+                                            <i class="<?= ICON_SUMMARY_DELETE ?>"></i>
                                         </button>
                                         <div class="spinner-border text-primary m-1"
                                             style="vertical-align:middle; display:none">

@@ -181,9 +181,11 @@ class AccessControl
         ])->get()->toArray();
 
         foreach ($role_route_records as $k => $record) {
-            $records[$record->routeName->name] = [
+
+            $records[$record['route_name']['name']] = [
                 "can_be_delete" => true,
-                "role" => $record->toArray()
+                "role" => $record['role'],
+                "id" => $record['id']
             ];
         }
 
