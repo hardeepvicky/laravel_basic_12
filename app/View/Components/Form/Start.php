@@ -14,15 +14,13 @@ class Start extends Component
      */
     public function __construct(
         public String $action,
-        public String $method = "GET",        
+        public String $method = "GET",
+        public $preventCssClassAdd = false,
     ) {
-        
-        if (in_array($method, ["GET"]))
-        {
+
+        if (in_array($method, ["GET"])) {
             $this->form_method = $method;
-        }
-        else
-        {
+        } else {
             $this->form_method = "POST";
         }
     }

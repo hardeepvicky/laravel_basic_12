@@ -65,23 +65,16 @@ class BaseMongoModel extends Model implements BaseModelInterface
             $model->forgotCache();
         });
 
-        self::deleting(function ($model) {});
+        self::deleting(function ($model) {
+            $model->beforeSave();
+        });
 
         self::deleted(function ($model) {
             $model->forgotCache();
         });
 
         self::retrieved(function ($model) {
-
-            $fileUtility = new FileUtility(static::getStorageDisk());
-
-            foreach ($model->getFileFields() as $field) {
-                if (isset($model->{$field}) && $model->{$field}) {
-                    $field_url_field = $field . "_url";
-
-                    $model->{$field_url_field} = $fileUtility->getUrl($model->{$field});
-                }
-            }
+            $model->afterFind();
         });
     }
 
@@ -94,6 +87,21 @@ class BaseMongoModel extends Model implements BaseModelInterface
 
             if (is_string($value) && strlen($value) > 0) {
                 $this->{$field} = utf8_encode($value);
+            }
+        }
+    }
+
+    public function beforeDelete() {}
+
+    public function afterFind()
+    {
+        $fileUtility = new FileUtility(static::getStorageDisk());
+
+        foreach ($this->getFileFields() as $field) {
+            if (isset($this->{$field}) && $this->{$field}) {
+                $field_url_field = $field . "_url";
+
+                $this->{$field_url_field} = $fileUtility->getUrl($this->{$field});
             }
         }
     }

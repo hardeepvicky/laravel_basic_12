@@ -6,7 +6,10 @@
 $(document).ready(function () {
     $.loader.init();
 
-    $("form").find("div.pristine-error").parents(".form-group").addClass("has-danger");
+    $("form")
+        .find("div.pristine-error")
+        .parents(".form-group")
+        .addClass("has-danger");
 
     $("input[type='checkbox'].chk-select-all").chkSelectAll();
 
@@ -33,11 +36,10 @@ $(document).ready(function () {
         dateFormat: "d-M-Y h:i K",
     });
 
-
-    $('.time-picker').flatpickr({
+    $(".time-picker").flatpickr({
         noCalendar: true,
         enableTime: true,
-        dateFormat: 'h:i K'
+        dateFormat: "h:i K",
     });
 
     // flatpickr(".date-month-picker", {
@@ -56,20 +58,22 @@ $(document).ready(function () {
 
     $(".cascade-drop-down").cascade();
 
-
-
     /** -------------------------------------------------------- */
 
-
-
-    $('input.invalid-char').on('keypress', function (event) {
-        var regex = new RegExp("^[a-zA-Z0-9~!@#$%^*()<>{}_.,/\+\-\\\\]+$");
-        var key = String.fromCharCode(!event.charCode ? event.which : event.charCode);
+    $("input.invalid-char").on("keypress", function (event) {
+        var regex = new RegExp("^[a-zA-Z0-9~!@#$%^*()<>{}_.,/+-\\\\]+$");
+        var key = String.fromCharCode(
+            !event.charCode ? event.which : event.charCode
+        );
         key = key.trim();
 
         var error_span = $(this).parent().find(".error-message");
         if (error_span.length == 0) {
-            $(this).parent().append('<span class="error-message">&#9679 Invalid Character</span>');
+            $(this)
+                .parent()
+                .append(
+                    '<span class="error-message">&#9679 Invalid Character</span>'
+                );
             var error_span = $(this).parent().find(".error-message");
         }
 
@@ -95,7 +99,7 @@ $(document).ready(function () {
                 showCancelButton: true,
                 confirmButtonColor: constants.swal.button.confirm_color,
                 cancelButtonColor: constants.swal.button.cancel_color,
-                confirmButtonText: "Yes, delete it!"
+                confirmButtonText: "Yes, delete it!",
             }).then(function (e) {
                 if (e.value) {
                     _form.attr("data-confirm", 1);
@@ -107,10 +111,9 @@ $(document).ready(function () {
         }
     });
 
-
     $(document).on("submit", "form.summary_search", function () {
         $(this).ajaxSubmit({
-            target: '#index_table',
+            target: "#index_table",
             beforeSubmit: function (formData, jqForm, options) {
                 $.loader.show();
             },
@@ -119,7 +122,7 @@ $(document).ready(function () {
             },
             error: function () {
                 $.loader.hide();
-            }
+            },
         });
 
         return false;
@@ -132,38 +135,50 @@ $(document).ready(function () {
 
         _form.find("input[name='is_sort_clear']").val(1);
 
-        var v = _form.find(".pagination_limit:first").find("option:first").val();
+        var v = _form
+            .find(".pagination_limit:first")
+            .find("option:first")
+            .val();
         _form.find(".pagination_limit").val(v);
 
         _form.trigger("submit");
     });
 
-    $(document).on("change", "form.summary_search select.pagination_limit", function () {
-        var _form = $(this).closest("form");
-        _form.trigger("submit");
-    });
+    $(document).on(
+        "change",
+        "form.summary_search select.pagination_limit",
+        function () {
+            var _form = $(this).closest("form");
+            _form.trigger("submit");
+        }
+    );
 
-    $("#index_table").on("click", ".pagination a.page-link, a.sortable", function () {
+    $("#index_table").on(
+        "click",
+        ".pagination a.page-link, a.sortable",
+        function () {
+            var href = $(this).attr("href");
+            $.loader.show();
 
-        var href = $(this).attr("href");
-        $.loader.show();
+            $("#index_table").load(href, function () {
+                $.loader.hide();
+            });
 
-        $("#index_table").load(href, function () {
-            $.loader.hide();
-        });
-
-        return false;
-    });
+            return false;
+        }
+    );
 
     $(document).on("click", "a.activate", function () {
-
         var _this = $(this).parent();
         var href = $(this).attr("href");
 
         ajaxGetJson(href, function (response) {
             var html = '<span class="badge bg-success">Active</span>';
-            html += '<br/>'
-            html += '<a class="de_activate" href="' + response['url'] + '">De-Activate</a>';
+            html += "<br/>";
+            html +=
+                '<a class="de_activate" href="' +
+                response["url"] +
+                '">De-Activate</a>';
             _this.html(html);
         });
 
@@ -171,14 +186,16 @@ $(document).ready(function () {
     });
 
     $(document).on("click", "a.de_activate", function () {
-
         var _this = $(this).parent();
         var href = $(this).attr("href");
 
         ajaxGetJson(href, function (response) {
             var html = '<span class="badge bg-danger">De-Active</span>';
-            html += '<br/>'
-            html += '<a class="activate" href="' + response['url'] + '">Activate</a>';
+            html += "<br/>";
+            html +=
+                '<a class="activate" href="' +
+                response["url"] +
+                '">Activate</a>';
             _this.html(html);
         });
 
@@ -186,7 +203,6 @@ $(document).ready(function () {
     });
 
     $(document).on("click", "a.confirm", function () {
-
         var _this = $(this).parent();
         var href = $(this).attr("href");
         var msg = $(this).data("msg");
@@ -194,10 +210,8 @@ $(document).ready(function () {
 
         confirmDialog(msg, function () {
             window.location.href = href;
-        })
+        });
 
         return false;
     });
 });
-
-

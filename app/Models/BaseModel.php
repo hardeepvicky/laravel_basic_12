@@ -100,6 +100,8 @@ class BaseModel extends Model implements BaseModelInterface
 
     public function beforeDelete() {}
 
+    public function afterFind() {}
+
     public static function getTableInfo($table_name)
     {
         if (!isset(static::$tableInfo[$table_name])) {

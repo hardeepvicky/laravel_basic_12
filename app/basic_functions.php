@@ -847,6 +847,16 @@ function str_path_normalize_to_save_to_data_base($path)
     return $path;
 }
 
+function str_normalize_for_array_key($str)
+{
+    $str = str_convert_multi_space_to_single_space($str);
+    $str = str_replace(" ", "-", $str);
+    $str = preg_replace("/[^a-zA-Z0-9.-]/", "", $str);
+    $str = trim($str);
+
+    return $str;
+}
+
 function date_get_for_file_name()
 {
     $dt = new DateTime();
@@ -859,8 +869,7 @@ function is_developer_role_login()
 {
     $auth_user = Auth::user();
 
-    if ($auth_user)
-    {
+    if ($auth_user) {
         return $auth_user->hasRole(Role::TYPE_DEVELOPER);
     }
 

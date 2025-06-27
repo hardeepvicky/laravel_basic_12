@@ -23,126 +23,29 @@ class PermissionController extends BackendController
         ], true);
 
         $section_conditions = $this->getConditions(Route::currentRouteName() . "-section", [
-            ["field" => "section_name", "type" => "int", "view_field" => "section_name"],
-            ["field" => "action_name", "type" => "int", "view_field" => "action_name"],
+            ["field" => "section_list_key", "type" => "", "view_field" => "section_list_key"],
         ], true);
+
+        // d($section_conditions);
 
         $sections = SectionRoutes::get();
 
+        $section_list = SectionRoutes::getList($sections);
+
         if ($conditions || $section_conditions) {
 
-            $records = RoleRouteName::where($conditions)->with([
-                "role" => function ($query) {
-                    $query->select(["id", "name", "code"]);
-                },
-                "routeName" => function ($query) {
-                    $query->select(["id", "name"]);
-                }
-            ])->get()->toArray();
+            $role_id_list = isset($conditions['role_id']) && $conditions['role_id'] ? [$conditions['role_id']] : [];
 
-            //d($section_conditions); exit;
-
-
-
-
-            foreach ($records as $k => $record) {
-                if (isset($record['role']) && isset($record['route_name'])) {
-
-                    $records[$k]['section'] = "Section is not set in SectionRoutes.php";
-                    $records[$k]['can_be_delete'] = true;
-
-                    if (in_array($record['route_name']['name'], SectionRoutes::ALLOW_ROUTES_FOR_ANY_LOGIN_USER)) {
-                        $records[$k]['can_be_delete'] = false;
-                        $records[$k]['role']['name'] = "Allow For All Login User";
-                    }
-
-                    if ($record['role']['code'] == Role::TYPE_SYSTEM_ADMIN && in_array($record['route_name']['name'], SectionRoutes::ALLOW_ROUTES_FOR_SYSTEM_ADMIN)) {
-                        $records[$k]['can_be_delete'] = false;
-                        $records[$k]['role']['name'] = "Allow For All System Admin";
-                    }
-
-                    foreach ($sections as $section_name => $sub_sections) {
-                        foreach ($sub_sections as $sub_section_name => $actions) {
-                            foreach ($actions as $action_name => $route_list) {
-                                if (in_array($record['route_name']['name'], $route_list)) {
-
-                                    $name = $sub_section_name;
-                                    if (!is_numeric($section_name)) {
-                                        $name = $section_name . " | " . $sub_section_name;
-                                    }
-
-                                    $records[$k]['section'] = $name;
-
-                                    $records[$k]['action'] = $action_name;
-                                }
-                            }
-                        }
-                    }
-
-                    if (isset($section_conditions['section_name']) && $section_conditions['section_name'] != $records[$k]['section']) {
-                        unset($records[$k]);
-                    }
-
-                    if (isset($section_conditions['action_name']) && $section_conditions['action_name'] != $records[$k]['action']) {
-                        unset($records[$k]);
-                    }
-                } else {
-                    unset($records[$k]);
-                }
-            }
+            $records = AccessControl::getAllowedRoutes($role_id_list, $section_conditions['section_list_key'] ?? null);
 
             usort($records, function ($a, $b) {
-                return strcmp($a['role']["name"], $b['role']["name"]);
+                return strcmp($a["role"]['name'], $b['role']["name"]);
             });
-
-            foreach (SectionRoutes::ALLOW_ROUTES_FOR_ANY_LOGIN_USER as $route_name) {
-                $records[] = [
-                    'section' => '',
-                    'action' => $route_name,
-                    'can_be_delete' => false,
-                    'role' => [
-                        'name' => 'Allow For All Login User'
-                    ]
-                ];
-            }
-
-            //d($conditions); exit;
-            if ($conditions && isset($conditions["role_id"]) && $conditions["role_id"]) {
-                $role = Role::findOrFail($conditions["role_id"]);
-                if ($role->code) {
-                    foreach (SectionRoutes::ALLOW_ROUTES_FOR_SYSTEM_ADMIN as $route_name) {
-                        $records[] = [
-                            'section' => '',
-                            'action' => $route_name,
-                            'can_be_delete' => false,
-                            'role' => [
-                                'name' => 'Allow For All System Admin User'
-                            ]
-                        ];
-                    }
-                }
-            }
-
 
             $this->setForView(compact("records"));
         }
 
         $role_list = Role::getList();
-
-        $section_list = [];
-
-        foreach ($sections as $section_name => $sub_sections) {
-            foreach ($sub_sections as $sub_section_name => $actions) {
-                foreach ($actions as $action_name => $route_list) {
-                    $name = $sub_section_name;
-                    if (!is_numeric($section_name)) {
-                        $name = $section_name . " | " . $sub_section_name;
-                    }
-
-                    $section_list[$name] = $name;
-                }
-            }
-        }
 
         $this->setForView(compact("role_list", "section_list"));
 

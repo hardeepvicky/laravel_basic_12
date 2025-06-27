@@ -222,3 +222,39 @@ function send_whatsapp_user_otp(user_id, callback) {
         }
     });
 }
+
+function add_form_to_body(method, action, params) {
+    const $form = $("<form>", {
+        action: action,
+        method: method,
+        target: "_self", // Target self to navigate if not using AJAX, or a hidden iframe
+    }).hide(); // Hide the form as it's for programmatic use
+
+    // 2. Add input fields (hidden inputs for parameters)
+    $.each(params, function (index, item) {
+        item.value = encodeURIComponent(item.value);
+
+        $("<input>")
+            .attr({
+                type: "hidden", // Hidden inputs are perfect for parameters
+                name: item.name,
+                value: item.value,
+            })
+            .appendTo($form);
+    });
+
+    $("body").append($form);
+
+    return $form;
+}
+
+function add_form_to_body_and_submit(method, action, params) {
+    const $form = add_form_to_body(method, action, params);
+
+    $form.submit();
+
+    setTimeout(function () {
+        $form.remove();
+        $("#responseArea").removeClass("hidden"); // Show a message to the user
+    }, 100);
+}

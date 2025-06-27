@@ -25,7 +25,17 @@ class LaravelExtend
                 "action" => $routeObj->getActionName(),
             ];
 
-            $routes[] = $route;
+            if (strpos($route['route_name'], "debugbar.") !== false) {
+                continue;
+            }
+
+            if (strpos($route['route_name'], "sanctum.") !== false) {
+                continue;
+            }
+
+            if ($route['route_name']) {
+                $routes[] = $route;
+            }
         }
 
         //d($routes); exit;

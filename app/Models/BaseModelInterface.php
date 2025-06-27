@@ -27,4 +27,10 @@ interface BaseModelInterface
     public function insertIgnoreIfExist(array $data);
 
     public function getUniqueId(array $data);
+
+    public function beforeSave();
+
+    public function beforeDelete();
+
+    public function afterFind();
 }

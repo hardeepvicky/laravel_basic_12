@@ -74,7 +74,7 @@ class User extends Authenticatable implements BaseModelInterface
         ],
     ];
 
-    
+
     public static function boot()
     {
         parent::boot();
@@ -119,6 +119,20 @@ class User extends Authenticatable implements BaseModelInterface
             $model->forgotCache();
         });
     }
+    public function beforeSave()
+    {
+        foreach ($this->getAttributes() as $field => $value) {
+            if (is_null($value)) {
+                continue;
+            }
+
+            if (is_string($value) && strlen($value) > 0) {
+                $this->{$field} = utf8_encode($value);
+            }
+        }
+    }
+
+    public function beforeDelete() {}
 
     public function afterFind()
     {
@@ -211,12 +225,11 @@ class User extends Authenticatable implements BaseModelInterface
 
     public function hasRole($role_id_code_name)
     {
-        $role = $this->roles()->where(function($q) use ($role_id_code_name){
+        $role = $this->roles()->where(function ($q) use ($role_id_code_name) {
             $q->orWhere("roles.code", $role_id_code_name)->orWhere("roles.name", $role_id_code_name);
         })->first();
 
-        if ($role)
-        {
+        if ($role) {
             return true;
         }
 

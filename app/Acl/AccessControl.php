@@ -2,8 +2,10 @@
 
 namespace App\Acl;
 
+use App\Helpers\LaravelExtend;
 use App\Helpers\RoleType;
 use App\Models\Role;
+use App\Models\RoleRouteName;
 use App\Models\RouteName;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -79,17 +81,31 @@ class AccessControl
         return false;
     }
 
-    public function getListOfAllowedRouteNames(array $role_id_list)
+    public static function getListOfAllowedRouteNames(array $role_id_list)
     {
+        array_check_data_type_and_throw_error($role_id_list, ["int", "string"]);
+
+        $role_id_list = array_unique($role_id_list);
+
         // by default allow 
         $allow_route_list = SectionRoutes::ALLOW_ROUTES_FOR_ANY_LOGIN_USER;
+
+        $is_allow_all_routes = env("ACL_IS_SYSTEM_ADMIN_ALLOW_ALL_ROUTES", false);
+
+        $all_routes = LaravelExtend::getRoutes();
 
         // check for system admin
         foreach ($role_id_list as $role_id) {
             $role = Role::where('code', Role::TYPE_SYSTEM_ADMIN)->find($role_id);
 
             if ($role) {
-                $allow_route_list = array_merge($allow_route_list, SectionRoutes::ALLOW_ROUTES_FOR_SYSTEM_ADMIN);
+                if ($is_allow_all_routes) {
+                    foreach ($all_routes as $route) {
+                        $allow_route_list[] = $route['route_name'];
+                    }
+                } else {
+                    $allow_route_list = array_merge($allow_route_list, SectionRoutes::ALLOW_ROUTES_FOR_SYSTEM_ADMIN);
+                }
             }
         }
 
@@ -115,6 +131,122 @@ class AccessControl
         }
 
         return $allow_route_list;
+    }
+
+    public static function getAllowedRoutes(array $role_id_list = [], $section_list_key = null)
+    {
+        array_check_data_type_and_throw_error($role_id_list, ["integer", "string"]);
+
+        $role_id_list = array_unique($role_id_list);
+
+        $admin_role = null;
+
+        $sections = SectionRoutes::get();
+
+        // d($sections, true);
+
+        if ($role_id_list) {
+            $admin_role = Role::where('code', Role::TYPE_SYSTEM_ADMIN)->whereIn("id", $role_id_list)->first();
+        }
+
+        $is_allow_all_routes_to_admin = env("ACL_IS_SYSTEM_ADMIN_ALLOW_ALL_ROUTES", false);
+
+        if (empty($role_id_list) || $admin_role) {
+            if ($is_allow_all_routes_to_admin) {
+                $all_routes = LaravelExtend::getRoutes();
+                foreach ($all_routes as $route) {
+                    $records[$route['route_name']] = [
+                        "role" => [
+                            "name" => "Admin User is allowed for all routes"
+                        ],
+                        "can_be_delete" => false
+                    ];
+                }
+            }
+        }
+
+        $qb = RoleRouteName::query();
+
+        if ($role_id_list) {
+            $qb->whereIn("role_id", $role_id_list);
+        }
+
+        $role_route_records = $qb->with([
+            "role" => function ($query) {
+                $query->select(["id", "name", "code"]);
+            },
+            "routeName" => function ($query) {
+                $query->select(["id", "name"]);
+            }
+        ])->get()->toArray();
+
+        foreach ($role_route_records as $k => $record) {
+            $records[$record->routeName->name] = [
+                "can_be_delete" => true,
+                "role" => $record->toArray()
+            ];
+        }
+
+        // by default allow 
+        $allow_route_list = SectionRoutes::ALLOW_ROUTES_FOR_ANY_LOGIN_USER;
+
+        foreach ($allow_route_list as $route_name) {
+            $records[$route_name] = [
+                "role" => [
+                    "name" => "All For Any Login User"
+                ],
+                "can_be_delete" => false
+            ];
+        }
+
+        if (!$is_allow_all_routes_to_admin && $admin_role) {
+            $allow_route_list = SectionRoutes::ALLOW_ROUTES_FOR_SYSTEM_ADMIN;
+
+            foreach ($allow_route_list as $route_name) {
+                $records[$route_name] = [
+                    "role" => [
+                        "name" => "Allowed For Admin"
+                    ],
+                    "can_be_delete" => false
+                ];
+            }
+        }
+
+        $ret_records = [];
+
+
+        foreach ($sections as $section_name => $sub_sections) {
+            foreach ($sub_sections as $sub_section_name => $actions) {
+                foreach ($actions as $action_name => $action_arr) {
+                    $routes = [];
+                    $found_record = [];
+
+                    foreach ($records as $route_name => $record) {
+                        if (in_array($route_name, $action_arr['routes'])) {
+                            $list_key = $action_arr['list_key'] ?? "";
+
+                            if ($section_list_key) {
+                                if ($list_key == $section_list_key) {
+                                    $found_record = $record;
+                                    $routes[] =  $route_name;
+                                }
+                            } else {
+                                $routes[] =  $route_name;
+                                $found_record = $record;
+                            }
+                        }
+                    }
+
+                    if ($routes && $found_record) {
+                        $found_record['routes'] = $routes;
+                        $found_record['section'] = SectionRoutes::getListValue($section_name, $sub_section_name, $action_name);
+                        $ret_records[] = $found_record;
+                    }
+                }
+            }
+        }
+
+        return $ret_records;
     }
 
     public function getMenuCacheKey($user_id)

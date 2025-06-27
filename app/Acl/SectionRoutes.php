@@ -2,6 +2,8 @@
 
 namespace App\Acl;
 
+use App\Exceptions\UserException;
+
 class SectionRoutes
 {
     /**
@@ -34,44 +36,133 @@ class SectionRoutes
         $sections = [];
 
         $sections[]["Home"] = self::home();
-        $sections[]["General"] = self::general();
 
-        $sections["HR"] = [
-            "Department" => self::department(),
-            "Designation" => self::designation(),
-            "Employee" => self::employee(),
-        ];
+        // $sections["HR"] = [
+        //     "Department" => self::department(),
+        //     "Designation" => self::designation(),
+        //     "Employee" => self::employee(),
+        // ];
 
-        $sections["Members"] = [
+        $sections["Admin"] = [
             "User" => self::user(),
-            "Role" => self::role()
-        ];
-
-        $sections["System Management"] = [
+            "Role" => self::role(),
             "Setting" => self::setting(),
-            "State" => self::state(),
-            "City" => self::city(),
-            "Type" => self::type(),
         ];
 
         $sections[]["Developer"] = self::developer();
 
+        return self::addExtraToSections($sections);
+    }
+
+    public static function addExtraToSections(array $sections)
+    {
+        foreach ($sections as $section_name => $sub_sections) {
+            foreach ($sub_sections as $sub_section_name => $actions) {
+                foreach ($actions as $action_name => $route_list) {
+                    $key = self::getListKey($section_name, $sub_section_name, $action_name);
+
+                    $actions[$action_name]['list_key'] = $key;
+                }
+                $sub_sections[$sub_section_name] = $actions;
+            }
+
+            $sections[$section_name] = $sub_sections;
+        }
+
         return $sections;
     }
+
+    public static function getListKey($section_name, $sub_section_name, $action_name)
+    {
+        $list = [];
+        if ($section_name && !is_numeric($section_name)) {
+            $list[] = $section_name;
+        }
+
+        if ($sub_section_name && !is_numeric($sub_section_name)) {
+            $list[] = $sub_section_name;
+        }
+
+        if ($action_name && !is_numeric($action_name)) {
+            $list[] = $action_name;
+        }
+
+        $key = str_normalize_for_array_key(implode(".", $list));
+
+        return $key;
+    }
+
+    public static function getListValue($section_name, $sub_section_name, $action_name)
+    {
+        $list = [];
+        if ($section_name && !is_numeric($section_name)) {
+            $list[] = $section_name;
+        }
+
+        if ($sub_section_name && !is_numeric($sub_section_name) > 0) {
+            $list[] = $sub_section_name;
+        }
+
+        if ($action_name && !is_numeric($action_name) > 0) {
+            $list[] = $action_name;
+        }
+
+        return implode(" | ", $list);;
+    }
+
+    public static function getList($sections = null)
+    {
+        if (!$sections) {
+            $sections = self::get();
+        }
+
+        if (!is_array($sections)) {
+            throw new UserException("argument 1 should be array", UserException::ERROR_GENERAL);
+        }
+
+        $section_list = [];
+
+        foreach ($sections as $section_name => $sub_sections) {
+            foreach ($sub_sections as $sub_section_name => $actions) {
+                foreach ($actions as $action_name => $route_list) {
+                    $key = self::getListKey($section_name, $sub_section_name, $action_name);
+
+                    if (array_key_exists($key, $section_list)) {
+                        throw new UserException("duplicate key generated for section_list");
+                    }
+
+                    $section_list[$key] = self::getListValue($section_name, $sub_section_name, $action_name);
+                }
+            }
+        }
+
+        return $section_list;
+    }
+
 
     protected static function commonRoutes($routePrefix)
     {
         $routes =  [
-            "Summary" => [$routePrefix . ".index"],
+            "Summary" => [
+                "routes" => [$routePrefix . ".index"]
+            ],
             "Add" => [
-                $routePrefix . ".create",
-                $routePrefix . ".store"
+                "routes" => [
+                    $routePrefix . ".create",
+                    $routePrefix . ".store"
+                ]
             ],
             "Edit" => [
-                $routePrefix . ".edit",
-                $routePrefix . ".update"
+                "routes" => [
+                    $routePrefix . ".edit",
+                    $routePrefix . ".update"
+                ]
             ],
-            "Delete" => [$routePrefix . ".destroy"]
+            "Delete" => [
+                "routes" => [
+                    $routePrefix . ".destroy"
+                ]
+            ]
         ];
 
         return $routes;
@@ -80,16 +171,9 @@ class SectionRoutes
     private static function home()
     {
         $routes =  [
-            "Dashbaord" => ["dashboard"],
-        ];
-
-        return $routes;
-    }
-
-    private static function general()
-    {
-        $routes =  [
-            "Enquiry" => ["enquiries.index"],
+            "Dashbaord" => [
+                "routes" => ["dashboard"]
+            ],
         ];
 
         return $routes;
@@ -101,7 +185,12 @@ class SectionRoutes
 
         $routes = self::commonRoutes($routePrefix);
 
-        $routes['Activate / Deactivate'] = [$routePrefix . ".activate", $routePrefix . ".de_activate"];
+        $routes['Activate / Deactivate'] = [
+            "routes" => [
+                $routePrefix . ".activate",
+                $routePrefix . ".de_activate"
+            ]
+        ];
 
         return $routes;
     }
@@ -112,7 +201,12 @@ class SectionRoutes
 
         $routes = self::commonRoutes($routePrefix);
 
-        $routes['Activate / Deactivate'] = [$routePrefix . ".activate", $routePrefix . ".de_activate"];
+        $routes['Activate / Deactivate'] = [
+            "routes" => [
+                $routePrefix . ".activate",
+                $routePrefix . ".de_activate"
+            ]
+        ];
 
         return $routes;
     }
@@ -123,7 +217,12 @@ class SectionRoutes
 
         $routes = self::commonRoutes($routePrefix);
 
-        $routes['Activate / Deactivate'] = [$routePrefix . ".activate", $routePrefix . ".de_activate"];
+        $routes['Activate / Deactivate'] = [
+            "routes" => [
+                $routePrefix . ".activate",
+                $routePrefix . ".de_activate"
+            ]
+        ];
 
         return $routes;
     }
@@ -134,7 +233,12 @@ class SectionRoutes
         $routePrefix = "user";
 
         $routes = self::commonRoutes($routePrefix);
-        $routes['Activate / Deactivate'] = [$routePrefix . ".activate", $routePrefix . ".de_activate"];
+        $routes['Activate / Deactivate'] = [
+            "routes" => [
+                $routePrefix . ".activate",
+                $routePrefix . ".de_activate"
+            ]
+        ];
 
         return $routes;
     }
@@ -144,7 +248,12 @@ class SectionRoutes
         $routePrefix = "role";
 
         $routes = self::commonRoutes($routePrefix);
-        $routes['Activate / Deactivate'] = [$routePrefix . ".activate", $routePrefix . ".de_activate"];
+        $routes['Activate / Deactivate'] = [
+            "routes" => [
+                $routePrefix . ".activate",
+                $routePrefix . ".de_activate"
+            ]
+        ];
 
         return $routes;
     }
@@ -182,7 +291,11 @@ class SectionRoutes
 
         $routes = [];
 
-        $routes["General"] = [$routePrefix . ".general"];
+        $routes["General"] = [
+            "routes" => [
+                $routePrefix . ".general"
+            ]
+        ];
 
         return $routes;
     }
@@ -193,9 +306,21 @@ class SectionRoutes
 
         $routes = [];
 
-        $routes["Email Logs"] = [$routePrefix . ".email_log"];
-        $routes["SQL Logs"] = [$routePrefix . ".sql_log"];
-        $routes["Laravel Routes Summary"] = [$routePrefix . ".laravel_routes_index"];
+        $routes["Email Logs"] = [
+            "routes" => [
+                $routePrefix . ".email_log"
+            ]
+        ];
+        $routes["SQL Logs"] = [
+            "routes" => [
+                $routePrefix . ".sql_log"
+            ]
+        ];
+        $routes["Laravel Routes Summary"] = [
+            "routes" => [
+                $routePrefix . ".laravel_routes_index"
+            ]
+        ];
 
         return $routes;
     }
