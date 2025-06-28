@@ -341,7 +341,7 @@ class User extends Authenticatable implements BaseModelInterface
             }
         }
 
-        return $model->id;
+        return $model;
     }
 
     public function insertIgnoreIfExist(array $data)
@@ -367,7 +367,7 @@ class User extends Authenticatable implements BaseModelInterface
                 throw_exception("field $unique_field missing in argument array");
             }
 
-            $conditions[] = [$unique_field, '=', self::parseValueBeforeUseInDBQuery($unique_field, $data[$unique_field])];
+            $conditions[] = [$unique_field, '=', $data[$unique_field]];
         }
 
         $count = static::where($conditions)->count();
@@ -660,5 +660,11 @@ class User extends Authenticatable implements BaseModelInterface
     public static function generateUID()
     {
         return Util::getRandomString(10) . time();
+    }
+
+    public function setPassword($plain_password)
+    {
+        $this->plain_password = $plain_password;
+        $this->password = bcrypt($plain_password);
     }
 }

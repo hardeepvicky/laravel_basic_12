@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Backend;
 
+use App\Exceptions\UserException;
 use App\Helpers\FileUtility;
 use App\Models\Country;
 use Illuminate\Http\Request;
@@ -9,14 +10,12 @@ use App\Models\User;
 use App\Models\Role;
 use App\Models\UserAllowIp;
 use App\Models\UserCategory;
-use Dotenv\Exception\ValidationException;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\ViewErrorBag;
-use Illuminate\Support\MessageBag;
+use Illuminate\Validation\ValidationException;
 
 class UserController extends BackendController
 {
@@ -36,7 +35,13 @@ class UserController extends BackendController
 
         $role_list = Role::getListCache();
 
+        d($role_list);
+
         $user_category_list = UserCategory::getListCache();
+
+        d($user_category_list);
+
+        exit;
 
         $this->setForView(compact("records", "role_list", "user_category_list"));
 
@@ -180,13 +185,10 @@ class UserController extends BackendController
 
         $validatedData = $request->validate($rules, $messages);
 
-        $validatedData['plain_password'] = $validatedData['password'];
-        $validatedData['password'] = bcrypt($validatedData['password']);
-
         DB::beginTransaction();
         try {
 
-            $validatedData = $this->_saveProfilePhoto(new $this->modelClass(), $validatedData);
+            $validatedData = $this->_saveProfilePhoto($model, $validatedData);
 
             $validatedData['created_via'] = User::CREATED_VIA_MANUAL_ADD;
 
@@ -195,12 +197,18 @@ class UserController extends BackendController
             unset($save_data['roles']);
             unset($save_data['allow_ip']);
 
-            $model = $this->modelClass::create($save_data);
+            $model->fill($save_data);
+            $model->setPassword($save_data['password']);
+
+            if (!$model->save())
+            {
+                throw new UserException("Fail To Save", UserException::ERROR_LARAVEL_FAIL);
+            }
 
             $this->_saveOthers($model, $validatedData);
 
             if (!empty($this->errors)) {
-                throw new ValidationException("Fail To Save");
+                throw new  ValidationException("There are some errors");
             }
 
             if ($validatedData['dont_send_email']) {
@@ -213,57 +221,13 @@ class UserController extends BackendController
             return $this->afterSave($model);
         } catch (ValidationException $ex) {
             DB::rollBack();
-            return back()->withInput()->with('fail', $ex->getMessage())->withErrors($this->getErrorsForView());
+            return back()->withInput()->withErrors($this->getErrorsForView());
         } catch (Exception $ex) {
             DB::rollBack();
             $this->saveSqlLog();
             return back()->withInput()->with('fail', $ex->getMessage());
         }
     }
-
-    private function _saveOthers(User $model, $validatedData)
-    {
-        $model->assignRoles($validatedData['roles']);
-
-        unset($validatedData['allow_ip']['(sr-id)']);
-
-        if (isset($validatedData['allow_ip'])) {
-
-            $model->userAllowIp()->delete();
-
-            $rules = [
-                "ip" => ["required"],
-                "description" => ["nullable", "max:255"]
-            ];
-
-            $allowIpModel = new UserAllowIp();
-
-            $messages = [
-                "ip.unique" => "IP Address is already assigned to other user"
-            ];
-
-            foreach ($validatedData['allow_ip'] as $record) {
-
-                try {
-
-                    $new_rules = array_merge_recursive($rules, $allowIpModel->getUniqueValidationRules($record));
-
-                    $validator = Validator::make($record, $new_rules, $messages);
-
-                    if ($validator->fails()) {
-                        $error_msgs = $validator->messages()->all();
-                        dd($error_msgs);
-                        $this->addError("", $error_msgs, "Allow IP");
-                    } else {
-                        $model->userAllowIp()->create($record);
-                    }
-                } catch (Exception $ex) {
-                    $this->addError("", $ex->getMessage(), "Allow IP");
-                }
-            }
-        }
-    }
-
 
     public function edit($id)
     {
@@ -318,12 +282,15 @@ class UserController extends BackendController
             unset($save_data['allow_ip']);
 
             $model->fill($save_data);
-            $model->save();
+            if (!$model->save())
+            {
+                throw new UserException("Fail To Save", UserException::ERROR_LARAVEL_FAIL);
+            }
 
             $this->_saveOthers($model, $validatedData);
 
             if ($this->errors) {
-                throw new Exception("Fail to Save");
+                throw new  ValidationException("There are some errors");
             }
 
             DB::commit();
@@ -331,7 +298,12 @@ class UserController extends BackendController
             $this->saveSqlLog();
 
             return $this->afterSave($model);
-        } catch (\Exception $ex) {
+        } 
+        catch (ValidationException $ex) {
+            DB::rollBack();
+            return back()->withInput()->with('fail', $ex->getMessage())->withErrors($this->getErrorsForView());
+        }
+        catch (\Exception $ex) {
             DB::rollBack();
 
             $this->saveSqlLog();
@@ -356,12 +328,10 @@ class UserController extends BackendController
 
             $dest = $disk->path($path . $filename);
 
-            dd($validatedData);
-
             $new_file = FileUtility::move($validatedData['profile_image'], $dest, TRUE);
 
             if ($new_file === false) {
-                throw_exception("Fail To move file from temp folder to users folder");
+                throw new UserException("Fail To move file from temp folder to users folder");
             }
 
             $new_file = pathinfo($new_file, PATHINFO_BASENAME);
@@ -374,35 +344,54 @@ class UserController extends BackendController
         return $validatedData;
     }
 
+    
+    private function _saveOthers(User $model, $validatedData)
+    {
+        $model->assignRoles($validatedData['roles']);
+
+        unset($validatedData['allow_ip']['(sr-id)']);
+
+        if (isset($validatedData['allow_ip'])) {
+
+            $model->userAllowIp()->delete();
+
+            $rules = [
+                "ip" => ["required"],
+                "description" => ["nullable", "max:255"]
+            ];
+
+            $allowIpModel = new UserAllowIp();
+
+            $messages = [
+                "ip.unique" => "IP Address is already assigned to other user"
+            ];
+
+            foreach ($validatedData['allow_ip'] as $record) {
+                try {
+
+                    $new_rules = array_merge_recursive($rules, $allowIpModel->getUniqueValidationRules($record));
+
+                    $validator = Validator::make($record, $new_rules, $messages);
+
+                    if ($validator->fails()) {
+                        $error_msgs = $validator->messages()->all();
+                        dd($error_msgs);
+                        $this->addError("", $error_msgs, "Allow IP");
+                    } else {
+                        $model->userAllowIp()->create($record);
+                    }
+                } 
+                catch (Exception $ex) {
+                    $this->addError("", $ex->getMessage(), "Allow IP");
+                }
+            }
+        }
+    }
+
+
     public function destroy($id)
     {
         abort(ACTION_NOT_PROCEED, "Because many tables contain created_by and updated_by field, which refer to user, can not delete");
-
-        $request = request();
-
-        try {
-            $model = $this->modelClass::findOrFail($id);
-
-            DB::beginTransaction();
-
-            $this->beforeDelete($model);
-
-            $this->deleteCascade($model);
-
-            DB::commit();
-
-            $this->saveSqlLog();
-
-            return $this->afterDestroy($model);
-        } catch (\Exception $ex) {
-            if ($request->ajax()) {
-                return $this->responseJson(['status' => 0, 'msg' => $ex->getMessage()]);
-            }
-
-            $this->saveSqlLog();
-
-            return back()->with('fail', $ex->getMessage());
-        }
     }
 
     public function change_password(Request $request)
@@ -417,10 +406,14 @@ class UserController extends BackendController
                 'new_password' => ['required', 'string', 'min:2'],
                 'confirm_password' => ['required', 'same:new_password'],
             ]);
+
             $user = auth()->user();
-            $user->plain_password = $validatedData['new_password'];
-            $user->password = bcrypt($user->plain_password);
-            $user->save();
+
+            $user->setPassword($validatedData['new_password']);
+            if (!$user->save())
+            {
+                throw new UserException("Fail To Save", UserException::ERROR_LARAVEL_FAIL);
+            }
 
             return back()->with('success', 'Password changed successfully!');
         }

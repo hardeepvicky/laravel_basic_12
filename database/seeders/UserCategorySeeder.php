@@ -26,18 +26,28 @@ class UserCategorySeeder extends Seeder
 
         $records = [
             [
+                "code" => "corporate",
+                "type" => User::TYPE_INTERNAL,
+                "name" => "Corporate",
+                "is_active" => 1,
+            ],
+            [
+                "code" => "production",
+                "type" => User::TYPE_INTERNAL,
+                "name" => "Production",
+                "is_active" => 1,
+            ],
+            [
                 "code" => "dealer",
                 "type" => User::TYPE_EXTERNAL,
                 "name" => "Dealer",
                 "is_active" => 1,
-                "is_pre_defined" => 1
             ],
             [
                 "code" => "demo-user",
                 "type" => User::TYPE_EXTERNAL,
                 "name" => "Demo User",
                 "is_active" => 1,
-                "is_pre_defined" => 1
             ]
         ];
 
