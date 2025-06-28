@@ -17733,9 +17733,9 @@ tbody, td, tfoot, th, thead, tr {
   border-bottom-color: var(--light-gray)
 }
 
-.table td, .table th {
+/* .table td, .table th {
   padding: .75rem
-}
+} */
 
 .table thead.bg-primary tr th {
   color: var(--white)

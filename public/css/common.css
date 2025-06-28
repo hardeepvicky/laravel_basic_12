@@ -201,3 +201,16 @@ label.info {
 .celec_date_time .divider {
     border-top: 1px solid #ced4da;
 }
+
+.summary-table > tbody > tr > * {
+    background-color: var(--bs-table-hover-bg);
+    color: var(--body-font-color);
+}
+
+.summary-table .card-header {
+    padding: 10px;
+}
+
+.summary-table .card-body {
+    padding: 10px;
+}

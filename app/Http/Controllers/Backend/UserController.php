@@ -7,12 +7,15 @@ use App\Models\Country;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Role;
+use App\Models\UserAllowIp;
 use App\Models\UserCategory;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\ViewErrorBag;
+use Illuminate\Support\MessageBag;
 
 class UserController extends BackendController
 {
@@ -78,7 +81,7 @@ class UserController extends BackendController
             }
         );
 
-        $builder->with(["userCategory"]);
+        $builder->with(["userCategory", "userAllowIp"]);
 
         if ($apply_sort) {
             $cache_key_for_sort = $cache_key_prefix . "-index-extra-params";
@@ -153,6 +156,7 @@ class UserController extends BackendController
 
     public function store(Request $request)
     {
+
         $rules = $this->_common_validation_rules();
         $messages = $this->_common_validation_messages();
 
@@ -163,17 +167,13 @@ class UserController extends BackendController
         // d($rules, true);
 
         $rules = array_merge_recursive($rules, [
-            'password' => 'required|min:5',
+            'password' => 'required|min:2',
             'password_confirm' => ['required', 'same:password'],
         ]);
 
         $messages = array_merge_recursive($messages, [
             'confirm_password.same' => 'Confirm password is not matched with password',
-            'email.email' => 'Email must be valid email address.',
-            'email.unique' => 'Email already exist',
         ]);
-
-        $validatedData = $request->validate($rules, $messages);
 
         $validatedData['plain_password'] = $validatedData['password'];
         $validatedData['password'] = bcrypt($validatedData['password']);
@@ -185,7 +185,8 @@ class UserController extends BackendController
 
             $validatedData['created_via'] = User::CREATED_VIA_MANUAL_ADD;
 
-            // d($validatedData); exit;
+            d($validatedData);
+            exit;
 
             $save_data = $validatedData;
 
@@ -195,6 +196,10 @@ class UserController extends BackendController
             $model = $this->modelClass::create($save_data);
 
             $this->_saveOthers($model, $validatedData);
+
+            if (!empty($this->errors)) {
+                throw new Exception("Fail To Save");
+            }
 
             if ($validatedData['dont_send_email']) {
                 $model->is_active = true;
@@ -207,13 +212,54 @@ class UserController extends BackendController
         } catch (Exception $ex) {
             DB::rollBack();
             $this->saveSqlLog();
-            return back()->withInput()->with('fail', $ex->getMessage());
+            return back()->withInput()->with('fail', $ex->getMessage())->with([
+                "errors" => $this->getErrorsForView()
+            ]);
         }
     }
 
     private function _saveOthers(User $model, $validatedData)
     {
         $model->assignRoles($validatedData['roles']);
+
+        unset($validatedData['allow_ip']['(sr-id)']);
+
+        if (isset($validatedData['allow_ip'])) {
+
+            $model->userAllowIp()->delete();
+
+            $rules = [
+                "ip" => ["required"],
+                "description" => ["nullable", "max:255"]
+            ];
+
+            $allowIpModel = new UserAllowIp();
+
+            $messages = [
+                "ip.unique" => "IP Address is already assigned to other user"
+            ];
+
+            foreach ($validatedData['allow_ip'] as $record) {
+
+                try {
+
+                    $new_rules = array_merge_recursive($rules, $allowIpModel->getUniqueValidationRules($record));
+
+                    $validator = Validator::make($record, $new_rules, $messages);
+
+                    // d(get_class_info(get_class($validator)));
+
+                    if ($validator->fails()) {
+                        $error_msgs = $validator->messages()->all();
+                        $this->addError("", $error_msgs, "Allow IP");
+                    } else {
+                        $model->userAllowIp()->create($record);
+                    }
+                } catch (Exception $ex) {
+                    $this->addError("", $ex->getMessage(), "Allow IP");
+                }
+            }
+        }
     }
 
 
@@ -274,6 +320,10 @@ class UserController extends BackendController
 
             $this->_saveOthers($model, $validatedData);
 
+            if ($this->errors) {
+                throw new Exception("Fail to Save");
+            }
+
             DB::commit();
 
             $this->saveSqlLog();
@@ -284,7 +334,7 @@ class UserController extends BackendController
 
             $this->saveSqlLog();
 
-            return back()->with('fail', $ex->getMessage())->withInput();
+            return back()->with('fail', $ex->getMessage())->withInput()->withErrors($this->getErrorsForView());
         }
     }
 
@@ -360,7 +410,7 @@ class UserController extends BackendController
                         $fail('The old password is incorrect.');
                     }
                 }],
-                'new_password' => ['required', 'string', 'min:5'],
+                'new_password' => ['required', 'string', 'min:2'],
                 'confirm_password' => ['required', 'same:new_password'],
             ]);
             $user = auth()->user();

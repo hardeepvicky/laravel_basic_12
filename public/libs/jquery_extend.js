@@ -775,7 +775,7 @@ jQuery.fn.extend({
                 brace_type: "(",
                 highlightTrClass: "highlight",
                 highlightDangerTrClass: "highlight-danger",
-                highlightSeconds: 1,
+                highlightSeconds: 0.5,
                 beforeRowAdd: function () {
                     return true;
                 },
@@ -861,6 +861,8 @@ jQuery.fn.extend({
                 var _tr = _table.find(selector.row).last();
 
                 settings.afterRowAdd(_table, last_id, _tr);
+
+                console.log(feature, "row added", last_id);
             });
 
             _table.on(events.delRow, function (e, opt) {
@@ -882,6 +884,8 @@ jQuery.fn.extend({
                 _table.attr(dataKeys.last_id, last_id);
 
                 settings.afterRowDel(_table, last_id);
+
+                console.log(feature, "row deleted", last_id);
             });
 
             function perform_up_down(_tr, callback) {

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\UserException;
 use App\Helpers\FileUtility;
 use App\Helpers\LaravelExtend;
 use App\Models\SqlLog;
@@ -10,9 +11,12 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\MessageBag;
 
 abstract class Controller
 {
+    public array $errors = [];
+
     protected function deleteCascade(Model $model)
     {
         $class_name = get_class($model);
@@ -195,5 +199,35 @@ abstract class Controller
         }
 
         return "";
+    }
+
+    public function addError($label, $messages, $group = null, $extra = [])
+    {
+        if (!is_array($messages)) {
+            $messages = [$messages];
+        }
+
+        if (!$group) {
+            $group = 0;
+        }
+
+        if (!is_scalar($group)) {
+            throw new UserException("group should be scaler value");
+        }
+
+        foreach ($messages as $msg) {
+            $this->errors[$group][] = compact("label", "msg", "extra", "group");
+        }
+    }
+
+    public function getErrorsForView()
+    {
+        $msgBag = new MessageBag();
+
+        foreach ($this->errors as $group => $errors) {
+            $msgBag->add($group, $errors);
+        }
+
+        return $msgBag;
     }
 }

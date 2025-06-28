@@ -138,8 +138,8 @@ use App\Models\User;
                         </div>
                         <div class="col-md-6 col-lg-6">
                             <div class="form-group mb-3">
-                                <table class="table table-striped table-bordered order-column template-table"
-                                    data-sr-table-template-min-row="0">
+                                <table class="table table-sm table-striped table-bordered order-column template-table"
+                                    data-sr-table-t emplate-min-row="0">
                                     <thead>
                                         <tr>
                                             <th class="text-center" style="width : 80px;">
@@ -164,6 +164,8 @@ use App\Models\User;
                                                         </span>
                                                     </div>
                                                 </div>
+                                                <x-inputs.text-field type="hidden" name="allow_ip[(sr-id)][id]"
+                                                    label="" />
                                             </td>
                                             <td>
                                                 <x-inputs.text-field name="allow_ip[(sr-id)][ip]" label=""
@@ -174,6 +176,10 @@ use App\Models\User;
                                                     placeholder="Enter Description" />
                                             </td>
                                         </tr>
+                                        @php
+                                            $allow_ip = old('allow_ip', $allow_ip);
+                                            unset($allow_ip['(sr-id)']);
+                                        @endphp
                                         @if (isset($allow_ip))
                                             @foreach ($allow_ip as $k => $allow_arr)
                                                 <tr class="" sr-id="{{ $allow_arr['id'] }}"
@@ -188,24 +194,34 @@ use App\Models\User;
                                                                 </span>
                                                             </div>
                                                         </div>
+                                                        <input type="hidden" name="allow_ip[{{ $k }}][id]"
+                                                            value="{{ $allow_arr['id'] }}" />
                                                     </td>
                                                     <td>
-                                                        <input type="hidden" name="features[{{ $k }}][id]"
-                                                            value="{{ $allow_arr['id'] }}" />
                                                         <?php $value = $allow_arr['ip']; ?>
-                                                        <x-inputs.text-field name="features[{{ $k }}][ip]"
+                                                        <x-inputs.text-field name="allow_ip[{{ $k }}][ip]"
                                                             label="" :value="$value" placeholder="Enter IP" />
                                                     </td>
                                                     <td>
                                                         <?php $value = $allow_arr['description']; ?>
-                                                        <x-inputs.checkbox
-                                                            name="features[{{ $k }}][description]"
-                                                            label="" :value="$value" />
+                                                        <x-inputs.text-field
+                                                            name="allow_ip[{{ $k }}][description]"
+                                                            label="" placeholder="Enter Description"
+                                                            :value="$value" />
                                                     </td>
                                                 </tr>
                                             @endforeach
                                         @endif
                                     </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <th class="text-center" style="width : 80px;">
+                                                <span class="sr-table-template-add">
+                                                    <i class="fas fa-plus-circle text-success icon"></i>
+                                                </span>
+                                            </th>
+                                        </tr>
+                                    </tfoot>
                                 </table>
                             </div>
                         </div>
@@ -350,32 +366,34 @@ use App\Models\User;
                 });
             });
 
-            $(".template-table").srTableTemplate({
-                brace_type: "(",
-            });
 
-            $("#type").change(function() {
-                var v = $(this).val();
-
-                $(".type-block").hide();
-                $(".type-block").find("input,select").attr("disabled", true);
-
-                var selector = ".type-block-" + v;
-
-                if ($(selector).length > 0) {
-                    $(selector).show();
-                    $(selector).find("input,select").removeAttr("disabled");
-                }
-
-                $("#name").removeClass("validate-alpha-numeric");
-
-                if (v == '{{ User::TYPE_INTERNAL }}') {
-                    $("#name").addClass("validate-alpha-numeric");
-                    $("#country_id").val(my_country['id']).trigger("change");
-                }
-            }).trigger("change");
 
             $.events.execAtLast(function() {
+                $(".template-table").srTableTemplate({
+                    brace_type: "(",
+                });
+
+                $("#type").change(function() {
+                    var v = $(this).val();
+
+                    $(".type-block").hide();
+                    $(".type-block").find("input,select").attr("disabled", true);
+
+                    var selector = ".type-block-" + v;
+
+                    if ($(selector).length > 0) {
+                        $(selector).show();
+                        $(selector).find("input,select").removeAttr("disabled");
+                    }
+
+                    $("#name").removeClass("validate-alpha-numeric");
+
+                    if (v == '{{ User::TYPE_INTERNAL }}') {
+                        $("#name").addClass("validate-alpha-numeric");
+                        $("#country_id").val(my_country['id']).trigger("change");
+                    }
+                }).trigger("change");
+
                 $("#country_id").change(function() {
                     var v = $(this).val();
 

@@ -12,7 +12,7 @@ use App\Models\User;
         </div>
 
         <div class="table-responsive">
-            <table class="table table-striped table-bordered table-hover">
+            <table class="table table-bordered summary-table">
                 <thead>
                     <tr class="border-bottom-primary">
                         <th><?= sortable_anchor('id', 'ID') ?></th>
@@ -100,6 +100,40 @@ use App\Models\User;
                                     </div>
                                     <div class="col-md-6 col-lg-8">
                                         <x-Backend.index-table-info :record="$record" :userList="$userListCache" />
+
+                                        <div class="row mt-3">
+                                            <div class="col-md-12 col-lg-6">
+                                                <div class="card">
+                                                    <div class="card-header border-l-secondary card-no-border">
+                                                        <h3>Allowed IP</h3>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <table class="table table-sm summary-table table-bordered">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>Sr. No.</th>
+                                                                    <th>IP</th>
+                                                                    <th>Description</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                @foreach ($record->userAllowIp as $i => $user_allow_ip)
+                                                                    <tr>
+                                                                        <td>{{ $i + 1 }}</td>
+                                                                        <td>{{ $user_allow_ip->ip }}</td>
+                                                                        <td>{{ $user_allow_ip->description }}</td>
+                                                                    </tr>
+                                                                @endforeach
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-12 col-lg-6">
+
+                                                </div>
+                                            </div>
+                                        </div>
+
 
                                         @if (is_developer_role_login())
                                             @if (is_array($record->used_in_other_table_created_by))
