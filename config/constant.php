@@ -2,8 +2,7 @@
 
 return [
     'path' => [
-        'temp' => 'files/temp/',
-        'user' => 'files/users/',
+        'temp' => 'user_files/temp/',
     ],
 
     'font_awesome_icon' => [

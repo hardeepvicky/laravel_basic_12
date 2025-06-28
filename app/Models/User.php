@@ -654,7 +654,7 @@ class User extends Authenticatable implements BaseModelInterface
             return $this->avatar;
         }
 
-        return "#";
+        return "img/user.png";
     }
 
     public static function generateUID()
