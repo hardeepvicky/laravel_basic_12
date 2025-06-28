@@ -898,7 +898,7 @@ function get_modified_time_of_file_or_dir($filePath)
                 throw new UserException("fail to find modified time of $filePath", UserException::ERROR_PHP_FAIL);
             }
         } else {
-            throw new UserException("file does exist : $filePath", UserException::ERROR_PHP_FAIL);
+            throw new UserException("file does exist : $filePath");
         }
     }
 
