@@ -363,10 +363,7 @@ $(document).ready(function () {
 });
 
 $(document).on("submit", "form.i-validate", function (e) {
-    e.preventDefault();
     var _form = $(this);
-
-    var result = true;
 
     _form.find(".error-message").remove();
 
@@ -376,38 +373,33 @@ $(document).on("submit", "form.i-validate", function (e) {
             var type = rules[cls];
             var selector = "." + cls;
 
-            console.log(selector, $(this).find(selector).length);
+            console.log(group, cls, selector, $(this).find(selector).length);
 
             $(this)
                 .find(selector)
                 .each(function () {
-                    var v = $(this).val();
-                    var from = $(this).data(type + "-from");
-
-                    var valid = validateInputValue(v, type, { from: from });
-
-                    if (!valid) {
-                        result = false;
-                        $(this).validate(type);
-
-                        if (!result) {
-                            var error = _form.find(".error-message:first");
-
-                            if (error.length > 0) {
-                                $("html,body").animate(
-                                    {
-                                        scrollTop: error.top,
-                                    },
-                                    "slow"
-                                );
-                            }
-                        }
-                    }
+                    $(this).iValidate(type);
                 });
         }
-
-        return result;
     }
+
+    var result = true;
+
+    if (_form.find(".error-message").is(":visible").length > 0) {
+        var error = _form.find(".error-message:first");
+        result = false;
+
+        if (error.length > 0) {
+            $("html,body").animate(
+                {
+                    scrollTop: error.top,
+                },
+                "slow"
+            );
+        }
+    }
+
+    return result;
 });
 
 function validate_required_group(inputs) {
