@@ -218,3 +218,7 @@ label.info {
 .array_print {
     margin-left: 10px;
 }
+
+.swal_error .swal2-html-container {
+    text-align: left;
+}
