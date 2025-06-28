@@ -70,6 +70,26 @@ function d($arg, $will_exit = false)
     }
 }
 
+function array_print($array, $indent = 0)
+{
+    $array = array_short_string_with_dot($array);
+
+    echo '<ul class="array_print indent-' . $indent . '">';
+    foreach ($array as $key => $value) {
+        echo '<li>';
+        if (is_array($value)) {
+            echo '<strong>' . htmlspecialchars($key) . ':</strong>';
+            array_print($value, $indent + 1); // Recurse for nested arrays
+        } else {
+            echo '<strong>' . htmlspecialchars($key) . ':</strong> ' . htmlspecialchars(print_r($value, true));
+        }
+        echo '</li>';
+    }
+
+    echo '</ul>';
+}
+
+
 function get_sub_domain()
 {
     $host = $_SERVER['APP_URL'] ?? "";
@@ -915,4 +935,45 @@ function get_asset_url($file)
     } else {
         return $file;
     }
+}
+
+function array_short_string_with_dot(array $arr, $max_string_len = 45, bool $recursive = true)
+{
+    foreach ($arr as $k => $v) {
+        if (is_string($v)) {
+
+            if (strlen($v) > $max_string_len) {
+                $arr[$k] = substr($v, 0, $max_string_len) . "....";
+            }
+        } else if (is_array($v) && $recursive) {
+            $arr[$k] = array_short_string_with_dot($v, $max_string_len, $recursive);
+        }
+    }
+
+    return $arr;
+}
+
+function array_purge_if_exceed_limit(array $arr, $max_len = 100, $recursive = true)
+{
+    $count = count($arr);
+
+    $keys = array_keys($arr);
+
+    for ($i = $max_len + 1; $i <= $count; $i++) {
+        if (isset($keys[$i])) {
+            unset($arr[$keys[$i]]);
+        }
+    }
+
+    foreach ($arr as $k => $v) {
+        if (is_object($v)) {
+            $v = (array) $v;
+        }
+
+        if (is_array($v) && $recursive) {
+            $arr[$k] = array_purge_if_exceed_limit($v, $max_len, $recursive);
+        }
+    }
+
+    return $arr;
 }

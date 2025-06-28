@@ -9,7 +9,7 @@
         </div>
 
         <div class="table-responsive">
-            <table class="table table-striped table-bordered table-hover">
+            <table class="table table-bordered summary-table">
                 <thead>
                     <tr class="border-bottom-primary">
                         <th><?= sortable_anchor('id', 'ID') ?></th>

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Acl\AccessControl;
+use App\Exceptions\UserException;
 use App\Helpers\FileUtility;
 use App\Helpers\Util;
 use Illuminate\Database\Eloquent\Builder;
@@ -200,8 +201,12 @@ class User extends Authenticatable implements BaseModelInterface
 
         $name = $this->name;
 
-        if ($this->person_name && strtolower($this->person_name) != strtolower($name)) {
-            $name .= " >> " . $this->person_name;
+        if ($this->type == self::TYPE_EXTERNAL) {
+            $name .= " (External)";
+        } else {
+            if ($this->person_name && strtolower($this->person_name) != strtolower($name)) {
+                $name .= " >> " . $this->person_name;
+            }
         }
 
         return $name;
@@ -236,7 +241,7 @@ class User extends Authenticatable implements BaseModelInterface
     {
         $field_rules = [
             "email" => [Rule::unique($this->connection . "." . $this->getTable(), "email")],
-            "mobile" => [Rule::unique($this->connection . "." . $this->getTable(), "mobile")->whereNotNull("mobile")->where('mobile', '<>', '')],
+            "mobile" => [Rule::unique($this->connection . "." . $this->getTable(), "mobile")->where("country_id", $request->input("country_id"))->whereNotNull("mobile")->where('mobile', '<>', '')],
         ];
 
         if ($request->get("user_type") == self::TYPE_INTERNAL) {
@@ -391,7 +396,7 @@ class User extends Authenticatable implements BaseModelInterface
         $auth_user = Auth::user();
 
         if ($auth_user && $auth_user->id == $this->id) {
-            throw new \Exception("You can not de-activate your self");
+            throw new UserException("You can not de-activate your self", UserException::ERROR_USER_ACTION_RESTRICT);
         }
 
         $this->is_active = 0;
@@ -641,13 +646,15 @@ class User extends Authenticatable implements BaseModelInterface
             if ($url) {
                 return $url;
             }
+
+            return "/" . NOT_FOUND_IMAGE_PATH;
         }
 
         if ($this->avatar) {
             return $this->avatar;
         }
 
-        return "/" . NOT_FOUND_IMAGE_PATH;
+        return "#";
     }
 
     public static function generateUID()

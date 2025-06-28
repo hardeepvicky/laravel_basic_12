@@ -10,6 +10,7 @@ class UserException extends Exception
     public const ERROR_LARAVEL_FAIL = 513;
     public const ERROR_PHP_FAIL = 514;
     public const ERROR_FROM_VALIDATION = 515;
+    public const ERROR_USER_ACTION_RESTRICT = 516;
 
     public $data;
     public function __construct(String $message, int $code = 512, $data = [])
@@ -36,6 +37,12 @@ class UserException extends Exception
             case self::ERROR_PHP_FAIL:
                 $data = [
                     "html" => "This is Error bcoz of PHP internal failure",
+                ];
+                break;
+
+            case self::ERROR_USER_ACTION_RESTRICT:
+                $data = [
+                    "html" => "Restriction",
                 ];
                 break;
         }

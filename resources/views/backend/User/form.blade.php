@@ -111,7 +111,7 @@ use App\Models\User;
                                 $value = implode(',', $model->userRole->pluck('role_id')->toArray());
                                 ?>
                                 <x-Inputs.drop-down name="roles[]" label="Roles" :list="$role_list" :value="$value"
-                                    class="select2" multiple="multiple" />
+                                    class="select2" multiple="multiple" mandatory="true" />
                             </div>
                         </div>
                         <div class="col-md-6 col-lg-4">
@@ -177,7 +177,7 @@ use App\Models\User;
                                             </td>
                                         </tr>
                                         @php
-                                            $allow_ip = old('allow_ip', $allow_ip);
+                                            $allow_ip = old('allow_ip', $allow_ip ?? []);
                                             unset($allow_ip['(sr-id)']);
                                         @endphp
                                         @if (isset($allow_ip))

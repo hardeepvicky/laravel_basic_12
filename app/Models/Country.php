@@ -40,7 +40,7 @@ class Country extends BaseModel
 
     public function getDisplayName()
     {
-        return $this->name . " (" . $this->sortname . ")";
+        return $this->name . " (" . $this->short_name . ")";
     }
 
     public static function getMyCountry()

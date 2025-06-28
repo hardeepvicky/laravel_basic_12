@@ -15,7 +15,7 @@ use App\Models\User;
             <x-Backend.session-flash />
             <x-Backend.form-errors />
 
-            <x-Inputs.text-field name="email_or_mobile" label="Email OR Mobile" placeholder="Enter Email OR Mobile"
+            <x-Inputs.text-field type="email" name="login_field" label="Email" placeholder="Enter Email"
                 mandatory="true" />
 
             <div class="form-group">

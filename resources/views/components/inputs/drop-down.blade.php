@@ -3,8 +3,10 @@ if (!isset($value)) {
     $value = '';
 }
 
+$name_without_square_braces = str_replace('[]', '', $name);
+
 if (!isset($errorName)) {
-    $errorName = $name;
+    $errorName = $name_without_square_braces;
 }
 
 if (!isset($mandatory)) {
@@ -42,8 +44,6 @@ if (!$mandatory && $is_disabled) {
 
 <?php
 $value_list = [];
-
-$name_without_square_braces = str_replace('[]', '', $name);
 
 $v = old($name_without_square_braces, $value);
 

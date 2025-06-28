@@ -258,13 +258,16 @@ Route::group(['middleware' => ['auth', 'role_permission']], function () {
 
     Route::group(['prefix' => "developer", 'as' => "developer."], function () {
 
-        $name = "sql_log";
-        Route::get($name, [DeveloperController::class, $name])->name($name);
-
         $name = "laravel_routes_index";
         Route::get($name, [DeveloperController::class, $name])->name($name);
 
-        $name = "email_log";
+        $name = "email_logs";
+        Route::get($name, [DeveloperController::class, $name])->name($name);
+
+        $name = "sql_logs";
+        Route::get($name, [DeveloperController::class, $name])->name($name);
+
+        $name = "ajax_logs";
         Route::get($name, [DeveloperController::class, $name])->name($name);
     });
 });

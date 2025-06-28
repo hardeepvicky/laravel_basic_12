@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Helpers\LaravelExtend;
+use App\Models\AjaxLog;
 use App\Models\EmailLog;
 use App\Models\SqlLog;
 use Illuminate\Support\Facades\Route;
@@ -20,7 +21,7 @@ class DeveloperController extends BackendController
         return $this->view(__FUNCTION__);
     }
 
-    public function sql_log()
+    public function sql_logs()
     {
         $cache_key_prefix = Route::currentRouteName();
 
@@ -52,7 +53,7 @@ class DeveloperController extends BackendController
         return $this->viewIndex(__FUNCTION__);
     }
 
-    public function email_log()
+    public function email_logs()
     {
         $conditions = $this->getConditions(Route::currentRouteName(), [
             ["field" => "from_email", "type" => "string", "view_field" => "from_email"],
@@ -69,34 +70,25 @@ class DeveloperController extends BackendController
 
         $this->setForView(compact("records"));
 
-        return $this->view(__FUNCTION__);
+        return $this->viewIndex(__FUNCTION__);
     }
 
-    // public function import_logs()
-    // {
-    //     $modelName = ImportLog::class;
+    public function ajax_logs()
+    {
+        $conditions = $this->getConditions(Route::currentRouteName(), [
+            ["field" => "route_name_or_url", "type" => "string", "view_field" => "route_name_or_url"],
+            ["field" => "created", "type" => "from_date", "view_field" => "from_date"],
+            ["field" => "created", "type" => "to_date", "view_field" => "to_date"],
+        ]);
 
-    //     $conditions = $this->getConditions(Route::currentRouteName(), [
-    //         ["field" => "type", "type" => "string", "view_field" => "type"],
-    //         ["field" => "is_fully_run", "type" => "int", "view_field" => "is_fully_run"],
-    //         ["field" => "have_error", "type" => "int", "view_field" => "have_error"],
-    //         ["field" => "created", "type" => "from_date", "view_field" => "from_date"],
-    //         ["field" => "created", "type" => "to_date", "view_field" => "to_date"],
-    //     ]);
+        $cache_key_prefix = Route::currentRouteName();
 
-    //     $records = $this->getPaginagteRecords($modelName::where($conditions));
+        $records = $this->getPaginagteRecords(AjaxLog::where($conditions), $cache_key_prefix);
 
-    //     //dd($records);
+        //dd($records);
 
-    //     $userList = User::getListCache();
+        $this->setForView(compact("records"));
 
-    //     $this->setForView(compact("records", "modelName", "userList"));
-
-    //     $view_name = "import_logs";
-    //     if (request()->ajax()) {
-    //         $view_name = "import_logs_index_table";
-    //     }
-
-    //     return $this->view($view_name);
-    // }
+        return $this->viewIndex(__FUNCTION__);
+    }
 }

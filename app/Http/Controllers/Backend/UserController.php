@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Models\Role;
 use App\Models\UserAllowIp;
 use App\Models\UserCategory;
+use Dotenv\Exception\ValidationException;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
@@ -162,7 +163,7 @@ class UserController extends BackendController
 
         $model = new $this->modelClass();
 
-        $rules = array_merge_recursive($rules, $model->getUniqueValidationRules());
+        $rules = array_merge_recursive($rules, $model->getUniqueValidationRules($request));
 
         // d($rules, true);
 
@@ -175,6 +176,10 @@ class UserController extends BackendController
             'confirm_password.same' => 'Confirm password is not matched with password',
         ]);
 
+        // dd("before validate");
+
+        $validatedData = $request->validate($rules, $messages);
+
         $validatedData['plain_password'] = $validatedData['password'];
         $validatedData['password'] = bcrypt($validatedData['password']);
 
@@ -184,9 +189,6 @@ class UserController extends BackendController
             $validatedData = $this->_saveProfilePhoto(new $this->modelClass(), $validatedData);
 
             $validatedData['created_via'] = User::CREATED_VIA_MANUAL_ADD;
-
-            d($validatedData);
-            exit;
 
             $save_data = $validatedData;
 
@@ -198,7 +200,7 @@ class UserController extends BackendController
             $this->_saveOthers($model, $validatedData);
 
             if (!empty($this->errors)) {
-                throw new Exception("Fail To Save");
+                throw new ValidationException("Fail To Save");
             }
 
             if ($validatedData['dont_send_email']) {
@@ -209,12 +211,13 @@ class UserController extends BackendController
             DB::commit();
             $this->saveSqlLog();
             return $this->afterSave($model);
+        } catch (ValidationException $ex) {
+            DB::rollBack();
+            return back()->withInput()->with('fail', $ex->getMessage())->withErrors($this->getErrorsForView());
         } catch (Exception $ex) {
             DB::rollBack();
             $this->saveSqlLog();
-            return back()->withInput()->with('fail', $ex->getMessage())->with([
-                "errors" => $this->getErrorsForView()
-            ]);
+            return back()->withInput()->with('fail', $ex->getMessage());
         }
     }
 
@@ -247,10 +250,9 @@ class UserController extends BackendController
 
                     $validator = Validator::make($record, $new_rules, $messages);
 
-                    // d(get_class_info(get_class($validator)));
-
                     if ($validator->fails()) {
                         $error_msgs = $validator->messages()->all();
+                        dd($error_msgs);
                         $this->addError("", $error_msgs, "Allow IP");
                     } else {
                         $model->userAllowIp()->create($record);
@@ -353,6 +355,8 @@ class UserController extends BackendController
             }
 
             $dest = $disk->path($path . $filename);
+
+            dd($validatedData);
 
             $new_file = FileUtility::move($validatedData['profile_image'], $dest, TRUE);
 

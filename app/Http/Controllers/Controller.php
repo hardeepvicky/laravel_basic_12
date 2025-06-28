@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Exceptions\UserException;
 use App\Helpers\FileUtility;
 use App\Helpers\LaravelExtend;
+use App\Models\AjaxLog;
 use App\Models\SqlLog;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\App;
@@ -162,7 +163,7 @@ abstract class Controller
             throw_exception("Fail to Save Sql Log");
         }
 
-        return true;
+        return $sqlLogModel;
     }
 
     protected function getQueryLog()
@@ -186,7 +187,24 @@ abstract class Controller
 
     protected function responseJson(array $response)
     {
-        $this->saveSqlLog();
+        if (App::environment('production')) {
+            return response()->json($response);
+        }
+
+        $sql_model = $this->saveSqlLog();
+
+        $request = request();
+
+        $save = [
+            "route_name_or_url" => Route::currentRouteName(),
+            "request" => $request->all(),
+            "response" => $response,
+            "sql_model" => $sql_model?->toArray()
+        ];
+
+        $save = array_purge_if_exceed_limit($save);
+
+        AjaxLog::create($save);
 
         return response()->json($response);
     }
@@ -225,8 +243,10 @@ abstract class Controller
         $msgBag = new MessageBag();
 
         foreach ($this->errors as $group => $errors) {
-            $msgBag->add($group, $errors);
+            $msgBag->add("custom-" . $group, $errors);
         }
+
+        dd($msgBag->all());
 
         return $msgBag;
     }

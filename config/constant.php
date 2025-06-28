@@ -22,6 +22,7 @@ return [
     ],
 
     "cache_time" => [
+        "permission" => 60 * 24 * 365,
         "menu" => 60 * 24 * 365,
         "model" => 60 * 24,
         "summary_search" => 60 * 24 * 30

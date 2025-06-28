@@ -140,10 +140,6 @@ class LaravelExtend
             return true;
         }
 
-        if ($ip == "127.0.0.1") {
-            return true;
-        }
-
         return false;
     }
 }

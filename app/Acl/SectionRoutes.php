@@ -345,9 +345,16 @@ class SectionRoutes
         ];
         $routes["SQL Logs"] = [
             "routes" => [
+                $routePrefix . ".sql_logs"
+            ]
+        ];
+
+        $routes["Ajax Logs"] = [
+            "routes" => [
                 $routePrefix . ".sql_log"
             ]
         ];
+
         $routes["Laravel Routes Summary"] = [
             "routes" => [
                 $routePrefix . ".laravel_routes_index"

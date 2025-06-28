@@ -3,6 +3,7 @@
 namespace App\Helpers;
 
 use App\Acl\AccessControl;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
@@ -25,12 +26,9 @@ class Menu
     {
         self::$menus = [];
 
-        $acccessControl = AccessControl::init();
+        self::$menus = AccessControl::getCacheMenu($auth_user_id);
 
-        $cache_key = $acccessControl->getMenuCacheKey($auth_user_id);
-
-        self::$menus = Cache::get($cache_key);
-
+        // dd(self::$menus);
         if (!empty(self::$menus)) {
             return self::checkForActive(self::$menus);
         }
@@ -43,13 +41,11 @@ class Menu
 
         //d(self::$menus); exit;
 
-        if (isset($cache_key)) {
-            self::_filterMenuForUser();
+        self::_filterMenuForUser($auth_user_id);
 
-            // d(self::$menus, true);
+        // d(self::$menus, true);
 
-            Cache::put($cache_key, self::$menus, laravel_constant("cache_time.menu"));
-        }
+        AccessControl::addMenuToCache($auth_user_id, self::$menus);
 
         return self::checkForActive(self::$menus);
     }
@@ -155,10 +151,12 @@ class Menu
         return $list;
     }
 
-    private static function _filterMenuForUser()
+    private static function _filterMenuForUser($user_id)
     {
+        $user = User::findOrFail($user_id);
+
         $role_id_list = [];
-        foreach (Auth::user()->userRole->toArray() as $user_role) {
+        foreach ($user->userRole->toArray() as $user_role) {
             $role_id_list[] = $user_role['role_id'];
         }
 
@@ -426,8 +424,9 @@ class DeveloperMenu extends BaseMenu
 
         $routePrefix = "developer";
 
-        $links[] = self::getLink($routePrefix . ".email_log", null, self::ICON_MENU_LIST, [], self::LINK_TYPE_SUMMARY);
-        $links[] = self::getLink($routePrefix . ".sql_log", null, self::ICON_MENU_LIST, [], self::LINK_TYPE_SUMMARY);
+        $links[] = self::getLink($routePrefix . ".email_logs", null, self::ICON_MENU_LIST, [], self::LINK_TYPE_SUMMARY);
+        $links[] = self::getLink($routePrefix . ".sql_logs", null, self::ICON_MENU_LIST, [], self::LINK_TYPE_SUMMARY);
+        $links[] = self::getLink($routePrefix . ".ajax_logs", null, self::ICON_MENU_LIST, [], self::LINK_TYPE_SUMMARY);
         $links[] = self::getLink($routePrefix . ".laravel_routes_index", null, self::ICON_MENU_LIST, [], self::LINK_TYPE_SUMMARY);
 
         return self::getModule("Developer", null, $links);
