@@ -128,7 +128,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
                     $data = array_merge($data, compact("menus", "header_menu_list", "partial_path", "breadcums"));
                 } else {
-                    $data['layout'] = 'backend.layouts.default';
+                    $data['layout'] = 'frontend.layouts.main';
                 }
 
                 return response()->view("errors.default", $data, $error_code);

@@ -1,2 +1,2 @@
 @yield('content')
-<script src="{{ asset('js/frontend/ajax.js') }}"></script>
+<script src="{{ get_asset_url('js/frontend/ajax.js') }}"></script>

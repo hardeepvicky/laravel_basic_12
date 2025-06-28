@@ -1,5 +1,6 @@
 <?php
 
+use App\Exceptions\UserException;
 use App\Helpers\ConsoleOutput;
 use App\Helpers\DateUtility;
 use App\Helpers\Util;
@@ -883,4 +884,35 @@ function get_value_from_list($list, $key, $default = "")
     }
 
     return $default;
+}
+
+function get_modified_time_of_file_or_dir($filePath)
+{
+    if ($filePath && strlen($filePath) > 0) {
+        if (file_exists($filePath)) {
+            $timestamp = filemtime($filePath);
+
+            if ($timestamp !== false) {
+                return DateUtility::getDate($timestamp);
+            } else {
+                throw new UserException("fail to find modified time of $filePath", UserException::ERROR_PHP_FAIL);
+            }
+        } else {
+            throw new UserException("file does exist : $filePath", UserException::ERROR_PHP_FAIL);
+        }
+    }
+
+    return null;
+}
+
+function get_asset_url($file)
+{
+    $new_file = explode("?", $file)[0];
+    $modified_date_time = get_modified_time_of_file_or_dir($new_file);
+    if ($modified_date_time) {
+        $modified_date_time = DateUtility::getDate($modified_date_time, DateUtility::DATETIME_OUT_FORMAT_FILE);
+        return asset($new_file . "?t=" . $modified_date_time);
+    } else {
+        return $file;
+    }
 }

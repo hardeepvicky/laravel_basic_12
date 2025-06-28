@@ -43,7 +43,12 @@ class DateUtility
     protected static function getDateObj($date = "", $timezone = NULL)
     {
         if ($date) {
-            $timestamp = strtotime($date);
+
+            if (is_int($date)) {
+                $timestamp = $date;
+            } else {
+                $timestamp = strtotime($date);
+            }
 
             if ($timestamp == false || $timestamp == -1) {
                 return false;
