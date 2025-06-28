@@ -8,6 +8,7 @@ use App\Jobs\Backend\JobSendEmailOnRegisration;
 use App\Models\User;
 use Exception;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Request;
 use PDOException;
 
 class LaravelExtend
@@ -95,7 +96,7 @@ class LaravelExtend
         dispatch($job);
     }
 
-    public static function checkDatabaseConnection($connectionName = 'mysql', bool $should_throw_error = false)
+    public static function check_database_connection($connectionName = 'mysql', bool $should_throw_error = false)
     {
         try {
             // Attempt to get the PDO instance for the specified connection
@@ -121,12 +122,26 @@ class LaravelExtend
         return false;
     }
 
-    public static function writeFile(string $file, $contents)
+    public static function isRequestFromLocal()
     {
-        if ($contents) {
-            if (file_put_contents($file, $contents, FILE_APPEND)) {
-                return true;
-            }
+        $host = Request::host();
+
+        $request = request();
+
+        $ip = $request->ip();
+
+        if ($host == "localhost") {
+            return true;
+        }
+
+        $arr = explode(".", $host);
+
+        if (count($arr) == 4) {
+            return true;
+        }
+
+        if ($ip == "127.0.0.1") {
+            return true;
         }
 
         return false;

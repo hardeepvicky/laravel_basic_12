@@ -1,24 +1,21 @@
-<?php 
-if (!isset($value)){
-    $value = "";
+<?php
+if (!isset($value)) {
+    $value = '';
 }
 
-if (!isset($errorName)){
+if (!isset($errorName)) {
     $errorName = $name;
 }
 
-if (!isset($mandatory))
-{
-    $mandatory = $attributes->get("required", false);
+if (!isset($mandatory)) {
+    $mandatory = $attributes->get('required', false);
 }
 
-if (!isset($is_disabled))
-{
-    $is_disabled = $attributes->get("disabled", false);
+if (!isset($is_disabled)) {
+    $is_disabled = $attributes->get('disabled', false);
 }
 
-$my_attributes = [
-];
+$my_attributes = [];
 
 if (isset($preventCssClassAddToInput) && $preventCssClassAddToInput) {
 } else {
@@ -30,8 +27,15 @@ if ($mandatory) {
 }
 
 if (!$mandatory && $is_disabled) {
-    $my_attributes['disabled'] = "true";
+    $my_attributes['disabled'] = 'true';
 }
+
+$autocomplete = $attributes->get('autocomplete', false);
+
+if ($autocomplete) {
+    $my_attributes['aria-autocomplete'] = $autocomplete;
+}
+
 ?>
 
 @if (isset($label) && $label)

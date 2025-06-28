@@ -9,11 +9,15 @@ class Country extends BaseModel
 {
     public array $child_model_class = [];
 
+    protected $appends = [
+        'display_name',
+    ];
+
     public function getUniqueValidationRules()
     {
         $field_rules = [
             "name" => [Rule::unique($this->connection . "." . $this->getTable(), "name")],
-            "shortname" => [Rule::unique($this->connection . "." . $this->getTable(), "shortname")],
+            "short_name" => [Rule::unique($this->connection . "." . $this->getTable(), "short_name")],
         ];
 
         if ($this->id) {
@@ -27,5 +31,22 @@ class Country extends BaseModel
         }
 
         return $field_rules;
+    }
+
+    protected function getDisplayNameAttribute()
+    {
+        return $this->getDisplayName();
+    }
+
+    public function getDisplayName()
+    {
+        return $this->name . " (" . $this->sortname . ")";
+    }
+
+    public static function getMyCountry()
+    {
+        $record = self::query()->where("name", "india")->first();
+
+        return $record;
     }
 }

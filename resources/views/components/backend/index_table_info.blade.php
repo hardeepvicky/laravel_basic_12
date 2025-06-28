@@ -1,6 +1,25 @@
-<span class="badge bg-info">Created : {{ if_date_time($record->created_at)}}</span>
-<span class="badge bg-info">By : {{ $userList[$record->created_by] ?? ""}}</span>
-<br/>
+<?php
+use App\Helpers\DateUtility;
 
-<span class="badge bg-info">Updated : {{ if_date_time($record->updated_at)}}</span>
-<span class="badge bg-info">By : {{ $userList[$record->updated_by] ?? ""}}</span>
+$created_array = DateUtility::getCelecDate($record->created_at);
+$updated_array = DateUtility::getCelecDate($record->updated_at);
+?>
+<div class="celec_date_time" style="width : 100px">
+    <div class="label label-header">Created</div>
+    <div class="divider"></div>
+    <div class="label date">{{ $created_array['date'] }}</div>
+    <div class="divider"></div>
+    <div class="label time">{{ $created_array['day'] }} {{ $created_array['time'] }}</div>
+    <div class="divider"></div>
+    <div class="label">By : {{ $userList[$record->created_by] ?? '' }}</div>
+</div>
+
+<div class="celec_date_time" style="width : 100px">
+    <div class="label label-header">Updated</div>
+    <div class="divider"></div>
+    <div class="label date">{{ $updated_array['date'] }}</div>
+    <div class="divider"></div>
+    <div class="label time">{{ $updated_array['day'] }} {{ $updated_array['time'] }}</div>
+    <div class="divider"></div>
+    <div class="label">By : {{ $userList[$record->updated_by] ?? '' }}</div>
+</div>

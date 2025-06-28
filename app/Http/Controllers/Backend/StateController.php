@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Backend;
 
+use App\Models\Country;
 use App\Models\State;
 use Illuminate\Http\Request;
 use Exception;
@@ -32,14 +33,15 @@ class StateController extends BackendController
         $cache_key = $cache_key_prefix . "-index";
 
         $conditions = $this->getConditions($cache_key, [
-            ["field" => "name", "type" => "string", "view_field" => "name"],
-            ["field" => "is_active", "type" => "", "view_field" => "is_active"],
+            ["field" => "name", "type" => "string"],
+            ["field" => "short_name", "type" => "string"],
+            ["field" => "country_id", "type" => "int"],
+            ["field" => "is_active", "type" => "int"],
         ]);
 
         $builder = $this->modelClass::where($conditions);
 
-        if ($apply_sort)
-        {
+        if ($apply_sort) {
             $cache_key_for_sort = $cache_key_prefix . "-index-extra-params";
 
             $clear_cache = request('is_sort_clear', false);
@@ -53,6 +55,17 @@ class StateController extends BackendController
         }
 
         return $builder;
+    }
+
+    protected function beforeViewRender()
+    {
+        $country_list = Country::getListCache();
+
+        $my_country = Country::getMyCountry();
+
+        $this->setForView(compact("country_list", "my_country"));
+
+        return parent::beforeViewRender();
     }
 
     public function create()
@@ -74,15 +87,18 @@ class StateController extends BackendController
     private function _common_validation_rules()
     {
         return [
-           
+            "country_id" => ["required"],
+            "name" => ["required"],
+            "short_name" => ["nullable"],
+            "is_active" => [""],
         ];
     }
 
     private function _common_validation_messages()
     {
         return [
-            "name.required" => "Departname name is required",
-            "name.unique" => "Departname name already exist",
+            "name.required" => "State is required",
+            "name.unique" => "State already exist",
         ];
     }
 
@@ -90,39 +106,33 @@ class StateController extends BackendController
     {
         $this->beforeCreate();
 
+        $model = new $this->modelClass();
+
         $rules = $this->_common_validation_rules();
+
+        $rules = array_merge_recursive($rules, $model->getUniqueValidationRules($request));
 
         $messages = $this->_common_validation_messages();
 
-        $rules = array_merge($rules, [
-            'name' => 'required|min:2|unique:' . $this->tableName,
-            'code' => 'required|min:1|unique:' . $this->tableName,
-        ]);
-
-        $messages = array_merge($messages, [
-
-        ]);
+        $messages = array_merge($messages, []);
 
         $validatedData = $request->validate($rules, $messages);
 
         DB::beginTransaction();
 
-        try
-        {
+        try {
             $model = $this->modelClass::create($validatedData);
-            
+
             $this->updateUserInfoAfterSave($model);
-            
+
             DB::commit();
 
             $this->saveSqlLog();
 
             return $this->afterSave($model);
-        }
-        catch(Exception $ex)
-        {
+        } catch (Exception $ex) {
             DB::rollBack();
-            
+
             $this->saveSqlLog();
 
             return back()->withInput()->with('fail', $ex->getMessage());
@@ -153,25 +163,17 @@ class StateController extends BackendController
 
         $rules = $this->_common_validation_rules();
 
+        $rules = array_merge_recursive($rules, $model->getUniqueValidationRules($request));
+
         $messages = $this->_common_validation_messages();
 
-        $messages = array_merge($messages, [
-
-        ]);
-
-        $table_name = $this->tableName;
-
-        $rules = array_merge($rules, [
-            'name' => "required|min:3|unique:$table_name,name,$model->id",
-            'code' => "required|min:1|unique:$table_name,code,$model->id",
-        ]);
+        $messages = array_merge($messages, []);
 
         $validatedData = $request->validate($rules, $messages);
 
         DB::beginTransaction();
 
-        try
-        {
+        try {
             $model = $this->modelClass::findOrFail($id);
 
             $model->fill($validatedData);
@@ -185,9 +187,7 @@ class StateController extends BackendController
             $this->saveSqlLog();
 
             return $this->afterSave($model);
-        }
-        catch(Exception $ex)
-        {
+        } catch (Exception $ex) {
             DB::rollBack();
 
             $this->saveSqlLog();

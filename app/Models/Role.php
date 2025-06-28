@@ -10,13 +10,13 @@ class Role extends BaseModel
 {
     use HasFactory;
 
-    const TYPE_SYSTEM_ADMIN = "system_admin"; 
-    const TYPE_DEVELOPER = "developer"; 
+    const TYPE_SYSTEM_ADMIN = "system_admin";
+    const TYPE_DEVELOPER = "developer";
 
     /**
      * name of table fields which uniquly identify the record
      */
-    protected static Array $unique_fields = ["name"];
+    protected static array $unique_fields = ["name"];
 
     protected $appends = [
         'display_name',
@@ -26,7 +26,7 @@ class Role extends BaseModel
      * set extra relationship array to overcome problem of accidential delete
      * this variable used in Controller.php -> delete()
      */
-    public Array $child_model_class = [
+    public array $child_model_class = [
         UserRole::class => [
             "foreignKey" => "role_id",
             "preventDelete" => true,
@@ -39,7 +39,7 @@ class Role extends BaseModel
         ],
     ];
 
-       
+
 
     public function userRole()
     {
@@ -51,15 +51,18 @@ class Role extends BaseModel
         return $this->belongsToMany(RouteName::class, RoleRouteName::class);
     }
 
-    public function scopeWithAll($query) 
+    public function scopeWithAll($query)
     {
         $query->with('userRole');
     }
 
-    protected function displayName(): Attribute
+    protected function getDisplayNameAttribute()
     {
-        return Attribute::make(
-            get: fn () => $this->name,
-        );
+        return $this->getDisplayName();
+    }
+
+    public function getDisplayName()
+    {
+        return $this->name;
     }
 }

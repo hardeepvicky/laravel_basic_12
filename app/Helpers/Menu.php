@@ -6,6 +6,7 @@ use App\Acl\AccessControl;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Route;
 
 class Menu
 {
@@ -31,24 +32,26 @@ class Menu
         self::$menus = Cache::get($cache_key);
 
         if (!empty(self::$menus)) {
-            return self::$menus;
+            return self::checkForActive(self::$menus);
         }
 
         self::$menus[] = (new HomeMenu)->get();
-        // self::$menus[] = (new HRMenu)->get();
-        // self::$menus[] = (new MasterMenu)->get();
+        // self::$menus[] = (new HRMenu)->get();        
+        self::$menus[] = (new MasterMenu)->get();
         self::$menus[] = (new AdminMenu)->get();
         self::$menus[] = (new DeveloperMenu)->get();
 
         //d(self::$menus); exit;
 
-        // if (isset($cache_key)) {
-        //     self::_filterMenuForUser();
+        if (isset($cache_key)) {
+            self::_filterMenuForUser();
 
-        //     Cache::put($cache_key, self::$menus, laravel_constant("cache_time.menu"));
-        // }
+            // d(self::$menus, true);
 
-        return self::checkForActive(self::$menus);;
+            Cache::put($cache_key, self::$menus, laravel_constant("cache_time.menu"));
+        }
+
+        return self::checkForActive(self::$menus);
     }
 
     public static function getBreadcums($menus)
@@ -161,7 +164,7 @@ class Menu
 
         $acccessControl = AccessControl::init();
         $allowed_route_name_list = $acccessControl->getListOfAllowedRouteNames($role_id_list);
-        //d($allowed_route_name_list);
+        // d($allowed_route_name_list, true);
 
         foreach (self::$menus as $k => $sub_menu) {
             if (isset($sub_menu['links'])) {
@@ -241,33 +244,50 @@ class BaseMenu
 
     public static function getLink(String $route_name, $title, String $icon, array $related_links = [], String $link_type = "")
     {
-        if (!$title) {
-            $title = self::getLinkTitleFromRouteName($route_name, $link_type);
+        $route_name = trim($route_name);
+
+        if (Route::has($route_name)) {
+            if (!$title) {
+                $title = self::getLinkTitleFromRouteName($route_name, $link_type);
+            }
+
+            $link = [
+                "title" => $title,
+                "icon" => "child-menu-icon " . $icon,
+                "route_name" => $route_name,
+                "related_links" => $related_links
+            ];
+
+            return $link;
         }
 
-        $link = [
-            "title" => $title,
-            "icon" => "child-menu-icon " . $icon,
-            "route_name" => trim($route_name),
-            "related_links" => $related_links
+        return [
+            "title" => "Route $route_name Not Exist",
+            "icon" => "",
+            "route_name" => null,
+            "related_links" => []
         ];
-
-        $link['is_active'] = self::isActiveLink($link);
-
-        return $link;
     }
 
     public static function addRelatedLink(String $route_name, String $title, array $related_links = [])
     {
-        $link = [
-            "title" => $title,
-            "route_name" => trim($route_name),
-            "related_links" => $related_links
+        $route_name = trim($route_name);
+
+        if (Route::has($route_name)) {
+            $link = [
+                "title" => $title,
+                "route_name" => trim($route_name),
+                "related_links" => $related_links
+            ];
+
+            return $link;
+        }
+
+        return [
+            "title" => "Route $route_name Not Exist",
+            "route_name" => null,
+            "related_links" => []
         ];
-
-        $link['is_active'] = self::isActiveLink($link);
-
-        return $link;
     }
 
     public static function isActiveLink(array $link)
@@ -422,8 +442,9 @@ class MasterMenu extends BaseMenu
 
         $links[] = self::country();
         $links[] = self::state();
-        $links[] = self::city();
-        $links[] = self::type();
+        // $links[] = self::city();
+        $links[] = self::user_category();
+        // $links[] = self::type();
 
         return self::getModule("Master", self::ICON_MENU_ROOT, $links);
     }
@@ -452,6 +473,15 @@ class MasterMenu extends BaseMenu
         $routePrefix = "city";
 
         $links = self::getControllerDefaultLinks($routePrefix, "City", self::ICON_MENU_ROOT_CHILD);
+
+        return $links;
+    }
+
+    private static function user_category()
+    {
+        $routePrefix = "user-category";
+
+        $links = self::getControllerDefaultLinks($routePrefix, "User Category", self::ICON_MENU_ROOT_CHILD);
 
         return $links;
     }

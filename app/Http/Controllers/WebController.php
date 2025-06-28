@@ -159,7 +159,7 @@ class WebController extends Controller
     {
         if (is_string($cache_prefix) && $cache_prefix) {
             $cache_key = get_cache_prefix() . "-request_" . $cache_prefix . "_user_" . $this->getAuthUserId();
-            
+
             $cache_key = BaseModel::optimizeCacheKey($cache_key);
 
             if (Cache::has($cache_key)) {
@@ -404,8 +404,7 @@ class WebController extends Controller
     {
         $cache_key = null;
 
-        if (is_string($cache_key_prefix) && $cache_key_prefix)
-        {
+        if (is_string($cache_key_prefix) && $cache_key_prefix) {
             $cache_key = get_cache_prefix() . "-pagination_limit-user-" . $this->getAuthUserId();
             $cache_key = BaseModel::optimizeCacheKey($cache_key);
         }
@@ -424,8 +423,7 @@ class WebController extends Controller
 
         $records = $builder->paginate($params['pagination_limit']);
 
-        foreach($records as $record)
-        {
+        foreach ($records as $record) {
             $record->afterFind();
         }
 
@@ -437,7 +435,7 @@ class WebController extends Controller
     protected function beforeEdit($model)
     {
         if (BaseModel::tableHaveField($model->getTable(), "is_pre_defined")) {
-            if ($model->is_pre_defined) {                
+            if ($model->is_pre_defined) {
                 abort(ACTION_NOT_PROCEED, "Pre-Defined Record can not be edit");
             }
         }

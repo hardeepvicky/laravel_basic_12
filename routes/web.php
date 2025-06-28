@@ -20,6 +20,7 @@ use App\Http\Controllers\Backend\RoleController;
 use App\Http\Controllers\Backend\SettingsController;
 use App\Http\Controllers\Backend\StateController;
 use App\Http\Controllers\Backend\TypeController;
+use App\Http\Controllers\Backend\UserCategoryController;
 use App\Http\Controllers\Backend\UserController;
 use App\Http\Controllers\Frontend\EnquiryController;
 use App\Http\Controllers\Frontend\FrontendController;
@@ -37,6 +38,9 @@ Route::get("/", function () {
 Route::get('/home', [HomeController::class, 'index'])->name('home');
 
 Auth::routes();
+
+Route::get('/signin', [LoginController::class, 'sign_in_form'])->name('sign_in');
+Route::get('/login/auto', [LoginController::class, 'auto_login'])->name('auto.login');
 
 Route::post('/check_before_login', [LoginController::class, 'check_before_login'])->name('check_before_login');
 
@@ -116,22 +120,28 @@ Route::group(['middleware' => ['auth', 'role_permission']], function () {
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
     });
 
-    // country
     $route_prefix = "country";
     $controllerClass = CountryController::class;
     Route::resource($route_prefix, $controllerClass);
-    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {});
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+        $name = "ajax_get";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+    });
 
-    // state
     $route_prefix = "state";
     $controllerClass = StateController::class;
     Route::resource($route_prefix, $controllerClass);
     Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
         $name = "ajax_get_list";
         Route::get($name . "/{country_id}", [$controllerClass, $name])->name($name);
+
+        $name = "activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "de_activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
     });
 
-    // City
     $route_prefix = "city";
     $controllerClass = CityController::class;
     Route::resource($route_prefix, $controllerClass);
@@ -142,7 +152,6 @@ Route::group(['middleware' => ['auth', 'role_permission']], function () {
     });
 
 
-    // Department
     $route_prefix = "department";
     $controllerClass = DepartmentController::class;
     Route::resource($route_prefix, $controllerClass);
@@ -155,7 +164,6 @@ Route::group(['middleware' => ['auth', 'role_permission']], function () {
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
     });
 
-    // Designation
     $route_prefix = "designation";
     $controllerClass = DesignationController::class;
     Route::resource($route_prefix, $controllerClass);
@@ -168,7 +176,6 @@ Route::group(['middleware' => ['auth', 'role_permission']], function () {
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
     });
 
-    // Type
     $route_prefix = "type";
     $controllerClass = TypeController::class;
     Route::resource($route_prefix, $controllerClass);
@@ -181,7 +188,24 @@ Route::group(['middleware' => ['auth', 'role_permission']], function () {
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
     });
 
-    // Employee
+    $route_prefix = "user-category";
+    $controllerClass = UserCategoryController::class;
+    Route::resource($route_prefix, $controllerClass);
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
+        $name = "activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "de_activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "ajax_get_list";
+        Route::get($name . "/{type}", [$controllerClass, $name])->name($name);
+
+        $name = "ajax_get";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+    });
+
     $route_prefix = "employee";
     $controllerClass = EmployeeController::class;
     Route::resource($route_prefix, $controllerClass);

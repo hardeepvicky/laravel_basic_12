@@ -162,3 +162,42 @@
 label.info {
     display: block;
 }
+
+.pointer {
+    cursor: pointer;
+}
+
+.hidden {
+    display: none;
+}
+
+.error-message {
+    color: red;
+    display: block;
+}
+
+.mandatory {
+    color: red;
+    font-size: 1rem;
+}
+
+.celec_date_time {
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    max-width: 200px;
+    display: inline-block;
+    margin-right: 10px;
+    font-size: 12px;
+}
+
+.celec_date_time .label {
+    padding: 2px;
+}
+
+.celec_date_time .label-header {
+    background-color: rgba(48, 142, 135, 0.2);
+}
+
+.celec_date_time .divider {
+    border-top: 1px solid #ced4da;
+}

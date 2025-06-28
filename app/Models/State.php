@@ -2,6 +2,10 @@
 
 namespace App\Models;
 
+use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Unique;
+
 class State extends BaseModel
 {
     public array $child_model_class = [
@@ -12,6 +16,11 @@ class State extends BaseModel
         ]
     ];
 
+    public function country()
+    {
+        return $this->belongsTo(Country::class);
+    }
+
     public function city()
     {
         return $this->hasMany(City::class);
@@ -20,6 +29,26 @@ class State extends BaseModel
     public function user()
     {
         return $this->hasMany(User::class);
+    }
+
+    public function getUniqueValidationRules(Request $request)
+    {
+        $field_rules = [
+            "name" => [Rule::unique($this->connection . "." . $this->getTable(), "name")->where("country_id", $request->input("country_id"))],
+            "short_name" => [Rule::unique($this->connection . "." . $this->getTable(), "short_name")->where("country_id", $request->input("country_id"))],
+        ];
+
+        if ($this->id) {
+            foreach ($field_rules as $field => $rules) {
+                foreach ($rules as $rule) {
+                    if ($rule instanceof Unique) {
+                        $rule->ignore($this->id, $this->primaryKey);
+                    }
+                }
+            }
+        }
+
+        return $field_rules;
     }
 
     public static function createShortName($name)

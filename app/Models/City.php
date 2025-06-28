@@ -17,4 +17,14 @@ class City extends BaseModel
     {
         return $this->belongsTo(State::class);
     }
+
+    protected function getDisplayNameAttribute()
+    {
+        return $this->getDisplayName();
+    }
+
+    public function getDisplayName()
+    {
+        return $this->name;
+    }
 }

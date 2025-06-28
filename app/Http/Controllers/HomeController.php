@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\LaravelExtend;
 use App\Http\Controllers\WebController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
@@ -13,7 +14,14 @@ class HomeController extends WebController
         if (Auth::check()) {
             return Redirect::route("dashboard");
         } else {
-            return Redirect::route("login");
+
+            $route_name = "login";
+
+            if (!LaravelExtend::isRequestFromLocal()) {
+                $route_name = "sign_in";
+            }
+
+            return Redirect::route($route_name);
         }
     }
 

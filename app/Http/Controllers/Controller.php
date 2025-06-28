@@ -29,14 +29,12 @@ abstract class Controller
         }
 
         foreach ($model->child_model_class as $childClass => $arr) {
-            $child_class_display_name = null;
+            $child_class_display_name = $childClass::classDisplayName();
 
-            if (get_parent_class($childClass) == "BaseModel") {
-                $child_class_display_name = $childClass::classDisplayName();
-            }
-
-            if (isset($arr['label']) && !empty($arr['label']) && is_string($arr['label'])) {
-                $child_class_display_name = $arr['label'];
+            if (!$child_class_display_name) {
+                if (isset($arr['label']) && !empty($arr['label']) && is_string($arr['label'])) {
+                    $child_class_display_name = $arr['label'];
+                }
             }
 
             if (!$child_class_display_name) {
@@ -189,11 +187,10 @@ abstract class Controller
         return response()->json($response);
     }
 
-    protected function getAuthUserId() : string
+    protected function getAuthUserId(): string
     {
         $auth_user = Auth::user();
-        if ($auth_user)
-        {
+        if ($auth_user) {
             return (string) $auth_user->id;
         }
 

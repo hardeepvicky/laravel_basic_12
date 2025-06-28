@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Date Utility
  * 
@@ -12,24 +13,26 @@
 
 namespace App\Helpers;
 
-class DateUtility 
+class DateUtility
 {
     const DATE_FORMAT = 'Y-m-d';
     const TIME_FORMAT = 'H:i:s';
     const DATETIME_FORMAT = 'Y-m-d H:i:s';
 
     const DATE_OUT_FORMAT = "d-M-Y";
-    const TIME_OUT_FORMAT = "h:i a";
-    const DATETIME_OUT_FORMAT = 'd-M-Y h:i a';
-    const DATETIME_OUT_FORMAT_FILE = 'd-M-Y_h-i-s_a';
-	
+    const TIME_OUT_FORMAT = "H:i";
+    const DATETIME_OUT_FORMAT = 'd-M-Y H:i';
+    const DATETIME_OUT_FORMAT_FILE = 'd-M-Y_H-i-s';
+
     const YEARS = "years";
     const MONTHS = "months";
     const WEEKS = "weeks";
     const DAYS = "days";
     const HOURS = "hours";
-    const MINTUES = "minutes";    
+    const MINTUES = "minutes";
     const SECONDS = "seconds";
+
+    public static $login_user_time_zone = null;
 
     /**
      * convert time string to standered date object 
@@ -39,25 +42,22 @@ class DateUtility
      */
     protected static function getDateObj($date = "", $timezone = NULL)
     {
-        if ($date)
-        {
+        if ($date) {
             $timestamp = strtotime($date);
 
-            if ($timestamp == false || $timestamp == -1)
-            {
+            if ($timestamp == false || $timestamp == -1) {
                 return false;
             }
 
             $date = new \DateTime(date(self::DATETIME_FORMAT, $timestamp));
-        }
-        else
-        {
+        } else {
             $date = new \Datetime();
         }
 
-        if ($timezone)
-        {
+        if ($timezone) {
             $date->setTimezone(new \DateTimeZone($timezone));
+        } else if (self::$login_user_time_zone) {
+            $date->setTimezone(new \DateTimeZone(self::$login_user_time_zone));
         }
 
         return $date;
@@ -77,19 +77,15 @@ class DateUtility
     {
         $date = self::getDateObj($date, $timezone);
 
-        if ($date == false)
-        {
+        if ($date == false) {
             return false;
         }
 
         $format = $format ? $format : self::DATETIME_FORMAT;
 
-        if ($date)
-        {
+        if ($date) {
             return $date->format($format);
-        }
-        else
-        {
+        } else {
             return $date->format($format);
         }
     }
@@ -108,52 +104,49 @@ class DateUtility
         $from_date = self::getDateObj($start_date);
         $to_date = self::getDateObj($end_date);
 
-        if ($from_date == false || $to_date == false)
-        {
+        if ($from_date == false || $to_date == false) {
             return false;
         }
 
         $diff = $to_date->diff($from_date);
-        
+
         $days = $diff->format('%a');
-        
+
         $seconds = ($days * 24 * 60 * 60) + ($diff->h * 60 * 60) + ($diff->i * 60) + $diff->s;
-        
-        switch($type)
-        {
-            case self::YEARS:              
+
+        switch ($type) {
+            case self::YEARS:
                 $result = $diff->y;
-            break;
+                break;
 
-            case self::MONTHS:              
+            case self::MONTHS:
                 $result = ($diff->y * 12) + $diff->m;
-            break;
+                break;
 
-            case self::WEEKS:              
+            case self::WEEKS:
                 $result = $days / 7;
-            break;
+                break;
 
-            case self::DAYS:              
+            case self::DAYS:
                 $result = $days;
-            break;
+                break;
 
             case self::HOURS:
                 $result = $seconds / 3600;
-            break;
+                break;
 
             case self::MINTUES:
                 $result = $seconds / 60;
-            break;
+                break;
 
-            default:                
+            default:
                 $result = $seconds;
-            break;
+                break;
         }
 
         $sign = $diff->format('%R');
 
-        if ($sign == "-")
-        {
+        if ($sign == "-") {
             $result = $sign . $result;
         }
 
@@ -175,23 +168,19 @@ class DateUtility
         $first_date = self::getDate($first_date, "U");
         $second_date = self::getDate($second_date, "U");
 
-        if ($first_date == false || $second_date == false)
-        {
+        if ($first_date == false || $second_date == false) {
             return false;
         }
 
-        if ($first_date > $second_date)
-        {
+        if ($first_date > $second_date) {
             return 1;
         }
 
-        if ($first_date < $second_date)
-        {
+        if ($first_date < $second_date) {
             return -1;
         }
 
-        if ($first_date == $second_date)
-        {
+        if ($first_date == $second_date) {
             return 0;
         }
     }
@@ -207,30 +196,26 @@ class DateUtility
      */
     public static function change($date = "", $duration = "", $duration_type = "days", $format = NULL)
     {
-        if (is_numeric($duration))
-        {
+        if (is_numeric($duration)) {
             $duration = round($duration);
-            if ($duration > 0)
-            {
+            if ($duration > 0) {
                 $duration = "+" . $duration;
             }
         }
-        
-        $f = DateUtility::DATETIME_FORMAT;
-        if ( in_array($duration_type, [DateUtility::DAYS, DateUtility::WEEKS, DateUtility::MONTHS, DateUtility::YEARS]) )
-        {
-			if($format){
-				$f = $format;
-			}else{
-				$f = DateUtility::DATE_FORMAT;
-			}
 
+        $f = DateUtility::DATETIME_FORMAT;
+        if (in_array($duration_type, [DateUtility::DAYS, DateUtility::WEEKS, DateUtility::MONTHS, DateUtility::YEARS])) {
+            if ($format) {
+                $f = $format;
+            } else {
+                $f = DateUtility::DATE_FORMAT;
+            }
         }
-        
+
         $date = DateUtility::getDate($date, $f);
 
         $duration .= " " . $duration_type;
-        
+
         return self::getDate($date . " " . $duration, $format);
     }
 
@@ -246,54 +231,43 @@ class DateUtility
     public static function getDayListBetweenTwoDates($start_date, $end_date, $key_format = "{n}", $format = NULL, $hierarchy = FALSE)
     {
         $list = array();
-        
+
         $diff_days = self::diff($start_date, $end_date, self::DAYS);
-        
-        while($diff_days <= 0)
-        {
+
+        while ($diff_days <= 0) {
             $str = self::getDate($start_date, $format);
 
             $k = "";
-            if ($key_format != "{n}")
-            {
+            if ($key_format != "{n}") {
                 $k = self::getDate($start_date, $key_format);
             }
 
-            if ($hierarchy)
-            {
+            if ($hierarchy) {
                 $year = self::getDate($start_date, "Y");
                 $month = self::getDate($start_date, "m");
 
-                if($k)
-                {
+                if ($k) {
                     $list[$year][$month][$k] = $str;
-                }
-                else
-                {
+                } else {
                     $list[$year][$month][] = $str;
                 }
-            }
-            else 
-            {
-                if($k)
-                {
+            } else {
+                if ($k) {
                     $list[$k] = $str;
-                }
-                else
-                {
+                } else {
                     $list[] = $str;
                 }
             }
 
             $start_date = self::change($start_date, 1, DateUtility::DAYS, DateUtility::DATE_FORMAT);
-            
+
             $diff_days++;
         }
 
         return $list;
     }
-    
-     /**
+
+    /**
      * return month list between two dates
      * 
      * @param String $start_date
@@ -306,48 +280,55 @@ class DateUtility
 
         $diff_days = self::diff($start_date, $end_date, self::DAYS);
 
-        while ($diff_days <= 0)
-        {
+        while ($diff_days <= 0) {
             $year = self::getDate($start_date, "Y");
             $month = self::getDate($start_date, "M");
             $m = self::getDate($start_date, "m");
 
             $list[$year][(int) $m] = $month;
-                
+
             $start_date = self::change($start_date, 1, DateUtility::DAYS, DateUtility::DATE_FORMAT);
             $diff_days++;
         }
 
         return $list;
     }
-    
+
     public static function getLastDateOfMonth($year, $month)
     {
         return date("Y-m-t", strtotime(date("$year-$month-d")));
     }
-    
+
     public static function getTotalDaysInMonth($y, $m)
     {
-        return cal_days_in_month(CAL_GREGORIAN, $m, $y); 
+        return cal_days_in_month(CAL_GREGORIAN, $m, $y);
     }
 
     public function isDate(String $date)
     {
-        if (\DateTime::createFromFormat('Y-m-d', $date) !== false)
-        {
+        if (\DateTime::createFromFormat('Y-m-d', $date) !== false) {
             return true;
         }
-        
-        if (\DateTime::createFromFormat('d-M-Y', $date) !== false)
-        {
+
+        if (\DateTime::createFromFormat('d-M-Y', $date) !== false) {
             return true;
         }
-        
-        if (\DateTime::createFromFormat('d-m-Y', $date) !== false)
-        {
+
+        if (\DateTime::createFromFormat('d-m-Y', $date) !== false) {
             return true;
         }
-        
+
         return false;
+    }
+
+    public static function getCelecDate($date, $timezone = null)
+    {
+        $dt = self::getDateObj($date, $timezone);
+
+        $ret_array['date'] = $dt->format(self::DATE_OUT_FORMAT);
+        $ret_array['time'] = $dt->format(self::TIME_OUT_FORMAT);
+        $ret_array['day'] = $dt->format('D');
+
+        return $ret_array;
     }
 }

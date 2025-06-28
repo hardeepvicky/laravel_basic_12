@@ -15,36 +15,32 @@ class BackendController extends WebController
 {
     protected function beforeViewRender()
     {
-        if (!parent::beforeViewRender())
-        {
+        if (!parent::beforeViewRender()) {
             return false;
         }
 
         $request = request();
 
-        if ( $request->ajax() ) {
+        if ($request->ajax()) {
             $this->layout = "backend.layouts.ajax";
-        }
-        else {
+        } else {
             $this->layout = "backend.layouts.main";
         }
-        
+
         $this->viewPrefix = "backend." . $this->getControllerName();
 
         $request = request();
 
         $current_route_name = Route::currentRouteName();
 
-        if ($current_route_name)
-        {
+        if ($current_route_name) {
             Menu::setCurrentRouteName($current_route_name);
         }
 
         $auth_user = Auth::user();
 
         $menus = $header_menu_list = [];
-        if ($auth_user)
-        {
+        if ($auth_user) {
             $menus = Menu::get($auth_user->id);
         }
 
@@ -66,23 +62,19 @@ class BackendController extends WebController
     {
         $request = request();
 
-        try
-        {       
-            $model = $this->modelClass::findOrFail($id); 
+        try {
+            $model = $this->modelClass::findOrFail($id);
 
-            if (!$this->delete($model))
-            {
+            if (!$this->delete($model)) {
                 throw new Exception("Fail to Delete");
             }
 
             $this->saveSqlLog();
 
             return $this->afterDestroy($model);
-        }
-        catch(\Exception $ex)
-        {
-            if ( $request->ajax() ) {
-                return $this->responseJson(['status'=> 0, 'msg'=> $ex->getMessage()]);
+        } catch (\Exception $ex) {
+            if ($request->ajax()) {
+                return $this->responseJson(['status' => 0, 'msg' => $ex->getMessage()]);
             }
 
             $this->saveSqlLog();
@@ -94,16 +86,13 @@ class BackendController extends WebController
     public function activate($id)
     {
         $response = ["status" => 1];
-        try
-        {
+        try {
             $model = $this->modelClass::findOrFail($id);
 
             $model->activate();
 
             $response['url'] = route($this->routePrefix . ".de_activate", ['id' => $id]);
-        }
-        catch(Exception $ex)
-        {
+        } catch (Exception $ex) {
             $response['status'] = 0;
             $response['msg'] = $ex->getMessage();
         }
@@ -114,16 +103,13 @@ class BackendController extends WebController
     public function de_activate($id)
     {
         $response = ["status" => 1];
-        try
-        {
+        try {
             $model = $this->modelClass::findOrFail($id);
 
             $model->deActivate();
 
             $response['url'] = route($this->routePrefix . ".activate", ['id' => $id]);
-        }
-        catch(Exception $ex)
-        {
+        } catch (Exception $ex) {
             $response['status'] = 0;
             $response['msg'] = $ex->getMessage();
         }
@@ -134,14 +120,11 @@ class BackendController extends WebController
     public function ajax_get($id)
     {
         $response = ["status" => 1];
-        try
-        {
+        try {
             $model = $this->modelClass::findOrFail($id);
 
             $response['data'] = $model->toArray();
-        }
-        catch(Exception $ex)
-        {
+        } catch (Exception $ex) {
             $response['status'] = 0;
             $response['msg'] = $ex->getMessage();
         }

@@ -10,9 +10,13 @@
                     <tr class="border-bottom-primary">
                         <th><?= sortable_anchor('id', 'ID') ?></th>
                         <th><?= sortable_anchor('name', 'Name') ?></th>
+                        <th><?= sortable_anchor('short_name', 'Short Name') ?></th>
+                        <th><?= sortable_anchor('phonecode', 'Phone Code') ?></th>
+                        <th>Timezone</th>
+                        <th><?= sortable_anchor('iso3', 'Phone Name') ?></th>
+                        <th><?= sortable_anchor('currency_name', 'Currency') ?></th>
                         <th>Info</th>
                         <th>Actions</th>
-
                     </tr>
                 </thead>
                 <tbody>
@@ -20,6 +24,11 @@
                         <tr>
                             <th scope="row">{{ $record->id }}</th>
                             <td>{{ $record->name }}</td>
+                            <td>{{ $record->short_name }}</td>
+                            <td>{{ $record->phonecode }}</td>
+                            <td>{{ $record->timezone }}</td>
+                            <td>{{ $record->iso3 }}</td>
+                            <td>{{ $record->currency_name }}</td>
                             <td>
                                 <x-Backend.index-table-info :record="$record" :userList="$userListCache" />
                             </td>

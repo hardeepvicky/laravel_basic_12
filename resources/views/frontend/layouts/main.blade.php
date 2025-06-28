@@ -11,8 +11,8 @@
     <meta name="description" content="{{ $page_author ?? config('app.author') }}" />
     <meta name="csrf-token" content="{{ csrf_token() }}" />
     <!-- App favicon -->
-    <link rel="icon" href="{{ asset('assets/images/favicon.png" type="image/x-icon" />
-    <link rel="shortcut icon" href="{{ asset('assets/images/favicon.png" type="image/x-icon" />
+    <link rel="icon" href="{{ asset('assets/images/favicon.png') }}" type="image/x-icon" />
+    <link rel="shortcut icon" href="{{ asset('assets/images/favicon.png') }}" type="image/x-icon" />
     <!-- Google font-->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
@@ -25,7 +25,8 @@
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/fontawesome-min.css') }}" />
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/flag-icon.css') }}" />
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/libs/select2/select2.min.css') }}" />
-    <link rel="stylesheet" type="text/css" href="{{ asset('assets/libs/select2/select2-bootstrap-5-theme.min.css') }}" />
+    <link rel="stylesheet" type="text/css"
+        href="{{ asset('assets/libs/select2/select2-bootstrap-5-theme.min.css') }}" />
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/libs/fancybox/dist/jquery.fancybox.min.css') }}" />
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/flatpickr/flatpickr.min.css') }}">
 

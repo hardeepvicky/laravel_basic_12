@@ -174,7 +174,7 @@ class FileUtility
         return true;
     }
 
-    public static function isExist($file)
+    public function isExist($file)
     {
         $file = trim($file);
         $file = explode("?", $file)[0];

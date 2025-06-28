@@ -43,7 +43,13 @@
 
     <script src="/assets/js/vendors/jquery/jquery.min.js"></script>
     <script src="/libs/events.js?<?= JS_VERSION ?>"></script>
+    <script async src="https://www.google.com/recaptcha/api.js"></script>
 
+    <style>
+        .login-card .login-main {
+            width: 480px;
+        }
+    </style>
 </head>
 
 <body>

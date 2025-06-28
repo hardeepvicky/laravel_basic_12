@@ -33,7 +33,7 @@ class CountryController extends BackendController
 
         $conditions = $this->getConditions($cache_key, [
             ["field" => "name", "type" => "string"],
-            ["field" => "sortname", "type" => "string"],
+            ["field" => "short_name", "type" => "string_equal"],
             ["field" => "phonecode", "type" => "int"],
             ["field" => "is_active", "type" => "int"],
         ]);
@@ -76,9 +76,9 @@ class CountryController extends BackendController
     {
         return [
             "name" => ["required"],
-            "sortname" => ["required"],
-            "iso3" => ["nullable"],
+            "short_name" => ["required"],
             "phonecode" => ["required"],
+            "iso3" => ["nullable"],
             "currency_name" => ["nullable"],
             "capital_city" => ["nullable"],
             "timezone" => ["nullable"],

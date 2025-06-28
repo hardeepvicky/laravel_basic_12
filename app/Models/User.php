@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Http\Request;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -27,14 +28,21 @@ class User extends Authenticatable implements BaseModelInterface
      * @var array<int, string>
      */
     protected $fillable = [
+        'type',
+        'user_category_id',
         'name',
+        'person_name',
         'email',
         'mobile',
         'whatsapp_mobile',
         'password',
+        'plain_password',
         'profile_image',
+        'avatar',
         'dont_send_email',
         'is_active',
+        'created_via',
+        'is_secure_login',
     ];
 
     /**
@@ -51,9 +59,31 @@ class User extends Authenticatable implements BaseModelInterface
         'display_name',
     ];
 
+    public static string $login_with = "email";
+
     protected static array $unique_fields = ["email"];
 
     protected static array $file_fields = ["profile_image"];
+
+    public const TYPE_INTERNAL = "internal";
+    public const TYPE_EXTERNAL = "external";
+
+    public const TYPE_LIST = [
+        self::TYPE_INTERNAL => "Internal",
+        self::TYPE_EXTERNAL => "External",
+    ];
+
+    public const CREATED_VIA_MANUAL_ADD = "manual_add";
+    public const CREATED_VIA_REGISTRATION = "register";
+    public const CREATED_VIA_GOOGLE = "google";
+    public const CREATED_VIA_APPLE = "apple";
+
+    public const CREATED_VIA_LIST = [
+        self::CREATED_VIA_MANUAL_ADD => "Manual Add From Backend",
+        self::CREATED_VIA_REGISTRATION => "Registeration Form",
+        self::CREATED_VIA_GOOGLE => "Google",
+        self::CREATED_VIA_APPLE => "Apple",
+    ];
 
     /**
      * The attributes that should be cast.
@@ -71,6 +101,11 @@ class User extends Authenticatable implements BaseModelInterface
             "foreignKey" => "user_id",
             "preventDelete" => false,
             "label" => "User's Role"
+        ],
+        UserAllowIp::class => [
+            "foreignKey" => "user_id",
+            "preventDelete" => false,
+            "label" => "User's Allow IP"
         ],
     ];
 
@@ -154,7 +189,27 @@ class User extends Authenticatable implements BaseModelInterface
 
     protected function getDisplayNameAttribute()
     {
-        return $this->name;
+        return $this->getDisplayName();
+    }
+
+    public function getDisplayName()
+    {
+        if ($this->type == self::TYPE_EXTERNAL) {
+            return $this->name;
+        }
+
+        $name = $this->name;
+
+        if ($this->person_name && strtolower($this->person_name) != strtolower($name)) {
+            $name .= " >> " . $this->person_name;
+        }
+
+        return $name;
+    }
+
+    public function userCategory()
+    {
+        return $this->belongsTo(UserCategory::class);
     }
 
     public function state()
@@ -167,17 +222,26 @@ class User extends Authenticatable implements BaseModelInterface
         return $this->hasMany(UserRole::class, 'user_id');
     }
 
+    public function userAllowIp()
+    {
+        return $this->hasMany(UserAllowIp::class, 'user_id');
+    }
+
     public function roles()
     {
         return $this->belongsToMany(Role::class, UserRole::class);
     }
 
-    public function getUniqueValidationRules()
+    public function getUniqueValidationRules(Request $request)
     {
         $field_rules = [
             "email" => [Rule::unique($this->connection . "." . $this->getTable(), "email")],
-            "mobile" => [Rule::unique($this->connection . "." . $this->getTable(), "mobile")],
+            "mobile" => [Rule::unique($this->connection . "." . $this->getTable(), "mobile")->whereNotNull("mobile")->where('mobile', '<>', '')],
         ];
+
+        if ($request->get("user_type") == self::TYPE_INTERNAL) {
+            $field_rules["name"] = Rule::unique($this->connection . "." . $this->getTable(), "name")->where("type", self::TYPE_INTERNAL);
+        }
 
         if ($this->id) {
             foreach ($field_rules as $field => $rules) {
@@ -194,9 +258,11 @@ class User extends Authenticatable implements BaseModelInterface
 
     public function isRquireOTPVerificationOnLogin()
     {
-        if (!$this->dont_send_email) {
-            return false;
+        if ($this->is_secure_login) {
+            return true;
         }
+
+        return false;
     }
 
     public function assignRoles(array $new_role_id_list)
@@ -352,15 +418,17 @@ class User extends Authenticatable implements BaseModelInterface
             return $builder->pluck($value_field, $key_field)->toArray();
         }
 
-        $records = $builder->get();
+        $records = $builder->get()->toArray();
+
+        // d($records, true);
 
         $list = [];
 
         foreach ($records as $record) {
             if ($value_field == "display_name_with_id") {
-                $list[$record->{$key_field}] = $record->display_name . "-" . $record->id;
+                $list[$record[$key_field]] = $record['display_name'] . "-" . $record['id'];
             } else {
-                $list[$record->{$key_field}] = $record->{$value_field};
+                $list[$record[$key_field]] = $record[$value_field];
             }
         }
 
@@ -417,7 +485,7 @@ class User extends Authenticatable implements BaseModelInterface
         return $list;
     }
 
-    public static function getListCache(String $key_field = "id", String $value_field = "display_name_with_id", $order_by = "name", $order_dir = "ASC")
+    public static function getListCache(String $key_field = "id", String $value_field = "display_name", $order_by = "name", $order_dir = "ASC")
     {
         $model = new static();
         $table_name = $model->getTable();
@@ -562,15 +630,24 @@ class User extends Authenticatable implements BaseModelInterface
 
     public function getProfileImage()
     {
+        if (isset($this->profile_image_url) && $this->profile_image_url) {
+            return $this->profile_image_url;
+        }
+
         if ($this->profile_image) {
-            return FileUtility::get($this->profile_image);
+            $fileUtility = new FileUtility($this->getStorageDisk());
+            $url = $fileUtility->getUrl($this->profile_image);
+
+            if ($url) {
+                return $url;
+            }
         }
 
         if ($this->avatar) {
             return $this->avatar;
         }
 
-        return null;
+        return "/" . NOT_FOUND_IMAGE_PATH;
     }
 
     public static function generateUID()

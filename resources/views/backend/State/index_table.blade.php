@@ -9,20 +9,24 @@
                 <thead>
                     <tr class="border-bottom-primary">
                         <th><?= sortable_anchor('id', 'ID') ?></th>
+                        <th>Country</th>
                         <th><?= sortable_anchor('name', 'Name') ?></th>
+                        <th><?= sortable_anchor('short_name', 'Short Name') ?></th>
+                        <th><?= sortable_anchor('is_active', 'Active / De-Active') ?></th>
                         <th>Info</th>
                         <th>Actions</th>
-                        
                     </tr>
                 </thead>
                 <tbody>
                     @foreach ($records as $record)
                         <tr>
                             <th scope="row">{{ $record->id }}</th>
+                            <td>{{ $record->country?->getDisplayName() }}</td>
                             <td>{{ $record->name }}</td>
-
-
-
+                            <td>{{ $record->short_name }}</td>
+                            <td>
+                                <x-Backend.active_deactive :isActive="$record->is_active" :id="$record->id" :routePrefix="$routePrefix" />
+                            </td>
                             <td>
                                 <x-Backend.index-table-info :record="$record" :userList="$userListCache" />
                             </td>

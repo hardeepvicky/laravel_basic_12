@@ -62,11 +62,7 @@ class PermissionController extends BackendController
 
             $data = $request->all();
 
-            // d($data);
-
             $role = Role::findOrFail($data['role_id']);
-
-            // d($sections);
 
             $choosen_route_list = [];
 
@@ -78,8 +74,6 @@ class PermissionController extends BackendController
             }
 
             $choosen_route_list = array_unique($choosen_route_list);
-
-            // dd($choosen_route_list);
 
             $roleRouteName = new RoleRouteName();
 
@@ -99,13 +93,15 @@ class PermissionController extends BackendController
 
             RoleRouteName::destroy($old_save_id_list);
 
-            $user_id_list = User::pluck("id")->toArray();
+            $user_id_list = User::whereHas("roles", function ($q) use ($role) {
+                $q->where("user_roles.role_id", $role->id);
+            })->pluck("id")->toArray();
 
             $accessControl->clearMenuCache($user_id_list);
 
             $this->saveSqlLog();
 
-            Session::flash('success', 'Permission are saved');
+            Session::flash('success', 'Permissions are saved');
         }
 
         $role_list = Role::getList();

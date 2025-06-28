@@ -1,4 +1,4 @@
-/* 
+/*
  * @author     Hardeep
  */
 
@@ -10,50 +10,53 @@
 var regex = {
     int: {
         exact: /^-?[\d]*$/,
-        partial: /-?[\d]/
+        partial: /-?[\d]/,
     },
     float: {
         exact: /^-?\d+\.?\d{0,9}$/,
-        partial: /-?\d+\.?\d{0,9}/
+        partial: /-?\d+\.?\d{0,9}/,
     },
     alpha: {
         exact: /^[A-Za-z]*$/g,
-        partial: /[A-Za-z]/g
+        partial: /[A-Za-z]/g,
     },
     alphaWithSpace: {
         exact: /^[A-Za-z\s]*$/g,
-        partial: /[A-Za-z\s]/g
+        partial: /[A-Za-z\s]/g,
     },
     alphaNumeric: {
         exact: /^[A-Za-z0-9]*$/g,
-        partial: /[A-Za-z0-9]/g
+        partial: /[A-Za-z0-9]/g,
     },
     alphaNumericWithSpace: {
         exact: /^[A-Za-z0-9\s]*$/g,
-        partial: /[A-Za-z0-9\s]/g
+        partial: /[A-Za-z0-9\s]/g,
     },
     mobile: {
         exact: /^[0-9]{10}$/g,
-        partial: /[0-9]/g
+        partial: /[0-9]/g,
     },
     phone: {
         exact: /^[0-9]{4}[0-9]{7}$/g,
-        partial: /[0-9]{4}[0-9]{7}/
+        partial: /[0-9]{4}[0-9]{7}/,
     },
     barcode: {
         exact: /^[A-Za-z0-9-_]*$/g,
-        partial: /[A-Za-z0-9-_]/g
+        partial: /[A-Za-z0-9-_]/g,
     },
     box: {
         exact: /^[A-Za-z0-9-_]*$/g,
-        partial: /[A-Za-z0-9-_]/g
-    }
+        partial: /[A-Za-z0-9-_]/g,
+    },
 };
 
 jQuery.fn.extend({
     iValidate: function (type, e, opt) {
         return this.each(function () {
-            if (typeof opt != "undefined" && typeof opt.trigger != "undefined") {
+            if (
+                typeof opt != "undefined" &&
+                typeof opt.trigger != "undefined"
+            ) {
                 return;
             }
 
@@ -70,25 +73,23 @@ jQuery.fn.extend({
             var from = $(this).attr("data-" + type + "-from");
             var from_val = 0;
 
-            console.log("data-" + type + "-from" + " : " + from + " : "  + typeof from);
+            console.log(
+                "data-" + type + "-from" + " : " + from + " : " + typeof from
+            );
 
-            if (from)
-            {
-                if ($.isNumeric(from))
-                {
+            if (from) {
+                if ($.isNumeric(from)) {
                     from_val = parseFloat(from);
-                }
-                else
-                {
-                    if ($(from).length == 0)
-                    {
+                } else {
+                    if ($(from).length == 0) {
                         console.error("from : " + from + " : not found");
                         return;
                     }
 
-                    if ($(from).length > 1)
-                    {
-                        console.error("from : " + from + " : more than 1 found");
+                    if ($(from).length > 1) {
+                        console.error(
+                            "from : " + from + " : more than 1 found"
+                        );
                         return;
                     }
 
@@ -106,7 +107,6 @@ jQuery.fn.extend({
                     break;
 
                 case "int":
-
                     if (!msg) {
                         msg = "Number only";
                     }
@@ -196,7 +196,6 @@ jQuery.fn.extend({
                     break;
             }
 
-
             if (result === false && typeof regex[type] != "undefined") {
                 console.log(v);
                 var v_list = v.match(regex[type]["partial"]);
@@ -208,11 +207,21 @@ jQuery.fn.extend({
                 }
             }
 
-            var $span = $(this).parent().find("." + type + "-error-message");
+            var $span = $(this)
+                .parent()
+                .find("." + type + "-error-message");
 
             if ($span.length == 0) {
-                $(this).parent().append('<span class="' + type + '-error-message error-message"></span>');
-                $span = $(this).parent().find("." + type + "-error-message");
+                $(this)
+                    .parent()
+                    .append(
+                        '<span class="' +
+                            type +
+                            '-error-message error-message"></span>'
+                    );
+                $span = $(this)
+                    .parent()
+                    .find("." + type + "-error-message");
             }
 
             console.log(type + " " + result);
@@ -222,11 +231,9 @@ jQuery.fn.extend({
             } else {
                 $span.html("&#9679 " + msg).show();
             }
-
         });
     },
 });
-
 
 function validateInputValue(v, type, opt) {
     if (!v) {
@@ -238,17 +245,16 @@ function validateInputValue(v, type, opt) {
     }
 
     switch (type) {
-        default: 
+        default:
             var v_list = v.match(regex[type]["exact"]);
             return v_list !== null;
             break;
-            
+
         case "int":
         case "float":
-            if (v == "-")
-            {
+            if (v == "-") {
                 return true;
-            }			
+            }
             var v_list = v.match(regex[type]["exact"]);
             return v_list !== null;
             break;
@@ -265,8 +271,10 @@ function validateInputValue(v, type, opt) {
         case "less-than-equal":
         case "more-than":
         case "more-than-equal":
-
-            if (typeof opt == "undefined" || typeof opt["from"] == "undefined") {
+            if (
+                typeof opt == "undefined" ||
+                typeof opt["from"] == "undefined"
+            ) {
                 console.error("from not found in opt");
             }
 
@@ -342,7 +350,11 @@ $(document).ready(function () {
     }
 
     for (var cls in validate_rules.keyup) {
-        event_apply("input propertychange paste", validate_rules.keyup[cls], "input." + cls);
+        event_apply(
+            "input propertychange paste",
+            validate_rules.keyup[cls],
+            "input." + cls
+        );
     }
 
     for (var cls in validate_rules.change) {
@@ -350,7 +362,8 @@ $(document).ready(function () {
     }
 });
 
-$(document).on("submit", "form.i-validate", function () {
+$(document).on("submit", "form.i-validate", function (e) {
+    e.preventDefault();
     var _form = $(this);
 
     var result = true;
@@ -361,35 +374,36 @@ $(document).on("submit", "form.i-validate", function () {
         var rules = validate_rules[group];
         for (var cls in rules) {
             var type = rules[cls];
-            var selector = "input." + cls;
+            var selector = "." + cls;
 
-            if (group == "change") {
-                selector = "select." + cls;
-            }
+            console.log(selector, $(this).find(selector).length);
 
-            $(this).find(selector).each(function () {
-                var v = $(this).val();
-                var from = $(this).data(type + "-from");
+            $(this)
+                .find(selector)
+                .each(function () {
+                    var v = $(this).val();
+                    var from = $(this).data(type + "-from");
 
-                var valid = validateInputValue(v, type, { from: from });
+                    var valid = validateInputValue(v, type, { from: from });
 
-                if (!valid) {
-                    result = false;
-                    $(this).validate(type);
+                    if (!valid) {
+                        result = false;
+                        $(this).validate(type);
 
-                    if (!result) {
-                        var error = _form.find(".error-message:first");
+                        if (!result) {
+                            var error = _form.find(".error-message:first");
 
-                        if (error.length > 0) {
-                            $('html,body').animate({
-                                scrollTop: error.top
-                            }, 'slow');
+                            if (error.length > 0) {
+                                $("html,body").animate(
+                                    {
+                                        scrollTop: error.top,
+                                    },
+                                    "slow"
+                                );
+                            }
                         }
                     }
-
-                    
-                }
-            });
+                });
         }
 
         return result;

@@ -15,6 +15,7 @@ class SectionRoutes
         "user.change.password",
 
         "*.ajax_get_list",
+        "*.ajax_get",
     ];
 
     /**
@@ -42,6 +43,10 @@ class SectionRoutes
         //     "Designation" => self::designation(),
         //     "Employee" => self::employee(),
         // ];
+
+        $sections["Master"] = [
+            "User Category" => self::user_category(),
+        ];
 
         $sections["Admin"] = [
             "User" => self::user(),
@@ -170,7 +175,7 @@ class SectionRoutes
     protected static function commonRoutes($routePrefix)
     {
         $routes =  [
-            "Summary" => [
+            "List" => [
                 "routes" => [$routePrefix . ".index"]
             ],
             "Add" => [
@@ -346,6 +351,21 @@ class SectionRoutes
         $routes["Laravel Routes Summary"] = [
             "routes" => [
                 $routePrefix . ".laravel_routes_index"
+            ]
+        ];
+
+        return $routes;
+    }
+
+    private static function user_category()
+    {
+        $routePrefix = "user-category";
+
+        $routes = self::commonRoutes($routePrefix);
+        $routes['Activate / Deactivate'] = [
+            "routes" => [
+                $routePrefix . ".activate",
+                $routePrefix . ".de_activate"
             ]
         ];
 

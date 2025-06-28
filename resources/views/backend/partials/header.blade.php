@@ -143,9 +143,10 @@ use App\Helpers\FileUtility;
                     @endphp
                     <li class="profile-nav custom-dropdown">
                         <div class="user-wrap">
-                            @if (isset($user->profile_image) && $user->profile_image)
-                                <div class="user-img"><img src="{{ FileUtility::get($user->profile_image) }}"
-                                        alt="user" /></div>
+                            @if (isset($user) && $user)
+                                <div class="user-img">
+                                    <img src="{{ $user->getProfileImage() }}" alt="user" style="background:none" />
+                                </div>
                             @endif
                             <div class="user-content">
                                 <!-- <h6>Ava Davis</h6> -->
@@ -165,17 +166,17 @@ use App\Helpers\FileUtility;
                                     @endif
                                 </li>
                                 <!-- <li class="d-flex">
-                                            <svg class="svg-color">
-                                                <use href="../assets/svg/iconly-sprite.svg#Message"></use>
-                                            </svg>
-                                            <a class="ms-2" href="letter-box.html">Inbox</a>
-                                        </li>
-                                        <li class="d-flex">
-                                            <svg class="svg-color">
-                                                <use href="../assets/svg/iconly-sprite.svg#Document"></use>
-                                            </svg>
-                                            <a class="ms-2" href="to-do.html">Task</a>
-                                        </li> -->
+                                                                                    <svg class="svg-color">
+                                                                                        <use href="../assets/svg/iconly-sprite.svg#Message"></use>
+                                                                                    </svg>
+                                                                                    <a class="ms-2" href="letter-box.html">Inbox</a>
+                                                                                </li>
+                                                                                <li class="d-flex">
+                                                                                    <svg class="svg-color">
+                                                                                        <use href="../assets/svg/iconly-sprite.svg#Document"></use>
+                                                                                    </svg>
+                                                                                    <a class="ms-2" href="to-do.html">Task</a>
+                                                                                </li> -->
 
                                 <li class="d-flex">
                                     <svg class="svg-color">

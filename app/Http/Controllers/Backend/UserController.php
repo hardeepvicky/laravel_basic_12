@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Helpers\FileUtility;
+use App\Models\Country;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Role;
+use App\Models\UserCategory;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
@@ -30,9 +32,24 @@ class UserController extends BackendController
 
         $role_list = Role::getListCache();
 
-        $this->setForView(compact("records", "role_list"));
+        $user_category_list = UserCategory::getListCache();
+
+        $this->setForView(compact("records", "role_list", "user_category_list"));
 
         return $this->viewIndex(__FUNCTION__);
+    }
+
+    protected function beforeViewRender()
+    {
+        $type_list = User::TYPE_LIST;
+
+        $country_list = Country::getListCache();
+
+        $my_country = Country::getMyCountry();
+
+        $this->setForView(compact("type_list", "country_list", "my_country"));
+
+        return parent::beforeViewRender();
     }
 
     private function _getBuildeForIndex($cache_key_prefix, $apply_sort = true)
@@ -40,13 +57,16 @@ class UserController extends BackendController
         $cache_key = $cache_key_prefix . "-index";
 
         $conditions = $this->getConditions($cache_key, [
-            ["field" => "name", "type" => "string", "view_field" => "name"],
-            ["field" => "email", "type" => "string", "view_field" => "email"],
-            ["field" => "is_active", "type" => "", "view_field" => "is_active"],
+            ["field" => "name", "type" => "string"],
+            ["field" => "email", "type" => "string"],
+            ["field" => "is_active", "type" => "int"],
+            ["field" => "type", "type" => "string_equal"],
+            ["field" => "user_category_id", "type" => "int"],
+            ["field" => "country_id", "type" => "int"],
         ]);
 
         $role_condition = $this->getConditions($cache_key . ".2", [
-            ["field" => "role_id", "type" => "", "view_field" => "role_id"],
+            ["field" => "role_id", "type" => "int"],
         ], true);
 
         $builder = $this->modelClass::where($conditions)->whereHas(
@@ -57,6 +77,8 @@ class UserController extends BackendController
                 }
             }
         );
+
+        $builder->with(["userCategory"]);
 
         if ($apply_sort) {
             $cache_key_for_sort = $cache_key_prefix . "-index-extra-params";
@@ -85,8 +107,12 @@ class UserController extends BackendController
 
         $is_add_form = true;
 
+        $my_country = Country::getMyCountry();
+
+        $model->country_id = $my_country->id;
+
         $this->_set_for_create_and_edit($model);
-        $this->setForView(compact("model", 'form', "is_add_form"));
+        $this->setForView(compact("model", 'form', "is_add_form", "my_country"));
         return $this->view("form");
     }
 
@@ -107,9 +133,13 @@ class UserController extends BackendController
     {
         return [
             'name' => ['required'],
+            'person_name' => ['nullable'],
             'email' => ['required'],
+            'type' => ['required'],
+            'user_category_id' => ['required'],
             'mobile' => ['nullable'],
             'roles' => ["required"],
+            'allow_ip' => [],
             "dont_send_email" => "",
             "profile_image" => "",
             "is_active" => "",
@@ -145,6 +175,7 @@ class UserController extends BackendController
 
         $validatedData = $request->validate($rules, $messages);
 
+        $validatedData['plain_password'] = $validatedData['password'];
         $validatedData['password'] = bcrypt($validatedData['password']);
 
         DB::beginTransaction();
@@ -152,11 +183,14 @@ class UserController extends BackendController
 
             $validatedData = $this->_saveProfilePhoto(new $this->modelClass(), $validatedData);
 
+            $validatedData['created_via'] = User::CREATED_VIA_MANUAL_ADD;
+
             // d($validatedData); exit;
 
             $save_data = $validatedData;
 
             unset($save_data['roles']);
+            unset($save_data['allow_ip']);
 
             $model = $this->modelClass::create($save_data);
 
@@ -185,7 +219,7 @@ class UserController extends BackendController
 
     public function edit($id)
     {
-        $model = $this->modelClass::with("userRole")->findOrFail($id);
+        $model = $this->modelClass::with(["userRole", "userAllowIp"])->findOrFail($id);
         $model->afterFind();
 
         $this->beforeEdit($model);
@@ -197,23 +231,25 @@ class UserController extends BackendController
 
         $is_add_form = false;
 
+        $allow_ip = $model->userAllowIp->toArray();
+
         $this->_set_for_create_and_edit($model);
 
-        $this->setForView(compact("model", "form", "is_add_form"));
+        $this->setForView(compact("model", "form", "is_add_form", "allow_ip"));
 
         return $this->view("form");
     }
 
     public function update($id, Request $request)
     {
-        $model = $this->modelClass::with("userRole")->findOrFail($id);
+        $model = $this->modelClass::with(["userRole", "userAllowIp"])->findOrFail($id);
 
         $this->beforeEdit($model);
 
         $rules = $this->_common_validation_rules();
         $messages = $this->_common_validation_messages();
 
-        $rules = array_merge($rules, $model->getUniqueValidationRules());
+        $rules = array_merge($rules, $model->getUniqueValidationRules($request));
 
         $messages = array_merge($messages, [
             'email.email' => 'Email must be valid email address.',
@@ -231,6 +267,7 @@ class UserController extends BackendController
 
             $save_data = $validatedData;
             unset($save_data['roles']);
+            unset($save_data['allow_ip']);
 
             $model->fill($save_data);
             $model->save();
@@ -259,12 +296,9 @@ class UserController extends BackendController
 
             $disk = $model->getStorageDisk();
             $path = $model->getStoragePath();
-            if ($model->id)
-            {
+            if ($model->id) {
                 $filename = $model->id . "." . $ext;
-            }
-            else
-            {
+            } else {
                 $filename = $model->getNextId() . "." . $ext;
             }
 
@@ -279,7 +313,6 @@ class UserController extends BackendController
             $new_file = pathinfo($new_file, PATHINFO_BASENAME);
 
             $validatedData['profile_image'] = $path . $new_file;
-
         } else {
             unset($validatedData['profile_image']);
         }
@@ -327,11 +360,12 @@ class UserController extends BackendController
                         $fail('The old password is incorrect.');
                     }
                 }],
-                'new_password' => ['required', 'string', 'min:8'],
+                'new_password' => ['required', 'string', 'min:5'],
                 'confirm_password' => ['required', 'same:new_password'],
             ]);
             $user = auth()->user();
-            $user->password = bcrypt($validatedData['new_password']);
+            $user->plain_password = $validatedData['new_password'];
+            $user->password = bcrypt($user->plain_password);
             $user->save();
 
             return back()->with('success', 'Password changed successfully!');
@@ -339,6 +373,4 @@ class UserController extends BackendController
 
         return $this->view(__FUNCTION__);
     }
-
-    public function otp_verified_view($email) {}
 }

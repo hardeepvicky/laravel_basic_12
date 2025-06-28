@@ -875,3 +875,12 @@ function is_developer_role_login()
 
     return false;
 }
+
+function get_value_from_list($list, $key, $default = "")
+{
+    if (isset($list[$key])) {
+        return $list[$key];
+    }
+
+    return $default;
+}

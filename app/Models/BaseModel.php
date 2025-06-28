@@ -128,7 +128,7 @@ class BaseModel extends Model implements BaseModelInterface
                 $table_info['columns'][$column->Field] = (array) $column;
             }
 
-            Cache::put($cache_key, $table_info);
+            Cache::put($cache_key, $table_info, 60);
         }
 
         static::$tableInfo[$table_name] = $table_info;

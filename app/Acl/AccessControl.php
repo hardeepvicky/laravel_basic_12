@@ -2,6 +2,7 @@
 
 namespace App\Acl;
 
+use App\Exceptions\UserException;
 use App\Helpers\LaravelExtend;
 use App\Helpers\RoleType;
 use App\Models\Role;
@@ -14,7 +15,7 @@ class AccessControl
 {
     private static $instance = null;
 
-    public static function init()
+    public static function init(): AccessControl
     {
         if (is_null(self::$instance)) {
             self::$instance = new AccessControl();
@@ -83,7 +84,7 @@ class AccessControl
 
     public static function getListOfAllowedRouteNames(array $role_id_list)
     {
-        array_check_data_type_and_throw_error($role_id_list, ["int", "string"]);
+        array_check_data_type_and_throw_error($role_id_list, ["integer", "string"]);
 
         $role_id_list = array_unique($role_id_list);
 
@@ -157,7 +158,7 @@ class AccessControl
                 foreach ($all_routes as $route) {
                     $records[$route['route_name']] = [
                         "role" => [
-                            "name" => "Admin User is allowed for all routes"
+                            "name" => "Admin is allowed for all routes"
                         ],
                         "can_be_delete" => false
                     ];
@@ -195,7 +196,7 @@ class AccessControl
         foreach ($allow_route_list as $route_name) {
             $records[$route_name] = [
                 "role" => [
-                    "name" => "All For Any Login User"
+                    "name" => "Allowed For Any Login User"
                 ],
                 "can_be_delete" => false
             ];
@@ -207,7 +208,7 @@ class AccessControl
             foreach ($allow_route_list as $route_name) {
                 $records[$route_name] = [
                     "role" => [
-                        "name" => "Allowed For Admin"
+                        "name" => "Allowed For Admin Only"
                     ],
                     "can_be_delete" => false
                 ];
@@ -262,7 +263,9 @@ class AccessControl
             $cache_key = $this->getMenuCacheKey($user_id);
 
             if (Cache::has($cache_key)) {
-                Cache::forget($cache_key);
+                if (!Cache::forget($cache_key)) {
+                    throw new UserException("Fail to clear cache of key : $cache_key", UserException::ERROR_LARAVEL_FAIL);
+                }
             }
         }
     }

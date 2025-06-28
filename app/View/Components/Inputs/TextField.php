@@ -13,7 +13,7 @@ class TextField extends Component
      */
     public function __construct(
         public String $name,
-        public String $label,
+        public String $label = "",
         public $value = "",
         public $mandatory = false,
         public $preventCssClassAddToInput = false,

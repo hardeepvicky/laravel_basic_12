@@ -1,19 +1,26 @@
+<?php
+
+use App\Models\User;
+
+?>
 @extends($layout)
 
 @section('content')
     <div class="login-main">
         <form class="theme-form" method="POST" action="{{ route('check_before_login') }}">
             @csrf
-            <h2 class="text-center">Login to account</h2>
-            <p class="text-center">Enter your email &amp; password to login</p>
+            <x-Inputs.text-field type="hidden" name="user_type" value="{{ User::TYPE_INTERNAL }}" />
+            <h2 class="text-center mb-2">Login</h2>
 
             <x-Backend.session-flash />
+            <x-Backend.form-errors />
 
-            <x-Inputs.text-field type="email" name="email" label="Email" placeholder="Enter Email" />
+            <x-Inputs.text-field name="login_field" label="Email OR Name" placeholder="Enter Email OR Name" />
             <div class="form-group">
                 <label class="col-form-label">Password</label>
                 <div class="form-input position-relative">
-                    <input class="form-control" type="password" name="password" required="" placeholder="*********">
+                    <x-Inputs.text-field type="password" name="password" label="" placeholder="*********"
+                        mandatory="true" />
                     <div class="show-hide"><span class="show"></span></div>
                 </div>
             </div>
@@ -34,13 +41,11 @@
                 <hr class="flex-grow-1">
             </div>
 
-            <a href="{{ route('auth.google.redirect') }}"
-                class="btn btn-lg google-btn d-flex align-items-center justify-content-center">
-                <i class="fa-brands fa-google"></i>
-                Login with Google
+            <a href="{{ route('auto.login') }}" class="btn btn-have-icon d-flex align-items-center justify-content-center">
+                <i class="fa-solid fa-user-secret"></i>
+                Auto Login
             </a>
         </form>
-
 
         <div class="mt-4 text-center text-sm text-gray-500">
             By signing in, you agree to our <a href="#" class="font-medium text-blue-600 hover:text-blue-500">Terms of

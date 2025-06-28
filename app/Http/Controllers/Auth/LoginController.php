@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Exceptions\UserException;
 use App\Helpers\LaravelExtend;
 use App\Http\Controllers\WebController;
+use App\Models\User;
 use App\Providers\RouteServiceProvider;
+use App\Rules\ReCaptcha;
 use Exception;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Request as FacadesRequest;
 use Illuminate\Validation\ValidationException;
-use ReflectionClass;
-use ReflectionMethod;
 
 class LoginController extends WebController
 {
@@ -45,9 +45,14 @@ class LoginController extends WebController
         parent::__construct();
     }
 
-    public function showLoginForm()
+    public function showLoginForm(Request $request)
     {
         return $this->view("login");
+    }
+
+    public function sign_in_form(Request $request)
+    {
+        return $this->view("sign_in");
     }
 
     protected function beforeViewRender()
@@ -68,34 +73,89 @@ class LoginController extends WebController
         return redirect($this->redirectTo);
     }
 
+    public function auto_login(Request $request)
+    {
+        if (LaravelExtend::isRequestFromLocal()) {
+            dd("Feature under develpment");
+            $ip = $request->ip();
+
+            dd($ip);
+
+            if ($ip) {
+                $user = User::where("email", "admin@admin.com")->first();
+
+                if ($user->plain_password) {
+                    return [
+                        "email" => $user->email,
+                        "password" => $user->plain_password
+                    ];
+                }
+            }
+        }
+
+        return back()->with("fail", "You can not auto login from external");
+    }
+
     public function check_before_login(Request $request)
     {
         $guard = $this->guard();
 
-        $form_fields = $request->only(["email", "password"]);
-
-        // d($form_fields, true);
-
-        if (filter_var($form_fields['email'], FILTER_VALIDATE_EMAIL)) {
-            
-        } else {
-            $form_fields['mobile'] = $form_fields['email'];
-            unset($form_fields['email']);
+        if ($request->get("user_type") == User::TYPE_EXTERNAL) {
+            $request->validate([
+                'g-recaptcha-response' => ['required', new ReCaptcha]
+            ], [
+                "g-recaptcha-response.required" => "Google Capcha verification required"
+            ]);
         }
 
-        if (!$guard->once($request->only(["email", "password"]))) {
+        $credentials = $this->credentials($request);
 
-            //login failed
+        // d($credentials, true);
+
+        if (!$guard->once($credentials)) {
+
             throw ValidationException::withMessages([
                 $this->username() => [trans('auth.failed')],
             ]);
         }
 
         $user = $guard->getUser();
+
+        // dd($user);
+
         if ($user->isRquireOTPVerificationOnLogin()) {
             return redirect(route("otp_verify", ["uid" => $user->uid]));
         } else {
             return $this->login($request);
         }
+    }
+
+    /**
+     * Get the credentials to be used by the controller.
+     * Overrides the default credentials method to handle both email and mobile.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return array
+     */
+    protected function credentials(Request $request)
+    {
+        $login = $request->input($this->username());
+
+        if ($request->get("user_type") == User::TYPE_EXTERNAL) {
+            $field = filter_var($login, FILTER_VALIDATE_EMAIL) ? 'email' : 'mobile';
+        } else {
+            $field = filter_var($login, FILTER_VALIDATE_EMAIL) ? 'email' : 'name';
+        }
+
+        return [
+            $field => $login,
+            'password' => $request->input('password'),
+            "type" => $request->input("user_type")
+        ];
+    }
+
+    public function username()
+    {
+        return "login_field";
     }
 }
