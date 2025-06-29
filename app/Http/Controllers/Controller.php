@@ -220,6 +220,7 @@ abstract class Controller
                 "sql_model" => $sql_model?->toArray()
             ];
 
+            $save = array_purge_if_exceed_limit($save);
             $save = array_short_string_with_dot($save, 255);
 
             $ajaxLog = new AjaxLog($save);
