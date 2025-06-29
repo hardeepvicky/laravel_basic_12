@@ -403,7 +403,7 @@ class WebController extends Controller
         ];
     }
 
-    protected function getPaginagteRecords(Builder $builder, $cache_key_prefix)
+    protected function getPaginagteRecords($builder, $cache_key_prefix)
     {
         $cache_key = null;
 

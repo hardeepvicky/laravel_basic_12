@@ -520,6 +520,10 @@ function get_class_info($class_name)
             throw_exception("class $class_name does not exit");
         }
     }
+    else
+    {
+        $class_name = get_class($class_name);
+    }
 
     $class = new ReflectionClass($class_name);
     $file = $class->getFileName();
@@ -551,7 +555,7 @@ function get_class_info($class_name)
         ];
     }
 
-    return compact("file", 'class_short_name', "constants", "properties", "methods");
+    return compact("file", "class_name", 'class_short_name', "constants", "properties", "methods");
 }
 
 

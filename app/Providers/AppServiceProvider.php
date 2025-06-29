@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Helpers\LaravelExtend;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
@@ -28,6 +29,11 @@ class AppServiceProvider extends ServiceProvider
     {
         if (!App::environment('production')) {
             DB::enableQueryLog();
+
+            if (LaravelExtend::check_database_connection("mongodb"))
+            {
+                DB::connection('mongodb')->enableQueryLog();
+            }
         }
     }
 }

@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use ReflectionClass;
 
 class BaseModel extends Model implements BaseModelInterface
 {
@@ -136,6 +137,30 @@ class BaseModel extends Model implements BaseModelInterface
         }
 
         return $list;
+    }
+
+    public static function getAllRelations(Model $model): array {
+        $class = new ReflectionClass($model);
+        $methods = $class->getMethods();
+
+        $relations = [];
+        foreach ($methods as $method) {
+            if ($method->class != get_class($model) || $method->getNumberOfParameters() > 0) continue;
+
+            try {
+                $relation = $method->invoke($model);
+                if ($relation instanceof \Illuminate\Database\Eloquent\Relations\Relation) {                    
+                    $relations[$method->getName()] = [
+                        "model" => $method,
+                        "relation" => $relation,
+                    ];
+                }
+            } catch (\Throwable $e) {
+                continue;
+            }
+        }
+
+        return $relations;
     }
 
     /*------------------------------------------------------------------*/

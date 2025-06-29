@@ -185,6 +185,23 @@ abstract class Controller
         return $db_logs;
     }
 
+    protected function getMongodbQueryLog()
+    {
+        $db_logs = DB::connection("mongodb")->getQueryLog();
+
+        foreach ($db_logs as $k => $row) {
+            $query = $row['query'];
+
+            $row['query'] = trim(preg_replace('/\s+/', ' ', $query));
+
+            unset($row['bindings']);
+
+            $db_logs[$k] = $row;
+        }
+
+        return $db_logs;
+    }
+
     protected function responseJson(array $response)
     {
         if (App::environment('production')) {
@@ -203,8 +220,13 @@ abstract class Controller
         ];
 
         $save = array_purge_if_exceed_limit($save);
+        
+        $ajaxLog = new AjaxLog($save);
 
-        AjaxLog::create($save);
+        if (!$ajaxLog->saveQuietly())
+        {
+            throw new UserException("Fail To Save Ajax Log", UserException::ERROR_LARAVEL_FAIL);
+        }
 
         return response()->json($response);
     }
