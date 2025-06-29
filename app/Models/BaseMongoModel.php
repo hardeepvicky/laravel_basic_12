@@ -7,8 +7,10 @@ use App\Traits\CacheTrait;
 use App\Traits\StorageTrait;
 use Illuminate\Support\Facades\Auth;
 use MongoDB\Laravel\Eloquent\Builder;
+use MongoDB\Laravel\Eloquent\Model;
+use ReflectionClass;
 
-class BaseMongoModel extends \MongoDB\Laravel\Eloquent\Model implements BaseModelInterface
+class BaseMongoModel extends Model implements BaseModelInterface
 {
     use StorageTrait, CacheTrait;
 
