@@ -210,8 +210,7 @@ abstract class Controller
 
         $sql_model = $this->saveSqlLog();
 
-        if (is_ajax_request())
-        {
+        if (is_ajax_request()) {
             $request = request();
 
             $save = [
@@ -221,12 +220,11 @@ abstract class Controller
                 "sql_model" => $sql_model?->toArray()
             ];
 
-            $save = array_purge_if_exceed_limit($save);
-            
+            $save = array_short_string_with_dot($save, 255);
+
             $ajaxLog = new AjaxLog($save);
 
-            if (!$ajaxLog->saveQuietly())
-            {
+            if (!$ajaxLog->saveQuietly()) {
                 throw new UserException("Fail To Save Ajax Log", UserException::ERROR_LARAVEL_FAIL);
             }
         }

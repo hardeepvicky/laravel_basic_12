@@ -519,9 +519,7 @@ function get_class_info($class_name)
         if (!class_exists($class_name)) {
             throw_exception("class $class_name does not exit");
         }
-    }
-    else
-    {
+    } else {
         $class_name = get_class($class_name);
     }
 
