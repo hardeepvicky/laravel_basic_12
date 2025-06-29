@@ -8,11 +8,15 @@ $.events = {
             icon: "error",
             showCloseButton: true,
             html: title + "<br/>" + responseHtml,
-            width: "80%",
-            customClass: {
-                popup: "swal_error",
-            },
         };
+
+        if (config.html.length > 255)
+        {
+            config.width = "80%";
+            config.customClass = {
+                popup: "swal_error",
+            }
+        }
 
         Swal.fire(config);
     },
@@ -51,8 +55,15 @@ $.events = {
             icon: "error",
             showCloseButton: true,
             html: title + "<br/>" + html,
-            width: "80%",
         };
+
+        if (config.html.length > 255)
+        {
+            config.width = "80%";
+            config.customClass = {
+                popup: "swal_error",
+            }
+        }
 
         Swal.fire(config);
     },

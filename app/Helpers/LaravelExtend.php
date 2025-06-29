@@ -142,4 +142,24 @@ class LaravelExtend
 
         return false;
     }
+
+    public static function merge_validation_rules($old_rules, $new_rules)
+    {
+        foreach($new_rules as $k => $rules)
+        {
+            if (is_array($rules))
+            {
+                if (isset($old_rules[$k]))
+                {
+                    $old_rules[$k] = array_merge($old_rules[$k], $rules);
+                }
+                else
+                {
+                    $old_rules[$k] = $rules;
+                }
+            }
+        }
+
+        return $old_rules;
+    }
 }

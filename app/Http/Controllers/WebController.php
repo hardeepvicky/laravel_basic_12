@@ -6,6 +6,7 @@ use App\Helpers\DateUtility;
 use App\Models\BaseModel;
 use App\Models\Setting;
 use App\Models\User;
+use App\Traits\CacheTrait;
 use Exception;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Database\Eloquent\Builder;
@@ -16,6 +17,8 @@ use Illuminate\Support\Facades\DB;
 
 class WebController extends Controller
 {
+    use CacheTrait;
+
     /**
      * variable require for view
      */
@@ -157,13 +160,16 @@ class WebController extends Controller
 
     protected function getRequestData($cache_prefix, array $array, bool $is_cache_clear = false)
     {
+        $cache_params = [];
+
         if (is_string($cache_prefix) && $cache_prefix) {
-            $cache_key = get_cache_prefix() . "-request_" . $cache_prefix . "_user_" . $this->getAuthUserId();
+            $cache_key = "request_" . $cache_prefix . "_user_" . $this->getAuthUserId();
 
-            $cache_key = BaseModel::optimizeCacheKey($cache_key);
+            $cache_params = self::getCache($cache_key);
 
-            if (Cache::has($cache_key)) {
-                $cache_params = Cache::get($cache_key);
+            if (!$cache_params)
+            {
+                $cache_params = [];
             }
         }
 
@@ -193,11 +199,9 @@ class WebController extends Controller
 
         if (isset($cache_key)) {
             if ($is_cache_clear) {
-                Cache::forget($cache_key);
+                self::forgotCache($cache_key);
             } else {
-                if (!Cache::put($cache_key, $params, laravel_constant("cache_time.summary_search"))) {
-                    throw_exception("Fail to put cache");
-                }
+                self::addCache($cache_key, $params, laravel_constant("cache_time.summary_search"));
             }
         }
 
@@ -210,16 +214,17 @@ class WebController extends Controller
         $search_variables = [];
 
         if (is_string($cache_prefix) && $cache_prefix) {
-
-            $cache_key = get_cache_prefix() . "-search_" . $cache_prefix  . "_user_" . $this->getAuthUserId();
-            $cache_key = BaseModel::optimizeCacheKey($cache_key);
+            $cache_key = "getConditions_" . $cache_prefix . "_user_" . $this->getAuthUserId();
         }
 
         $request_params = request()->all();
 
         if (empty($request_params) && isset($cache_key)) {
-            if (Cache::has($cache_key)) {
-                $request_params = Cache::get($cache_key);
+            $cache_params = self::getCache($cache_key);
+
+            if ($cache_params)
+            {
+                $request_params = $cache_params;
             }
         }
 
@@ -298,9 +303,7 @@ class WebController extends Controller
         }
 
         if (isset($cache_key)) {
-            if (!Cache::put($cache_key, $search_variables, laravel_constant("cache_time.summary_search"))) {
-                throw_exception("Fail to put cache");
-            }
+            self::addCache($cache_key, $search_variables, laravel_constant("cache_time.summary_search"));
         }
 
         if (!isset($this->data['search'])) {
@@ -405,8 +408,7 @@ class WebController extends Controller
         $cache_key = null;
 
         if (is_string($cache_key_prefix) && $cache_key_prefix) {
-            $cache_key = get_cache_prefix() . "-pagination_limit-user-" . $this->getAuthUserId();
-            $cache_key = BaseModel::optimizeCacheKey($cache_key);
+            $cache_key = "pagination_limit-" . $cache_key_prefix . "-user-" . $this->getAuthUserId();
         }
 
         $params = $this->getRequestData($cache_key, [

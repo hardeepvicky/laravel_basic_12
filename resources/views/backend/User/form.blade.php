@@ -32,6 +32,7 @@ use App\Models\User;
     <x-Backend.form-errors />
 
     <x-Form.start action="{{ $form['url'] }}" method="{{ $form['method'] }}" class="i-validate" />
+    <x-Inputs.text-field type="hidden" name="country_id" :value="$model->country_id" />
 
     <div class="row">
         <div class="col-md-12 offset-lg-1 col-lg-10">
@@ -60,7 +61,7 @@ use App\Models\User;
                                 <x-Inputs.drop-down id="country_id" name="country_id" label="Country" :list="$country_list"
                                     :value="$model->country_id" class="select2" mandatory="true" />
                             </div>
-                        </div>
+                        </div>                        
                         <div class="col-md-6 col-lg-4">
                             <div class="form-group mb-3">
                                 <x-Inputs.text-field id="name" name="name" label="Name" :value="$model->name"

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Backend;
 
 use App\Exceptions\UserException;
 use App\Helpers\FileUtility;
+use App\Helpers\LaravelExtend;
 use App\Models\Country;
 use Illuminate\Http\Request;
 use App\Models\User;
@@ -15,7 +16,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
 
 class UserController extends BackendController
 {
@@ -35,13 +35,7 @@ class UserController extends BackendController
 
         $role_list = Role::getListCache();
 
-        d($role_list);
-
         $user_category_list = UserCategory::getListCache();
-
-        d($user_category_list);
-
-        exit;
 
         $this->setForView(compact("records", "role_list", "user_category_list"));
 
@@ -68,6 +62,7 @@ class UserController extends BackendController
         $conditions = $this->getConditions($cache_key, [
             ["field" => "name", "type" => "string"],
             ["field" => "email", "type" => "string"],
+            ["field" => "mobile", "type" => "string"],
             ["field" => "is_active", "type" => "int"],
             ["field" => "type", "type" => "string_equal"],
             ["field" => "user_category_id", "type" => "int"],
@@ -146,6 +141,7 @@ class UserController extends BackendController
             'email' => ['required'],
             'type' => ['required'],
             'user_category_id' => ['required'],
+            'country_id' => ['required'],
             'mobile' => ['nullable'],
             'roles' => ["required"],
             'allow_ip' => [],
@@ -168,14 +164,14 @@ class UserController extends BackendController
 
         $model = new $this->modelClass();
 
-        $rules = array_merge_recursive($rules, $model->getUniqueValidationRules($request));
-
-        // d($rules, true);
+        $rules = LaravelExtend::merge_validation_rules($rules, $model->getUniqueValidationRules($request));
 
         $rules = array_merge_recursive($rules, [
             'password' => 'required|min:2',
             'password_confirm' => ['required', 'same:password'],
         ]);
+
+        // dd($rules);
 
         $messages = array_merge_recursive($messages, [
             'confirm_password.same' => 'Confirm password is not matched with password',
@@ -207,8 +203,8 @@ class UserController extends BackendController
 
             $this->_saveOthers($model, $validatedData);
 
-            if (!empty($this->errors)) {
-                throw new  ValidationException("There are some errors");
+            if ($this->custom_errors) {
+                throw new Exception("Fail to Save");
             }
 
             if ($validatedData['dont_send_email']) {
@@ -219,13 +215,10 @@ class UserController extends BackendController
             DB::commit();
             $this->saveSqlLog();
             return $this->afterSave($model);
-        } catch (ValidationException $ex) {
-            DB::rollBack();
-            return back()->withInput()->withErrors($this->getErrorsForView());
-        } catch (Exception $ex) {
+        }catch (Exception $ex) {
             DB::rollBack();
             $this->saveSqlLog();
-            return back()->withInput()->with('fail', $ex->getMessage());
+            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", $this->custom_errors);
         }
     }
 
@@ -235,6 +228,12 @@ class UserController extends BackendController
         $model->afterFind();
 
         $this->beforeEdit($model);
+
+        if (!$model->country_id)
+        {
+            $my_country = Country::getMyCountry();
+            $model->country_id = $my_country->id;
+        }
 
         $form = [
             'url' => route($this->routePrefix . '.update', $id),
@@ -254,6 +253,7 @@ class UserController extends BackendController
 
     public function update($id, Request $request)
     {
+        // dd($request->all());
         $model = $this->modelClass::with(["userRole", "userAllowIp"])->findOrFail($id);
 
         $this->beforeEdit($model);
@@ -261,7 +261,9 @@ class UserController extends BackendController
         $rules = $this->_common_validation_rules();
         $messages = $this->_common_validation_messages();
 
-        $rules = array_merge($rules, $model->getUniqueValidationRules($request));
+        $rules = LaravelExtend::merge_validation_rules($rules, $model->getUniqueValidationRules($request));
+
+        // dd($rules);
 
         $messages = array_merge($messages, [
             'email.email' => 'Email must be valid email address.',
@@ -289,8 +291,8 @@ class UserController extends BackendController
 
             $this->_saveOthers($model, $validatedData);
 
-            if ($this->errors) {
-                throw new  ValidationException("There are some errors");
+            if ($this->custom_errors) { 
+                throw new Exception("Fail to Save");
             }
 
             DB::commit();
@@ -299,16 +301,12 @@ class UserController extends BackendController
 
             return $this->afterSave($model);
         } 
-        catch (ValidationException $ex) {
-            DB::rollBack();
-            return back()->withInput()->with('fail', $ex->getMessage())->withErrors($this->getErrorsForView());
-        }
         catch (\Exception $ex) {
             DB::rollBack();
 
             $this->saveSqlLog();
 
-            return back()->with('fail', $ex->getMessage())->withInput()->withErrors($this->getErrorsForView());
+            return back()->with('fail', $ex->getMessage())->withInput()->with("custom_errors", $this->custom_errors);
         }
     }
 
@@ -375,7 +373,6 @@ class UserController extends BackendController
 
                     if ($validator->fails()) {
                         $error_msgs = $validator->messages()->all();
-                        dd($error_msgs);
                         $this->addError("", $error_msgs, "Allow IP");
                     } else {
                         $model->userAllowIp()->create($record);

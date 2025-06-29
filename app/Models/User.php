@@ -6,6 +6,10 @@ use App\Acl\AccessControl;
 use App\Exceptions\UserException;
 use App\Helpers\FileUtility;
 use App\Helpers\Util;
+use App\Traits\CacheTrait;
+use App\Traits\ModelListTrait;
+use App\Traits\MysqlTableInfoTrait;
+use App\Traits\StorageTrait;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -21,7 +25,7 @@ use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable implements BaseModelInterface
 {
-    use HasApiTokens, HasFactory, Notifiable, StorageTrait, CacheTrait;
+    use HasApiTokens, HasFactory, Notifiable, StorageTrait, CacheTrait, ModelListTrait, MysqlTableInfoTrait;
 
     /**
      * The attributes that are mass assignable.
@@ -31,6 +35,7 @@ class User extends Authenticatable implements BaseModelInterface
     protected $fillable = [
         'type',
         'user_category_id',
+        'country_id',
         'name',
         'person_name',
         'email',
@@ -60,18 +65,18 @@ class User extends Authenticatable implements BaseModelInterface
         'display_name',
     ];
 
-    public static string $login_with = "email";
-
     protected static array $unique_fields = ["email"];
 
     protected static array $file_fields = ["profile_image"];
+
+    protected static array $list_fields = ["id", "name", "type", "person_name"];
 
     public const TYPE_INTERNAL = "internal";
     public const TYPE_EXTERNAL = "external";
 
     public const TYPE_LIST = [
         self::TYPE_INTERNAL => "Internal",
-        self::TYPE_EXTERNAL => "External",
+        self::TYPE_EXTERNAL => "Outside of Celec",
     ];
 
     public const CREATED_VIA_MANUAL_ADD = "manual_add";
@@ -155,6 +160,7 @@ class User extends Authenticatable implements BaseModelInterface
             $model->forgotCache();
         });
     }
+
     public function beforeSave()
     {
         foreach ($this->getAttributes() as $field => $value) {
@@ -212,14 +218,26 @@ class User extends Authenticatable implements BaseModelInterface
         return $name;
     }
 
+    public function getFullMobileNo($field = "mobile")
+    {
+        $phonecode = $this->country?->phonecode ?? "";
+
+        if ($phonecode)
+        {
+            return "+" . $phonecode . $this->{$field};
+        }
+
+        return $this->{$field};
+    }
+
     public function userCategory()
     {
         return $this->belongsTo(UserCategory::class);
     }
 
-    public function state()
+    public function country()
     {
-        return $this->belongsTo(State::class);
+        return $this->belongsTo(Country::class);
     }
 
     public function userRole()
@@ -241,17 +259,28 @@ class User extends Authenticatable implements BaseModelInterface
     {
         $field_rules = [
             "email" => [Rule::unique($this->connection . "." . $this->getTable(), "email")],
-            "mobile" => [Rule::unique($this->connection . "." . $this->getTable(), "mobile")->where("country_id", $request->input("country_id"))->whereNotNull("mobile")->where('mobile', '<>', '')],
         ];
 
-        if ($request->get("user_type") == self::TYPE_INTERNAL) {
-            $field_rules["name"] = Rule::unique($this->connection . "." . $this->getTable(), "name")->where("type", self::TYPE_INTERNAL);
+        $rule = Rule::unique($this->connection . "." . $this->getTable(), "mobile");
+        $rule->whereNotNull("mobile");
+
+        if ($request->input("country_id"))
+        {
+            $rule->where("country_id", $request->input("country_id"));
         }
 
+        $field_rules['mobile'] = [$rule];
+
+        if ($request->get("type") == self::TYPE_INTERNAL) {            
+            $rule = Rule::unique($this->connection . "." . $this->getTable(), "name")->where("type", self::TYPE_INTERNAL);
+            $field_rules["name"] = [$rule];
+        }
+        
         if ($this->id) {
             foreach ($field_rules as $field => $rules) {
                 foreach ($rules as $rule) {
                     if ($rule instanceof Unique) {
+                        // d([$field => $this->id]);
                         $rule->ignore($this->id, $this->primaryKey);
                     }
                 }
@@ -417,104 +446,33 @@ class User extends Authenticatable implements BaseModelInterface
         return $class_name;
     }
 
-    public static function fetchList(Builder $builder, String $key_field, String $value_field, String $table_name)
+    public static function fetchList(Builder $builder, String $key_field, String $value_field)
     {
-        if (Schema::hasColumn($table_name, $key_field) && Schema::hasColumn($table_name, $value_field)) {
-            return $builder->pluck($value_field, $key_field)->toArray();
+        $model = new static();
+        $table_name  = $model->getTable();
+
+        if (!in_array($key_field, self::$list_fields) && static::tableHaveField($table_name, $key_field) )
+        {
+            self::$list_fields[] = $key_field;
         }
 
-        $records = $builder->get()->toArray();
+        if (!in_array($value_field, self::$list_fields) && static::tableHaveField($table_name, $value_field) )
+        {
+            self::$list_fields[] = $value_field;
+        }
+        
+        $builder->select(self::$list_fields);
 
-        // d($records, true);
+        $records = $builder->get();
+
+        // dd($records); exit;
 
         $list = [];
 
         foreach ($records as $record) {
-            if ($value_field == "display_name_with_id") {
-                $list[$record[$key_field]] = $record['display_name'] . "-" . $record['id'];
-            } else {
-                $list[$record[$key_field]] = $record[$value_field];
-            }
+            $arr = $record->toArray();
+            $list[$arr[$key_field]] = $arr[$value_field];
         }
-
-        return $list;
-    }
-
-    public static function getList(String $key_field = "id", String $value_field = "display_name", $conditions = [], $order_by = "name", $order_dir = "asc")
-    {
-        $builder = static::query();
-
-        $model = new static();
-        $table_name = $model->getTable();
-
-        $builder->orWhere(function ($query) use ($conditions) {
-            if (isset($conditions['or_id'])) {
-                $v = $conditions['or_id'];
-
-                if (is_array($v)) {
-                    if (!empty($v)) {
-                        $query->whereIn("id", $v);
-                    }
-                } else {
-                    $query->where("id", $v);
-                }
-            }
-        });
-
-        unset($conditions['or_id']);
-
-        if (static::tableHaveField($table_name, 'is_active')) {
-            if (!isset($conditions['is_active'])) {
-                $conditions['is_active'] = 1;
-            }
-        }
-
-        $builder->orWhere(function ($query) use ($conditions) {
-            foreach ($conditions as $k => $v) {
-                if (is_array($v)) {
-                    if (!empty($v)) {
-                        $query->whereIn($k, $v);
-                    }
-                } else {
-                    $query->where($k, $v);
-                }
-            }
-        });
-
-        if ($order_by && $order_dir) {
-            $builder->orderBy($order_by, $order_dir);
-        }
-
-        $list = static::fetchList($builder, $key_field, $value_field, $table_name);
-
-        return $list;
-    }
-
-    public static function getListCache(String $key_field = "id", String $value_field = "display_name", $order_by = "name", $order_dir = "ASC")
-    {
-        $model = new static();
-        $table_name = $model->getTable();
-
-        $key = "list-" . $key_field . "-" . $value_field;
-
-        $list = static::getCache($key);
-
-        if ($list) {
-            return $list;
-        }
-
-        $builder = static::query();
-
-        if ($order_by && $order_dir) {
-            $builder->orderBy($order_by, $order_dir);
-        }
-
-        $model = new static();
-        $table_name = $model->getTable();
-
-        $list = static::fetchList($builder, $key_field, $value_field, $table_name);
-
-        self::addCache($key, $list);
 
         return $list;
     }
@@ -633,7 +591,7 @@ class User extends Authenticatable implements BaseModelInterface
         $this->save();
     }
 
-    public function getProfileImage()
+    public function getProfileImage($defalut = "img/user.png")
     {
         if (isset($this->profile_image_url) && $this->profile_image_url) {
             return $this->profile_image_url;
@@ -654,7 +612,7 @@ class User extends Authenticatable implements BaseModelInterface
             return $this->avatar;
         }
 
-        return "img/user.png";
+        return $defalut;
     }
 
     public static function generateUID()

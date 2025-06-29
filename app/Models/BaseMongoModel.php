@@ -3,9 +3,9 @@
 namespace App\Models;
 
 use App\Helpers\FileUtility;
+use App\Traits\CacheTrait;
+use App\Traits\StorageTrait;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Storage;
 use MongoDB\Laravel\Eloquent\Builder;
 use MongoDB\Laravel\Eloquent\Model;
 

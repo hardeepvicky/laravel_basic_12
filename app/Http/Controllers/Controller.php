@@ -16,7 +16,7 @@ use Illuminate\Support\MessageBag;
 
 abstract class Controller
 {
-    public array $errors = [];
+    public array $custom_errors = [];
 
     protected function deleteCascade(Model $model)
     {
@@ -234,20 +234,7 @@ abstract class Controller
         }
 
         foreach ($messages as $msg) {
-            $this->errors[$group][] = compact("label", "msg", "extra", "group");
+            $this->custom_errors[$group][] = compact("label", "msg", "extra");
         }
-    }
-
-    public function getErrorsForView()
-    {
-        $msgBag = new MessageBag();
-
-        foreach ($this->errors as $group => $errors) {
-            $msgBag->add("custom-" . $group, $errors);
-        }
-
-        dd($msgBag->all());
-
-        return $msgBag;
     }
 }

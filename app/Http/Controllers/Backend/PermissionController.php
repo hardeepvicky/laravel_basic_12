@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Backend;
 
 use App\Acl\AccessControl;
 use App\Acl\SectionRoutes;
+use App\Exceptions\UserException;
 use App\Models\Role;
 use App\Models\RoleRouteName;
 use App\Models\User;
@@ -80,7 +81,7 @@ class PermissionController extends BackendController
             $old_save_id_list = RoleRouteName::where("role_id", "=", $role->id)->pluck("id", "id");
             foreach ($choosen_route_list as $route_name) {
                 if (!isset($synced_route_name_list[$route_name])) {
-                    die("$route_name not found. may be you forgot to add in SectionRoutes.php");
+                    throw new UserException("$route_name not found");
                 }
 
                 $saved_id = $roleRouteName->insertIgnoreIfExist([

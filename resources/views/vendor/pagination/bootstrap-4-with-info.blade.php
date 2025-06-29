@@ -14,7 +14,7 @@
             {!! __('results') !!}
         </h6>
     </div>
-    <nav class="col-md-6">
+    <nav class="col-md-6">        
         @if ($paginator->hasPages())
         <ul class="pagination" style="justify-content:flex-end; margin-bottom:0;">
             {{-- Previous Page Link --}}
