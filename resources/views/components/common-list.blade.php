@@ -3,7 +3,13 @@ $my_attributes = [];
 
 if (isset($preventDefaultCssClass) && $preventDefaultCssClass) {
 } else {
-    $my_attributes['class'] = '';
+    $preventDefaultCssClass = false;
+
+    $my_attributes['class'] = 'common-list';
+
+    if ($type == 'ul') {
+        $my_attributes['class'] .= 'common-ul';
+    }
 }
 ?>
 
@@ -20,7 +26,7 @@ if (isset($preventDefaultCssClass) && $preventDefaultCssClass) {
 @foreach ($list as $k => $v)
     <li data-key="{{ $k }}">
         @if (is_array($v))
-            <x-common-list :list="$v" :headerText="$k" />
+            <x-common-list :list="$v" :headerText="$k" :type="$type" :liClass="$liClass" :preventDefaultCssClass="$preventDefaultCssClass" />
         @elseif(is_scalar($v))
             {!! $v !!}
         @endif
