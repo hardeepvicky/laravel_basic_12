@@ -210,6 +210,10 @@ abstract class Controller
 
         $sql_model = $this->saveSqlLog();
 
+        if ($sql_model) {
+            $sql_model->afterFind();
+        }
+
         if (is_ajax_request()) {
             $request = request();
 

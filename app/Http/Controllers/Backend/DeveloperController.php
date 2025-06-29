@@ -100,6 +100,11 @@ class DeveloperController extends BackendController
                 $op = '<=';
                 break;
 
+            case "bool":
+            case "boolean":
+                $parse_value = (bool) $value;
+                break;
+
             default:
                 $parse_value = $value;
                 break;
@@ -182,6 +187,8 @@ class DeveloperController extends BackendController
 
         $conditions = $this->getConditions(Route::currentRouteName(), [
             ["field" => "route_name_or_url", "type" => "string", "view_field" => "route_name_or_url"],
+            ["field" => "sql_model.have_dml_query", "type" => "bool", "view_field" => "have_dml_query"],
+            ["field" => "sql_model.have_heavy_query", "type" => "bool", "view_field" => "have_heavy_query"],
             ["field" => "created_at", "type" => "from_date", "view_field" => "from_date"],
             ["field" => "created_at", "type" => "to_date", "view_field" => "to_date"],
         ]);
@@ -189,6 +196,8 @@ class DeveloperController extends BackendController
         $builder = AjaxLog::where($conditions);
 
         $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
+
+        // d($records->toArray(), true);
 
         $builder = AjaxLog::where($conditions);
 

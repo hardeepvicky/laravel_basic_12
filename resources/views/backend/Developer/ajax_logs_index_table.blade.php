@@ -47,6 +47,24 @@
                         </td>
                         <td>
                             <x-Backend.index-table-info :record="$record" :userList="$userListCache" />
+
+                            <div class="mt-2 mb-2">
+                                @if (isset($record->sql_model['sql_log_file_url']))
+                                <a href="{{ $record->sql_model['sql_log_file_url'] }}"
+                                    class="btn btn-outline-secondary">
+                                    <i class="fas fa-download"></i>
+                                    SQL Log
+                                </a>
+                                @endif
+
+                                @if (isset($record->sql_model['sql_dml_log_file_url']))
+                                <a href="{{ $record->sql_model['sql_dml_log_file_url'] }}"
+                                    class="btn btn-outline-secondary">
+                                    <i class="fas fa-download"></i>
+                                    DML SQL Log
+                                </a>
+                            </div>
+                            @endif
                         </td>
                     </tr>
                     @endforeach
