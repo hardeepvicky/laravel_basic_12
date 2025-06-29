@@ -18,15 +18,37 @@
                 </thead>
                 <tbody>
                     @foreach ($records as $record)
-                        <tr>
-                            <td>{{ $record->id }}</td>
-                            <td>{{ $record->route_name_or_url }}</td>
-                            <td>{!! array_print($record->request) !!}</td>
-                            <td>{!! array_print($record->response) !!}</td>
-                            <td>
-                                <x-Backend.index-table-info :record="$record" :userList="$userListCache" />
-                            </td>
-                        </tr>
+                    <tr>
+                        <td>{{ $record->id }}</td>
+                        <td>{{ $record->route_name_or_url }}</td>
+                        <td>
+                            <div id="request-{{ $record->id }}" class="h-200">
+                                {!! array_print($record->request) !!}
+                            </div>
+
+                            <span class="btn btn-info btn-sm css-toggler mt-1 mb-1"
+                                data-sr-css-class-toggle-target="#request-{{ $record->id }}"
+                                data-sr-css-class-toggle-class="h-200" data-sr-css-class-toggle-applied-text="More"
+                                data-sr-css-class-toggle-not-applied-text="Less">
+                                More
+                            </span>
+                        </td>
+                        <td>
+                            <div id="response-{{ $record->id }}" class="h-200">
+                                {!! array_print($record->response) !!}
+                            </div>
+
+                            <span class="btn btn-info btn-sm css-toggler mt-1 mb-1"
+                                data-sr-css-class-toggle-target="#response-{{ $record->id }}"
+                                data-sr-css-class-toggle-class="h-200" data-sr-css-class-toggle-applied-text="More"
+                                data-sr-css-class-toggle-not-applied-text="Less">
+                                More
+                            </span>
+                        </td>
+                        <td>
+                            <x-Backend.index-table-info :record="$record" :userList="$userListCache" />
+                        </td>
+                    </tr>
                     @endforeach
                 </tbody>
             </table>

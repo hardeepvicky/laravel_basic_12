@@ -74,7 +74,7 @@ function array_print($array, $indent = 0)
 {
     $array = array_short_string_with_dot($array);
 
-    echo '<ul class="array_print indent-' . $indent . '">';
+    echo '<ul class="array_print indent-' . $indent . '" >';
     foreach ($array as $key => $value) {
         echo '<li>';
         if (is_array($value)) {

@@ -58,6 +58,8 @@ $(document).ready(function () {
 
     $(".cascade-drop-down").cascade();
 
+    $(".sr-paragraph").srParagraph();
+
     /** -------------------------------------------------------- */
 
     $("input.invalid-char").on("keypress", function (event) {

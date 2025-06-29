@@ -210,22 +210,25 @@ abstract class Controller
 
         $sql_model = $this->saveSqlLog();
 
-        $request = request();
-
-        $save = [
-            "route_name_or_url" => Route::currentRouteName(),
-            "request" => $request->all(),
-            "response" => $response,
-            "sql_model" => $sql_model?->toArray()
-        ];
-
-        $save = array_purge_if_exceed_limit($save);
-        
-        $ajaxLog = new AjaxLog($save);
-
-        if (!$ajaxLog->saveQuietly())
+        if (is_ajax_request())
         {
-            throw new UserException("Fail To Save Ajax Log", UserException::ERROR_LARAVEL_FAIL);
+            $request = request();
+
+            $save = [
+                "route_name_or_url" => Route::currentRouteName(),
+                "request" => $request->all(),
+                "response" => $response,
+                "sql_model" => $sql_model?->toArray()
+            ];
+
+            $save = array_purge_if_exceed_limit($save);
+            
+            $ajaxLog = new AjaxLog($save);
+
+            if (!$ajaxLog->saveQuietly())
+            {
+                throw new UserException("Fail To Save Ajax Log", UserException::ERROR_LARAVEL_FAIL);
+            }
         }
 
         return response()->json($response);
