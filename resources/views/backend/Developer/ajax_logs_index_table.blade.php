@@ -1,3 +1,7 @@
+<?php
+
+use App\Helpers\Util;
+?>
 <div class="card" id="page-summary">
     <div class="card-header border-t-info">
         <x-Backend.pagination-links :records="$records" />
@@ -10,17 +14,21 @@
                     <tr class="border-bottom-primary">
                         <th>ID</th>
                         <th>Route Name / Url</th>
+                        <th><?= sortable_anchor('exec_time', 'Time Taken (Seconds)') ?></th>
                         <th>Request</th>
                         <th>Response</th>
-                        <th>Info</th>
+                        <th>
+                            Info
+                            <?= sortable_anchor('created_at', 'Created') ?>
+                        </th>
                     </tr>
-
                 </thead>
                 <tbody>
                     @foreach ($records as $record)
                     <tr>
                         <td>{{ $record->id }}</td>
                         <td>{{ $record->route_name_or_url }}</td>
+                        <td>{{ Util::niceTime($record->exec_time) }}</td>
                         <td>
                             <div id="request-{{ $record->id }}" class="h-200">
                                 {!! array_print($record->request) !!}

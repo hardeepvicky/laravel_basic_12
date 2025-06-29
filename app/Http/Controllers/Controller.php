@@ -225,7 +225,9 @@ abstract class Controller
             ];
 
             $save = array_purge_if_exceed_limit($save);
-            $save = array_short_string_with_dot($save, 255);
+            $save = array_short_string_with_dot($save, 2048);
+
+            $save["exec_time"] = microtime(true) - LARAVEL_START;
 
             $ajaxLog = new AjaxLog($save);
 
