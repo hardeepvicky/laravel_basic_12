@@ -22,7 +22,8 @@ $.ajaxSetup({
 $(document).ajaxError(function (event, xhr, settings, errorString) {
     if (xhr.status == 403) {
         $.events.onAjaxError(errorString, "Session is expired. Please Login");
-    } else if (
+    } 
+    else if (
         typeof xhr.responseText == "string" &&
         xhr.responseText.length > 0
     ) {

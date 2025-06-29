@@ -2,9 +2,12 @@
 
 namespace Database\Seeders;
 
+use App\Exceptions\UserException;
+use App\Helpers\ConsoleOutput;
 use App\Models\Role;
 use Illuminate\Database\Seeder;
 use App\Models\User;
+use App\Models\UserCategory;
 use App\Models\UserRole;
 use Exception;
 
@@ -20,22 +23,64 @@ class UserSeeder extends Seeder
         $role = Role::where("code", "system_admin")->first();
 
         if (!$role) {
-            throw new Exception("System Admin Role Not Found");
+            throw new UserException("Role Not Found");
         }
 
-        $user = User::where("name", "Admin")->first();
+        $user_category =  UserCategory::where("type", User::TYPE_INTERNAL)->first();
 
-        if (!$user) {
-            $user = User::create([
-                'name' => 'Admin',
-                'email' => 'admin@admin.com',
-                'password' => bcrypt('admin@123'),
+        if (!$user_category) {
+            throw new UserException("User Category Not Found");
+        }
+
+        $counts = [
+            "total_count" => 0,
+            "insert_count" => 0,
+            "update_count" => 0,
+            "delete_count" => 0,
+        ];
+
+        $records = [
+            [
+                'type' => User::TYPE_INTERNAL,
+                "user_category_id" => $user_category->id,
+                'name' => 'admin',
+                'email' => 'admin@celec.com',
+                'password' => bcrypt('admin'),
                 'dont_send_email' => 1,
                 'is_active' => 1,
                 'is_pre_defined' => 0,
-            ]);
+            ],            
+        ];
+
+        $counts['total_count'] = count($records);
+
+        $model = new User();
+
+        foreach ($records as $record) {
+            $model = $model->insertOrUpdate($record, $is_insert, $is_update);
+
+            if  (!$model)
+            {
+                throw new UserException("Fail To Save", UserException::ERROR_LARAVEL_FAIL);
+            }
+
+            $model->assignRoles([$role->id]);
+
+            if ($is_insert) {
+                $counts['insert_count']++;
+            }
+
+            if ($is_update) {
+                $counts['update_count']++;
+            }
         }
 
-        $user->assignRoles([$role->id]);
+        $output = new ConsoleOutput();
+
+        $counts = array_human_keys($counts);
+
+        $output->addLog($counts);
+
+        $output->writeLogToConsole();
     }
 }

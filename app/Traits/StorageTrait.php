@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Models;
+namespace App\Traits;
 
-use App\Helpers\FileUtility;
 use Illuminate\Support\Facades\Storage;
 
 trait StorageTrait

@@ -2,7 +2,11 @@
 
 namespace App\Models;
 
-use App\Helpers\FileUtility;
+use App\Exceptions\UserException;
+use App\Traits\CacheTrait;
+use App\Traits\ModelListTrait;
+use App\Traits\MysqlTableInfoTrait;
+use App\Traits\StorageTrait;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -12,21 +16,21 @@ use Illuminate\Support\Facades\DB;
 
 class BaseModel extends Model implements BaseModelInterface
 {
-    use StorageTrait, CacheTrait;
+    use StorageTrait, CacheTrait, ModelListTrait, MysqlTableInfoTrait;
 
     protected static array $unique_fields = [];
 
     protected static array $file_fields = [];
 
+    protected static array $list_fields = ["id", "name"];
+
     /**
      * set extra relationship array to overcome problem of accidential delete
      * this variable used in Controller.php -> delete()
      */
-    public array $child_model_class = [];
+    public array $child_model_class = [];    
 
     protected $guarded = ["id"];
-
-    private static $tableInfo = [];
 
     public static function classDisplayName(): string
     {
@@ -102,67 +106,27 @@ class BaseModel extends Model implements BaseModelInterface
 
     public function afterFind() {}
 
-    public static function getTableInfo($table_name)
+    
+    public static function fetchList(Builder $builder, String $key_field, String $value_field)
     {
-        if (!isset(static::$tableInfo[$table_name])) {
-            static::setTableInfo($table_name);
+        $model = new static();
+        $table_name  = $model->getTable();
+
+        if (!in_array($key_field, self::$list_fields) && self::tableHaveField($table_name, $key_field) )
+        {
+            self::$list_fields[] = $key_field;
         }
 
-        return static::$tableInfo[$table_name];
-    }
-
-    public static function setTableInfo($table_name)
-    {
-        $cache_key = "table-info-" . $table_name;
-
-        $table_info = Cache::get($cache_key);
-
-        if (!$table_info) {
-            $table_info = [
-                "columns" => []
-            ];
-
-            $columns = DB::select('SHOW COLUMNS FROM ' . $table_name);
-
-            foreach ($columns as $column) {
-                $table_info['columns'][$column->Field] = (array) $column;
-            }
-
-            Cache::put($cache_key, $table_info, 60);
+        if (!in_array($value_field, self::$list_fields) && self::tableHaveField($table_name, $value_field) )
+        {
+            self::$list_fields[] = $value_field;
         }
-
-        static::$tableInfo[$table_name] = $table_info;
-    }
-
-    public static function tableHaveField($table_name, $field)
-    {
-        if (!isset(static::$tableInfo[$table_name])) {
-            static::setTableInfo($table_name);
-        }
-
-        $info = static::$tableInfo[$table_name];
-
-        if (isset($info["columns"][$field])) {
-            return true;
-        }
-
-        return false;
-    }
-
-    public static function parseValueBeforeUseInDBQuery($field, $value)
-    {
-        return $value;
-    }
-
-    public static function fetchList(Builder $builder, String $key_field, String $value_field, String $table_name)
-    {
-        if (self::tableHaveField($table_name, $key_field) && self::tableHaveField($table_name, $value_field)) {
-            return $builder->pluck($value_field, $key_field)->toArray();
-        }
+        
+        $builder->select(self::$list_fields);
 
         $records = $builder->get();
 
-        // d($value_field); dd($records->toArray());
+        // dd($records); exit;
 
         $list = [];
 
@@ -170,82 +134,6 @@ class BaseModel extends Model implements BaseModelInterface
             $arr = $record->toArray();
             $list[$arr[$key_field]] = $arr[$value_field];
         }
-
-        return $list;
-    }
-
-    public static function getList(String $key_field = "id", String $value_field = "display_name", $conditions = [], $order_by = "name", $order_dir = "asc")
-    {
-        $builder = static::query();
-
-        $model = new static();
-        $table_name = $model->getTable();
-
-        $builder->orWhere(function ($query) use ($conditions) {
-            if (isset($conditions['or_id'])) {
-                $v = $conditions['or_id'];
-
-                if (is_array($v)) {
-                    if (!empty($v)) {
-                        $query->whereIn("id", $v);
-                    }
-                } else {
-                    $query->where("id", $v);
-                }
-            }
-        });
-
-        unset($conditions['or_id']);
-
-        if (static::tableHaveField($table_name, 'is_active')) {
-            if (!isset($conditions['is_active'])) {
-                $conditions['is_active'] = 1;
-            }
-        }
-
-        $builder->orWhere(function ($query) use ($conditions) {
-            foreach ($conditions as $k => $v) {
-                if (is_array($v)) {
-                    if (!empty($v)) {
-                        $query->whereIn($k, $v);
-                    }
-                } else {
-                    $query->where($k, $v);
-                }
-            }
-        });
-
-        if ($order_by && $order_dir) {
-            $builder->orderBy($order_by, $order_dir);
-        }
-
-        $list = static::fetchList($builder, $key_field, $value_field, $table_name);
-
-        return $list;
-    }
-
-    public static function getListCache(String $key_field = "id", String $value_field = "display_name", $order_by = "name", $order_dir = "ASC")
-    {
-        $key = "list-" . $key_field . "-" . $value_field;
-
-        $list = static::getCache($key);
-
-        if ($list) {
-            return $list;
-        }
-
-        $builder = static::query();
-
-        if ($order_by && $order_dir) {
-            $builder->orderBy($order_by, $order_dir);
-        }
-
-        $model = new static();
-        $table_name = $model->getTable();
-
-        $list = static::fetchList($builder, $key_field, $value_field, $table_name);
-
-        self::addCache($key, $list);
 
         return $list;
     }
@@ -317,16 +205,16 @@ class BaseModel extends Model implements BaseModelInterface
     public function getUniqueId(array $data)
     {
         if (!static::$unique_fields) {
-            throw_exception("unique_fields is not set yet");
+            throw new UserException("unique_fields is not set yet");
         }
 
         $conditions = [];
         foreach (static::$unique_fields as $unique_field) {
             if (!isset($data[$unique_field])) {
-                throw_exception("field $unique_field missing in argument array");
+                throw new UserException("field $unique_field missing in argument data");
             }
 
-            $conditions[] = [$unique_field, '=', self::parseValueBeforeUseInDBQuery($unique_field, $data[$unique_field])];
+            $conditions[] = [$unique_field, '=', $data[$unique_field]];
         }
 
         $count = static::where($conditions)->count();
@@ -336,7 +224,7 @@ class BaseModel extends Model implements BaseModelInterface
         }
 
         if ($count > 1) {
-            throw_exception("more than 1 records found");
+            throw new UserException("more than 1 records found");
         }
 
         $record = static::where($conditions)->first(["id"]);

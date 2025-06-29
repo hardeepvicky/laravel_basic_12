@@ -340,7 +340,7 @@ class SectionRoutes
 
         $routes["Email Logs"] = [
             "routes" => [
-                $routePrefix . ".email_log"
+                $routePrefix . ".email_logs"
             ]
         ];
         $routes["SQL Logs"] = [
@@ -351,7 +351,7 @@ class SectionRoutes
 
         $routes["Ajax Logs"] = [
             "routes" => [
-                $routePrefix . ".sql_log"
+                $routePrefix . ".ajax_logs"
             ]
         ];
 

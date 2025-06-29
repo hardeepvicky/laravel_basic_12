@@ -35,7 +35,7 @@
                 @foreach ($elements as $element)
                 {{-- "Three Dots" Separator --}}
                 @if (is_string($element))
-                <li class="page-link disabled" aria-disabled="true">
+                <li class="page-item disabled" aria-disabled="true">
                     <a class="page-link" href="javascript:void(0)">{{ $element }}</a>
                 </li>
                 @endif

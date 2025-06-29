@@ -24,6 +24,9 @@ use App\Models\User;
                         <x-Inputs.text-field name="email" label="Email" :value="$search['email']" autocomplete="off" />
                     </div>
                     <div class="col-md-3">
+                        <x-Inputs.text-field name="mobile" label="Mobile" :value="$search['mobile']" autocomplete="off" />
+                    </div>
+                    <div class="col-md-3">
                         <x-Inputs.drop-down name="role_id" label="Role" :value="$search['role_id']" :list="$role_list"
                             class="select2" />
                     </div>

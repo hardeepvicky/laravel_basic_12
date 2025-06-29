@@ -977,3 +977,15 @@ function array_purge_if_exceed_limit(array $arr, $max_len = 100, $recursive = tr
 
     return $arr;
 }
+
+
+function is_ajax_request()
+{
+    if (
+        isset($_SERVER['HTTP_X_REQUESTED_WITH']) &&
+        strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest'
+    ) {
+        return true;
+    }
+    return false;
+}

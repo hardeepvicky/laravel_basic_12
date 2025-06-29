@@ -2,6 +2,7 @@
 
 use App\Exceptions\UserException;
 use App\Helpers\Menu;
+use App\Http\Middleware\Authenticate;
 use App\Http\Middleware\RolePermission;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -19,7 +20,8 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
-            'role_permission' => RolePermission::class
+            'check_auth' => Authenticate::class,
+            'role_permission' => RolePermission::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
@@ -86,6 +88,8 @@ return Application::configure(basePath: dirname(__DIR__))
 
             $error_code = $e->getCode();
 
+            dd($error_code);
+
             $error_msg = $e->getMessage();
 
             $request = request();
@@ -94,15 +98,12 @@ return Application::configure(basePath: dirname(__DIR__))
 
             $current_route_name = Route::currentRouteName();
 
-            $ajax_view_name = "errors.ajax.$error_code";
+            $ajax_view_name = "errors.ajax.user_exception";
             if (!view()->exists($ajax_view_name)) {
                 $ajax_view_name = "errors.ajax.default";
             }
 
-            $file_name = $e->getFile();
-            $file_line_no = $e->getLine();
-
-            $data = array_merge($e->data, compact("error_code", "error_msg", "current_url", "current_route_name", "ajax_view_name", "file_name", "file_line_no"));
+            $data = array_merge($e->data, compact("error_code", "error_msg", "current_url", "current_route_name", "ajax_view_name"));
 
             // dd($data);
 

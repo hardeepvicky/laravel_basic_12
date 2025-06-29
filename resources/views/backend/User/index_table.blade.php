@@ -1,5 +1,6 @@
 <?php
 use App\Models\User;
+
 ?>
 <div class="card" id="page-summary">
     <div class="card-header border-t-info">
@@ -36,7 +37,7 @@ use App\Models\User;
                             <td>{{ $record->email }}</td>
                             <td>{{ $record->mobile }}</td>
                             <td>
-                                @if ($url = $record->getProfileImage())
+                                @if ($url = $record->getProfileImage(null))
                                     <a class="fancybox" data-fancybox="group-{{ $record->id }}"
                                         href="{{ $url }}">
                                         <img class="img-thumbnail rounded-circle small-img" src="{{ $url }}" />

@@ -8,12 +8,13 @@ use App\Helpers\RoleType;
 use App\Models\Role;
 use App\Models\RoleRouteName;
 use App\Models\RouteName;
-use App\Models\User;
-use Illuminate\Support\Facades\Cache;
+use App\Traits\CacheTrait;
 use Illuminate\Support\Facades\DB;
 
 class AccessControl
 {
+    use CacheTrait;
+    
     private static $instance = null;
     public static $cache_key = "AccessControl";
 
@@ -254,66 +255,6 @@ class AccessControl
         return $ret_records;
     }
 
-
-    public static function getCacheKey()
-    {
-        return "AccessControl";
-    }
-
-    public static function getCache($key)
-    {
-        $base_cache_key = self::getCacheKey();
-
-        if ($base_cache_key) {
-            $cache_key = $base_cache_key . "-" . $key;
-
-            if (Cache::has($cache_key)) {
-                return Cache::get($cache_key);
-            }
-        }
-
-        return null;
-    }
-
-    public static function addCache($key, $data)
-    {
-        $base_cache_key = self::getCacheKey();
-
-        $cache_key = $base_cache_key . "-" . $key;
-
-        //put cache
-        Cache::put($cache_key, $data, laravel_constant("cache_time.permission"));
-
-        //make refrence to cache keys 
-        $list_of_cache_keys = [];
-        if (Cache::has($base_cache_key)) {
-            $list_of_cache_keys = Cache::get($list_of_cache_keys);
-        }
-
-        if (!in_array($cache_key, $list_of_cache_keys)) {
-            $list_of_cache_keys[] = $cache_key;
-        }
-
-        if (!Cache::put($base_cache_key, $list_of_cache_keys, laravel_constant("cache_time.permission"))) {
-            throw new UserException("Fail To Put Cache", UserException::ERROR_LARAVEL_FAIL);
-        }
-    }
-
-    public static function forgotCache($key = null)
-    {
-        $base_cache_key = self::getCacheKey();
-
-        if (Cache::has($base_cache_key)) {
-            $list_of_cache_keys = Cache::get($base_cache_key);
-
-            foreach ($list_of_cache_keys as $cache_key) {
-                if (is_null($key) || $key == $cache_key) {
-                    Cache::forget($cache_key);
-                }
-            }
-        }
-    }
-
     public static function getMenuCacheKey($user_id)
     {
         return "menu_user_" . $user_id;
@@ -338,17 +279,7 @@ class AccessControl
 
     public function syncRouteNamesToDatabase()
     {
-        $routeCollection = \Illuminate\Support\Facades\Route::getRoutes();
-
-        $route_list = [];
-        foreach ($routeCollection as $route) {
-            $name = trim($route->getName());
-            if ($name) {
-                $route_list[] = $name;
-            }
-        }
-
-        sort($route_list);
+        $routes = LaravelExtend::getRoutes();
 
         $routeNameModel = new RouteName();
 
@@ -356,20 +287,20 @@ class AccessControl
 
         $saved_route_name_list = [];
 
-        foreach ($route_list as $route_name) {
+        foreach ($routes as $route) {
             if (
-                in_array($route_name, SectionRoutes::ALLOW_ROUTES_FOR_ANY_LOGIN_USER)
-                && in_array($route_name, SectionRoutes::ALLOW_ROUTES_FOR_SYSTEM_ADMIN)
+                in_array($route['route_name'], SectionRoutes::ALLOW_ROUTES_FOR_ANY_LOGIN_USER)
+                && in_array($route['route_name'], SectionRoutes::ALLOW_ROUTES_FOR_SYSTEM_ADMIN)
             ) {
                 continue;
             }
 
 
-            $id = $routeNameModel->insertIgnoreIfExist(["name" => $route_name]);
+            $id = $routeNameModel->insertIgnoreIfExist(["name" => $route['route_name']]);
 
             unset($old_id_list[$id]);
 
-            $saved_route_name_list[$route_name] = $id;
+            $saved_route_name_list[$route['route_name']] = $id;
         }
 
         if ($old_id_list) {

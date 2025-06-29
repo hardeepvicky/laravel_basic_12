@@ -6,7 +6,7 @@ interface BaseModelInterface
 {
     public static function classDisplayName(): string;
 
-    public static function getModelCacheKey(): string;
+    public static function getCacheKey(): string;
 
     public static function getCache($key);
 
@@ -16,7 +16,7 @@ interface BaseModelInterface
 
     public static function getStoragePath();
 
-    public function forgotCache();
+    public static function forgotCache($key);
 
     public function getNextId();
 

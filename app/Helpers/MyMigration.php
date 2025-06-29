@@ -63,4 +63,16 @@ class MyMigration extends Migration
             DB::statement($q);
         }
     }
+
+    public function indexExists($table, $index)
+    {
+        $database = DB::getDatabaseName();
+        $result = DB::table('information_schema.statistics')
+            ->where('table_schema', $database)
+            ->where('table_name', $table)
+            ->where('index_name', $index)
+            ->exists();
+
+        return $result;
+    }
 }
