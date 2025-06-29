@@ -217,3 +217,11 @@ label.info {
 .swal_error .swal2-html-container {
     text-align: left;
 }
+
+.common-list {
+    margin-left: 1em;
+}
+
+.common-list li {
+    list-style: initial;
+}
