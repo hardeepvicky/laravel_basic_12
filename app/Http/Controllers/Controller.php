@@ -185,6 +185,23 @@ abstract class Controller
         return $db_logs;
     }
 
+    protected function getMongodbQueryLog()
+    {
+        $db_logs = DB::connection("mongodb")->getQueryLog();
+
+        foreach ($db_logs as $k => $row) {
+            $query = $row['query'];
+
+            $row['query'] = trim(preg_replace('/\s+/', ' ', $query));
+
+            unset($row['bindings']);
+
+            $db_logs[$k] = $row;
+        }
+
+        return $db_logs;
+    }
+
     protected function responseJson(array $response)
     {
         if (App::environment('production')) {
@@ -193,18 +210,31 @@ abstract class Controller
 
         $sql_model = $this->saveSqlLog();
 
-        $request = request();
+        if ($sql_model) {
+            $sql_model->afterFind();
+        }
 
-        $save = [
-            "route_name_or_url" => Route::currentRouteName(),
-            "request" => $request->all(),
-            "response" => $response,
-            "sql_model" => $sql_model?->toArray()
-        ];
+        if (is_ajax_request()) {
+            $request = request();
 
-        $save = array_purge_if_exceed_limit($save);
+            $save = [
+                "route_name_or_url" => Route::currentRouteName(),
+                "request" => $request->all(),
+                "response" => $response,
+                "sql_model" => $sql_model?->toArray()
+            ];
 
-        AjaxLog::create($save);
+            $save = array_purge_if_exceed_limit($save);
+            $save = array_short_string_with_dot($save, 2048);
+
+            $save["exec_time"] = microtime(true) - LARAVEL_START;
+
+            $ajaxLog = new AjaxLog($save);
+
+            if (!$ajaxLog->saveQuietly()) {
+                throw new UserException("Fail To Save Ajax Log", UserException::ERROR_LARAVEL_FAIL);
+            }
+        }
 
         return response()->json($response);
     }

@@ -49,7 +49,7 @@ class UserSeeder extends Seeder
                 'dont_send_email' => 1,
                 'is_active' => 1,
                 'is_pre_defined' => 0,
-            ],            
+            ],                         
         ];
 
         $counts['total_count'] = count($records);

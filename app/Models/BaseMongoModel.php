@@ -8,6 +8,7 @@ use App\Traits\StorageTrait;
 use Illuminate\Support\Facades\Auth;
 use MongoDB\Laravel\Eloquent\Builder;
 use MongoDB\Laravel\Eloquent\Model;
+use ReflectionClass;
 
 class BaseMongoModel extends Model implements BaseModelInterface
 {
@@ -205,6 +206,30 @@ class BaseMongoModel extends Model implements BaseModelInterface
         self::addCache($key, $list);
 
         return $list;
+    }
+
+    public static function getAllRelations(Model $model): array {
+        $class = new ReflectionClass($model);
+        $methods = $class->getMethods();
+
+        $relations = [];
+        foreach ($methods as $method) {
+            if ($method->class != get_class($model) || $method->getNumberOfParameters() > 0) continue;
+
+            try {
+                $relation = $method->invoke($model);
+                if ($relation instanceof \Illuminate\Database\Eloquent\Relations\Relation) {                    
+                    $relations[$method->getName()] = [
+                        "model" => $method,
+                        "relation" => $relation,
+                    ];
+                }
+            } catch (\Throwable $e) {
+                continue;
+            }
+        }
+
+        return $relations;
     }
 
     /*------------------------------------------------------------------*/

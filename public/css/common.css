@@ -1,30 +1,43 @@
 .error-card {
-    border-radius: 1.5rem; /* More rounded corners */
-    padding: 3rem; /* More padding */
+    border-radius: 1.5rem;
+    /* More rounded corners */
+    padding: 3rem;
+    /* More padding */
     max-width: 650px;
     width: 100%;
-    transition: transform 0.3s ease-in-out; /* Add subtle hover effect */
+    transition: transform 0.3s ease-in-out;
+    /* Add subtle hover effect */
 }
 
 .error-card:hover {
-    transform: scale(1.02); /* Slightly enlarge on hover */
+    transform: scale(1.02);
+    /* Slightly enlarge on hover */
 }
+
 .error-code {
-    font-size: 4rem; /* Large font size */
-    font-weight: 800; /* Extra bold */
+    font-size: 4rem;
+    /* Large font size */
+    font-weight: 800;
+    /* Extra bold */
     margin-bottom: 1rem;
-    animation: pulse 2s infinite cubic-bezier(0.4, 0, 0.6, 1); /* Subtle pulse animation */
+    animation: pulse 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+    /* Subtle pulse animation */
     text-align: center;
 }
+
 .error-title {
-    font-size: 2.5rem; /* H1 size */
-    font-weight: 700; /* Bold */
+    font-size: 2.5rem;
+    /* H1 size */
+    font-weight: 700;
+    /* Bold */
     margin-bottom: 1rem;
     line-height: 1.2;
     text-align: center;
 }
+
 .error-description {
-    font-size: 1.25rem; /* Larger paragraph text */
+    font-size: 1.25rem;
+    /* Larger paragraph text */
     margin-bottom: 2rem;
 }
 
@@ -39,12 +52,16 @@
 
 .list-container {
     background-color: #ffffff;
-    border-radius: 1.5rem; /* More pronounced rounded corners */
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15), 0 5px 10px rgba(0, 0, 0, 0.1); /* Deeper shadow */
-    padding: 2.5rem; /* Generous internal padding */
+    border-radius: 1.5rem;
+    /* More pronounced rounded corners */
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15), 0 5px 10px rgba(0, 0, 0, 0.1);
+    /* Deeper shadow */
+    padding: 2.5rem;
+    /* Generous internal padding */
     max-width: 600px;
     width: 100%;
 }
+
 .list-title {
     font-size: 2.2rem;
     font-weight: 700;
@@ -54,6 +71,7 @@
     position: relative;
     padding-bottom: 0.8rem;
 }
+
 .list-title::after {
     content: "";
     position: absolute;
@@ -62,30 +80,38 @@
     transform: translateX(-50%);
     width: 80px;
     height: 4px;
-    background: linear-gradient(
-        to right,
-        #6a11cb,
-        #2575fc
-    ); /* Underline matching background gradient */
+    background: linear-gradient(to right,
+            #6a11cb,
+            #2575fc);
+    /* Underline matching background gradient */
     border-radius: 2px;
 }
+
 .custom-list-group {
-    list-style: none; /* Remove default bullet points */
+    list-style: none;
+    /* Remove default bullet points */
     padding: 0;
     margin: 0;
 }
+
 .custom-list-group-item {
-    background-color: #f8f9fa; /* Light background for items */
+    background-color: #f8f9fa;
+    /* Light background for items */
     color: #495057;
-    border: none; /* Remove default Bootstrap list-group-item border */
-    border-radius: 0.8rem; /* Rounded corners for each item */
-    margin-bottom: 1rem; /* Space between items */
+    border: none;
+    /* Remove default Bootstrap list-group-item border */
+    border-radius: 0.8rem;
+    /* Rounded corners for each item */
+    margin-bottom: 1rem;
+    /* Space between items */
     padding: 1rem 1.5rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    transition: all 0.3s ease-in-out; /* Smooth transitions for hover effects */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05); /* Subtle shadow for items */
+    transition: all 0.3s ease-in-out;
+    /* Smooth transitions for hover effects */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    /* Subtle shadow for items */
 }
 
 .custom-list-group-item.selected {
@@ -94,20 +120,28 @@
 }
 
 .custom-list-group-item:last-child {
-    margin-bottom: 0; /* No margin after the last item */
+    margin-bottom: 0;
+    /* No margin after the last item */
 }
+
 .custom-list-group-item:hover {
-    transform: translateY(-3px); /* Lift effect on hover */
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1); /* More pronounced shadow on hover */
+    transform: translateY(-3px);
+    /* Lift effect on hover */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    /* More pronounced shadow on hover */
     cursor: pointer;
 }
+
 .item-text {
     font-size: 1.1rem;
     font-weight: 500;
-    flex-grow: 1; /* Allow text to take up available space */
+    flex-grow: 1;
+    /* Allow text to take up available space */
 }
+
 .item-icon {
-    color: var(--theme-default); /* Icon color matching gradient */
+    color: var(--theme-default);
+    /* Icon color matching gradient */
     font-size: 1.3rem;
     margin-left: 1rem;
 }
@@ -119,13 +153,19 @@
 /* Icon styling (Font Awesome - example) */
 .fa-check-circle {
     color: #28a745;
-} /* Green for completed tasks */
+}
+
+/* Green for completed tasks */
 .fa-clock {
     color: #ffc107;
-} /* Amber for pending tasks */
+}
+
+/* Amber for pending tasks */
 .fa-star {
     color: #dc3545;
-} /* Red for important items */
+}
+
+/* Red for important items */
 
 /* Responsive adjustments for smaller screens */
 @media (max-width: 576px) {
@@ -133,13 +173,16 @@
         padding: 1.5rem;
         border-radius: 1rem;
     }
+
     .list-title {
         font-size: 1.8rem;
         margin-bottom: 1.5rem;
     }
+
     .item-text {
         font-size: 1rem;
     }
+
     .custom-list-group-item {
         padding: 1rem 1.2rem;
     }
@@ -176,28 +219,28 @@ label.info {
     font-size: 1rem;
 }
 
-.celec_date_time {
+.celec_info {
+    margin: 0 10px 10px 0;
     border: 1px solid #ced4da;
     border-radius: 5px;
     max-width: 200px;
     display: inline-block;
-    margin-right: 10px;
     font-size: 12px;
 }
 
-.celec_date_time .label {
+.celec_info .label {
     padding: 2px;
 }
 
-.celec_date_time .label-header {
+.celec_info .label-header {
     background-color: rgba(48, 142, 135, 0.2);
 }
 
-.celec_date_time .divider {
+.celec_info .divider {
     border-top: 1px solid #ced4da;
 }
 
-.summary-table > tbody > tr > * {
+.summary-table>tbody>tr>* {
     background-color: var(--bs-table-hover-bg);
     color: var(--body-font-color);
 }
@@ -211,7 +254,7 @@ label.info {
 }
 
 .array_print {
-    margin-left: 10px;
+    margin-left: 1em;
 }
 
 .swal_error .swal2-html-container {
@@ -224,4 +267,9 @@ label.info {
 
 .common-list li {
     list-style: initial;
+}
+
+.h-200 {
+    max-height: 200px;
+    overflow: hidden;
 }
