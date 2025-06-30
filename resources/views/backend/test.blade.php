@@ -7,5 +7,7 @@ $list = ['Hardeep', 'Vicky', '<span class="badge badge-info">Vicky</span>', 'Lan
 @extends('backend.layouts.default')
 
 @section('content')
-    <x-common-list :list="$list" headerText="Order List" type="ul" />
+    <div class="card-wrapper rounded-3 h-100 bg-light-secondary">
+        <x-common-list :list="$list" headerText="Order List" type="ol" />
+    </div>
 @endsection
