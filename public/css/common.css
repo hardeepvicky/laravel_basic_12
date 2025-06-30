@@ -273,3 +273,8 @@ label.info {
     max-height: 200px;
     overflow: hidden;
 }
+
+.inline {
+    display: inline-block;
+    width: auto;
+}

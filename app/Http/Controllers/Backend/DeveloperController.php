@@ -59,6 +59,7 @@ class DeveloperController extends BackendController
 
             case "to_date":
                 $parse_value = Carbon::parse($value);
+                $parse_value->addHours(23.99);
                 $op = '<=';
                 break;
 
@@ -124,6 +125,8 @@ class DeveloperController extends BackendController
             ["field" => "route_name_or_url", "type" => "string", "view_field" => "route_name_or_url"],
             ["field" => "created_at", "type" => "from_date", "view_field" => "from_date"],
             ["field" => "created_at", "type" => "to_date", "view_field" => "to_date"],
+            ["field" => "have_dml_query", "type" => "int"],
+            ["field" => "have_heavy_query", "type" => "int"],
         ]);
 
         // dd($conditions);
