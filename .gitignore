@@ -25,6 +25,6 @@ yarn-error.log
 /public/user_files
 /public/logs
 
-storage/app
+/storage
 
 *.log
