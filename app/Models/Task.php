@@ -94,6 +94,10 @@ class Task extends BaseModel
                     $this->addError("End Date", "Can not be empty", $group);
                 }
             }
+            else if ($this->type == self::TYPE_RECURRING)
+            {
+                $this->start_date_time = $this->end_date_time = null;
+            }
         }
 
         return parent::beforeSave();
