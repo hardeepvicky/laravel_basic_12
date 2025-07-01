@@ -39,6 +39,7 @@ class SectionRoutes
         $sections = [];
 
         $sections[]["Home"] = self::home();
+        $sections[]["Task"] = self::task();
 
         // $sections["HR"] = [
         //     "Department" => self::department(),
@@ -375,6 +376,29 @@ class SectionRoutes
             "routes" => [
                 $routePrefix . ".activate",
                 $routePrefix . ".de_activate"
+            ]
+        ];
+
+        return $routes;
+    }
+
+    private static function task()
+    {
+        $routePrefix = "task";
+
+        $routes = self::commonRoutes($routePrefix);
+        $routes['Today'] = [
+            "routes" => [
+                $routePrefix . "-today",
+            ]
+        ];
+
+        $routes['Change Status'] = [
+            "routes" => [
+                $routePrefix . ".status_confirm",
+                $routePrefix . ".status_in_progress",
+                $routePrefix . ".status_complete",
+                $routePrefix . ".status_verified",
             ]
         ];
 
