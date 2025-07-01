@@ -389,7 +389,7 @@ class SectionRoutes
         $routes = self::commonRoutes($routePrefix);
         $routes['Today'] = [
             "routes" => [
-                $routePrefix . "-today",
+                $routePrefix . ".today",
             ]
         ];
 
