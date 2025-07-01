@@ -10,8 +10,11 @@
                     <tr class="border-bottom-primary">
                         <th>ID</th>
                         <th>Route Name / Url</th>
-                        <th>Info</th>
-                        <th>Actions</th>
+                        <th>
+                            <?= sortable_anchor('created_at', 'Created') ?>
+                            | <?= sortable_anchor('updated_at', 'Updated') ?>
+                        </th>
+                        <th>Actions</th>    
                     </tr>
 
                 </thead>

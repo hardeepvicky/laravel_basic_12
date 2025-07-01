@@ -200,4 +200,19 @@ class LaravelExtend
 
         return $db_logs;
     }
+
+    public static function getCreatedByOrUpdatedBy($id, $userList = [])
+    {
+        if ($id === 0)
+        {
+            return "system";
+        }
+
+        if (empty($userList))
+        {
+            $userList = User::getListCache();
+        }
+
+        return $userList[$id] ?? '';
+    }
 }

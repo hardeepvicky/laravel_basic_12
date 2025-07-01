@@ -21,6 +21,7 @@ use App\Helpers\Util;
                             <?= sortable_anchor('created_at', 'Created') ?>
                             | <?= sortable_anchor('updated_at', 'Updated') ?>
                         </th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -44,6 +45,9 @@ use App\Helpers\Util;
                             </span>
                             @endif
                         </td>                        
+                        <td>
+                            <x-Backend.index-table-info :record="$record" :userList="$userListCache" />
+                        </td>
                         <td>
                             <div class="mt-2 mb-2">
                                 @if (isset($record->sql_log_file_url))

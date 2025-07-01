@@ -18,9 +18,10 @@ use App\Helpers\Util;
                         <th>Request</th>
                         <th>Response</th>
                         <th>
-                            Info
                             <?= sortable_anchor('created_at', 'Created') ?>
+                            | <?= sortable_anchor('updated_at', 'Updated') ?>
                         </th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -55,7 +56,8 @@ use App\Helpers\Util;
                         </td>
                         <td>
                             <x-Backend.index-table-info :record="$record" :userList="$userListCache" />
-
+                        </td>
+                        <td>
                             <div class="mt-2 mb-2">
                                 @if (isset($record->sql_model['sql_log_file_url']))
                                 <a href="{{ $record->sql_model['sql_log_file_url'] }}"

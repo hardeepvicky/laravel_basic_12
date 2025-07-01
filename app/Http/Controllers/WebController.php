@@ -447,8 +447,10 @@ class WebController extends Controller
             if (!$model->can_edit) {
                 $msg = "Record can not be edit";
                 if (BaseModel::tableHaveField($model->getTable(), "cannot_edit_reason_array") || array_key_exists("cannot_edit_reason_array", $model->attributes)) {
+
                     if ($model->cannot_edit_reason_array) {
-                        $msg .= "Reason : " . implode(", ", $model->cannot_edit_reason_array);
+                        $arr = $model->cannot_edit_reason_array;
+                        $msg .= ", Reason : " . implode(", ", $arr);
                     }
                 }
 

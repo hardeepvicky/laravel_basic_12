@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Exceptions\UserException;
+use App\Helpers\DateUtility;
+use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -17,12 +20,13 @@ class Task extends BaseModel
     protected $casts = [
         'start_date_time' => 'date',
         'end_date_time' => 'date',
+        'cannot_edit_reason_array' => 'array'
     ];
 
     public array $child_model_class = [
-        User::class => [
-            "foreignKey" => "task_id",
-            "preventDelete" => false,
+        Task::class => [
+            "foreignKey" => "parent_id",
+            "preventDelete" => true,
         ],
     ];
 
@@ -228,5 +232,142 @@ class Task extends BaseModel
                 ];
                 break;
         }
+    }
+
+    public static function setDates(array $record) : array
+    {
+        $days_to_add = 0;
+
+        switch($record['complete_time_in_days'])
+        {
+            case self::COMPLETE_TIME_1_DAY:
+                $days_to_add = 1;
+                break;
+            case self::COMPLETE_TIME_2_DAY:
+                $days_to_add = 2;
+                break;
+            case self::COMPLETE_TIME_3_DAY:
+                $days_to_add = 3;
+                break;
+            case self::COMPLETE_TIME_4_DAY:
+                $days_to_add = 4;
+                break;
+            case self::COMPLETE_TIME_5_DAY:
+                $days_to_add = 5;
+                break;
+            case self::COMPLETE_TIME_WEEK:
+                $days_to_add = 7;
+                break;
+            case self::COMPLETE_TIME_2_WEEK:
+                $days_to_add = 14;
+                break;
+            case self::COMPLETE_TIME_MONTH:
+                $days_to_add = 30;
+                break;
+            case self::COMPLETE_TIME_QUARTER:
+                $days_to_add = 90;
+                break;
+        }
+
+        if (isset($record['start_date_time']))
+        {
+            $record['end_date_time'] = DateUtility::change($record['start_date_time'], $days_to_add, DateUtility::DAYS, DateUtility::DATE_FORMAT);
+        }
+
+        return $record;
+    }
+
+    public static function createRecurringTask(Task $task) : int
+    {
+        $save_count = 0;
+
+        if ($task->type == self::TYPE_RECURRING)
+        {
+            $today = date(DateUtility::DATE_FORMAT);
+
+            $days = 0;
+
+            switch($task->recurring_type)
+            {
+                case self::RECURRING_DAILY:
+                    $days = 1;
+                    break;
+                case self::RECURRING_WEEKLY:
+                    $days = 7;
+                    break;
+                case self::RECURRING_2_WEEK:
+                    $days = 14;
+                    break;
+                case self::RECURRING_MONTHLY:
+                    $days = 30;
+                    break;
+                case self::RECURRING_QUATARLY:
+                    $days = 90;
+                    break;
+                case self::RECURRING_YEARLY:
+                    $days = 365;
+                    break;                
+            }
+
+            if ($days > 0)
+            {
+                $next_date = DateUtility::getDate($task->created_at, DateUtility::DATE_FORMAT);
+
+                while(DateUtility::compare($next_date, $today) <= 0)
+                {
+                    try
+                    {
+                        $record = $task->getAttributes();
+                        unset($record["id"]);
+                        unset($record["created_at"]);
+                        unset($record["updated_at"]);
+                        unset($record["created_by"]);
+                        unset($record["updated_by"]);
+
+                        
+                        $record['type'] = self::TYPE_ONE_TIME;
+                        $record['one_time_type'] = self::ONE_TIME_CUSTOM;
+                        $record['is_draft'] = 0;
+                        $record['is_completed'] = 0;
+                        $record['is_verified'] = 0;
+                        $record['can_edit'] = 0;
+                        $record['cannot_edit_reason_array'] = ['Task created from recurring task by system'];
+
+                        $record['start_date_time'] = $next_date;
+                        $record['parent_id'] = $task->id;
+                        $record["created_by"] = $record["updated_by"] = 0;
+
+                        $record = self::setDates($record);
+                        
+                        // d($record);
+
+                        $count = Task::where("parent_id", $record['parent_id'])->whereDate("start_date_time", $record['start_date_time'])->count();
+
+                        if ($count == 0)
+                        {
+                            $model = new Task($record);
+                            
+                            if ($model->save())
+                            {
+                                $save_count++;
+                            }
+                            else
+                            {
+                                throw new UserException("Fail To Save", UserException::ERROR_LARAVEL_FAIL);
+                            }
+                        }
+                    }
+                    catch(Exception $ex)
+                    {
+                        d($model->custom_errors);
+                        throw $ex;
+                    }
+
+                    $next_date = DateUtility::change($next_date, $days, DateUtility::DAYS, DateUtility::DATE_FORMAT);
+                }
+            }
+        }
+
+        return $save_count;
     }
 }

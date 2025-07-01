@@ -97,20 +97,22 @@ class BaseModel extends Model implements BaseModelInterface
     public function beforeSave()
     {
         if ($this->custom_errors) {
-            throw new UserException("Some errors while saving", UserException::ERROR_USER_DATA_WRONG, [
+            throw new UserException("Some errors in model while saving", UserException::ERROR_USER_DATA_WRONG, [
                 "custom_errors" => $this->custom_errors
             ]);
         }
 
-        foreach ($this->getAttributes() as $field => $value) {
-            if (is_null($value)) {
-                continue;
-            }
+        // foreach ($this->getAttributes() as $field => $value) {
+        //     if (is_null($value)) {
+        //         continue;
+        //     }
 
-            if (is_string($value) && strlen($value) > 0) {
-                $this->{$field} = utf8_encode($value);
-            }
-        }
+        //     if (is_string($value) && strlen($value) > 0) {
+        //         $this->{$field} = utf8_encode($value);
+        //     }
+        // }
+
+        // dd($this->getAttributes());
     }
 
     public function beforeDelete() {}

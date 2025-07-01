@@ -43,13 +43,26 @@ class TaskCommand extends MyCommand
 
         try {
             $counts = [
+                'task_created' => 0,
                 "task_status_change_to_assigned" => 0,
-                'task_created' => 0
             ];
+
+            
+            $records = Task::where("type", TASK::TYPE_RECURRING)
+                ->where("status", Task::STATUS_CREATED)
+                ->get();
+
+            if ($records && $records->count() > 0)
+            {
+                foreach($records as $record)
+                {
+                    $counts['task_created'] += Task::createRecurringTask($record);
+                }
+            }
 
             $records = Task::where("type", TASK::TYPE_ONE_TIME)
                 ->where("status", Task::STATUS_CREATED)
-                ->whereDate("start_date_time", Carbon::today())
+                ->whereDate("start_date_time", "<=", Carbon::today())
                 ->get();
 
             if ($records && $records->count() > 0)
