@@ -136,16 +136,25 @@ class WebController extends Controller
 
         $sub_title = null;
 
+        $module_name = $this->getModuleName();
+
         if ($method_name == "index") {
         } else if ($method_name == "show") {
             $sub_title = "View";
-        } else {
-            $sub_title = str_replace("index", "Summary", $method_name);
+        } 
+        else if ($method_name == "showLoginForm")
+        {
+            $module_name = "Login";
+        }
+        else if ($method_name == "sign_in_form")
+        {
+            $module_name = "Sign In";
+        }
+        else {
+            $sub_title = str_replace("index", "List", $method_name);
 
             $sub_title = str_function_name_to_human_text($sub_title);
         }
-
-        $module_name = $this->getModuleName();
 
         $page_title = trim($module_name);
 
