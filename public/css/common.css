@@ -289,3 +289,7 @@ label.info {
 .custom-slider output {
     font-size: 1em;
 }
+.inline {
+    display: inline-block;
+    width: auto;
+}

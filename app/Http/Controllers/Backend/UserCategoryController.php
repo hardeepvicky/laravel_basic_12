@@ -33,9 +33,11 @@ class UserCategoryController extends BackendController
         $cache_key = $cache_key_prefix . "-index";
 
         $conditions = $this->getConditions($cache_key, [
+            ["field" => "id", "type" => "int"],
             ["field" => "name", "type" => "string"],
+            ["field" => "description", "type" => "string"],
             ["field" => "is_active", "type" => "int"],
-            ["field" => "type", "type" => "int"],
+            ["field" => "type", "type" => "string_equal"],
         ]);
 
         $builder = $this->modelClass::where($conditions);
