@@ -51,19 +51,20 @@
                                             @if ($record->status == Task::STATUS_ASSIGNED)
                                                 <a class="btn btn-secondary btn-sm mb-2 confirm"
                                                     href="{{ route($routePrefix . '.status_confirm', ['id' => $record->id]) }}">
-                                                    {{ get_value_from_list($status_list, Task::STATUS_CONFIRM) }}
+                                                    Confirm Now
                                                 </a>
 
                                                 <a class="btn btn-secondary btn-sm mb-2 confirm"
                                                     href="{{ route($routePrefix . '.status_in_progress', ['id' => $record->id]) }}">
                                                     {{ get_value_from_list($status_list, Task::STATUS_IN_PROGRESS) }}
+                                                    Move To In-Progress
                                                 </a>
                                             @endif
 
                                             @if (in_array($record->status, [Task::STATUS_CONFIRM]))
                                                 <a class="btn btn-secondary btn-sm mb-2 confirm"
                                                     href="{{ route($routePrefix . '.status_in_progress', ['id' => $record->id]) }}">
-                                                    {{ get_value_from_list($status_list, Task::STATUS_IN_PROGRESS) }}
+                                                    Move To In-Progress
                                                 </a>
                                             @endif
 
@@ -75,14 +76,14 @@
 
                                                 <a class="btn btn-secondary btn-sm mb-2 confirm"
                                                     href="{{ route($routePrefix . '.status_complete', ['id' => $record->id]) }}">
-                                                    {{ get_value_from_list($status_list, Task::STATUS_COMPLETED) }}
+                                                    Complete Now
                                                 </a>
                                             @endif
 
                                             @if (in_array($record->status, [Task::STATUS_COMPLETED]))
                                                 <a class="btn btn-secondary btn-sm mb-2 confirm"
                                                     href="{{ route($routePrefix . '.status_verified', ['id' => $record->id]) }}">
-                                                    {{ get_value_from_list($status_list, Task::STATUS_VERIFIED) }}
+                                                    Verify Now
                                                 </a>
                                             @endif
                                         </td>
@@ -159,7 +160,7 @@
                                             @if (in_array($record->status, [Task::STATUS_COMPLETED]) && in_array($record->created_by, [0, $auth_user->id]))
                                                 <a class="btn btn-secondary btn-sm mb-2 confirm"
                                                     href="{{ route($routePrefix . '.status_verified', ['id' => $record->id]) }}">
-                                                    {{ get_value_from_list($status_list, Task::STATUS_VERIFIED) }}
+                                                    Verify Now
                                                 </a>
                                             @endif
                                         </td>
