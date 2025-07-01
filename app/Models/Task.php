@@ -28,6 +28,10 @@ class Task extends BaseModel
             "foreignKey" => "parent_id",
             "preventDelete" => true,
         ],
+        TaskRecurringDate::class => [
+            "foreignKey" => "task_id",
+            "preventDelete" => false,
+        ],
     ];
 
     public const TYPE_ONE_TIME = "ONE_TIME";
