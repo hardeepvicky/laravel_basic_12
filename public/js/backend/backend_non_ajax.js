@@ -58,6 +58,8 @@ $(document).ready(function () {
 
     $(".cascade-drop-down").cascade();
 
+    $(".sr-paragraph").srParagraph();
+
     /** -------------------------------------------------------- */
 
     $("input.invalid-char").on("keypress", function (event) {
@@ -214,4 +216,68 @@ $(document).ready(function () {
 
         return false;
     });
+
+    $(document).on("change", ".summary_table_with_search", function () {
+        summary_table_with_search($(this));
+    });
+
+    $(document).on("keyup", ".summary_table_with_search input", function (e) {
+        var _this = $(this);
+        var name = $(this).attr("name");
+
+        if (e.which == 27) {
+            $(this).val("");
+        }
+
+        if (e.which == 13 || e.which == 27) {
+            summary_table_with_search(_this.closest(".summary_table_with_search"), function () {
+                $("input[name='" + name + "']").focus();
+            });
+        }
+    });
+
+    $(document).on("click", ".summary_table_with_search .clear_search", function () {
+        var _this = $(this);
+        _this.clearForm();
+        summary_table_with_search(_this);
+    });
 });
+
+function summary_table_with_search(ele, callback) {
+    var base_url = $(ele).data("base_url");
+
+    var form_data = {};
+
+    $(ele).find("thead input, thead select, .search_field").each(function () {
+
+        var val = $(this).val();
+
+        var type = $(this).attr("type");
+
+        if (type == "checkbox" || type == "radio") {
+            val = $(this).prop("checked");
+        }
+
+        form_data[$(this).attr("name")] = val;
+    });
+
+    console.log(base_url, form_data);
+
+    $(ele).ajaxSubmit({
+        target: "#index_table",
+        method: "GET",
+        data: form_data,
+        beforeSubmit: function (formData, jqForm, options) {
+            $.loader.show();
+        },
+        success: function (responseText, statusText, xhr, $form) {
+            $.loader.hide();
+            if (typeof callback == "function") {
+                callback();
+            }
+        },
+        error: function () {
+            $.loader.hide();
+        },
+    });
+}

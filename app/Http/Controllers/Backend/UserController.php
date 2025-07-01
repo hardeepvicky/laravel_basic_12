@@ -367,14 +367,15 @@ class UserController extends BackendController
             foreach ($validatedData['allow_ip'] as $record) {
                 try {
 
-                    $new_rules = array_merge_recursive($rules, $allowIpModel->getUniqueValidationRules($record));
-
+                    $new_rules = LaravelExtend::merge_validation_rules($rules, $allowIpModel->getUniqueValidationRules($record));
+                    
                     $validator = Validator::make($record, $new_rules, $messages);
-
+                    
                     if ($validator->fails()) {
                         $error_msgs = $validator->messages()->all();
                         $this->addError("", $error_msgs, "Allow IP");
                     } else {
+                        unset($record['id']);
                         $model->userAllowIp()->create($record);
                     }
                 } 

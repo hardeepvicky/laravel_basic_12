@@ -25,9 +25,11 @@
     <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/css/themify.css') }}" />
     <link rel="stylesheet" type="text/css"
         href="{{ get_asset_url('assets/css/vendors/weather-icons/weather-icons.min.css') }}" />
+    <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/css/vendors/range.css') }}" />
     <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/css/vendors/scrollbar.css') }}" />
     <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/css/vendors/slick.css') }}" />
     <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/css/vendors/slick-theme.css') }}" />
+
     <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/libs/select2/select2.min.css') }}" />
     <link rel="stylesheet" type="text/css"
         href="{{ get_asset_url('assets/libs/select2/select2-bootstrap-5-theme.min.css') }}" />
@@ -39,8 +41,8 @@
         href="{{ get_asset_url('assets/css/vendors/flatpickr/flatpickr.min.css') }}">
 
     <!-- Theme Specfic -->
-    <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/css/style.css') }}" />
     <link id="color" rel="stylesheet" href="{{ get_asset_url('assets/css/color-1.css') }}" media="screen" />
+    <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/css/style.css') }}" />
 
     <!-- Project related CSS -->
     <link rel="stylesheet" type="text/css" href="{{ get_asset_url('libs/loader/loader.css') }}" />
@@ -105,6 +107,8 @@
     <script src="{{ get_asset_url('assets/js/sidebar.js') }}"></script>
     <script src="{{ get_asset_url('assets/js/scrollbar/simplebar.js') }}"></script>
     <script src="{{ get_asset_url('assets/js/scrollbar/custom.js') }}"></script>
+    <script src="{{ get_asset_url('assets/js/range/rangeslider.nostyle.umd.min.js') }}"></script>
+    <script src="{{ get_asset_url('assets/js/range/rangeslider.umd.min.js') }}"></script>
 
     <script src="{{ get_asset_url('assets/js/theme-customizer/customizer.js') }}"></script>
 

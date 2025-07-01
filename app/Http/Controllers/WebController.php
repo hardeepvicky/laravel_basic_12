@@ -167,8 +167,7 @@ class WebController extends Controller
 
             $cache_params = self::getCache($cache_key);
 
-            if (!$cache_params)
-            {
+            if (!$cache_params) {
                 $cache_params = [];
             }
         }
@@ -222,8 +221,7 @@ class WebController extends Controller
         if (empty($request_params) && isset($cache_key)) {
             $cache_params = self::getCache($cache_key);
 
-            if ($cache_params)
-            {
+            if ($cache_params) {
                 $request_params = $cache_params;
             }
         }
@@ -403,7 +401,7 @@ class WebController extends Controller
         ];
     }
 
-    protected function getPaginagteRecords(Builder $builder, $cache_key_prefix)
+    protected function getPaginagteRecords($builder, $cache_key_prefix)
     {
         $cache_key = null;
 
@@ -419,8 +417,11 @@ class WebController extends Controller
             throw_exception("pagination_limit can not be less than 1");
         }
 
+        $paginationList = [2 => 2, 10 => 10, 20 => 20, 50 => 50, 100 => 100];
+
         $this->setForView([
-            "pagination_limit" => $params['pagination_limit']
+            "pagination_limit" => $params['pagination_limit'],
+            "paginationList" => $paginationList
         ]);
 
         $records = $builder->paginate($params['pagination_limit']);
@@ -446,8 +447,10 @@ class WebController extends Controller
             if (!$model->can_edit) {
                 $msg = "Record can not be edit";
                 if (BaseModel::tableHaveField($model->getTable(), "cannot_edit_reason_array") || array_key_exists("cannot_edit_reason_array", $model->attributes)) {
+
                     if ($model->cannot_edit_reason_array) {
-                        $msg .= "Reason : " . implode(", ", $model->cannot_edit_reason_array);
+                        $arr = $model->cannot_edit_reason_array;
+                        $msg .= ", Reason : " . implode(", ", $arr);
                     }
                 }
 

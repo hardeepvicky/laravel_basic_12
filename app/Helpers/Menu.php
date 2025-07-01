@@ -34,7 +34,7 @@ class Menu
         }
 
         self::$menus[] = (new HomeMenu)->get();
-        // self::$menus[] = (new HRMenu)->get();        
+        self::$menus[] = (new TaskMenu)->get();
         self::$menus[] = (new MasterMenu)->get();
         self::$menus[] = (new AdminMenu)->get();
         self::$menus[] = (new DeveloperMenu)->get();
@@ -315,7 +315,7 @@ class BaseMenu
                     self::addRelatedLink($routePrefix . ".edit", "Edit"),
                     self::addRelatedLink($routePrefix . ".view", "View"),
                 ]),
-                self::getLink($routePrefix . ".create", "Create", self::ICON_MENU_CREATE),
+                self::getLink($routePrefix . ".create", "Add", self::ICON_MENU_CREATE),
             ],
         ];
 
@@ -422,14 +422,34 @@ class DeveloperMenu extends BaseMenu
     {
         $links = [];
 
+        $links[] = self::type();
+        $links[] = self::logs();
+
+        return self::getModule("Developer", null, $links);
+    }
+
+    private static function type()
+    {
+        $routePrefix = "type";
+
+        $links = self::getControllerDefaultLinks($routePrefix, "Type", self::ICON_MENU_ROOT_CHILD);
+
+        return $links;
+    }
+
+    public static function logs()
+    {
+        $links = [];
+
         $routePrefix = "developer";
 
         $links[] = self::getLink($routePrefix . ".email_logs", null, self::ICON_MENU_LIST, [], self::LINK_TYPE_SUMMARY);
         $links[] = self::getLink($routePrefix . ".sql_logs", null, self::ICON_MENU_LIST, [], self::LINK_TYPE_SUMMARY);
         $links[] = self::getLink($routePrefix . ".ajax_logs", null, self::ICON_MENU_LIST, [], self::LINK_TYPE_SUMMARY);
+        $links[] = self::getLink($routePrefix . ".command_logs", null, self::ICON_MENU_LIST, [], self::LINK_TYPE_SUMMARY);
         $links[] = self::getLink($routePrefix . ".laravel_routes_index", null, self::ICON_MENU_LIST, [], self::LINK_TYPE_SUMMARY);
 
-        return self::getModule("Developer", null, $links);
+        return self::getModule("Logs", null, $links);
     }
 }
 
@@ -443,11 +463,9 @@ class MasterMenu extends BaseMenu
         $links[] = self::state();
         // $links[] = self::city();
         $links[] = self::user_category();
-        // $links[] = self::type();
 
         return self::getModule("Master", self::ICON_MENU_ROOT, $links);
     }
-
 
     private static function country()
     {
@@ -481,15 +499,6 @@ class MasterMenu extends BaseMenu
         $routePrefix = "user-category";
 
         $links = self::getControllerDefaultLinks($routePrefix, "User Category", self::ICON_MENU_ROOT_CHILD);
-
-        return $links;
-    }
-
-    private static function type()
-    {
-        $routePrefix = "type";
-
-        $links = self::getControllerDefaultLinks($routePrefix, "Type", self::ICON_MENU_ROOT_CHILD);
 
         return $links;
     }
@@ -534,5 +543,25 @@ class HRMenu extends BaseMenu
         $links = self::getControllerDefaultLinks($routePrefix, "Employee", self::ICON_MENU_ROOT_CHILD);
 
         return $links;
+    }
+}
+
+
+
+class TaskMenu extends BaseMenu
+{
+    public static function get(): array
+    {
+        $routePrefix = "task";
+
+        $arr = self::getControllerDefaultLinks($routePrefix, "Task", self::ICON_MENU_ROOT);
+
+        $links[] = self::getLink($routePrefix . ".today", "Today", self::ICON_MENU_LIST);
+        
+        $arr["links"] = array_merge($links, $arr["links"]);
+
+        // d($arr, true);
+
+        return $arr;
     }
 }

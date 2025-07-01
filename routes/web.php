@@ -19,6 +19,7 @@ use App\Http\Controllers\Backend\PublicController;
 use App\Http\Controllers\Backend\RoleController;
 use App\Http\Controllers\Backend\SettingsController;
 use App\Http\Controllers\Backend\StateController;
+use App\Http\Controllers\Backend\TaskController;
 use App\Http\Controllers\Backend\TypeController;
 use App\Http\Controllers\Backend\UserCategoryController;
 use App\Http\Controllers\Backend\UserController;
@@ -96,6 +97,9 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission']], functi
     $controllerClass = UserController::class;
     Route::resource($route_prefix, $controllerClass)->except("show");
     Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
+        $name = "ajax_get";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
 
         $name = "activate";
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
@@ -186,6 +190,12 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission']], functi
 
         $name = "de_activate";
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "ajax_get_list";
+        Route::get($name . "/{type}", [$controllerClass, $name])->name($name);
+
+        $name = "ajax_get_code_list";
+        Route::get($name . "/{type}", [$controllerClass, $name])->name($name);
     });
 
     $route_prefix = "user-category";
@@ -216,6 +226,36 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission']], functi
 
         $name = "de_activate";
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+    });
+
+    $route_prefix = "task";
+    $controllerClass = TaskController::class;
+    Route::resource($route_prefix, $controllerClass);
+
+    $name = "today";
+    Route::get($route_prefix . "-" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
+        $name = "status_confirm";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "status_in_progress";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "status_complete";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "status_verified";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "ajax_get";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "ajax_get_list";
+        Route::get($name, [$controllerClass, $name])->name($name);
+
+        $name = "ajax_get_count";
+        Route::get($name, [$controllerClass, $name])->name($name);
     });
 
 
@@ -268,6 +308,9 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission']], functi
         Route::get($name, [DeveloperController::class, $name])->name($name);
 
         $name = "ajax_logs";
+        Route::get($name, [DeveloperController::class, $name])->name($name);
+
+        $name = "command_logs";
         Route::get($name, [DeveloperController::class, $name])->name($name);
     });
 });

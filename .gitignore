@@ -25,6 +25,10 @@ yarn-error.log
 /public/user_files
 /public/logs
 
-/storage
+/storage/app/public/logs
+/storage/app/public/user_files
+/storage/debugbar
+/storage/framework
+/storage/logs
 
 *.log

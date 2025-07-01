@@ -53,7 +53,7 @@ class BackendController extends WebController
 
         $partial_path = "backend.partials";
 
-        $this->setForView(compact("current_route_name", "menus", "header_menu_list", "partial_path", "breadcums", "userListCache"));
+        $this->setForView(compact("current_route_name", "menus", "header_menu_list", "partial_path", "breadcums", "userListCache", "auth_user"));
 
         return true;
     }

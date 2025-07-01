@@ -24,7 +24,7 @@ interface BaseModelInterface
 
     public function insertOrUpdate(array $data, &$is_insert = null, &$is_update = null);
 
-    public function insertIgnoreIfExist(array $data);
+    public function insertIgnoreIfExist(array $data, &$is_insert = null);
 
     public function getUniqueId(array $data);
 

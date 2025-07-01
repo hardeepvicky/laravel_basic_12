@@ -22,6 +22,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Unique;
 use Laravel\Sanctum\HasApiTokens;
+use ReflectionClass;
 
 class User extends Authenticatable implements BaseModelInterface
 {
@@ -373,12 +374,19 @@ class User extends Authenticatable implements BaseModelInterface
         return $model;
     }
 
-    public function insertIgnoreIfExist(array $data)
+    public function insertIgnoreIfExist(array $data, &$is_insert = null)
     {
         $record = $this->getUniqueId($data);
 
         if (!$record) {
             $record = static::create($data);
+
+            if (!$record)
+            {
+                throw new UserException("Fail to save", UserException::ERROR_LARAVEL_FAIL);
+            }
+
+            $is_insert = true;
         }
 
         return $record->id;
@@ -624,5 +632,29 @@ class User extends Authenticatable implements BaseModelInterface
     {
         $this->plain_password = $plain_password;
         $this->password = bcrypt($plain_password);
+    }
+
+    public static function getAllRelations(Model $model): array {
+        $class = new ReflectionClass($model);
+        $methods = $class->getMethods();
+
+        $relations = [];
+        foreach ($methods as $method) {
+            if ($method->class != get_class($model) || $method->getNumberOfParameters() > 0) continue;
+
+            try {
+                $relation = $method->invoke($model);
+                if ($relation instanceof \Illuminate\Database\Eloquent\Relations\Relation) {                    
+                    $relations[$method->getName()] = [
+                        "model" => $method,
+                        "relation" => $relation,
+                    ];
+                }
+            } catch (\Throwable $e) {
+                continue;
+            }
+        }
+
+        return $relations;
     }
 }

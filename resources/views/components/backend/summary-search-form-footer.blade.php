@@ -1,14 +1,20 @@
 <div class="row">
     <div class="col-sm-4">
+        @if(isset($showPaginationDropDown) && $showPaginationDropDown)
         Limit : 
         <select name="pagination_limit" class="pagination_limit">            
             @foreach($paginationList as $k => $t)
                 @php
-                    $attr = $selectedPaginationLimit == $k ? 'selected="selected"' : "";
+                    $attr = "";
+                    if (isset($selectedPaginationLimit))
+                    {
+                        $attr = $selectedPaginationLimit == $k ? 'selected="selected"' : "";
+                    }
                 @endphp
                 <option value="{{ $k }}" {{ $attr }}>{{$t}}</option>
             @endforeach
         </select>
+        @endif
     </div>
     <div class="col-sm-6">
         <div>

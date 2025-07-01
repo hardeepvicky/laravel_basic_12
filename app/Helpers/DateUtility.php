@@ -32,7 +32,7 @@ class DateUtility
     const MINTUES = "minutes";
     const SECONDS = "seconds";
 
-    public static $login_user_time_zone = null;
+    public static $login_user_time_zone = "+5:30";
 
     /**
      * convert time string to standered date object 
@@ -328,7 +328,7 @@ class DateUtility
 
     public static function getCelecDate($date, $timezone = null)
     {
-        $dt = self::getDateObj($date, $timezone);
+        $dt = self::getDateObj($date, $timezone);        
 
         $ret_array['date'] = $dt->format(self::DATE_OUT_FORMAT);
         $ret_array['time'] = $dt->format(self::TIME_OUT_FORMAT);

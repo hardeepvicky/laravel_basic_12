@@ -8,7 +8,9 @@ if (isset($preventDefaultCssClass) && $preventDefaultCssClass) {
     $my_attributes['class'] = 'common-list';
 
     if ($type == 'ul') {
-        $my_attributes['class'] .= 'common-ul';
+        $my_attributes['class'] .= ' common-ul';
+    } elseif ($type == 'ol') {
+        $my_attributes['class'] .= ' common-ol';
     }
 }
 ?>

@@ -11,25 +11,33 @@ if (!isset($is_disabled)) {
     $is_disabled = (bool) $attributes->get('disabled', false);
 }
 
+$div_class = 'form-check';
+
+if ($attributes->get('role') == 'switch') {
+    $div_class .= ' form-switch';
+}
+
 $my_attributes = [];
 
 if (isset($preventCssClassAddToInput) && $preventCssClassAddToInput) {
 } else {
-    $my_attributes['class'] = 'form-check-input primary';
+    $my_attributes['class'] = 'form-check-input';
 }
 
 if ($is_disabled) {
-    $my_attributes['disabled'] = 'true';
+    $my_attributes['disabled'] = 'disabled';
 }
 
-if (old($name, $value)) {
-    $my_attributes['checked'] = 'true';
+$v = old($name, $value);
+if ($v) {
+    $my_attributes['checked'] = 'checked';
 }
+
 
 $id = $attributes->get('id', $name);
 ?>
 
-<label class="form-check">
+<label class="{{ $div_class }}">
     <input type="hidden" name="{{ $name }}" value="0" />
     <input type="checkbox" name="{{ $name }}" value="1" id="{{ $id }}"
         {{ $attributes->merge($my_attributes) }} />

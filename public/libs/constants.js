@@ -17,5 +17,6 @@ const constants = {
             search : 'fas fa-search',
             cross : 'fas fa-times-circle'
         }
-    }
+    },
+    dateFormat : 'd-M-Y'
 };

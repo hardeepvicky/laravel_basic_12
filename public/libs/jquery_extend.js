@@ -350,11 +350,11 @@ jQuery.fn.extend({
         return this.each(function () {
             var target = $(this).data(feature + "-target");
             if (!target) {
-                console.error(
-                    "data-" + feature + "-target is not defined in html"
-                );
+                $.events.onError("html attr is not found", "data-" + feature + "-target");
                 return;
             }
+
+            var _this = $(this);
 
             var tag = $(this).tagName();
 
@@ -381,9 +381,7 @@ jQuery.fn.extend({
                 var class_name = $(this).data(feature + "-class");
 
                 if (!class_name) {
-                    console.error(
-                        "data-" + feature + "-class is not defined in html"
-                    );
+                    $.events.onError("html attr is not found", "data-" + feature + "-class");
                     return;
                 }
 
@@ -406,8 +404,23 @@ jQuery.fn.extend({
                         $(this).on(events.toggleClass, function () {
                             if (!$(target).hasClass(class_name)) {
                                 $(target).addClass(class_name);
+
+                                var text = $(this).data(feature + "-applied-text");
+
+                                if (text)
+                                {
+                                    _this.text(text)
+                                }
+
                             } else {
                                 $(target).removeClass(class_name);
+
+                                var text = $(this).data(feature + "-not-applied-text");
+
+                                if (text)
+                                {
+                                    _this.text(text)
+                                }
                             }
                         });
 
@@ -562,15 +575,6 @@ jQuery.fn.extend({
         return this.each(function () {
             var _this = $(this);
 
-            var max = $(this).data(feature + "-max");
-
-            if (!max) {
-                console.error(
-                    "data-" + feature + "-max is not defined in html"
-                );
-                return;
-            }
-
             if ($(this).applyOnce(feature)) {
                 max = parseInt(max);
 
@@ -621,7 +625,7 @@ jQuery.fn.extend({
                     _this
                         .find("." + feature + "-more-text-opener")
                         .click(function () {
-                            $(this).trigger(events.moreText);
+                            $(this).trigger(events.toggle);
                         });
 
                     _this

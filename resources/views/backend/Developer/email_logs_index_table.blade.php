@@ -13,6 +13,10 @@
                     <th>To Name</th>
                     <th>To Email</th>
                     <th>Subject</th>
+                    <th>
+                        <?= sortable_anchor('created_at', 'Created') ?>
+                        | <?= sortable_anchor('updated_at', 'Updated') ?>
+                    </th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -25,6 +29,9 @@
                         <td>{{ $record->to_name }}</td>
                         <td>{{ $record->to_email }}</td>
                         <td>{{ $record->subject }}</td>
+                        <td>
+                            <x-Backend.index-table-info :record="$record" :userList="$userListCache" />
+                        </td>
                         <td>
                             <span class="btn btn-info btn-sm css-toggler ajax-load"
                                 data-sr-css-class-toggle-target="#record-{{ $record->id }}"

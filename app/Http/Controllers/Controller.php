@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\UserException;
+use App\Helpers\DateUtility;
 use App\Helpers\FileUtility;
 use App\Helpers\LaravelExtend;
 use App\Models\AjaxLog;
@@ -94,6 +95,8 @@ abstract class Controller
             return false;
         }
 
+        // d($db_logs, true);
+
         $sqlLogModel = new SqlLog();
 
         $sqlLogModel->route_name_or_url = Route::getCurrentRoute()->getName();
@@ -102,37 +105,11 @@ abstract class Controller
             $sqlLogModel->route_name_or_url = request()->getRequestUri();
         }
 
-        $sqlLogModel->have_dml_query = false;
-        $sqlLogModel->have_heavy_query = false;
+        $sqlLogModel->have_dml_query = $db_logs['have_dml_query'];
+        $sqlLogModel->have_heavy_query = $db_logs['have_heavy_query'];
 
         if (!$sqlLogModel->saveQuietly()) {
             throw_exception("Fail to Save Sql Log");
-        }
-
-        $sql_list = $dml_sql_list = [
-            implode(",", ["Query", "Time-In-MilliSeconds"])
-        ];
-
-        foreach ($db_logs as $row) {
-            $query = $row['query'];
-
-            $sql_row = implode(", ", [$query, $row["time"]]);
-
-            $sql_list[] = $sql_row;
-
-            $query_first_10_chars = strtolower(substr($query, 0, 10));;
-
-            $is_dml = str_check_char_array_exist($query_first_10_chars, ["insert", "update", "delete"]);
-
-            if ($is_dml) {
-                $sqlLogModel->have_dml_query = true;
-
-                $dml_sql_list[] = $sql_row;
-            }
-
-            if ($row["time"] > 1000) {
-                $sqlLogModel->have_heavy_query = true;
-            }
         }
 
         $base_file_name = date_get_for_file_name() . "_";
@@ -143,7 +120,7 @@ abstract class Controller
 
         $path = SqlLog::getStoragePath();
         $filename = $base_file_name . "_sql.txt";
-        $content = implode(PHP_EOL, $sql_list);
+        $content = implode(PHP_EOL, $db_logs['sql_list']);
 
         $fileUtility->writeLog($path, $filename, $content);
 
@@ -152,7 +129,7 @@ abstract class Controller
         if ($sqlLogModel->have_dml_query) {
             $filename = $base_file_name . "_sql_dml.txt";
 
-            $content = implode(PHP_EOL, $dml_sql_list);
+            $content = implode(PHP_EOL, $db_logs['dml_sql_list']);
 
             $fileUtility->writeLog($path, $filename, $content);
 
@@ -167,22 +144,48 @@ abstract class Controller
     }
 
     protected function getQueryLog()
-    {
-        $db_logs = DB::getQueryLog();
+    {   
+        $db_logs = LaravelExtend::getQueryLog();
 
-        foreach ($db_logs as $k => $row) {
+        $sql_list = $dml_sql_list = [
+            implode(",", ["Query", "Time-In-MilliSeconds"])
+        ];
+
+        $ret_rows = [
+            "have_dml_query" => false,
+            "have_heavy_query" => false,
+        ];
+
+        foreach ($db_logs as $row) {
             $query = $row['query'];
 
-            $query = vsprintf(str_replace('?', "'%s'", $query), $row['bindings']);
+            $sql_row = implode(", ", [$query, $row["time"]]);
 
-            $row['query'] = trim(preg_replace('/\s+/', ' ', $query));
+            $sql_list[] = $sql_row;
 
-            unset($row['bindings']);
+            $query_first_10_chars = strtolower(substr($query, 0, 10));;
 
-            $db_logs[$k] = $row;
+            $is_dml = str_check_char_array_exist($query_first_10_chars, ["insert", "update", "delete"]);
+
+            if ($is_dml) {
+                $dml_sql_list[] = $sql_row;
+                $ret_rows['have_dml_query'] = true;
+            }
+
+            if ($row["time"] > 1000) {
+                $ret_rows['have_heavy_query'] = true;
+            }
         }
 
-        return $db_logs;
+        $ret_rows['sql_list'] = $sql_list;
+        $ret_rows['dml_sql_list'] = $dml_sql_list;
+
+        return $ret_rows;
+    }
+
+    protected function getMongodbQueryLog()
+    {
+        return LaravelExtend::getMongodbQueryLog();
     }
 
     protected function responseJson(array $response)
@@ -193,18 +196,31 @@ abstract class Controller
 
         $sql_model = $this->saveSqlLog();
 
-        $request = request();
+        if ($sql_model) {
+            $sql_model->afterFind();
+        }
 
-        $save = [
-            "route_name_or_url" => Route::currentRouteName(),
-            "request" => $request->all(),
-            "response" => $response,
-            "sql_model" => $sql_model?->toArray()
-        ];
+        if (is_ajax_request()) {
+            $request = request();
 
-        $save = array_purge_if_exceed_limit($save);
+            $save = [
+                "route_name_or_url" => Route::currentRouteName(),
+                "request" => $request->all(),
+                "response" => $response,
+                "sql_model" => $sql_model?->toArray()
+            ];
 
-        AjaxLog::create($save);
+            $save = array_purge_if_exceed_limit($save);
+            $save = array_short_string_with_dot($save, 2048);
+
+            $save["exec_time"] = microtime(true) - LARAVEL_START;
+
+            $ajaxLog = new AjaxLog($save);
+
+            if (!$ajaxLog->saveQuietly()) {
+                throw new UserException("Fail To Save Ajax Log", UserException::ERROR_LARAVEL_FAIL);
+            }
+        }
 
         return response()->json($response);
     }

@@ -74,7 +74,7 @@ function array_print($array, $indent = 0)
 {
     $array = array_short_string_with_dot($array);
 
-    echo '<ul class="array_print indent-' . $indent . '">';
+    echo '<ul class="array_print indent-' . $indent . '" >';
     foreach ($array as $key => $value) {
         echo '<li>';
         if (is_array($value)) {
@@ -519,6 +519,8 @@ function get_class_info($class_name)
         if (!class_exists($class_name)) {
             throw_exception("class $class_name does not exit");
         }
+    } else {
+        $class_name = get_class($class_name);
     }
 
     $class = new ReflectionClass($class_name);
@@ -551,7 +553,7 @@ function get_class_info($class_name)
         ];
     }
 
-    return compact("file", 'class_short_name', "constants", "properties", "methods");
+    return compact("file", "class_name", 'class_short_name', "constants", "properties", "methods");
 }
 
 

@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use ReflectionClass;
 
 class BaseModel extends Model implements BaseModelInterface
 {
@@ -24,11 +25,13 @@ class BaseModel extends Model implements BaseModelInterface
 
     protected static array $list_fields = ["id", "name"];
 
+    public array $custom_errors = [];
+
     /**
      * set extra relationship array to overcome problem of accidential delete
      * this variable used in Controller.php -> delete()
      */
-    public array $child_model_class = [];    
+    public array $child_model_class = [];
 
     protected $guarded = ["id"];
 
@@ -51,6 +54,8 @@ class BaseModel extends Model implements BaseModelInterface
                     $model->created_by = $auth_user->id;
                 }
             }
+
+            $model->setDefaultAttributes();
 
             $model->beforeSave();
         });
@@ -91,37 +96,59 @@ class BaseModel extends Model implements BaseModelInterface
 
     public function beforeSave()
     {
-        foreach ($this->getAttributes() as $field => $value) {
-            if (is_null($value)) {
-                continue;
-            }
-
-            if (is_string($value) && strlen($value) > 0) {
-                $this->{$field} = utf8_encode($value);
-            }
+        if ($this->custom_errors) {
+            throw new UserException("Some errors in model while saving", UserException::ERROR_USER_DATA_WRONG, [
+                "custom_errors" => $this->custom_errors
+            ]);
         }
+
+        // foreach ($this->getAttributes() as $field => $value) {
+        //     if (is_null($value)) {
+        //         continue;
+        //     }
+
+        //     if (is_string($value) && strlen($value) > 0) {
+        //         $this->{$field} = utf8_encode($value);
+        //     }
+        // }
+
+        // dd($this->getAttributes());
     }
 
     public function beforeDelete() {}
 
     public function afterFind() {}
 
-    
+    public function getFieldLabels()
+    {
+        $labels = [];
+
+        $table_info = $this->getTableInfo($this->getTable());
+
+        foreach ($table_info['columns'] as $field => $field_attr) {
+
+            $text = str_replace(["_id", "is_", "_at"], "", $field);
+
+            $labels[$field] = ucwords(str_function_name_to_human_text($text));
+        }
+
+        return $labels;
+    }
+
+
     public static function fetchList(Builder $builder, String $key_field, String $value_field)
     {
         $model = new static();
         $table_name  = $model->getTable();
 
-        if (!in_array($key_field, self::$list_fields) && self::tableHaveField($table_name, $key_field) )
-        {
+        if (!in_array($key_field, self::$list_fields) && self::tableHaveField($table_name, $key_field)) {
             self::$list_fields[] = $key_field;
         }
 
-        if (!in_array($value_field, self::$list_fields) && self::tableHaveField($table_name, $value_field) )
-        {
+        if (!in_array($value_field, self::$list_fields) && self::tableHaveField($table_name, $value_field)) {
             self::$list_fields[] = $value_field;
         }
-        
+
         $builder->select(self::$list_fields);
 
         $records = $builder->get();
@@ -138,9 +165,36 @@ class BaseModel extends Model implements BaseModelInterface
         return $list;
     }
 
+    public static function getAllRelations(Model $model): array
+    {
+        $class = new ReflectionClass($model);
+        $methods = $class->getMethods();
+
+        $relations = [];
+        foreach ($methods as $method) {
+            if ($method->class != get_class($model) || $method->getNumberOfParameters() > 0) continue;
+
+            try {
+                $relation = $method->invoke($model);
+                if ($relation instanceof \Illuminate\Database\Eloquent\Relations\Relation) {
+                    $relations[$method->getName()] = [
+                        "model" => $method,
+                        "relation" => $relation,
+                    ];
+                }
+            } catch (\Throwable $e) {
+                continue;
+            }
+        }
+
+        return $relations;
+    }
+
     /*------------------------------------------------------------------*/
     /**------------------------Member Functions ----------------------- */
     /*------------------------------------------------------------------*/
+
+    public function setDefaultAttributes() {}
 
     public function hasAttribute($key)
     {
@@ -191,12 +245,20 @@ class BaseModel extends Model implements BaseModelInterface
         return $model->id;
     }
 
-    public function insertIgnoreIfExist(array $data)
+    public function insertIgnoreIfExist(array $data, &$is_insert = null)
     {
         $record = $this->getUniqueId($data);
 
+        // dump($record);
+
         if (!$record) {
             $record = static::create($data);
+            if (!$record)
+            {
+                throw new UserException("Fail To Save", UserException::ERROR_LARAVEL_FAIL);
+            }
+
+            $is_insert = true;
         }
 
         return $record->id;
@@ -212,6 +274,11 @@ class BaseModel extends Model implements BaseModelInterface
         foreach (static::$unique_fields as $unique_field) {
             if (!isset($data[$unique_field])) {
                 throw new UserException("field $unique_field missing in argument data");
+            }
+
+            if (isset($this->casts) && $this->casts)
+            {
+
             }
 
             $conditions[] = [$unique_field, '=', $data[$unique_field]];
@@ -242,5 +309,24 @@ class BaseModel extends Model implements BaseModelInterface
     {
         $this->is_active = 0;
         $this->save();
+    }
+
+    public function addError($label, $messages, $group = null, $extra = [])
+    {
+        if (!is_array($messages)) {
+            $messages = [$messages];
+        }
+
+        if (!$group) {
+            $group = 0;
+        }
+
+        if (!is_scalar($group)) {
+            throw new UserException("group should be scaler value");
+        }
+
+        foreach ($messages as $msg) {
+            $this->custom_errors[$group][] = compact("label", "msg", "extra");
+        }
     }
 }

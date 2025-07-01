@@ -1,5 +1,5 @@
-@if($value)
-    <span class="badge bg-success">Yes</span>
+@if ($value)
+    <span class="">Yes</span>
 @else
-    <span class="badge bg-danger">No</span>
+    <span class="">No</span>
 @endif
