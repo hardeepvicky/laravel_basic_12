@@ -47,18 +47,23 @@ body > .black_drop_container {
 }
 
 .form-check {
+    display: inline-block;
+    margin-right: 10px;
+}
+
+.custom-check {
     display: flex;
     justify-content: start;
     align-items: center;
     margin-right: 1rem;
 }
 
-.form-check .form-check-input {
+.custom-check .form-check-input {
     width: 1.3em;
     height: 1.3em;
 }
 
-.form-check .form-check-label {
+.custom-check .form-check-label {
     font-size: 1.1em;
     margin-left: 5px;
     cursor: pointer;

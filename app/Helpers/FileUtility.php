@@ -286,6 +286,15 @@ class FileUtility
         return $this->writeFile($path . "/" . $file, $contents);
     }
 
+    public function getContent(string $filepath)
+    {
+        $filepath = str_path_normalize_to_save_to_data_base($filepath);
+
+        $contents = $this->disk->get($filepath);
+
+        return $contents;
+    }
+
     public function getUrl($file)
     {
         if ($this->disk->fileExists($file)) {

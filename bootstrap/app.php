@@ -4,6 +4,7 @@ use App\Exceptions\UserException;
 use App\Helpers\Menu;
 use App\Http\Middleware\Authenticate;
 use App\Http\Middleware\RolePermission;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -88,7 +89,59 @@ return Application::configure(basePath: dirname(__DIR__))
 
             $error_code = $e->getCode();
 
-            dd($error_code);
+            $error_msg = $e->getMessage();
+
+            $request = request();
+
+            $current_url = $request->url();
+
+            $current_route_name = Route::currentRouteName();
+
+            $ajax_view_name = "errors.ajax.user_exception";
+            if (!view()->exists($ajax_view_name)) {
+                $ajax_view_name = "errors.ajax.default";
+            }
+
+            $data = array_merge($e->data, compact("error_code", "error_msg", "current_url", "current_route_name", "ajax_view_name"));
+
+            // dd($data);
+
+            if ($request->ajax()) {
+                return response()->view($ajax_view_name, $data, $error_code);
+            } else {
+
+                $auth_user = Auth::user();
+
+                if ($auth_user) {
+                    //below code if its is backend user
+                    $data['layout'] = 'backend.layouts.main';
+
+                    Menu::setCurrentRouteName($current_route_name);
+
+                    $menus = Menu::get(Auth::user()->id);
+
+                    $header_menu_list = Menu::getList($menus);
+
+                    $partial_path = "backend.partials";
+
+                    $breadcums = Menu::getBreadcums($menus);
+
+                    $data = array_merge($data, compact("menus", "header_menu_list", "partial_path", "breadcums"));
+                } else {
+                    $data['layout'] = 'frontend.layouts.main';
+                }
+
+                return response()->view("errors.default", $data, $error_code);
+            }
+        });
+
+        $exceptions->renderable(function (ModelNotFoundException $e) {
+
+            $error_code = $e->getCode();
+
+            d($error_code);
+
+            dd($e->getModel());
 
             $error_msg = $e->getMessage();
 

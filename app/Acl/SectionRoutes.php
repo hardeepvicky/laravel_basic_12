@@ -15,6 +15,8 @@ class SectionRoutes
         "user.change.password",
 
         "*.ajax_get_list",
+        "*.ajax_get_code_list",
+        "*.ajax_get_count",
         "*.ajax_get",
     ];
 

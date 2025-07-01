@@ -374,12 +374,19 @@ class User extends Authenticatable implements BaseModelInterface
         return $model;
     }
 
-    public function insertIgnoreIfExist(array $data)
+    public function insertIgnoreIfExist(array $data, &$is_insert = null)
     {
         $record = $this->getUniqueId($data);
 
         if (!$record) {
             $record = static::create($data);
+
+            if (!$record)
+            {
+                throw new UserException("Fail to save", UserException::ERROR_LARAVEL_FAIL);
+            }
+
+            $is_insert = true;
         }
 
         return $record->id;

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Backend;
 
+use App\Models\Task;
 use App\Models\Type;
 use Illuminate\Http\Request;
 use Exception;
@@ -33,6 +34,7 @@ class TypeController extends BackendController
 
         $conditions = $this->getConditions($cache_key, [
             ["field" => "name", "type" => "string", "view_field" => "name"],
+            ["field" => "code", "type" => "string", "view_field" => "code"],
             ["field" => "type", "type" => "string", "view_field" => "type"],
             ["field" => "short_name", "type" => "string", "view_field" => "short_name"],
             ["field" => "is_active", "type" => "", "view_field" => "is_active"],
@@ -40,8 +42,7 @@ class TypeController extends BackendController
 
         $builder = $this->modelClass::where($conditions);
 
-        if ($apply_sort)
-        {
+        if ($apply_sort) {
             $cache_key_for_sort = $cache_key_prefix . "-index-extra-params";
 
             $clear_cache = request('is_sort_clear', false);
@@ -55,6 +56,15 @@ class TypeController extends BackendController
         }
 
         return $builder;
+    }
+
+    protected function beforeViewRender()
+    {
+        $type_list = Type::getTypeList();
+
+        $this->setForView(compact("type_list"));
+
+        return parent::beforeViewRender();
     }
 
     public function create()
@@ -76,18 +86,18 @@ class TypeController extends BackendController
     private function _common_validation_rules()
     {
         return [
+            "type" => ["required"],
+            "name" => ["required"],
+            "code" => ["required"],
+            "list_display_order" => ["nullable"],
+            "short_name" => ["nullable"],
             "is_active" => ""
         ];
     }
 
     private function _common_validation_messages()
     {
-        return [
-            "name.required" => "Name is required",
-            "name.unique" => "Name already exist",
-            "type.required" => "Source is required",
-            "type.unique" => "Source already exist",
-        ];
+        return [];
     }
 
     public function store(Request $request)
@@ -96,38 +106,29 @@ class TypeController extends BackendController
 
         $rules = $this->_common_validation_rules();
 
+        $model = new $this->modelClass();
+
+        $rules = array_merge_recursive($rules, $model->getUniqueValidationRules($request));
+
         $messages = $this->_common_validation_messages();
-
-        $rules = array_merge($rules, [
-            'name' => 'required|min:2|unique:' . $this->tableName,
-            'type' => 'required|unique:' . $this->tableName,
-            'short_name' => 'required|unique:' . $this->tableName,
-        ]);
-
-        $messages = array_merge($messages, [
-
-        ]);
 
         $validatedData = $request->validate($rules, $messages);
 
         DB::beginTransaction();
 
-        try
-        {
+        try {
             $model = $this->modelClass::create($validatedData);
-            
+
             $this->updateUserInfoAfterSave($model);
-            
+
             DB::commit();
 
             $this->saveSqlLog();
 
             return $this->afterSave($model);
-        }
-        catch(Exception $ex)
-        {
+        } catch (Exception $ex) {
             DB::rollBack();
-            
+
             $this->saveSqlLog();
 
             return back()->withInput()->with('fail', $ex->getMessage());
@@ -158,26 +159,17 @@ class TypeController extends BackendController
 
         $rules = $this->_common_validation_rules();
 
+        $rules = array_merge_recursive($rules, $model->getUniqueValidationRules($request));
+
+        // dd($rules);
+
         $messages = $this->_common_validation_messages();
-
-        $messages = array_merge($messages, [
-
-        ]);
-
-        $table_name = $this->tableName;
-
-        $rules = array_merge($rules, [
-            'name' => "required|min:3|unique:$table_name,name,$model->id",
-            'type' => "required|unique:$table_name,type,$model->id",
-            'short_name' => "required|unique:$table_name,short_name,$model->id",
-        ]);
 
         $validatedData = $request->validate($rules, $messages);
 
         DB::beginTransaction();
 
-        try
-        {
+        try {
             $model = $this->modelClass::findOrFail($id);
 
             $model->fill($validatedData);
@@ -191,9 +183,7 @@ class TypeController extends BackendController
             $this->saveSqlLog();
 
             return $this->afterSave($model);
-        }
-        catch(Exception $ex)
-        {
+        } catch (Exception $ex) {
             DB::rollBack();
 
             $this->saveSqlLog();
@@ -201,5 +191,61 @@ class TypeController extends BackendController
             return back()->withInput()->with('fail', $ex->getMessage());
         }
     }
-}
 
+    public function ajax_get_code_list($type)
+    {
+        $response = ["status" => 1, "data" => []];
+
+        try {
+            list($group, $field) = explode(".", $type);
+
+            $code_list = [];
+
+            switch ($group) {
+                case "task":
+                    $code_list = Task::getCodeList($field);
+                    break;
+                default:
+                    throw new Exception("Invalid type : $type");
+            }
+
+            foreach ($code_list as $code) {
+                $response['data'][] = [
+                    'id' => $code,
+                    'name' => $code,
+                ];
+            }
+        } catch (Exception $ex) {
+            $response['status'] = 0;
+            $response['msg'] = $ex->getMessage();
+        }
+
+        return $this->responseJson($response);
+    }
+
+    public function ajax_get_list($type)
+    {
+        $response = ["status" => 1];
+
+        try {
+
+            $records = $this->modelClass::where("type", $type)->get();
+
+            $response['data'] = [];
+
+            foreach ($records as $record) {
+                $row = [
+                    "id" => $record->id,
+                    "name" => $record->getDisplayName(),
+                ];
+
+                $response['data'][] = $row;
+            }
+        } catch (Exception $ex) {
+            $response['status'] = 0;
+            $response['msg'] = $ex->getMessage();
+        }
+
+        return $this->responseJson($response);
+    }
+}

@@ -80,9 +80,7 @@
     transform: translateX(-50%);
     width: 80px;
     height: 4px;
-    background: linear-gradient(to right,
-            #6a11cb,
-            #2575fc);
+    background: linear-gradient(to right, #6a11cb, #2575fc);
     /* Underline matching background gradient */
     border-radius: 2px;
 }
@@ -240,7 +238,7 @@ label.info {
     border-top: 1px solid #ced4da;
 }
 
-.summary-table>tbody>tr>* {
+.summary-table > tbody > tr > * {
     background-color: var(--bs-table-hover-bg);
     color: var(--body-font-color);
 }
@@ -272,4 +270,22 @@ label.info {
 .h-200 {
     max-height: 200px;
     overflow: hidden;
+}
+
+.custom-slider {
+    display: flex;
+    justify-content: start;
+    align-items: center;
+}
+
+.custom-slider .form-label {
+    margin: 0;
+}
+
+.custom-slider .custom-slider-input {
+    margin: 0 10px 0 10px;
+}
+
+.custom-slider output {
+    font-size: 1em;
 }

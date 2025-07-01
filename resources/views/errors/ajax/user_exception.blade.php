@@ -13,6 +13,8 @@
         <!-- Error Description -->
         <p class="error-description mb-2">
             {{ $error_msg }}
+
+            <x-Backend.form-errors />
         </p>
 
         <div class="info-for-developer mb-2">
@@ -30,7 +32,7 @@
         </div>
 
         <div class="help-links text-center">
-            @if(is_ajax_request())
+            @if (is_ajax_request())
             @else
                 <span class="btn btn-secondary" onclick="history.back();">Back</span>
             @endif

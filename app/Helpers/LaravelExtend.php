@@ -130,7 +130,7 @@ class LaravelExtend
 
         $ip = $request->ip();
 
-        if ($host == "localhost") {
+        if ($host == "localhost" || $host == "dev.erp.com") {
             return true;
         }
 
@@ -145,21 +145,59 @@ class LaravelExtend
 
     public static function merge_validation_rules($old_rules, $new_rules)
     {
-        foreach($new_rules as $k => $rules)
-        {
-            if (is_array($rules))
-            {
-                if (isset($old_rules[$k]))
-                {
+        foreach ($new_rules as $k => $rules) {
+            if (is_array($rules)) {
+                if (isset($old_rules[$k])) {
                     $old_rules[$k] = array_merge($old_rules[$k], $rules);
-                }
-                else
-                {
+                } else {
                     $old_rules[$k] = $rules;
                 }
             }
         }
 
         return $old_rules;
+    }
+
+    public static function getQueryLog($connection = "")
+    {
+        if ($connection)
+        {
+            $db_logs = DB::connection($connection)->getQueryLog();
+        }
+        else
+        {
+            $db_logs = DB::getQueryLog();
+        }
+
+        foreach ($db_logs as $k => $row) {
+            $query = $row['query'];
+
+            $query = vsprintf(str_replace('?', "'%s'", $query), $row['bindings']);
+
+            $row['query'] = trim(preg_replace('/\s+/', ' ', $query));
+
+            unset($row['bindings']);
+
+            $db_logs[$k] = $row;
+        }
+
+        return $db_logs;
+    }
+
+    public static function getMongodbQueryLog($connection = "mongodb")
+    {
+        $db_logs = DB::connection($connection)->getQueryLog();
+
+        foreach ($db_logs as $k => $row) {
+            $query = $row['query'];
+
+            $row['query'] = trim(preg_replace('/\s+/', ' ', $query));
+
+            unset($row['bindings']);
+
+            $db_logs[$k] = $row;
+        }
+
+        return $db_logs;
     }
 }

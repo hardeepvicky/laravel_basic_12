@@ -284,12 +284,14 @@ class BaseMongoModel extends Model implements BaseModelInterface
         return $model->id;
     }
 
-    public function insertIgnoreIfExist(array $data)
+    public function insertIgnoreIfExist(array $data, &$is_insert = null)
     {
         $record = $this->getUniqueId($data);
 
         if (!$record) {
             $record = static::create($data);
+
+            $is_insert = true;
         }
 
         return $record->id;

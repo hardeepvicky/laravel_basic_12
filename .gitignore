@@ -26,5 +26,6 @@ yarn-error.log
 /public/logs
 
 storage/app
+storage/logs
 
 *.log
