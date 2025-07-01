@@ -80,7 +80,7 @@
                                                 </a>
                                             @endif
 
-                                            @if (in_array($record->status, [Task::STATUS_COMPLETED]))
+                                            @if (in_array($record->status, [Task::STATUS_COMPLETED]) && in_array($record->created_by, [0, $auth_user->id]))
                                                 <a class="btn btn-secondary btn-sm mb-2 confirm"
                                                     href="{{ route($routePrefix . '.status_verified', ['id' => $record->id]) }}">
                                                     Verify Now
