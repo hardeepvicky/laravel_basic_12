@@ -554,8 +554,14 @@ class TaskMenu extends BaseMenu
     {
         $routePrefix = "task";
 
-        $links = self::getControllerDefaultLinks($routePrefix, "Task", self::ICON_MENU_ROOT);
+        $arr = self::getControllerDefaultLinks($routePrefix, "Task", self::ICON_MENU_ROOT);
 
-        return $links;
+        $links[] = self::getLink($routePrefix . ".today", "Today", self::ICON_MENU_LIST);
+        
+        $arr["links"] = array_merge($links, $arr["links"]);
+
+        // d($arr, true);
+
+        return $arr;
     }
 }

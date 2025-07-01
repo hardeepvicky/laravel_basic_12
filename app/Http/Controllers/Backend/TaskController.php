@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Exceptions\UserException;
+use App\Helpers\DateUtility;
 use App\Helpers\LaravelExtend;
 use App\Models\Task;
 use App\Models\TaskRecurringDate;
@@ -68,6 +69,63 @@ class TaskController extends BackendController
         }
 
         return $builder;
+    }
+
+    public function today()
+    {
+        $cache_key_prefix = Route::currentRouteName();
+
+        $default_conditions[] = ['type', Task::TYPE_ONE_TIME];
+        $default_conditions[] = ['is_draft', 0];
+        $default_conditions[] = ['is_verified', 0];
+
+        $builder = $this->modelClass::where($default_conditions);
+
+        $auth_user_id = $this->getAuthUserId();
+
+        $builder->where("assign_to_user_id", $auth_user_id);
+
+        $builder->where(function($query){        
+            $query->whereNotIn("status", [TASK::STATUS_CREATED, TASK::STATUS_VERIFIED]);
+            $query->whereDate("start_date_time", "<=", date(DateUtility::DATE_FORMAT));
+        });
+
+        $cache_key_for_sort = $cache_key_prefix . "-extra-params-" . __FUNCTION__;
+
+        $clear_cache = request('is_sort_clear', false);
+
+        $sort_params = $this->getRequestData($cache_key_for_sort, [
+            ["key" => "sort_by", "default" => "start_date_time"],
+            ["key" => "sort_dir", "default" => "DESC"],
+        ], $clear_cache);
+
+        $builder->orderBy($sort_params['sort_by'], $sort_params['sort_dir']);
+
+        $my_tasks = $builder->get();
+
+        $cache_key = $cache_key_prefix . "-2";
+
+        $conditions = $this->getConditions($cache_key, [
+            ["field" => "status", "type" => "string_equal", "view_field" => "other_task_status"],
+            ["field" => "assign_to_user_id", "type" => "int", "view_field" => "other_assign_to_user_id"],
+        ]);
+
+        $builder = $this->modelClass::where($default_conditions)->where($conditions);
+        $builder->where(function($query) use($auth_user_id){  
+            $query->whereNotIn("status", [TASK::STATUS_CREATED, TASK::STATUS_VERIFIED]);
+            $query->whereDate("start_date_time", "<=", date(DateUtility::DATE_FORMAT));
+            $query->whereNot("assign_to_user_id", $auth_user_id);
+        });
+
+        $builder->with([
+            "assignToUser"
+        ]);
+
+        $records = $builder->get();
+
+        $this->setForView(compact("records", "my_tasks"));
+
+        return $this->viewIndex(__FUNCTION__);
     }
 
     protected function beforeViewRender()
@@ -408,5 +466,41 @@ class TaskController extends BackendController
         }
 
         return $this->responseJson($response);
+    }
+
+    public function status_confirm($id)
+    {
+        $this->model = $this->modelClass::findOrFail($id);
+
+        $this->model->changeStatus(Task::STATUS_CONFIRM);
+
+        return back()->with("success", "Status Changed Successfully");
+    }
+
+    public function status_in_progress($id)
+    {
+        $this->model = $this->modelClass::findOrFail($id);
+
+        $this->model->changeStatus(Task::STATUS_IN_PROGRESS);
+
+        return back()->with("success", "Status Changed Successfully");
+    }
+
+    public function status_complete($id)
+    {
+        $this->model = $this->modelClass::findOrFail($id);
+
+        $this->model->changeStatus(Task::STATUS_COMPLETED);
+
+        return back()->with("success", "Status Changed Successfully");
+    }
+
+    public function status_verified($id)
+    {
+        $this->model = $this->modelClass::findOrFail($id);
+
+        $this->model->changeStatus(Task::STATUS_VERIFIED);
+
+        return back()->with("success", "Status Changed Successfully");
     }
 }

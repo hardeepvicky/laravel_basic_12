@@ -7,8 +7,9 @@ use App\View\Components\BackendComponent;
 class SummarySearchFormFooter extends BackendComponent
 {
     public function __construct(
-        public $selectedPaginationLimit,
+        public $selectedPaginationLimit = null,
         public $paginationListOptions = null,
+        public $showPaginationDropDown = true
     ) {
         parent::__construct();
 

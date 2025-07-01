@@ -165,13 +165,25 @@ class Task extends BaseModel
     {
         $this->status = $status;
 
-        $this->save();
-
         switch($status)
         {
             case self::STATUS_ASSIGNED:
                 break;
+
+            case self::STATUS_COMPLETED:
+                $this->is_completed = true;
+                break;
+            case self::STATUS_VERIFIED:
+                $this->is_verified = true;
+                break;
         }
+
+        if (!$this->save())
+        {
+            throw new UserException("Fail To Save", UserException::ERROR_LARAVEL_FAIL);
+        }
+
+        
     }
 
     public static function getCodeList(String $field)
@@ -287,83 +299,144 @@ class Task extends BaseModel
 
             $days = 0;
 
-            switch($task->recurring_type)
+            if ($task->recurring_type != self::RECURRING_CUSTOM)
             {
-                case self::RECURRING_DAILY:
-                    $days = 1;
-                    break;
-                case self::RECURRING_WEEKLY:
-                    $days = 7;
-                    break;
-                case self::RECURRING_2_WEEK:
-                    $days = 14;
-                    break;
-                case self::RECURRING_MONTHLY:
-                    $days = 30;
-                    break;
-                case self::RECURRING_QUATARLY:
-                    $days = 90;
-                    break;
-                case self::RECURRING_YEARLY:
-                    $days = 365;
-                    break;                
-            }
-
-            if ($days > 0)
-            {
-                $next_date = DateUtility::getDate($task->created_at, DateUtility::DATE_FORMAT);
-
-                while(DateUtility::compare($next_date, $today) <= 0)
+                switch($task->recurring_type)
                 {
-                    try
+                    case self::RECURRING_DAILY:
+                        $days = 1;
+                        break;
+                    case self::RECURRING_WEEKLY:
+                        $days = 7;
+                        break;
+                    case self::RECURRING_2_WEEK:
+                        $days = 14;
+                        break;
+                    case self::RECURRING_MONTHLY:
+                        $days = 30;
+                        break;
+                    case self::RECURRING_QUATARLY:
+                        $days = 90;
+                        break;
+                    case self::RECURRING_YEARLY:
+                        $days = 365;
+                        break;                
+                }
+
+                if ($days > 0)
+                {
+                    $next_date = DateUtility::getDate($task->created_at, DateUtility::DATE_FORMAT);
+
+                    while(DateUtility::compare($next_date, $today) <= 0)
                     {
-                        $record = $task->getAttributes();
-                        unset($record["id"]);
-                        unset($record["created_at"]);
-                        unset($record["updated_at"]);
-                        unset($record["created_by"]);
-                        unset($record["updated_by"]);
-
-                        
-                        $record['type'] = self::TYPE_ONE_TIME;
-                        $record['one_time_type'] = self::ONE_TIME_CUSTOM;
-                        $record['is_draft'] = 0;
-                        $record['is_completed'] = 0;
-                        $record['is_verified'] = 0;
-                        $record['can_edit'] = 0;
-                        $record['cannot_edit_reason_array'] = ['Task created from recurring task by system'];
-
-                        $record['start_date_time'] = $next_date;
-                        $record['parent_id'] = $task->id;
-                        $record["created_by"] = $record["updated_by"] = 0;
-
-                        $record = self::setDates($record);
-                        
-                        // d($record);
-
-                        $count = Task::where("parent_id", $record['parent_id'])->whereDate("start_date_time", $record['start_date_time'])->count();
-
-                        if ($count == 0)
+                        try
                         {
-                            $model = new Task($record);
+                            $record = $task->getAttributes();
+                            unset($record["id"]);
+                            unset($record["created_at"]);
+                            unset($record["updated_at"]);
+                            unset($record["created_by"]);
+                            unset($record["updated_by"]);
+
                             
-                            if ($model->save())
+                            $record['type'] = self::TYPE_ONE_TIME;
+                            $record['one_time_type'] = self::ONE_TIME_CUSTOM;
+                            $record['is_draft'] = 0;
+                            $record['is_completed'] = 0;
+                            $record['is_verified'] = 0;
+                            $record['can_edit'] = 0;
+                            $record['cannot_edit_reason_array'] = ['Task created from recurring task by system'];
+
+                            $record['start_date_time'] = $next_date;
+                            $record['parent_id'] = $task->id;
+                            $record["created_by"] = $record["updated_by"] = 0;
+
+                            $record = self::setDates($record);
+                            
+                            // d($record);
+
+                            $count = Task::where("parent_id", $record['parent_id'])->whereDate("start_date_time", $record['start_date_time'])->count();
+
+                            if ($count == 0)
                             {
-                                $save_count++;
-                            }
-                            else
-                            {
-                                throw new UserException("Fail To Save", UserException::ERROR_LARAVEL_FAIL);
+                                $model = new Task($record);
+                                
+                                if ($model->save())
+                                {
+                                    $save_count++;
+                                }
+                                else
+                                {
+                                    throw new UserException("Fail To Save", UserException::ERROR_LARAVEL_FAIL);
+                                }
                             }
                         }
-                    }
-                    catch(Exception $ex)
-                    {
-                        d($model->custom_errors);
-                        throw $ex;
-                    }
+                        catch(Exception $ex)
+                        {
+                            d($model?->custom_errors);
+                            throw $ex;
+                        }
 
-                    $next_date = DateUtility::change($next_date, $days, DateUtility::DAYS, DateUtility::DATE_FORMAT);
+                        $next_date = DateUtility::change($next_date, $days, DateUtility::DAYS, DateUtility::DATE_FORMAT);
+                    }
+                }
+            }
+            else
+            {
+                $task->load("taskRecurringDate");
+
+                foreach($task->taskRecurringDate as $task_custom_date)
+                {
+                    if (DateUtility::compare($task_custom_date->date, $today) <= 0)
+                    {
+                        try
+                        {
+                            $record = $task->getAttributes();
+                            unset($record["id"]);
+                            unset($record["created_at"]);
+                            unset($record["updated_at"]);
+                            unset($record["created_by"]);
+                            unset($record["updated_by"]);
+
+                            
+                            $record['type'] = self::TYPE_ONE_TIME;
+                            $record['one_time_type'] = self::ONE_TIME_CUSTOM;
+                            $record['is_draft'] = 0;
+                            $record['is_completed'] = 0;
+                            $record['is_verified'] = 0;
+                            $record['can_edit'] = 0;
+                            $record['cannot_edit_reason_array'] = ['Task created from recurring task by system'];
+
+                            $record['start_date_time'] = $task_custom_date->date->toDateString();
+                            $record['parent_id'] = $task->id;
+                            $record["created_by"] = $record["updated_by"] = 0;
+
+                            $record = self::setDates($record);
+                            
+                            // d($record);
+
+                            $count = Task::where("parent_id", $record['parent_id'])->whereDate("start_date_time", $record['start_date_time'])->count();
+
+                            if ($count == 0)
+                            {
+                                $model = new Task($record);
+                                
+                                if ($model->save())
+                                {
+                                    $save_count++;
+                                }
+                                else
+                                {
+                                    throw new UserException("Fail To Save", UserException::ERROR_LARAVEL_FAIL);
+                                }
+                            }
+                        }
+                        catch(Exception $ex)
+                        {
+                            d($model?->custom_errors);
+                            throw $ex;
+                        }
+                    }
                 }
             }
         }
