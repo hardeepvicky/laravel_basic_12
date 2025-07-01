@@ -10,7 +10,9 @@
     <meta name="keywords"
         content="admin template, Admiro admin template, best javascript admin, dashboard template, bootstrap admin template, responsive admin template, web app">
     <meta name="author" content="pixelstrap">
-    <title>Admiro - Premium Admin Template</title>
+    <title>
+        {{ $page_title ?? config('app.name') }}
+    </title>
     <!-- Favicon icon-->
     <link rel="icon" href="/assets/images/favicon.png" type="image/x-icon">
     <link rel="shortcut icon" href="/assets/images/favicon.png" type="image/x-icon">
