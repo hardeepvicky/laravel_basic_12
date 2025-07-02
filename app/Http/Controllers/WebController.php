@@ -42,6 +42,13 @@ class WebController extends Controller
         }
     }
 
+    public static function getCacheKey(): string
+    {
+        $str = static::class;
+
+        return static::optimizeCacheKey($str);
+    }
+
     protected function setForView(array $array)
     {
         $this->data = array_merge($this->data, $array);

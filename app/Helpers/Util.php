@@ -203,19 +203,22 @@ class Util
     }
 
 
-    public static function getTreeArray(array $records, $parent_field, $parentId = 0)
+    public static function getTreeArray(array $records, $parent_field, $parentId = 0, $max_depth = 20, $current_depth = 0)
     {
         $data = array();
 
         foreach ($records as $element) {
             if ($element[$parent_field] == $parentId) {
-                $children = self::getTreeArray($records, $parent_field, $element['id']);
+                if ($current_depth < $max_depth)
+                {
+                    $children = self::getTreeArray($records, $parent_field, $element['id'], $max_depth, $current_depth + 1);
 
-                if ($children) {
-                    $element['children'] = $children;
+                    if ($children) {
+                        $element['children'] = $children;
+                    }
+
+                    $data[] = $element;
                 }
-
-                $data[] = $element;
             }
         }
 

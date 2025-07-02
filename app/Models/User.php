@@ -447,6 +447,13 @@ class User extends Authenticatable implements BaseModelInterface
         return $class_name;
     }
 
+    public static function getCacheKey(): string
+    {
+        $str = static::class;
+
+        return static::optimizeCacheKey($str);
+    }
+
     public static function classDisplayName(): string
     {
         $class_name = str_class_name_to_human_text(static::class);

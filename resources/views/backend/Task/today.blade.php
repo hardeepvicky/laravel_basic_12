@@ -56,7 +56,6 @@
 
                                                 <a class="btn btn-secondary btn-sm mb-2 confirm"
                                                     href="{{ route($routePrefix . '.status_in_progress', ['id' => $record->id]) }}">
-                                                    {{ get_value_from_list($status_list, Task::STATUS_IN_PROGRESS) }}
                                                     Move To In-Progress
                                                 </a>
                                             @endif
@@ -80,7 +79,7 @@
                                                 </a>
                                             @endif
 
-                                            @if (in_array($record->status, [Task::STATUS_COMPLETED]) && in_array($record->created_by, [0, $auth_user->id]))
+                                            @if (in_array($record->status, [Task::STATUS_COMPLETED]))
                                                 <a class="btn btn-secondary btn-sm mb-2 confirm"
                                                     href="{{ route($routePrefix . '.status_verified', ['id' => $record->id]) }}">
                                                     Verify Now
@@ -157,7 +156,7 @@
                                             {{ get_value_from_list($status_list, $record->status) }}
                                         </td>
                                         <td>
-                                            @if (in_array($record->status, [Task::STATUS_COMPLETED]) && in_array($record->created_by, [0, $auth_user->id]))
+                                            @if (in_array($record->status, [Task::STATUS_COMPLETED]))
                                                 <a class="btn btn-secondary btn-sm mb-2 confirm"
                                                     href="{{ route($routePrefix . '.status_verified', ['id' => $record->id]) }}">
                                                     Verify Now

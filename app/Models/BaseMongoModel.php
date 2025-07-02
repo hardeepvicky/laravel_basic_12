@@ -36,6 +36,13 @@ class BaseMongoModel extends Model implements BaseModelInterface
         return $class_name;
     }
 
+    public static function getCacheKey(): string
+    {
+        $str = static::class;
+
+        return static::optimizeCacheKey($str);
+    }
+
     public static function boot()
     {
         parent::boot();

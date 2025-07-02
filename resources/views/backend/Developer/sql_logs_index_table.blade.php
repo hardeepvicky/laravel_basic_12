@@ -9,7 +9,13 @@
                 <thead>
                     <tr class="border-bottom-primary">
                         <th>ID</th>
-                        <th>Route Name / Url</th>
+                        <th>
+                            Route Name / Url
+                            <hr>
+                            <?= sortable_anchor('request_method', 'Request Method') ?>
+                        </th>
+                        <th>Cache Logs</th>
+                        
                         <th>
                             <?= sortable_anchor('created_at', 'Created') ?>
                             | <?= sortable_anchor('updated_at', 'Updated') ?>
@@ -22,7 +28,25 @@
                     @foreach ($records as $record)
                     <tr>
                         <td>{{ $record->id }}</td>
-                        <td>{{ $record->route_name_or_url }}</td>
+                        <td>
+                            {{ $record->route_name_or_url }}
+                            <hr>
+                            <label class="info">
+                                Request Method : <span>{{ $record->request_method }}</span>
+                            </label>
+                        </td>
+                        <td>
+                            <div id="cache_logs-{{ $record->id }}" class="h-200">
+                                {!! array_print($record->cache_model['cache_logs'] ?? []) !!}
+                            </div>
+
+                            <span class="btn btn-info btn-sm css-toggler mt-1 mb-1"
+                                data-sr-css-class-toggle-target="#cache_logs-{{ $record->id }}"
+                                data-sr-css-class-toggle-class="h-200" data-sr-css-class-toggle-applied-text="More"
+                                data-sr-css-class-toggle-not-applied-text="Less">
+                                More
+                            </span>
+                        </td>
                         <td>
                             <x-Backend.index-table-info :record="$record" :userList="$userListCache" />
                         </td>

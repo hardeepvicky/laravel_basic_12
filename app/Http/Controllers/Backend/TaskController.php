@@ -134,7 +134,9 @@ class TaskController extends BackendController
             $this->model = new Task();
         }
 
-        $user_conditions = [];
+        $user_conditions = [
+            "type" => User::TYPE_INTERNAL,
+        ];
 
         if ($this->model->assign_to_user_id) {
             $user_conditions['or_id'] = $this->model->assign_to_user_id;

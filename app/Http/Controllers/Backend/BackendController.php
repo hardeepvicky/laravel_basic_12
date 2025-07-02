@@ -55,6 +55,8 @@ class BackendController extends WebController
 
         $this->setForView(compact("current_route_name", "menus", "header_menu_list", "partial_path", "breadcums", "userListCache", "auth_user"));
 
+        $this->saveSqlLog();
+
         return true;
     }
 

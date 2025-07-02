@@ -72,21 +72,24 @@ function d($arg, $will_exit = false)
 
 function array_print($array, $indent = 0)
 {
-    $array = array_short_string_with_dot($array);
+    if (is_array($array)) {
+        $array = array_short_string_with_dot($array);
 
-    echo '<ul class="array_print indent-' . $indent . '" >';
-    foreach ($array as $key => $value) {
-        echo '<li>';
-        if (is_array($value)) {
-            echo '<strong>' . htmlspecialchars($key) . ':</strong>';
-            array_print($value, $indent + 1); // Recurse for nested arrays
-        } else {
-            echo '<strong>' . htmlspecialchars($key) . ':</strong> ' . htmlspecialchars(print_r($value, true));
+
+        echo '<ul class="array_print indent-' . $indent . '" >';
+        foreach ($array as $key => $value) {
+            echo '<li>';
+            if (is_array($value)) {
+                echo '<strong>' . htmlspecialchars($key) . ':</strong>';
+                array_print($value, $indent + 1); // Recurse for nested arrays
+            } else {
+                echo '<strong>' . htmlspecialchars($key) . ':</strong> ' . htmlspecialchars(print_r($value, true));
+            }
+            echo '</li>';
         }
-        echo '</li>';
-    }
 
-    echo '</ul>';
+        echo '</ul>';
+    }
 }
 
 

@@ -42,6 +42,13 @@ class BaseModel extends Model implements BaseModelInterface
         return $class_name;
     }
 
+    public static function getCacheKey(): string
+    {
+        $str = static::class;
+
+        return static::optimizeCacheKey($str);
+    }
+
     public static function boot()
     {
         parent::boot();
@@ -102,15 +109,15 @@ class BaseModel extends Model implements BaseModelInterface
             ]);
         }
 
-        // foreach ($this->getAttributes() as $field => $value) {
-        //     if (is_null($value)) {
-        //         continue;
-        //     }
+        foreach ($this->getAttributes() as $field => $value) {
+            if (is_null($value)) {
+                continue;
+            }
 
-        //     if (is_string($value) && strlen($value) > 0) {
-        //         $this->{$field} = utf8_encode($value);
-        //     }
-        // }
+            if (is_string($value) && strlen($value) > 0) {
+                $this->{$field} = utf8_encode($value);
+            }
+        }
 
         // dd($this->getAttributes());
     }
@@ -125,12 +132,16 @@ class BaseModel extends Model implements BaseModelInterface
 
         $table_info = $this->getTableInfo($this->getTable());
 
+        // d($table_info, true);
+
         foreach ($table_info['columns'] as $field => $field_attr) {
 
             $text = str_replace(["_id", "is_", "_at"], "", $field);
 
             $labels[$field] = ucwords(str_function_name_to_human_text($text));
         }
+
+        // d($labels, true);
 
         return $labels;
     }

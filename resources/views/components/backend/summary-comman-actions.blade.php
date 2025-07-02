@@ -16,6 +16,14 @@
     </li>
     @endif
 
+    @if(in_array("copy", $buttonList))
+    <li>
+        <a class="btn btn-outline-primary summary-action-button" href="{{ route($routePrefix . '.copy',[$id]) }}">
+            <i class="fa-solid fa-copy"></i>
+        </a>
+    </li>
+    @endif
+
     @if(in_array("delete", $buttonList))
     <li>
         <x-Backend.summary-delete-button url="{{ route($routePrefix . '.destroy', [$id]) }}" />

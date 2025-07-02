@@ -1,0 +1,303 @@
+<?php
+
+namespace App\Http\Controllers\Backend;
+
+use App\Acl\AccessControl;
+use App\Helpers\LaravelExtend;
+use App\Models\AppMenu;
+use App\Models\Department;
+use Illuminate\Http\Request;
+use Exception;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Route;
+
+class AppMenuController extends BackendController
+{
+    public String $routePrefix = "app-menu";
+
+    protected $modelClass = AppMenu::class;
+
+    protected AppMenu | null $model = null;
+
+    public function index()
+    {
+        $cache_key_prefix = Route::currentRouteName();
+
+        $builder = $this->_getBuildeForIndex($cache_key_prefix);
+
+        $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
+
+        foreach($records as $k => $record)
+        {
+            $record->direct_child_count = $record->child->count();
+            $record->getAllChildCount();
+        }
+
+        // dd($records->toArray());
+
+        $this->setForView(compact("records"));
+
+        return $this->viewIndex(__FUNCTION__);
+    }
+
+    private function _getBuildeForIndex($cache_key_prefix, $apply_sort = true)
+    {
+        $cache_key = $cache_key_prefix . "-index";
+
+        $conditions = $this->getConditions($cache_key, [
+            ["field" => "parent_id", "type" => "int", "view_field" => "parent_id"],
+            ["field" => "name", "type" => "string"],
+            ["field" => "route_name", "type" => "string"],
+            ["field" => "is_link", "type" => "", "view_field" => "is_link"],
+            ["field" => "is_active", "type" => "", "view_field" => "is_active"],
+        ]);
+
+        $builder = $this->modelClass::query();
+
+        if (isset($conditions[0][0]) && $conditions[0][0] == "parent_id" && $conditions[0][2])
+        {
+            $child_id_list = AppMenu::getChildIdList([$conditions[0][2]]);
+
+            if ($child_id_list)
+            {
+                $builder->whereIn("id", $child_id_list);
+                unset($conditions[0]);
+            }
+        }
+
+        // d($conditions, true);
+
+        $builder = $builder->where($conditions);
+
+        if ($apply_sort) {
+            $cache_key_for_sort = $cache_key_prefix . "-index-extra-params";
+
+            $clear_cache = request('is_sort_clear', false);
+
+            $sort_params = $this->getRequestData($cache_key_for_sort, [
+                ["key" => "sort_by", "default" => "id"],
+                ["key" => "sort_dir", "default" => "DESC"],
+            ], $clear_cache);
+
+            $builder->orderBy($sort_params['sort_by'], $sort_params['sort_dir']);
+        }
+
+        return $builder;
+    }
+
+    protected function beforeViewRender()
+    {
+        if (is_null($this->model)) {
+            $this->model = new $this->modelClass();
+        }
+
+        $dept_conditions = [];        
+
+        if ($this->model->department_id) {
+            $dept_conditions['or_id'] = $this->model->department_id;
+        }
+
+        $dept_list = Department::getList("id", "display_name", $dept_conditions, "list_display_order");
+
+        $routes = LaravelExtend::getRoutes();
+
+        foreach($routes as $route)
+        {
+            $route_list[$route['route_name']] = $route['route_name'];
+        }
+
+        // dd($route_list);
+
+        $tree_list = AppMenu::getTreeList([
+            ["is_link", 0]
+        ]);
+
+        // d($tree_list, true);
+
+        $field_labels = $this->model->getFieldLabels();
+
+
+        $this->setForView(compact("field_labels", "dept_list", "route_list", "tree_list"));
+
+        return parent::beforeViewRender();
+    }
+
+    public function create()
+    {
+        $this->beforeCreate();
+
+        $model = new $this->modelClass();
+
+        $form = [
+            'url' => route($this->routePrefix . '.store'),
+            'method' => 'POST',
+        ];
+
+        $this->setForView(compact("model", 'form'));
+
+        return $this->view("form");
+    }
+
+    private function _common_validation_rules()
+    {
+        return [
+            "name" => ["required"],
+            "menu_display_order" => ["required"],
+            "department_id" => [],
+            "parent_id" => ["nullable"],
+            "css_class" => ["nullable"],
+            "icon_css_class" => ["nullable"],
+            "is_link" => "",
+            "is_active" => "",
+        ];
+    }
+
+    private function _common_validation_messages()
+    {
+        return [];
+    }
+
+    public function store(Request $request)
+    {
+        $this->beforeCreate();
+
+        $rules = $this->_common_validation_rules();
+
+        $this->model = new $this->modelClass();
+
+        $rules = LaravelExtend::merge_validation_rules($rules, $this->model->getUniqueValidationRules($request));
+        $rules = LaravelExtend::merge_validation_rules($rules, $this->model->getRequiedIfRules($request));
+
+        $messages = $this->_common_validation_messages();
+
+        $validatedData = $request->validate($rules, $messages);
+
+        DB::beginTransaction();
+
+        try {
+            // dd($validatedData);
+            $this->model = $this->modelClass::create($validatedData);
+
+            $this->updateUserInfoAfterSave($this->model);
+
+            DB::commit();
+
+            $accessControl = new AccessControl();
+            $accessControl->clearMenuCache();
+
+            $this->saveSqlLog();
+
+            return $this->afterSave($this->model);
+        } catch (Exception $ex) {
+            DB::rollBack();
+
+            $this->saveSqlLog();
+
+            $this->custom_errors = array_merge_recursive($this->custom_errors, $this->model->custom_errors);
+
+            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", $this->custom_errors);
+        }
+    }
+
+    public function edit($id)
+    {
+        $model = $this->model = $this->modelClass::findOrFail($id);
+
+        $this->beforeEdit($model);
+
+        $form = [
+            'url' => route($this->routePrefix . '.update', $id),
+            'method' => 'PUT',
+        ];
+
+        $this->setForView(compact("model", "form"));
+
+        return $this->view("form");
+    }
+
+    public function update($id, Request $request)
+    {
+        $this->model = $this->modelClass::findOrFail($id);
+
+        $this->beforeEdit($this->model);
+
+        $rules = $this->_common_validation_rules();
+
+        $rules = LaravelExtend::merge_validation_rules($rules, $this->model->getUniqueValidationRules($request));
+        $rules = LaravelExtend::merge_validation_rules($rules, $this->model->getRequiedIfRules($request));
+
+
+        $messages = $this->_common_validation_messages();
+
+        $validatedData = $request->validate($rules, $messages);
+
+        DB::beginTransaction();
+
+        try {
+            $this->model->fill($validatedData);
+
+            $this->model->save();
+
+            $this->updateUserInfoAfterSave($this->model);
+
+            DB::commit();
+
+            $accessControl = new AccessControl();
+            $accessControl->clearMenuCache();
+
+            $this->saveSqlLog();
+
+            return $this->afterSave($this->model);
+        } catch (Exception $ex) {
+            DB::rollBack();
+
+            $this->saveSqlLog();
+
+            $this->custom_errors = array_merge_recursive($this->custom_errors, $this->model->custom_errors);
+
+            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", $this->custom_errors);
+        }
+    }
+
+    public function copy($id)
+    {
+        $model = $this->model = $this->modelClass::findOrFail($id);
+
+        $this->beforeEdit($model);
+
+        $form = [
+            'url' => route($this->routePrefix . '.store', $id),
+            'method' => 'POST',
+        ];
+
+        $this->setForView(compact("model", "form"));
+
+        return $this->view("form");
+    }
+
+    public function ajax_get_list($type)
+    {
+        $response = ["status" => 1];
+
+        try {
+
+            $records = $this->modelClass::where("type", $type)->get();
+
+            $response['data'] = [];
+
+            foreach ($records as $record) {
+                $row = [
+                    "id" => $record->id,
+                    "name" => $record->getDisplayName(),
+                ];
+
+                $response['data'][] = $row;
+            }
+        } catch (Exception $ex) {
+            $response['status'] = 0;
+            $response['msg'] = $ex->getMessage();
+        }
+
+        return $this->responseJson($response);
+    }
+}

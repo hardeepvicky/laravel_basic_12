@@ -255,13 +255,25 @@ class AccessControl
         return $ret_records;
     }
 
+    public static function getCacheKey(): string
+    {
+        $str = static::class;
+
+        return static::optimizeCacheKey($str);
+    }
+
     public static function getMenuCacheKey($user_id)
     {
         return "menu_user_" . $user_id;
     }
 
-    public static function clearMenuCache(array $user_id_list)
+    public static function clearMenuCache(array $user_id_list = [])
     {
+        if (empty($user_id_list))
+        {
+            self::forgotCache();
+        }
+
         foreach ($user_id_list as $user_id) {
             self::forgotCache(self::getMenuCacheKey($user_id));
         }
@@ -274,7 +286,7 @@ class AccessControl
 
     public static function addMenuToCache($user_id, $data)
     {
-        return self::addCache(self::getMenuCacheKey($user_id), $data);
+        return self::addCache(self::getMenuCacheKey($user_id), $data, 60 * 60 * 24 * 365);
     }
 
     public function syncRouteNamesToDatabase()
