@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Helpers\FileUtility;
 use App\Helpers\LaravelExtend;
 use App\Models\AppMenu;
+use App\Models\FieldSetting;
 use App\Models\Task;
 use App\Models\Type;
 use Illuminate\Console\Command;
@@ -35,7 +36,7 @@ class ModelToJsonCommand extends Command
 
         $model_name = trim($model_name);
 
-        $filename = $model_name .".json";
+        $filename = $model_name . ".json";
 
         $path = "files/command/";
 
@@ -43,26 +44,29 @@ class ModelToJsonCommand extends Command
 
         $fileUtility = new FileUtility($disk);
 
-        switch($model_name)
-        {
+        switch ($model_name) {
             case "Type":
                 $records = Type::all();
-                $json = json_encode($records->toArray());                
+                $json = json_encode($records->toArray());
                 break;
 
             case "AppMenu":
                 $records = AppMenu::all();
-                $json = json_encode($records->toArray());                
+                $json = json_encode($records->toArray());
+                break;
+
+            case "FieldSetting":
+                $records = FieldSetting::all();
+                $json = json_encode($records->toArray());
                 break;
 
             default:
                 $this->error($model_name . " is not in switch case");
         }
 
-        if (isset($json) && $json)
-        {
+        if (isset($json) && $json) {
             $fileUtility->writeLog($path, $filename, $json);
-                    
+
             $this->info("$filename : Json Write Successfully");
         }
     }

@@ -17,9 +17,10 @@ class DatabaseSeeder extends Seeder
         $this->call(UserCategorySeeder::class);
         $this->call(RoleSeeder::class);
         $this->call(UserSeeder::class);
-        
+
         $this->call(StateSeeder::class);
         $this->call(TypeSeeder::class);
         $this->call(AppMenuSeeder::class);
+        $this->call(FieldSettingSeeder::class);
     }
 }

@@ -28,7 +28,7 @@ class AppMenuSeeder extends Seeder
 
         $model_name = "Type";
 
-        $filename = $model_name .".json";
+        $filename = $model_name . ".json";
 
         $path = "files/command/";
 
@@ -38,12 +38,9 @@ class AppMenuSeeder extends Seeder
 
         $records = json_decode($content);
 
-        if ($records === null && json_last_error() !== JSON_ERROR_NONE)
-        {
-             $output->addLogMessage("cound not decode json from " . $path . $filename, "error");
-        }
-        else
-        {
+        if ($records === null && json_last_error() !== JSON_ERROR_NONE) {
+            $output->addLogMessage("cound not decode json from " . $path . $filename, "error");
+        } else {
             $counts['total_count'] = count($records);
 
             $model = new AppMenu();
@@ -59,42 +56,31 @@ class AppMenuSeeder extends Seeder
 
                 $save = [];
 
-                foreach($table_info['columns'] as $field => $field_attr)
-                {
-                    if (in_array($field, ["id"]))
-                    {
+                foreach ($table_info['columns'] as $field => $field_attr) {
+                    if (in_array($field, ["id"])) {
                         continue;
                     }
 
-                    if (isset($record->{$field}))
-                    {
+                    if (isset($record->{$field})) {
                         $save[$field] = $record->{$field};
                     }
                 }
 
-                if (!isset($save['parent_id']))
-                {
+                if (!isset($save['parent_id'])) {
                     $save['parent_id'] = 0;
                 }
 
-                try
-                {
+                try {
                     // dd($save);
                     $id = $model->insertIgnoreIfExist($save, $is_insert);
 
-                    if ($id)
-                    {
+                    if ($is_insert) {
                         $counts['insert_count']++;
                     }
-                }
-                catch(UserException $ex)
-                {
-                    if (isset($ex->data['custom_errors']) && is_array($ex->data['custom_errors']))
-                    {
-                        foreach($ex->data['custom_errors'] as $group => $errors)
-                        {
-                            foreach($errors as $error)
-                            {
+                } catch (UserException $ex) {
+                    if (isset($ex->data['custom_errors']) && is_array($ex->data['custom_errors'])) {
+                        foreach ($ex->data['custom_errors'] as $group => $errors) {
+                            foreach ($errors as $error) {
                                 $output->addLogMessage($group . " : " . $error['label'] . " : " . $error['msg'], "error");
                             }
                         }
