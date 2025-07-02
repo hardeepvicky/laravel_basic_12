@@ -74,4 +74,23 @@ class ArrayHelper
             }
         }
     }
+
+    public function onlyKeys(bool $recursive = false, array $arr = [])
+    {
+        if (empty($arr)) {
+            $arr = $this->data;
+        }
+
+        foreach ($arr as $k => $v) {
+            if (!is_numeric($k)) {
+                if ($recursive && is_array($v) && count($v) > 0) {
+                    $arr[$k] = $this->onlyKeys($recursive, $v);
+                } else {
+                    $arr[$k] = "";
+                }
+            }
+        }
+
+        return $arr;
+    }
 }

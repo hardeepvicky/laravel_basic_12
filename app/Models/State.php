@@ -67,8 +67,6 @@ class State extends BaseModel
         $first_chars = [];
 
         $exception_words = ["and", "or", "by"];
-        $exception_chars = ["\\", "/"];
-
         $retain_words = ["al", "ar", "la", "ash", "as", "su"];
 
         foreach ($words as $k => $word) {
@@ -90,10 +88,6 @@ class State extends BaseModel
 
             if (empty($char)) {
                 $char = strtoupper($word[0]);
-            }
-
-            if (in_array($char, $exception_chars)) {
-                continue;
             }
 
             $first_chars[$k] = $char;

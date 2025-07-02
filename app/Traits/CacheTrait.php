@@ -3,18 +3,14 @@
 namespace App\Traits;
 
 use App\Exceptions\UserException;
+use App\Helpers\ArrayHelper;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Cache;
 
 trait CacheTrait
 {
     public static int $cache_time_in_seconds = 60;
-
-    public static function getCacheKey(): string
-    {
-        $str = get_called_class();
-
-        return static::optimizeCacheKey($str);
-    }
+    public static array $cache_logs = [];
 
     public static function optimizeCacheKey($key): string
     {
@@ -33,6 +29,11 @@ trait CacheTrait
 
         if (Cache::has($cache_key)) {
             $result = Cache::get($cache_key);
+            self::addLog($base_cache_key, "get", $cache_key, $result);
+        }
+        else
+        {
+            self::addLog($base_cache_key, "not-found", $cache_key);
         }
 
         return $result;
@@ -54,11 +55,20 @@ trait CacheTrait
         {
             throw new UserException("Fail To Put Cache", UserException::ERROR_LARAVEL_FAIL);
         }
+        else
+        {
+            self::addLog($base_cache_key, "put", $cache_key, $data);
+        }
 
         //make refrence to cache keys 
         $list_of_cache_keys = [];
         if (Cache::has($base_cache_key)) {
-            $list_of_cache_keys = Cache::get($list_of_cache_keys);
+            $list_of_cache_keys = Cache::get($base_cache_key);
+            self::addLog($base_cache_key, "get", $base_cache_key, $list_of_cache_keys);
+        }
+        else
+        {
+            self::addLog($base_cache_key, "not-found", $base_cache_key);
         }
 
         if (!in_array($cache_key, $list_of_cache_keys)) {
@@ -67,6 +77,10 @@ trait CacheTrait
 
         if (!Cache::put($base_cache_key, $list_of_cache_keys, $cache_time_in_seconds)) {
             throw new UserException("Fail To Put Cache", UserException::ERROR_LARAVEL_FAIL);
+        }
+        else
+        {
+            self::addLog($base_cache_key, "put", $base_cache_key, $list_of_cache_keys);
         }
     }
 
@@ -77,15 +91,58 @@ trait CacheTrait
         if (Cache::has($base_cache_key)) {
             $list_of_cache_keys = Cache::get($base_cache_key);
 
+            self::addLog($base_cache_key, "get", $base_cache_key, $list_of_cache_keys);
+
             foreach ($list_of_cache_keys as $cache_key) {
-                if (is_null($cache_key) || $cache_key == $key)
+                if (is_null($key) || $cache_key == $key)
                 {
-                    if (!Cache::forget($cache_key))
+                    if (Cache::has($cache_key))
                     {
-                        throw new UserException("Fail To Forgot Cache", UserException::ERROR_LARAVEL_FAIL);
+                        if (!Cache::forget($cache_key))
+                        {
+                            throw new UserException("Fail To Forgot Cache", UserException::ERROR_LARAVEL_FAIL);
+                        }
+                        else
+                        {
+                            self::addLog($base_cache_key, "forget", $cache_key);
+                        }
+                    }
+                    else
+                    {
+                        self::addLog($base_cache_key, "not-found", $cache_key);
                     }
                 }
             }
         }
+        else
+        {
+            self::addLog($base_cache_key, "not-found", $base_cache_key);
+        }
+    }
+
+    protected static function addLog($base_cache_key, string $op, $cache_key, $data = null)
+    {
+        $cache_log_level = env("APP_CACHE_LOG_LEVEL", 0);
+
+        if ($cache_log_level == 0)
+        {
+            return;
+        }
+
+        if ($cache_log_level == 1)
+        {
+            $data = null;
+        }
+        
+        if (is_array($data) && count($data) > 0)
+        {
+            $data = array_purge_if_exceed_limit($data, 20, true);
+        }
+
+        self::$cache_logs[$base_cache_key][] = [
+            "op" => $op,
+            "cache_key" => $cache_key,
+            "data" => $data
+        ];
     }
 }

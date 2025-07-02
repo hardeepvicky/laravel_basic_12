@@ -2,16 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use App\Acl\AccessControl;
 use App\Exceptions\UserException;
 use App\Helpers\DateUtility;
 use App\Helpers\FileUtility;
 use App\Helpers\LaravelExtend;
 use App\Models\AjaxLog;
+use App\Models\BaseModel;
+use App\Models\BaseMongoModel;
+use App\Models\CacheLog;
 use App\Models\SqlLog;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\MessageBag;
 
@@ -100,6 +105,8 @@ abstract class Controller
         $sqlLogModel = new SqlLog();
 
         $sqlLogModel->route_name_or_url = Route::getCurrentRoute()->getName();
+        $method = Request::method();
+        $sqlLogModel->request_method = $method;
 
         if (!$sqlLogModel->route_name_or_url) {
             $sqlLogModel->route_name_or_url = request()->getRequestUri();
@@ -134,6 +141,14 @@ abstract class Controller
             $fileUtility->writeLog($path, $filename, $content);
 
             $sqlLogModel->sql_dml_log_file = $path . $filename;
+        }
+
+        $cache_model = $this->saveCacheLog();
+
+        if ($cache_model)
+        {
+            $cache_model->sql_log_id = $sqlLogModel->id;
+            $sqlLogModel->cache_model = $cache_model->toArray();
         }
 
         if (!$sqlLogModel->saveQuietly()) {
@@ -188,6 +203,24 @@ abstract class Controller
         return LaravelExtend::getMongodbQueryLog();
     }
 
+    public function saveCacheLog()
+    {
+        $cache_log_level = env("APP_CACHE_LOG_LEVEL", 0);
+
+        if (!$cache_log_level)
+        {
+            return null;
+        }
+
+        $save['cache_logs']["BaseModel"] = BaseModel::$cache_logs;
+        $save['cache_logs']["BaseMongoModel"] = BaseMongoModel::$cache_logs;
+        $save['cache_logs']["AccessControl"] = AccessControl::$cache_logs;
+
+        $model = new CacheLog($save);
+
+        return $model;
+    }
+
     protected function responseJson(array $response)
     {
         if (App::environment('production')) {
@@ -196,18 +229,25 @@ abstract class Controller
 
         $sql_model = $this->saveSqlLog();
 
-        if ($sql_model) {
+         if ($sql_model) {
             $sql_model->afterFind();
         }
+
+        $cache_model = $this->saveCacheLog();
 
         if (is_ajax_request()) {
             $request = request();
 
+            $method = Request::method();
+
             $save = [
                 "route_name_or_url" => Route::currentRouteName(),
+                "url" => $_SERVER['REQUEST_URI'],
+                "request_method" => $method,
                 "request" => $request->all(),
                 "response" => $response,
-                "sql_model" => $sql_model?->toArray()
+                "sql_model" => $sql_model?->toArray(),
+                "cache_model" => $cache_model?->toArray()
             ];
 
             $save = array_purge_if_exceed_limit($save);
@@ -219,6 +259,12 @@ abstract class Controller
 
             if (!$ajaxLog->saveQuietly()) {
                 throw new UserException("Fail To Save Ajax Log", UserException::ERROR_LARAVEL_FAIL);
+            }
+
+            if ($cache_model)
+            {
+                $cache_model->ajax_log_id = $ajaxLog->id;
+                $cache_model->save();
             }
         }
 

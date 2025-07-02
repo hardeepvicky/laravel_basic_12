@@ -3,6 +3,7 @@
 namespace App\Helpers;
 
 use App\Acl\AccessControl;
+use App\Models\AppMenu;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -22,24 +23,97 @@ class Menu
         }
     }
 
+    public static function getDynamicMenus(array $app_menus, $depth = 0)
+    {
+        $dynamic_menus = [];
+
+        foreach($app_menus as $app_menu)
+        {
+            $dynamic_menu = [
+                "title" => $app_menu['name'],
+                "css_class" => $app_menu['css_class'],
+                "icon" => $app_menu['icon_css_class'],
+                "related_links" => []
+            ];
+
+            if (isset($app_menu['app_menu_related_link']) && $app_menu['app_menu_related_link'])
+            {
+                foreach($app_menu['app_menu_related_link'] as $app_menu_related_link)
+                {
+                    if ($app_menu_related_link['route_name_array'])
+                    {
+                        foreach($app_menu_related_link['route_name_array'] as $route_name)
+                        {
+                            $related_link = [
+                                "title" => $app_menu_related_link['name'],
+                                "route_name" => $route_name,
+                                "related_links" => []
+                            ];
+
+                            $dynamic_menu['related_links'][] = $related_link;
+                        }
+                    }
+                }
+            }
+
+            if (isset($app_menu['children']) && $app_menu['children'])
+            {
+                $dynamic_menu['links'] = self::getDynamicMenus($app_menu['children'], $depth + 1);
+            }
+            else if ($app_menu['is_link'] && $app_menu['route_name'])
+            {
+                $dynamic_menu['route_name'] = $app_menu['route_name'];
+            }
+
+            if (!$dynamic_menu['icon'])
+            {
+                if ($depth == 0)
+                {
+                    $dynamic_menu['icon'] = "fas fa-layer-group";
+                }
+                else if ($depth > 0) 
+                {
+                    $dynamic_menu['icon'] = 'fas fa-cube';
+                }
+            }
+            
+            if ($depth > 0 && $app_menu['is_link'] && $app_menu['route_name'])
+            {
+                $dynamic_menu['icon'] .= ' child-menu-icon';
+            }
+
+            $dynamic_menus[] = $dynamic_menu;
+        }
+
+        return $dynamic_menus;
+    }
+
     public static function get($auth_user_id)
     {
         self::$menus = [];
 
         self::$menus = AccessControl::getCacheMenu($auth_user_id);
 
-        // dd(self::$menus);
+        // d(self::$menus);
         if (!empty(self::$menus)) {
             return self::checkForActive(self::$menus);
         }
 
         self::$menus[] = (new HomeMenu)->get();
-        self::$menus[] = (new TaskMenu)->get();
+
+        $app_menus = AppMenu::getTreeRecordsWithRelation([
+            ["is_active", 1]
+        ]);
+        
+        $app_menus = self::getDynamicMenus($app_menus);        
+        // d($app_menus);
+
+        self::$menus = array_merge(self::$menus, $app_menus);
+        
         self::$menus[] = (new MasterMenu)->get();
+        
         self::$menus[] = (new AdminMenu)->get();
         self::$menus[] = (new DeveloperMenu)->get();
-
-        //d(self::$menus); exit;
 
         self::_filterMenuForUser($auth_user_id);
 
@@ -314,6 +388,7 @@ class BaseMenu
                 self::getLink($routePrefix . ".index", "List", self::ICON_MENU_LIST, [
                     self::addRelatedLink($routePrefix . ".edit", "Edit"),
                     self::addRelatedLink($routePrefix . ".view", "View"),
+                    self::addRelatedLink($routePrefix . ".copy", "Copy"),
                 ]),
                 self::getLink($routePrefix . ".create", "Add", self::ICON_MENU_CREATE),
             ],
@@ -354,7 +429,7 @@ class HomeMenu extends BaseMenu
 
         $links[] = self::getLink("dashboard", "Dashboard", 'fa-solid fa-gauge');
 
-        return self::getModule("Home", 'fas fa-home', $links);
+        return self::getModule("Dashboard", 'fas fa-home', $links);
     }
 }
 
@@ -422,10 +497,20 @@ class DeveloperMenu extends BaseMenu
     {
         $links = [];
 
+        $links[] = self::app_menu();
         $links[] = self::type();
         $links[] = self::logs();
 
         return self::getModule("Developer", null, $links);
+    }
+
+    private static function app_menu()
+    {
+        $routePrefix = "app-menu";
+
+        $links = self::getControllerDefaultLinks($routePrefix, "Menu", self::ICON_MENU_ROOT_CHILD);
+
+        return $links;
     }
 
     private static function type()
@@ -557,7 +642,7 @@ class TaskMenu extends BaseMenu
         $arr = self::getControllerDefaultLinks($routePrefix, "Task", self::ICON_MENU_ROOT);
 
         $links[] = self::getLink($routePrefix . ".today", "Today", self::ICON_MENU_LIST);
-        
+
         $arr["links"] = array_merge($links, $arr["links"]);
 
         // d($arr, true);

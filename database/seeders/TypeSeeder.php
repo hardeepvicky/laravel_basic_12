@@ -3,9 +3,9 @@
 namespace Database\Seeders;
 
 use App\Helpers\ConsoleOutput;
-use App\Models\State;
 use App\Models\Type;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Storage;
 
 class TypeSeeder extends Seeder
 {
@@ -25,22 +25,24 @@ class TypeSeeder extends Seeder
             "delete_count" => 0,
         ];
 
-        $disk = Type::getStorageDisk();
+        $model_name = "Type";
 
-        $path = "files/command/type.json";
+        $filename = $model_name .".json";
 
-        $content = $disk->get($path);
+        $path = "files/command/";
+
+        $disk = Storage::disk(DEFAULT_DISK);
+
+        $content = $disk->get($path . $filename);
 
         $records = json_decode($content);
 
         if ($records === null && json_last_error() !== JSON_ERROR_NONE)
         {
-             $output->addLogMessage("cound not decode json from $path", "error");
+             $output->addLogMessage("cound not decode json from " . $path . $filename, "error");
         }
         else
         {
-            // dd($records);
-
             $counts['total_count'] = count($records);
 
             $model = new Type();
@@ -72,7 +74,7 @@ class TypeSeeder extends Seeder
                 // dd($save);
                 $id = $model->insertIgnoreIfExist($save, $is_insert);
 
-                if ($is_insert)
+                if ($id)
                 {
                     $counts['insert_count']++;
                 }

@@ -108,7 +108,7 @@ class TypeController extends BackendController
 
         $model = new $this->modelClass();
 
-        $rules = array_merge_recursive($rules, $model->getUniqueValidationRules($request));
+        $rules = LaravelExtend::merge_validation_rules($rules, $model->getUniqueValidationRules($request));
 
         $messages = $this->_common_validation_messages();
 
@@ -159,7 +159,7 @@ class TypeController extends BackendController
 
         $rules = $this->_common_validation_rules();
 
-        $rules = array_merge_recursive($rules, $model->getUniqueValidationRules($request));
+        $rules = LaravelExtend::merge_validation_rules($rules, $model->getUniqueValidationRules($request));
 
         // dd($rules);
 

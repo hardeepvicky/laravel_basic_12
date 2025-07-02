@@ -3,6 +3,7 @@
 namespace App\Acl;
 
 use App\Exceptions\UserException;
+use App\Models\AppMenu;
 
 class SectionRoutes
 {
@@ -39,13 +40,8 @@ class SectionRoutes
         $sections = [];
 
         $sections[]["Home"] = self::home();
-        $sections[]["Task"] = self::task();
 
-        // $sections["HR"] = [
-        //     "Department" => self::department(),
-        //     "Designation" => self::designation(),
-        //     "Employee" => self::employee(),
-        // ];
+        $app_menus = AppMenu::getTreeRecordsWithRelation();
 
         $sections["Master"] = [
             "User Category" => self::user_category(),
@@ -59,7 +55,78 @@ class SectionRoutes
 
         $sections[]["Developer"] = self::developer();
 
+        $dynamic_sections = self::getDynamicSections($app_menus);
+
+        $sections = array_merge($sections, $dynamic_sections);
+
+        // d($sections, true);
+
         return self::addExtraToSections($sections);
+    }
+
+    public static function getDynamicSections($app_menus)
+    {
+        $dynamic_sections = [];
+
+        // d($app_menus, true);
+
+        foreach ($app_menus as $app_menu) {
+            $main_section = [];
+            if (isset($app_menu['children']) && $app_menu['children']) {                
+                $have_grand_child = false;
+                foreach ($app_menu['children'] as $children) {
+
+                    $main_section[$children['name']]["routes"][] = $children['route_name'];                    
+
+                    if (isset($children['app_menu_related_link']) && $children['app_menu_related_link']) {
+                        foreach ($children['app_menu_related_link'] as $app_menu_related_link) { 
+                            if (!isset($main_section[$app_menu_related_link['name']]["routes"]))
+                            {
+                                $main_section[$app_menu_related_link['name']]["routes"] = [];
+                            }
+
+                            $main_section[$app_menu_related_link['name']]["routes"] = array_merge($main_section[$app_menu_related_link['name']]["routes"], $app_menu_related_link["route_name_array"]);
+                        }
+                    }
+
+                    if (isset($children['children']) && $children['children'])
+                    {
+                        $have_grand_child = true;
+                        $sub_section = [];
+                        foreach($children['children'] as $grand_child)
+                        {
+                            $sub_section[$grand_child['name']]["routes"][] = $grand_child['route_name'];                    
+                            if (isset($grand_child['app_menu_related_link']) && $grand_child['app_menu_related_link']) {
+                                foreach ($grand_child['app_menu_related_link'] as $app_menu_related_link) { 
+
+                                    if (!isset($sub_section[$app_menu_related_link['name']]["routes"]))
+                                    {
+                                        $sub_section[$app_menu_related_link['name']]["routes"] = [];
+                                    }
+
+                                    $sub_section[$app_menu_related_link['name']]["routes"] = array_merge($sub_section[$app_menu_related_link['name']]["routes"], $app_menu_related_link["route_name_array"]);
+                                }
+                            }
+                        }
+
+                        $main_section[$children['name']] = $sub_section;
+                    }
+                }
+
+                if ($have_grand_child)
+                {
+                    $dynamic_sections[$app_menu['name']] = $main_section;
+                }
+                else
+                {
+                    $dynamic_sections[][$app_menu['name']] = $main_section;
+                }
+            }
+        }
+
+        // d($dynamic_sections); exit;
+
+        return $dynamic_sections;
     }
 
     public static function addExtraToSections(array $sections)

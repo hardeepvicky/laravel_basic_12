@@ -293,3 +293,23 @@ label.info {
     display: inline-block;
     width: auto;
 }
+
+.ml-1
+{
+    margin-left: 5px;
+}
+
+.ml-2
+{
+    margin-left: 10px;
+}
+
+.ml-3
+{
+    margin-left: 15px;
+}
+
+.ml-4
+{
+    margin-left: 20px;
+}
