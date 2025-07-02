@@ -86,14 +86,14 @@ class Menu
         ]);
         
         $app_menus = self::getDynamicMenus($app_menus);        
-        // dd($app_menus);
-        self::$menus = array_merge(self::$menus, $app_menus);
+        // d($app_menus);
 
+        self::$menus = array_merge(self::$menus, $app_menus);
+        
         self::$menus[] = (new MasterMenu)->get();
+        
         self::$menus[] = (new AdminMenu)->get();
         self::$menus[] = (new DeveloperMenu)->get();
-
-        // d(self::$menus); exit;
 
         self::_filterMenuForUser($auth_user_id);
 

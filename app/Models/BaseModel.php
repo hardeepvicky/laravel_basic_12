@@ -109,16 +109,6 @@ class BaseModel extends Model implements BaseModelInterface
             ]);
         }
 
-        foreach ($this->getAttributes() as $field => $value) {
-            if (is_null($value)) {
-                continue;
-            }
-
-            if (is_string($value) && strlen($value) > 0) {
-                $this->{$field} = utf8_encode($value);
-            }
-        }
-
         // dd($this->getAttributes());
     }
 

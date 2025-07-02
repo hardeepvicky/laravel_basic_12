@@ -58,6 +58,11 @@ class AppMenu extends BaseModel
     {
         return $this->hasMany(AppMenu::class, "parent_id");
     }
+    
+    public function appMenuRelatedLink()
+    {
+        return $this->hasMany(AppMenuRelatedLink::class);
+    }
 
     protected function getDisplayNameAttribute()
     {
@@ -138,6 +143,15 @@ class AppMenu extends BaseModel
     public static function getTreeList(array $conditions = []) : array
     {
         return Util::getTreeListArray(self::getTreeRecords($conditions, 2), "id", "name", false, false);
+    }
+
+    public static function getTreeRecordsWithRelation(array $conditions = [], $max_depth = 10) : array
+    {
+        $records = self::where($conditions)->with("appMenuRelatedLink")->orderBy("menu_display_order")->get();
+
+        $records = Util::getTreeArray($records->toArray(), "parent_id", 0, $max_depth);
+
+        return $records;
     }
 
     public function getChildren()

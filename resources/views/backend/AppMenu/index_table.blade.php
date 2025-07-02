@@ -9,6 +9,7 @@
                 <thead>
                     <tr class="border-bottom-primary">
                         <th><?= sortable_anchor('id', get_value_from_list($field_labels, 'id', 'id')) ?></th>
+                        <th>Parent</th>
                         <th><?= sortable_anchor('name', get_value_from_list($field_labels, 'name', 'name')) ?></th>
                         <th><?= sortable_anchor('menu_display_order', get_value_from_list($field_labels, 'menu_display_order', 'menu_display_order')) ?></th>
                         <th><?= sortable_anchor('is_link', get_value_from_list($field_labels, 'is_link', 'is_link')) ?></th>
@@ -22,6 +23,7 @@
                     @foreach ($records as $record)
                         <tr>
                             <th scope="row">{{ $record->id }}</th>
+                            <td>{{ get_value_from_list($tree_list, $record->parent_id) }}</td>
                             <td>{{ $record->name }}</td>
                             <td>{{ $record->menu_display_order }}</td>
                             <td>{{ $record->is_link ? 'Yes' : "No" }}</td>

@@ -3,13 +3,16 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Acl\AccessControl;
+use App\Exceptions\UserException;
 use App\Helpers\LaravelExtend;
 use App\Models\AppMenu;
+use App\Models\AppMenuRelatedLink;
 use App\Models\Department;
 use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Validator;
 
 class AppMenuController extends BackendController
 {
@@ -149,6 +152,7 @@ class AppMenuController extends BackendController
             "icon_css_class" => ["nullable"],
             "is_link" => "",
             "is_active" => "",
+            "appMenuRelatedLink" => "",
         ];
     }
 
@@ -178,6 +182,12 @@ class AppMenuController extends BackendController
             // dd($validatedData);
             $this->model = $this->modelClass::create($validatedData);
 
+            $this->_saveOthers($validatedData);
+
+            if ($this->custom_errors) { 
+                throw new Exception("Fail to Save");
+            }
+
             $this->updateUserInfoAfterSave($this->model);
 
             DB::commit();
@@ -201,7 +211,7 @@ class AppMenuController extends BackendController
 
     public function edit($id)
     {
-        $model = $this->model = $this->modelClass::findOrFail($id);
+        $model = $this->model = $this->modelClass::with("appMenuRelatedLink")->findOrFail($id);
 
         $this->beforeEdit($model);
 
@@ -210,14 +220,18 @@ class AppMenuController extends BackendController
             'method' => 'PUT',
         ];
 
-        $this->setForView(compact("model", "form"));
+        $appMenuRelatedLink = $this->model->appMenuRelatedLink->toArray();
+
+        // d($appMenuRelatedLink, true);
+
+        $this->setForView(compact("model", "form", "appMenuRelatedLink"));
 
         return $this->view("form");
     }
 
     public function update($id, Request $request)
     {
-        $this->model = $this->modelClass::findOrFail($id);
+        $this->model = $this->modelClass::with("appMenuRelatedLink")->findOrFail($id);
 
         $this->beforeEdit($this->model);
 
@@ -234,9 +248,19 @@ class AppMenuController extends BackendController
         DB::beginTransaction();
 
         try {
+            $save_data = $validatedData;
+
+            unset($save_data['appMenuRelatedLink']);
+
             $this->model->fill($validatedData);
 
             $this->model->save();
+
+            $this->_saveOthers($validatedData);
+
+            if ($this->custom_errors) { 
+                throw new Exception("Fail to Save");
+            }
 
             $this->updateUserInfoAfterSave($this->model);
 
@@ -256,6 +280,59 @@ class AppMenuController extends BackendController
             $this->custom_errors = array_merge_recursive($this->custom_errors, $this->model->custom_errors);
 
             return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", $this->custom_errors);
+        }
+    }
+
+    
+    private function _saveOthers($validatedData)
+    {
+        unset($validatedData['appMenuRelatedLink']['(sr-id)']);
+        
+        if (isset($validatedData['appMenuRelatedLink'])) {
+            
+            $this->model->appMenuRelatedLink()->delete();
+
+            $rules = [
+                "name" => ["required"],
+                "route_name_array" => ["required"],
+            ];
+
+            $child_model = new AppMenuRelatedLink();
+
+            $messages = [   
+            ];
+
+            foreach ($validatedData['appMenuRelatedLink'] as $record) {
+                try {
+                    // d($record); exit;
+                    $new_rules = LaravelExtend::merge_validation_rules($rules, $child_model->getUniqueValidationRules($record));
+                    
+                    $validator = Validator::make($record, $new_rules, $messages);
+                    
+                    if ($validator->fails()) {
+                        $error_msgs = $validator->messages()->all();
+                        $this->addError("", $error_msgs, "Related Link");
+                    } else {
+                        unset($record['id']);
+                        $this->model->appMenuRelatedLink()->create($record);
+                    }
+                } 
+                catch(UserException $ex)
+                {
+                    if ($ex->getCode() != UserException::ERROR_USER_DATA_WRONG)
+                    {
+                        $this->addError("", $ex->getMessage(), "Related Link");
+                    }
+                }
+                catch (Exception $ex) {
+                    $this->addError("", $ex->getMessage(), "Related Link");
+                }
+            }
+        }
+
+        if ($this->custom_errors)
+        {
+            // d($this->custom_errors); exit;
         }
     }
 

@@ -24,7 +24,8 @@
                             $field = 'is_link';
                             $label = get_value_from_list($field_labels, $field, $field);
                             ?>
-                            <x-Inputs.checkbox :id="$field" :name="$field" :label="$label" value="{{ $model->{$field}  }}"/>
+                            <x-Inputs.checkbox :id="$field" :name="$field" :label="$label"
+                                value="{{ $model->{$field} }}" />
                         </div>
                     </div>
                     <div class="row">
@@ -34,8 +35,8 @@
                                 $field = 'department_id';
                                 $label = get_value_from_list($field_labels, $field, $field);
                                 ?>
-                                <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
-                                    :list="$dept_list" value="{{ $model->{$field}  }}" class="select2" pleaseSelect="For All"/>
+                                <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$dept_list"
+                                    value="{{ $model->{$field} }}" class="select2" pleaseSelect="For All" />
                             </div>
                         </div>
                         <div class="col-md-6 col-lg-4">
@@ -44,8 +45,8 @@
                                 $field = 'parent_id';
                                 $label = get_value_from_list($field_labels, $field, $field);
                                 ?>
-                                <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
-                                    :list="$tree_list" value="{{ $model->{$field}  }}" class="select2" pleaseSelect="Root"/>
+                                <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$tree_list"
+                                    value="{{ $model->{$field} }}" class="select2" pleaseSelect="Root" />
                             </div>
                         </div>
                         <div class="col-md-6 col-lg-4">
@@ -54,9 +55,9 @@
                                 $field = 'name';
                                 $label = get_value_from_list($field_labels, $field, $field);
                                 ?>
-                                <x-Inputs.text-field :name="$field" :label="$label" value="{{ $model->{$field}  }}"
+                                <x-Inputs.text-field :name="$field" :label="$label" value="{{ $model->{$field} }}"
                                     placeholder="Enter {{ $label }}" mandatory="true" autocomplete="off" />
-                            </div>                            
+                            </div>
                         </div>
                         <div class="col-md-6 col-lg-4">
                             <div class="form-group mb-3">
@@ -64,9 +65,9 @@
                                 $field = 'css_class';
                                 $label = get_value_from_list($field_labels, $field, $field);
                                 ?>
-                                <x-Inputs.text-field :name="$field" :label="$label" value="{{ $model->{$field}  }}"
+                                <x-Inputs.text-field :name="$field" :label="$label" value="{{ $model->{$field} }}"
                                     placeholder="Enter {{ $label }}" />
-                            </div>                            
+                            </div>
                         </div>
                         <div class="col-md-6 col-lg-4">
                             <div class="form-group mb-3">
@@ -74,9 +75,9 @@
                                 $field = 'icon_css_class';
                                 $label = get_value_from_list($field_labels, $field, $field);
                                 ?>
-                                <x-Inputs.text-field :name="$field" :label="$label" value="{{ $model->{$field}  }}"
+                                <x-Inputs.text-field :name="$field" :label="$label" value="{{ $model->{$field} }}"
                                     placeholder="Enter {{ $label }}" />
-                            </div>                            
+                            </div>
                         </div>
                         <div class="col-md-6 col-lg-4 is_link-block is_link-block-1">
                             <div class="form-group mb-3">
@@ -85,7 +86,7 @@
                                 $label = get_value_from_list($field_labels, $field, $field);
                                 ?>
                                 <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
-                                    :list="$route_list" value="{{ $model->{$field}  }}" class="select2" />
+                                    :list="$route_list" value="{{ $model->{$field} }}" class="select2" />
                             </div>
                         </div>
                         <div class="col-md-6 col-lg-4">
@@ -94,9 +95,114 @@
                                 $field = 'menu_display_order';
                                 $label = get_value_from_list($field_labels, $field, $field);
                                 ?>
-                                <x-Inputs.text-field type="number" :name="$field" :label="$label" value="{{ $model->{$field}  }}"
-                                    placeholder="Enter {{ $label }}" mandatory="true" />
+                                <x-Inputs.text-field type="number" :name="$field" :label="$label"
+                                    value="{{ $model->{$field} }}" placeholder="Enter {{ $label }}"
+                                    mandatory="true" />
                             </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 col-lg-8">
+                            <label class="form-label">Related Links</label>
+                            <table class="table table-sm table-bordered order-column template-table"
+                                data-sr-table-template-min-row="0">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center" style="width : 10%;">
+                                            <span class="sr-table-template-add">
+                                                <i class="fas fa-plus-circle text-success icon"></i>
+                                            </span>
+                                        </th>
+                                        <th style="width : 25%;">Label</th>
+                                        <th>Route</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="sr-table-template-row hidden">
+                                        <td>
+                                            <div class="block">
+                                                <div class="left-block">
+                                                    <div class="sr-table-template-move-up">
+                                                        <i class="fas fa-arrow-circle-up icon"></i>
+                                                    </div>
+                                                    <div class="sr-table-template-move-down">
+                                                        <i class="fas fa-arrow-circle-down icon"></i>
+                                                    </div>
+                                                </div>
+                                                <div class="right-block">
+                                                    <span class="sr-table-template-delete">
+                                                        <i class=" fas fa-times-circle text-danger icon"></i>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <x-inputs.text-field type="hidden" name="appMenuRelatedLink[(sr-id)][id]"
+                                                class="" />
+                                        </td>
+                                        <td>
+                                            <x-inputs.text-field name="appMenuRelatedLink[(sr-id)][name]" label=""
+                                                class="will-require" placeholder="Label" />
+                                        </td>
+                                        <td>
+                                            <x-Inputs.drop-down name="appMenuRelatedLink[(sr-id)][route_name_array][]" label="" :list="$route_list"
+                                                value="" class="will-require will-select2" multiple="multiple" />
+                                        </td>
+                                    </tr>
+                                    @php
+                                        $appMenuRelatedLink = old('appMenuRelatedLink', $appMenuRelatedLink ?? []);
+                                        unset($appMenuRelatedLink['(sr-id)']);
+                                    @endphp
+                                    @if (isset($appMenuRelatedLink))
+                                        @foreach ($appMenuRelatedLink as $k => $appMenuRelatedLink_arr)
+                                            <tr class="" sr-id="{{ $appMenuRelatedLink_arr['id'] }}"
+                                                sr-counter="{{ $k }}">
+                                                <td>
+                                                    <div class="block">
+                                                        <div class="left-block">
+                                                            <div class="sr-table-template-move-up">
+                                                                <i class="fas fa-arrow-circle-up icon"></i>
+                                                            </div>
+                                                            <div class="sr-table-template-move-down">
+                                                                <i class="fas fa-arrow-circle-down icon"></i>
+                                                            </div>
+                                                        </div>
+                                                        <div class="right-block">
+                                                            <span class="sr-table-template-delete">
+                                                                <i class=" fas fa-times-circle text-danger icon"></i>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <input type="hidden"
+                                                        name="appMenuRelatedLink[{{ $k }}][id]"
+                                                        value="{{ $appMenuRelatedLink_arr['id'] ?? '' }}" />
+                                                </td>
+                                                <td>
+                                                    <?php $value = $appMenuRelatedLink_arr['name'] ?? ''; ?>
+                                                    <x-inputs.text-field
+                                                        name="appMenuRelatedLink[{{ $k }}][name]"
+                                                        class="" label="" :value="$value"
+                                                        placeholder="Label" mandatory="true"/>
+                                                </td>
+                                                <td>
+                                                    <?php $value = $appMenuRelatedLink_arr['route_name_array'] ?? ''; ?>
+                                                    <x-inputs.drop-down
+                                                        name="appMenuRelatedLink[{{ $k }}][route_name_array][]"
+                                                        class="select2" label="" :value="$value"
+                                                        :list="$route_list" mandatory="true" multiple="multiple" />
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    @endif
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th class="text-center" style="width : 80px;">
+                                            <span class="sr-table-template-add">
+                                                <i class="fas fa-plus-circle text-success icon"></i>
+                                            </span>
+                                        </th>
+                                    </tr>
+                                </tfoot>
+                            </table>
                         </div>
                     </div>
                     <div class="row">
@@ -106,7 +212,7 @@
                                 $field = 'is_active';
                                 $label = get_value_from_list($field_labels, $field, $field);
                                 ?>
-                                <x-Inputs.checkbox :name="$field" :label="$label" value="{{ $model->{$field}  }}"/>
+                                <x-Inputs.checkbox :name="$field" :label="$label" value="{{ $model->{$field} }}" />
                             </div>
                         </div>
                     </div>
@@ -120,8 +226,8 @@
     <script>
         $(function() {
             $.events.execAtLast(function() {
-               
-                
+
+
                 function show_hide_field() {
 
                     var is_link = $("#is_link").prop("checked");
@@ -144,6 +250,18 @@
 
 
                 $("#is_link").change(show_hide_field);
+
+                $(".template-table").srTableTemplate({
+                    brace_type: "(",
+                    afterRowAdd(_table, last_id, _tr) {
+                        _tr.find(".will-select2").select2({
+                            placeHolder: "Please Select",
+                            theme: "bootstrap-5",
+                        });
+
+                        _tr.find(".will-require").attr("required", true);
+                    }
+                });
 
                 show_hide_field();
             });
