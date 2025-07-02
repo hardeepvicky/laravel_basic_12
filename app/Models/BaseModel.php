@@ -125,11 +125,21 @@ class BaseModel extends Model implements BaseModelInterface
 
         // d($table_info, true);
 
+        $eception_list = [
+            "code",
+            "can_edit",
+            "cannot_edit_reason_array",
+            "can_delete",
+            "cannot_delete_reason_array",
+        ];
+
         foreach ($table_info['columns'] as $field => $field_attr) {
 
-            $text = str_replace(["_id", "is_", "_at"], "", $field);
+            if (!in_array($field, $eception_list)) {
+                $text = str_replace(["_id", "is_"], "", $field);
 
-            $labels[$field] = ucwords(str_function_name_to_human_text($text));
+                $labels[$field] = ucwords(str_function_name_to_human_text($text));
+            }
         }
 
         // d($labels, true);

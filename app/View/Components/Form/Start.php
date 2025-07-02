@@ -13,7 +13,7 @@ class Start extends Component
      * @return void
      */
     public function __construct(
-        public String $action,
+        public String $action = "",
         public String $method = "GET",
         public $preventCssClassAdd = false,
     ) {

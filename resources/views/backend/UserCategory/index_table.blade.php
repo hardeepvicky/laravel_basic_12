@@ -4,57 +4,16 @@
     </div>
 
     <div class="card-body p-1 summary_table_with_search" data-base_url="{{ route($routePrefix . '.index') }}">
-
-        <div class="row mb-2">
-            <div class="col-md-12 col-lg-6">
-                Limit :
-                <?php $false = false; ?>
-                <x-Inputs.drop-down name="pagination_limit" label="" value="{{ $pagination_limit }}"
-                    :list="$paginationList" class="form-control-sm search_field inline" :pleaseSelect="$false" />
-
-                <span class="btn btn-secondary btn-sm clear_search">Clear</span>
-            </div>
-            <div class="col-md-12 col-lg-6">
-
-            </div>
-        </div>
-
         <div class="table-responsive">
             <table class="table table-bordered summary-table">
                 <thead>
                     <tr class="border-bottom-primary">
-                        <th style="width: 10%;">
-                            <x-Inputs.text-field name="id" label="" :value="$search['id']" class="form-control-sm" />
-                            <hr />
-                            <?= sortable_anchor('id', 'ID') ?>
+                        <th><?= sortable_anchor('id', get_value_from_list($field_labels, 'id')) ?></th>
+                        <th><?= sortable_anchor('type', get_value_from_list($field_labels, 'type')) ?></th>
+                        <th><?= sortable_anchor('name', get_value_from_list($field_labels, 'name')) ?></th>
+                        <th><?= sortable_anchor('description', get_value_from_list($field_labels, 'description')) ?>
                         </th>
-                        <th style="width: 10%;">
-                            <x-Inputs.drop-down name="type" label="" :value="$search['type']" :list="$type_list"
-                                pleaseSelect="All" class="form-control-sm" />
-                            <hr />
-                            <?= sortable_anchor('type', 'Type') ?>
-                        </th>
-                        <th style="width: 10%;">
-                            <x-Inputs.text-field name="name" label="" :value="$search['name']"
-                                class="form-control-sm" />
-                            <hr />
-                            <?= sortable_anchor('name', 'Name') ?>
-                        </th>
-                        <th style="width: 10%;">
-                            <x-Inputs.text-field name="description" label="" :value="$search['description']"
-                                class="form-control-sm" />
-                            <hr />
-                            <?= sortable_anchor('description', 'Description') ?>
-                        </th>
-                        <th style="width: 10%;">
-                            <x-Inputs.drop-down name="is_active" label="" :value="$search['is_active']"
-                                :list="$yes_no_list" pleaseSelect="All" class="form-control-sm" />
-                            <hr />
-                            <?= sortable_anchor('is_active', 'Active') ?>
-                        </th>
-                        <th style="width: 10%;">
-                            <?= sortable_anchor('is_pre_defined', 'Pre-Defined') ?>
-                        </th>
+                        <th><?= get_value_from_list($field_labels, 'is_active') ?></th>
                         <th>Info</th>
                         <th>Actions</th>
                     </tr>
@@ -69,9 +28,6 @@
                         <td>
                             <x-Backend.active_deactive :isActive="$record->is_active" :id="$record->id"
                                 :routePrefix="$routePrefix" />
-                        </td>
-                        <td>
-                            <x-Backend.yes-no-label :value="$record->is_pre_defined" />
                         </td>
                         <td>
                             <x-Backend.index-table-info :record="$record" :userList="$userListCache" />

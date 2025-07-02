@@ -108,12 +108,7 @@ class Task extends BaseModel
     {
         $labels = parent::getFieldLabels();
 
-        $labels['name'] = "Title";
         $labels['one_time_type'] = "When To Start";
-        $labels['recurring_type'] = "Recurring";
-        $labels['start_date_time'] = "Start Date";
-        $labels['end_date_time'] = "End Date";
-        $labels['complete_time_in_days'] = "Task Should complete In Days";
 
         return $labels;
     }

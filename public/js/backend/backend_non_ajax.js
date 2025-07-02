@@ -217,6 +217,23 @@ $(document).ready(function () {
         return false;
     });
 
+    $(document).on("submit", "form.confirm-submit", function () {
+        var _this = $(this);
+        var msg = _this.data("msg");
+        var is_confirm = _this.data("is_confirm");
+
+        if (!is_confirm) {
+            msg = msg ? msg : "Are You Sure?";
+
+            confirmDialog(msg, function () {
+                _this.attr("data-is_confirm", 1);
+                _this.trigger("submit");
+            });
+
+            return false;
+        }
+    });
+
     $(document).on("change", ".summary_table_with_search", function () {
         summary_table_with_search($(this));
     });

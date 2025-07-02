@@ -336,11 +336,10 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission']], functi
     $controllerClass = SettingsController::class;
     $name = "general";
     Route::any($controller_prefix . "/" . $name, [$controllerClass, $name])->name($controller_prefix . "." . $name);
-
-    Route::group(['prefix' => 'logs', 'as' => 'logs.'], function () {
-        $name = "email";
-        Route::get($name, [DeveloperController::class, $name])->name($name);
-    });
+    $name = "field_setting";
+    Route::any($controller_prefix . "/" . $name . "/{type?}", [$controllerClass, $name])->name($controller_prefix . "." . $name);
+    $name = "page_setting";
+    Route::any($controller_prefix . "/" . $name . "/{type?}", [$controllerClass, $name])->name($controller_prefix . "." . $name);
 
     Route::group(['prefix' => "developer", 'as' => "developer."], function () {
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Backend;
 
+use App\Models\FieldSetting;
 use App\Models\User;
 use App\Models\UserCategory;
 use Illuminate\Http\Request;
@@ -62,7 +63,9 @@ class UserCategoryController extends BackendController
     {
         $type_list = User::TYPE_LIST;
 
-        $this->setForView(compact("type_list"));
+        $field_labels = FieldSetting::getDynamicFields($this->modelClass);
+
+        $this->setForView(compact("type_list", "field_labels"));
 
         return parent::beforeViewRender();
     }

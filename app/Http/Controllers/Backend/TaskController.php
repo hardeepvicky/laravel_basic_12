@@ -5,14 +5,13 @@ namespace App\Http\Controllers\Backend;
 use App\Exceptions\UserException;
 use App\Helpers\DateUtility;
 use App\Helpers\LaravelExtend;
+use App\Models\FieldSetting;
 use App\Models\Task;
 use App\Models\TaskRecurringDate;
 use App\Models\Type;
 use App\Models\User;
-use App\Models\UserCategory;
 use Illuminate\Http\Request;
 use Exception;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Validator;
@@ -52,7 +51,8 @@ class TaskController extends BackendController
         $builder = $this->modelClass::where($conditions);
 
         $builder->with([
-            "assignToUser", "taskRecurringDate"
+            "assignToUser",
+            "taskRecurringDate"
         ]);
 
         if ($apply_sort) {
@@ -85,7 +85,7 @@ class TaskController extends BackendController
 
         $builder->where("assign_to_user_id", $auth_user_id);
 
-        $builder->where(function($query){        
+        $builder->where(function ($query) {
             $query->whereNotIn("status", [TASK::STATUS_CREATED, TASK::STATUS_VERIFIED]);
             $query->whereDate("start_date_time", "<=", date(DateUtility::DATE_FORMAT));
         });
@@ -111,7 +111,7 @@ class TaskController extends BackendController
         ]);
 
         $builder = $this->modelClass::where($default_conditions)->where($conditions);
-        $builder->where(function($query) use($auth_user_id){  
+        $builder->where(function ($query) use ($auth_user_id) {
             $query->whereNotIn("status", [TASK::STATUS_CREATED, TASK::STATUS_VERIFIED]);
             $query->whereDate("start_date_time", "<=", date(DateUtility::DATE_FORMAT));
             $query->whereNot("assign_to_user_id", $auth_user_id);
@@ -206,7 +206,7 @@ class TaskController extends BackendController
 
         $complete_in_days_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
 
-        $field_labels = $this->model->getFieldLabels();
+        $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
         $this->setForView(compact("user_list", "type_list", "one_time_type_list", "recurring_type_list", "status_list", "complete_in_days_list", "field_labels"));
 
@@ -293,7 +293,7 @@ class TaskController extends BackendController
 
             $this->_saveOthers($validatedData);
 
-            if ($this->custom_errors) { 
+            if ($this->custom_errors) {
                 throw new Exception("Fail to Save");
             }
 
@@ -319,8 +319,7 @@ class TaskController extends BackendController
     {
         $validatedData['status'] = Task::STATUS_CREATED;
 
-        if (isset($validatedData['is_draft']) && $validatedData['is_draft'])
-        {
+        if (isset($validatedData['is_draft']) && $validatedData['is_draft']) {
             $validatedData['status'] = Task::STATUS_DRAFT;
         }
 
@@ -341,16 +340,15 @@ class TaskController extends BackendController
 
             $child_model = new TaskRecurringDate();
 
-            $messages = [
-            ];
+            $messages = [];
 
             foreach ($validatedData['taskRecurringDate'] as $record) {
                 try {
                     d($record);
                     $new_rules = LaravelExtend::merge_validation_rules($rules, $child_model->getUniqueValidationRules($record));
-                    
+
                     $validator = Validator::make($record, $new_rules, $messages);
-                    
+
                     if ($validator->fails()) {
                         $error_msgs = $validator->messages()->all();
                         $this->addError("", $error_msgs, "Recurring Dates");
@@ -358,15 +356,13 @@ class TaskController extends BackendController
                         unset($record['id']);
                         $this->model->taskRecurringDate()->create($record);
                     }
-                } 
-                catch (Exception $ex) {
+                } catch (Exception $ex) {
                     $this->addError("", $ex->getMessage(), "Recurring Dates");
                 }
             }
         }
 
-        if ($this->custom_errors)
-        {
+        if ($this->custom_errors) {
             // d($this->custom_errors); exit;
         }
     }
@@ -422,7 +418,7 @@ class TaskController extends BackendController
 
             $this->_saveOthers($validatedData);
 
-            if ($this->custom_errors) { 
+            if ($this->custom_errors) {
                 throw new Exception("Fail to Save");
             }
 

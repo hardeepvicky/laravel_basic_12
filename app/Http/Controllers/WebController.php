@@ -5,10 +5,8 @@ namespace App\Http\Controllers;
 use App\Helpers\DateUtility;
 use App\Models\BaseModel;
 use App\Models\Setting;
-use App\Models\User;
 use App\Traits\CacheTrait;
 use Exception;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\App;
@@ -148,16 +146,11 @@ class WebController extends Controller
         if ($method_name == "index") {
         } else if ($method_name == "show") {
             $sub_title = "View";
-        } 
-        else if ($method_name == "showLoginForm")
-        {
+        } else if ($method_name == "showLoginForm") {
             $module_name = "Login";
-        }
-        else if ($method_name == "sign_in_form")
-        {
+        } else if ($method_name == "sign_in_form") {
             $module_name = "Sign In";
-        }
-        else {
+        } else {
             $sub_title = str_replace("index", "List", $method_name);
 
             $sub_title = str_function_name_to_human_text($sub_title);

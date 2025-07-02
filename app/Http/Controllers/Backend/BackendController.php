@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Backend;
 use App\Helpers\Menu;
 use App\Http\Controllers\WebController;
 use App\Models\BaseModel;
+use App\Models\SummaryAndFormSetting;
 use App\Models\User;
 use Exception;
 use Illuminate\Support\Facades\Route;
@@ -37,6 +38,8 @@ class BackendController extends WebController
             Menu::setCurrentRouteName($current_route_name);
         }
 
+        $current_url = request()->getRequestUri();
+
         $auth_user = Auth::user();
 
         $menus = $header_menu_list = [];
@@ -53,7 +56,7 @@ class BackendController extends WebController
 
         $partial_path = "backend.partials";
 
-        $this->setForView(compact("current_route_name", "menus", "header_menu_list", "partial_path", "breadcums", "userListCache", "auth_user"));
+        $this->setForView(compact("current_route_name", "current_url", "menus", "header_menu_list", "partial_path", "breadcums", "userListCache", "auth_user"));
 
         $this->saveSqlLog();
 

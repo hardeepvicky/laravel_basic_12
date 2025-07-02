@@ -27,8 +27,7 @@ class Menu
     {
         $dynamic_menus = [];
 
-        foreach($app_menus as $app_menu)
-        {
+        foreach ($app_menus as $app_menu) {
             $dynamic_menu = [
                 "title" => $app_menu['name'],
                 "css_class" => $app_menu['css_class'],
@@ -36,14 +35,10 @@ class Menu
                 "related_links" => []
             ];
 
-            if (isset($app_menu['app_menu_related_link']) && $app_menu['app_menu_related_link'])
-            {
-                foreach($app_menu['app_menu_related_link'] as $app_menu_related_link)
-                {
-                    if ($app_menu_related_link['route_name_array'])
-                    {
-                        foreach($app_menu_related_link['route_name_array'] as $route_name)
-                        {
+            if (isset($app_menu['app_menu_related_link']) && $app_menu['app_menu_related_link']) {
+                foreach ($app_menu['app_menu_related_link'] as $app_menu_related_link) {
+                    if ($app_menu_related_link['route_name_array']) {
+                        foreach ($app_menu_related_link['route_name_array'] as $route_name) {
                             $related_link = [
                                 "title" => $app_menu_related_link['name'],
                                 "route_name" => $route_name,
@@ -56,29 +51,21 @@ class Menu
                 }
             }
 
-            if (isset($app_menu['children']) && $app_menu['children'])
-            {
+            if (isset($app_menu['children']) && $app_menu['children']) {
                 $dynamic_menu['links'] = self::getDynamicMenus($app_menu['children'], $depth + 1);
-            }
-            else if ($app_menu['is_link'] && $app_menu['route_name'])
-            {
+            } else if ($app_menu['is_link'] && $app_menu['route_name']) {
                 $dynamic_menu['route_name'] = $app_menu['route_name'];
             }
 
-            if (!$dynamic_menu['icon'])
-            {
-                if ($depth == 0)
-                {
+            if (!$dynamic_menu['icon']) {
+                if ($depth == 0) {
                     $dynamic_menu['icon'] = "fas fa-layer-group";
-                }
-                else if ($depth > 0) 
-                {
+                } else if ($depth > 0) {
                     $dynamic_menu['icon'] = 'fas fa-cube';
                 }
             }
-            
-            if ($depth > 0 && $app_menu['is_link'] && $app_menu['route_name'])
-            {
+
+            if ($depth > 0 && $app_menu['is_link'] && $app_menu['route_name']) {
                 $dynamic_menu['icon'] .= ' child-menu-icon';
             }
 
@@ -104,14 +91,14 @@ class Menu
         $app_menus = AppMenu::getTreeRecordsWithRelation([
             ["is_active", 1]
         ]);
-        
-        $app_menus = self::getDynamicMenus($app_menus);        
+
+        $app_menus = self::getDynamicMenus($app_menus);
         // d($app_menus);
 
         self::$menus = array_merge(self::$menus, $app_menus);
-        
+
         self::$menus[] = (new MasterMenu)->get();
-        
+
         self::$menus[] = (new AdminMenu)->get();
         self::$menus[] = (new DeveloperMenu)->get();
 
@@ -466,6 +453,7 @@ class AdminMenu extends BaseMenu
 
         $links = [
             self::getLink($routePrefix . ".general", "General", 'fa-solid fa-gear'),
+            self::getLink($routePrefix . ".field_setting", "Field Setting", 'fa-solid fa-gear'),
         ];
 
         return self::getModule("Setting", self::ICON_MENU_ROOT_CHILD, $links);
@@ -546,7 +534,6 @@ class MasterMenu extends BaseMenu
 
         $links[] = self::country();
         $links[] = self::state();
-        // $links[] = self::city();
         $links[] = self::user_category();
 
         return self::getModule("Master", self::ICON_MENU_ROOT, $links);
@@ -570,15 +557,6 @@ class MasterMenu extends BaseMenu
         return $links;
     }
 
-    private static function city()
-    {
-        $routePrefix = "city";
-
-        $links = self::getControllerDefaultLinks($routePrefix, "City", self::ICON_MENU_ROOT_CHILD);
-
-        return $links;
-    }
-
     private static function user_category()
     {
         $routePrefix = "user-category";
@@ -586,67 +564,5 @@ class MasterMenu extends BaseMenu
         $links = self::getControllerDefaultLinks($routePrefix, "User Category", self::ICON_MENU_ROOT_CHILD);
 
         return $links;
-    }
-}
-
-
-class HRMenu extends BaseMenu
-{
-    public static function get(): array
-    {
-        $links = [];
-
-        $links[] = self::department();
-        $links[] = self::designation();
-        $links[] = self::employee();
-
-        return self::getModule("HR", null, $links);
-    }
-
-    private static function department()
-    {
-        $routePrefix = "department";
-
-        $links = self::getControllerDefaultLinks($routePrefix, "Department", self::ICON_MENU_ROOT_CHILD);
-
-        return $links;
-    }
-
-    private static function designation()
-    {
-        $routePrefix = "designation";
-
-        $links = self::getControllerDefaultLinks($routePrefix, "Designation", self::ICON_MENU_ROOT_CHILD);
-
-        return $links;
-    }
-
-    private static function employee()
-    {
-        $routePrefix = "employee";
-
-        $links = self::getControllerDefaultLinks($routePrefix, "Employee", self::ICON_MENU_ROOT_CHILD);
-
-        return $links;
-    }
-}
-
-
-
-class TaskMenu extends BaseMenu
-{
-    public static function get(): array
-    {
-        $routePrefix = "task";
-
-        $arr = self::getControllerDefaultLinks($routePrefix, "Task", self::ICON_MENU_ROOT);
-
-        $links[] = self::getLink($routePrefix . ".today", "Today", self::ICON_MENU_LIST);
-
-        $arr["links"] = array_merge($links, $arr["links"]);
-
-        // d($arr, true);
-
-        return $arr;
     }
 }

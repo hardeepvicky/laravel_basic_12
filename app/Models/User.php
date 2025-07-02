@@ -223,8 +223,7 @@ class User extends Authenticatable implements BaseModelInterface
     {
         $phonecode = $this->country?->phonecode ?? "";
 
-        if ($phonecode)
-        {
+        if ($phonecode) {
             return "+" . $phonecode . $this->{$field};
         }
 
@@ -265,18 +264,17 @@ class User extends Authenticatable implements BaseModelInterface
         $rule = Rule::unique($this->connection . "." . $this->getTable(), "mobile");
         $rule->whereNotNull("mobile");
 
-        if ($request->input("country_id"))
-        {
+        if ($request->input("country_id")) {
             $rule->where("country_id", $request->input("country_id"));
         }
 
         $field_rules['mobile'] = [$rule];
 
-        if ($request->get("type") == self::TYPE_INTERNAL) {            
+        if ($request->get("type") == self::TYPE_INTERNAL) {
             $rule = Rule::unique($this->connection . "." . $this->getTable(), "name")->where("type", self::TYPE_INTERNAL);
             $field_rules["name"] = [$rule];
         }
-        
+
         if ($this->id) {
             foreach ($field_rules as $field => $rules) {
                 foreach ($rules as $rule) {
@@ -381,8 +379,7 @@ class User extends Authenticatable implements BaseModelInterface
         if (!$record) {
             $record = static::create($data);
 
-            if (!$record)
-            {
+            if (!$record) {
                 throw new UserException("Fail to save", UserException::ERROR_LARAVEL_FAIL);
             }
 
@@ -466,16 +463,14 @@ class User extends Authenticatable implements BaseModelInterface
         $model = new static();
         $table_name  = $model->getTable();
 
-        if (!in_array($key_field, self::$list_fields) && static::tableHaveField($table_name, $key_field) )
-        {
+        if (!in_array($key_field, self::$list_fields) && static::tableHaveField($table_name, $key_field)) {
             self::$list_fields[] = $key_field;
         }
 
-        if (!in_array($value_field, self::$list_fields) && static::tableHaveField($table_name, $value_field) )
-        {
+        if (!in_array($value_field, self::$list_fields) && static::tableHaveField($table_name, $value_field)) {
             self::$list_fields[] = $value_field;
         }
-        
+
         $builder->select(self::$list_fields);
 
         $records = $builder->get();
@@ -641,7 +636,8 @@ class User extends Authenticatable implements BaseModelInterface
         $this->password = bcrypt($plain_password);
     }
 
-    public static function getAllRelations(Model $model): array {
+    public static function getAllRelations(Model $model): array
+    {
         $class = new ReflectionClass($model);
         $methods = $class->getMethods();
 
@@ -651,7 +647,7 @@ class User extends Authenticatable implements BaseModelInterface
 
             try {
                 $relation = $method->invoke($model);
-                if ($relation instanceof \Illuminate\Database\Eloquent\Relations\Relation) {                    
+                if ($relation instanceof \Illuminate\Database\Eloquent\Relations\Relation) {
                     $relations[$method->getName()] = [
                         "model" => $method,
                         "relation" => $relation,
@@ -663,5 +659,43 @@ class User extends Authenticatable implements BaseModelInterface
         }
 
         return $relations;
+    }
+
+
+    public function getFieldLabels()
+    {
+        $labels = [];
+
+        $table_info = $this->getTableInfo($this->getTable());
+
+        // d($table_info, true);
+
+        $eception_list = [
+            "code",
+            "can_edit",
+            "cannot_edit_reason_array",
+            "can_delete",
+            "cannot_delete_reason_array",
+            "used_in_other_table_created_by",
+            "used_in_other_table_updated_by",
+            "uid",
+            "plain_password",
+            "password",
+            "remember_token",
+            "remember_token",
+        ];
+
+        foreach ($table_info['columns'] as $field => $field_attr) {
+
+            if (!in_array($field, $eception_list)) {
+                $text = str_replace(["_id", "is_"], "", $field);
+
+                $labels[$field] = ucwords(str_function_name_to_human_text($text));
+            }
+        }
+
+        // d($labels, true);
+
+        return $labels;
     }
 }

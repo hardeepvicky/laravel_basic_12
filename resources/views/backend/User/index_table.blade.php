@@ -1,4 +1,5 @@
 <?php
+
 use App\Models\User;
 
 ?>
@@ -16,158 +17,160 @@ use App\Models\User;
             <table class="table table-bordered summary-table">
                 <thead>
                     <tr class="border-bottom-primary">
-                        <th><?= sortable_anchor('id', 'ID') ?></th>
-                        <th><?= sortable_anchor('type', 'Type') ?></th>
-                        <th>Category</th>
-                        <th><?= sortable_anchor('name', 'Name') ?></th>
-                        <th><?= sortable_anchor('email', 'Email') ?></th>
-                        <th>Mobile</th>
-                        <th>Profile Photo</th>
-                        <th><?= sortable_anchor('is_active', 'Active / De-Active') ?></th>
+                        <th><?= sortable_anchor('id', get_value_from_list($field_labels, 'id')) ?></th>
+                        <th><?= sortable_anchor('type', get_value_from_list($field_labels, 'type')) ?></th>
+                        <th><?= get_value_from_list($field_labels, 'user_category_id') ?></th>
+                        <th><?= sortable_anchor('name', get_value_from_list($field_labels, 'name')) ?></th>
+                        <th><?= sortable_anchor('email', get_value_from_list($field_labels, 'email')) ?></th>
+                        <th><?= sortable_anchor('mobile', get_value_from_list($field_labels, 'mobile')) ?></th>
+                        <th><?= get_value_from_list($field_labels, 'profile_image') ?></th>
+                        <th><?= get_value_from_list($field_labels, 'is_active') ?></th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach ($records as $record)
-                        <tr>
-                            <td>{{ $record->id }}</td>
-                            <td>{{ get_value_from_list($type_list, $record->type) }}</td>
-                            <td>{{ $record->userCategory?->getDisplayName() }}</td>
-                            <td>{{ $record->name }}</td>
-                            <td>{{ $record->email }}</td>
-                            <td>{{ $record->mobile }}</td>
-                            <td>
-                                @if ($url = $record->getProfileImage(null))
-                                    <a class="fancybox" data-fancybox="group-{{ $record->id }}"
-                                        href="{{ $url }}">
-                                        <img class="img-thumbnail rounded-circle small-img" src="{{ $url }}" />
-                                    </a>
-                                @endif
-                            </td>
-                            <td>
-                                <x-Backend.active_deactive :isActive="$record->is_active" :id="$record->id" :routePrefix="$routePrefix" />
-                            </td>
-                            <td>
-                                <x-Backend.summary-comman-actions :id="$record->id" :routePrefix="$routePrefix" />
+                    <tr>
+                        <td>{{ $record->id }}</td>
+                        <td>{{ get_value_from_list($type_list, $record->type) }}</td>
+                        <td>{{ $record->userCategory?->getDisplayName() }}</td>
+                        <td>{{ $record->name }}</td>
+                        <td>{{ $record->email }}</td>
+                        <td>{{ $record->mobile }}</td>
+                        <td>
+                            @if ($url = $record->getProfileImage(null))
+                            <a class="fancybox" data-fancybox="group-{{ $record->id }}" href="{{ $url }}">
+                                <img class="img-thumbnail rounded-circle small-img" src="{{ $url }}" />
+                            </a>
+                            @endif
+                        </td>
+                        <td>
+                            <x-Backend.active_deactive :isActive="$record->is_active" :id="$record->id"
+                                :routePrefix="$routePrefix" />
+                        </td>
+                        <td>
+                            <x-Backend.summary-comman-actions :id="$record->id" :routePrefix="$routePrefix" />
 
-                                <span class="btn btn-info btn-sm css-toggler mt-1 mb-1"
-                                    data-sr-css-class-toggle-target="#record-{{ $record->id }}"
-                                    data-sr-css-class-toggle-class="hidden">
-                                    Details
-                                </span>
-                            </td>
-                        </tr>
-                        <tr id="record-{{ $record->id }}" class="hidden">
-                            <td></td>
-                            <td colspan="7">
-                                <div class="row">
-                                    <div class="col-md-6 col-lg-4">
-                                        <div class="card">
-                                            <div class="card-header border-l-primary card-no-border">
-                                                <h3>Info</h3>
-                                            </div>
-                                            <div class="card-body">
-                                                <label class="info">
-                                                    Person Name :
-                                                    <span>
-                                                        {{ $record->person_name }}
-                                                    </span>
-                                                </label>
-                                                <label class="info">
-                                                    Don't Send Email :
-                                                    <x-Backend.yes-no-label :value="$record->dont_send_email" />
-                                                </label>
-                                                <label class="info">
-                                                    Pre Defined :
-                                                    <x-Backend.yes-no-label :value="$record->is_pre_defined" />
-                                                </label>
-
-                                                <hr>
-                                                <h5>Roles</h5>
-                                                <ol>
-                                                    @foreach ($record->getRolesList() as $role_id => $role_name)
-                                                        <li>{{ $role_name }}</li>
-                                                    @endforeach
-                                                </ol>
-
-                                                <label class="info">
-                                                    Created Via :
-                                                    <span>
-                                                        {{ get_value_from_list(User::CREATED_VIA_LIST, $record->created_via) }}
-                                                    </span>
-                                                </label>
-                                            </div>
+                            <span class="btn btn-info btn-sm css-toggler mt-1 mb-1"
+                                data-sr-css-class-toggle-target="#record-{{ $record->id }}"
+                                data-sr-css-class-toggle-class="hidden">
+                                Details
+                            </span>
+                        </td>
+                    </tr>
+                    <tr id="record-{{ $record->id }}" class="hidden">
+                        <td></td>
+                        <td colspan="7">
+                            <div class="row">
+                                <div class="col-md-6 col-lg-4">
+                                    <div class="card">
+                                        <div class="card-header border-l-primary card-no-border">
+                                            <h3>Info</h3>
                                         </div>
-                                    </div>
-                                    <div class="col-md-6 col-lg-8">
-                                        <x-Backend.index-table-info :record="$record" :userList="$userListCache" />
+                                        <div class="card-body">
+                                            <label class="info">
+                                                {{ get_value_from_list($field_labels, 'person_name') }} :
+                                                <span>
+                                                    {{ $record->person_name }}
+                                                </span>
+                                            </label>
+                                            <label class="info">
+                                                {{ get_value_from_list($field_labels, 'dont_send_email') }} :
+                                                <x-Backend.yes-no-label :value="$record->dont_send_email" />
+                                            </label>
+                                            <label class="info">
+                                                {{ get_value_from_list($field_labels, 'is_pre_defined') }} :
+                                                <x-Backend.yes-no-label :value="$record->is_pre_defined" />
+                                            </label>
 
-                                        <div class="row mt-3">
-                                            <div class="col-md-12 col-lg-6">
-                                                <div class="card">
-                                                    <div class="card-header border-l-secondary card-no-border">
-                                                        <h3>Allowed IP</h3>
-                                                    </div>
-                                                    <div class="card-body">
-                                                        <table class="table table-sm summary-table table-bordered">
-                                                            <thead>
-                                                                <tr>
-                                                                    <th>Sr. No.</th>
-                                                                    <th>IP</th>
-                                                                    <th>Description</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody>
-                                                                @foreach ($record->userAllowIp as $i => $user_allow_ip)
-                                                                    <tr>
-                                                                        <td>{{ $i + 1 }}</td>
-                                                                        <td>{{ $user_allow_ip->ip }}</td>
-                                                                        <td>{{ $user_allow_ip->description }}</td>
-                                                                    </tr>
-                                                                @endforeach
-                                                            </tbody>
-                                                        </table>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-12 col-lg-6">
+                                            <hr>
+                                            <h5>Roles</h5>
+                                            <ol>
+                                                @foreach ($record->getRolesList() as $role_id => $role_name)
+                                                <li>{{ $role_name }}</li>
+                                                @endforeach
+                                            </ol>
 
-                                                </div>
-                                            </div>
+                                            <label class="info">
+                                                {{ get_value_from_list($field_labels, 'created_via') }} :
+                                                <span>
+                                                    {{ get_value_from_list(User::CREATED_VIA_LIST, $record->created_via) }}
+                                                </span>
+                                            </label>
                                         </div>
-
-
-                                        @if (is_developer_role_login())
-                                            @if (is_array($record->used_in_other_table_created_by))
-                                                <hr>
-                                                <h5>This User create records Of Other Modules</h5>
-                                                <ol>
-                                                    @foreach ($record->used_in_other_table_created_by as $arr)
-                                                        <li>
-                                                            <strong>{{ $arr['label'] }} : </strong>
-                                                            <span>{{ $arr['counter'] }}</span>
-                                                        </li>
-                                                    @endforeach
-                                                </ol>
-                                            @endif
-
-
-                                            @if (is_array($record->used_in_other_table_updated_by))
-                                                <hr>
-                                                <h5>This User update records Of Other Modules</h5>
-                                                <ol>
-                                                    @foreach ($record->used_in_other_table_updated_by as $arr)
-                                                        <li>
-                                                            <strong>{{ $arr['label'] }} : </strong>
-                                                            <span>{{ $arr['counter'] }}</span>
-                                                        </li>
-                                                    @endforeach
-                                                </ol>
-                                            @endif
-                                        @endif
                                     </div>
                                 </div>
-                            </td>
-                        </tr>
+                                <div class="col-md-6 col-lg-8">
+                                    <x-Backend.index-table-info :record="$record" :userList="$userListCache" />
+
+                                    <div class="row mt-3">
+                                        <div class="col-md-12 col-lg-6">
+                                            <div class="card">
+                                                <div class="card-header border-l-secondary card-no-border">
+                                                    <h3>Allowed IP</h3>
+                                                </div>
+                                                <div class="card-body">
+                                                    <table class="table table-sm summary-table table-bordered">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Sr. No.</th>
+                                                                <th>{{ get_value_from_list($user_allow_ip_field_labels, 'ip') }}
+                                                                </th>
+                                                                <th>{{ get_value_from_list($user_allow_ip_field_labels, 'description') }}
+                                                                </th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            @foreach ($record->userAllowIp as $i => $user_allow_ip)
+                                                            <tr>
+                                                                <td>{{ $i + 1 }}</td>
+                                                                <td>{{ $user_allow_ip->ip }}</td>
+                                                                <td>{{ $user_allow_ip->description }}</td>
+                                                            </tr>
+                                                            @endforeach
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12 col-lg-6">
+
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                    @if (is_developer_role_login())
+                                    @if (is_array($record->used_in_other_table_created_by))
+                                    <hr>
+                                    <h5>This User create records Of Other Modules</h5>
+                                    <ol>
+                                        @foreach ($record->used_in_other_table_created_by as $arr)
+                                        <li>
+                                            <strong>{{ $arr['label'] }} : </strong>
+                                            <span>{{ $arr['counter'] }}</span>
+                                        </li>
+                                        @endforeach
+                                    </ol>
+                                    @endif
+
+
+                                    @if (is_array($record->used_in_other_table_updated_by))
+                                    <hr>
+                                    <h5>This User update records Of Other Modules</h5>
+                                    <ol>
+                                        @foreach ($record->used_in_other_table_updated_by as $arr)
+                                        <li>
+                                            <strong>{{ $arr['label'] }} : </strong>
+                                            <span>{{ $arr['counter'] }}</span>
+                                        </li>
+                                        @endforeach
+                                    </ol>
+                                    @endif
+                                    @endif
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
                     @endforeach
                 </tbody>
             </table>

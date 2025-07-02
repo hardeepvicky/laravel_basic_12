@@ -5,6 +5,7 @@
 $page_header_links = [
     ['title' => 'Add', 'url' => route($routePrefix . '.create')],
 ];
+$false = false;
 
 ?>
 
@@ -15,6 +16,13 @@ $page_header_links = [
         <form method="GET" class="summary_search" action="{{ route($routePrefix . '.index') }}">
             <input type="hidden" name="is_sort_clear" value="1" />
             <div class="row mb-4">
+                <div class="col-md-1">
+                    <?php
+                    $field = 'pagination_limit';
+                    ?>
+                    <x-Inputs.drop-down :name="$field" label="Limit" :list="$paginationList" :value="$pagination_limit"
+                        :pleaseSelect="$false" class="pagination_limit" />
+                </div>
                 <div class="col-md-3">
                     <?php
                     $field = "name";
@@ -54,7 +62,7 @@ $page_header_links = [
                         class="select2" />
                 </div>
             </div>
-            <x-Backend.summary-search-form-footer :selectedPaginationLimit="$pagination_limit" />
+            <x-Backend.summary-search-form-footer :showPaginationDropDown="$false" />
         </form>
     </div>
 </div>

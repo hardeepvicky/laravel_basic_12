@@ -6,6 +6,7 @@ use App\Exceptions\UserException;
 use App\Helpers\FileUtility;
 use App\Helpers\LaravelExtend;
 use App\Models\Country;
+use App\Models\FieldSetting;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Role;
@@ -50,7 +51,11 @@ class UserController extends BackendController
 
         $my_country = Country::getMyCountry();
 
-        $this->setForView(compact("type_list", "country_list", "my_country"));
+        $field_labels = FieldSetting::getDynamicFields($this->modelClass);
+
+        $user_allow_ip_field_labels = FieldSetting::getDynamicFields("UserAllowIp");
+
+        $this->setForView(compact("type_list", "country_list", "my_country", "field_labels", "user_allow_ip_field_labels"));
 
         return parent::beforeViewRender();
     }
@@ -196,8 +201,7 @@ class UserController extends BackendController
             $model->fill($save_data);
             $model->setPassword($save_data['password']);
 
-            if (!$model->save())
-            {
+            if (!$model->save()) {
                 throw new UserException("Fail To Save", UserException::ERROR_LARAVEL_FAIL);
             }
 
@@ -215,7 +219,7 @@ class UserController extends BackendController
             DB::commit();
             $this->saveSqlLog();
             return $this->afterSave($model);
-        }catch (Exception $ex) {
+        } catch (Exception $ex) {
             DB::rollBack();
             $this->saveSqlLog();
             return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", $this->custom_errors);
@@ -229,8 +233,7 @@ class UserController extends BackendController
 
         $this->beforeEdit($model);
 
-        if (!$model->country_id)
-        {
+        if (!$model->country_id) {
             $my_country = Country::getMyCountry();
             $model->country_id = $my_country->id;
         }
@@ -284,14 +287,13 @@ class UserController extends BackendController
             unset($save_data['allow_ip']);
 
             $model->fill($save_data);
-            if (!$model->save())
-            {
+            if (!$model->save()) {
                 throw new UserException("Fail To Save", UserException::ERROR_LARAVEL_FAIL);
             }
 
             $this->_saveOthers($model, $validatedData);
 
-            if ($this->custom_errors) { 
+            if ($this->custom_errors) {
                 throw new Exception("Fail to Save");
             }
 
@@ -300,8 +302,7 @@ class UserController extends BackendController
             $this->saveSqlLog();
 
             return $this->afterSave($model);
-        } 
-        catch (\Exception $ex) {
+        } catch (\Exception $ex) {
             DB::rollBack();
 
             $this->saveSqlLog();
@@ -342,7 +343,7 @@ class UserController extends BackendController
         return $validatedData;
     }
 
-    
+
     private function _saveOthers(User $model, $validatedData)
     {
         $model->assignRoles($validatedData['roles']);
@@ -368,9 +369,9 @@ class UserController extends BackendController
                 try {
 
                     $new_rules = LaravelExtend::merge_validation_rules($rules, $allowIpModel->getUniqueValidationRules($record));
-                    
+
                     $validator = Validator::make($record, $new_rules, $messages);
-                    
+
                     if ($validator->fails()) {
                         $error_msgs = $validator->messages()->all();
                         $this->addError("", $error_msgs, "Allow IP");
@@ -378,8 +379,7 @@ class UserController extends BackendController
                         unset($record['id']);
                         $model->userAllowIp()->create($record);
                     }
-                } 
-                catch (Exception $ex) {
+                } catch (Exception $ex) {
                     $this->addError("", $ex->getMessage(), "Allow IP");
                 }
             }
@@ -408,8 +408,7 @@ class UserController extends BackendController
             $user = auth()->user();
 
             $user->setPassword($validatedData['new_password']);
-            if (!$user->save())
-            {
+            if (!$user->save()) {
                 throw new UserException("Fail To Save", UserException::ERROR_LARAVEL_FAIL);
             }
 

@@ -27,6 +27,8 @@ class BaseMongoModel extends Model implements BaseModelInterface
      */
     public array $child_model_class = [];
 
+    public array $custom_errors = [];
+
     protected $guarded = ["id"];
 
     public static function classDisplayName(): string
@@ -215,7 +217,8 @@ class BaseMongoModel extends Model implements BaseModelInterface
         return $list;
     }
 
-    public static function getAllRelations(Model $model): array {
+    public static function getAllRelations(Model $model): array
+    {
         $class = new ReflectionClass($model);
         $methods = $class->getMethods();
 
@@ -225,7 +228,7 @@ class BaseMongoModel extends Model implements BaseModelInterface
 
             try {
                 $relation = $method->invoke($model);
-                if ($relation instanceof \Illuminate\Database\Eloquent\Relations\Relation) {                    
+                if ($relation instanceof \Illuminate\Database\Eloquent\Relations\Relation) {
                     $relations[$method->getName()] = [
                         "model" => $method,
                         "relation" => $relation,
