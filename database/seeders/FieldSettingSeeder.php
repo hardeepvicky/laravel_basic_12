@@ -32,7 +32,7 @@ class FieldSettingSeeder extends Seeder
 
         $filename = $model_name . ".json";
 
-        $path = "files/command/";
+        $path = "files/command/ModelToJsonCommand/";
 
         $disk = Storage::disk(DEFAULT_DISK);
 
@@ -56,10 +56,14 @@ class FieldSettingSeeder extends Seeder
 
                 try {
                     $record = Util::objToArray($record);
-                    $id = $model->insertIgnoreIfExist($record, $is_insert);
+                    $id = $model->insertOrUpdate($record, $is_insert, $is_update);
 
                     if ($is_insert) {
                         $counts['insert_count']++;
+                    }
+
+                    if ($is_update) {
+                        $counts['update_count']++;
                     }
                 } catch (UserException $ex) {
                     if (isset($ex->data['custom_errors']) && is_array($ex->data['custom_errors'])) {

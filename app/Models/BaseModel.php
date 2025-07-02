@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use ReflectionClass;
+use ReflectionMethod;
 
 class BaseModel extends Model implements BaseModelInterface
 {
@@ -363,5 +364,35 @@ class BaseModel extends Model implements BaseModelInterface
         ]);
 
         return $arrayHelper->getData();
+    }
+
+
+    public function loadAllRelations(&$relations = [])
+    {
+        $class = new ReflectionClass($this);
+        $methods = $class->getMethods(ReflectionMethod::IS_PUBLIC);
+
+        foreach ($methods as $method) {
+            // Skip inherited methods and methods with parameters
+            if (
+                $method->class !== get_class($this) ||
+                $method->getNumberOfParameters() > 0
+            ) {
+                continue;
+            }
+
+            try {
+                $return = $method->invoke($this);
+
+                if ($return instanceof \Illuminate\Database\Eloquent\Relations\Relation) {
+                    $relations[] = $method->getName();
+                }
+            } catch (\Throwable $e) {
+                // Skip methods that throw exceptions
+                continue;
+            }
+        }
+
+        return $this->load($relations);
     }
 }

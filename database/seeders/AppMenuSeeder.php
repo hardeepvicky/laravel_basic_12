@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Exceptions\UserException;
 use App\Helpers\ConsoleOutput;
+use App\Helpers\Util;
 use App\Models\AppMenu;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Storage;
@@ -30,7 +31,7 @@ class AppMenuSeeder extends Seeder
 
         $filename = $model_name . ".json";
 
-        $path = "files/command/";
+        $path = "files/command/ModelToJsonCommand/";
 
         $disk = Storage::disk(DEFAULT_DISK);
 
@@ -72,10 +73,15 @@ class AppMenuSeeder extends Seeder
 
                 try {
                     // dd($save);
-                    $id = $model->insertIgnoreIfExist($save, $is_insert);
+                    $record = Util::objToArray($record);
+                    $id = $model->insertOrUpdate($record, $is_insert, $is_update);
 
                     if ($is_insert) {
                         $counts['insert_count']++;
+                    }
+
+                    if ($is_update) {
+                        $counts['update_count']++;
                     }
                 } catch (UserException $ex) {
                     if (isset($ex->data['custom_errors']) && is_array($ex->data['custom_errors'])) {

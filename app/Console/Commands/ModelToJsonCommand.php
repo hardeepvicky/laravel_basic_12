@@ -32,42 +32,69 @@ class ModelToJsonCommand extends Command
      */
     public function handle()
     {
-        $model_name = $this->ask('Enter Model name');
+        $model_name_list = ['Type', 'AppMenu', 'FieldSetting', 'Role'];
 
-        $model_name = trim($model_name);
+        sort($model_name_list);
 
-        $filename = $model_name . ".json";
+        $options = ['Manully Enter', 'All'];
 
-        $path = "files/command/";
+        $options = array_merge($options, $model_name_list);
 
-        $disk = Storage::disk(DEFAULT_DISK);
+        $choice = $this->choice(
+            'Select Model :',
+            $options,
+            0 // default index (optional)
+        );
 
-        $fileUtility = new FileUtility($disk);
+        $model_list = [];
 
-        switch ($model_name) {
-            case "Type":
-                $records = Type::all();
-                $json = json_encode($records->toArray());
-                break;
+        if ($choice == "Manully Enter") {
+            $model_name = $this->ask('Enter Model name');
+            $model_name = trim($model_name);
 
-            case "AppMenu":
-                $records = AppMenu::all();
-                $json = json_encode($records->toArray());
-                break;
-
-            case "FieldSetting":
-                $records = FieldSetting::all();
-                $json = json_encode($records->toArray());
-                break;
-
-            default:
-                $this->error($model_name . " is not in switch case");
+            $model_list = [$model_name];
+        }
+        if ($choice == "All") {
+            $model_list = $model_name_list;
+        } else {
+            $model_list = [$choice];
         }
 
-        if (isset($json) && $json) {
-            $fileUtility->writeLog($path, $filename, $json);
+        foreach ($model_list as $model_name) {
+            $filename = $model_name . ".json";
 
-            $this->info("$filename : Json Write Successfully");
+            $path = "files/command/ModelToJsonCommand";
+
+            $disk = Storage::disk(DEFAULT_DISK);
+
+            $fileUtility = new FileUtility($disk);
+
+            $ref_model_class = "App\\Models\\" . $model_name;
+
+            $this->info("Working in $model_name");
+
+            $count = $ref_model_class::count();
+
+            $this->info("Total Count : $count");
+
+            if ($count > 10000) {
+                $user_input = $this->ask('Records are more than 1000, Do You still want to proceed (Yes/NO) [Default:No]');
+
+                if (strtolower(trim($user_input)) != "yes") {
+                    return;
+                }
+            }
+
+            $records = $ref_model_class::all();
+
+            $json = json_encode($records->toArray());
+
+            if (isset($json) && $json) {
+                $fileUtility->writeLog($path, $filename, $json);
+
+                $this->info("$filename : Json Write Successfully");
+                $this->newLine(1);
+            }
         }
     }
 }

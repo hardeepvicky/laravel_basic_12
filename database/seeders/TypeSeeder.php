@@ -27,9 +27,9 @@ class TypeSeeder extends Seeder
 
         $model_name = "Type";
 
-        $filename = $model_name .".json";
+        $filename = $model_name . ".json";
 
-        $path = "files/command/";
+        $path = "files/command/ModelToJsonCommand/";
 
         $disk = Storage::disk(DEFAULT_DISK);
 
@@ -37,12 +37,9 @@ class TypeSeeder extends Seeder
 
         $records = json_decode($content);
 
-        if ($records === null && json_last_error() !== JSON_ERROR_NONE)
-        {
-             $output->addLogMessage("cound not decode json from " . $path . $filename, "error");
-        }
-        else
-        {
+        if ($records === null && json_last_error() !== JSON_ERROR_NONE) {
+            $output->addLogMessage("cound not decode json from " . $path . $filename, "error");
+        } else {
             $counts['total_count'] = count($records);
 
             $model = new Type();
@@ -58,25 +55,25 @@ class TypeSeeder extends Seeder
 
                 $save = [];
 
-                foreach($table_info['columns'] as $field => $field_attr)
-                {
-                    if (in_array($field, ["id"]))
-                    {
+                foreach ($table_info['columns'] as $field => $field_attr) {
+                    if (in_array($field, ["id"])) {
                         continue;
                     }
 
-                    if (isset($record->{$field}))
-                    {
+                    if (isset($record->{$field})) {
                         $save[$field] = $record->{$field};
                     }
                 }
 
                 // dd($save);
-                $id = $model->insertIgnoreIfExist($save, $is_insert);
+                $id = $model->insertOrUpdate($save, $is_insert, $is_update);
 
-                if ($id)
-                {
+                if ($is_insert) {
                     $counts['insert_count']++;
+                }
+
+                if ($is_update) {
+                    $counts['update_count']++;
                 }
             }
         }
