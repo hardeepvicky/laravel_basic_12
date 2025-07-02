@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Exceptions\UserException;
+use App\Helpers\ArrayHelper;
 use App\Traits\CacheTrait;
 use App\Traits\ModelListTrait;
 use App\Traits\MysqlTableInfoTrait;
@@ -253,8 +254,7 @@ class BaseModel extends Model implements BaseModelInterface
 
         if (!$record) {
             $record = static::create($data);
-            if (!$record)
-            {
+            if (!$record) {
                 throw new UserException("Fail To Save", UserException::ERROR_LARAVEL_FAIL);
             }
 
@@ -276,9 +276,7 @@ class BaseModel extends Model implements BaseModelInterface
                 throw new UserException("field $unique_field missing in argument data");
             }
 
-            if (isset($this->casts) && $this->casts)
-            {
-
+            if (isset($this->casts) && $this->casts) {
             }
 
             $conditions[] = [$unique_field, '=', $data[$unique_field]];
@@ -328,5 +326,31 @@ class BaseModel extends Model implements BaseModelInterface
         foreach ($messages as $msg) {
             $this->custom_errors[$group][] = compact("label", "msg", "extra");
         }
+    }
+
+    public function getDisplayFieldsToUser()
+    {
+        $attributes = $this->getAttributes();
+
+        if (!$attributes) {
+            $table_info = $this->getTableInfo($this->getTable());
+
+            if (isset($table_info['columns']) || $table_info['columns']) {
+                foreach ($table_info['columns'] as $field => $field_attr) {
+                    $attributes[] = $field;
+                }
+            }
+        }
+
+        $arrayHelper = new ArrayHelper($attributes);
+        $arrayHelper->unsetValues([
+            "is_pre_defined",
+            "can_edit",
+            "cannot_edit_reason_array",
+            "can_delete",
+            "cannot_delete_reason_array",
+        ]);
+
+        return $arrayHelper->getData();
     }
 }

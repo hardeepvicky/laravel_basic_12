@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Exceptions\UserException;
+use App\Helpers\ArrayHelper;
 use App\Helpers\DateUtility;
 use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -80,7 +81,7 @@ class Task extends BaseModel
 
         if ($this->is_draft) {
             $this->status = self::STATUS_DRAFT;
-        } else {            
+        } else {
             if ($this->type == self::TYPE_ONE_TIME) {
                 if (!$this->one_time_type) {
                     $this->addError("One Time", "Can not be empty", $group);
@@ -93,9 +94,7 @@ class Task extends BaseModel
                 if (!$this->end_date_time) {
                     $this->addError("End Date", "Can not be empty", $group);
                 }
-            }
-            else if ($this->type == self::TYPE_RECURRING)
-            {
+            } else if ($this->type == self::TYPE_RECURRING) {
                 $this->start_date_time = $this->end_date_time = null;
             }
         }
@@ -128,20 +127,16 @@ class Task extends BaseModel
     {
         $rules = [];
 
-        if (!$request->input("is_draft", false))
-        {
+        if (!$request->input("is_draft", false)) {
             $rules["priority"] = ["required"];
         }
 
-        if ($request->input("type") == self::TYPE_ONE_TIME)
-        {
+        if ($request->input("type") == self::TYPE_ONE_TIME) {
             $rules["assign_to_user_id"] = ["required"];
             $rules["one_time_type"] = ["required"];
             $rules["start_date_time"] = ["required"];
             $rules["end_date_time"] = ["required"];
-        }
-        else
-        {
+        } else {
             $rules["recurring_type"] = ["required"];
             $rules["complete_time_in_days"] = ["required"];
         }
@@ -173,8 +168,7 @@ class Task extends BaseModel
     {
         $this->status = $status;
 
-        switch($status)
-        {
+        switch ($status) {
             case self::STATUS_ASSIGNED:
                 break;
 
@@ -186,12 +180,9 @@ class Task extends BaseModel
                 break;
         }
 
-        if (!$this->save())
-        {
+        if (!$this->save()) {
             throw new UserException("Fail To Save", UserException::ERROR_LARAVEL_FAIL);
         }
-
-        
     }
 
     public static function getCodeList(String $field)
@@ -254,12 +245,11 @@ class Task extends BaseModel
         }
     }
 
-    public static function setDates(array $record) : array
+    public static function setDates(array $record): array
     {
         $days_to_add = 0;
 
-        switch($record['complete_time_in_days'])
-        {
+        switch ($record['complete_time_in_days']) {
             case self::COMPLETE_TIME_1_DAY:
                 $days_to_add = 1;
                 break;
@@ -289,28 +279,24 @@ class Task extends BaseModel
                 break;
         }
 
-        if (isset($record['start_date_time']))
-        {
+        if (isset($record['start_date_time'])) {
             $record['end_date_time'] = DateUtility::change($record['start_date_time'], $days_to_add, DateUtility::DAYS, DateUtility::DATE_FORMAT);
         }
 
         return $record;
     }
 
-    public static function createRecurringTask(Task $task) : int
+    public static function createRecurringTask(Task $task): int
     {
         $save_count = 0;
 
-        if ($task->type == self::TYPE_RECURRING)
-        {
+        if ($task->type == self::TYPE_RECURRING) {
             $today = date(DateUtility::DATE_FORMAT);
 
             $days = 0;
 
-            if ($task->recurring_type != self::RECURRING_CUSTOM)
-            {
-                switch($task->recurring_type)
-                {
+            if ($task->recurring_type != self::RECURRING_CUSTOM) {
+                switch ($task->recurring_type) {
                     case self::RECURRING_DAILY:
                         $days = 1;
                         break;
@@ -328,17 +314,14 @@ class Task extends BaseModel
                         break;
                     case self::RECURRING_YEARLY:
                         $days = 365;
-                        break;                
+                        break;
                 }
 
-                if ($days > 0)
-                {
+                if ($days > 0) {
                     $next_date = DateUtility::getDate($task->created_at, DateUtility::DATE_FORMAT);
 
-                    while(DateUtility::compare($next_date, $today) <= 0)
-                    {
-                        try
-                        {
+                    while (DateUtility::compare($next_date, $today) <= 0) {
+                        try {
                             $record = $task->getAttributes();
                             unset($record["id"]);
                             unset($record["created_at"]);
@@ -346,7 +329,7 @@ class Task extends BaseModel
                             unset($record["created_by"]);
                             unset($record["updated_by"]);
 
-                            
+
                             $record['type'] = self::TYPE_ONE_TIME;
                             $record['one_time_type'] = self::ONE_TIME_CUSTOM;
                             $record['is_draft'] = 0;
@@ -360,27 +343,21 @@ class Task extends BaseModel
                             $record["created_by"] = $record["updated_by"] = 0;
 
                             $record = self::setDates($record);
-                            
+
                             // d($record);
 
                             $count = Task::where("parent_id", $record['parent_id'])->whereDate("start_date_time", $record['start_date_time'])->count();
 
-                            if ($count == 0)
-                            {
+                            if ($count == 0) {
                                 $model = new Task($record);
-                                
-                                if ($model->save())
-                                {
+
+                                if ($model->save()) {
                                     $save_count++;
-                                }
-                                else
-                                {
+                                } else {
                                     throw new UserException("Fail To Save", UserException::ERROR_LARAVEL_FAIL);
                                 }
                             }
-                        }
-                        catch(Exception $ex)
-                        {
+                        } catch (Exception $ex) {
                             d($model?->custom_errors);
                             throw $ex;
                         }
@@ -388,17 +365,12 @@ class Task extends BaseModel
                         $next_date = DateUtility::change($next_date, $days, DateUtility::DAYS, DateUtility::DATE_FORMAT);
                     }
                 }
-            }
-            else
-            {
+            } else {
                 $task->load("taskRecurringDate");
 
-                foreach($task->taskRecurringDate as $task_custom_date)
-                {
-                    if (DateUtility::compare($task_custom_date->date, $today) <= 0)
-                    {
-                        try
-                        {
+                foreach ($task->taskRecurringDate as $task_custom_date) {
+                    if (DateUtility::compare($task_custom_date->date, $today) <= 0) {
+                        try {
                             $record = $task->getAttributes();
                             unset($record["id"]);
                             unset($record["created_at"]);
@@ -406,7 +378,7 @@ class Task extends BaseModel
                             unset($record["created_by"]);
                             unset($record["updated_by"]);
 
-                            
+
                             $record['type'] = self::TYPE_ONE_TIME;
                             $record['one_time_type'] = self::ONE_TIME_CUSTOM;
                             $record['is_draft'] = 0;
@@ -420,27 +392,21 @@ class Task extends BaseModel
                             $record["created_by"] = $record["updated_by"] = 0;
 
                             $record = self::setDates($record);
-                            
+
                             // d($record);
 
                             $count = Task::where("parent_id", $record['parent_id'])->whereDate("start_date_time", $record['start_date_time'])->count();
 
-                            if ($count == 0)
-                            {
+                            if ($count == 0) {
                                 $model = new Task($record);
-                                
-                                if ($model->save())
-                                {
+
+                                if ($model->save()) {
                                     $save_count++;
-                                }
-                                else
-                                {
+                                } else {
                                     throw new UserException("Fail To Save", UserException::ERROR_LARAVEL_FAIL);
                                 }
                             }
-                        }
-                        catch(Exception $ex)
-                        {
+                        } catch (Exception $ex) {
                             d($model?->custom_errors);
                             throw $ex;
                         }
@@ -450,5 +416,36 @@ class Task extends BaseModel
         }
 
         return $save_count;
+    }
+
+    public function getDisplayFieldsToUser()
+    {
+        $attributes = $this->getAttributes();
+
+        if (!$attributes) {
+            $table_info = $this->getTableInfo($this->getTable());
+
+            if (isset($table_info['columns']) || $table_info['columns']) {
+                foreach ($table_info['columns'] as $field => $field_attr) {
+                    $attributes[] = $field;
+                }
+            }
+        }
+
+        $arrayHelper = new ArrayHelper($attributes);
+        $arrayHelper->unsetValues([
+            "code",
+            "is_pre_defined",
+            "can_edit",
+            "cannot_edit_reason_array",
+            "can_delete",
+            "cannot_delete_reason_array",
+            "created_at",
+            "updated_at",
+            "created_by",
+            "updated_by",
+        ]);
+
+        return $arrayHelper->getData();
     }
 }

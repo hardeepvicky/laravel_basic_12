@@ -130,7 +130,7 @@ class LaravelExtend
 
         $ip = $request->ip();
 
-        if ($host == "localhost" || $host == "dev.erp.com") {
+        if (in_array($host, ["localhost", "dev.erp.com", "dev.celecerp.com"])) {
             return true;
         }
 
@@ -160,12 +160,9 @@ class LaravelExtend
 
     public static function getQueryLog($connection = "")
     {
-        if ($connection)
-        {
+        if ($connection) {
             $db_logs = DB::connection($connection)->getQueryLog();
-        }
-        else
-        {
+        } else {
             $db_logs = DB::getQueryLog();
         }
 
@@ -203,16 +200,33 @@ class LaravelExtend
 
     public static function getCreatedByOrUpdatedBy($id, $userList = [])
     {
-        if ($id === 0)
-        {
+        if ($id === 0) {
             return "system";
         }
 
-        if (empty($userList))
-        {
+        if (empty($userList)) {
             $userList = User::getListCache();
         }
 
         return $userList[$id] ?? '';
+    }
+
+    public static function getListOfModels()
+    {
+        $models = [];
+        $path = app_path('Models');
+
+        foreach (scandir($path) as $file) {
+            if ($file === '.' || $file === '..') {
+                continue;
+            }
+
+            if (str_ends_with($file, '.php')) {
+                $model_name = pathinfo($file, PATHINFO_FILENAME);
+                $models[$model_name] = 'App\\Models\\' . $model_name;
+            }
+        }
+
+        return $models;
     }
 }
