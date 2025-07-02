@@ -36,6 +36,26 @@ class Menu
                 "related_links" => []
             ];
 
+            if (isset($app_menu['app_menu_related_link']) && $app_menu['app_menu_related_link'])
+            {
+                foreach($app_menu['app_menu_related_link'] as $app_menu_related_link)
+                {
+                    if ($app_menu_related_link['route_name_array'])
+                    {
+                        foreach($app_menu_related_link['route_name_array'] as $route_name)
+                        {
+                            $related_link = [
+                                "title" => $app_menu_related_link['name'],
+                                "route_name" => $route_name,
+                                "related_links" => []
+                            ];
+
+                            $dynamic_menu['related_links'][] = $related_link;
+                        }
+                    }
+                }
+            }
+
             if (isset($app_menu['children']) && $app_menu['children'])
             {
                 $dynamic_menu['links'] = self::getDynamicMenus($app_menu['children'], $depth + 1);
@@ -81,7 +101,7 @@ class Menu
 
         self::$menus[] = (new HomeMenu)->get();
 
-        $app_menus = AppMenu::getTreeRecords([
+        $app_menus = AppMenu::getTreeRecordsWithRelation([
             ["is_active", 1]
         ]);
         

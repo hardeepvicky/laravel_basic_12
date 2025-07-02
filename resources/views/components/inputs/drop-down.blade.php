@@ -21,7 +21,7 @@ $my_attributes = [];
 
 if (isset($preventCssClassAddToInput) && $preventCssClassAddToInput) {
 } else {
-    $my_attributes['class'] = 'form-control';
+    $my_attributes['class'] = 'form-select';
 }
 
 if ($mandatory) {

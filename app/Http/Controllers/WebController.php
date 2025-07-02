@@ -433,7 +433,7 @@ class WebController extends Controller
             throw_exception("pagination_limit can not be less than 1");
         }
 
-        $paginationList = [2 => 2, 10 => 10, 20 => 20, 50 => 50, 100 => 100];
+        $paginationList = [5 => 5, 10 => 10, 20 => 20, 50 => 50, 100 => 100];
 
         $this->setForView([
             "pagination_limit" => $params['pagination_limit'],

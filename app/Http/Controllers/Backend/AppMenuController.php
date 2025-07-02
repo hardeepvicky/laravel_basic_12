@@ -338,7 +338,7 @@ class AppMenuController extends BackendController
 
     public function copy($id)
     {
-        $model = $this->model = $this->modelClass::findOrFail($id);
+        $model = $this->model = $this->modelClass::with("appMenuRelatedLink")->findOrFail($id);
 
         $this->beforeEdit($model);
 
@@ -347,7 +347,9 @@ class AppMenuController extends BackendController
             'method' => 'POST',
         ];
 
-        $this->setForView(compact("model", "form"));
+        $appMenuRelatedLink = $this->model->appMenuRelatedLink->toArray();
+
+        $this->setForView(compact("model", "form", "appMenuRelatedLink"));
 
         return $this->view("form");
     }

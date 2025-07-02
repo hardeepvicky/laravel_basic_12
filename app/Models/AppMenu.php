@@ -18,6 +18,10 @@ class AppMenu extends BaseModel
             "foreignKey" => "parent_id",
             "preventDelete" => true,
         ],
+        AppMenuRelatedLink::class => [
+            "foreignKey" => "app_menu_id",
+            "preventDelete" => false,
+        ]
     ];
 
     protected $appends = [

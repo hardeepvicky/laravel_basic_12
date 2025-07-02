@@ -102,7 +102,7 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-12 col-lg-8">
+                        <div class="col-md-12 col-lg-8 is_link-block is_link-block-1">
                             <label class="form-label">Related Links</label>
                             <table class="table table-sm table-bordered order-column template-table"
                                 data-sr-table-template-min-row="0">

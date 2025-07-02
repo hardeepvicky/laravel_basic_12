@@ -20,6 +20,7 @@ use App\Http\Controllers\Backend\PublicController;
 use App\Http\Controllers\Backend\RoleController;
 use App\Http\Controllers\Backend\SettingsController;
 use App\Http\Controllers\Backend\StateController;
+use App\Http\Controllers\Backend\SubDepartmentController;
 use App\Http\Controllers\Backend\TaskController;
 use App\Http\Controllers\Backend\TypeController;
 use App\Http\Controllers\Backend\UserCategoryController;
@@ -154,6 +155,9 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission']], functi
 
         $name = "ajax_get_list";
         Route::get($name . "/{state_id}", [$controllerClass, $name])->name($name);
+
+        $name = "ajax_get";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
     });
 
 
@@ -167,6 +171,30 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission']], functi
 
         $name = "de_activate";
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "ajax_get";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+    });
+
+    $route_prefix = "sub-department";
+    $controllerClass = SubDepartmentController::class;
+    Route::resource($route_prefix, $controllerClass);
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
+        $name = "copy";
+        Route::get("{id}/" . $name, [$controllerClass, $name])->name($name);
+
+        $name = "activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "de_activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "ajax_get_list";
+        Route::get($name . "/{department_id}", [$controllerClass, $name])->name($name);
+
+        $name = "ajax_get";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
     });
 
     $route_prefix = "designation";
@@ -178,6 +206,9 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission']], functi
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
 
         $name = "de_activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "ajax_get";
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
     });
 
