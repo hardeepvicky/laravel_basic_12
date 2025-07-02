@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\AppMenu;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -19,5 +20,6 @@ class DatabaseSeeder extends Seeder
         
         $this->call(StateSeeder::class);
         $this->call(TypeSeeder::class);
+        $this->call(AppMenuSeeder::class);
     }
 }

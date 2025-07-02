@@ -11,7 +11,7 @@ use Illuminate\Validation\Rules\Unique;
 
 class AppMenu extends BaseModel
 {
-    protected static array $unique_fields = [];
+    protected static array $unique_fields = ["parent_id", "name"];
 
     public array $child_model_class = [
         AppMenu::class => [
@@ -31,7 +31,7 @@ class AppMenu extends BaseModel
             $this->parent_id = 0;
         }
 
-        if ($this->parent_id == $this->id)
+        if ($this->id > 0 && $this->parent_id == $this->id)
         {
             $this->addError("Parent", "Parent and name are same", "Menu");
         }
