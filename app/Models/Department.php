@@ -13,10 +13,10 @@ class Department extends BaseModel
     ];
 
     public array $child_model_class = [
-        Employee::class => [
-            "foreignKey" => "department_id",
-            "preventDelete" => true
-        ],
+        // Employee::class => [
+        //     "foreignKey" => "department_id",
+        //     "preventDelete" => true
+        // ],
         User::class => [
             "foreignKey" => "department_id",
             "preventDelete" => true
