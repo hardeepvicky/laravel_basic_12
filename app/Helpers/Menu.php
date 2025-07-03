@@ -427,10 +427,7 @@ class AdminMenu extends BaseMenu
     {
         $links = [];
 
-        $links[] = self::user();
-        $links[] = self::role();
         $links[] = self::permission();
-        $links[] = self::setting();
 
         return self::getModule("Admin", self::ICON_MENU_ROOT, $links);
     }
@@ -446,6 +443,20 @@ class AdminMenu extends BaseMenu
 
         return self::getModule("Permission", self::ICON_MENU_ROOT_CHILD, $links);
     }
+}
+
+class DeveloperMenu extends BaseMenu
+{
+    public static function get(): array
+    {
+        $links = [];
+
+        $links[] = self::setting();
+        $links[] = self::app_menu();
+        $links[] = self::logs();
+
+        return self::getModule("Developer", null, $links);
+    }
 
     public static function setting()
     {
@@ -459,53 +470,11 @@ class AdminMenu extends BaseMenu
         return self::getModule("Setting", self::ICON_MENU_ROOT_CHILD, $links);
     }
 
-
-    private static function user()
-    {
-        $routePrefix = "user";
-
-        $links = self::getControllerDefaultLinks($routePrefix, "User", "fas fa-users");
-
-        return $links;
-    }
-
-    private static function role()
-    {
-        $routePrefix = "role";
-
-        $links = self::getControllerDefaultLinks($routePrefix, "Role", self::ICON_MENU_ROOT_CHILD);
-
-        return $links;
-    }
-}
-
-class DeveloperMenu extends BaseMenu
-{
-    public static function get(): array
-    {
-        $links = [];
-
-        $links[] = self::app_menu();
-        $links[] = self::type();
-        $links[] = self::logs();
-
-        return self::getModule("Developer", null, $links);
-    }
-
     private static function app_menu()
     {
         $routePrefix = "app-menu";
 
         $links = self::getControllerDefaultLinks($routePrefix, "Menu", self::ICON_MENU_ROOT_CHILD);
-
-        return $links;
-    }
-
-    private static function type()
-    {
-        $routePrefix = "type";
-
-        $links = self::getControllerDefaultLinks($routePrefix, "Type", self::ICON_MENU_ROOT_CHILD);
 
         return $links;
     }

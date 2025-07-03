@@ -117,15 +117,15 @@ class BaseModel extends Model implements BaseModelInterface
         $model = new static();
         $table_name  = $model->getTable();
 
-        if (!in_array($key_field, self::$list_fields) && self::tableHaveField($table_name, $key_field)) {
-            self::$list_fields[] = $key_field;
+        if (!in_array($key_field, static::$list_fields) && static::tableHaveField($table_name, $key_field)) {
+            static::$list_fields[] = $key_field;
         }
 
-        if (!in_array($value_field, self::$list_fields) && self::tableHaveField($table_name, $value_field)) {
-            self::$list_fields[] = $value_field;
+        if (!in_array($value_field, static::$list_fields) && static::tableHaveField($table_name, $value_field)) {
+            static::$list_fields[] = $value_field;
         }
 
-        $builder->select(self::$list_fields);
+        $builder->select(static::$list_fields);
 
         $records = $builder->get();
 

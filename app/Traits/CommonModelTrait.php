@@ -100,7 +100,7 @@ trait CommonModelTrait
     {
         $unique_fields = self::getUniqueFields();
 
-        if ($unique_fields) {
+        if (!$unique_fields) {
             throw new UserException("unique_fields is not set yet");
         }
 

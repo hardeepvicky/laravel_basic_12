@@ -185,7 +185,7 @@ class User extends Authenticatable implements BaseModelInterface
     {
         $fileUtility = new FileUtility(static::getStorageDisk());
 
-        foreach ($this->getFileFields() as $field) {
+        foreach (self::getFileFields() as $field) {
             if (isset($this->{$field}) && $this->{$field}) {
                 $field_url_field = $field . "_url";
 
@@ -254,10 +254,14 @@ class User extends Authenticatable implements BaseModelInterface
         return $field_rules;
     }
 
-    
-    public function getFileFields()
+    public static function getFileFields()
     {
         return static::$file_fields;
+    }
+
+    public static function getUniqueFields()
+    {
+        return static::$unique_fields;
     }
 
     protected function getDisplayNameAttribute()
