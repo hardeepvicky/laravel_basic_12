@@ -12,7 +12,6 @@ use App\Helpers\Util;
             <table class="table table-striped table-bordered table-hover">
                 <thead>
                     <tr class="border-bottom-primary">
-                        <th>ID</th>
                         <th>
                             Route Name
                             <hr>
@@ -32,7 +31,6 @@ use App\Helpers\Util;
                 <tbody>
                     @foreach ($records as $record)
                     <tr>
-                        <td>{{ $record->id }}</td>
                         <td>
                             {{ $record->route_name_or_url }}
 
@@ -44,8 +42,8 @@ use App\Helpers\Util;
                                 <label class="info">
                                     Url : <span>{{ $record->url }}</span>
                                 </label>
-
                             </div>
+                            
                             <span class="btn btn-info btn-sm css-toggler mt-1 mb-1"
                                     data-sr-css-class-toggle-target="#url-{{ $record->id }}"
                                     data-sr-css-class-toggle-class="h-200" data-sr-css-class-toggle-applied-text="More"
@@ -56,7 +54,7 @@ use App\Helpers\Util;
                         <td>{{ Util::niceTime($record->exec_time) }}</td>
                         <td>
                             <div id="request-{{ $record->id }}" class="h-200">
-                                {!! array_print($record->request) !!}
+                                {!! array_print($record->request, 100) !!}
                             </div>
 
                             <span class="btn btn-info btn-sm css-toggler mt-1 mb-1"
@@ -68,7 +66,7 @@ use App\Helpers\Util;
                         </td>
                         <td>
                             <div id="response-{{ $record->id }}" class="h-200">
-                                {!! array_print($record->response) !!}
+                                {!! array_print($record->response, 100) !!}
                             </div>
 
                             <span class="btn btn-info btn-sm css-toggler mt-1 mb-1"
@@ -80,7 +78,7 @@ use App\Helpers\Util;
                         </td>
                         <td>
                             <div id="cache_logs-{{ $record->id }}" class="h-200">
-                                {!! array_print($record->cache_model['cache_logs'] ?? []) !!}
+                                {!! array_print($record->cacheLog?->logs ?? [], 100) !!}
                             </div>
 
                             <span class="btn btn-info btn-sm css-toggler mt-1 mb-1"

@@ -132,7 +132,7 @@ class DeveloperController extends BackendController
 
         // dd($conditions);
 
-        $builder = SqlLog::where($conditions);
+        $builder = SqlLog::where($conditions)->with("cacheLog");
 
         $cache_key_for_sort = $cache_key_prefix . "-index-extra-params";
 
@@ -146,6 +146,8 @@ class DeveloperController extends BackendController
         $builder->orderBy($sort_params['sort_by'], $sort_params['sort_dir']);
 
         $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
+
+        // d($records[0]->cacheLog, true);
 
         $this->setForView(compact("records"));
 

@@ -78,10 +78,10 @@ function d($arg, $will_exit = false)
     }
 }
 
-function array_print($array, $indent = 0)
+function array_print($array, $max_string_len = 45, $indent = 0)
 {
     if (is_array($array)) {
-        $array = array_short_string_with_dot($array);
+        $array = array_short_string_with_dot($array, $max_string_len, false);
 
 
         echo '<ul class="array_print indent-' . $indent . '" >';
@@ -89,7 +89,7 @@ function array_print($array, $indent = 0)
             echo '<li>';
             if (is_array($value)) {
                 echo '<strong>' . htmlspecialchars($key) . ':</strong>';
-                array_print($value, $indent + 1); // Recurse for nested arrays
+                array_print($value, $max_string_len, $indent + 1); // Recurse for nested arrays
             } else {
                 echo '<strong>' . htmlspecialchars($key) . ':</strong> ' . htmlspecialchars(print_r($value, true));
             }

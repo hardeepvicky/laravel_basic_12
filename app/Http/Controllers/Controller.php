@@ -148,8 +148,10 @@ abstract class Controller
         if ($cache_model)
         {
             $cache_model->sql_log_id = $sqlLogModel->id;
-            $sqlLogModel->cache_model = $cache_model->toArray();
+            $sqlLogModel->cache_log_id = $cache_model->id;
         }
+
+        // dd($sqlLogModel->toArray());
 
         if (!$sqlLogModel->saveQuietly()) {
             throw_exception("Fail to Save Sql Log");
@@ -212,11 +214,17 @@ abstract class Controller
             return null;
         }
 
-        $save['cache_logs']["BaseModel"] = BaseModel::$cache_logs;
-        $save['cache_logs']["BaseMongoModel"] = BaseMongoModel::$cache_logs;
-        $save['cache_logs']["AccessControl"] = AccessControl::$cache_logs;
+        $save['logs']["WebController"] = WebController::$cache_logs;
+        $save['logs']["BaseModel"] = BaseModel::$cache_logs;
+        $save['logs']["BaseMongoModel"] = BaseMongoModel::$cache_logs;
+        $save['logs']["AccessControl"] = AccessControl::$cache_logs;
 
         $model = new CacheLog($save);
+
+        if (!$model->save())
+        {
+            throw new UserException("Fail To Save", UserException::ERROR_LARAVEL_FAIL);
+        }
 
         return $model;
     }
@@ -247,7 +255,7 @@ abstract class Controller
                 "request" => $request->all(),
                 "response" => $response,
                 "sql_model" => $sql_model?->toArray(),
-                "cache_model" => $cache_model?->toArray()
+                "cache_log_id" => $cache_model?->id
             ];
 
             $save = array_purge_if_exceed_limit($save);

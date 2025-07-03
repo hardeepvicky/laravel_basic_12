@@ -10,4 +10,9 @@ class SqlLog extends BaseMongoModel
     {
         return "logs/sql/";
     }
+
+    public function cacheLog()
+    {
+        return $this->belongsTo(CacheLog::class);
+    }
 }

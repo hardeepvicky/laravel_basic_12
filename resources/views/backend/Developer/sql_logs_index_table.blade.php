@@ -8,7 +8,6 @@
             <table class="table table-striped table-bordered table-hover">
                 <thead>
                     <tr class="border-bottom-primary">
-                        <th>ID</th>
                         <th>
                             Route Name / Url
                             <hr>
@@ -27,7 +26,6 @@
                 <tbody>
                     @foreach ($records as $record)
                     <tr>
-                        <td>{{ $record->id }}</td>
                         <td>
                             {{ $record->route_name_or_url }}
                             <hr>
@@ -37,7 +35,7 @@
                         </td>
                         <td>
                             <div id="cache_logs-{{ $record->id }}" class="h-200">
-                                {!! array_print($record->cache_model['cache_logs'] ?? []) !!}
+                                {!! array_print($record->cacheLog?->logs ?? [], 200) !!}
                             </div>
 
                             <span class="btn btn-info btn-sm css-toggler mt-1 mb-1"

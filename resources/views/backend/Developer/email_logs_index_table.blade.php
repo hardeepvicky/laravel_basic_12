@@ -7,7 +7,6 @@
         <table class="table table-striped table-bordered table-hover mb-0">
             <thead>
                 <tr>
-                    <th>ID</th>
                     <th>From Name</th>
                     <th>From Email</th>
                     <th>To Name</th>
@@ -23,7 +22,6 @@
             <tbody>
                 @foreach ($records as $record)
                     <tr>
-                        <td>{{ $record->id }}</td>
                         <td>{{ $record->from_name }}</td>
                         <td>{{ $record->from_email }}</td>
                         <td>{{ $record->to_name }}</td>

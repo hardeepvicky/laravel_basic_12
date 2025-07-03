@@ -12,7 +12,6 @@ use App\Helpers\Util;
             <table class="table table-bordered summary-table">
                 <thead>
                     <tr class="border-bottom-primary">
-                        <th>ID</th>
                         <th>Command</th>
                         <th>Description</th>
                         <th><?= sortable_anchor('exec_time', 'Time Taken (Seconds)') ?></th>                        
@@ -27,7 +26,6 @@ use App\Helpers\Util;
                 <tbody>
                     @foreach ($records as $record)
                     <tr>
-                        <td>{{ $record->id }}</td>
                         <td>{{ $record->command }}</td>
                         <td>{{ $record->description }}</td>
                         <td>{{ Util::niceTime($record->exec_time) }}</td>
