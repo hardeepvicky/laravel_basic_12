@@ -50,7 +50,7 @@ use App\Helpers\Util;
                             <div class="mt-2 mb-2">
                                 @if (isset($record->sql_log_file_url))
                                 <a href="{{ $record->sql_log_file_url }}"
-                                    class="btn btn-outline-secondary">
+                                    class="btn btn-outline-secondary mb-2">
                                     <i class="fas fa-download"></i>
                                     SQL Log
                                 </a>
@@ -58,7 +58,7 @@ use App\Helpers\Util;
 
                                 @if (isset($record->sql_dml_log_file_url))
                                 <a href="{{ $record->sql_dml_log_file_url }}"
-                                    class="btn btn-outline-secondary">
+                                    class="btn btn-outline-secondary mb-2">
                                     <i class="fas fa-download"></i>
                                     DML SQL Log
                                 </a>

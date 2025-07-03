@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Backend;
 
+use App\Helpers\LaravelExtend;
 use App\Models\Task;
 use App\Models\Type;
 use Illuminate\Http\Request;

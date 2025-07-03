@@ -955,14 +955,26 @@ function get_asset_url($file)
     }
 }
 
+function str_short_with_dot($str, $max_string_len = 45)
+{
+    if ($str)
+    {
+        if (strlen($str) > $max_string_len)
+        {
+            $str = substr($str, 0, $max_string_len) . "....";
+        }
+    }
+
+    return $str;
+}
+
 function array_short_string_with_dot(array $arr, $max_string_len = 45, bool $recursive = true)
 {
     foreach ($arr as $k => $v) {
         if (is_string($v)) {
 
-            if (strlen($v) > $max_string_len) {
-                $arr[$k] = substr($v, 0, $max_string_len) . "....";
-            }
+            $arr[$k] = str_short_with_dot($v, $max_string_len);
+
         } else if (is_array($v) && $recursive) {
             $arr[$k] = array_short_string_with_dot($v, $max_string_len, $recursive);
         }

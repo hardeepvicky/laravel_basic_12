@@ -50,14 +50,14 @@
                         </td>
                         <td>
                             @if ($record->sql_log_file_url)
-                            <a href="{{ $record->sql_log_file_url }}" class="btn btn-outline-secondary">
+                            <a href="{{ $record->sql_log_file_url }}" class="btn btn-outline-secondary  mb-2">
                                 <i class="fas fa-download"></i>
                                 SQL Log
                             </a>
                             @endif
 
                             @if ($record->sql_dml_log_file_url)
-                            <a href="{{ $record->sql_dml_log_file_url }}" class="btn btn-outline-secondary">
+                            <a href="{{ $record->sql_dml_log_file_url }}" class="btn btn-outline-secondary  mb-2">
                                 <i class="fas fa-download"></i>
                                 DML SQL Log
                             </a>

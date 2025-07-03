@@ -40,7 +40,7 @@ use App\Helpers\Util;
 
                             <div id="url-{{ $record->id }}" class="h-200">
                                 <label class="info">
-                                    Url : <span>{{ $record->url }}</span>
+                                    Url : <span>{{ str_short_with_dot($record->url, 180) }}</span>
                                 </label>
                             </div>
                             
@@ -95,7 +95,7 @@ use App\Helpers\Util;
                             <div class="mt-2 mb-2">
                                 @if (isset($record->sql_model['sql_log_file_url']))
                                 <a href="{{ $record->sql_model['sql_log_file_url'] }}"
-                                    class="btn btn-outline-secondary">
+                                    class="btn btn-outline-secondary mb-2">
                                     <i class="fas fa-download"></i>
                                     SQL Log
                                 </a>
@@ -103,7 +103,7 @@ use App\Helpers\Util;
 
                                 @if (isset($record->sql_model['sql_dml_log_file_url']))
                                 <a href="{{ $record->sql_model['sql_dml_log_file_url'] }}"
-                                    class="btn btn-outline-secondary">
+                                    class="btn btn-outline-secondary mb-2">
                                     <i class="fas fa-download"></i>
                                     DML SQL Log
                                 </a>
