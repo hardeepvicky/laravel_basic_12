@@ -115,8 +115,6 @@ $page_header_links = [['title' => 'Create', 'url' => route($routePrefix . '.crea
         $(".cascade-drop-down").trigger("change", {
             pageLoad: true
         });
-
-        ajaxGetJson("/user/ajax_get/4");
     });
 </script>
 @endsection
