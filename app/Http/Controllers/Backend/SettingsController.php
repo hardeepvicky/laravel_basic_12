@@ -41,8 +41,6 @@ class SettingsController extends BackendController
         if ($request->isMethod('post')) {
             $data = $request->all();
 
-            $settingModel = new Setting();
-
             //d($data["data"]['text']); exit;
             foreach ($data["data"]['text'] as $key => $value) {
 
@@ -50,7 +48,7 @@ class SettingsController extends BackendController
                     $value = "0";
                 }
 
-                $settingModel->insertOrUpdate([
+                $settingModel = Setting::insertOrUpdate([
                     "name" => $key,
                     "value" => $value,
                 ]);
@@ -164,7 +162,7 @@ class SettingsController extends BackendController
                         "field_labels" => $data['field_labels'],
                     ];
 
-                    $model = $model->insertOrUpdate($save_data);
+                    $model = FieldSetting::insertOrUpdate($save_data);
 
                     return back()->with("success", "Record save successfully");
                 } catch (Exception $ex) {
@@ -223,7 +221,7 @@ class SettingsController extends BackendController
                         "field_labels" => $data['field_labels'],
                     ];
 
-                    $model = $model->insertOrUpdate($save_data);
+                    $model = FieldSetting::insertOrUpdate($save_data);
 
                     return back()->with("success", "Record save successfully");
                 } catch (Exception $ex) {
