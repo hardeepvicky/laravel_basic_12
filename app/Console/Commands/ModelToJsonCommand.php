@@ -54,6 +54,11 @@ class ModelToJsonCommand extends Command
             $model_name = $this->ask('Enter Model name');
             $model_name = trim($model_name);
 
+            if (strlen($model_name) <= 0)
+            {
+                return;
+            }
+
             $model_list = [$model_name];
         }
         else if ($choice == "All") {
@@ -161,7 +166,7 @@ class ModelToJsonCommand extends Command
 
     public static function getStorageDisk()
     {
-        $disk = Storage::disk("local");
+        $disk = Storage::disk("public");
 
         return $disk;
     }
