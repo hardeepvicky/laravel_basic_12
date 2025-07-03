@@ -305,6 +305,7 @@ class AppMenuController extends BackendController
             foreach ($validatedData['appMenuRelatedLink'] as $record) {
                 try {
                     // d($record); exit;
+                    $record['app_menu_id'] = $this->model->id;
                     $new_rules = LaravelExtend::merge_validation_rules($rules, $child_model->getUniqueValidationRules($record));
                     
                     $validator = Validator::make($record, $new_rules, $messages);

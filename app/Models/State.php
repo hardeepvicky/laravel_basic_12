@@ -16,6 +16,19 @@ class State extends BaseModel
         ]
     ];
 
+    public function beforeSave()
+    {
+        parent::beforeSave();
+
+        foreach($this->getAttributes() as $k => $v)
+        {
+            if (is_string($v) && strlen($v) > 0)
+            {
+                $this->{$k} = utf8_encode($v);
+            }
+        }
+    }
+
     public function country()
     {
         return $this->belongsTo(Country::class);

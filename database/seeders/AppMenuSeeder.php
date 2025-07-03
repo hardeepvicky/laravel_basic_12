@@ -2,10 +2,12 @@
 
 namespace Database\Seeders;
 
+use App\Console\Commands\ModelToJsonCommand;
 use App\Exceptions\UserException;
 use App\Helpers\ConsoleOutput;
 use App\Helpers\Util;
 use App\Models\AppMenu;
+use App\Models\AppMenuRelatedLink;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Storage;
 
@@ -24,14 +26,18 @@ class AppMenuSeeder extends Seeder
             "total_count" => 0,
             "insert_count" => 0,
             "update_count" => 0,
-            "delete_count" => 0,
+            "delete_count" => 0,            
         ];
 
-        $model_name = "Type";
+        $muti_counters = [];
+
+        $model_class = AppMenu::class;
+
+        $model_name = str_class_name_without_namespace($model_class);
 
         $filename = $model_name . ".json";
 
-        $path = "files/command/ModelToJsonCommand/";
+        $path = ModelToJsonCommand::$path . "/";
 
         $disk = Storage::disk(DEFAULT_DISK);
 
@@ -44,7 +50,7 @@ class AppMenuSeeder extends Seeder
         } else {
             $counts['total_count'] = count($records);
 
-            $model = new AppMenu();
+            $model = new $model_class();
 
             $is_insert = false;
             $is_update = false;
@@ -73,8 +79,8 @@ class AppMenuSeeder extends Seeder
 
                 try {
                     // dd($save);
-                    $record = Util::objToArray($record);
-                    $id = $model->insertOrUpdate($record, $is_insert, $is_update);
+                    $save = Util::objToArray($save);
+                    $id = $model->insertOrUpdate($save, $is_insert, $is_update);
 
                     if ($is_insert) {
                         $counts['insert_count']++;
@@ -83,6 +89,42 @@ class AppMenuSeeder extends Seeder
                     if ($is_update) {
                         $counts['update_count']++;
                     }
+
+                    if (isset($record->child_records))
+                    {
+                        $child_records = $record->child_records;
+
+                        if (isset($child_records->AppMenuRelatedLink) && is_array($child_records->AppMenuRelatedLink))
+                        {
+                            $app_menu_related_links = Util::objToArray($child_records->AppMenuRelatedLink);
+
+                            $child_model = new AppMenuRelatedLink();
+
+                            if (!isset($muti_counters['AppMenuRelatedLink']['total_count']))
+                            {
+                                $muti_counters['AppMenuRelatedLink'] = $counts;
+                            }
+
+                            foreach($app_menu_related_links as $child_record)
+                            {
+                                unset($child_record['id']);
+                                unset($child_record['app_menu_id']);
+
+                                $child_record['app_menu_id'] = $id;
+
+                                $child_id = $child_model->insertOrUpdate($child_record, $is_insert, $is_update);
+
+                                if ($is_insert) {
+                                    $muti_counters['AppMenuRelatedLink']['insert_count']++;
+                                }
+
+                                if ($is_update) {
+                                    $muti_counters['AppMenuRelatedLink']['update_count']++;
+                                }
+                            }
+                        }
+                    }
+
                 } catch (UserException $ex) {
                     if (isset($ex->data['custom_errors']) && is_array($ex->data['custom_errors'])) {
                         foreach ($ex->data['custom_errors'] as $group => $errors) {
@@ -91,13 +133,25 @@ class AppMenuSeeder extends Seeder
                             }
                         }
                     }
+                    else
+                    {
+                        throw $ex;
+                    }
                 }
             }
         }
+        
 
-        $counts = array_human_keys($counts);
+        $muti_counters[$model_name] = $counts;
 
-        $output->addLog($counts);
+        foreach($muti_counters as $label => $counts)
+        {
+            $output->addLogMessage(str_class_name_to_human_text($label));
+
+            $counts = array_human_keys($counts);
+
+            $output->addLog($counts);
+        }
 
         $output->writeLogToConsole();
     }

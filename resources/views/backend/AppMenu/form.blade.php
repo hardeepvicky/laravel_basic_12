@@ -28,17 +28,7 @@
                                 value="{{ $model->{$field} }}" />
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-md-6 col-lg-4">
-                            <div class="form-group mb-3">
-                                <?php
-                                $field = 'department_id';
-                                $label = get_value_from_list($field_labels, $field, $field);
-                                ?>
-                                <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$dept_list"
-                                    value="{{ $model->{$field} }}" class="select2" pleaseSelect="For All" />
-                            </div>
-                        </div>
+                    <div class="row">                        
                         <div class="col-md-6 col-lg-4">
                             <div class="form-group mb-3">
                                 <?php

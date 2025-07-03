@@ -110,8 +110,6 @@ class BaseModel extends Model implements BaseModelInterface
                 "custom_errors" => $this->custom_errors
             ]);
         }
-
-        // dd($this->getAttributes());
     }
 
     public function beforeDelete() {}

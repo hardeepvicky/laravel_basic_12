@@ -89,6 +89,7 @@ class AppMenu extends BaseModel
     public function getUniqueValidationRules(Request $request)
     {
         $field_rules = [
+            "name" => [Rule::unique($this->connection . "." . $this->getTable(), "name")->where("parent_id", $request->input("parent_id", 0))],
         ];
 
         if ($this->id) {

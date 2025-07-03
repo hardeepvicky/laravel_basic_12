@@ -45,7 +45,15 @@ function d($arg, $will_exit = false)
         $console->addLogMessage("Line : " . $callBy['line']);
         $console->writeLogToConsole();
 
-        dump($arg);
+        if (is_array($arg))
+        {
+            dump($arg);
+        }
+        else
+        {
+            $console->addLogMessage("Type : " . gettype($arg));
+        }
+
     } else {
 
         echo "<pre>";
