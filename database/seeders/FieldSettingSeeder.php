@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Console\Commands\ModelToJsonCommand;
 use App\Exceptions\UserException;
 use App\Helpers\ConsoleOutput;
 use App\Helpers\Util;
@@ -32,9 +33,9 @@ class FieldSettingSeeder extends Seeder
 
         $filename = $model_name . ".json";
 
-        $path = "files/command/ModelToJsonCommand/";
+        $path = ModelToJsonCommand::$path . "/";
 
-        $disk = Storage::disk(DEFAULT_DISK);
+        $disk = ModelToJsonCommand::getStorageDisk();
 
         $content = $disk->get($path . $filename);
 
