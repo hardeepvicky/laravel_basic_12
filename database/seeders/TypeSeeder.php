@@ -67,7 +67,7 @@ class TypeSeeder extends Seeder
                 }
 
                 // dd($save);
-                $id = $model->insertOrUpdate($save, $is_insert, $is_update);
+                $model = Type::insertOrUpdate($save, $is_insert, $is_update);
 
                 if ($is_insert) {
                     $counts['insert_count']++;

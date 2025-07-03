@@ -46,8 +46,6 @@ class FieldSettingSeeder extends Seeder
         } else {
             $counts['total_count'] = count($records);
 
-            $model = new FieldSetting();
-
             $is_insert = false;
             $is_update = false;
 
@@ -57,7 +55,7 @@ class FieldSettingSeeder extends Seeder
 
                 try {
                     $record = Util::objToArray($record);
-                    $id = $model->insertOrUpdate($record, $is_insert, $is_update);
+                    $model = FieldSetting::insertOrUpdate($record, $is_insert, $is_update);
 
                     if ($is_insert) {
                         $counts['insert_count']++;

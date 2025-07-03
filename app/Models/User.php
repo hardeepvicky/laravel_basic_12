@@ -7,6 +7,8 @@ use App\Exceptions\UserException;
 use App\Helpers\FileUtility;
 use App\Helpers\Util;
 use App\Traits\CacheTrait;
+use App\Traits\CommonModelTrait;
+use App\Traits\CommonMysqlModelTrait;
 use App\Traits\ModelListTrait;
 use App\Traits\MysqlTableInfoTrait;
 use App\Traits\StorageTrait;
@@ -26,7 +28,7 @@ use ReflectionClass;
 
 class User extends Authenticatable implements BaseModelInterface
 {
-    use HasApiTokens, HasFactory, Notifiable, StorageTrait, CacheTrait, ModelListTrait, MysqlTableInfoTrait;
+    use HasApiTokens, HasFactory, Notifiable, StorageTrait, CacheTrait, CommonModelTrait, ModelListTrait, MysqlTableInfoTrait, CommonMysqlModelTrait;
 
     /**
      * The attributes that are mass assignable.
@@ -66,6 +68,30 @@ class User extends Authenticatable implements BaseModelInterface
         'display_name',
     ];
 
+     /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'used_in_other_table_created_by' => 'array',
+        'used_in_other_table_updated_by' => 'array',
+    ];
+
+    public array $child_model_class = [
+        UserRole::class => [
+            "foreignKey" => "user_id",
+            "preventDelete" => false,
+            "label" => "User's Role"
+        ],
+        UserAllowIp::class => [
+            "foreignKey" => "user_id",
+            "preventDelete" => false,
+            "label" => "User's Allow IP"
+        ],
+    ];
+
     protected static array $unique_fields = ["email"];
 
     protected static array $file_fields = ["profile_image"];
@@ -92,30 +118,7 @@ class User extends Authenticatable implements BaseModelInterface
         self::CREATED_VIA_APPLE => "Apple",
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-        'used_in_other_table_created_by' => 'array',
-        'used_in_other_table_updated_by' => 'array',
-    ];
-
-    public array $child_model_class = [
-        UserRole::class => [
-            "foreignKey" => "user_id",
-            "preventDelete" => false,
-            "label" => "User's Role"
-        ],
-        UserAllowIp::class => [
-            "foreignKey" => "user_id",
-            "preventDelete" => false,
-            "label" => "User's Allow IP"
-        ],
-    ];
-
+    public array $custom_errors = [];
 
     public static function boot()
     {
@@ -164,19 +167,20 @@ class User extends Authenticatable implements BaseModelInterface
 
     public function beforeSave()
     {
-        foreach ($this->getAttributes() as $field => $value) {
-            if (is_null($value)) {
-                continue;
-            }
-
-            if (is_string($value) && strlen($value) > 0) {
-                $this->{$field} = utf8_encode($value);
-            }
+        if ($this->custom_errors) {
+            throw new UserException("Some errors in model while saving", UserException::ERROR_USER_DATA_WRONG, [
+                "custom_errors" => $this->custom_errors
+            ]);
         }
     }
 
-    public function beforeDelete() {}
-
+    public function beforeDelete() {
+        if ($this->custom_errors) {
+            throw new UserException("Some errors in model while deleting", UserException::ERROR_USER_DATA_WRONG, [
+                "custom_errors" => $this->custom_errors
+            ]);
+        }
+    }
     public function afterFind()
     {
         $fileUtility = new FileUtility(static::getStorageDisk());
@@ -190,45 +194,6 @@ class User extends Authenticatable implements BaseModelInterface
         }
     }
 
-    public function getFileFields()
-    {
-        return static::$file_fields;
-    }
-
-    protected function getDisplayNameAttribute()
-    {
-        return $this->getDisplayName();
-    }
-
-    public function getDisplayName()
-    {
-        if ($this->type == self::TYPE_EXTERNAL) {
-            return $this->name;
-        }
-
-        $name = $this->name;
-
-        if ($this->type == self::TYPE_EXTERNAL) {
-            $name .= " (External)";
-        } else {
-            if ($this->person_name && strtolower($this->person_name) != strtolower($name)) {
-                $name .= " >> " . $this->person_name;
-            }
-        }
-
-        return $name;
-    }
-
-    public function getFullMobileNo($field = "mobile")
-    {
-        $phonecode = $this->country?->phonecode ?? "";
-
-        if ($phonecode) {
-            return "+" . $phonecode . $this->{$field};
-        }
-
-        return $this->{$field};
-    }
 
     public function userCategory()
     {
@@ -289,6 +254,47 @@ class User extends Authenticatable implements BaseModelInterface
         return $field_rules;
     }
 
+    
+    public function getFileFields()
+    {
+        return static::$file_fields;
+    }
+
+    protected function getDisplayNameAttribute()
+    {
+        return $this->getDisplayName();
+    }
+
+    public function getDisplayName()
+    {
+        if ($this->type == self::TYPE_EXTERNAL) {
+            return $this->name;
+        }
+
+        $name = $this->name;
+
+        if ($this->type == self::TYPE_EXTERNAL) {
+            $name .= " (External)";
+        } else {
+            if ($this->person_name && strtolower($this->person_name) != strtolower($name)) {
+                $name .= " >> " . $this->person_name;
+            }
+        }
+
+        return $name;
+    }
+
+    public function getFullMobileNo($field = "mobile")
+    {
+        $phonecode = $this->country?->phonecode ?? "";
+
+        if ($phonecode) {
+            return "+" . $phonecode . $this->{$field};
+        }
+
+        return $this->{$field};
+    }
+
     public function isRquireOTPVerificationOnLogin()
     {
         if ($this->is_secure_login) {
@@ -335,90 +341,6 @@ class User extends Authenticatable implements BaseModelInterface
         return false;
     }
 
-    public function getNextId()
-    {
-        $table = $this->getTable();
-        $statement = DB::select("SHOW TABLE STATUS LIKE '" . $table . "'");
-        $nextId = $statement[0]->Auto_increment;
-
-        return $nextId;
-    }
-
-    public function insertOrUpdate(array $data, &$is_insert = null, &$is_update = null)
-    {
-        $model = $this->getUniqueId($data);
-
-        if ($model) {
-            $model->fill($data);
-            if ($model->isDirty()) {
-                if ($model->save()) {
-                    $is_update = true;
-                } else {
-                    $is_update = false;
-                    throw new \Exception("Fail To Save");
-                }
-            }
-        } else {
-            $model = static::create($data);
-
-            if ($model) {
-                $is_insert = true;
-            } else {
-                $is_insert = false;
-                return null;
-            }
-        }
-
-        return $model;
-    }
-
-    public function insertIgnoreIfExist(array $data, &$is_insert = null)
-    {
-        $record = $this->getUniqueId($data);
-
-        if (!$record) {
-            $record = static::create($data);
-
-            if (!$record) {
-                throw new UserException("Fail to save", UserException::ERROR_LARAVEL_FAIL);
-            }
-
-            $is_insert = true;
-        }
-
-        return $record->id;
-    }
-
-    public function getUniqueId(array $data)
-    {
-        if (!static::$unique_fields) {
-            throw_exception("unique_fields is not set yet");
-        }
-
-        $conditions = [];
-        foreach (static::$unique_fields as $unique_field) {
-            if (!isset($data[$unique_field])) {
-                throw_exception("field $unique_field missing in argument array");
-            }
-
-            $conditions[] = [$unique_field, '=', $data[$unique_field]];
-        }
-
-        $count = static::where($conditions)->count();
-
-        if ($count == 0) {
-            return false;
-        }
-
-        if ($count > 1) {
-            throw_exception("more than 1 records found");
-        }
-
-        $record = static::where($conditions)->first(["id"]);
-
-        return $record;
-    }
-
     public function activate()
     {
         $this->is_active = 1;
@@ -439,21 +361,19 @@ class User extends Authenticatable implements BaseModelInterface
 
     public function getClassDisplayName()
     {
-        $class_name = static::classDisplayName();
-
-        return $class_name;
+        return self::classDisplayName();
     }
-
+    
     public static function getCacheKey(): string
     {
-        $str = static::class;
+        $str = "User";
 
         return static::optimizeCacheKey($str);
     }
 
     public static function classDisplayName(): string
     {
-        $class_name = str_class_name_to_human_text(static::class);
+        $class_name = "User";
 
         return $class_name;
     }
@@ -635,32 +555,6 @@ class User extends Authenticatable implements BaseModelInterface
         $this->plain_password = $plain_password;
         $this->password = bcrypt($plain_password);
     }
-
-    public static function getAllRelations(Model $model): array
-    {
-        $class = new ReflectionClass($model);
-        $methods = $class->getMethods();
-
-        $relations = [];
-        foreach ($methods as $method) {
-            if ($method->class != get_class($model) || $method->getNumberOfParameters() > 0) continue;
-
-            try {
-                $relation = $method->invoke($model);
-                if ($relation instanceof \Illuminate\Database\Eloquent\Relations\Relation) {
-                    $relations[$method->getName()] = [
-                        "model" => $method,
-                        "relation" => $relation,
-                    ];
-                }
-            } catch (\Throwable $e) {
-                continue;
-            }
-        }
-
-        return $relations;
-    }
-
 
     public function getFieldLabels()
     {

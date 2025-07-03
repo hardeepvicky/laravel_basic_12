@@ -4,12 +4,11 @@ namespace App\Models;
 
 class City extends BaseModel
 {
-    public array $child_model_class = [
-        Employee::class => [
-            "label" => "Employee",
-            "foreignKey" => ["current_city_id", "permanent_city_id"],
-            "preventDelete" => true
-        ]
+    public static array $child_model_class = [
+        // Employee::class => [
+        //     "foreignKey" => ["current_city_id", "permanent_city_id"],
+        //     "preventDelete" => true
+        // ]
     ];
 
 

@@ -32,14 +32,15 @@ abstract class Controller
         if (method_exists($model, 'getClassDisplayName')) {
             $class_display_name = $model->getClassDisplayName();
         } else {
-            throw_exception("Please Declare getClassDisplayName() method in $class_name");
+            throw new UserException("Please Declare getClassDisplayName() method in $class_name");
         }
 
-        if (!isset($model->child_model_class)) {
+        if (!property_exists($class_name, "child_model_class")) {
             throw_exception("child_model_class Array is not set in $class_name");
+            throw new UserException("child_model_class Array is not set in $class_name");
         }
 
-        foreach ($model->child_model_class as $childClass => $arr) {
+        foreach ($class_name::$child_model_class as $childClass => $arr) {
             $child_class_display_name = $childClass::classDisplayName();
 
             if (!$child_class_display_name) {
@@ -214,10 +215,12 @@ abstract class Controller
             return null;
         }
 
+        $save['logs'] = [];
+
         $save['logs']["WebController"] = WebController::$cache_logs;
         $save['logs']["BaseModel"] = BaseModel::$cache_logs;
         $save['logs']["BaseMongoModel"] = BaseMongoModel::$cache_logs;
-        $save['logs']["AccessControl"] = AccessControl::$cache_logs;
+        $save['logs']["Other"] = AccessControl::$cache_logs;
 
         $model = new CacheLog($save);
 

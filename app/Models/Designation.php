@@ -8,15 +8,15 @@ use Illuminate\Validation\Rules\Unique;
 
 class Designation extends BaseModel
 {
-    public array $child_model_class = [
-        Employee::class => [
-            "foreignKey" => "designation_id",
-            "preventDelete" => true
-        ],
-        User::class => [
-            "foreignKey" => "designation_id",
-            "preventDelete" => true
-        ],
+    public static array $child_model_class = [
+        // Employee::class => [
+        //     "foreignKey" => "designation_id",
+        //     "preventDelete" => true
+        // ],
+        // User::class => [
+        //     "foreignKey" => "designation_id",
+        //     "preventDelete" => true
+        // ],
     ];
 
     protected $appends = [

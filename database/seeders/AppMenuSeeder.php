@@ -98,7 +98,7 @@ class AppMenuSeeder extends Seeder
 
             try {
                 // d($save, true);
-                $id = $model->insertOrUpdate($save, $is_insert, $is_update);
+                $id = AppMenu::insertOrUpdate($save, $is_insert, $is_update);
 
                 if ($is_insert) {
                     $this->multi_counters["AppMenu"]['insert_count']++;

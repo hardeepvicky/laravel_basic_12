@@ -13,7 +13,7 @@ class AppMenu extends BaseModel
 {
     protected static array $unique_fields = ["parent_id", "name"];
 
-    public array $child_model_class = [
+    public static array $child_model_class = [
         AppMenu::class => [
             "foreignKey" => "parent_id",
             "preventDelete" => true,

@@ -129,7 +129,7 @@ trait CacheTrait
             return;
         }
 
-        if ($cache_log_level == 1)
+        if ($cache_log_level < 3)
         {
             $data = null;
         }
@@ -139,9 +139,27 @@ trait CacheTrait
             $data = array_purge_if_exceed_limit($data, 20, true);
         }
 
+        $call_by_list = [];
+
+        if ($cache_log_level >= 2)
+        {
+            foreach(debug_backtrace() as $callBy)
+            {
+                if (count($call_by_list) < 5)
+                {
+                    $call_by_list[] = [
+                        "file" => $callBy['file'],
+                        "function" => $callBy['function'],
+                        "line" => $callBy['line'],
+                    ];
+                }
+            }
+        }
+
         self::$cache_logs[$base_cache_key][] = [
             "op" => $op,
             "cache_key" => $cache_key,
+            "call_from" => $call_by_list,
             "data" => $data
         ];
     }

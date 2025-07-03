@@ -8,12 +8,11 @@ use Illuminate\Validation\Rules\Unique;
 
 class State extends BaseModel
 {
-    public array $child_model_class = [
-        Employee::class => [
-            "label" => "Employee",
-            "foreignKey" => ["current_state_id", "permanent_state_id"],
-            "preventDelete" => true
-        ]
+    public static array $child_model_class = [
+        // Employee::class => [
+        //     "foreignKey" => ["current_state_id", "permanent_state_id"],
+        //     "preventDelete" => true
+        // ]
     ];
 
     public function beforeSave()

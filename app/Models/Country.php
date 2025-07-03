@@ -7,8 +7,6 @@ use Illuminate\Validation\Rules\Unique;
 
 class Country extends BaseModel
 {
-    public array $child_model_class = [];
-
     protected $appends = [
         'display_name',
     ];

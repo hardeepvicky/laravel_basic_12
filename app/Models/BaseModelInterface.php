@@ -18,15 +18,15 @@ interface BaseModelInterface
 
     public static function forgotCache($key);
 
+    public static function insertOrUpdate(array $data, &$is_insert = null, &$is_update = null, bool $save_quitely = false);
+
+    public static function insertIgnoreIfExist(array $data, &$is_insert = null, bool $save_quitely = false);
+
+    public static function getUniqueRecord(array $data);
+
     public function getNextId();
 
     public function getClassDisplayName();
-
-    public function insertOrUpdate(array $data, &$is_insert = null, &$is_update = null);
-
-    public function insertIgnoreIfExist(array $data, &$is_insert = null);
-
-    public function getUniqueId(array $data);
 
     public function beforeSave();
 

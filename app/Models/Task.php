@@ -24,7 +24,7 @@ class Task extends BaseModel
         'cannot_edit_reason_array' => 'array'
     ];
 
-    public array $child_model_class = [
+    public static array $child_model_class = [
         Task::class => [
             "foreignKey" => "parent_id",
             "preventDelete" => true,

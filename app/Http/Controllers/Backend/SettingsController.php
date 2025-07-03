@@ -164,9 +164,7 @@ class SettingsController extends BackendController
                         "field_labels" => $data['field_labels'],
                     ];
 
-                    if (!$model->insertOrUpdate($save_data)) {
-                        throw new UserException("Fail To save", UserException::ERROR_LARAVEL_FAIL);
-                    }
+                    $model = $model->insertOrUpdate($save_data);
 
                     return back()->with("success", "Record save successfully");
                 } catch (Exception $ex) {
@@ -225,9 +223,7 @@ class SettingsController extends BackendController
                         "field_labels" => $data['field_labels'],
                     ];
 
-                    if (!$model->insertOrUpdate($save_data)) {
-                        throw new UserException("Fail To save", UserException::ERROR_LARAVEL_FAIL);
-                    }
+                    $model = $model->insertOrUpdate($save_data);
 
                     return back()->with("success", "Record save successfully");
                 } catch (Exception $ex) {

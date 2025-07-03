@@ -57,7 +57,7 @@ class UserSeeder extends Seeder
         $model = new User();
 
         foreach ($records as $record) {
-            $model = $model->insertOrUpdate($record, $is_insert, $is_update);
+            $model = User::insertOrUpdate($record, $is_insert, $is_update);
 
             if  (!$model)
             {

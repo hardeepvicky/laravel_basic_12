@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use App\Exceptions\UserException;
 use App\Helpers\FileUtility;
 use App\Traits\CacheTrait;
+use App\Traits\CommonModelTrait;
 use App\Traits\StorageTrait;
 use Illuminate\Support\Facades\Auth;
 use MongoDB\Laravel\Eloquent\Builder;
@@ -12,7 +14,7 @@ use ReflectionClass;
 
 class BaseMongoModel extends Model implements BaseModelInterface
 {
-    use StorageTrait, CacheTrait;
+    use StorageTrait, CacheTrait, CommonModelTrait;
 
     protected $connection = 'mongodb';
 
@@ -25,7 +27,7 @@ class BaseMongoModel extends Model implements BaseModelInterface
      * set extra relationship array to overcome problem of accidential delete
      * this variable used in Controller.php -> delete()
      */
-    public array $child_model_class = [];
+    public static array $child_model_class = [];
 
     public array $custom_errors = [];
 
@@ -90,18 +92,20 @@ class BaseMongoModel extends Model implements BaseModelInterface
 
     public function beforeSave()
     {
-        foreach ($this->getAttributes() as $field => $value) {
-            if (is_null($value)) {
-                continue;
-            }
-
-            if (is_string($value) && strlen($value) > 0) {
-                $this->{$field} = utf8_encode($value);
-            }
+        if ($this->custom_errors) {
+            throw new UserException("Some errors in model while saving", UserException::ERROR_USER_DATA_WRONG, [
+                "custom_errors" => $this->custom_errors
+            ]);
         }
     }
 
-    public function beforeDelete() {}
+    public function beforeDelete() {
+        if ($this->custom_errors) {
+            throw new UserException("Some errors in model while deleting", UserException::ERROR_USER_DATA_WRONG, [
+                "custom_errors" => $this->custom_errors
+            ]);
+        }
+    }
 
     public function afterFind()
     {
@@ -116,15 +120,14 @@ class BaseMongoModel extends Model implements BaseModelInterface
         }
     }
 
-    public function getFileFields()
+    public static function getFileFields()
     {
         return static::$file_fields;
     }
 
-
-    public static function parseValueBeforeUseInDBQuery($field, $value)
+    public static function getUniqueFields()
     {
-        return $value;
+        return static::$unique_fields;
     }
 
     public static function fetchList(Builder $builder, String $key_field, String $value_field, String $table_name)
@@ -217,31 +220,6 @@ class BaseMongoModel extends Model implements BaseModelInterface
         return $list;
     }
 
-    public static function getAllRelations(Model $model): array
-    {
-        $class = new ReflectionClass($model);
-        $methods = $class->getMethods();
-
-        $relations = [];
-        foreach ($methods as $method) {
-            if ($method->class != get_class($model) || $method->getNumberOfParameters() > 0) continue;
-
-            try {
-                $relation = $method->invoke($model);
-                if ($relation instanceof \Illuminate\Database\Eloquent\Relations\Relation) {
-                    $relations[$method->getName()] = [
-                        "model" => $method,
-                        "relation" => $relation,
-                    ];
-                }
-            } catch (\Throwable $e) {
-                continue;
-            }
-        }
-
-        return $relations;
-    }
-
     /*------------------------------------------------------------------*/
     /**------------------------Member Functions ----------------------- */
     /*------------------------------------------------------------------*/
@@ -264,77 +242,6 @@ class BaseMongoModel extends Model implements BaseModelInterface
         $class_name = static::classDisplayName();
 
         return $class_name;
-    }
-
-    public function insertOrUpdate(array $data, &$is_insert = null, &$is_update = null)
-    {
-        $model = $this->getUniqueId($data);
-
-        if ($model) {
-            $model->fill($data);
-            if ($model->isDirty()) {
-                if ($model->save()) {
-                    $is_update = true;
-                } else {
-                    $is_update = false;
-                    throw new \Exception("Fail To Save");
-                }
-            }
-        } else {
-            $model = static::create($data);
-
-            if ($model) {
-                $is_insert = true;
-            } else {
-                $is_insert = false;
-                return null;
-            }
-        }
-
-        return $model->id;
-    }
-
-    public function insertIgnoreIfExist(array $data, &$is_insert = null)
-    {
-        $record = $this->getUniqueId($data);
-
-        if (!$record) {
-            $record = static::create($data);
-
-            $is_insert = true;
-        }
-
-        return $record->id;
-    }
-
-    public function getUniqueId(array $data)
-    {
-        if (!static::$unique_fields) {
-            throw_exception("unique_fields is not set yet");
-        }
-
-        $conditions = [];
-        foreach (static::$unique_fields as $unique_field) {
-            if (!isset($data[$unique_field])) {
-                throw_exception("field $unique_field missing in argument array");
-            }
-
-            $conditions[] = [$unique_field, '=', self::parseValueBeforeUseInDBQuery($unique_field, $data[$unique_field])];
-        }
-
-        $count = static::where($conditions)->count();
-
-        if ($count == 0) {
-            return false;
-        }
-
-        if ($count > 1) {
-            throw_exception("more than 1 records found");
-        }
-
-        $record = static::where($conditions)->first(["id"]);
-
-        return $record;
     }
 
     public function activate()
