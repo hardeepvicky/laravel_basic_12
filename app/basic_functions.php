@@ -42,17 +42,22 @@ function d($arg, $will_exit = false)
         $console = new ConsoleOutput();
 
         $console->addLogMessage("File : " . $callBy['file']);
-        $console->addLogMessage("Line : " . $callBy['line']);
-        $console->writeLogToConsole();
+        $console->addLogMessage("Line : " . $callBy['line']);        
 
         if (is_array($arg))
         {
             dump($arg);
         }
+        else if (is_scalar($arg))
+        {
+            $console->addLogMessage(gettype($arg) . " : " . $arg);
+        }
         else
         {
-            $console->addLogMessage("Type : " . gettype($arg));
+            $console->addLogMessage(gettype($arg));
         }
+
+        $console->writeLogToConsole();
 
     } else {
 
