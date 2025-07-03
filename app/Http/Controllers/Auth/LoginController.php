@@ -75,39 +75,43 @@ class LoginController extends WebController
 
     public function auto_login(Request $request)
     {
-        $ip = $request->ip();
+        if (LaravelExtend::isRequestFromLocal()) {
+            $ip = $request->ip();
 
-        if ($ip) {
-            $user = User::whereHas("userAllowIP", function ($q) use ($ip) {
-                $q->where("ip", $ip);
-            })->first();
+            if ($ip) {
+                $user = User::whereHas("userAllowIP", function ($q) use ($ip) {
+                    $q->where("ip", $ip);
+                })->first();
 
-            if ($user) {
-                $credentials =  [
-                    "email" => $user->email,
-                    "password" => $user->plain_password
-                ];
+                if ($user) {
+                    $credentials =  [
+                        "email" => $user->email,
+                        "password" => $user->plain_password
+                    ];
 
-                $result = $this->guard()->attempt(
-                    $credentials,
-                    false
-                );
+                    $result = $this->guard()->attempt(
+                        $credentials,
+                        false
+                    );
 
-                if ($result) {
-                    if ($request->hasSession()) {
-                        $request->session()->put('auth.password_confirmed_at', time());
+                    if ($result) {
+                        if ($request->hasSession()) {
+                            $request->session()->put('auth.password_confirmed_at', time());
+                        }
+
+                        return $this->sendLoginResponse($request);
                     }
-
-                    return $this->sendLoginResponse($request);
+                } else {
+                    return back()->with("fail", "You are not allow to auto login");
                 }
-            } else {
-                return back()->with("fail", "You are not allow to auto login");
             }
+
+            $this->incrementLoginAttempts($request);
+
+            return $this->sendFailedLoginResponse($request);
         }
 
-        $this->incrementLoginAttempts($request);
-
-        return $this->sendFailedLoginResponse($request);
+        return back()->with("fail", "You can not auto login from external");
     }
 
     public function check_before_login(Request $request)

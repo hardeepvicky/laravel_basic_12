@@ -128,8 +128,6 @@ class LaravelExtend
 
         $request = request();
 
-        $ip = $request->ip();
-
         if (in_array($host, ["localhost", "dev.erp.com", "dev.celecerp.com"])) {
             return true;
         }
