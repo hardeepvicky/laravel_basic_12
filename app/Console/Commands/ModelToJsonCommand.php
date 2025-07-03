@@ -146,7 +146,7 @@ class ModelToJsonCommand extends Command
 
         if (isset($json) && strlen($json) > 0) {
 
-            $disk = Storage::disk(DEFAULT_DISK);
+            $disk = self::getStorageDisk();
 
             $fileUtility = new FileUtility($disk);
 
@@ -157,5 +157,12 @@ class ModelToJsonCommand extends Command
             $this->info("$filename : Json Write Successfully");
             $this->newLine(1);
         }
+    }
+
+    public static function getStorageDisk()
+    {
+        $disk = Storage::disk("local");
+
+        return $disk;
     }
 }

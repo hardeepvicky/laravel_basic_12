@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Console\Commands\ModelToJsonCommand;
 use App\Helpers\ConsoleOutput;
 use App\Models\Type;
 use Illuminate\Database\Seeder;
@@ -29,9 +30,9 @@ class TypeSeeder extends Seeder
 
         $filename = $model_name . ".json";
 
-        $path = "files/command/ModelToJsonCommand/";
+        $path = ModelToJsonCommand::$path . "/";
 
-        $disk = Storage::disk(DEFAULT_DISK);
+        $disk = ModelToJsonCommand::getStorageDisk();
 
         $content = $disk->get($path . $filename);
 

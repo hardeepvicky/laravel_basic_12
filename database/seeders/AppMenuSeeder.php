@@ -40,7 +40,7 @@ class AppMenuSeeder extends Seeder
 
         $path = ModelToJsonCommand::$path . "/";
 
-        $disk = Storage::disk(DEFAULT_DISK);
+        $disk = ModelToJsonCommand::getStorageDisk();
 
         $content = $disk->get($path . $filename);
 
