@@ -74,7 +74,7 @@ class LoginController extends WebController
     }
 
     public function auto_login(Request $request)
-{
+    {
         $ip = $request->ip();
 
         if ($ip) {
