@@ -11,6 +11,11 @@ class FileUtility
 
     public function __construct(protected LocalFilesystemAdapter $disk) {}
 
+    public function getDisk()
+    {
+        return $this->disk;
+    }
+
     /**
      * return filename which which will be save 
      * @param string $filename
@@ -60,6 +65,8 @@ class FileUtility
 
     public static function getFileList($path, $exts = array(), $recursive = false)
     {
+        $path = trim(trim($path), "/") . "/";
+
         $files = scandir($path);
         $ret_files = array();
 
@@ -72,6 +79,25 @@ class FileUtility
             } else if (!empty($exts) && !in_array(pathinfo($file, PATHINFO_EXTENSION), $exts)) {
             } else {
                 $ret_files[] = $path . $file;
+            }
+        }
+
+        return $ret_files;
+    }
+
+    public static function getFolderList($path)
+    {
+        $path = trim(trim($path), "/") . "/";
+        $files = scandir($path);
+
+        $ret_files = array();
+
+        foreach ($files as $k => $file) {
+            $f = $path . $file;
+
+            if ($file == '.' || $file == '..') {
+            } else if (is_dir($f)) {
+                $ret_files[] = $file;
             }
         }
 
