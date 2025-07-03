@@ -67,16 +67,29 @@ class PermissionController extends BackendController
 
             $choosen_route_list = [];
 
+            $counters = [
+                "total"  => 0,
+                "new"  => 0,
+                "delete"  => 0,
+                "update"  => 0,
+            ];
+
             // dd($data['data']);
             foreach ($data['route_keys'] as $route_key) {
                 $routes = SectionRoutes::getRoutesFromKey($route_key, $sections);
 
-                $choosen_route_list = array_merge($routes, $choosen_route_list);
+                $choosen_route_list = array_merge($routes, $choosen_route_list);                
             }
 
             $choosen_route_list = array_unique($choosen_route_list);
 
+            $counters['total'] = count($choosen_route_list);
+
             $roleRouteName = new RoleRouteName();
+
+            $is_insert = false;
+
+            $new_permission_count = 0;
 
             $old_save_id_list = RoleRouteName::where("role_id", "=", $role->id)->pluck("id", "id");
             foreach ($choosen_route_list as $route_name) {
@@ -87,12 +100,25 @@ class PermissionController extends BackendController
                 $saved_id = $roleRouteName->insertIgnoreIfExist([
                     "role_id" => $data['role_id'],
                     "route_name_id" => $synced_route_name_list[$route_name],
-                ]);
+                ], $is_insert, true);
+
+                if ($is_insert)
+                {
+                    $counters['new']++;
+                }
+                else
+                {
+                    $counters['delete']++;
+                }
 
                 unset($old_save_id_list[$saved_id]);
             }
 
-            RoleRouteName::destroy($old_save_id_list);
+            $counters['delete'] = count($old_save_id_list);
+
+            RoleRouteName::withoutEvents(function() use ($old_save_id_list){
+                RoleRouteName::destroy($old_save_id_list);            
+            });
 
             $user_id_list = User::whereHas("roles", function ($q) use ($role) {
                 $q->where("user_roles.role_id", $role->id);
@@ -102,7 +128,15 @@ class PermissionController extends BackendController
 
             $this->saveSqlLog();
 
-            Session::flash('success', 'Permissions are saved');
+            $msg_list = [];
+
+            foreach($counters as $label => $count)
+            {
+                $label = str_function_name_to_human_text($label);
+                $msg_list[] = "$label : $count";
+            }
+
+            Session::flash('success', 'Permissions are saved, ' . implode(", ", $msg_list));
         }
 
         $role_list = Role::getList();

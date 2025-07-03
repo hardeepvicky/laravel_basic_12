@@ -93,7 +93,7 @@ class BaseModel extends Model implements BaseModelInterface
             $model->beforeDelete();
         });
 
-        self::deleted(function ($model) {
+        self::deleted(function ($model) {            
             $model->forgotCache();
         });
     }
@@ -256,22 +256,37 @@ class BaseModel extends Model implements BaseModelInterface
         return $model->id;
     }
 
-    public function insertIgnoreIfExist(array $data, &$is_insert = null)
+    public function insertIgnoreIfExist(array $data, &$is_insert = null, bool $save_quitely = false)
     {
-        $record = $this->getUniqueId($data);
+        $model = $this->getUniqueId($data);
 
         // dump($record);
 
-        if (!$record) {
-            $record = static::create($data);
-            if (!$record) {
-                throw new UserException("Fail To Save", UserException::ERROR_LARAVEL_FAIL);
+        if (!$model) {
+
+            $model = new static($data);
+
+            if ($save_quitely)
+            {
+                if (!$model->saveQuietly()) {
+                    throw new UserException("Fail To Save", UserException::ERROR_LARAVEL_FAIL);
+                }
+            }
+            else
+            {
+                if (!$model->save()) {
+                    throw new UserException("Fail To Save", UserException::ERROR_LARAVEL_FAIL);
+                }
             }
 
             $is_insert = true;
         }
+        else
+        {
+            $is_insert = false;
+        }
 
-        return $record->id;
+        return $model->id;
     }
 
     public function getUniqueId(array $data)
