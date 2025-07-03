@@ -21,6 +21,10 @@ class Department extends BaseModel
             "foreignKey" => "department_id",
             "preventDelete" => true
         ],
+        SubDepartment::class => [
+            "foreignKey" => "department_id",
+            "preventDelete" => true
+        ],
     ];
 
     protected function getDisplayNameAttribute()

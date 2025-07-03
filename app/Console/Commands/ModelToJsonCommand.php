@@ -56,116 +56,87 @@ class ModelToJsonCommand extends Command
 
             $model_list = [$model_name];
         }
-        if ($choice == "All") {
+        else if ($choice == "All") {
             $model_list = $default_model_name_list;
         } else {
             $model_list = [$choice];
         }
 
         foreach ($model_list as $model_name) {
-            $filename = $model_name . ".json";
+            $ref_model_class = "App\\Models\\" . $model_name;
 
-            if (in_array($model_name, $default_model_name_list))
-            {
-                $ref_model_class = "App\\Models\\" . $model_name;
+            $this->info("Working on $model_name");
 
-                $this->info("Working in $model_name");
+            $count = $ref_model_class::count();
 
-                $count = $ref_model_class::count();
+            $this->info("Total Count : $count");
 
-                $this->info("Total Count : $count");
+            if ($count > 1000) {
+                $user_input = $this->ask('Records are more than 1000, Do You still want to proceed (Yes/NO) [Default:No]');
 
-                if ($count > 1000) {
-                    $user_input = $this->ask('Records are more than 1000, Do You still want to proceed (Yes/NO) [Default:No]');
-
-                    if (strtolower(trim($user_input)) != "yes") {
-                        $this->info("User reply : $user_input");
-                    }
+                if (strtolower(trim($user_input)) != "yes") {
+                    $this->info("User reply : $user_input");
                 }
+            }
 
-                $records = $ref_model_class::all();
+            $records = $ref_model_class::all();
 
-                foreach($records as $k => $record)
+            foreach($records as $k => $record)
+            {
+                $child_records = [];
+
+                $child_model = new $ref_model_class();
+
+                if (isset($child_model->child_model_class) && is_array($child_model->child_model_class))
                 {
-                    $child_records = [];
-
-                    $child_model = new $ref_model_class();
-
-                    if (isset($child_model->child_model_class) && is_array($child_model->child_model_class))
+                    foreach($child_model->child_model_class as $child_model_class => $child_model_arr)
                     {
-                        foreach($child_model->child_model_class as $child_model_class => $child_model_arr)
+                        if ($child_model_class != $ref_model_class)
                         {
-                            if ($child_model_class != $ref_model_class)
+                            $child_model_class_name = str_class_name_without_namespace($child_model_class);
+
+                            $this->info("Working on $child_model_class_name");
+
+                            $conditions = [];
+                            if (isset($child_model_arr['foreignKey']) && is_array($child_model_arr['foreignKey']))
                             {
-                                $child_model_class_name = str_class_name_without_namespace($child_model_class);
-
-                                $this->info("Working in $child_model_class_name");
-
-                                $conditions = [];
-                                if (isset($child_model_arr['foreignKey']) && is_array($child_model_arr['foreignKey']))
+                                foreach($child_model_arr['foreignKey'] as $foreignKey)
                                 {
-                                    foreach($child_model_arr['foreignKey'] as $foreignKey)
+                                    if (is_string($foreignKey))
                                     {
-                                        if (is_string($foreignKey))
-                                        {
-                                            $conditions[] = [$foreignKey, $record->id];
-                                        }
+                                        $conditions[] = [$foreignKey, $record->id];
                                     }
                                 }
-                                else
-                                {
-                                    $conditions[] = [$child_model_arr['foreignKey'], $record->id];
-                                }
-
-                                $qb = $child_model_class::where($conditions);
-
-                                $count = $qb->count();
-
-                                $this->info("Total Count : $count");
-
-                                if ($count > 1000) {
-                                    $user_input = $this->ask('Records are more than 1000, Do You still want to proceed (Yes/NO) [Default:No]');
-
-                                    if (strtolower(trim($user_input)) != "yes") {
-                                        $this->info("User reply : $user_input");
-                                    }
-                                }
-
-                                $child_model_class_name = str_class_name_without_namespace($child_model_class);
-                                $child_records[$child_model_class_name] = $qb->get()->toArray();
                             }
+                            else
+                            {
+                                $conditions[] = [$child_model_arr['foreignKey'], $record->id];
+                            }
+
+                            $qb = $child_model_class::where($conditions);
+
+                            $count = $qb->count();
+
+                            $this->info("Total Count : $count");
+
+                            if ($count > 1000) {
+                                $user_input = $this->ask('Records are more than 1000, Do You still want to proceed (Yes/NO) [Default:No]');
+
+                                if (strtolower(trim($user_input)) != "yes") {
+                                    $this->info("User reply : $user_input");
+                                }
+                            }
+
+                            $child_model_class_name = str_class_name_without_namespace($child_model_class);
+                            $child_records[$child_model_class_name] = $qb->get()->toArray();
                         }
                     }
-
-                    $records[$k]->child_records = $child_records;
-                }
-                
-                $this->writeJson($records->toArray(), $model_name);
-                
-            }
-            else
-            {
-                $this->info("Working in $model_name");
-
-                $ref_model_class = "App\\Models\\" . $model_name;
-                
-
-                $count = $ref_model_class::count();
-
-                $this->info("Total Count : $count");
-
-                if ($count > 1000) {
-                    $user_input = $this->ask('Records are more than 1000, Do You still want to proceed (Yes/NO) [Default:No]');
-
-                    if (strtolower(trim($user_input)) != "yes") {
-                        $this->info("User reply : $user_input");
-                    }
                 }
 
-                $records = $ref_model_class::all();
-
-                $this->writeJson($records->toArray(), $model_name);
+                $records[$k]->child_records = $child_records;
             }
+            
+            $this->writeJson($records->toArray(), $model_name);
         }
     }
 
