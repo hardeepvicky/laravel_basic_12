@@ -5,9 +5,6 @@ namespace App\Helpers;
 use App\Acl\AccessControl;
 use App\Models\AppMenu;
 use App\Models\User;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Route;
 
 class Menu
@@ -138,10 +135,22 @@ class Menu
         {
             $developer_menu['links'] = array_merge($developer_menu['links'], self::$dynamic_menu_need_to_insert_in_static['Developer']);
         }
+
+        // d($developer_menu, true);
         
         self::$menus[] = $developer_menu;
 
-        self::_filterMenuForUser($auth_user_id);
+        $user = User::findOrFail($auth_user_id);
+
+        $role_id_list = [];
+        foreach ($user->userRole->toArray() as $user_role) {
+            $role_id_list[] = $user_role['role_id'];
+        }
+
+        $acccessControl = AccessControl::init();
+        $allowed_route_name_list = $acccessControl->getListOfAllowedRouteNames($role_id_list);
+
+        self::$menus = self::_filterMenuForUser($allowed_route_name_list, self::$menus);
 
         // d(self::$menus, true);
 
@@ -265,54 +274,31 @@ class Menu
         return $list;
     }
 
-    private static function _filterMenuForUser($user_id)
+    private static function _filterMenuForUser($allowed_route_name_list, $menus)
     {
-        $user = User::findOrFail($user_id);
-
-        $role_id_list = [];
-        foreach ($user->userRole->toArray() as $user_role) {
-            $role_id_list[] = $user_role['role_id'];
-        }
-
-        $acccessControl = AccessControl::init();
-        $allowed_route_name_list = $acccessControl->getListOfAllowedRouteNames($role_id_list);
-        // d($allowed_route_name_list, true);
-
-        foreach (self::$menus as $k => $sub_menu) {
-            if (isset($sub_menu['links'])) {
-                foreach ($sub_menu['links'] as $k2 => $sub_menu2) {
-                    if (isset($sub_menu2['links'])) {
-                        foreach ($sub_menu2['links'] as $k3 => $sub_menu3) {
-                            if (isset($sub_menu3['route_name'])) {
-                                if (!in_array($sub_menu3['route_name'], $allowed_route_name_list)) {
-                                    unset($sub_menu2['links'][$k3]);
-                                }
-                            }
-                        }
-
-                        if (empty($sub_menu2['links'])) {
-                            unset($sub_menu['links'][$k2]);
-                        } else {
-                            $sub_menu['links'][$k2] = $sub_menu2;
-                        }
-                    } else if (isset($sub_menu2['route_name'])) {
-                        if (!in_array($sub_menu2['route_name'], $allowed_route_name_list)) {
-                            unset($sub_menu['links'][$k2]);
-                        }
-                    }
-                }
-            } else if (isset($sub_menu['route_name'])) {
-                if (!in_array($sub_menu['route_name'], $allowed_route_name_list)) {
-                    unset(self::$menus[$k]);
-                }
+        foreach($menus as $k => $menu)
+        {
+            if (isset($menu['links']) && is_array($menu['links']))
+            {
+                $menus[$k]['links'] = self::_filterMenuForUser($allowed_route_name_list, $menu['links']);
             }
 
-            if (empty($sub_menu['links'])) {
-                unset(self::$menus[$k]);
-            } else {
-                self::$menus[$k] = $sub_menu;
+            if (isset($menu['route_name']) && strlen($menu['route_name']) > 0)
+            {
+                if (!in_array($menu['route_name'], $allowed_route_name_list)) {
+                    unset($menus[$k]);
+                }
+            }
+            else if (isset($menus[$k]['links']))
+            {
+                if (empty($menus[$k]['links']))
+                {
+                    unset($menus[$k]);
+                }
             }
         }
+
+        return $menus;
     }
 }
 
@@ -481,7 +467,6 @@ class AdminMenu extends BaseMenu
         $links = [];
 
         $links[] = self::permission();
-        $links[] = self::type();
 
         return self::getModule("Admin", self::ICON_MENU_ROOT, $links);
     }
@@ -497,15 +482,6 @@ class AdminMenu extends BaseMenu
 
         return self::getModule("Permission", self::ICON_MENU_ROOT_CHILD, $links);
     }
-
-    private static function type()
-    {
-        $routePrefix = "type";
-
-        $links = self::getControllerDefaultLinks($routePrefix, "Type", self::ICON_MENU_ROOT_CHILD);
-
-        return $links;
-    }
 }
 
 class DeveloperMenu extends BaseMenu
@@ -517,6 +493,7 @@ class DeveloperMenu extends BaseMenu
         $links[] = self::setting();
         $links[] = self::app_menu();
         $links[] = self::logs();
+        $links[] = self::other();
 
         return self::getModule("Developer", null, $links);
     }
@@ -552,8 +529,18 @@ class DeveloperMenu extends BaseMenu
         $links[] = self::getLink($routePrefix . ".sql_logs", null, self::ICON_MENU_LIST, [], self::LINK_TYPE_SUMMARY);
         $links[] = self::getLink($routePrefix . ".ajax_logs", null, self::ICON_MENU_LIST, [], self::LINK_TYPE_SUMMARY);
         $links[] = self::getLink($routePrefix . ".command_logs", null, self::ICON_MENU_LIST, [], self::LINK_TYPE_SUMMARY);
-        $links[] = self::getLink($routePrefix . ".laravel_routes_index", null, self::ICON_MENU_LIST, [], self::LINK_TYPE_SUMMARY);
 
         return self::getModule("Logs", null, $links);
+    }
+    
+    public static function other()
+    {
+        $links = [];
+
+        $routePrefix = "developer";
+
+        $links[] = self::getLink($routePrefix . ".laravel_routes_index", "Laravel Routes", self::ICON_MENU_LIST, [], self::LINK_TYPE_SUMMARY);
+
+        return self::getModule("Other", null, $links);
     }
 }

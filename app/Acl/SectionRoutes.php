@@ -42,8 +42,10 @@ class SectionRoutes
 
         // d($app_menus);
 
+        
         $sections = self::getDynamicSections($app_menus);
-
+        
+        $sections[] = self::home();
         $sections[] = self::developer();
 
         $database_routes = [];
@@ -276,13 +278,17 @@ class SectionRoutes
 
     private static function home()
     {
-        $routes =  [
-            "Dashbaord" => [
-                "routes" => ["dashboard"]
-            ],
+        $section = [
+            "text" => "Dashboard",
+            "children" => []
         ];
 
-        return $routes;
+        $section['children'][] = [
+            "text" => "Dashboard",
+            "route_list" => ["dashboard"]
+        ];
+
+        return $section;
     }
 
     private static function developer()
@@ -294,64 +300,118 @@ class SectionRoutes
             "children" => []
         ];
 
-        $section['children'][] = [
-            "text" => "Email Logs",
-            "route_list" => [$routePrefix . ".email_logs"]
+        $section['children'][] = self::setting();
+        $section['children'][] = self::app_menu();
+        $section['children'][] = self::developer_logs();
+        $section['children'][] = self::developer_other();
+
+        return $section;
+    }
+
+    private static function setting()
+    {
+        $routePrefix = "setting";
+
+        $section = [
+            "text" => "Setting",
+            "children" => []
         ];
 
         $section['children'][] = [
-            "text" => "SQL Logs",
-            "route_list" => [$routePrefix . ".sql_logs"]
+            "text" => "General",
+            "route_list" => [$routePrefix . ".general"]
         ];
 
         $section['children'][] = [
-            "text" => "Ajax Logs",
-            "route_list" => [$routePrefix . ".ajax_logs"]
-        ];
-
-        $section['children'][] = [
-            "text" => "Laravel Routes Summary",
-            "route_list" => [$routePrefix . ".laravel_routes_index"]
+            "text" => "Field Setting",
+            "route_list" => [$routePrefix . ".field_setting"]
         ];
 
         return $section;
     }
 
-    private static function user_category()
+    private static function app_menu()
     {
-        $routePrefix = "user-category";
+        $routePrefix = "app-menu";
 
-        $routes = self::commonRoutes($routePrefix);
-        $routes['Activate / Deactivate'] = [
-            "routes" => [
-                $routePrefix . ".activate",
-                $routePrefix . ".de_activate"
-            ]
+        $section = [
+            "text" => "Menu",
+            "children" => []
         ];
 
-        return $routes;
+        $section['children'][] = [
+            "text" => "List",
+            "route_list" => [$routePrefix . ".index"]
+        ];
+        
+        $section['children'][] = [
+            "text" => "Add",
+            "route_list" => [$routePrefix . ".create", $routePrefix . ".store"]
+        ];
+
+        $section['children'][] = [
+            "text" => "Edit",
+            "route_list" => [$routePrefix . ".edit", $routePrefix . ".update"]
+        ];
+
+        $section['children'][] = [
+            "text" => "Delete",
+            "route_list" => [$routePrefix . ".destroy"]
+        ];
+
+        $section['children'][] = [
+            "text" => "Activate or Deactivate",
+            "route_list" => [$routePrefix . ".activate", $routePrefix . ".de_activate"]
+        ];
+
+        return $section;
     }
 
-    private static function task()
+    private static function developer_logs()
     {
-        $routePrefix = "task";
+        $routePrefix = "developer";
 
-        $routes = self::commonRoutes($routePrefix);
-        $routes['Today'] = [
-            "routes" => [
-                $routePrefix . ".today",
-            ]
+        $section = [
+            "text" => "Logs",
+            "children" => []
         ];
 
-        $routes['Change Status'] = [
-            "routes" => [
-                $routePrefix . ".status_confirm",
-                $routePrefix . ".status_in_progress",
-                $routePrefix . ".status_complete",
-                $routePrefix . ".status_verified",
-            ]
+        $section['children'][] = [
+            "text" => "Email",
+            "route_list" => [$routePrefix . ".email_logs"]
+        ];
+        $section['children'][] = [
+            "text" => "SQL",
+            "route_list" => [$routePrefix . ".sql_logs"]
         ];
 
-        return $routes;
+        $section['children'][] = [
+            "text" => "Ajax",
+            "route_list" => [$routePrefix . ".ajax_logs"]
+        ];
+
+        $section['children'][] = [
+            "text" => "Command",
+            "route_list" => [$routePrefix . ".command_logs"]
+        ];
+
+        return $section;
+    }
+
+    private static function developer_other()
+    {
+        $routePrefix = "developer";
+
+        $section = [
+            "text" => "Other",
+            "children" => []
+        ];
+
+        $section['children'][] = [
+            "text" => "Laravel Routes",
+            "route_list" => [$routePrefix . ".laravel_routes_index"]
+        ];
+
+        return $section;
     }
 }

@@ -135,7 +135,7 @@ class AccessControl
             }
         }
 
-        return $allow_route_list;
+        return array_unique($allow_route_list);
     }
 
     public static function getAllowedRoutes(array $role_id_list = [], array $chosen_route_list = [])
