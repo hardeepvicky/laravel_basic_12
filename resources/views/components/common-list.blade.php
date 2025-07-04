@@ -22,7 +22,7 @@ if (isset($preventDefaultCssClass) && $preventDefaultCssClass) {
 @if ($type == 'ol')
     <ol {{ $attributes->merge($my_attributes) }}>
     @else
-        <ul {{ $attributes->merge($my_attributes) }}>
+    <ul {{ $attributes->merge($my_attributes) }}>
 @endif
 
 @foreach ($list as $k => $v)

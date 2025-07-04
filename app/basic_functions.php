@@ -75,12 +75,76 @@ function d($arg, $will_exit = false)
             print_r($arg);
         }
 
-        echo "</pre>";
+        echo "</pre>";        
     }
 
     if ($will_exit) {
         exit;
     }
+}
+
+
+function print_var_name($var)
+{
+    foreach ($GLOBALS as $var_name => $value) {
+        if ($value === $var) {
+            return $var_name;
+        }
+    }
+
+    return false;
+}
+
+function print_for_debug($arg, $label = "", bool $show_data_type = false, $depth = 0)
+{
+    echo '<ul class="array_print indent-' . $depth . '" >';
+
+    $type = gettype($arg);
+
+    echo '<li>';
+
+    if ($show_data_type)
+    {
+        echo ' (' . $type . ") : ";
+    }
+
+    if ($label)
+    {
+        echo " " . $label . " => ";
+    }
+
+    if ($type == "object")
+    {
+        $arg = (array) $arg;
+    }
+
+    if($type == "array") { 
+        if (empty($arg))               
+        {
+            echo "[]";
+        }
+        else
+        {
+            foreach ($arg as $key => $value) {
+                print_for_debug($value, $key, $show_data_type, $depth + 1);
+            }
+        }
+    }
+    else
+    {
+        if (is_bool($arg)) {
+            echo  $arg ? "True" : "False";
+        } else if (is_null($arg)) {
+            echo "NULL";
+        }
+        else
+        {
+            print_r(htmlspecialchars($arg));
+        }         
+    }
+    
+    echo '</li>';
+    echo '</ul>';
 }
 
 function array_print($array, $max_string_len = 45, $indent = 0)
@@ -102,6 +166,14 @@ function array_print($array, $max_string_len = 45, $indent = 0)
         }
 
         echo '</ul>';
+    }
+}
+
+
+function obj_print($arg, $max_string_len = 45, $indent = 0)
+{
+    if (is_object($arg)) {
+        array_print($arg, $max_string_len, $indent);
     }
 }
 
@@ -362,17 +434,6 @@ function array_check_value_and_throw_error($arr, $keys, $msg = "")
             throw new Exception($msg);
         }
     }
-}
-
-function print_var_name($var)
-{
-    foreach ($GLOBALS as $var_name => $value) {
-        if ($value === $var) {
-            return $var_name;
-        }
-    }
-
-    return false;
 }
 
 function laravel_constant($name)

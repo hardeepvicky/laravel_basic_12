@@ -85,22 +85,14 @@
             });
 
             $("form").submit(function() {
-                var len = $("input.chk-action").length;
+                var len = $("#hidden_routes input").length;
 
                 if (len <= 0) {
-                    $("select#role_id").trigger("change");
-                    return false;
-                }
-
-                var check_len = $("input.chk-action:checked").length;
-
-                if (check_len <= 0) {
                     Swal.fire(
                         'Error!',
                         'Please Select At Least One Checkbox',
                         'error'
                     )
-
                     return false;
                 }
             });

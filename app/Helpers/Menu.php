@@ -14,6 +14,7 @@ class Menu
 {
     private static $menus = [];
     private static $current_route_name = "";
+    private static $dynamic_menu_need_to_insert_in_static = [];
 
     public static function setCurrentRouteName($current_route_name)
     {
@@ -26,6 +27,8 @@ class Menu
     public static function getDynamicMenus(array $app_menus, $depth = 0)
     {
         $dynamic_menus = [];
+
+        $static_menu_list = self::getStaticMenuList();
 
         foreach ($app_menus as $app_menu) {
             $dynamic_menu = [
@@ -69,6 +72,22 @@ class Menu
                 $dynamic_menu['icon'] .= ' child-menu-icon';
             }
 
+            if (isset($app_menu['show_in_static_menu']) && $app_menu['show_in_static_menu'])
+            {
+                if (is_string($app_menu['show_in_static_menu']))
+                {
+                    $app_menu['show_in_static_menu'] = [$app_menu['show_in_static_menu']];
+                }
+
+                foreach($app_menu['show_in_static_menu'] as $static_label)
+                {
+                    if (isset($static_menu_list[$static_label]))
+                    {
+                        self::$dynamic_menu_need_to_insert_in_static[$static_label][] = $dynamic_menu;
+                    }
+                }
+            }
+
             $dynamic_menus[] = $dynamic_menu;
         }
 
@@ -79,28 +98,57 @@ class Menu
     {
         self::$menus = [];
 
-        self::$menus = AccessControl::getCacheMenu($auth_user_id);
+        // self::$menus = AccessControl::getCacheMenu($auth_user_id);
 
         // d(self::$menus);
         if (!empty(self::$menus)) {
             return self::checkForActive(self::$menus);
         }
 
-        self::$menus[] = (new HomeMenu)->get();
-
         $app_menus = AppMenu::getTreeRecordsWithRelation([
             ["is_active", 1]
         ]);
 
+        // d($app_menus, true);
         $app_menus = self::getDynamicMenus($app_menus);
-        // d($app_menus);
+
+        $home_menu = (new HomeMenu)->get();
+
+        if (isset(self::$dynamic_menu_need_to_insert_in_static['Home']))
+        {
+            $home_menu['links'] = array_merge($home_menu['links'], self::$dynamic_menu_need_to_insert_in_static['Home']);
+        }
+
+        self::$menus[] = $home_menu;
 
         self::$menus = array_merge(self::$menus, $app_menus);
 
-        self::$menus[] = (new MasterMenu)->get();
+        $admin_menu = (new AdminMenu)->get();
 
-        self::$menus[] = (new AdminMenu)->get();
-        self::$menus[] = (new DeveloperMenu)->get();
+        if (isset(self::$dynamic_menu_need_to_insert_in_static['Admin']))
+        {
+            $admin_menu['links'] = array_merge($admin_menu['links'], self::$dynamic_menu_need_to_insert_in_static['Admin']);
+        }
+
+        self::$menus[] = $admin_menu;
+
+        $master_menu = (new MasterMenu)->get();
+
+        if (isset(self::$dynamic_menu_need_to_insert_in_static['Master']))
+        {
+            $master_menu['links'] = array_merge($master_menu['links'], self::$dynamic_menu_need_to_insert_in_static['Master']);
+        }
+
+        self::$menus[] = $master_menu;
+
+        $developer_menu = (new DeveloperMenu)->get();
+
+        if (isset(self::$dynamic_menu_need_to_insert_in_static['Developer']))
+        {
+            $developer_menu['links'] = array_merge($developer_menu['links'], self::$dynamic_menu_need_to_insert_in_static['Developer']);
+        }
+        
+        self::$menus[] = $developer_menu;
 
         self::_filterMenuForUser($auth_user_id);
 
@@ -109,6 +157,20 @@ class Menu
         AccessControl::addMenuToCache($auth_user_id, self::$menus);
 
         return self::checkForActive(self::$menus);
+    }
+
+    public static function getStaticMenuList()
+    {
+        $list = ["Dashboard", "Master", "Admin", "Developer"];
+
+        $ret_list = [];
+
+        foreach($list as $k => $v)
+        {
+            $ret_list[$v] = $v;
+        }
+
+        return $ret_list;
     }
 
     public static function getBreadcums($menus)

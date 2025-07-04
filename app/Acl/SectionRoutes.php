@@ -4,6 +4,7 @@ namespace App\Acl;
 
 use App\Exceptions\UserException;
 use App\Models\AppMenu;
+use App\Models\RoleRouteName;
 
 class SectionRoutes
 {
@@ -35,33 +36,35 @@ class SectionRoutes
     /**
      * function to retrive all sections
      */
-    public static function get()
+    public static function get($role_id_list = null)
     {
-        $sections = [];
-
-        $sections[]["Home"] = self::home();
-
         $app_menus = AppMenu::getTreeRecordsWithRelation();
 
-        $sections["Master"] = [
-            "User Category" => self::user_category(),
-        ];
+        // d($app_menus);
 
-        $sections["Admin"] = [
-            "User" => self::user(),
-            "Role" => self::role(),
-            "Setting" => self::setting(),
-        ];
+        $sections = self::getDynamicSections($app_menus);
 
-        $sections[]["Developer"] = self::developer();
+        $sections[] = self::developer();
 
-        $dynamic_sections = self::getDynamicSections($app_menus);
+        $database_routes = [];
 
-        $sections = array_merge($sections, $dynamic_sections);
+        $qb = RoleRouteName::with(['routeName' => function ($query) {
+            $query->select(['id', 'name']);
+        }])->with("role");
 
-        // d($sections, true);
+        if ($role_id_list)
+        {
+            if (!is_array($role_id_list))
+            {
+                $role_id_list = [$role_id_list];
+            }
 
-        return self::addExtraToSections($sections);
+            $qb->whereIn("role_id", $role_id_list);
+        }
+
+        $database_routes = $qb->get()->toArray();
+
+        return self::addExtraToSections($sections, $database_routes);
     }
 
     public static function getDynamicSections($app_menus)
@@ -71,121 +74,128 @@ class SectionRoutes
         // d($app_menus, true);
 
         foreach ($app_menus as $app_menu) {
-            $main_section = [];
-            if (isset($app_menu['children']) && $app_menu['children']) {                
-                $have_grand_child = false;
-                foreach ($app_menu['children'] as $children) {
 
-                    $main_section[$children['name']]["routes"][] = $children['route_name'];                    
+            $section = [
+                "text" => $app_menu['name'],
+                "route_list" => [],
+                "children" => [],
+            ];
 
-                    if (isset($children['app_menu_related_link']) && $children['app_menu_related_link']) {
-                        foreach ($children['app_menu_related_link'] as $app_menu_related_link) { 
-                            if (!isset($main_section[$app_menu_related_link['name']]["routes"]))
-                            {
-                                $main_section[$app_menu_related_link['name']]["routes"] = [];
-                            }
+            if (isset($app_menu['route_name']) && $app_menu['route_name'])
+            {
+                $section['route_list'][] = $app_menu['route_name'];
+            }
 
-                            $main_section[$app_menu_related_link['name']]["routes"] = array_merge($main_section[$app_menu_related_link['name']]["routes"], $app_menu_related_link["route_name_array"]);
+            if (isset($app_menu['children']) && is_array($app_menu['children'])) {
+                $section['children'] = array_merge($section['children'], self::getDynamicSections($app_menu['children']));
+            }
+
+            $related_sections = [];
+
+            if (isset($app_menu['app_menu_related_link']) && is_array($app_menu['app_menu_related_link']))
+            {
+                foreach ($app_menu['app_menu_related_link'] as $app_menu_related_link) {
+                    // d($section);
+                    // d($app_menu_related_link);
+                    if (isset($app_menu_related_link['route_name_array'])) {
+                        if (is_string($app_menu_related_link['route_name_array'])) {
+                            $app_menu_related_link['route_name_array'] = [$app_menu_related_link['route_name_array']];
                         }
-                    }
 
-                    if (isset($children['children']) && $children['children'])
-                    {
-                        $have_grand_child = true;
-                        $sub_section = [];
-                        foreach($children['children'] as $grand_child)
+                        $related_section = [
+                            "text" => $app_menu_related_link['name'],
+                            "route_list" => []
+                        ];
+
+                        $related_section['route_list'] = $app_menu_related_link['route_name_array'];
+
+                        // d($sub_section, true);
+
+                        $parent_section_found = false;
+
+                        if ($section['text'] == $related_section['text'])
                         {
-                            $sub_section[$grand_child['name']]["routes"][] = $grand_child['route_name'];                    
-                            if (isset($grand_child['app_menu_related_link']) && $grand_child['app_menu_related_link']) {
-                                foreach ($grand_child['app_menu_related_link'] as $app_menu_related_link) { 
-
-                                    if (!isset($sub_section[$app_menu_related_link['name']]["routes"]))
-                                    {
-                                        $sub_section[$app_menu_related_link['name']]["routes"] = [];
-                                    }
-
-                                    $sub_section[$app_menu_related_link['name']]["routes"] = array_merge($sub_section[$app_menu_related_link['name']]["routes"], $app_menu_related_link["route_name_array"]);
-                                }
-                            }
+                            $parent_section_found = true;
+                            $section['route_list'] = array_merge($section['route_list'], $related_section["route_list"]);
                         }
 
-                        $main_section[$children['name']] = $sub_section;
+                        if ($parent_section_found)
+                        {
+                            unset($related_section);
+                        }
+
+                        if (isset($related_section))
+                        {
+                            $related_sections[] = $related_section;
+                        }
                     }
                 }
+            }
 
-                if ($have_grand_child)
+            $dynamic_sections[] = $section;
+
+            if (isset($related_sections) && is_array($related_sections))
+            {
+                foreach($related_sections as $related_section)
                 {
-                    $dynamic_sections[$app_menu['name']] = $main_section;
-                }
-                else
-                {
-                    $dynamic_sections[][$app_menu['name']] = $main_section;
+                    $dynamic_sections[] = $related_section;
                 }
             }
         }
 
-        // d($dynamic_sections); exit;
-
         return $dynamic_sections;
     }
 
-    public static function addExtraToSections(array $sections)
+    public static function addExtraToSections(array $sections, $database_routes)
     {
-        foreach ($sections as $section_name => $sub_sections) {
-            foreach ($sub_sections as $sub_section_name => $actions) {
-                foreach ($actions as $action_name => $route_list) {
-                    $key = self::getListKey($section_name, $sub_section_name, $action_name);
+        foreach ($sections as $k => $arr) {
+            if (isset($arr['children']) && $arr['children']) {
+                $arr['children'] = self::addExtraToSections($arr['children'], $database_routes);
+            } else if (isset($arr['route_list']) && $arr['route_list']) {
 
-                    $actions[$action_name]['list_key'] = $key;
+                $arr['database_routes'] = [];
+                $arr['allow_role_routes'] = [];
+                $arr['allow_route_list'] = [];
+
+                $arr['state']['selected'] = false;
+
+                foreach($database_routes as $database_route)
+                {
+                    if (in_array($database_route['route_name']['name'], $arr['route_list']))
+                    {
+                        $arr["database_routes"][] = $database_route;
+                        $arr['state']['selected'] = true;
+
+                        $role = $database_route["role"];
+
+                        if (!isset($arr['allow_role_routes'][$role['id']]))
+                        {
+                            $arr['allow_role_routes'][$role['id']] = $role;
+                        } 
+
+                        $arr['allow_role_routes'][$role['id']]["route_list"][$database_route['id']] = $database_route['route_name']['name'];
+
+                        $arr['allow_route_list'][] = $database_route['route_name']['name'];
+                    }
                 }
-                $sub_sections[$sub_section_name] = $actions;
+
+                // if (!empty($arr['allow_role_routes']))
+                // {
+                //     d($arr);
+                // }
+
+                $arr["li_attr"] = [
+                    "data-routes" => implode(",", $arr['route_list'])
+                ];
             }
 
-            $sections[$section_name] = $sub_sections;
+            $sections[$k] = $arr;
         }
 
         return $sections;
     }
 
-    public static function getListKey($section_name, $sub_section_name, $action_name)
-    {
-        $list = [];
-        if ($section_name && !is_numeric($section_name)) {
-            $list[] = $section_name;
-        }
-
-        if ($sub_section_name && !is_numeric($sub_section_name)) {
-            $list[] = $sub_section_name;
-        }
-
-        if ($action_name && !is_numeric($action_name)) {
-            $list[] = $action_name;
-        }
-
-        $key = str_normalize_for_array_key(implode(".", $list));
-
-        return $key;
-    }
-
-    public static function getListValue($section_name, $sub_section_name, $action_name)
-    {
-        $list = [];
-        if ($section_name && !is_numeric($section_name)) {
-            $list[] = $section_name;
-        }
-
-        if ($sub_section_name && !is_numeric($sub_section_name) > 0) {
-            $list[] = $sub_section_name;
-        }
-
-        if ($action_name && !is_numeric($action_name) > 0) {
-            $list[] = $action_name;
-        }
-
-        return implode(" | ", $list);;
-    }
-
-    public static function getList($sections = null)
+    public static function getList($sections = null, $prefex = "")
     {
         if (!$sections) {
             $sections = self::get();
@@ -197,20 +207,14 @@ class SectionRoutes
 
         $section_list = [];
 
-        foreach ($sections as $section_name => $sub_sections) {
-            foreach ($sub_sections as $sub_section_name => $actions) {
-                foreach ($actions as $action_name => $action_arr) {
-                    if (isset($action_arr['list_key'])) {
-                        $key = $action_arr['list_key'];
-                    } else {
-                        $key = self::getListKey($section_name, $sub_section_name, $action_name);
-                    }
+        foreach ($sections as $arr) {
 
-                    if (array_key_exists($key, $section_list)) {
-                        throw new UserException("duplicate key generated for section_list");
-                    }
-
-                    $section_list[$key] = self::getListValue($section_name, $sub_section_name, $action_name);
+            if (isset($arr['children']) && is_array($arr['children']) && $arr['children']) {
+                $children_list = self::getList($arr['children'], $prefex . $arr['text'] . " | ");
+                $section_list = array_merge($section_list, $children_list);
+            } else if (isset($arr['route_list']) && is_array($arr['route_list']) && $arr['route_list']) {
+                foreach ($arr['route_list'] as $route_name) {
+                    $section_list[$prefex . $arr['text']][] = $route_name;
                 }
             }
         }
@@ -281,157 +285,36 @@ class SectionRoutes
         return $routes;
     }
 
-    private static function department()
-    {
-        $routePrefix = "department";
-
-        $routes = self::commonRoutes($routePrefix);
-
-        $routes['Activate / Deactivate'] = [
-            "routes" => [
-                $routePrefix . ".activate",
-                $routePrefix . ".de_activate"
-            ]
-        ];
-
-        return $routes;
-    }
-
-    private static function designation()
-    {
-        $routePrefix = "designation";
-
-        $routes = self::commonRoutes($routePrefix);
-
-        $routes['Activate / Deactivate'] = [
-            "routes" => [
-                $routePrefix . ".activate",
-                $routePrefix . ".de_activate"
-            ]
-        ];
-
-        return $routes;
-    }
-
-    private static function employee()
-    {
-        $routePrefix = "employee";
-
-        $routes = self::commonRoutes($routePrefix);
-
-        $routes['Activate / Deactivate'] = [
-            "routes" => [
-                $routePrefix . ".activate",
-                $routePrefix . ".de_activate"
-            ]
-        ];
-
-        return $routes;
-    }
-
-
-    private static function user()
-    {
-        $routePrefix = "user";
-
-        $routes = self::commonRoutes($routePrefix);
-        $routes['Activate / Deactivate'] = [
-            "routes" => [
-                $routePrefix . ".activate",
-                $routePrefix . ".de_activate"
-            ]
-        ];
-
-        return $routes;
-    }
-
-    private static function role()
-    {
-        $routePrefix = "role";
-
-        $routes = self::commonRoutes($routePrefix);
-        $routes['Activate / Deactivate'] = [
-            "routes" => [
-                $routePrefix . ".activate",
-                $routePrefix . ".de_activate"
-            ]
-        ];
-
-        return $routes;
-    }
-
-    private static function state()
-    {
-        $routePrefix = "state";
-
-        $routes = self::commonRoutes($routePrefix);
-
-        return $routes;
-    }
-
-    private static function city()
-    {
-        $routePrefix = "city";
-
-        $routes = self::commonRoutes($routePrefix);
-
-        return $routes;
-    }
-
-    private static function type()
-    {
-        $routePrefix = "type";
-
-        $routes = self::commonRoutes($routePrefix);
-
-        return $routes;
-    }
-
-    private static function setting()
-    {
-        $routePrefix = "setting";
-
-        $routes = [];
-
-        $routes["General"] = [
-            "routes" => [
-                $routePrefix . ".general"
-            ]
-        ];
-
-        return $routes;
-    }
-
     private static function developer()
     {
         $routePrefix = "developer";
 
-        $routes = [];
-
-        $routes["Email Logs"] = [
-            "routes" => [
-                $routePrefix . ".email_logs"
-            ]
-        ];
-        $routes["SQL Logs"] = [
-            "routes" => [
-                $routePrefix . ".sql_logs"
-            ]
+        $section = [
+            "text" => "Developer",
+            "children" => []
         ];
 
-        $routes["Ajax Logs"] = [
-            "routes" => [
-                $routePrefix . ".ajax_logs"
-            ]
+        $section['children'][] = [
+            "text" => "Email Logs",
+            "route_list" => [$routePrefix . ".email_logs"]
         ];
 
-        $routes["Laravel Routes Summary"] = [
-            "routes" => [
-                $routePrefix . ".laravel_routes_index"
-            ]
+        $section['children'][] = [
+            "text" => "SQL Logs",
+            "route_list" => [$routePrefix . ".sql_logs"]
         ];
 
-        return $routes;
+        $section['children'][] = [
+            "text" => "Ajax Logs",
+            "route_list" => [$routePrefix . ".ajax_logs"]
+        ];
+
+        $section['children'][] = [
+            "text" => "Laravel Routes Summary",
+            "route_list" => [$routePrefix . ".laravel_routes_index"]
+        ];
+
+        return $section;
     }
 
     private static function user_category()

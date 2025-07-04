@@ -90,6 +90,16 @@
                                     mandatory="true" />
                             </div>
                         </div>
+                        <div class="col-md-6 col-lg-4">
+                            <div class="form-group mb-3">
+                                <?php
+                                $field = 'show_in_static_menu';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$static_menu_list"
+                                    value="{{ $model->{$field} }}" class="select2" multiple="true"/>
+                            </div>
+                        </div>
                     </div>
                     <div class="row">
                         <div class="col-md-12 col-lg-8 is_link-block is_link-block-1">

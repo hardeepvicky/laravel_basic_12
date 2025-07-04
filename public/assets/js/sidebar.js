@@ -192,6 +192,32 @@ submenuTitles.forEach((title) => {
     });
   });
 });
+
+
+const submenuchildTitles = document.querySelectorAll(".submenu-title-level-4");
+// Add onclick event listener to each submenu-title item
+submenuchildTitles.forEach((title) => {
+  title.addEventListener("click", () => {
+    const parentLi = title.closest("li");
+    parentLi.classList.toggle("active");
+    const submenu = parentLi.querySelector(".submenu-level-4");
+    if (submenu) {
+      submenu.style.display =
+        submenu.style.display === "block" ? "none" : "block";
+    }
+    submenuchildTitles.forEach((otherTitle) => {
+      if (otherTitle !== title) {
+        const otherParentLi = otherTitle.closest("li");
+        const otherSubmenu =
+          otherParentLi.querySelector(".submenu-level-4");
+        if (otherSubmenu) {
+          otherSubmenu.style.display = "none";
+        }
+        otherParentLi.classList.remove("active");
+      }
+    });
+  });
+});
 var url = window.location.href;
 const urlLink = url.includes("#") ? url.split("#")[0] : url;
 const submenuLinks = document.querySelectorAll(".sidebar-menu li a");

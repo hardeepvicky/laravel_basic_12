@@ -3,6 +3,7 @@
 namespace App\Acl;
 
 use App\Exceptions\UserException;
+use App\Helpers\ArrayHelper;
 use App\Helpers\LaravelExtend;
 use App\Helpers\RoleType;
 use App\Models\Role;
@@ -137,7 +138,7 @@ class AccessControl
         return $allow_route_list;
     }
 
-    public static function getAllowedRoutes(array $role_id_list = [], $section_list_key = null)
+    public static function getAllowedRoutes(array $role_id_list = [], array $chosen_route_list = [])
     {
         array_check_data_type_and_throw_error($role_id_list, ["integer", "string"]);
 
@@ -145,9 +146,9 @@ class AccessControl
 
         $admin_role = null;
 
-        $sections = SectionRoutes::get();
+        $sections = SectionRoutes::get($role_id_list);
 
-        // d($sections, true);
+        $section_list = SectionRoutes::getList($sections);
 
         if ($role_id_list) {
             $admin_role = Role::where('code', Role::TYPE_SYSTEM_ADMIN)->whereIn("id", $role_id_list)->first();
@@ -155,104 +156,133 @@ class AccessControl
 
         $is_allow_all_routes_to_admin = env("ACL_IS_SYSTEM_ADMIN_ALLOW_ALL_ROUTES", false);
 
-        if (empty($role_id_list) || $admin_role) {
+        $arrayHelper = new ArrayHelper($section_list);
+
+        $records = [];
+
+        if (isset($admin_role)) {
             if ($is_allow_all_routes_to_admin) {
                 $all_routes = LaravelExtend::getRoutes();
                 foreach ($all_routes as $route) {
-                    $records[$route['route_name']] = [
-                        "role" => [
-                            "name" => "Admin is allowed for all routes"
-                        ],
+
+                    $keys = $arrayHelper->getKeyIfValueExistInArray([], $route['route_name'], false);
+
+                    if ($keys)
+                    {
+                        $label = array_key_first($keys);
+
+                        $records[] = [
+                            "section" => $label,
+                            "role" => "Admin is allowed for all routes",
+                            "route_list" => [$route['route_name']],
+                            "can_be_delete" => false
+                        ];
+                    }
+                }
+            }
+            else
+            {
+                $routes = SectionRoutes::ALLOW_ROUTES_FOR_SYSTEM_ADMIN;
+
+                foreach ($routes as $route_name) {
+
+                    $keys = $arrayHelper->getKeyIfValueExistInArray([], $route_name, false);
+
+                    if ($keys)
+                    {
+                        $label = array_key_first($keys);
+                    }
+                    else
+                    {
+                        $label = str_function_name_to_human_text($route_name);
+                    }
+
+                    $records[] = [
+                        "section" => $label,
+                        "role" => "Default Allowed Routes For Admin",
+                        "route_list" => [$route_name],
                         "can_be_delete" => false
                     ];
                 }
             }
         }
 
-        $qb = RoleRouteName::query();
+        $records = array_merge($records, self::_getSectionsForPermissionSummary($sections, $chosen_route_list));
 
-        if ($role_id_list) {
-            $qb->whereIn("role_id", $role_id_list);
-        }
+        $routes = SectionRoutes::ALLOW_ROUTES_FOR_ANY_LOGIN_USER;
 
-        $role_route_records = $qb->with([
-            "role" => function ($query) {
-                $query->select(["id", "name", "code"]);
-            },
-            "routeName" => function ($query) {
-                $query->select(["id", "name"]);
+        foreach ($routes as $route_name) {
+
+            $keys = $arrayHelper->getKeyIfValueExistInArray([], $route_name, false);
+
+            if ($keys)
+            {
+                $label = array_key_first($keys);
             }
-        ])->get()->toArray();
+            else
+            {
+                $label = str_function_name_to_human_text($route_name);
+            }
 
-        foreach ($role_route_records as $k => $record) {
-
-            $records[$record['route_name']['name']] = [
-                "can_be_delete" => true,
-                "role" => $record['role'],
-                "id" => $record['id']
-            ];
-        }
-
-        // by default allow 
-        $allow_route_list = SectionRoutes::ALLOW_ROUTES_FOR_ANY_LOGIN_USER;
-
-        foreach ($allow_route_list as $route_name) {
-            $records[$route_name] = [
-                "role" => [
-                    "name" => "Allowed For Any Login User"
-                ],
+            $records[] = [
+                "section" => $label,
+                "role" => "Default Allowed Routes For Any Login User",
+                "route_list" => [$route_name],
                 "can_be_delete" => false
             ];
         }
 
-        if (!$is_allow_all_routes_to_admin && $admin_role) {
-            $allow_route_list = SectionRoutes::ALLOW_ROUTES_FOR_SYSTEM_ADMIN;
+        // d($records); exit;
 
-            foreach ($allow_route_list as $route_name) {
-                $records[$route_name] = [
-                    "role" => [
-                        "name" => "Allowed For Admin Only"
-                    ],
-                    "can_be_delete" => false
-                ];
+        return $records;
+    }
+
+    private static function _getSectionsForPermissionSummary(array $sections, array $chosen_route_list = [], $prefix = "")
+    {
+        $records = [];
+
+        foreach($sections as $section)
+        {
+            if (isset($section['children']) && is_array($section['children']))
+            {
+                $records = array_merge($records, self::_getSectionsForPermissionSummary($section['children'], $chosen_route_list, $prefix . $section['text'] . " | "));
             }
-        }
 
-        $ret_records = [];
-
-
-        foreach ($sections as $section_name => $sub_sections) {
-            foreach ($sub_sections as $sub_section_name => $actions) {
-                foreach ($actions as $action_name => $action_arr) {
-                    $routes = [];
-                    $found_record = [];
-
-                    foreach ($records as $route_name => $record) {
-                        if (in_array($route_name, $action_arr['routes'])) {
-                            $list_key = $action_arr['list_key'] ?? "";
-
-                            if ($section_list_key) {
-                                if ($list_key == $section_list_key) {
-                                    $found_record = $record;
-                                    $routes[] =  $route_name;
-                                }
-                            } else {
-                                $routes[] =  $route_name;
-                                $found_record = $record;
-                            }
-                        }
-                    }
-
-                    if ($routes && $found_record) {
-                        $found_record['routes'] = $routes;
-                        $found_record['section'] = SectionRoutes::getListValue($section_name, $sub_section_name, $action_name);
-                        $ret_records[] = $found_record;
+            if (!empty($chosen_route_list) && isset($section['route_list']) && is_array($section['route_list']))
+            {
+                $found = false;
+                foreach($section['route_list'] as $route_name)
+                {
+                    if (in_array($route_name, $chosen_route_list))
+                    {
+                        $found = true;
                     }
                 }
+
+                if (!$found)
+                {
+                    $section = [];
+                }
             }
+
+            if (isset($section['allow_role_routes']) && $section['allow_role_routes'])
+            {
+                foreach($section['allow_role_routes'] as $allow_role_route)
+                {
+                    $record = [
+                        "section" => $prefix . $section['text'],
+                        "role" => $allow_role_route['name'],
+                        "route_list" => $allow_role_route['route_list'],
+                        "can_be_delete" => true
+                    ];
+
+                    $records[] = $record;
+                }
+            }
+
         }
 
-        return $ret_records;
+        return $records;
     }
 
     public static function getCacheKey(): string
@@ -308,11 +338,11 @@ class AccessControl
             }
 
 
-            $id = $routeNameModel->insertIgnoreIfExist(["name" => $route['route_name']]);
+            $model = $routeNameModel->insertIgnoreIfExist(["name" => $route['route_name']]);
 
-            unset($old_id_list[$id]);
+            unset($old_id_list[$model->id]);
 
-            $saved_route_name_list[$route['route_name']] = $id;
+            $saved_route_name_list[$route['route_name']] = $model->id;
         }
 
         if ($old_id_list) {

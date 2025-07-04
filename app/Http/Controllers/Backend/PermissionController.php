@@ -10,6 +10,7 @@ use App\Models\RoleRouteName;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 
@@ -31,18 +32,22 @@ class PermissionController extends BackendController
 
         $sections = SectionRoutes::get();
 
+        // d($sections);
+
         $section_list = SectionRoutes::getList($sections);
+
+        // d($section_list);
 
         if ($conditions || $section_conditions) {
 
             $role_id_list = isset($conditions['role_id']) && $conditions['role_id'] ? [$conditions['role_id']] : [];
 
-            $records = AccessControl::getAllowedRoutes($role_id_list, $section_conditions['section_list_key'] ?? null);
+            $choosen_route_list = isset($section_conditions['section_list_key']) && $section_conditions['section_list_key'] ? get_value_from_list($section_list, $section_conditions['section_list_key']) : [];
 
-            usort($records, function ($a, $b) {
-                return strcmp($a["role"]['name'], $b['role']["name"]);
-            });
+            $records = AccessControl::getAllowedRoutes($role_id_list, $choosen_route_list);
 
+            // d($records, true);
+            
             $this->setForView(compact("records"));
         }
 
@@ -74,16 +79,24 @@ class PermissionController extends BackendController
                 "update"  => 0,
             ];
 
-            // dd($data['data']);
-            foreach ($data['route_keys'] as $route_key) {
-                $routes = SectionRoutes::getRoutesFromKey($route_key, $sections);
+            foreach ($data['route_names'] as $route_name) {
+                if (strpos($route_name, ",") !== false)
+                {
+                    $route_names = explode(",", $route_name);
 
-                $choosen_route_list = array_merge($routes, $choosen_route_list);                
+                    $choosen_route_list = array_merge($choosen_route_list, $route_names);                    
+                }
+                else
+                {
+                    $choosen_route_list[] = $route_name;
+                }
             }
 
             $choosen_route_list = array_unique($choosen_route_list);
 
             $counters['total'] = count($choosen_route_list);
+
+            // d($choosen_route_list, true);
 
             $roleRouteName = new RoleRouteName();
 
@@ -97,7 +110,7 @@ class PermissionController extends BackendController
                     throw new UserException("$route_name not found");
                 }
 
-                $saved_id = $roleRouteName->insertIgnoreIfExist([
+                $roleRouteName = $roleRouteName->insertIgnoreIfExist([
                     "role_id" => $data['role_id'],
                     "route_name_id" => $synced_route_name_list[$route_name],
                 ], $is_insert, true);
@@ -111,7 +124,7 @@ class PermissionController extends BackendController
                     $counters['delete']++;
                 }
 
-                unset($old_save_id_list[$saved_id]);
+                unset($old_save_id_list[$roleRouteName->id]);
             }
 
             $counters['delete'] = count($old_save_id_list);
@@ -148,36 +161,7 @@ class PermissionController extends BackendController
 
     public function ajax_get_permissions($role_id)
     {
-        $role_route_names = RoleRouteName::select(['role_id', 'route_name_id'])->where("role_id", "=", $role_id)
-            ->with(['routeName' => function ($query) {
-                $query->select(['id', 'name']);
-            }])->get();
-
-        $saved_route_list = [];
-
-        foreach ($role_route_names->toArray() as $role_route) {
-            $saved_route_list[] = $role_route['route_name']['name'];
-        }
-
-        $sections = SectionRoutes::get();
-
-        foreach ($sections as $section_name => $sub_sections) {
-            foreach ($sub_sections as $sub_section_name => $actions) {
-                foreach ($actions as $action_name => $action_arr) {
-
-                    $is_checked = false;
-                    foreach ($action_arr['routes'] as $route_name) {
-                        if (in_array($route_name, $saved_route_list)) {
-                            $is_checked = true;
-                        }
-                    }
-
-                    $actions[$action_name]['is_checked'] = $is_checked;
-                }
-
-                $sections[$section_name][$sub_section_name] = $actions;
-            }
-        }
+        $sections = SectionRoutes::get($role_id);
 
         $this->setForView(compact("sections"));
 
@@ -193,13 +177,37 @@ class PermissionController extends BackendController
         try {
             $id = $request->get("id");
 
-            $record = RoleRouteName::select('id')->findOrFail($id);
+            $id_list = explode(",", $id);
+            
+            DB::beginTransaction();
 
-            $record->delete();
+            $records = RoleRouteName::whereIn("id", $id_list)->get();
+
+            $role_list = [];
+
+            foreach($records as $record)
+            {
+                $role_list[] = $record->role_id;
+
+                RoleRouteName::withoutEvents(function() use($record){
+                    $record->delete();
+                });
+            }
+
+            $user_id_list = User::whereHas("roles", function ($q) use ($role_list) {
+                $q->whereIn("user_roles.role_id", $role_list);
+            })->pluck("id")->toArray();
+
+            $accessControl = AccessControl::init();
+
+            $accessControl->clearMenuCache($user_id_list);
+
+            DB::commit();
 
             $respone["status"] = 1;
             $respone["msg"] = "Success";
         } catch (Exception $ex) {
+            DB::rollBack();
             $respone['msg'] = $ex->getMessage();
         }
 

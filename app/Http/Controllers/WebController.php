@@ -227,6 +227,14 @@ class WebController extends Controller
 
         $request_params = request()->all();
 
+        foreach($request_params as $k => $v)
+        {
+            if (is_string($v))
+            {
+                $request_params[$k] = urldecode($v);
+            }
+        }
+
         if (empty($request_params) && isset($cache_key)) {
             $cache_params = self::getCache($cache_key);
 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Backend;
 use App\Acl\AccessControl;
 use App\Exceptions\UserException;
 use App\Helpers\LaravelExtend;
+use App\Helpers\Menu;
 use App\Models\AppMenu;
 use App\Models\AppMenuRelatedLink;
 use App\Models\Department;
@@ -119,8 +120,9 @@ class AppMenuController extends BackendController
 
         $field_labels = $this->model->getFieldLabels();
 
+        $static_menu_list = Menu::getStaticMenuList();
 
-        $this->setForView(compact("field_labels", "dept_list", "route_list", "tree_list"));
+        $this->setForView(compact("field_labels", "dept_list", "route_list", "tree_list", "static_menu_list"));
 
         return parent::beforeViewRender();
     }
@@ -150,6 +152,7 @@ class AppMenuController extends BackendController
             "parent_id" => ["nullable"],
             "css_class" => ["nullable"],
             "icon_css_class" => ["nullable"],
+            "show_in_static_menu" => ["nullable"],
             "is_link" => "",
             "is_active" => "",
             "appMenuRelatedLink" => "",

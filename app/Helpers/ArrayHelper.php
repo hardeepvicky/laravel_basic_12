@@ -2,6 +2,7 @@
 
 namespace App\Helpers;
 
+use App\Exceptions\UserException;
 use Exception;
 
 class ArrayHelper
@@ -92,5 +93,38 @@ class ArrayHelper
         }
 
         return $arr;
+    }
+
+    public function getKeyIfValueExistInArray($data = [], $find_value, bool $recursive = false)
+    {
+        if (!is_array($data) || empty($data))
+        {
+            $data = $this->data;
+        }
+
+        if (!is_scalar($find_value))
+        {
+            throw new UserException("arg 2nd: find_value value should be scaler");
+        }
+
+        $keys = [];
+
+        foreach($data as $k => $v)
+        {
+            if (is_array($v))
+            {
+                if (in_array($find_value, $v))
+                {
+                    $keys[$k] = $v;
+                }
+
+                if ($recursive)
+                {
+                    $keys[$k] = $this->getKeyIfValueExistInArray($v, $find_value, $recursive);
+                }
+            }
+        }
+
+        return $keys;
     }
 }

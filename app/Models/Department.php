@@ -12,7 +12,7 @@ class Department extends BaseModel
         'display_name',
     ];
 
-    public array $child_model_class = [
+    public static array $child_model_class = [
         // Employee::class => [
         //     "foreignKey" => "department_id",
         //     "preventDelete" => true

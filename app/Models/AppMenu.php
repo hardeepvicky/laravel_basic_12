@@ -24,6 +24,10 @@ class AppMenu extends BaseModel
         ]
     ];
 
+    protected $casts = [
+        "show_in_static_menu" => "array"
+    ];
+
     protected $appends = [
         'display_name',
     ];
