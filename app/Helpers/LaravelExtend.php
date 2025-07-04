@@ -8,6 +8,7 @@ use App\Jobs\Backend\JobSendEmailOnRegisration;
 use App\Models\User;
 use Exception;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Request;
 use PDOException;
 

@@ -305,7 +305,8 @@ class AccessControl
         }
 
         foreach ($user_id_list as $user_id) {
-            self::forgotCache(self::getMenuCacheKey($user_id));
+            $cache_key = self::getMenuCacheKey($user_id);
+            self::forgotCache($cache_key);
         }
     }
 
