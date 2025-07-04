@@ -28,7 +28,7 @@
                                 value="{{ $model->{$field} }}" />
                         </div>
                     </div>
-                    <div class="row">                        
+                    <div class="row">
                         <div class="col-md-6 col-lg-4">
                             <div class="form-group mb-3">
                                 <?php
@@ -68,17 +68,7 @@
                                 <x-Inputs.text-field :name="$field" :label="$label" value="{{ $model->{$field} }}"
                                     placeholder="Enter {{ $label }}" />
                             </div>
-                        </div>
-                        <div class="col-md-6 col-lg-4 is_link-block is_link-block-1">
-                            <div class="form-group mb-3">
-                                <?php
-                                $field = 'route_name';
-                                $label = get_value_from_list($field_labels, $field, $field);
-                                ?>
-                                <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
-                                    :list="$route_list" value="{{ $model->{$field} }}" class="select2" />
-                            </div>
-                        </div>
+                        </div>                        
                         <div class="col-md-6 col-lg-4">
                             <div class="form-group mb-3">
                                 <?php
@@ -97,7 +87,18 @@
                                 $label = get_value_from_list($field_labels, $field, $field);
                                 ?>
                                 <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$static_menu_list"
-                                    value="{{ $model->{$field} }}" class="select2" multiple="true"/>
+                                    :value="$model->{$field}" class="select2" multiple="true"/>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-4 is_link-block is_link-block-1">
+                            <div class="form-group mb-3">
+                                <?php
+                                $field = 'route_name';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
+                                    :list="$route_list" value="{{ $model->{$field} }}" class="select2" />
+                                <span id="apply_to_related_links" class="btn btn-primary btn-sm">Apply To Related Links</span>
                             </div>
                         </div>
                     </div>
@@ -144,7 +145,7 @@
                                         </td>
                                         <td>
                                             <x-Inputs.drop-down name="appMenuRelatedLink[(sr-id)][route_name_array][]" label="" :list="$route_list"
-                                                value="" class="will-require will-select2" multiple="multiple" />
+                                                value="" class="will-require will-select2 related_link" multiple="multiple" />
                                         </td>
                                     </tr>
                                     @php
@@ -186,7 +187,7 @@
                                                     <?php $value = $appMenuRelatedLink_arr['route_name_array'] ?? ''; ?>
                                                     <x-inputs.drop-down
                                                         name="appMenuRelatedLink[{{ $k }}][route_name_array][]"
-                                                        class="select2" label="" :value="$value"
+                                                        class="select2 related_link" label="" :value="$value"
                                                         :list="$route_list" mandatory="true" multiple="multiple" />
                                                 </td>
                                             </tr>
@@ -250,6 +251,49 @@
 
 
                 $("#is_link").change(show_hide_field);
+
+                $("#apply_to_related_links").click(function()
+                {
+                    var text = $("#route_name").find("option:selected").text();
+
+                    var arr = text.split(".");
+
+                    if (typeof arr == "object" && Object.keys(arr).length > 1)
+                    {
+                        prefix = arr[0];
+
+                        $("select.related_link").each(function(){
+                            var new_val_list = [];
+                            var option_list = {};
+                            $(this).find(">option").each(function(i, ele){
+                                option_list[$(ele).text()] = $(ele).val();
+                            });
+
+                            $(this).find(">option:selected").each(function(){
+                                var r_text = $(this).text();
+                                var arr = r_text.split(".");
+                                if (typeof arr == "object" && Object.keys(arr).length == 2)
+                                {
+                                    var postfix = arr[1];
+
+                                    var new_text = prefix + "." + postfix;
+
+                                    if (typeof option_list[new_text] != "undefined")
+                                    {
+                                        new_val_list.push(option_list[new_text]);
+                                    }
+                                }
+                            });
+
+                            console.log("new values", option_list);
+
+                            if (Object.keys(new_val_list).length > 0)
+                            {
+                                $(this).val(new_val_list).trigger("change");
+                            }
+                        })
+                    }
+                });
 
                 $(".template-table").srTableTemplate({
                     brace_type: "(",

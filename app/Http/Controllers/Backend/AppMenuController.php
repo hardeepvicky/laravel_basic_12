@@ -255,7 +255,14 @@ class AppMenuController extends BackendController
 
             unset($save_data['appMenuRelatedLink']);
 
-            $this->model->fill($validatedData);
+            if (!isset($save_data['show_in_static_menu']))
+            {
+                $save_data['show_in_static_menu'] = [];
+            }
+
+            // d($save_data, true);
+
+            $this->model->fill($save_data);
 
             $this->model->save();
 

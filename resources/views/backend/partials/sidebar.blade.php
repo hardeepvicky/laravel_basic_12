@@ -36,68 +36,7 @@
                     <i class="iconly-Arrow-Right-2 icli"></i>
                 </a>
                 <?php if(isset($menu['links']) && $menu['links']): ?>
-                <ul class="sidebar-submenu" style="display: none;">
-                    <?php foreach($menu['links'] as $submenu): ?>
-                    <li>
-                        <?php if(isset($submenu['route_name']) && $submenu['route_name']): ?>
-                        <a href="{{ route($submenu['route_name']) }}"
-                            class="menu-a {{ $submenu['is_active'] ? 'active' : '' }}">
-                            <i class="{{ $submenu['icon'] }}"></i>
-                            <span>{{ $submenu['title'] }}</span>
-                        </a>
-                        <?php else: ?>
-                        <a href="javascript:void(0);" class="submenu-title">
-                            <i class="{{ $submenu['icon'] }}"></i>
-                            <span>{{ $submenu['title'] }}</span>
-                            <i class="iconly-Arrow-Right-2 icli"></i>
-                        </a>
-                        <?php if(isset($submenu['links']) && $submenu['links']): ?>
-                        <ul class="according-submenu" style="display: none;">
-                            <?php foreach($submenu['links'] as $nestedSubmenu): ?>
-                            <li>
-                                <?php if(isset($nestedSubmenu['route_name']) && $nestedSubmenu['route_name']): ?>
-                                <a href="{{ route($nestedSubmenu['route_name']) }}"
-                                    class="menu-a {{ $nestedSubmenu['is_active'] ? 'active' : '' }}">
-                                    <i class="{{ $nestedSubmenu['icon'] }}"></i>
-                                    <span>{{ $nestedSubmenu['title'] }}</span>
-                                </a>
-                                <?php else: ?>
-                                <a href="javascript:void(0);" class="submenu-title-level-4">
-                                    <i class="{{ $nestedSubmenu['icon'] }}"></i>
-                                    <span>{{ $nestedSubmenu['title'] }}</span>
-                                    <i class="iconly-Arrow-Right-2 icli"></i>
-                                </a>
-                                <?php if(isset($nestedSubmenu['links']) && $nestedSubmenu['links']): ?>
-                                <ul class="submenu-level-4" style="display: none;">
-                                    @foreach ($nestedSubmenu['links'] as $nestedSubmenu2)
-                                        <li>
-                                            <?php if(isset($nestedSubmenu2['route_name']) && $nestedSubmenu2['route_name']): ?>
-                                            <a href="{{ route($nestedSubmenu2['route_name']) }}"
-                                                class="menu-a {{ $nestedSubmenu2['is_active'] ? 'active' : '' }}">
-                                                <i class="{{ $nestedSubmenu2['icon'] }}"></i>
-                                                <span>{{ $nestedSubmenu2['title'] }}</span>
-                                            </a>
-                                            <?php else: ?>
-                                            <a href="javascript:void(0);" class="">
-                                                <i class="{{ $nestedSubmenu2['icon'] }}"></i>
-                                                <span>{{ $nestedSubmenu2['title'] }}</span>
-                                            </a>
-                                            <?php endif; ?>
-                                        </li>
-                                        <?php endforeach; ?>
-                                </ul>
-                                <?php endif; ?>
-                                <?php endif; ?>
-
-                            </li>
-                            <?php endforeach; ?>
-                        </ul>
-                        <?php endif; ?>
-                        <?php endif; ?>
-
-                    </li>
-                    <?php endforeach;?>
-                </ul>
+                    <x-Backend.menu-render :menus="$menu['links']" level="1" class="sidebar-submenu" />
                 <?php endif; ?>
                 <?php endif; ?>
             </li>

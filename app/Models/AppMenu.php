@@ -151,7 +151,7 @@ class AppMenu extends BaseModel
 
     public static function getTreeList(array $conditions = []) : array
     {
-        return Util::getTreeListArray(self::getTreeRecords($conditions, 2), "id", "name", false, false);
+        return Util::getTreeListArray(self::getTreeRecords($conditions, 3), "id", "name", false, false);
     }
 
     public static function getTreeRecordsWithRelation(array $conditions = [], $max_depth = 10) : array

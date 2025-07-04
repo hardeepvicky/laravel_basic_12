@@ -132,15 +132,6 @@ class Menu
 
         self::$menus[] = $admin_menu;
 
-        $master_menu = (new MasterMenu)->get();
-
-        if (isset(self::$dynamic_menu_need_to_insert_in_static['Master']))
-        {
-            $master_menu['links'] = array_merge($master_menu['links'], self::$dynamic_menu_need_to_insert_in_static['Master']);
-        }
-
-        self::$menus[] = $master_menu;
-
         $developer_menu = (new DeveloperMenu)->get();
 
         if (isset(self::$dynamic_menu_need_to_insert_in_static['Developer']))
@@ -161,7 +152,7 @@ class Menu
 
     public static function getStaticMenuList()
     {
-        $list = ["Dashboard", "Master", "Admin", "Developer"];
+        $list = ["Dashboard", "Admin", "Developer"];
 
         $ret_list = [];
 
@@ -490,6 +481,7 @@ class AdminMenu extends BaseMenu
         $links = [];
 
         $links[] = self::permission();
+        $links[] = self::type();
 
         return self::getModule("Admin", self::ICON_MENU_ROOT, $links);
     }
@@ -504,6 +496,15 @@ class AdminMenu extends BaseMenu
         ];
 
         return self::getModule("Permission", self::ICON_MENU_ROOT_CHILD, $links);
+    }
+
+    private static function type()
+    {
+        $routePrefix = "type";
+
+        $links = self::getControllerDefaultLinks($routePrefix, "Type", self::ICON_MENU_ROOT_CHILD);
+
+        return $links;
     }
 }
 
@@ -554,46 +555,5 @@ class DeveloperMenu extends BaseMenu
         $links[] = self::getLink($routePrefix . ".laravel_routes_index", null, self::ICON_MENU_LIST, [], self::LINK_TYPE_SUMMARY);
 
         return self::getModule("Logs", null, $links);
-    }
-}
-
-class MasterMenu extends BaseMenu
-{
-    public static function get(): array
-    {
-        $links = [];
-
-        $links[] = self::country();
-        $links[] = self::state();
-        $links[] = self::user_category();
-
-        return self::getModule("Master", self::ICON_MENU_ROOT, $links);
-    }
-
-    private static function country()
-    {
-        $routePrefix = "country";
-
-        $links = self::getControllerDefaultLinks($routePrefix, "Country", self::ICON_MENU_ROOT_CHILD);
-
-        return $links;
-    }
-
-    private static function state()
-    {
-        $routePrefix = "state";
-
-        $links = self::getControllerDefaultLinks($routePrefix, "State", self::ICON_MENU_ROOT_CHILD);
-
-        return $links;
-    }
-
-    private static function user_category()
-    {
-        $routePrefix = "user-category";
-
-        $links = self::getControllerDefaultLinks($routePrefix, "User Category", self::ICON_MENU_ROOT_CHILD);
-
-        return $links;
     }
 }
