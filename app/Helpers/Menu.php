@@ -98,7 +98,7 @@ class Menu
     {
         self::$menus = [];
 
-        // self::$menus = AccessControl::getCacheMenu($auth_user_id);
+        self::$menus = AccessControl::getCacheMenu($auth_user_id);
 
         // d(self::$menus);
         if (!empty(self::$menus)) {
