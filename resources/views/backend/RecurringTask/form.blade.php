@@ -86,9 +86,14 @@ use App\Helpers\DateUtility;
                                 <?php
                                 $field = 'start_date_time';
                                 $label = get_value_from_list($field_labels, $field, $field);
+                                $value = $model->{$field};
+                                if ($value instanceof  \Illuminate\Support\Carbon)
+                                {
+                                    $value = $value->format(DateUtility::DATE_OUT_FORMAT);
+                                }
                                 ?>
                                 <x-Inputs.text-field :id="$field" :name="$field" :label="$label"
-                                    value="{{ $model->{$field}  }}" class="custom-date-picker" placeholder="Enter {{ $label }}"
+                                    :value="$value" class="custom-date-picker" placeholder="Enter {{ $label }}"
                                     autocomplete="off" mandatory="true" readonly="true" />
                             </div>
                             <div class="form-group mb-3 ">
@@ -218,6 +223,8 @@ use App\Helpers\DateUtility;
 
     <script>
         $(function() {
+            var screen_name = '<?= $screen_name ?>';
+            
             $.events.execAtLast(function() {
 
                 var start_date_picker;
@@ -247,6 +254,11 @@ use App\Helpers\DateUtility;
                 start_date_picker = flatpickr("#start_date_time", {
                     dateFormat: constants.dateFormat,
                 });
+
+                if (screen_name == "add")
+                {
+                    start_date_picker.set("minDate", new Date());
+                }
 
                 $("#recurring_type").change(function() {
                     var v = $(this).val();

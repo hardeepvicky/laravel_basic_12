@@ -47,6 +47,11 @@ use App\Models\Task;
                                             <span>{{ get_value_from_list($recurring_type_list, $record->recurring_type) }}</span>
                                         </label>
                                         <label class="info">
+                                            {{ get_value_from_list($field_labels, 'start_date_time', 'start_date_time') }}
+                                            :
+                                            <span>{{ if_date($record->start_date_time) }}</span>
+                                        </label>
+                                        <label class="info">
                                             {{ get_value_from_list($field_labels, 'task_should_be_complete_in', 'task_should_be_complete_in') }} :
                                             <span>{{ get_value_from_list($complete_in_list, $record->task_should_be_complete_in) }}</span>
                                         </label>
@@ -81,6 +86,7 @@ use App\Models\Task;
                                                         <tr>
                                                             <th>Sr. No.</th>
                                                             <th>Date</th>
+                                                            <th>Task</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -88,6 +94,11 @@ use App\Models\Task;
                                                             <tr>
                                                                 <td>{{ $i + 1 }}</td>
                                                                 <td>{{ if_date($recurringTaskDate->date) }}</td>
+                                                                <td>
+                                                                    @if($recurringTaskDate->task_id)
+                                                                        <a target="_blank" href="{{ route("task.index", ["id" => $recurringTaskDate->task_id]) }}">View Task</a>
+                                                                    @endif
+                                                                </td>
                                                             </tr>
                                                         @endforeach
                                                     </tbody>

@@ -140,6 +140,7 @@ use App\Helpers\DateUtility;
 
         <script>
             $(function() {
+                var screen_name = '<?= $screen_name ?>';
                 $.events.execAtLast(function() {
 
                     var start_date_picker, end_date_picker;
@@ -175,6 +176,11 @@ use App\Helpers\DateUtility;
                         }
                     });
 
+                    if (screen_name == "add")
+                    {
+                        start_date_picker.set("minDate", new Date());
+                    }
+
                     end_date_picker = flatpickr("#end_date_time", {
                         dateFormat: constants.dateFormat,
                     });
@@ -184,6 +190,13 @@ use App\Helpers\DateUtility;
                         if (typeof start_date_picker.selectedDates == "object" && start_date_picker.selectedDates[0])
                         {
                             end_date_picker.set("minDate", start_date_picker.selectedDates[0]);
+                        }
+                    }
+                    else
+                    {
+                        if (screen_name == "add")
+                        {
+                            end_date_picker.set("minDate", new Date());
                         }
                     }
 

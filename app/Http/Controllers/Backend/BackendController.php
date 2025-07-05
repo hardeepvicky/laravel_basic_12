@@ -56,7 +56,21 @@ class BackendController extends WebController
 
         $partial_path = "backend.partials";
 
-        $this->setForView(compact("current_route_name", "current_url", "menus", "header_menu_list", "partial_path", "breadcums", "userListCache", "auth_user"));
+        $screen_name = "";
+        if (strpos($current_route_name, ".create") !== false)
+        {
+            $screen_name = "add";
+        }
+        else if (strpos($current_route_name, ".index") !== false)
+        {
+            $screen_name = "summary";
+        }
+        else if (strpos($current_route_name, ".edit") !== false)
+        {
+            $screen_name = "edit";
+        }
+
+        $this->setForView(compact("current_route_name", "current_url", "menus", "header_menu_list", "partial_path", "breadcums", "userListCache", "auth_user", "screen_name"));
 
         $this->saveSqlLog();
 

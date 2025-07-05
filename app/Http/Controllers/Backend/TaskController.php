@@ -40,6 +40,7 @@ class TaskController extends BackendController
         $cache_key = $cache_key_prefix . "-index";
 
         $conditions = $this->getConditions($cache_key, [
+            ["field" => "id", "type" => "int"],
             ["field" => "task_type", "type" => "string_equal"],
             ["field" => "name", "type" => "string"],
             ["field" => "assign_to_user_id", "type" => "int"],
