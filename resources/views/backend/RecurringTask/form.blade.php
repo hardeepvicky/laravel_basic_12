@@ -255,7 +255,7 @@ use App\Helpers\DateUtility;
                     $("#recurring_type_block_custom").hide();
 
                     $(".recurring_type_non_custom").find("input,select").removeAttr("disabled");
-                    $(".recurring_type_non_custom").hide();
+                    $(".recurring_type_non_custom").show();
 
                     if (v) {
                         if (v == '{{ RecurringTask::RECURRING_CUSTOM }}')
