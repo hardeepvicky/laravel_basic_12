@@ -3,12 +3,27 @@
 namespace App\Helpers;
 
 use App\Helpers\ConsoleOutput;
+use Exception;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class MyMigration extends Migration
 {
     private $query_list = [];
+
+    private static $output;
+
+    public static function getConsoleOutput()
+    {
+        if (is_null(self::$output))
+        {
+            self::$output = new ConsoleOutput();
+        }
+
+        return self::$output;
+    }
 
     public function addQueryToList(string | array $data)
     {
@@ -43,29 +58,69 @@ class MyMigration extends Migration
 
     public function runQueryList()
     {
-        $output = new ConsoleOutput();
+        $output = self::getConsoleOutput();
 
         $output->clearLogs();
 
-        $output->addLogMessage('Total SQL : ' . count($this->query_list));
-
-        $output->writeLogToConsole();
+        $output->writeLogToConsole('Total SQL : ' . count($this->query_list));
 
         foreach ($this->query_list as $index => $q) {
             $output->clearLogs();
 
             $str_sub = substr($q, 0, 20) . "....";
 
-            $output->addLogMessage('Running SQL : ' . ($index + 1) . " : " . $str_sub);
-
-            $output->writeLogToConsole();
+            $output->writeLogToConsole('Running SQL : ' . ($index + 1) . " : " . $str_sub);
 
             DB::statement($q);
         }
     }
 
+    public function getColumns(string $tableName)
+    {
+        $output = self::getConsoleOutput();
+
+        $output->writeLogToConsole('Fetching Columns');
+
+        if (!Schema::hasTable($tableName)) {
+            throw new Exception("$tableName not found in database");
+        }
+
+        $columns = Schema::getColumnListing($tableName);
+
+        return $columns;
+    }
+
+    public function getForeignKeys(string $tableName)
+    {
+        $output = self::getConsoleOutput();
+
+        $output->writeLogToConsole('Fetching foreign keys');
+
+        $databaseName = DB::connection()->getDatabaseName();
+
+        $foreignKeys = DB::select("
+            SELECT
+                kcu.COLUMN_NAME AS foreign_key_column,
+                kcu.REFERENCED_TABLE_NAME AS referenced_table,
+                kcu.REFERENCED_COLUMN_NAME AS referenced_column,
+                kcu.CONSTRAINT_NAME AS constraint_name
+            FROM
+                INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS kcu
+            WHERE
+                kcu.TABLE_SCHEMA = ? AND
+                kcu.TABLE_NAME = ? AND
+                kcu.REFERENCED_TABLE_NAME IS NOT NULL;
+        ", [$databaseName, $tableName]);
+
+        return $foreignKeys;
+    }
+
     public function indexExists($table, $index)
     {
+        $output = self::getConsoleOutput();
+
+        $output->writeLogToConsole('Fetching Index');
+
         $database = DB::getDatabaseName();
         $result = DB::table('information_schema.statistics')
             ->where('table_schema', $database)
@@ -74,5 +129,41 @@ class MyMigration extends Migration
             ->exists();
 
         return $result;
+    }
+
+    public function dropColumnsWithIndex(string $tableName, array $fields)
+    {
+        $output = self::getConsoleOutput();
+        $foreignKeys = $this->getForeignKeys($tableName);
+
+        $output->writeLogToConsole('Droping foreign Keys');
+
+        foreach($foreignKeys as $foreign_key)
+        {
+            $output->writeLogToConsole($foreign_key->constraint_name);
+
+            Schema::table($tableName, function (Blueprint $table) use($foreign_key) {                
+                $table->dropForeign($foreign_key->constraint_name);
+            });
+        }
+
+        $columns = $this->getColumns($tableName);
+
+        foreach($fields as $k => $field)
+        {
+            if (!in_array($field, $columns))
+            {
+                unset($fields[$k]);
+            }
+        }
+
+        $output = self::getConsoleOutput();
+
+        $output->writeLogToConsole('Droping fields : ' . implode(",", $fields));
+
+        if ($fields)
+        {
+            Schema::dropColumns($tableName, $fields);
+        }
     }
 }

@@ -46,7 +46,13 @@ class DateUtility
 
             if (is_int($date)) {
                 $timestamp = $date;
-            } else {
+            } 
+            else if (is_object($date))
+            {
+                $date = $date->format("Y-m-d H:i:s");
+                $timestamp = strtotime($date);
+            }
+            else {
                 $timestamp = strtotime($date);
             }
 

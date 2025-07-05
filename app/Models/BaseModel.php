@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Exceptions\UserException;
+use App\Helpers\DateUtility;
 use App\Helpers\FileUtility;
 use App\Traits\CacheTrait;
 use App\Traits\CommonModelTrait;

@@ -42,22 +42,11 @@ function d($arg, $will_exit = false)
         $console = new ConsoleOutput();
 
         $console->addLogMessage("File : " . $callBy['file']);
-        $console->addLogMessage("Line : " . $callBy['line']);        
-
-        if (is_array($arg))
-        {
-            dump($arg);
-        }
-        else if (is_scalar($arg))
-        {
-            $console->addLogMessage(gettype($arg) . " : " . $arg);
-        }
-        else
-        {
-            $console->addLogMessage(gettype($arg));
-        }
-
+        $console->addLogMessage("Line : " . $callBy['line']);            
+        $console->addLogMessage("Data Type : " . gettype($arg));
         $console->writeLogToConsole();
+
+        dump($arg);
 
     } else {
 
@@ -989,7 +978,7 @@ function get_value_from_list($list, $key, $default = "")
     {
         return $default;
     }
-    
+
     if (!is_scalar($key))
     {
         throw new UserException("arg 2 : key should be scaler, found : " . gettype($key));

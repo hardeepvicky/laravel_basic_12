@@ -7,7 +7,6 @@ use App\Helpers\DateUtility;
 use App\Helpers\LaravelExtend;
 use App\Models\FieldSetting;
 use App\Models\Task;
-use App\Models\TaskRecurringDate;
 use App\Models\Type;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -41,18 +40,17 @@ class TaskController extends BackendController
         $cache_key = $cache_key_prefix . "-index";
 
         $conditions = $this->getConditions($cache_key, [
+            ["field" => "task_type", "type" => "string_equal"],
             ["field" => "name", "type" => "string"],
-            ["field" => "description", "type" => "string"],
-            ["field" => "type", "type" => "string_equal"],
-            ["field" => "status", "type" => "string_equal"],
             ["field" => "assign_to_user_id", "type" => "int"],
+            ["field" => "priority", "type" => "int"],
+            ["field" => "is_draft", "type" => "int"],
         ]);
 
         $builder = $this->modelClass::where($conditions);
 
         $builder->with([
             "assignToUser",
-            "taskRecurringDate"
         ]);
 
         if ($apply_sort) {
@@ -75,7 +73,6 @@ class TaskController extends BackendController
     {
         $cache_key_prefix = Route::currentRouteName();
 
-        $default_conditions[] = ['type', Task::TYPE_ONE_TIME];
         $default_conditions[] = ['is_draft', 0];
         $default_conditions[] = ['is_verified', 0];
 
@@ -145,7 +142,7 @@ class TaskController extends BackendController
         $user_list = User::getList("id", "display_name", $user_conditions);
 
         $type_conditions = [];
-        $type_conditions['type'] = Type::getType($this->model, "type");
+        $type_conditions['type'] = Type::getType($this->model, "task_type");
 
         if ($this->model->type) {
             $saved_type_id = Type::getIdFromCode($type_conditions['type'], $this->model->type);
@@ -154,33 +151,7 @@ class TaskController extends BackendController
                 $type_conditions['or_id'] = $saved_type_id;
             }
         }
-        $type_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
-
-
-        $type_conditions = [];
-        $type_conditions['type'] = Type::getType($this->model, "one_time_type");
-
-        if ($this->model->type) {
-            $saved_type_id = Type::getIdFromCode($type_conditions['type'], $this->model->one_time_type);
-
-            if ($saved_type_id) {
-                $type_conditions['or_id'] = $saved_type_id;
-            }
-        }
-
-        $one_time_type_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
-
-        $type_conditions = [];
-        $type_conditions['type'] = Type::getType($this->model, "recurring_type");
-        if ($this->model->recurring_type) {
-            $saved_type_id = Type::getIdFromCode($type_conditions['type'], $this->model->recurring_type);
-
-            if ($saved_type_id) {
-                $type_conditions['or_id'] = $saved_type_id;
-            }
-        }
-
-        $recurring_type_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
+        $task_type_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
 
         $type_conditions = [];
         $type_conditions['type'] = Type::getType($this->model, "status");
@@ -194,21 +165,9 @@ class TaskController extends BackendController
 
         $status_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
 
-        $type_conditions = [];
-        $type_conditions['type'] = Type::getType($this->model, "complete_time_in_days");
-        if ($this->model->complete_time_in_days) {
-            $saved_type_id = Type::getIdFromCode($type_conditions['type'], $this->model->complete_time_in_days);
-
-            if ($saved_type_id) {
-                $type_conditions['or_id'] = $saved_type_id;
-            }
-        }
-
-        $complete_in_days_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
-
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
-        $this->setForView(compact("user_list", "type_list", "one_time_type_list", "recurring_type_list", "status_list", "complete_in_days_list", "field_labels"));
+        $this->setForView(compact("user_list", "task_type_list", "status_list", "field_labels"));
 
         return parent::beforeViewRender();
     }
@@ -234,28 +193,21 @@ class TaskController extends BackendController
     private function _common_validation_rules()
     {
         return [
+            "is_draft" => "",
+            "task_type" => ["required"],
             "name" => ["required"],
-            "type" => [],
+            "description" => ["nullable"],
             "assign_to_user_id" => [],
-            "one_time_type" => [],
-            "recurring_type" => [],
             "start_date_time" => [],
             "end_date_time" => [],
             "priority" => [],
-            "complete_time_in_days" => [],
-            "description" => ["nullable"],
             "is_send_notification" => "",
-            "is_draft" => "",
-            "is_active" => "",
-            "taskRecurringDate" => "",
         ];
     }
 
     private function _common_validation_messages()
     {
         return [
-            "name.required" => "User Category is required",
-            "name.unique" => "User Category already exist",
         ];
     }
 
@@ -282,8 +234,6 @@ class TaskController extends BackendController
 
         try {
             $save_data = $this->_beforeSave($validatedData);
-
-            unset($save_data['taskRecurringDate']);
 
             $this->model->fill($save_data);
 
@@ -317,7 +267,7 @@ class TaskController extends BackendController
     {
         $validatedData['status'] = Task::STATUS_CREATED;
 
-        if (isset($validatedData['is_draft']) && $validatedData['is_draft']) {
+        if (isset($validatedData['is_draft']) && $validatedData['is_draft'] == 1) {
             $validatedData['status'] = Task::STATUS_DRAFT;
         }
 
@@ -326,48 +276,14 @@ class TaskController extends BackendController
 
     private function _saveOthers($validatedData)
     {
-        unset($validatedData['taskRecurringDate']['(sr-id)']);
-
-        $this->model->taskRecurringDate()->delete();
-
-        if (isset($validatedData['taskRecurringDate'])) {
-
-            $rules = [
-                "date" => ["required"],
-            ];
-
-            $child_model = new TaskRecurringDate();
-
-            $messages = [];
-
-            foreach ($validatedData['taskRecurringDate'] as $record) {
-                try {
-                    d($record);
-                    $new_rules = LaravelExtend::merge_validation_rules($rules, $child_model->getUniqueValidationRules($record));
-
-                    $validator = Validator::make($record, $new_rules, $messages);
-
-                    if ($validator->fails()) {
-                        $error_msgs = $validator->messages()->all();
-                        $this->addError("", $error_msgs, "Recurring Dates");
-                    } else {
-                        unset($record['id']);
-                        $this->model->taskRecurringDate()->create($record);
-                    }
-                } catch (Exception $ex) {
-                    $this->addError("", $ex->getMessage(), "Recurring Dates");
-                }
-            }
-        }
-
-        if ($this->custom_errors) {
-            // d($this->custom_errors); exit;
-        }
+        
     }
 
     public function edit($id)
     {
-        $model = $this->model = $this->modelClass::with(["taskRecurringDate"])->findOrFail($id);
+        $model = $this->model = $this->modelClass::findOrFail($id);
+
+        $model->afterFind();
 
         $this->beforeEdit($this->model);
 
@@ -376,9 +292,7 @@ class TaskController extends BackendController
             'method' => 'PUT',
         ];
 
-        $taskRecurringDate = $this->model->taskRecurringDate->toArray();
-
-        $this->setForView(compact("model", "form", "taskRecurringDate"));
+        $this->setForView(compact("model", "form"));
 
         return $this->view("form");
     }
@@ -405,8 +319,6 @@ class TaskController extends BackendController
         try {
 
             $save_data = $this->_beforeSave($validatedData);
-
-            unset($save_data['taskRecurringDate']);
 
             $this->model->fill($save_data);
 
@@ -442,7 +354,7 @@ class TaskController extends BackendController
 
         try {
 
-            $records = $this->modelClass::where("type", $type)->get();
+            $records = $this->modelClass::where("task_type", $type)->get();
 
             $response['data'] = [];
 

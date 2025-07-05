@@ -13,9 +13,8 @@ use App\Models\Task;
                     <tr class="border-bottom-primary">
                         <th><?= sortable_anchor('id', get_value_from_list($field_labels, 'id', 'id')) ?></th>
                         <th><?= sortable_anchor('name', get_value_from_list($field_labels, 'name', 'name')) ?></th>
-                        <th><?= sortable_anchor('description', get_value_from_list($field_labels, 'description', 'description')) ?>
-                        </th>
-                        <th><?= sortable_anchor('type', get_value_from_list($field_labels, 'type', 'type')) ?></th>
+                        <th><?= sortable_anchor('task_type', get_value_from_list($field_labels, 'task_type', 'task_type')) ?></th>                        
+                        </th>                        
                         <th>Assign To</th>
                         <th><?= sortable_anchor('priority', get_value_from_list($field_labels, 'priority', 'priority')) ?>
                         </th>
@@ -33,8 +32,7 @@ use App\Models\Task;
                         <tr>
                             <th scope="row">{{ $record->id }}</th>
                             <td>{{ $record->name }}</td>
-                            <td>{{ $record->description }}</td>
-                            <td>{{ get_value_from_list($type_list, $record->type) }}</td>
+                            <td>{{ get_value_from_list($task_type_list, $record->task_type) }}</td>
                             <td>{{ $record->assignToUser?->getDisplayName() }}</td>
                             <td>{{ $record->priority }}</td>
                             <td>
@@ -45,39 +43,16 @@ use App\Models\Task;
                                             <span>{{ get_value_from_list($status_list, $record->status) }}</span>
                                         </label>
 
-                                        @if ($record->type == Task::TYPE_ONE_TIME)
-                                            <label class="info">
-                                                {{ get_value_from_list($field_labels, 'one_time_type', 'one_time_type') }}
-                                                :
-                                                <span>{{ get_value_from_list($one_time_type_list, $record->one_time_type) }}</span>
-                                            </label>
-                                            <label class="info">
-                                                {{ get_value_from_list($field_labels, 'complete_time_in_days', 'complete_time_in_days') }} :
-                                                <span>{{ get_value_from_list($complete_in_days_list, $record->complete_time_in_days) }}</span>
-                                            </label>
-                                            <label class="info">
-                                                {{ get_value_from_list($field_labels, 'start_date_time', 'start_date_time') }}
-                                                :
-                                                <span>{{ if_date($record->start_date_time) }}</span>
-                                            </label>
-                                            <label class="info">
-                                                {{ get_value_from_list($field_labels, 'end_date_time', 'end_date_time') }}
-                                                :
-                                                <span>{{ if_date($record->end_date_time) }}</span>
-                                            </label>
-                                        @endif
-
-                                        @if ($record->type == Task::TYPE_RECURRING)
-                                            <label class="info">
-                                                {{ get_value_from_list($field_labels, 'recurring_type', 'recurring_type') }}
-                                                :
-                                                <span>{{ get_value_from_list($recurring_type_list, $record->recurring_type) }}</span>
-                                            </label>
-                                            <label class="info">
-                                                {{ get_value_from_list($field_labels, 'complete_time_in_days', 'complete_time_in_days') }} :
-                                                <span>{{ get_value_from_list($complete_in_days_list, $record->complete_time_in_days) }}</span>
-                                            </label>
-                                        @endif
+                                        <label class="info">
+                                            {{ get_value_from_list($field_labels, 'start_date_time', 'start_date_time') }}
+                                            :
+                                            <span>{{ if_date($record->start_date_time) }}</span>
+                                        </label>
+                                        <label class="info">
+                                            {{ get_value_from_list($field_labels, 'end_date_time', 'end_date_time') }}
+                                            :
+                                            <span>{{ if_date($record->end_date_time) }}</span>
+                                        </label>
                                     </div>
                                 </div>
                             </td>
@@ -99,31 +74,11 @@ use App\Models\Task;
                             <td colspan="7">
                                 <div class="row">
                                     <div class="col-md-6 col-lg-4">
-                                        @if ($record->recurring_type == Task::RECURRING_CUSTOM)
-                                            <div class="card">
-                                                <div class="card-header border-l-primary card-no-border">
-                                                    <h3>Recurring Custom Dates</h3>
-                                                </div>
-                                                <div class="card-body">
-                                                    <table class="table table-sm summary-table table-bordered">
-                                                        <thead>
-                                                            <tr>
-                                                                <th>Sr. No.</th>
-                                                                <th>Date</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            @foreach ($record->taskRecurringDate as $i => $taskRecurringDate)
-                                                                <tr>
-                                                                    <td>{{ $i + 1 }}</td>
-                                                                    <td>{{ if_date($taskRecurringDate->date) }}</td>
-                                                                </tr>
-                                                            @endforeach
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
-                                        @endif
+                                        <label class="info">
+                                            {{ get_value_from_list($field_labels, 'description', 'description') }}
+                                            :
+                                            <span>{{ $record->description }}</span>
+                                        </label>
                                     </div>
                                 </div>
                             </td>

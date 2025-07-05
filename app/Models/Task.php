@@ -43,9 +43,9 @@ class Task extends BaseModel
     public const STATUS_CREATED = "CREATED";
     public const STATUS_ASSIGNED = "ASSIGNED";
     public const STATUS_CONFIRM = "CONFIRM";
+    public const STATUS_IN_PROGRESS = "IN_PROGRESS";
     public const STATUS_COMPLETED = "COMPLETED";
     public const STATUS_VERIFIED = "VERIFIED";
-    public const STATUS_IN_PROGRESS = "IN_PROGRESS";
 
     public function beforeSave()
     {
@@ -67,7 +67,8 @@ class Task extends BaseModel
     {
         $rules = [];
 
-        if ($request->input("is_draft", false)) {
+        if (!$request->input("is_draft", false)) 
+        {
             $rules["priority"] = ["required"];
             $rules["assign_to_user_id"] = ["required"];            
             $rules["start_date_time"] = ["required"];
@@ -122,6 +123,7 @@ class Task extends BaseModel
     {
         $class_info = get_class_info(static::class);
 
+        
         switch ($field) {
             case "task_type":
 

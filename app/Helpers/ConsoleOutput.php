@@ -53,18 +53,25 @@ class ConsoleOutput extends OutputConsoleOutput
         $this->log_messages = [];
     }
 
-    public function writeLogToConsole()
+    public function writeLogToConsole($message = "")
     {
-        foreach ($this->log_messages as $arr) {
+        if ($message && is_scalar($message))
+        {
+            $this->writeln('<info>' . $message. '</info>');
+        }
+        else
+        {
+            foreach ($this->log_messages as $arr) {
 
-            if (count($arr) < 2) {
-                continue;
-            }
+                if (count($arr) < 2) {
+                    continue;
+                }
 
-            if ($arr[1] == "info") {
-                $this->writeln('<info>' . ($arr[0]) . '</info>');
-            } else if ($arr[1] == "error") {
-                $this->writeln('<error>' . ($arr[0]) . '</error>');
+                if ($arr[1] == "info") {
+                    $this->writeln('<info>' . ($arr[0]) . '</info>');
+                } else if ($arr[1] == "error") {
+                    $this->writeln('<error>' . ($arr[0]) . '</error>');
+                }
             }
         }
     }
