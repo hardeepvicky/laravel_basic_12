@@ -1,3 +1,6 @@
+<?php
+$index_table_info_options['show_as'] = 'full_datetime';
+?>
 <div class="card" id="page-summary">
     <div class="card-header border-t-info">
         <x-Backend.pagination-links :records="$records" />
@@ -46,7 +49,7 @@
                             </span>
                         </td>
                         <td>
-                            <x-Backend.index-table-info :record="$record" :userList="$userListCache" />
+                            <x-Backend.index-table-info :record="$record" :userList="$userListCache" :options="$index_table_info_options"/>
                         </td>
                         <td>
                             @if ($record->sql_log_file_url)

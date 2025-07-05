@@ -55,4 +55,34 @@ class UserException extends Exception
 
         $this->data = $data;
     }
+
+    public static function checkKeyExistOrThrowException(array $list, $key, array $options = [])
+    {
+        if (!is_scalar($key))
+        {
+            throw new UserException("arg 2 key should be scaler");
+        }
+
+        if (!isset($list[$key]))
+        {
+            $valid_keys = str_short_with_dot(implode(", ", array_keys($list)));
+
+            throw new UserException("Invalid key : $key in list, Valid Keys are : " . $valid_keys);
+        }
+    }
+
+    public static function checkValueExistOrThrowException(array $list, $value, array $options = [])
+    {
+        if (!is_scalar($value))
+        {
+            throw new UserException("arg 2 value should be scaler");
+        }
+
+        if (!in_array($value, $list))
+        {
+            $valid = str_short_with_dot(implode(", ", $list));
+
+            throw new UserException("Invalid value : $value in list, Valid values are : " . $valid);
+        }
+    }
 }

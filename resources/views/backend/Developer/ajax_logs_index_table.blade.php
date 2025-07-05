@@ -1,6 +1,7 @@
 <?php
 
 use App\Helpers\Util;
+
 ?>
 <div class="card" id="page-summary">
     <div class="card-header border-t-info">
@@ -89,7 +90,7 @@ use App\Helpers\Util;
                             </span>
                         </td>
                         <td>
-                            <x-Backend.index-table-info :record="$record" :userList="$userListCache" />
+                            <x-Backend.index-table-info :record="$record" :userList="$userListCache" options="true"/>
                         </td>
                         <td>
                             <div class="mt-2 mb-2">

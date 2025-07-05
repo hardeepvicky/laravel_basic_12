@@ -147,8 +147,6 @@ class DeveloperController extends BackendController
 
         $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
 
-        // d($records[0]->cacheLog, true);
-
         $this->setForView(compact("records"));
 
         return $this->viewIndex(__FUNCTION__);
