@@ -36,7 +36,6 @@ abstract class Controller
         }
 
         if (!property_exists($class_name, "child_model_class")) {
-            throw_exception("child_model_class Array is not set in $class_name");
             throw new UserException("child_model_class Array is not set in $class_name");
         }
 

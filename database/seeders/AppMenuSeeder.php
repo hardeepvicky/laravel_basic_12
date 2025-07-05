@@ -156,9 +156,4 @@ class AppMenuSeeder extends Seeder
             }
         }
     }
-
-    public function getParentId($name)
-    {
-        // AppMenu::where("name", $name)->get();
-    }
 }

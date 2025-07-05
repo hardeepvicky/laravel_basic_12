@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Exceptions\UserException;
 use App\Helpers\FileUtility;
 use App\Helpers\LaravelExtend;
 use App\Models\AppMenu;
@@ -92,9 +93,13 @@ class ModelToJsonCommand extends Command
 
                 $child_model = new $ref_model_class();
 
-                if (isset($child_model->child_model_class) && is_array($child_model->child_model_class))
+                if (!property_exists($ref_model_class, "child_model_class")) {
+                    throw new UserException("child_model_class Array is not set in $ref_model_class");
+                }
+
+                if (isset($ref_model_class::$child_model_class) && is_array($ref_model_class::$child_model_class))
                 {
-                    foreach($child_model->child_model_class as $child_model_class => $child_model_arr)
+                    foreach($ref_model_class::$child_model_class as $child_model_class => $child_model_arr)
                     {
                         if ($child_model_class != $ref_model_class)
                         {
