@@ -10,6 +10,7 @@ use App\Models\Role;
 use App\Models\RoleRouteName;
 use App\Models\RouteName;
 use App\Traits\CacheTrait;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class AccessControl
@@ -299,7 +300,7 @@ class AccessControl
 
     public static function clearMenuCache(array $user_id_list = [])
     {
-        self::forgotCache();
+        Cache::flush();
 
         /*
         if (empty($user_id_list))
