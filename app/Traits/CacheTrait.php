@@ -129,19 +129,28 @@ trait CacheTrait
             return;
         }
 
-        if ($cache_log_level < 3)
+        if ($cache_log_level < 2)
         {
             $data = null;
         }
-        
-        if (is_array($data) && count($data) > 0)
+        else if ($cache_log_level < 3)
         {
-            $data = array_purge_if_exceed_limit($data, 20, true);
+            if (is_array($data))
+            {
+                $data = array_keys($data);
+            }
+        }
+        else if ($cache_log_level < 4)
+        {
+            if (is_array($data) && count($data) > 0)
+            {
+                $data = array_purge_if_exceed_limit($data, 20, true);
+            }
         }
 
         $call_by_list = [];
 
-        if ($cache_log_level >= 2)
+        if ($cache_log_level >= 5)
         {
             foreach(debug_backtrace() as $callBy)
             {
@@ -159,8 +168,8 @@ trait CacheTrait
         self::$cache_logs[$base_cache_key][] = [
             "op" => $op,
             "cache_key" => $cache_key,
+            "data" => $data,
             "call_from" => $call_by_list,
-            "data" => $data
         ];
     }
 }
