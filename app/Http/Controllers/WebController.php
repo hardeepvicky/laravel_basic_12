@@ -445,6 +445,8 @@ class WebController extends Controller
 
         foreach ($records as $record) {
             $record->afterFind();
+
+            // d($record->toArray(), true);
         }
 
         return $records;

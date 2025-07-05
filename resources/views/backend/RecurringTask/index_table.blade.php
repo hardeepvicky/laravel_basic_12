@@ -33,7 +33,7 @@ use App\Models\Task;
                         <tr>
                             <th scope="row">{{ $record->id }}</th>
                             <td>{{ $record->name }}</td>
-                            <td>{{ get_value_from_list($type_list, $record->task_type) }}</td>
+                            <td>{{ get_value_from_list($task_type_list, $record->task_type) }}</td>
                             <td>{{ $record->description }}</td>
                             
                             <td>{{ $record->assignToUser?->getDisplayName() }}</td>
@@ -47,8 +47,8 @@ use App\Models\Task;
                                             <span>{{ get_value_from_list($recurring_type_list, $record->recurring_type) }}</span>
                                         </label>
                                         <label class="info">
-                                            {{ get_value_from_list($field_labels, 'complete_time_in_days', 'complete_time_in_days') }} :
-                                            <span>{{ get_value_from_list($complete_in_days_list, $record->complete_time_in_days) }}</span>
+                                            {{ get_value_from_list($field_labels, 'task_should_be_complete_in', 'task_should_be_complete_in') }} :
+                                            <span>{{ get_value_from_list($complete_in_days_list, $record->task_should_be_complete_in) }}</span>
                                         </label>
                                     </div>
                                 </div>
@@ -84,10 +84,10 @@ use App\Models\Task;
                                                         </tr>
                                                     </thead>
                                                     <tbody>
-                                                        @foreach ($record->taskRecurringDate as $i => $taskRecurringDate)
+                                                        @foreach ($record->recurringTaskDate as $i => $recurringTaskDate)
                                                             <tr>
                                                                 <td>{{ $i + 1 }}</td>
-                                                                <td>{{ if_date($taskRecurringDate->date) }}</td>
+                                                                <td>{{ if_date($recurringTaskDate->date) }}</td>
                                                             </tr>
                                                         @endforeach
                                                     </tbody>

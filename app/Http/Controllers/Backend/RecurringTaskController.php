@@ -7,6 +7,7 @@ use App\Helpers\DateUtility;
 use App\Helpers\LaravelExtend;
 use App\Models\FieldSetting;
 use App\Models\RecurringTask;
+use App\Models\RecurringTaskDate;
 use App\Models\Task;
 use App\Models\TaskRecurringDate;
 use App\Models\Type;
@@ -42,12 +43,11 @@ class RecurringTaskController extends BackendController
         $cache_key = $cache_key_prefix . "-index";
 
         $conditions = $this->getConditions($cache_key, [
-            ["field" => "name", "type" => "string"],
-            ["field" => "description", "type" => "string"],
             ["field" => "task_type", "type" => "string_equal"],
-            ["field" => "recurring_type", "type" => "string_equal"],
-            ["field" => "is_draft", "type" => "int"],
+            ["field" => "name", "type" => "string"],
             ["field" => "assign_to_user_id", "type" => "int"],
+            ["field" => "priority", "type" => "int"],
+            ["field" => "is_draft", "type" => "int"],
         ]);
 
         $builder = $this->modelClass::where($conditions);
@@ -156,15 +156,15 @@ class RecurringTaskController extends BackendController
         return [
             "task_type" => ["required"],
             "name" => ["required"],
+            "description" => ["nullable"],
             "assign_to_user_id" => [],
             "recurring_type" => [],
             "start_date_time" => [],
             "priority" => [],
-            "complete_time_in_days" => [],
-            "description" => ["nullable"],
+            "task_should_be_complete_in" => [],
+            "recurringTaskDate" => [],
             "is_send_notification" => "",
             "is_draft" => "",
-            "recurringTaskDate" => "",
         ];
     }
 
@@ -189,6 +189,8 @@ class RecurringTaskController extends BackendController
 
         $messages = array_merge($messages, []);
 
+        // d($rules, true);
+
         $validatedData = $request->validate($rules, $messages);
 
         // d($validatedData, true);
@@ -199,6 +201,8 @@ class RecurringTaskController extends BackendController
             $save_data = $this->_beforeSave($validatedData);
 
             unset($save_data['recurringTaskDate']);
+
+            // d($save_data, true);
 
             $this->model->fill($save_data);
 
@@ -251,7 +255,7 @@ class RecurringTaskController extends BackendController
                 "date" => ["required"],
             ];
 
-            $child_model = new TaskRecurringDate();
+            $child_model = new RecurringTaskDate();
 
             $messages = [];
 

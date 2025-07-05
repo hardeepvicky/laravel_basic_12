@@ -18,8 +18,9 @@ return new class extends Migration
             $table->string("name", 255);
             $table->unsignedBigInteger("assign_to_user_id")->nullable();
             $table->text("description")->nullable();
+            $table->integer("priority")->default(1);
             $table->timestamp("start_date_time")->nullable();
-            $table->string("complete_time_in_days")->nullable();
+            $table->string("task_should_be_complete_in")->nullable();            
             $table->boolean("is_draft")->default(0);
             $table->boolean("is_send_notification")->default(0);
             $table->timestamps();

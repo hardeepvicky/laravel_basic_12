@@ -59,15 +59,6 @@ class RecurringTask extends BaseModel
 
     public function setDefaultAttributes() {}
 
-    public function getFieldLabels()
-    {
-        $labels = parent::getFieldLabels();
-
-        $labels['one_time_type'] = "When To Start";
-
-        return $labels;
-    }
-
     public function getUniqueValidationRules(Request $request)
     {
         return [];
@@ -76,6 +67,27 @@ class RecurringTask extends BaseModel
     public function getRequiedIfRules(Request $request)
     {
         $rules = [];
+
+        if ($request->get("is_draft"))
+        {
+
+        }
+        else
+        {
+            $rules['assign_to_user_id'] = ["required"];
+            $rules['recurring_type'] = ["required"];
+            $rules['priority'] = ["required"];
+            $rules['task_should_be_complete_in'] = ["required"];
+
+            if ($request->get("recurring_type") == self::RECURRING_CUSTOM)
+            {
+                $rules['recurringTaskDate'] = ["required"];
+            }
+            else
+            {
+                $rules["start_date_time"] = ["required"];
+            }
+        }
 
         return $rules;
     }

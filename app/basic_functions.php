@@ -985,9 +985,14 @@ function is_developer_role_login()
 
 function get_value_from_list($list, $key, $default = "")
 {
+    if (is_null($key))
+    {
+        return $default;
+    }
+    
     if (!is_scalar($key))
     {
-        throw new UserException("arg 2 : key should be scaler");
+        throw new UserException("arg 2 : key should be scaler, found : " . gettype($key));
     }
 
     $key = trim($key);

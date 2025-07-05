@@ -82,7 +82,7 @@ use App\Helpers\DateUtility;
                                     :list="$recurring_type_list" value="{{ $model->{$field}  }}" mandatory="true" class="select2" />
                             </div>
                             
-                            <div class="form-group mb-3">
+                            <div class="form-group mb-3 recurring_type_non_custom">
                                 <?php
                                 $field = 'start_date_time';
                                 $label = get_value_from_list($field_labels, $field, $field);
@@ -93,7 +93,7 @@ use App\Helpers\DateUtility;
                             </div>
                             <div class="form-group mb-3 ">
                                 <?php
-                                $field = 'complete_time_in_days';
+                                $field = 'task_should_be_complete_in';
                                 $label = get_value_from_list($field_labels, $field, $field);
                                 $false = false
                                 ?>
@@ -254,11 +254,17 @@ use App\Helpers\DateUtility;
                     $("#recurring_type_block_custom").find("input,select").attr("disabled", "true");
                     $("#recurring_type_block_custom").hide();
 
+                    $(".recurring_type_non_custom").find("input,select").removeAttr("disabled");
+                    $(".recurring_type_non_custom").hide();
+
                     if (v) {
                         if (v == '{{ RecurringTask::RECURRING_CUSTOM }}')
                         {
                             $("#recurring_type_block_custom").find("input,select").removeAttr("disabled");
                             $("#recurring_type_block_custom").show();
+
+                            $(".recurring_type_non_custom").find("input,select").attr("disabled", "true");
+                            $(".recurring_type_non_custom").hide();
                         }
                     }
                 });
