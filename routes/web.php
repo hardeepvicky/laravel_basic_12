@@ -17,6 +17,7 @@ use App\Http\Controllers\Backend\EnquiryController as BackendEnquiryController;
 use App\Http\Controllers\Backend\PermissionController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Backend\PublicController;
+use App\Http\Controllers\Backend\RecurringTaskController;
 use App\Http\Controllers\Backend\RoleController;
 use App\Http\Controllers\Backend\SettingsController;
 use App\Http\Controllers\Backend\StateController;
@@ -278,6 +279,21 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission']], functi
 
         $name = "status_verified";
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "ajax_get";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "ajax_get_list";
+        Route::get($name, [$controllerClass, $name])->name($name);
+
+        $name = "ajax_get_count";
+        Route::get($name, [$controllerClass, $name])->name($name);
+    });
+
+    $route_prefix = "recurring-task";
+    $controllerClass = RecurringTaskController::class;
+    Route::resource($route_prefix, $controllerClass);
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
 
         $name = "ajax_get";
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Backend;
 
 use App\Acl\AccessControl;
 use App\Exceptions\UserException;
+use App\Helpers\ArrayHelper;
 use App\Helpers\LaravelExtend;
 use App\Helpers\Menu;
 use App\Models\AppMenu;
@@ -50,6 +51,7 @@ class AppMenuController extends BackendController
 
         $conditions = $this->getConditions($cache_key, [
             ["field" => "parent_id", "type" => "int", "view_field" => "parent_id"],
+            ["field" => "is_find_nested_child", "type" => "bool", "view_field" => "is_find_nested_child"],
             ["field" => "name", "type" => "string"],
             ["field" => "route_name", "type" => "string"],
             ["field" => "is_link", "type" => "", "view_field" => "is_link"],
@@ -58,7 +60,11 @@ class AppMenuController extends BackendController
 
         $builder = $this->modelClass::query();
 
-        if (isset($conditions[0][0]) && $conditions[0][0] == "parent_id" && $conditions[0][2])
+        if (
+            (isset($conditions[0]) && $conditions[0][0] == "parent_id" && strlen($conditions[0][2]) > 0)
+            && 
+            (isset($conditions[1]) && $conditions[1][0] == "is_find_nested_child" && strlen($conditions[1][2]) > 0)
+        )
         {
             $child_id_list = AppMenu::getChildIdList([$conditions[0][2]]);
 
@@ -69,9 +75,15 @@ class AppMenuController extends BackendController
             }
         }
 
-        // d($conditions, true);
+        $array_helper =  new ArrayHelper([]);
+        $conditions = $array_helper->unsetValues($conditions, ["is_find_nested_child"], true, [ArrayHelper::UNSET_VALUE_REMOVE_PARENT_IF_FOUND_CHILD]);
 
-        $builder = $builder->where($conditions);
+        if($conditions)
+        {
+            // d($conditions, true);
+
+            $builder = $builder->where($conditions);
+        }
 
         if ($apply_sort) {
             $cache_key_for_sort = $cache_key_prefix . "-index-extra-params";
@@ -115,8 +127,6 @@ class AppMenuController extends BackendController
         $tree_list = AppMenu::getTreeList([
             ["is_link", 0]
         ]);
-
-        // d($tree_list, true);
 
         $field_labels = $this->model->getFieldLabels();
 
@@ -198,8 +208,6 @@ class AppMenuController extends BackendController
             $accessControl = new AccessControl();
             $accessControl->clearMenuCache();
 
-            $this->saveSqlLog();
-
             return $this->afterSave($this->model);
         } catch (Exception $ex) {
             DB::rollBack();
@@ -278,8 +286,6 @@ class AppMenuController extends BackendController
 
             $accessControl = new AccessControl();
             $accessControl->clearMenuCache();
-
-            $this->saveSqlLog();
 
             return $this->afterSave($this->model);
         } catch (Exception $ex) {

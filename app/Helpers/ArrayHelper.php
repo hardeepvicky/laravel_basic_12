@@ -8,6 +8,9 @@ use Exception;
 class ArrayHelper
 {
     private array $data;
+
+    public const UNSET_VALUE_REMOVE_PARENT_IF_FOUND_CHILD = 1;
+
     public function __construct(array $data)
     {
         $this->data = $data;
@@ -63,17 +66,49 @@ class ArrayHelper
         }
     }
 
-    public function unsetValues(array $values)
+    public function unsetValues(array $data, array $find_values, bool $recursive = false, array $options = [])
     {
-        foreach ($values as $value) {
-            if (is_scalar($value)) {
-                $key = array_search($value, $this->data);
+        if (empty($data))
+        {
+            $data = $this->data;
+        }
 
-                if ($key) {
-                    unset($this->data[$key]);
+        if (count($data) > 0)
+        {
+            $find_list = array_get_scaler_value_only($find_values);
+            $list = array_get_scaler_value_only($data);            
+            foreach ($find_list as $k => $value) {
+                $key = array_search($value, $list);
+
+                if ($key !== false) {
+                    unset($data[$key]);
                 }
             }
         }
+
+        if ($recursive)
+        {
+            if (count($data) > 0)
+            {
+                foreach($data as $k => $v)
+                {
+                    if (is_array($v) && count($v) > 0)
+                    {
+                        $data[$k] = $this->unsetValues($v, $find_values, $recursive);
+
+                        if (in_array(self::UNSET_VALUE_REMOVE_PARENT_IF_FOUND_CHILD, $options))
+                        {
+                            if (count($data[$k]) != count($v))
+                            {
+                                unset($data[$k]);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return $data;
     }
 
     public function onlyKeys(bool $recursive = false, array $arr = [])

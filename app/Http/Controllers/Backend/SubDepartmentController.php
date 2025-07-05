@@ -150,8 +150,6 @@ class SubDepartmentController extends BackendController
 
             DB::commit();
 
-            $this->saveSqlLog();
-
             return $this->afterSave($this->model);
         } catch (Exception $ex) {
             DB::rollBack();
@@ -210,8 +208,6 @@ class SubDepartmentController extends BackendController
             $this->updateUserInfoAfterSave($this->model);
 
             DB::commit();
-
-            $this->saveSqlLog();
 
             return $this->afterSave($this->model);
         } catch (Exception $ex) {

@@ -134,8 +134,6 @@ class DesignationController extends BackendController
             
             DB::commit();
 
-            $this->saveSqlLog();
-
             return $this->afterSave($model);
         }
         catch(Exception $ex)
@@ -196,8 +194,6 @@ class DesignationController extends BackendController
             $this->updateUserInfoAfterSave($this->model);
 
             DB::commit();
-
-            $this->saveSqlLog();
 
             return $this->afterSave($this->model);
         } catch (Exception $ex) {

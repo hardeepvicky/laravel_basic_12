@@ -217,7 +217,6 @@ class UserController extends BackendController
             }
 
             DB::commit();
-            $this->saveSqlLog();
             return $this->afterSave($model);
         } catch (Exception $ex) {
             DB::rollBack();
@@ -298,8 +297,6 @@ class UserController extends BackendController
             }
 
             DB::commit();
-
-            $this->saveSqlLog();
 
             return $this->afterSave($model);
         } catch (\Exception $ex) {

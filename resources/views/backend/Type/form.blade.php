@@ -30,7 +30,7 @@
                             <div class="form-group mb-3">
                                 <?php $list = []; ?>
                                 <x-Inputs.drop-down id="code" name="code" label="Code" :list="$list"
-                                    :value="$model->code" class="select2" mandatory="true" />
+                                    :value="$model->code" class="select2"/>
                             </div>
                         </div>
                         <div class="col-md-6 col-lg-4">

@@ -24,7 +24,7 @@ use App\Models\User;
                         <th><?= sortable_anchor('email', get_value_from_list($field_labels, 'email')) ?></th>
                         <th><?= sortable_anchor('mobile', get_value_from_list($field_labels, 'mobile')) ?></th>
                         <th><?= get_value_from_list($field_labels, 'profile_image') ?></th>
-                        <th><?= get_value_from_list($field_labels, 'is_active') ?></th>
+                        <th><?= sortable_anchor('is_active', get_value_from_list($field_labels, 'is_active')) ?></th>
                         <th>Actions</th>
                     </tr>
                 </thead>

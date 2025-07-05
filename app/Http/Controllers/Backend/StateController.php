@@ -127,8 +127,6 @@ class StateController extends BackendController
 
             DB::commit();
 
-            $this->saveSqlLog();
-
             return $this->afterSave($model);
         } catch (Exception $ex) {
             DB::rollBack();
@@ -183,8 +181,6 @@ class StateController extends BackendController
             $this->updateUserInfoAfterSave($model);
 
             DB::commit();
-
-            $this->saveSqlLog();
 
             return $this->afterSave($model);
         } catch (Exception $ex) {

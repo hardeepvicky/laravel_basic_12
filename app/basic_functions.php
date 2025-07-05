@@ -372,15 +372,22 @@ function curl_post_request($url, $params, $headers = [])
 
 function str_class_name_without_namespace($class_name)
 {
-    if (strpos($class_name, "\\") >= 0) {
+    if (is_object($class_name))
+    {
+        $class_name = get_class($class_name);
+    }
+
+    if (is_string($class_name) && strpos($class_name, "\\") >= 0) {
         $arr = explode("\\", $class_name);
 
         if ($arr) {
             $class_name = end($arr);
+
+            return $class_name;
         }
     }
 
-    return $class_name;
+    return null;
 }
 
 function str_space_before_every_capital_letter($str)
@@ -978,8 +985,23 @@ function is_developer_role_login()
 
 function get_value_from_list($list, $key, $default = "")
 {
+    if (!is_scalar($key))
+    {
+        throw new UserException("arg 2 : key should be scaler");
+    }
+
+    $key = trim($key);
+
     if (isset($list[$key])) {
         return $list[$key];
+    }
+
+    foreach($list as $k => $v)
+    {
+        if (strtolower($k) == strtolower($key))
+        {
+            return $v;
+        }
     }
 
     return $default;
@@ -1079,4 +1101,19 @@ function is_ajax_request()
         return true;
     }
     return false;
+}
+
+function array_get_scaler_value_only(array $data)
+{
+    $list = [];
+
+    foreach($data as $k => $v)
+    {
+        if (is_scalar($v))
+        {
+            $list[$k] = $v;
+        }
+    }
+
+    return $list;
 }

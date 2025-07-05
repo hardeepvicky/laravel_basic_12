@@ -74,8 +74,6 @@ class BackendController extends WebController
                 throw new Exception("Fail to Delete");
             }
 
-            $this->saveSqlLog();
-
             return $this->afterDestroy($model);
         } catch (\Exception $ex) {
             if ($request->ajax()) {

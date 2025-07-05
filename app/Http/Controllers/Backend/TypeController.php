@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Backend;
 
+use App\Exceptions\UserException;
 use App\Helpers\LaravelExtend;
+use App\Models\FieldSetting;
 use App\Models\Task;
 use App\Models\Type;
 use Illuminate\Http\Request;
@@ -63,7 +65,9 @@ class TypeController extends BackendController
     {
         $type_list = Type::getTypeList();
 
-        $this->setForView(compact("type_list"));
+        $field_labels = FieldSetting::getDynamicFields($this->modelClass);
+        
+        $this->setForView(compact("type_list", "field_labels"));
 
         return parent::beforeViewRender();
     }
@@ -124,8 +128,6 @@ class TypeController extends BackendController
 
             DB::commit();
 
-            $this->saveSqlLog();
-
             return $this->afterSave($model);
         } catch (Exception $ex) {
             DB::rollBack();
@@ -171,7 +173,7 @@ class TypeController extends BackendController
         DB::beginTransaction();
 
         try {
-            $model = $this->modelClass::findOrFail($id);
+            // d($validatedData, true);
 
             $model->fill($validatedData);
 
@@ -180,8 +182,6 @@ class TypeController extends BackendController
             $this->updateUserInfoAfterSave($model);
 
             DB::commit();
-
-            $this->saveSqlLog();
 
             return $this->afterSave($model);
         } catch (Exception $ex) {
@@ -198,19 +198,15 @@ class TypeController extends BackendController
         $response = ["status" => 1, "data" => []];
 
         try {
-            list($group, $field) = explode(".", $type);
 
-            $code_list = [];
+            $codes = Type::getCodes($type);
 
-            switch ($group) {
-                case "task":
-                    $code_list = Task::getCodeList($field);
-                    break;
-                default:
-                    throw new Exception("Invalid type : $type");
+            if (!isset($codes['code_list']))
+            {
+                throw new UserException("code_list key is not found in codes varibale");
             }
 
-            foreach ($code_list as $code) {
+            foreach ($codes['code_list'] as $code) {
                 $response['data'][] = [
                     'id' => $code,
                     'name' => $code,
