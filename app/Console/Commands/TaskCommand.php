@@ -6,6 +6,7 @@ use App\Helpers\ConsoleOutput;
 use App\Helpers\MyCommand;
 use App\Models\AutomateTask;
 use App\Models\CommandLog;
+use App\Models\RecurringTask;
 use App\Models\Task;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
@@ -48,20 +49,17 @@ class TaskCommand extends MyCommand
             ];
 
             
-            $records = Task::where("type", TASK::TYPE_RECURRING)
-                ->where("status", Task::STATUS_CREATED)
-                ->get();
+            $records = RecurringTask::where("is_draft", 0)->get();
 
             if ($records && $records->count() > 0)
             {
                 foreach($records as $record)
                 {
-                    $counts['task_created'] += Task::createRecurringTask($record);
+                    $counts['task_created'] += RecurringTask::createTask($record);
                 }
             }
 
-            $records = Task::where("type", TASK::TYPE_ONE_TIME)
-                ->where("status", Task::STATUS_CREATED)
+            $records = Task::where("status", Task::STATUS_CREATED)
                 ->whereDate("start_date_time", "<=", Carbon::today())
                 ->get();
 

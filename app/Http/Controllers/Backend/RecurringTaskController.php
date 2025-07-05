@@ -115,7 +115,7 @@ class RecurringTaskController extends BackendController
         $recurring_type_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
 
         $type_conditions = [];
-        $type_conditions['type'] = Type::getType($this->model, "complete_time_in_days");
+        $type_conditions['type'] = Type::getType($this->model, "task_should_be_complete_in");
         if ($this->model->complete_time_in_days) {
             $saved_type_id = Type::getIdFromCode($type_conditions['type'], $this->model->complete_time_in_days);
 
@@ -124,11 +124,11 @@ class RecurringTaskController extends BackendController
             }
         }
 
-        $complete_in_days_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
+        $complete_in_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
 
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
-        $this->setForView(compact("user_list", "task_type_list", "recurring_type_list", "complete_in_days_list", "field_labels"));
+        $this->setForView(compact("user_list", "task_type_list", "recurring_type_list", "complete_in_list", "field_labels"));
 
         return parent::beforeViewRender();
     }

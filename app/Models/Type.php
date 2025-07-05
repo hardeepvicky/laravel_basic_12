@@ -59,7 +59,7 @@ class Type extends BaseModel
             RecurringTask::class => [
                 "fields" => [
                     "recurring_type" => "Recurring Type",
-                    "complete_time_in_days" => "Complete In Days",
+                    "task_should_be_complete_in" => "Should Complete in",
                 ]
             ],
         ];

@@ -48,7 +48,7 @@ use App\Models\Task;
                                         </label>
                                         <label class="info">
                                             {{ get_value_from_list($field_labels, 'task_should_be_complete_in', 'task_should_be_complete_in') }} :
-                                            <span>{{ get_value_from_list($complete_in_days_list, $record->task_should_be_complete_in) }}</span>
+                                            <span>{{ get_value_from_list($complete_in_list, $record->task_should_be_complete_in) }}</span>
                                         </label>
                                     </div>
                                 </div>

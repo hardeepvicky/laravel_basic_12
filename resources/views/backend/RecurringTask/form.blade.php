@@ -98,7 +98,7 @@ use App\Helpers\DateUtility;
                                 $false = false
                                 ?>
                                 <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
-                                    :list="$complete_in_days_list" value="{{ $model->{$field}  }}" mandatory="true" class="select2" :pleaseSelect="$false"/>
+                                    :list="$complete_in_list" value="{{ $model->{$field}  }}" mandatory="true" class="select2"/>
                             </div>
                             <div class="form-group mb-3">
                                 <?php
