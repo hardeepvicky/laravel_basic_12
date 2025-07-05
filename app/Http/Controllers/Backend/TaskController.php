@@ -84,7 +84,6 @@ class TaskController extends BackendController
 
         $builder->where(function ($query) {
             $query->whereNotIn("status", [TASK::STATUS_CREATED, TASK::STATUS_VERIFIED]);
-            $query->whereDate("start_date_time", "<=", date(DateUtility::DATE_FORMAT));
         });
 
         $cache_key_for_sort = $cache_key_prefix . "-extra-params-" . __FUNCTION__;
@@ -110,7 +109,6 @@ class TaskController extends BackendController
         $builder = $this->modelClass::where($default_conditions)->where($conditions);
         $builder->where(function ($query) use ($auth_user_id) {
             $query->whereNotIn("status", [TASK::STATUS_CREATED, TASK::STATUS_VERIFIED]);
-            $query->whereDate("start_date_time", "<=", date(DateUtility::DATE_FORMAT));
             $query->whereNot("assign_to_user_id", $auth_user_id);
         });
 
@@ -279,6 +277,33 @@ class TaskController extends BackendController
         
     }
 
+    protected function beforeEdit($model)
+    {
+        parent::beforeEdit($model);
+
+        if (in_array($model->status, [Task::STATUS_CONFIRM, Task::STATUS_IN_PROGRESS, Task::STATUS_COMPLETED, Task::STATUS_VERIFIED]))
+        {
+            $type_conditions = [];
+            $type_conditions['type'] = Type::getType($this->model, "status");
+            $status_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
+
+            $msg = "Can't edit, Task Status is " . $status_list[$model->status];            
+
+            $edit_status_label = [];
+
+            foreach([Task::STATUS_DRAFT, Task::STATUS_CREATED, Task::STATUS_ASSIGNED] as $status)
+            {
+                $edit_status_label[] = $status_list[$status];
+            }
+
+            $msg .= ", Only Status with " . implode(", ", $edit_status_label);
+
+            $msg .= " can be edit";
+            
+            abort(ACTION_NOT_PROCEED, $msg);
+        }
+
+    }
     public function edit($id)
     {
         $model = $this->model = $this->modelClass::findOrFail($id);
