@@ -129,7 +129,7 @@ abstract class Controller
         $filename = $base_file_name . "_sql.txt";
         $content = implode(PHP_EOL, $db_logs['sql_list']);
 
-        $fileUtility->writeLog($path, $filename, $content);
+        $fileUtility->writeContent($path, $filename, $content);
 
         $sqlLogModel->sql_log_file = $path . $filename;
 
@@ -138,17 +138,9 @@ abstract class Controller
 
             $content = implode(PHP_EOL, $db_logs['dml_sql_list']);
 
-            $fileUtility->writeLog($path, $filename, $content);
+            $fileUtility->writeContent($path, $filename, $content);
 
             $sqlLogModel->sql_dml_log_file = $path . $filename;
-        }
-
-        $cache_model = $this->saveCacheLog();
-
-        if ($cache_model)
-        {
-            $cache_model->sql_log_id = $sqlLogModel->id;
-            $sqlLogModel->cache_log_id = $cache_model->id;
         }
 
         // dd($sqlLogModel->toArray());
@@ -161,7 +153,7 @@ abstract class Controller
     }
 
     protected function getQueryLog()
-    {   
+    {
         $db_logs = LaravelExtend::getQueryLog();
 
         $sql_list = $dml_sql_list = [
@@ -205,32 +197,6 @@ abstract class Controller
         return LaravelExtend::getMongodbQueryLog();
     }
 
-    public function saveCacheLog()
-    {
-        $cache_log_level = env("APP_CACHE_LOG_LEVEL", 0);
-
-        if (!$cache_log_level)
-        {
-            return null;
-        }
-
-        $save['logs'] = [];
-
-        $save['logs']["WebController"] = WebController::$cache_logs;
-        $save['logs']["BaseModel"] = BaseModel::$cache_logs;
-        $save['logs']["BaseMongoModel"] = BaseMongoModel::$cache_logs;
-        $save['logs']["Other"] = AccessControl::$cache_logs;
-
-        $model = new CacheLog($save);
-
-        if (!$model->save())
-        {
-            throw new UserException("Fail To Save", UserException::ERROR_LARAVEL_FAIL);
-        }
-
-        return $model;
-    }
-
     protected function responseJson(array $response)
     {
         if (App::environment('production')) {
@@ -239,11 +205,9 @@ abstract class Controller
 
         $sql_model = $this->saveSqlLog();
 
-         if ($sql_model) {
+        if ($sql_model) {
             $sql_model->afterFind();
         }
-
-        $cache_model = $this->saveCacheLog();
 
         if (is_ajax_request()) {
             $request = request();
@@ -257,7 +221,6 @@ abstract class Controller
                 "request" => $request->all(),
                 "response" => $response,
                 "sql_model" => $sql_model?->toArray(),
-                "cache_log_id" => $cache_model?->id
             ];
 
             $save = array_purge_if_exceed_limit($save);
@@ -269,12 +232,6 @@ abstract class Controller
 
             if (!$ajaxLog->saveQuietly()) {
                 throw new UserException("Fail To Save Ajax Log", UserException::ERROR_LARAVEL_FAIL);
-            }
-
-            if ($cache_model)
-            {
-                $cache_model->ajax_log_id = $ajaxLog->id;
-                $cache_model->save();
             }
         }
 

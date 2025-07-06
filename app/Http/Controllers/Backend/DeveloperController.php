@@ -24,6 +24,23 @@ class DeveloperController extends BackendController
         return $this->view(__FUNCTION__);
     }
 
+    protected function beforeViewRender()
+    {
+        if (!parent::beforeViewRender()) {
+            return false;
+        }
+
+        $index_table_info_options = [
+            "show_as" => "full_datetime"
+        ];
+
+        // d($index_table_info_options);
+
+        $this->setForView(compact("index_table_info_options"));
+
+        return true;
+    }
+
     protected function parseConditionValue($value, String $type)
     {
         $data_type = gettype($value);
@@ -132,40 +149,9 @@ class DeveloperController extends BackendController
 
         // dd($conditions);
 
-        $builder = SqlLog::where($conditions)->with("cacheLog");
+        $builder = SqlLog::where($conditions);
 
-        $cache_key_for_sort = $cache_key_prefix . "-index-extra-params";
-
-        $clear_cache = request('is_sort_clear', false);
-
-        $sort_params = $this->getRequestData($cache_key_for_sort, [
-            ["key" => "sort_by", "default" => "created_at"],
-            ["key" => "sort_dir", "default" => "DESC"],
-        ], $clear_cache);
-
-        $builder->orderBy($sort_params['sort_by'], $sort_params['sort_dir']);
-
-        $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
-
-        $this->setForView(compact("records"));
-
-        return $this->viewIndex(__FUNCTION__);
-    }
-
-    public function email_logs()
-    {
-        $cache_key_prefix = Route::currentRouteName();
-
-        $conditions = $this->getConditions(Route::currentRouteName(), [
-            ["field" => "from_email", "type" => "string", "view_field" => "from_email"],
-            ["field" => "to_email", "type" => "string", "view_field" => "to_email"],
-            ["field" => "created", "type" => "from_date", "view_field" => "from_date"],
-            ["field" => "created", "type" => "to_date", "view_field" => "to_date"],
-        ]);
-
-        $builder = EmailLog::where($conditions);
-
-        $cache_key_for_sort = $cache_key_prefix . "-index-extra-params";
+        $cache_key_for_sort = $cache_key_prefix . "-extra-params";
 
         $clear_cache = request('is_sort_clear', false);
 
@@ -177,8 +163,6 @@ class DeveloperController extends BackendController
         $builder->orderBy($sort_params['sort_by'], $sort_params['sort_dir']);
 
         $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
-
-        //dd($records);
 
         $this->setForView(compact("records"));
 
@@ -199,13 +183,7 @@ class DeveloperController extends BackendController
 
         $builder = AjaxLog::where($conditions);
 
-        $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
-
-        // d($records->toArray(), true);
-
-        $builder = AjaxLog::where($conditions);
-
-        $cache_key_for_sort = $cache_key_prefix . "-index-extra-params";
+        $cache_key_for_sort = $cache_key_prefix . "-extra-params";
 
         $clear_cache = request('is_sort_clear', false);
 
@@ -242,7 +220,7 @@ class DeveloperController extends BackendController
 
         $builder = CommandLog::where($conditions);
 
-        $cache_key_for_sort = $cache_key_prefix . "-index-extra-params";
+        $cache_key_for_sort = $cache_key_prefix . "-extra-params";
 
         $clear_cache = request('is_sort_clear', false);
 
@@ -254,6 +232,39 @@ class DeveloperController extends BackendController
         $builder->orderBy($sort_params['sort_by'], $sort_params['sort_dir']);
 
         $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
+
+        $this->setForView(compact("records"));
+
+        return $this->viewIndex(__FUNCTION__);
+    }
+
+    public function email_logs()
+    {
+        $cache_key_prefix = Route::currentRouteName();
+
+        $conditions = $this->getConditions(Route::currentRouteName(), [
+            ["field" => "from_email", "type" => "string", "view_field" => "from_email"],
+            ["field" => "to_email", "type" => "string", "view_field" => "to_email"],
+            ["field" => "created", "type" => "from_date", "view_field" => "from_date"],
+            ["field" => "created", "type" => "to_date", "view_field" => "to_date"],
+        ]);
+
+        $builder = EmailLog::where($conditions);
+
+        $cache_key_for_sort = $cache_key_prefix . "-extra-params";
+
+        $clear_cache = request('is_sort_clear', false);
+
+        $sort_params = $this->getRequestData($cache_key_for_sort, [
+            ["key" => "sort_by", "default" => "created_at"],
+            ["key" => "sort_dir", "default" => "DESC"],
+        ], $clear_cache);
+
+        $builder->orderBy($sort_params['sort_by'], $sort_params['sort_dir']);
+
+        $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
+
+        //dd($records);
 
         $this->setForView(compact("records"));
 

@@ -55,14 +55,12 @@ class ModelToJsonCommand extends Command
             $model_name = $this->ask('Enter Model name');
             $model_name = trim($model_name);
 
-            if (strlen($model_name) <= 0)
-            {
+            if (strlen($model_name) <= 0) {
                 return;
             }
 
             $model_list = [$model_name];
-        }
-        else if ($choice == "All") {
+        } else if ($choice == "All") {
             $model_list = $default_model_name_list;
         } else {
             $model_list = [$choice];
@@ -87,8 +85,7 @@ class ModelToJsonCommand extends Command
 
             $records = $ref_model_class::all();
 
-            foreach($records as $k => $record)
-            {
+            foreach ($records as $k => $record) {
                 $child_records = [];
 
                 $child_model = new $ref_model_class();
@@ -97,29 +94,21 @@ class ModelToJsonCommand extends Command
                     throw new UserException("child_model_class Array is not set in $ref_model_class");
                 }
 
-                if (isset($ref_model_class::$child_model_class) && is_array($ref_model_class::$child_model_class))
-                {
-                    foreach($ref_model_class::$child_model_class as $child_model_class => $child_model_arr)
-                    {
-                        if ($child_model_class != $ref_model_class)
-                        {
+                if (isset($ref_model_class::$child_model_class) && is_array($ref_model_class::$child_model_class)) {
+                    foreach ($ref_model_class::$child_model_class as $child_model_class => $child_model_arr) {
+                        if ($child_model_class != $ref_model_class) {
                             $child_model_class_name = str_class_name_without_namespace($child_model_class);
 
                             $this->info("Working on $child_model_class_name");
 
                             $conditions = [];
-                            if (isset($child_model_arr['foreignKey']) && is_array($child_model_arr['foreignKey']))
-                            {
-                                foreach($child_model_arr['foreignKey'] as $foreignKey)
-                                {
-                                    if (is_string($foreignKey))
-                                    {
+                            if (isset($child_model_arr['foreignKey']) && is_array($child_model_arr['foreignKey'])) {
+                                foreach ($child_model_arr['foreignKey'] as $foreignKey) {
+                                    if (is_string($foreignKey)) {
                                         $conditions[] = [$foreignKey, $record->id];
                                     }
                                 }
-                            }
-                            else
-                            {
+                            } else {
                                 $conditions[] = [$child_model_arr['foreignKey'], $record->id];
                             }
 
@@ -145,7 +134,7 @@ class ModelToJsonCommand extends Command
 
                 $records[$k]->child_records = $child_records;
             }
-            
+
             $this->writeJson($records->toArray(), $model_name);
         }
     }
@@ -162,7 +151,7 @@ class ModelToJsonCommand extends Command
 
             $filename = $filename . ".json";
 
-            $fileUtility->writeLog(self::$path, $filename, $json);
+            $fileUtility->writeContent(self::$path, $filename, $json);
 
             $this->info("$filename : Json Write Successfully");
             $this->newLine(1);

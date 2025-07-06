@@ -62,9 +62,9 @@ class UserController extends BackendController
 
     private function _getBuildeForIndex($cache_key_prefix, $apply_sort = true)
     {
-        $cache_key = $cache_key_prefix . "-index";
+        $cache_key = $cache_key_prefix;
 
-        $conditions = $this->getConditions($cache_key, [
+        $conditions = $this->getConditions($cache_key_prefix, [
             ["field" => "name", "type" => "string"],
             ["field" => "email", "type" => "string"],
             ["field" => "mobile", "type" => "string"],
@@ -74,7 +74,9 @@ class UserController extends BackendController
             ["field" => "country_id", "type" => "int"],
         ]);
 
-        $role_condition = $this->getConditions($cache_key . ".2", [
+        $cache_key = $cache_key_prefix . "-2";
+
+        $role_condition = $this->getConditions($cache_key, [
             ["field" => "role_id", "type" => "int"],
         ], true);
 
@@ -90,7 +92,7 @@ class UserController extends BackendController
         $builder->with(["userCategory", "userAllowIp"]);
 
         if ($apply_sort) {
-            $cache_key_for_sort = $cache_key_prefix . "-index-extra-params";
+            $cache_key_for_sort = $cache_key_prefix . "-extra-params";
 
             $clear_cache = request('is_sort_clear', false);
 

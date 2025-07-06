@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Helpers;
 
 use App\Exceptions\UserException;
@@ -9,8 +10,8 @@ class MyCommand extends Command
 {
     public CommandLog $logModel;
 
-    public function logCreate(array $save_data) : CommandLog
-    {        
+    public function logCreate(array $save_data): CommandLog
+    {
         $this->logModel = new CommandLog($save_data);
 
         return $this->logModel;
@@ -24,11 +25,10 @@ class MyCommand extends Command
         if (!$this->logModel->saveQuietly()) {
             throw new UserException("Fail to Save Log", UserException::ERROR_LARAVEL_FAIL);
         }
-        
+
         $db_logs = $this->getQueryLog();
 
-        if ($db_logs)
-        {
+        if ($db_logs) {
             $this->logModel->have_dml_query = $db_logs['have_dml_query'];
             $this->logModel->have_heavy_query = $db_logs['have_heavy_query'];
 
@@ -46,7 +46,7 @@ class MyCommand extends Command
             $filename = $base_file_name . "_sql.txt";
             $content = implode(PHP_EOL, $db_logs['sql_list']);
 
-            $fileUtility->writeLog($path, $filename, $content);
+            $fileUtility->writeContent($path, $filename, $content);
 
             $this->logModel->sql_log_file = $path . $filename;
 
@@ -55,7 +55,7 @@ class MyCommand extends Command
 
                 $content = implode(PHP_EOL, $db_logs['dml_sql_list']);
 
-                $fileUtility->writeLog($path, $filename, $content);
+                $fileUtility->writeContent($path, $filename, $content);
 
                 $this->logModel->sql_dml_log_file = $path . $filename;
             }
@@ -67,7 +67,7 @@ class MyCommand extends Command
     }
 
     protected function getQueryLog()
-    {   
+    {
         $db_logs = LaravelExtend::getQueryLog();
 
         $sql_list = $dml_sql_list = [

@@ -11,8 +11,7 @@ class IndexTableInfo extends BackendComponent
         public $record,
         public $userList,
         public $options = []
-    )
-    {
+    ) {
         parent::__construct();
 
         $default_options = [
@@ -21,17 +20,16 @@ class IndexTableInfo extends BackendComponent
 
         $show_as_valid_options = ["celec_datetime", "datetime", "date", "full_datetime", "human_date"];
 
-        $options = array_merge($default_options, $options);
+        $option_array = array_merge($default_options, $options);
 
-        if (!isset($options['show_as']))
-        {
+        if (!isset($option_array['show_as'])) {
             throw new UserException("show_as key is not found in options");
         }
 
-        UserException::checkValueExistOrThrowException($show_as_valid_options, $options['show_as']);
+        UserException::checkValueExistOrThrowException($show_as_valid_options, $option_array['show_as']);
 
-        $this->setForView(compact("options"));
-        
+        $this->setForView(compact("option_array"));
+
         $this->view_path = "index_table_info";
     }
 }

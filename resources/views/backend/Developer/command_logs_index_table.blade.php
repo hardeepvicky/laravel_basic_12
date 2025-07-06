@@ -14,7 +14,7 @@ use App\Helpers\Util;
                     <tr class="border-bottom-primary">
                         <th>Command</th>
                         <th>Description</th>
-                        <th><?= sortable_anchor('exec_time', 'Time Taken (Seconds)') ?></th>                        
+                        <th><?= sortable_anchor('exec_time', 'Time Taken (Seconds)') ?></th>
                         <th>Info</th>
                         <th>
                             <?= sortable_anchor('created_at', 'Created') ?>
@@ -42,23 +42,22 @@ use App\Helpers\Util;
                                 More
                             </span>
                             @endif
-                        </td>                        
+                        </td>
                         <td>
-                            <x-Backend.index-table-info :record="$record" :userList="$userListCache" />
+                            <x-Backend.index-table-info :record="$record" :userList="$userListCache"
+                                :options="$index_table_info_options" />
                         </td>
                         <td>
                             <div class="mt-2 mb-2">
                                 @if (isset($record->sql_log_file_url))
-                                <a href="{{ $record->sql_log_file_url }}"
-                                    class="btn btn-outline-secondary mb-2">
+                                <a href="{{ $record->sql_log_file_url }}" class="btn btn-outline-secondary mb-2">
                                     <i class="fas fa-download"></i>
                                     SQL Log
                                 </a>
                                 @endif
 
                                 @if (isset($record->sql_dml_log_file_url))
-                                <a href="{{ $record->sql_dml_log_file_url }}"
-                                    class="btn btn-outline-secondary mb-2">
+                                <a href="{{ $record->sql_dml_log_file_url }}" class="btn btn-outline-secondary mb-2">
                                     <i class="fas fa-download"></i>
                                     DML SQL Log
                                 </a>

@@ -21,7 +21,6 @@ use App\Helpers\Util;
                         <th><?= sortable_anchor('exec_time', 'Time Taken (Seconds)') ?></th>
                         <th>Request</th>
                         <th>Response</th>
-                        <th>Cache Logs</th>
                         <th>
                             <?= sortable_anchor('created_at', 'Created') ?>
                             | <?= sortable_anchor('updated_at', 'Updated') ?>
@@ -44,12 +43,12 @@ use App\Helpers\Util;
                                     Url : <span>{{ str_short_with_dot($record->url, 180) }}</span>
                                 </label>
                             </div>
-                            
+
                             <span class="btn btn-info btn-sm css-toggler mt-1 mb-1"
-                                    data-sr-css-class-toggle-target="#url-{{ $record->id }}"
-                                    data-sr-css-class-toggle-class="h-200" data-sr-css-class-toggle-applied-text="More"
-                                    data-sr-css-class-toggle-not-applied-text="Less">
-                                    More
+                                data-sr-css-class-toggle-target="#url-{{ $record->id }}"
+                                data-sr-css-class-toggle-class="h-200" data-sr-css-class-toggle-applied-text="More"
+                                data-sr-css-class-toggle-not-applied-text="Less">
+                                More
                             </span>
                         </td>
                         <td>{{ Util::niceTime($record->exec_time) }}</td>
@@ -78,19 +77,8 @@ use App\Helpers\Util;
                             </span>
                         </td>
                         <td>
-                            <div id="cache_logs-{{ $record->id }}" class="h-200">
-                                {!! array_print($record->cacheLog?->logs ?? [], 100) !!}
-                            </div>
-
-                            <span class="btn btn-info btn-sm css-toggler mt-1 mb-1"
-                                data-sr-css-class-toggle-target="#cache_logs-{{ $record->id }}"
-                                data-sr-css-class-toggle-class="h-200" data-sr-css-class-toggle-applied-text="More"
-                                data-sr-css-class-toggle-not-applied-text="Less">
-                                More
-                            </span>
-                        </td>
-                        <td>
-                            <x-Backend.index-table-info :record="$record" :userList="$userListCache" options="true"/>
+                            <x-Backend.index-table-info :record="$record" :userList="$userListCache"
+                                :options="$index_table_info_options" />
                         </td>
                         <td>
                             <div class="mt-2 mb-2">

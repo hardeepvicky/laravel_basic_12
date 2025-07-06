@@ -172,7 +172,7 @@ class WebController extends Controller
         $cache_params = [];
 
         if (is_string($cache_prefix) && $cache_prefix) {
-            $cache_key = "request_" . $cache_prefix . "_user_" . $this->getAuthUserId();
+            $cache_key = "request_" . $cache_prefix . "_user-" . $this->getAuthUserId();
 
             $cache_params = self::getCache($cache_key);
 
@@ -222,15 +222,13 @@ class WebController extends Controller
         $search_variables = [];
 
         if (is_string($cache_prefix) && $cache_prefix) {
-            $cache_key = "getConditions_" . $cache_prefix . "_user_" . $this->getAuthUserId();
+            $cache_key = "conditions-" . $cache_prefix . "_user_" . $this->getAuthUserId();
         }
 
         $request_params = request()->all();
 
-        foreach($request_params as $k => $v)
-        {
-            if (is_string($v))
-            {
+        foreach ($request_params as $k => $v) {
+            if (is_string($v)) {
                 $request_params[$k] = urldecode($v);
             }
         }
@@ -418,13 +416,9 @@ class WebController extends Controller
         ];
     }
 
-    protected function getPaginagteRecords($builder, $cache_key_prefix)
+    protected function getPaginagteRecords($builder, String $cache_key_prefix)
     {
-        $cache_key = null;
-
-        if (is_string($cache_key_prefix) && $cache_key_prefix) {
-            $cache_key = "pagination_limit-" . $cache_key_prefix . "-user-" . $this->getAuthUserId();
-        }
+        $cache_key = $cache_key_prefix . "-pagination_limit";
 
         $params = $this->getRequestData($cache_key, [
             ["key" => "pagination_limit", "default" => $this->paginationLimit],

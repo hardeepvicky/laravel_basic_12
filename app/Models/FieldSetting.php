@@ -10,7 +10,7 @@ class FieldSetting extends BaseMongoModel
     {
         $model_class = str_class_name_without_namespace($model_class);
 
-        $cache_key = "-getDynamicFields-" . $model_class;
+        $cache_key = "dynamic-field-labels";
 
         $fields = self::getCache($cache_key);
 

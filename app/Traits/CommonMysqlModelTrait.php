@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Traits;
 
 use App\Exceptions\UserException;
@@ -19,32 +20,6 @@ trait CommonMysqlModelTrait
         return $nextId;
     }
 
-    public function getDisplayFieldsToUser()
-    {
-        $attributes = $this->getAttributes();
-
-        if (!$attributes) {
-            $table_info = $this->getTableInfo($this->getTable());
-
-            if (isset($table_info['columns']) || $table_info['columns']) {
-                foreach ($table_info['columns'] as $field => $field_attr) {
-                    $attributes[] = $field;
-                }
-            }
-        }
-
-        $arrayHelper = new ArrayHelper($attributes);
-        $arrayHelper->unsetValues([
-            "is_pre_defined",
-            "can_edit",
-            "cannot_edit_reason_array",
-            "can_delete",
-            "cannot_delete_reason_array",
-        ]);
-
-        return $arrayHelper->getData();
-    }
-
     public function getFieldLabels()
     {
         $labels = [];
@@ -54,7 +29,6 @@ trait CommonMysqlModelTrait
         // d($table_info, true);
 
         $eception_list = [
-            "code",
             "can_edit",
             "cannot_edit_reason_array",
             "can_delete",

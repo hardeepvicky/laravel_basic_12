@@ -305,7 +305,7 @@ class FileUtility
         return false;
     }
 
-    public function writeLog(string $path, string $file, $contents)
+    public function writeContent(string $path, string $file, $contents)
     {
         $path = str_path_normalize_to_save_to_data_base($path);
 
