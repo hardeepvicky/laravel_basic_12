@@ -90,6 +90,7 @@ abstract class Controller
 
     protected function saveSqlLog()
     {
+
         if (App::environment('production')) {
             return false;
         }

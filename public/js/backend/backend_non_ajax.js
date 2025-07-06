@@ -60,6 +60,7 @@ $(document).ready(function () {
 
     $(".sr-paragraph").srParagraph();
 
+
     /** -------------------------------------------------------- */
 
     $("input.invalid-char").on("keypress", function (event) {
@@ -258,6 +259,11 @@ $(document).ready(function () {
         _this.clearForm();
         summary_table_with_search(_this);
     });
+
+
+    $(".auto-suggesstion-list").each(function () {
+
+    });
 });
 
 function summary_table_with_search(ele, callback) {
@@ -297,4 +303,257 @@ function summary_table_with_search(ele, callback) {
             $.loader.hide();
         },
     });
+}
+
+function suggestion_list(textarea, suggestionBox, suggestion_data, url) {
+    textarea = $(textarea);
+    if (textarea.length <= 0) {
+        console.error("textarea notr found");
+        return;
+    }
+
+    suggestionBox = $(suggestionBox);
+
+    if (suggestionBox.length <= 0) {
+        console.error("suggestionBox not foud");
+        return;
+    }
+
+    if (url || suggestion_data) {
+
+    }
+    else {
+        console.error("either data-url or data-suggestions is required");
+        return;
+    }
+
+    let currentSearchTerm = '';
+    let currentTriggerIndex = -1; // Position of the '#' character
+    let activeSuggestionIndex = -1; // For keyboard navigation
+
+    // --- Dummy Data (Replace with AJAX call to Laravel backend) ---
+    // suggestion_data = [{
+    //     id: 1,
+    //     type: 'user',
+    //     name: 'Admin',
+    //     display: '#user.id:1 (Admin)'
+    // },
+    // {
+    //     id: 2,
+    //     type: 'user',
+    //     name: 'Editor',
+    //     display: '#user.id:2 (Editor)'
+    // },
+    // {
+    //     id: 3,
+    //     type: 'user',
+    //     name: 'User',
+    //     display: '#user.id:3 (User)'
+    // },
+    // {
+    //     id: 4,
+    //     type: 'user',
+    //     name: 'John Doe',
+    //     display: '#user.id:4 (John Doe)'
+    // },
+    // {
+    //     id: 5,
+    //     type: 'product',
+    //     name: 'Laptop',
+    //     display: '#product.id:5 (Laptop)'
+    // },
+    // {
+    //     id: 6,
+    //     type: 'user',
+    //     name: 'Developer',
+    //     display: '#user.id:6 (Developer)'
+    // },
+    // {
+    //     id: 7,
+    //     type: 'user',
+    //     name: 'Jane Smith',
+    //     display: '#user.id:7 (Jane Smith)'
+    // },
+    // ];
+    // --- End Dummy Data ---
+
+    // Function to fetch suggestions (simulated or via AJAX)
+    const fetchSuggestions = function (term) {
+        if (url) {
+            return $.get(url, { query: term })
+                .done(function (data) {
+                    var responseData = ajaxHandleResponse(url, data);
+                    return responseData['data'];
+                })
+                .fail(function (jqXHR, textStatus, errorThrown) {
+                    $.events.onAjaxError("Error fetching suggestions : " + textStatus, errorThrown);
+                    return []; // Return empty array on error
+                });
+        }
+
+        return new $.Deferred().resolve(
+            suggestion_data.filter(s =>
+                s.name.toLowerCase().includes(term.toLowerCase()) ||
+                s.display.toLowerCase().includes(term.toLowerCase())
+            )
+        ).promise();
+    };
+
+    // Function to display suggestions
+    const displaySuggestions = function (suggestions) {
+        suggestionBox.empty().removeClass('hidden');
+        activeSuggestionIndex = -1; // Reset active index
+
+        if (suggestions.length === 0) {
+            suggestionBox.addClass('hidden');
+            return;
+        }
+
+        console.log(suggestions);
+
+        $.each(suggestions, function (index, suggestion) {
+            console.log(suggestion);
+            const $item = $('<div>')
+                .addClass('suggestion-item')
+                .text(suggestion.display)
+                .data('value', suggestion.name) // Store the #model.id:X part
+                .data('index', index); // For keyboard navigation
+
+            console.log($item.html());
+
+            $item.on('click', function () {
+                insertSuggestion($(this).data('value'));
+            });
+            suggestionBox.append($item);
+        });
+    };
+
+    // Function to insert selected suggestion into textarea
+    const insertSuggestion = function (value) {
+        const text = textarea.val();
+        const textBefore = text.substring(0, currentTriggerIndex);
+        const textAfter = text.substring(currentTriggerIndex + currentSearchTerm.length + 1); // +1 for the #
+
+        textarea.val(textBefore + value + ' ' + textAfter); // Add a space after insertion
+
+        hideSuggestions();
+
+        // Put cursor after the inserted text
+        const newCursorPos = (textBefore + value + ' ').length;
+
+        textarea[0].setSelectionRange(newCursorPos, newCursorPos);
+
+        textarea.focus();
+    };
+
+    // Function to hide suggestions
+    const hideSuggestions = function () {
+        suggestionBox.addClass('hidden').empty();
+        currentSearchTerm = '';
+        currentTriggerIndex = -1;
+        activeSuggestionIndex = -1;
+        suggestionData = [];
+    };
+
+    // --- Event Handlers ---
+
+    let inputTimeout = null; // For debouncing AJAX calls
+
+    textarea.on('input', function (e) {
+        const cursorPosition = this.selectionStart;
+        const text = textarea.val();
+
+        // Find the most recent '#' before the cursor that's not preceded by a space/newline
+        let lastHashIndex = -1;
+        for (let i = cursorPosition - 1; i >= 0; i--) {
+            if (text[i] === '#') {
+                lastHashIndex = i;
+                break;
+            }
+            if (/\s/.test(text[
+                i
+            ])) { // If space/newline found before '#', it's not a direct hash trigger
+                lastHashIndex = -1;
+                break;
+            }
+        }
+
+        if (lastHashIndex !== -1 && lastHashIndex < cursorPosition) {
+            currentTriggerIndex = lastHashIndex;
+            // Extract the term after '#' up to the cursor or a space/newline
+            const partialTerm = text.substring(lastHashIndex + 1, cursorPosition).split(/\s/)[0];
+            currentSearchTerm = partialTerm;
+            // console.log("search term", currentSearchTerm);
+
+            if (currentSearchTerm.length > 0) {
+                // Debounce the fetch request
+                clearTimeout(inputTimeout);
+                inputTimeout = setTimeout(function () {
+                    fetchSuggestions(currentSearchTerm).done(
+                        function (data) {
+
+                            if (url)
+                            {
+                                data = ajaxHandleResponse(url, data);
+                                suggestions = data['data'];
+                            }
+
+                            displaySuggestions(suggestions);
+                        });
+                }, 250); // Wait 250ms after last input
+            } else {
+                hideSuggestions();
+            }
+        } else {
+            hideSuggestions();
+        }
+    });
+
+    textarea.on('keydown', function (e) {
+        if (suggestionBox.hasClass('hidden')) return;
+
+        const $items = suggestionBox.children('.suggestion-item');
+        if ($items.length === 0) return;
+
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            activeSuggestionIndex = (activeSuggestionIndex + 1) % $items
+                .length;
+            updateActiveSuggestion($items);
+            $items.eq(activeSuggestionIndex)[0].scrollIntoView({
+                block: 'nearest'
+            });
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            activeSuggestionIndex = (activeSuggestionIndex - 1 + $items
+                .length) % $items.length;
+            updateActiveSuggestion($items);
+            $items.eq(activeSuggestionIndex)[0].scrollIntoView({
+                block: 'nearest'
+            });
+        } else if (e.key === 'Enter') {
+            if (activeSuggestionIndex !== -1) {
+                e.preventDefault(); // Prevent newline in textarea
+                insertSuggestion($items.eq(activeSuggestionIndex).data(
+                    'value'));
+            }
+        } else if (e.key === 'Escape') {
+            hideSuggestions();
+        }
+    });
+
+    // Handle clicks outside the suggestion box to hide it
+    $(document).on('click', function (e) {
+        if (!textarea.is(e.target) && !suggestionBox.has(e.target)
+            .length) {
+            hideSuggestions();
+        }
+    });
+
+    function updateActiveSuggestion($items) {
+        $items.removeClass('selected');
+        if (activeSuggestionIndex !== -1) {
+            $items.eq(activeSuggestionIndex).addClass('selected');
+        }
+    }
 }

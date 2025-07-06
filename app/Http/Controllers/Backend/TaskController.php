@@ -6,6 +6,7 @@ use App\Exceptions\UserException;
 use App\Helpers\DateUtility;
 use App\Helpers\LaravelExtend;
 use App\Models\FieldSetting;
+use App\Models\Tag;
 use App\Models\Task;
 use App\Models\Type;
 use App\Models\User;
@@ -47,6 +48,7 @@ class TaskController extends BackendController
             ["field" => "priority", "type" => "int"],
             ["field" => "is_draft", "type" => "int"],
         ]);
+        
 
         $builder = $this->modelClass::where($conditions);
 
@@ -201,13 +203,13 @@ class TaskController extends BackendController
             "end_date_time" => [],
             "priority" => [],
             "is_send_notification" => "",
+            "tags" => []
         ];
     }
 
     private function _common_validation_messages()
     {
-        return [
-        ];
+        return [];
     }
 
     public function store(Request $request)
@@ -233,6 +235,8 @@ class TaskController extends BackendController
 
         try {
             $save_data = $this->_beforeSave($validatedData);
+
+            unset($save_data['tags']);
 
             $this->model->fill($save_data);
 
@@ -275,41 +279,52 @@ class TaskController extends BackendController
 
     private function _saveOthers($validatedData)
     {
-        
+        if (isset($validatedData['tags']))
+        {
+            $tags = explode(",", $validatedData['tags']);
+
+            $this->model->tags()->delete();
+
+            foreach($tags as $tag)
+            {
+                $this->model->tags()->create([
+                    "type" => "Task",
+                    "name" => $tag,
+                    "foreign_id" => $this->model->id,
+                    "foreign_table" => $this->model->getTable(),
+                    "foreign_model" => str_class_name_without_namespace(get_class($this->model)),
+                ]);
+            }
+        }
     }
 
     protected function beforeEdit($model)
     {
         parent::beforeEdit($model);
 
-        if (in_array($model->status, [Task::STATUS_CONFIRM, Task::STATUS_IN_PROGRESS, Task::STATUS_COMPLETED, Task::STATUS_VERIFIED]))
-        {
+        if (in_array($model->status, [Task::STATUS_CONFIRM, Task::STATUS_IN_PROGRESS, Task::STATUS_COMPLETED, Task::STATUS_VERIFIED])) {
             $type_conditions = [];
             $type_conditions['type'] = Type::getType($this->model, "status");
             $status_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
 
-            $msg = "Can't edit, Task Status is " . $status_list[$model->status];            
+            $msg = "Can't edit, Task Status is " . $status_list[$model->status];
 
             $edit_status_label = [];
 
-            foreach([Task::STATUS_DRAFT, Task::STATUS_CREATED, Task::STATUS_ASSIGNED] as $status)
-            {
+            foreach ([Task::STATUS_DRAFT, Task::STATUS_CREATED, Task::STATUS_ASSIGNED] as $status) {
                 $edit_status_label[] = $status_list[$status];
             }
 
             $msg .= ", Only Status with " . implode(", ", $edit_status_label);
 
             $msg .= " can be edit";
-            
+
             abort(ACTION_NOT_PROCEED, $msg);
         }
-
     }
     public function edit($id)
     {
-        $model = $this->model = $this->modelClass::findOrFail($id);
-
-        $model->afterFind();
+        $model = $this->model = $this->modelClass::with("tags")->findOrFail($id);
 
         $this->beforeEdit($this->model);
 
@@ -345,6 +360,8 @@ class TaskController extends BackendController
         try {
 
             $save_data = $this->_beforeSave($validatedData);
+
+            unset($save_data['tags']);
 
             $this->model->fill($save_data);
 

@@ -12,11 +12,16 @@ class ConsoleOutput extends OutputConsoleOutput
 
     private array $log_types = ["info", "error"];
 
-    public function addLog(string | array $data)
+    public function addLog(string | array $data, $depth = 0)
     {
+        if ($depth > 3)
+        {
+            return [];
+        }
+
         if (is_string($data)) {
             $this->addLogMessage($data);
-        } else {
+        } else if(is_array($data)) {
             $msg_list = [];
             foreach ($data as $k => $v) {
                 if (is_scalar($v)) {
@@ -27,12 +32,17 @@ class ConsoleOutput extends OutputConsoleOutput
 
                     $msg_list[] = $k . ":" . $v;
                 } else {
-                    $msg_list[] = $k . ":" . gettype($v);
+                    $this->addLog($v, $depth + 1);
                 }
             }
 
-            $this->addLogMessage(implode(", ", $msg_list));
+            if ($msg_list)
+            {
+                $this->addLogMessage(implode(", ", $msg_list));
+            }
         }
+
+        return [];
     }
 
     public function addLogMessage(string $msg, string $type = "info")
@@ -67,10 +77,13 @@ class ConsoleOutput extends OutputConsoleOutput
                     continue;
                 }
 
-                if ($arr[1] == "info") {
-                    $this->writeln('<info>' . ($arr[0]) . '</info>');
-                } else if ($arr[1] == "error") {
-                    $this->writeln('<error>' . ($arr[0]) . '</error>');
+                if  (isset($arr[0]))
+                {
+                    if ($arr[1] == "info") {
+                        $this->writeln('<info>' . ($arr[0]) . '</info>');
+                    } else if ($arr[1] == "error") {
+                        $this->writeln('<error>' . ($arr[0]) . '</error>');
+                    }
                 }
             }
         }

@@ -1,4 +1,5 @@
 <?php
+
 use App\Models\Task;
 ?>
 <div class="card" id="page-summary">
@@ -13,8 +14,9 @@ use App\Models\Task;
                     <tr class="border-bottom-primary">
                         <th><?= sortable_anchor('id', get_value_from_list($field_labels, 'id', 'id')) ?></th>
                         <th><?= sortable_anchor('name', get_value_from_list($field_labels, 'name', 'name')) ?></th>
-                        <th><?= sortable_anchor('task_type', get_value_from_list($field_labels, 'task_type', 'task_type')) ?></th>                        
-                        </th>                        
+                        <th><?= sortable_anchor('task_type', get_value_from_list($field_labels, 'task_type', 'task_type')) ?>
+                        </th>
+                        </th>
                         <th>Assign To</th>
                         <th><?= sortable_anchor('priority', get_value_from_list($field_labels, 'priority', 'priority')) ?>
                         </th>
@@ -29,60 +31,60 @@ use App\Models\Task;
                 </thead>
                 <tbody>
                     @foreach ($records as $record)
-                        <tr>
-                            <th scope="row">{{ $record->id }}</th>
-                            <td>{{ $record->name }}</td>
-                            <td>{{ get_value_from_list($task_type_list, $record->task_type) }}</td>
-                            <td>{{ $record->assignToUser?->getDisplayName() }}</td>
-                            <td>{{ $record->priority }}</td>
-                            <td>
-                                <div class="row" id="record-info-{{ $record->id }}">
-                                    <div class="col-sm-12">
-                                        <label class="info">
-                                            {{ get_value_from_list($field_labels, 'status', 'status') }} :
-                                            <span>{{ get_value_from_list($status_list, $record->status) }}</span>
-                                        </label>
+                    <tr>
+                        <th scope="row">{{ $record->id }}</th>
+                        <td>{{ $record->name }}</td>
+                        <td>{{ get_value_from_list($task_type_list, $record->task_type) }}</td>
+                        <td>{{ $record->assignToUser?->getDisplayName() }}</td>
+                        <td>{{ $record->priority }}</td>
+                        <td>
+                            <div class="row" id="record-info-{{ $record->id }}">
+                                <div class="col-sm-12">
+                                    <label class="info">
+                                        {{ get_value_from_list($field_labels, 'status', 'status') }} :
+                                        <span>{{ get_value_from_list($status_list, $record->status) }}</span>
+                                    </label>
 
-                                        <label class="info">
-                                            {{ get_value_from_list($field_labels, 'start_date_time', 'start_date_time') }}
-                                            :
-                                            <span>{{ if_date($record->start_date_time) }}</span>
-                                        </label>
-                                        <label class="info">
-                                            {{ get_value_from_list($field_labels, 'end_date_time', 'end_date_time') }}
-                                            :
-                                            <span>{{ if_date($record->end_date_time) }}</span>
-                                        </label>
-                                    </div>
+                                    <label class="info">
+                                        {{ get_value_from_list($field_labels, 'start_date_time', 'start_date_time') }}
+                                        :
+                                        <span>{{ if_date($record->start_date_time) }}</span>
+                                    </label>
+                                    <label class="info">
+                                        {{ get_value_from_list($field_labels, 'end_date_time', 'end_date_time') }}
+                                        :
+                                        <span>{{ if_date($record->end_date_time) }}</span>
+                                    </label>
                                 </div>
-                            </td>
-                            <td>
-                                <x-Backend.index-table-info :record="$record" :userList="$userListCache" />
-                            </td>
-                            <td>
-                                <x-Backend.summary-comman-actions :id="$record->id" :routePrefix="$routePrefix" />
-                                <span class="btn btn-info btn-sm css-toggler mt-1 mb-1"
-                                    data-sr-css-class-toggle-target="#record-{{ $record->id }}"
-                                    data-sr-css-class-toggle-class="hidden" data-sr-css-class-toggle-applied-text="Show"
-                                    data-sr-css-class-toggle-not-applied-text="Hide">
-                                    Show
-                                </span>
-                            </td>
-                        </tr>
-                        <tr id="record-{{ $record->id }}" class="hidden">
-                            <td></td>
-                            <td colspan="7">
-                                <div class="row">
-                                    <div class="col-md-6 col-lg-4">
-                                        <label class="info">
-                                            {{ get_value_from_list($field_labels, 'description', 'description') }}
-                                            :
-                                            <span>{{ $record->description }}</span>
-                                        </label>
-                                    </div>
+                            </div>
+                        </td>
+                        <td>
+                            <x-Backend.index-table-info :record="$record" :userList="$userListCache" />
+                        </td>
+                        <td>
+                            <x-Backend.summary-comman-actions :id="$record->id" :routePrefix="$routePrefix" />
+                            <span class="btn btn-info btn-sm css-toggler mt-1 mb-1"
+                                data-sr-css-class-toggle-target="#record-{{ $record->id }}"
+                                data-sr-css-class-toggle-class="hidden" data-sr-css-class-toggle-applied-text="Show"
+                                data-sr-css-class-toggle-not-applied-text="Hide">
+                                Show
+                            </span>
+                        </td>
+                    </tr>
+                    <tr id="record-{{ $record->id }}" class="hidden">
+                        <td></td>
+                        <td colspan="7">
+                            <div class="row">
+                                <div class="col-md-6 col-lg-4">
+                                    <label class="info">
+                                        {{ get_value_from_list($field_labels, 'description', 'description') }}
+                                        :
+                                        <span>{!! nl2br($record->description) !!}</span>
+                                    </label>
                                 </div>
-                            </td>
-                        </tr>
+                            </div>
+                        </td>
+                    </tr>
                     @endforeach
                 </tbody>
             </table>

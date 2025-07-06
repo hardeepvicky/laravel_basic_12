@@ -31,6 +31,8 @@ class BaseModel extends Model implements BaseModelInterface
 
     protected static array $list_fields = ["id", "name"];
 
+    protected static array $fields_containg_tags = [];
+
     public array $custom_errors = [];
 
     protected $guarded = ["id"];
@@ -53,8 +55,8 @@ class BaseModel extends Model implements BaseModelInterface
             $model->beforeSave();
         });
 
-        self::created(function ($model) {
-            $model->forgotCache();
+        self::created(function ($model) {            
+            $model->afterSave();
         });
 
         self::updating(function ($model) {
@@ -70,7 +72,7 @@ class BaseModel extends Model implements BaseModelInterface
         });
 
         self::updated(function ($model) {
-            $model->forgotCache();
+            $model->afterSave();
         });
 
         self::deleting(function ($model) {
@@ -92,6 +94,19 @@ class BaseModel extends Model implements BaseModelInterface
         }
     }
 
+    public function afterSave()
+    {
+        $this->forgotCache();
+
+        foreach(static::$fields_containg_tags as $field)
+        {
+            if ($this->{$field})
+            {
+                $this->{$field} = ModuleLink::saveLinksFromStringPattern($this, $this->{$field});
+            }
+        }
+    }
+
     public function beforeDelete() {
         if ($this->custom_errors) {
             throw new UserException("Some errors in model while deleting", UserException::ERROR_USER_DATA_WRONG, [
@@ -109,6 +124,14 @@ class BaseModel extends Model implements BaseModelInterface
                 $field_url_field = $field . "_url";
 
                 $this->{$field_url_field} = $fileUtility->getUrl($this->{$field});
+            }
+        }
+
+        foreach(static::$fields_containg_tags as $field)
+        {
+            if ($this->{$field})
+            {
+                $this->{$field} = ModuleLink::parseStringToMakeLinks($this, $this->{$field});
             }
         }
     }

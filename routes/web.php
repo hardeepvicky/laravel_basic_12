@@ -22,6 +22,7 @@ use App\Http\Controllers\Backend\RoleController;
 use App\Http\Controllers\Backend\SettingsController;
 use App\Http\Controllers\Backend\StateController;
 use App\Http\Controllers\Backend\SubDepartmentController;
+use App\Http\Controllers\Backend\TagsController;
 use App\Http\Controllers\Backend\TaskController;
 use App\Http\Controllers\Backend\TypeController;
 use App\Http\Controllers\Backend\UserCategoryController;
@@ -318,6 +319,13 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission']], functi
 
         $name = "de_activate";
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+    });
+
+    $route_prefix = "tags";
+    $controllerClass = TagsController::class;
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+        $name = "ajax_get_list";
+        Route::get($name, [$controllerClass, $name])->name($name);
     });
 
 

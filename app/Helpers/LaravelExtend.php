@@ -5,12 +5,18 @@ namespace App\Helpers;
 use App\Jobs\Backend\JobForgotPassword;
 use App\Jobs\Backend\JobSendEmailUserOtp;
 use App\Jobs\Backend\JobSendEmailOnRegisration;
+use App\Models\BaseModelInterface;
 use App\Models\User;
 use Exception;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Request;
+use Illuminate\Support\Facades\Route;
 use PDOException;
+use ReflectionClass;
+use Illuminate\Support\Str;
 
 class LaravelExtend
 {
@@ -227,5 +233,78 @@ class LaravelExtend
         }
 
         return $models;
+    }
+
+    /**
+     * Checks if a model has a specific Eloquent relationship defined.
+     *
+     * @param Model|string $modelInstanceOrClass The model instance or fully qualified class name.
+     * @param string $relationName The name of the relation method (e.g., 'posts', 'user').
+     * @return bool
+     */
+    public static function mysqlModelHasRelation(Model|string $modelInstanceOrClass, string $relationName): bool
+    {
+        try {
+            $model = is_string($modelInstanceOrClass) ? app($modelInstanceOrClass) : $modelInstanceOrClass;
+            $reflectionClass = new ReflectionClass($model);
+
+            // Check if the method exists
+            if (!$reflectionClass->hasMethod($relationName)) {
+                return false;
+            }
+
+            $method = $reflectionClass->getMethod($relationName);
+
+            // Check if the method is public and has no required parameters
+            // (Eloquent relations are typically public methods with no mandatory params)
+            if (!$method->isPublic() || $method->getNumberOfRequiredParameters() > 0) {
+                return false;
+            }
+
+            // Attempt to invoke the method on a new instance of the model
+            // We use a new instance to avoid side effects on an existing one
+            // and to ensure all dynamic properties are set up.
+            $relation = $method->invoke($model);
+
+            // Check if the returned value is an instance of a Laravel Relation
+            return $relation instanceof Relation;
+        } catch (\ReflectionException $e) {
+            // Method or class not found, or other reflection error
+            return false;
+        } catch (\Throwable $e) {
+            // Any other exception during invocation (e.g., if relation method relies on instantiated data)
+            // This is a safety net; ideally, relation methods don't throw on clean instances.
+            return false;
+        }
+    }
+
+    public static function getViewLinkForModel(String $model_name, $id)    
+    {        
+        $placeholder = Str::snake($model_name);
+
+        $route_prefix = strtolower(trim($model_name));
+
+        $route_postfix_array = ["index"];
+
+        foreach($route_postfix_array as $route_postfix)
+        {
+            if (Route::has($route_prefix . "." . $route_postfix))
+            {
+                $params = [];
+
+                if ($route_postfix == "show")
+                {
+                    $params = [$placeholder => $id];
+                }
+                else if ($route_postfix == "index")
+                {
+                    $params = ["id" => $id];
+                }
+
+                return route($route_prefix . "." . $route_postfix, $params);
+            }
+        }
+
+        return null;
     }
 }

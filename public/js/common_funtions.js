@@ -66,6 +66,7 @@ function ajaxHandleResponse(url, response, callback) {
         if (typeof callback == "function") {
             callback(responseJson);
         }
+
     } else if (typeof responseJson["msg"] != "undefined") {
         $.events.onUserError(responseJson["msg"]);
     } else {
@@ -73,6 +74,8 @@ function ajaxHandleResponse(url, response, callback) {
             url: url,
         });
     }
+
+    return responseJson;
 }
 
 function ajaxGetJson(url, callback) {

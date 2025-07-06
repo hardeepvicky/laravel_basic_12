@@ -274,3 +274,50 @@ label.form-label {
 .template-table {
     border: 1px solid var(--light-gray);
 }
+
+.textarea-wrapper {
+    position: relative;
+    /* Crucial for positioning the suggestion box */
+    width: 100%;
+    /* Or fixed width if preferred */
+    max-width: 600px;
+    /* Example max width */
+    margin: 0 auto;
+    /* Center it */
+}
+
+.suggestion-box {
+    position: absolute;
+    /* Position relative to .textarea-wrapper */
+    z-index: 1000;
+    background-color: white;
+    border: 1px solid #ccc;
+    max-height: 200px;
+    overflow-y: auto;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    /* Match textarea width */
+    margin-top: 4px;
+    /* Small gap below textarea */
+    border-radius: 0.25rem;
+    /* Tailwind-like rounded corners */
+}
+
+.suggestion-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+    font-size: 0.9rem;
+    color: #333;
+}
+
+.suggestion-item:last-child {
+    border-bottom: none;
+}
+
+.suggestion-item:hover,
+.suggestion-item.selected {
+    background-color: #f0f0f0;
+    color: #2563eb;
+    /* Blue from Tailwind */
+}

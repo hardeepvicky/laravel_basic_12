@@ -3,13 +3,9 @@
 namespace App\Models;
 
 use App\Exceptions\UserException;
-use App\Helpers\ArrayHelper;
-use App\Helpers\DateUtility;
 use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\Unique;
 
 class Task extends BaseModel
 {
@@ -24,14 +20,12 @@ class Task extends BaseModel
         'cannot_edit_reason_array' => 'array'
     ];
 
+    protected static array $fields_containg_tags = ["description"];
+
     public static array $child_model_class = [
         Task::class => [
             "foreignKey" => "parent_id",
             "preventDelete" => true,
-        ],
-        TaskRecurringDate::class => [
-            "foreignKey" => "task_id",
-            "preventDelete" => false,
         ],
     ];
 
@@ -67,10 +61,9 @@ class Task extends BaseModel
     {
         $rules = [];
 
-        if (!$request->input("is_draft", false)) 
-        {
+        if (!$request->input("is_draft", false)) {
             $rules["priority"] = ["required"];
-            $rules["assign_to_user_id"] = ["required"];            
+            $rules["assign_to_user_id"] = ["required"];
             $rules["start_date_time"] = ["required"];
             $rules["end_date_time"] = ["required"];
         }
@@ -83,9 +76,11 @@ class Task extends BaseModel
         return $this->belongsTo(User::class, "assign_to_user_id");
     }
 
-    public function taskRecurringDate()
+    public function tags()
     {
-        return $this->hasMany(TaskRecurringDate::class);
+        $class_name = str_class_name_without_namespace($this);
+
+        return $this->hasMany(Tag::class, 'foreign_id')->where("foreign_model", $class_name);
     }
 
     protected function getDisplayNameAttribute()
@@ -123,16 +118,14 @@ class Task extends BaseModel
     {
         $class_info = get_class_info(static::class);
 
-        
+
         switch ($field) {
             case "task_type":
 
                 $list = [];
 
-                foreach($class_info['constants'] as $constant => $label)
-                {
-                    if (strpos($constant, "TASK_TYPE_") !== false)
-                    {
+                foreach ($class_info['constants'] as $constant => $label) {
+                    if (strpos($constant, "TASK_TYPE_") !== false) {
                         $list[] = $label;
                     }
                 }
@@ -141,19 +134,17 @@ class Task extends BaseModel
 
                 break;
 
-             case "status":
+            case "status":
                 $list = [];
 
-                foreach($class_info['constants'] as $constant => $label)
-                {
-                    if (strpos($constant, "STATUS_") !== false)
-                    {
+                foreach ($class_info['constants'] as $constant => $label) {
+                    if (strpos($constant, "STATUS_") !== false) {
                         $list[] = $label;
                     }
                 }
 
                 return $list;
-            break;
+                break;
         }
     }
 }
