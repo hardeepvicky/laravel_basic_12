@@ -25,6 +25,10 @@ class Department extends BaseModel
             "foreignKey" => "department_id",
             "preventDelete" => true
         ],
+        Task::class => [
+            "foreignKey" => "dept_id",
+            "preventDelete" => true,
+        ]
     ];
 
     protected function getDisplayNameAttribute()

@@ -423,7 +423,7 @@ use App\Models\User;
                         $("#name").addClass("validate-alpha-numeric");
                         $("#country_id").val(my_country['id']).trigger("change");
                     }
-                }).trigger("change");
+                }).trigger("change", {pageLoad : true});
 
                 $("#country_id").change(function() {
                     var v = $(this).val();
@@ -443,8 +443,6 @@ use App\Models\User;
                         });
                     }
                 });
-
-                $(".cascade-drop-down").trigger("change", {pageLoad : true});
             });
         });
     </script>

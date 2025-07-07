@@ -93,6 +93,10 @@ class User extends Authenticatable implements BaseModelInterface
             "preventDelete" => false,
             "label" => "User's Allow IP"
         ],
+        Task::class => [
+            "foreignKey" => "assign_to_user_id",
+            "preventDelete" => true,
+        ]
     ];
 
     protected static array $unique_fields = ["email"];
@@ -140,7 +144,7 @@ class User extends Authenticatable implements BaseModelInterface
         });
 
         self::created(function ($model) {
-            $model->forgotCache();
+            $model->afterSave();
         });
 
         self::updating(function ($model) {
@@ -158,7 +162,7 @@ class User extends Authenticatable implements BaseModelInterface
         });
 
         self::updated(function ($model) {
-            $model->forgotCache();
+            $model->afterSave();
         });
 
         self::deleting(function ($model) {});
@@ -174,6 +178,35 @@ class User extends Authenticatable implements BaseModelInterface
             throw new UserException("Some errors in model while saving", UserException::ERROR_USER_DATA_WRONG, [
                 "custom_errors" => $this->custom_errors
             ]);
+        }
+    }
+
+    public function afterSave()
+    {
+        $this->forgotCache();
+
+        foreach(Department::$child_model_class as $child_model_class => $arr)
+        {
+            if (isset($arr['foreignKey']))
+            {
+                if (!is_array($arr['foreignKey']))
+                {
+                    $arr['foreignKey'] = [$arr['foreignKey']];
+                }
+
+                foreach($arr['foreignKey'] as $foreign_field)
+                {
+                    switch($child_model_class)
+                    {
+                        case Task::class:
+                            $this->tasks()->update([
+                                $foreign_field => $this->dept_id
+                            ]);
+                            break;
+                    }
+                    
+                }
+            }
         }
     }
 
@@ -231,6 +264,11 @@ class User extends Authenticatable implements BaseModelInterface
     public function userAllowIp()
     {
         return $this->hasMany(UserAllowIp::class, 'user_id');
+    }
+
+    public function tasks()
+    {
+        return $this->hasMany(Task::class, 'assign_to_user_id');
     }
 
     public function roles()
