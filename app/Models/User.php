@@ -279,7 +279,6 @@ class User extends Authenticatable implements BaseModelInterface
         if ($request->get("type") == self::TYPE_INTERNAL) {
             $field_rules["name"] = ["required"];
             $field_rules["dept_id"] = ["required"];
-            $field_rules["sub_dept_id"] = ["required"];
             $field_rules["desg_id"] = ["required"];
         }
 
