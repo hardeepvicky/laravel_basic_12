@@ -13,14 +13,15 @@ return new class extends Migration
     {
         Schema::create('tags', function (Blueprint $table) {
             $table->id();
-            $table->string("main_model");
-            $table->string("main_table");
-            $table->string("main_id");
+            $table->string("main_model")->nullable();
+            $table->string("main_table")->nullable();
+            $table->string("main_table_field")->nullable();
+            $table->string("main_id")->nullable();
             $table->string("name");
             $table->string("search_term");
-            $table->unsignedBigInteger("foreign_id")->nullable();
             $table->string("foreign_table")->nullable();
             $table->string("foreign_model")->nullable();
+            $table->unsignedBigInteger("foreign_id")->nullable();
             $table->timestamps();
             $table->bigInteger("created_by")->nullable();
             $table->bigInteger("updated_by")->nullable();

@@ -140,11 +140,14 @@ class MyMigration extends Migration
 
         foreach($foreignKeys as $foreign_key)
         {
-            $output->writeLogToConsole($foreign_key->constraint_name);
+            if (in_array($foreign_key->foreign_key_column, $fields))
+            {
+                $output->writeLogToConsole($foreign_key->constraint_name);
 
-            Schema::table($tableName, function (Blueprint $table) use($foreign_key) {                
-                $table->dropForeign($foreign_key->constraint_name);
-            });
+                Schema::table($tableName, function (Blueprint $table) use($foreign_key) {                
+                    $table->dropForeign($foreign_key->constraint_name);
+                });
+            }
         }
 
         $columns = $this->getColumns($tableName);

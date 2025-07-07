@@ -219,7 +219,7 @@ class WebController extends Controller
     protected function getConditions($cache_prefix, array $array, bool $return_key_value_pair_conditions = false)
     {
         $conditions = [];
-        $search_variables = [];
+        $search_variables = $cache_variables = [];
 
         if (is_string($cache_prefix) && $cache_prefix) {
             $cache_key = "conditions-" . $cache_prefix . "_user_" . $this->getAuthUserId();
@@ -313,10 +313,22 @@ class WebController extends Controller
                     $conditions[] = [$field, $op, $parse_value];
                 }
             }
+
+            if (isset($row['cache'])) 
+            {
+                if ($row['cache'])
+                {
+                    $cache_variables[$view_field] = $value;
+                }
+            }
+            else
+            {
+                $cache_variables[$view_field] = $value;
+            }
         }
 
         if (isset($cache_key)) {
-            self::addCache($cache_key, $search_variables, laravel_constant("cache_time.summary_search"));
+            self::addCache($cache_key, $cache_variables, laravel_constant("cache_time.summary_search"));
         }
 
         if (!isset($this->data['search'])) {

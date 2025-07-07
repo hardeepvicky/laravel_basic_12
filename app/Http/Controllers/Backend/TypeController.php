@@ -36,6 +36,7 @@ class TypeController extends BackendController
         $cache_key = $cache_key_prefix . "-index";
 
         $conditions = $this->getConditions($cache_key, [
+            ["field" => "id", "type" => "int", "cache" => false],
             ["field" => "name", "type" => "string", "view_field" => "name"],
             ["field" => "code", "type" => "string", "view_field" => "code"],
             ["field" => "type", "type" => "string", "view_field" => "type"],

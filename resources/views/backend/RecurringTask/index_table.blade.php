@@ -13,12 +13,14 @@ use App\Models\Task;
                     <tr class="border-bottom-primary">
                         <th><?= sortable_anchor('id', get_value_from_list($field_labels, 'id', 'id')) ?></th>
                         <th><?= sortable_anchor('name', get_value_from_list($field_labels, 'name', 'name')) ?></th>
-                        <th><?= sortable_anchor('task_type', get_value_from_list($field_labels, 'task_type', 'task_type')) ?></th>
+                        <th><?= sortable_anchor('task_type', get_value_from_list($field_labels, 'task_type', 'task_type')) ?>
+                        </th>
                         <th><?= sortable_anchor('description', get_value_from_list($field_labels, 'description', 'description')) ?>
-                        </th>                        
+                        </th>
                         <th>Assign To</th>
                         <th><?= sortable_anchor('priority', get_value_from_list($field_labels, 'priority', 'priority')) ?>
                         </th>
+                        <th>Task created by system</th>
                         <th>Task Info</th>
                         <th>
                             <?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?>
@@ -35,9 +37,16 @@ use App\Models\Task;
                             <td>{{ $record->name }}</td>
                             <td>{{ get_value_from_list($task_type_list, $record->task_type) }}</td>
                             <td>{{ $record->description }}</td>
-                            
-                            <td>{{ $record->assignToUser?->getDisplayName() }}</td>
+
+                            <td>
+                                <label class="info">
+                                    {{ get_value_from_list($field_labels, 'dept_id', 'dept_id') }}
+                                    : <span>{{ $record->department?->getDisplayName() }}</span>
+                                    > {{ $record->assignToUser?->getDisplayName() }}
+                                </label>
+                            </td>
                             <td>{{ $record->priority }}</td>
+                            <td>{{ $record->tasks->count() }}</td>
                             <td>
                                 <div class="row" id="record-info-{{ $record->id }}">
                                     <div class="col-sm-12">
@@ -47,14 +56,13 @@ use App\Models\Task;
                                             <span>{{ get_value_from_list($recurring_type_list, $record->recurring_type) }}</span>
                                         </label>
                                         <label class="info">
-                                            {{ get_value_from_list($field_labels, 'start_date_time', 'start_date_time') }}
+                                            {{ get_value_from_list($field_labels, 'task_should_be_complete_in', 'task_should_be_complete_in') }}
                                             :
-                                            <span>{{ if_date($record->start_date_time) }}</span>
-                                        </label>
-                                        <label class="info">
-                                            {{ get_value_from_list($field_labels, 'task_should_be_complete_in', 'task_should_be_complete_in') }} :
                                             <span>{{ get_value_from_list($complete_in_list, $record->task_should_be_complete_in) }}</span>
                                         </label>
+                                        <x-Backend.celec_date_time
+                                            label="{{ get_value_from_list($field_labels, 'start_date_time', 'start_date_time') }}"
+                                            :value="$record->start_date_time" />
                                     </div>
                                 </div>
                             </td>
@@ -95,9 +103,40 @@ use App\Models\Task;
                                                                 <td>{{ $i + 1 }}</td>
                                                                 <td>{{ if_date($recurringTaskDate->date) }}</td>
                                                                 <td>
-                                                                    @if($recurringTaskDate->task_id)
-                                                                        <a target="_blank" href="{{ route("task.index", ["id" => $recurringTaskDate->task_id]) }}">View Task</a>
+                                                                    @if ($recurringTaskDate->task_id)
+                                                                        <a target="_blank"
+                                                                            href="{{ route('task.index', ['id' => $recurringTaskDate->task_id]) }}">View
+                                                                            Task</a>
                                                                     @endif
+                                                                </td>
+                                                            </tr>
+                                                        @endforeach
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 col-lg-4">
+                                        <div class="card">
+                                            <div class="card-header border-l-primary card-no-border">
+                                                <h3>Task created by system</h3>
+                                            </div>
+                                            <div class="card-body">
+                                                <table class="table table-sm summary-table table-bordered">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Sr. No.</th>
+                                                            <th>Task</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach ($record->tasks as $i => $task)
+                                                            <tr>
+                                                                <td>{{ $i + 1 }}</td>
+                                                                <td>
+                                                                    <a target="_blank" href="{{ route('task.index', ['id' => $task->id]) }}">
+                                                                        {{ $task->getDisplayName() }}
+                                                                    </a>
                                                                 </td>
                                                             </tr>
                                                         @endforeach

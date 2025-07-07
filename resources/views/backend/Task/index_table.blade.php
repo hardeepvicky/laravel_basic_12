@@ -20,6 +20,7 @@ use App\Models\Task;
                         <th>Assign To</th>
                         <th><?= sortable_anchor('priority', get_value_from_list($field_labels, 'priority', 'priority')) ?>
                         </th>
+                        <th>{{ get_value_from_list($field_labels, 'tag_name', 'tag_name') }}</th>
                         <th>Task Info</th>
                         <th>
                             <?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?>
@@ -35,8 +36,15 @@ use App\Models\Task;
                         <th scope="row">{{ $record->id }}</th>
                         <td>{{ $record->name }}</td>
                         <td>{{ get_value_from_list($task_type_list, $record->task_type) }}</td>
-                        <td>{{ $record->assignToUser?->getDisplayName() }}</td>
+                        <td>
+                            <label class="info">
+                                {{  get_value_from_list($field_labels, 'dept_id', 'dept_id') }}
+                                : <span>{{ $record->department?->getDisplayName() }}</span>
+                                > {{ $record->assignToUser?->getDisplayName() }}
+                            </label>
+                        </td>
                         <td>{{ $record->priority }}</td>
+                        <td>{{ implode(", ", $record->tags->pluck("name")->toArray()) }}</td>
                         <td>
                             <div class="row" id="record-info-{{ $record->id }}">
                                 <div class="col-sm-12">
@@ -46,15 +54,12 @@ use App\Models\Task;
                                     </label>
 
                                     <label class="info">
-                                        {{ get_value_from_list($field_labels, 'start_date_time', 'start_date_time') }}
-                                        :
-                                        <span>{{ if_date($record->start_date_time) }}</span>
+                                        {{ get_value_from_list($field_labels, 'duration', 'duration') }} :
+                                        <span>{{ get_value_from_list($duration_list, $record->duration) }}</span>
                                     </label>
-                                    <label class="info">
-                                        {{ get_value_from_list($field_labels, 'end_date_time', 'end_date_time') }}
-                                        :
-                                        <span>{{ if_date($record->end_date_time) }}</span>
-                                    </label>
+
+                                    <x-Backend.celec_date_time label="{{ get_value_from_list($field_labels, 'start_date_time', 'start_date_time') }}" :value="$record->start_date_time"/>
+                                    <x-Backend.celec_date_time label="{{ get_value_from_list($field_labels, 'end_date_time', 'end_date_time') }}" :value="$record->end_date_time"/>
                                 </div>
                             </div>
                         </td>

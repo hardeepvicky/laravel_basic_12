@@ -38,6 +38,7 @@ class TagsController extends BackendController
         $cache_key = $cache_key_prefix . "-index";
 
         $conditions = $this->getConditions($cache_key, [
+            ["field" => "id", "type" => "int", "cache" => false],
             ["field" => "name", "type" => "string"],
             ["field" => "type", "type" => ""],
         ]);
@@ -74,23 +75,38 @@ class TagsController extends BackendController
             {
                 $search_term = trim($search_term);
                 
-                $records = $this->modelClass::where("search_term", 'LIKE', '%' . $search_term . '%')->limit(20)->get();
+                $records = $this->modelClass::where("search_term", 'LIKE', '%' . $search_term . '%')
+                            ->orderBy("main_model", "ASC")
+                            ->orderBy("search_term", "ASC")
+                            ->limit(20)
+                            ->get();
 
                 if  ($records && $records->count() > 0)
                 {
                     foreach($records as $record)
                     {
-                        $response['data'][] = [
-                            "display" => $record->main_model . " -> " . $record->name,
-                            "name" => "#" . $record->main_model . ".id:" . $record->main_id . " (" . $record->name . ")"
-                        ];
+                        $row = [];
+
+                        if ($record->main_model)
+                        {
+                            $row['display'] = $record->main_model . " -> " . $record->name;
+                            $row['name'] = "#" . $record->main_model . ".id:" . $record->main_id . " (" . $record->name . ")";
+                        }
+                        else
+                        {
+                            $row['display'] = $record->name;
+                            $row['name'] = "#" . $row['display'];
+                        }
+
+                        $response['data'][] = $row;
                     }
                 }     
             }
         }
         catch(Exception $ex)
         {
-            Log::error($ex->getMessage());
+            // Log::error($ex->getMessage());
+            throw $ex;
         }
 
         return $this->responseJson($response);

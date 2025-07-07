@@ -15,7 +15,10 @@ $.ajaxSetup({
         //$.loader.init().setInfo("Loading...").show();
     },
     complete : function (xhr, status) {
-        //$.loader.hide();
+        if (typeof $.loader == "object")
+        {
+            $.loader.hide();
+        }
     }
 });
 

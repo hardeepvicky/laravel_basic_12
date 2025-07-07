@@ -102,7 +102,6 @@ class SettingsController extends BackendController
             UserRole::class,
             Type::class,
             FieldSetting::class,
-            PageSetting::class,
             Employee::class,
             City::class,
             Enquiry::class,
@@ -143,8 +142,6 @@ class SettingsController extends BackendController
             }
 
             $fields = $ref_model->getFieldLabels();
-
-            // d($fields, true);
 
             $model = FieldSetting::where("type", $type)->first();
             if (!$model) {

@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Exceptions\UserException;
-use App\Helpers\DateUtility;
 use App\Helpers\LaravelExtend;
-use App\Models\FieldSetting;
+use App\Models\Department;
+use App\Models\RecurringTask;
 use App\Models\Tag;
 use App\Models\Task;
 use App\Models\Type;
@@ -14,7 +14,6 @@ use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Validator;
 
 class TaskController extends BackendController
 {
@@ -31,6 +30,8 @@ class TaskController extends BackendController
 
         $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
 
+        // dd($records->toArray(), true);
+
         $this->setForView(compact("records"));
 
         return $this->viewIndex(__FUNCTION__);
@@ -41,20 +42,31 @@ class TaskController extends BackendController
         $cache_key = $cache_key_prefix . "-index";
 
         $conditions = $this->getConditions($cache_key, [
-            ["field" => "id", "type" => "int"],
+            ["field" => "id", "type" => "int", "cache" => false],
             ["field" => "task_type", "type" => "string_equal"],
             ["field" => "name", "type" => "string"],
+            ["field" => "dept_id", "type" => "int"],
             ["field" => "assign_to_user_id", "type" => "int"],
             ["field" => "priority", "type" => "int"],
             ["field" => "is_draft", "type" => "int"],
         ]);
-        
+
+        $tag_conditions = $this->getConditions($cache_key . "-2", [
+            ["field" => "name", "type" => "string", "view_field" => "tag_name"],
+        ]);
 
         $builder = $this->modelClass::where($conditions);
 
         $builder->with([
-            "assignToUser",
+            "department", "assignToUser", "tags",
         ]);
+
+        if ($tag_conditions)
+        {
+            $builder->wherehas("tags", function($query) use($tag_conditions) {
+                $query->where($tag_conditions);
+            });
+        }
 
         if ($apply_sort) {
             $cache_key_for_sort = $cache_key_prefix . "-index-extra-params";
@@ -163,12 +175,34 @@ class TaskController extends BackendController
                 $type_conditions['or_id'] = $saved_type_id;
             }
         }
-
         $status_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
 
-        $field_labels = FieldSetting::getDynamicFields($this->modelClass);
+        $type_conditions = [];
+        $type_conditions['type'] = Type::getType(new RecurringTask(), "task_should_be_complete_in");
+        if ($this->model->duration) {
+            $saved_type_id = Type::getIdFromCode($type_conditions['type'], $this->model->duration);
 
-        $this->setForView(compact("user_list", "task_type_list", "status_list", "field_labels"));
+            if ($saved_type_id) {
+                $type_conditions['or_id'] = $saved_type_id;
+            }
+        }
+
+        $duration_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
+
+        // d($this->model->duration);
+        // d(LaravelExtend::getQueryLog());
+        // d($duration_list, true);
+
+        $dept_conditions = [];
+        if ($this->model->dept_id) {
+            $dept_conditions['or_id'] = $this->model->dept_id;
+        }
+
+        $department_list = Department::getList("id", "display_name", $dept_conditions, "list_display_order");
+
+        $field_labels = $this->model->getFieldLabels();
+
+        $this->setForView(compact("user_list", "task_type_list", "status_list",  "department_list", "duration_list", "field_labels"));
 
         return parent::beforeViewRender();
     }
@@ -195,7 +229,6 @@ class TaskController extends BackendController
     {
         return [
             "is_draft" => "",
-            "task_type" => ["required"],
             "name" => ["required"],
             "description" => ["nullable"],
             "assign_to_user_id" => [],
@@ -203,7 +236,7 @@ class TaskController extends BackendController
             "end_date_time" => [],
             "priority" => [],
             "is_send_notification" => "",
-            "tags" => []
+            "tag_name" => []
         ];
     }
 
@@ -222,8 +255,8 @@ class TaskController extends BackendController
 
         $this->model = new $this->modelClass();
 
-        $rules = LaravelExtend::merge_validation_rules($rules, $this->model->getUniqueValidationRules($request));
         $rules = LaravelExtend::merge_validation_rules($rules, $this->model->getRequiedIfRules($request));
+        $rules = LaravelExtend::merge_validation_rules($rules, $this->model->getUniqueValidationRules($request));
 
         $messages = array_merge($messages, []);
 
@@ -236,7 +269,7 @@ class TaskController extends BackendController
         try {
             $save_data = $this->_beforeSave($validatedData);
 
-            unset($save_data['tags']);
+            unset($save_data['tag_name']);
 
             $this->model->fill($save_data);
 
@@ -274,26 +307,47 @@ class TaskController extends BackendController
             $validatedData['status'] = Task::STATUS_DRAFT;
         }
 
+        $validatedData['end_date_time'] = null;
+
+        if (isset($validatedData['start_date_time']) && isset($validatedData['duration']))
+        {
+            $validatedData['end_date_time'] = RecurringTask::getEndDate($validatedData['start_date_time'], $validatedData['duration']);
+        }
+
+        // dd($validatedData);
+
         return $validatedData;
     }
 
     private function _saveOthers($validatedData)
     {
-        if (isset($validatedData['tags']))
+        if (isset($validatedData['tag_name']))
         {
-            $tags = explode(",", $validatedData['tags']);
+            $tag_names = explode(",", $validatedData['tag_name']);
 
             $this->model->tags()->delete();
 
-            foreach($tags as $tag)
+            foreach($tag_names as $tag_name)
             {
-                $this->model->tags()->create([
-                    "type" => "Task",
-                    "name" => $tag,
-                    "foreign_id" => $this->model->id,
-                    "foreign_table" => $this->model->getTable(),
-                    "foreign_model" => str_class_name_without_namespace(get_class($this->model)),
-                ]);
+                $model_class_name = str_class_name_without_namespace($this->modelClass);
+
+                if (!$model_class_name)
+                {
+                    throw new UserException("could not found model_class_name");
+                }
+
+                $save_data = [
+                    "name" => $tag_name,
+                    "search_term" =>  $tag_name,
+                    "foreign_model" => $model_class_name,
+                    "foreign_id" => $this->model->id
+                ];
+
+                // d($save_data, true);
+
+                $tag = new Tag($save_data);
+
+                $this->model->tags()->save($tag);
             }
         }
     }
@@ -346,8 +400,10 @@ class TaskController extends BackendController
 
         $rules = $this->_common_validation_rules();
 
-        $rules = LaravelExtend::merge_validation_rules($rules, $this->model->getUniqueValidationRules($request));
         $rules = LaravelExtend::merge_validation_rules($rules, $this->model->getRequiedIfRules($request));
+        $rules = LaravelExtend::merge_validation_rules($rules, $this->model->getUniqueValidationRules($request));
+
+        // d($rules);
 
         $messages = $this->_common_validation_messages();
 
@@ -355,13 +411,17 @@ class TaskController extends BackendController
 
         $validatedData = $request->validate($rules, $messages);
 
+        // d($validatedData);
+
         DB::beginTransaction();
 
         try {
 
             $save_data = $this->_beforeSave($validatedData);
 
-            unset($save_data['tags']);
+            unset($save_data['tag_name']);
+
+            // dd($save_data);
 
             $this->model->fill($save_data);
 

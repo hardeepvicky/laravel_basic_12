@@ -105,6 +105,9 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission']], functi
         $name = "ajax_get";
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
 
+        $name = "ajax_get_list";
+        Route::get($name, [$controllerClass, $name])->name($name);
+
         $name = "activate";
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
 

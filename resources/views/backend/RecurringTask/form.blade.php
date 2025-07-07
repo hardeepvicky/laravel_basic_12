@@ -32,16 +32,7 @@ use App\Helpers\DateUtility;
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-6 col-lg-4">
-                            <div class="form-group mb-3">
-                                <?php
-                                $field = 'task_type';
-                                $label = get_value_from_list($field_labels, $field, $field);
-                                ?>
-                                <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
-                                    :list="$task_type_list" value="{{ $model->{$field}  }}" mandatory="true" class="select2" />
-                            </div>
-                        </div>
+                        
                         <div class="col-md-6 col-lg-4">
                             <div class="form-group mb-3">
                                 <?php
@@ -65,13 +56,33 @@ use App\Helpers\DateUtility;
                     </div>
                     <div class="row is_draft-block is_draft-block-0">
                         <div class="col-md-12 col-lg-6">
-                            <div class="form-group mb-3 ">
+                            <div class="form-group mb-3">
+                                <?php
+                                $field = 'dept_id';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$department_list"
+                                    :value="$model->{$field}" 
+                                    class="select2 cascade-drop-down"
+                                    data-sr-cascade-target="#assign_to_user_id"
+                                    data-sr-cascade-url="/user/ajax_get_list?=dept_id={v}" 
+                                    mandatory="true"
+                                />
+                            </div>
+                            <div class="form-group mb-3">
                                 <?php
                                 $field = 'assign_to_user_id';
                                 $label = get_value_from_list($field_labels, $field, $field);
                                 ?>
+                                <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" data-value="{{ $model->{$field} }}" mandatory="true" class="select2" mandatory="true"/>
+                            </div>
+                            <div class="form-group mb-3">
+                                <?php
+                                $field = 'task_type';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
                                 <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
-                                    :list="$user_list" value="{{ $model->{$field}  }}" mandatory="true" class="select2" />
+                                    :list="$task_type_list" value="{{ $model->{$field}  }}" mandatory="true" class="select2" />
                             </div>
                             <div class="form-group mb-3 ">
                                 <?php
@@ -81,7 +92,6 @@ use App\Helpers\DateUtility;
                                 <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
                                     :list="$recurring_type_list" value="{{ $model->{$field}  }}" mandatory="true" class="select2" />
                             </div>
-                            
                             <div class="form-group mb-3 recurring_type_non_custom">
                                 <?php
                                 $field = 'start_date_time';
@@ -89,7 +99,7 @@ use App\Helpers\DateUtility;
                                 $value = $model->{$field};
                                 if ($value instanceof  \Illuminate\Support\Carbon)
                                 {
-                                    $value = $value->format(DateUtility::DATE_OUT_FORMAT);
+                                    $value = $value->format(DateUtility::DATETIME_OUT_FORMAT);
                                 }
                                 ?>
                                 <x-Inputs.text-field :id="$field" :name="$field" :label="$label"
@@ -252,7 +262,8 @@ use App\Helpers\DateUtility;
                 }
 
                 start_date_picker = flatpickr("#start_date_time", {
-                    dateFormat: constants.dateFormat,
+                    dateFormat: constants.dateTimeFormat,
+                    enableTime: true,
                 });
 
                 if (screen_name == "add")
@@ -286,7 +297,8 @@ use App\Helpers\DateUtility;
                     afterRowAdd(_table, last_id, _tr)
                     {
                         _tr.find(".will-date-picker").flatpickr({
-                            dateFormat: constants.dateFormat,
+                            dateFormat: constants.dateTimeFormat,
+                            enableTime: true,
                         });
                     }
                 });
@@ -296,6 +308,8 @@ use App\Helpers\DateUtility;
                 });
 
                 $("#is_draft").change(show_hide_field);
+
+                $(".cascade-drop-down").trigger("change", {pageLoad : true});
 
                 show_hide_field();
             })

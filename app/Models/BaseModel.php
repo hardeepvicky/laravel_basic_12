@@ -13,6 +13,7 @@ use App\Traits\MysqlTableInfoTrait;
 use App\Traits\StorageTrait;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 
 class BaseModel extends Model implements BaseModelInterface
@@ -94,10 +95,33 @@ class BaseModel extends Model implements BaseModelInterface
         }
     }
 
+    protected function convertTimeZoneBeforeQueryToDatabase()
+    {
+        foreach($this->casts as $field => $config)
+        {
+            if (strpos($config, "date") !== false)
+            {
+                if ($this->{$field} && $this->{$field} instanceof Carbon)
+                {
+                    if ($this->{$field}->timezoneName != "UTC")
+                    {
+                        $new_field = $this->{$field}->setTimezone("UTC");
+                        $this->{$field} = $new_field;
+                    }
+                }
+            }
+        }
+    }
+
     public function afterSave()
     {
         $this->forgotCache();
 
+        
+    }
+
+    public function saveModuleLinksFromString()
+    {
         foreach(static::$fields_containg_tags as $field)
         {
             if ($this->{$field})
@@ -105,7 +129,7 @@ class BaseModel extends Model implements BaseModelInterface
                 ModuleLink::saveLinksFromStringPattern($this, $this->{$field});
             }
         }
-    }
+    } 
 
     public function beforeDelete() {
         if ($this->custom_errors) {
@@ -126,7 +150,10 @@ class BaseModel extends Model implements BaseModelInterface
                 $this->{$field_url_field} = $fileUtility->getUrl($this->{$field});
             }
         }
+    }
 
+    public function parseTagsForModuleLinking()
+    {
         foreach(static::$fields_containg_tags as $field)
         {
             if ($this->{$field})
@@ -136,20 +163,40 @@ class BaseModel extends Model implements BaseModelInterface
         }
     }
 
+    public function convertTimeZoneForDisplay()
+    {
+        foreach($this->casts as $field => $config)
+        {
+            if (strpos($config, "date") !== false)
+            {
+                if ($this->{$field} && $this->{$field} instanceof Carbon)
+                {
+                    if ($this->{$field}->timezoneName != "UTC")
+                    {
+                        $new_field = $this->{$field}->setTimezone("Asia/");
+                        $this->{$field} = $new_field;
+                    }
+                }
+            }
+        }
+    }
+
     public static function fetchList(Builder $builder, String $key_field, String $value_field)
     {
         $model = new static();
         $table_name  = $model->getTable();
 
-        if (!in_array($key_field, static::$list_fields) && static::tableHaveField($table_name, $key_field)) {
-            static::$list_fields[] = $key_field;
+        $list_fields = static::getListFields();
+
+        if (!in_array($key_field, $list_fields) && static::tableHaveField($table_name, $key_field)) {
+            $list_fields[] = $key_field;
         }
 
-        if (!in_array($value_field, static::$list_fields) && static::tableHaveField($table_name, $value_field)) {
-            static::$list_fields[] = $value_field;
+        if (!in_array($value_field, $list_fields) && static::tableHaveField($table_name, $value_field)) {
+            $list_fields[] = $value_field;
         }
 
-        $builder->select(static::$list_fields);
+        $builder->select($list_fields);
 
         $records = $builder->get();
 
@@ -182,6 +229,11 @@ class BaseModel extends Model implements BaseModelInterface
     public static function getFileFields()
     {
         return static::$file_fields;
+    }
+
+    public static function getListFields()
+    {
+        return static::$list_fields;
     }
 
     public static function getUniqueFields()

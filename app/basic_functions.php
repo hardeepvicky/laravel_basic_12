@@ -291,7 +291,7 @@ function sortable_anchor(String $sort_by, String $title, array $attrs = [])
 function if_date_time($datetime)
 {
     if ($datetime) {
-        return DateUtility::getDate($datetime, DateUtility::DATETIME_OUT_FORMAT, 'Asia/Kolkata');
+        return DateUtility::getDate($datetime, DateUtility::DATETIME_OUT_FORMAT);
     }
 
     return "";
@@ -300,7 +300,7 @@ function if_date_time($datetime)
 function if_date($datetime)
 {
     if ($datetime) {
-        return DateUtility::getDate($datetime, DateUtility::DATE_OUT_FORMAT, 'Asia/Kolkata');
+        return DateUtility::getDate($datetime, DateUtility::DATE_OUT_FORMAT);
     }
 
     return "";

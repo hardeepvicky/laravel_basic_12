@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Helpers\ConsoleOutput;
+use App\Helpers\DateUtility;
 use App\Helpers\MyCommand;
 use App\Models\AutomateTask;
 use App\Models\CommandLog;
@@ -47,7 +48,6 @@ class TaskCommand extends MyCommand
                 'task_created' => 0,
                 "task_status_change_to_assigned" => 0,
             ];
-
             
             $records = RecurringTask::where("is_draft", 0)->get();
 
@@ -59,8 +59,10 @@ class TaskCommand extends MyCommand
                 }
             }
 
+            $now = DateUtility::getDate(null, DateUtility::DATETIME_FORMAT, DateUtility::$login_user_time_zone);
+
             $records = Task::where("status", Task::STATUS_CREATED)
-                ->whereDate("start_date_time", "<=", Carbon::today())
+                ->where("start_date_time", "<=", $now)
                 ->get();
 
             if ($records && $records->count() > 0)
@@ -71,7 +73,6 @@ class TaskCommand extends MyCommand
                     $counts['task_status_change_to_assigned']++;
                 }
             }
-
 
             $this->logUpdate([
                 "counts" => $counts

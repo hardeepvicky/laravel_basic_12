@@ -56,7 +56,15 @@ $(document).ready(function () {
 
     $(".i-data-table").idataTable();
 
-    $(".cascade-drop-down").cascade();
+    $(".cascade-drop-down").cascade({
+        beforeGet: function (src, url) {
+            $.loader.init().setInfo("Fetching...").show();
+            return url;
+        },
+        afterGet: function (src, dest, response) {
+            return response;
+        },
+    });
 
     $(".sr-paragraph").srParagraph();
 

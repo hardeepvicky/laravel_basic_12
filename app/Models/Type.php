@@ -26,7 +26,7 @@ class Type extends BaseModel
         return $this->name;
     }
 
-    
+
     public function getUniqueValidationRules(Request $request)
     {
         $field_rules = [
@@ -53,7 +53,7 @@ class Type extends BaseModel
             Task::class => [
                 "fields" => [
                     "task_type" => "Task Type",
-                    "status" => "Status",                    
+                    "status" => "Status",
                 ]
             ],
             RecurringTask::class => [
@@ -74,15 +74,22 @@ class Type extends BaseModel
         foreach ($types as $model_class => $arr) {
 
             $model = new $model_class();
-            
+
             $model_class_name = str_class_name_without_namespace($model_class);
 
             $model_class_display_name = $model->getClassDisplayName();
 
             if (isset($arr['fields']) && is_array($arr['fields']))
             {
-                $field_labels = FieldSetting::getDynamicFields($model);   
-                
+                if (method_exists($model, "getFieldLabels"))
+                {
+                    $field_labels = $model->getFieldLabels();
+                }
+                else
+                {
+                    $field_labels = FieldSetting::getDynamicFields($model);
+                }
+
                 foreach ($arr['fields'] as $field => $label) {
 
                     if (isset($field_labels[$field]))
@@ -108,15 +115,15 @@ class Type extends BaseModel
         foreach ($types as $model_class => $arr) {
 
             $model = new $model_class();
-            
+
             $model_class_name = str_class_name_without_namespace($model_class);
 
             $model_class_display_name = $model->getClassDisplayName();
 
             if (isset($arr['fields']) && is_array($arr['fields']))
             {
-                $field_labels = FieldSetting::getDynamicFields($model);   
-                
+                $field_labels = FieldSetting::getDynamicFields($model);
+
                 foreach ($arr['fields'] as $field => $label) {
 
                     if (!method_exists($model_class, "getCodeList"))
@@ -171,7 +178,6 @@ class Type extends BaseModel
                 $class_name = str_class_name_without_namespace($find_model_class);
                 return $class_name . "." . $find_field;
             }
-
         }
 
         throw new UserException("could not find $find_field of $find_model_class in types");

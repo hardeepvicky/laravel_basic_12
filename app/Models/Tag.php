@@ -16,11 +16,6 @@ class Tag extends BaseModel
         'display_name',
     ];
 
-    public function beforeSave()
-    {
-        $this->search_term = $this->main_model . "." . $this->name;
-    }
-
     protected function getDisplayNameAttribute()
     {
         return $this->getDisplayName();
@@ -34,7 +29,7 @@ class Tag extends BaseModel
     public function getUniqueValidationRules(Request $request)
     {
         $field_rules = [
-            "name" => [Rule::unique($this->connection . "." . $this->getTable(), "name")->where("main_model", $request->input("main_model"))],
+            "search_term" => [Rule::unique($this->connection . "." . $this->getTable(), "name")],
         ];
 
         if ($this->id) {

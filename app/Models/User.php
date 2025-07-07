@@ -38,6 +38,9 @@ class User extends Authenticatable implements BaseModelInterface
     protected $fillable = [
         'type',
         'user_category_id',
+        'dept_id',
+        'sub_dept_id',
+        'desg_id',
         'country_id',
         'name',
         'person_name',
@@ -181,6 +184,7 @@ class User extends Authenticatable implements BaseModelInterface
             ]);
         }
     }
+
     public function afterFind()
     {
         $fileUtility = new FileUtility(static::getStorageDisk());
@@ -194,7 +198,6 @@ class User extends Authenticatable implements BaseModelInterface
         }
     }
 
-
     public function userCategory()
     {
         return $this->belongsTo(UserCategory::class);
@@ -203,6 +206,21 @@ class User extends Authenticatable implements BaseModelInterface
     public function country()
     {
         return $this->belongsTo(Country::class);
+    }
+
+    public function department()
+    {
+        return $this->belongsTo(Department::class, "dept_id");
+    }
+
+    public function subDepartment()
+    {
+        return $this->belongsTo(SubDepartment::class, "sub_dept_id");
+    }
+
+    public function designation()
+    {
+        return $this->belongsTo(Designation::class, "desg_id");
     }
 
     public function userRole()
@@ -249,6 +267,20 @@ class User extends Authenticatable implements BaseModelInterface
                     }
                 }
             }
+        }
+
+        return $field_rules;
+    }
+
+    public function getRequiredIfRules(Request $request)
+    {
+        $field_rules = [];
+
+        if ($request->get("type") == self::TYPE_INTERNAL) {
+            $field_rules["name"] = ["required"];
+            $field_rules["dept_id"] = ["required"];
+            $field_rules["sub_dept_id"] = ["required"];
+            $field_rules["desg_id"] = ["required"];
         }
 
         return $field_rules;

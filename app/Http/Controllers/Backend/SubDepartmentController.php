@@ -40,6 +40,7 @@ class SubDepartmentController extends BackendController
         $cache_key = $cache_key_prefix . "-index";
 
         $conditions = $this->getConditions($cache_key, [
+            ["field" => "id", "type" => "int", "cache" => false],
             ["field" => "department_id", "type" => "int"],
             ["field" => "name", "type" => "string"],
             ["field" => "is_active", "type" => "int"],

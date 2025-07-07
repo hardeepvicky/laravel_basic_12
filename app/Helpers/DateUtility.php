@@ -32,7 +32,7 @@ class DateUtility
     const MINTUES = "minutes";
     const SECONDS = "seconds";
 
-    public static $login_user_time_zone = "+5:30";
+    public static $login_user_time_zone = 'Asia/Kolkata';
 
     /**
      * convert time string to standered date object 
@@ -67,8 +67,6 @@ class DateUtility
 
         if ($timezone) {
             $date->setTimezone(new \DateTimeZone($timezone));
-        } else if (self::$login_user_time_zone) {
-            $date->setTimezone(new \DateTimeZone(self::$login_user_time_zone));
         }
 
         return $date;
@@ -94,11 +92,7 @@ class DateUtility
 
         $format = $format ? $format : self::DATETIME_FORMAT;
 
-        if ($date) {
-            return $date->format($format);
-        } else {
-            return $date->format($format);
-        }
+        return $date->format($format);
     }
 
 
@@ -218,8 +212,6 @@ class DateUtility
         if (in_array($duration_type, [DateUtility::DAYS, DateUtility::WEEKS, DateUtility::MONTHS, DateUtility::YEARS])) {
             if ($format) {
                 $f = $format;
-            } else {
-                $f = DateUtility::DATE_FORMAT;
             }
         }
 

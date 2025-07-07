@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Backend;
 use App\Exceptions\UserException;
 use App\Helpers\DateUtility;
 use App\Helpers\LaravelExtend;
+use App\Models\Department;
 use App\Models\FieldSetting;
 use App\Models\RecurringTask;
 use App\Models\RecurringTaskDate;
@@ -43,6 +44,7 @@ class RecurringTaskController extends BackendController
         $cache_key = $cache_key_prefix . "-index";
 
         $conditions = $this->getConditions($cache_key, [
+            ["field" => "id", "type" => "int", "cache" => false],
             ["field" => "task_type", "type" => "string_equal"],
             ["field" => "name", "type" => "string"],
             ["field" => "assign_to_user_id", "type" => "int"],
@@ -53,8 +55,10 @@ class RecurringTaskController extends BackendController
         $builder = $this->modelClass::where($conditions);
 
         $builder->with([
+            "department",
             "assignToUser",
-            "recurringTaskDate"
+            "recurringTaskDate",
+            "tasks"
         ]);
 
         if ($apply_sort) {
@@ -126,9 +130,18 @@ class RecurringTaskController extends BackendController
 
         $complete_in_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
 
+        $dept_conditions = [];
+        if ($this->model->dept_id) {
+            $dept_conditions['or_id'] = $this->model->dept_id;
+        }
+
+        $department_list = Department::getList("id", "display_name", $dept_conditions, "list_display_order");
+
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
-        $this->setForView(compact("user_list", "task_type_list", "recurring_type_list", "complete_in_list", "field_labels"));
+        // $field_labels = $this->model->getFieldLabels();
+
+        $this->setForView(compact("user_list", "task_type_list", "recurring_type_list", "complete_in_list", "department_list", "field_labels"));
 
         return parent::beforeViewRender();
     }
@@ -157,11 +170,6 @@ class RecurringTaskController extends BackendController
             "task_type" => ["required"],
             "name" => ["required"],
             "description" => ["nullable"],
-            "assign_to_user_id" => [],
-            "recurring_type" => [],
-            "start_date_time" => [],
-            "priority" => [],
-            "task_should_be_complete_in" => [],
             "recurringTaskDate" => [],
             "is_send_notification" => "",
             "is_draft" => "",

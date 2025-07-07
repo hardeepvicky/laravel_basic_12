@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Exceptions\UserException;
+use App\Helpers\DateUtility;
 use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Http\Request;
@@ -15,8 +16,8 @@ class Task extends BaseModel
     ];
 
     protected $casts = [
-        'start_date_time' => 'date',
-        'end_date_time' => 'date',
+        'start_date_time' => 'datetime',
+        'end_date_time' => 'datetime',
         'cannot_edit_reason_array' => 'array'
     ];
 
@@ -46,6 +47,10 @@ class Task extends BaseModel
         if ($this->is_draft) {
             $this->status = self::STATUS_DRAFT;
         }
+        else if (!$this->id)
+        {
+            $this->status = self::STATUS_CREATED;
+        }
 
         return parent::beforeSave();
     }
@@ -62,13 +67,20 @@ class Task extends BaseModel
         $rules = [];
 
         if (!$request->input("is_draft", false)) {
-            $rules["priority"] = ["required"];
+            $rules["task_type"] = ["required"];
+            $rules["dept_id"] = ["required"];
             $rules["assign_to_user_id"] = ["required"];
+            $rules["priority"] = ["required"];
             $rules["start_date_time"] = ["required"];
-            $rules["end_date_time"] = ["required"];
+            $rules["duration"] = ["required"];            
         }
 
         return $rules;
+    }
+
+    public function department()
+    {
+        return $this->belongsTo(Department::class, "dept_id");
     }
 
     public function assignToUser()
@@ -91,6 +103,15 @@ class Task extends BaseModel
     public function getDisplayName()
     {
         return $this->name;
+    }
+
+    public function getFieldLabels()
+    {
+        $labels = parent::getFieldLabels();
+
+        $labels['tag_name'] = "Tags";
+
+        return $labels;
     }
 
     public function changeStatus($status)
@@ -139,6 +160,20 @@ class Task extends BaseModel
 
                 foreach ($class_info['constants'] as $constant => $label) {
                     if (strpos($constant, "STATUS_") !== false) {
+                        $list[] = $label;
+                    }
+                }
+
+                return $list;
+                break;
+
+            case "duration":
+                $list = [];
+
+                $class_info = get_class_info(RecurringTask::class);
+
+                foreach ($class_info['constants'] as $constant => $label) {
+                    if (strpos($constant, "COMPLETE_TIME_") !== false) {
                         $list[] = $label;
                     }
                 }

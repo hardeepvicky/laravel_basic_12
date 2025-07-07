@@ -42,6 +42,7 @@ class EmployeeController extends BackendController
         $cache_key = $cache_key_prefix . "-index";
 
         $conditions = $this->getConditions($cache_key, [
+            ["field" => "id", "type" => "int", "cache" => false],
             ["field" => "name", "type" => "string"],
             ["field" => "department_id", "type" => "int"],
             ["field" => "designation_id", "type" => "int"],

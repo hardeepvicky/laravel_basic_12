@@ -6,6 +6,8 @@ use App\Exceptions\UserException;
 use App\Helpers\FileUtility;
 use App\Helpers\LaravelExtend;
 use App\Models\Country;
+use App\Models\Department;
+use App\Models\Designation;
 use App\Models\FieldSetting;
 use Illuminate\Http\Request;
 use App\Models\User;
@@ -38,7 +40,11 @@ class UserController extends BackendController
 
         $user_category_list = UserCategory::getListCache();
 
-        $this->setForView(compact("records", "role_list", "user_category_list"));
+        $department_list = Department::getListCache();
+
+        $designation_list = Designation::getListCache();
+
+        $this->setForView(compact("records", "role_list", "user_category_list", "department_list", "designation_list"));
 
         return $this->viewIndex(__FUNCTION__);
     }
@@ -65,6 +71,7 @@ class UserController extends BackendController
         $cache_key = $cache_key_prefix;
 
         $conditions = $this->getConditions($cache_key_prefix, [
+            ["field" => "id", "type" => "int", "cache" => false],
             ["field" => "name", "type" => "string"],
             ["field" => "email", "type" => "string"],
             ["field" => "mobile", "type" => "string"],
@@ -89,7 +96,7 @@ class UserController extends BackendController
             }
         );
 
-        $builder->with(["userCategory", "userAllowIp"]);
+        $builder->with(["userCategory", "userAllowIp", "department", "subDepartment", "designation"]);
 
         if ($apply_sort) {
             $cache_key_for_sort = $cache_key_prefix . "-extra-params";
@@ -137,7 +144,22 @@ class UserController extends BackendController
         }
         $role_list = Role::getList("id", "display_name", $conditions);
 
-        $this->setForView(compact("role_list"));
+        $conditions = [];
+
+        if ($model && $model->dept_id) {
+            $conditions['or_id'] = $model->dept_id;
+        }
+        $department_list = Department::getList("id", "display_name", $conditions);
+
+        $conditions = [];
+
+        if ($model && $model->desg_id) {
+            $conditions['or_id'] = $model->desg_id;
+        }
+
+        $designation_list = Designation::getList("id", "display_name", $conditions);
+
+        $this->setForView(compact("role_list", "department_list", "designation_list"));
     }
 
     private function _common_validation_rules()
@@ -171,6 +193,7 @@ class UserController extends BackendController
 
         $model = new $this->modelClass();
 
+        $rules = LaravelExtend::merge_validation_rules($rules, $model->getRequiredIfRules($request));
         $rules = LaravelExtend::merge_validation_rules($rules, $model->getUniqueValidationRules($request));
 
         $rules = array_merge_recursive($rules, [
@@ -229,7 +252,7 @@ class UserController extends BackendController
 
     public function edit($id)
     {
-        $model = $this->modelClass::with(["userRole", "userAllowIp"])->findOrFail($id);
+        $model = $this->modelClass::with(["userRole", "userAllowIp", "department", "subDepartment", "designation"])->findOrFail($id);
         $model->afterFind();
 
         $this->beforeEdit($model);
@@ -265,6 +288,7 @@ class UserController extends BackendController
         $rules = $this->_common_validation_rules();
         $messages = $this->_common_validation_messages();
 
+        $rules = LaravelExtend::merge_validation_rules($rules, $model->getRequiredIfRules($request));
         $rules = LaravelExtend::merge_validation_rules($rules, $model->getUniqueValidationRules($request));
 
         // dd($rules);
@@ -415,5 +439,43 @@ class UserController extends BackendController
         }
 
         return $this->view(__FUNCTION__);
+    }
+
+    public function ajax_get_list()
+    {
+        $response = ["status" => 1];
+
+        try {
+            $conditions = $this->getConditions(null, [
+                ["field" => "name", "type" => "string"],
+                ["field" => "email", "type" => "string"],
+                ["field" => "mobile", "type" => "string"],
+                ["field" => "is_active", "type" => "int"],
+                ["field" => "type", "type" => "string_equal"],
+                ["field" => "user_category_id", "type" => "int"],
+                ["field" => "country_id", "type" => "int"],
+                ["field" => "dept_id", "type" => "int"],
+                ["field" => "sub_dept_id", "type" => "int"],
+                ["field" => "desg_id", "type" => "int"],
+            ]);
+
+            $records = $this->modelClass::where($conditions)->get();
+
+            $response['data'] = [];
+
+            foreach ($records as $record) {
+                $row = [
+                    "id" => $record->id,
+                    "name" => $record->getDisplayName(),
+                ];
+
+                $response['data'][] = $row;
+            }
+        } catch (Exception $ex) {
+            $response['status'] = 0;
+            $response['msg'] = $ex->getMessage();
+        }
+
+        return $this->responseJson($response);
     }
 }

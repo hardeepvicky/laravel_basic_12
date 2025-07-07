@@ -88,6 +88,34 @@ use App\Models\User;
                                     autocomplete="off" />
                             </div>
                         </div>
+                        <div class="col-md-6 col-lg-4 type-block type-block-{{ User::TYPE_INTERNAL }}">
+                            <div class="form-group mb-3">
+                                <x-Inputs.drop-down id="dept_id" name="dept_id" label="Department" :list="$department_list"
+                                    :value="$model->dept_id" 
+                                    class="select2 cascade-drop-down"
+                                    data-sr-cascade-target="#sub_dept_id"
+                                    data-sr-cascade-url="/sub-department/ajax_get_list/{v}" 
+                                    mandatory="true"
+                                />
+                            </div>
+                        </div>   
+                        <div class="col-md-6 col-lg-4 type-block type-block-{{ User::TYPE_INTERNAL }}">
+                            <div class="form-group mb-3">
+                                <x-Inputs.drop-down id="sub_dept_id" name="sub_dept_id" label="Sub Department" 
+                                    data-value="{{ $model->sub_dept_id }}" 
+                                    class="select2"
+                                />
+                            </div>
+                        </div>   
+                        <div class="col-md-6 col-lg-4 type-block type-block-{{ User::TYPE_INTERNAL }}">
+                            <div class="form-group mb-3">
+                                <x-Inputs.drop-down id="desg_id" name="desg_id" label="Designation" :list="$designation_list"
+                                    :value="$model->desg_id" 
+                                    class="select2"
+                                    mandatory="true"
+                                />
+                            </div>
+                        </div>   
                     </div>
                     @if ($is_add_form)
                         <div class="row">
@@ -356,6 +384,8 @@ use App\Models\User;
 
                     $("#inline-loader").show();
 
+                    $.loader.setInfo("Loading...").show();
+
                     $.post(url, data, function(responseText) {
                         console.log(responseText);
                         ajaxHandleResponse(url, responseText, function(response) {
@@ -414,9 +444,7 @@ use App\Models\User;
                     }
                 });
 
-                $(".cascade-drop-down").trigger("change", {
-                    pageLoad: true
-                });
+                $(".cascade-drop-down").trigger("change", {pageLoad : true});
             });
         });
     </script>

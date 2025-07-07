@@ -18,5 +18,6 @@ const constants = {
             cross : 'fas fa-times-circle'
         }
     },
-    dateFormat : 'd-M-Y'
+    dateFormat : 'd-M-Y',
+    dateTimeFormat : 'd-M-Y H:i',
 };
