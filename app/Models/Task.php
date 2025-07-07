@@ -24,10 +24,7 @@ class Task extends BaseModel
     protected static array $fields_containg_tags = ["description"];
 
     public static array $child_model_class = [
-        Task::class => [
-            "foreignKey" => "parent_id",
-            "preventDelete" => true,
-        ],
+        
     ];
 
     public const TASK_TYPE_PROJECT = "PROJECT";
