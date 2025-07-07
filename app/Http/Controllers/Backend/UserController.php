@@ -459,6 +459,11 @@ class UserController extends BackendController
                 ["field" => "desg_id", "type" => "int"],
             ]);
 
+            if (empty($conditions))
+            {
+                throw new UserException("No any condition applied");
+            }
+
             $records = $this->modelClass::where($conditions)->get();
 
             $response['data'] = [];

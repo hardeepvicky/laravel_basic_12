@@ -69,7 +69,7 @@ $page_header_links = [['title' => 'List', 'url' => route($routePrefix . '.index'
                                 :value="$model->{$field}" 
                                 class="select2 cascade-drop-down"
                                 data-sr-cascade-target="#assign_to_user_id"
-                                data-sr-cascade-url="/user/ajax_get_list?=dept_id={v}" 
+                                data-sr-cascade-url="/user/ajax_get_list?dept_id={v}" 
                                 mandatory="true"
                             />
                         </div>
