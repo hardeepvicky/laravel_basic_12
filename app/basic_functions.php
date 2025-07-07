@@ -972,29 +972,43 @@ function is_developer_role_login()
     return false;
 }
 
-function get_value_from_list($list, $key, $default = "")
+function get_value_from_list($list, $find_key, $default = "")
 {
-    if (is_null($key))
+    if (is_null($find_key))
     {
         return $default;
     }
 
-    if (!is_scalar($key))
+    if (!is_array($find_key))
     {
-        throw new UserException("arg 2 : key should be scaler, found : " . gettype($key));
+        if (!is_scalar($find_key))
+        {
+            throw new UserException("arg 2 : key should be scaler or array, found : " . gettype($find_key));
+        }
+        $keys = [$find_key];
+    }
+    else
+    {
+        $keys = $find_key;
     }
 
-    $key = trim($key);
+    foreach($keys as $key)
+    {
+        $key = trim($key);
 
-    if (isset($list[$key])) {
-        return $list[$key];
+        if (isset($list[$key])) {
+            return $list[$key];
+        }
     }
 
     foreach($list as $k => $v)
     {
-        if (strtolower($k) == strtolower($key))
+        foreach($keys as $key)
         {
-            return $v;
+            if (trim(strtolower($k)) == trim(strtolower($key)))
+            {
+                return $v;
+            }
         }
     }
 
@@ -1110,4 +1124,22 @@ function array_get_scaler_value_only(array $data)
     }
 
     return $list;
+}
+
+function get_value_from_object($obj, $keys, $default = "")
+{
+    if (!is_object($obj))
+    {
+        return $default;
+    }
+
+    foreach($keys as $key)
+    {
+        if ($obj->{$key})
+        {
+            return $obj->{$key};
+        }
+    }
+
+    return $default;
 }

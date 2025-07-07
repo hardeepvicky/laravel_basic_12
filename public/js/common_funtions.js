@@ -261,3 +261,11 @@ function add_form_to_body_and_submit(method, action, params) {
         $("#responseArea").removeClass("hidden"); // Show a message to the user
     }, 100);
 }
+
+
+function getTimeZone()
+{
+    const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+    return userTimeZone;
+}

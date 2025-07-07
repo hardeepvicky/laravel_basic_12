@@ -35,3 +35,7 @@ $(document).ajaxError(function (event, xhr, settings, errorString) {
         });
     }
 });
+
+$(function(){
+    $("input.timezone").val(getTimeZone());
+});

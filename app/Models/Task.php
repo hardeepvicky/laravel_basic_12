@@ -107,6 +107,8 @@ class Task extends BaseModel
         $labels = parent::getFieldLabels();
 
         $labels['tag_name'] = "Tags";
+        $labels['from_start_date'] = "From Start Date";
+        $labels['to_start_date'] = "To Start Date";
 
         return $labels;
     }

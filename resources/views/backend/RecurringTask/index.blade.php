@@ -61,6 +61,14 @@ $false = false;
                     <x-Inputs.drop-down :name="$field" :label="$label" :value="$search[$field]" :list="$yes_no_list"
                         class="select2" />
                 </div>
+                <div class="col-md-3 col-xl-2 mb-2">
+                    <?php
+                    $field = "recurring_type";
+                    $label = get_value_from_list($field_labels, $field, $field);
+                    ?>
+                    <x-Inputs.drop-down :name="$field" :label="$label" :value="$search[$field]" :list="$recurring_type_list"
+                        class="select2" />
+                </div>
             </div>
             <x-Backend.summary-search-form-footer :showPaginationDropDown="$false" />
         </form>

@@ -2,11 +2,15 @@
 
 use App\Helpers\DateUtility;
 use App\Helpers\LaravelExtend;
+use Illuminate\Support\Carbon;
+
+$created_at = $record->created_at;
+$updated_at = $record->updated_at;
 
 if ($option_array['show_as'] == "celec_datetime" || $option_array['show_as'] == "celec_date"):
 
-    $created_array = DateUtility::getCelecDate($record->created_at);
-    $updated_array = DateUtility::getCelecDate($record->updated_at);
+    $created_array = DateUtility::getCelecDate($created_at);
+    $updated_array = DateUtility::getCelecDate($updated_at);
 ?>
     <div class="celec_info">
         <div class="label label-header">Created</div>
@@ -27,11 +31,12 @@ if ($option_array['show_as'] == "celec_datetime" || $option_array['show_as'] == 
         <div class="divider"></div>
         <div class="label">By : {{ LaravelExtend::getCreatedByOrUpdatedBy($record->updated_by) }}</div>
     </div>
-<?php elseif ($option_array['show_as'] == "human_date" || $option_array['show_as'] == "human_datetime"): ?>
+<?php elseif ($option_array['show_as'] == "human_date" || $option_array['show_as'] == "human_datetime"): 
+?>
     <div class="celec_info">
         <div class="label label-header">Created</div>
         <div class="divider"></div>
-        <div class="label">{{ $record->created_at->diffForHumans() }}</div>
+        <div class="label">{{ $created_at->diffForHumans() }}</div>
         <div class="divider"></div>
         <div class="label">By : {{ LaravelExtend::getCreatedByOrUpdatedBy($record->created_by) }}</div>
     </div>
@@ -39,7 +44,7 @@ if ($option_array['show_as'] == "celec_datetime" || $option_array['show_as'] == 
     <div class="celec_info">
         <div class="label label-header">Updated</div>
         <div class="divider"></div>
-        <div class="label">{{ $record->updated_at->diffForHumans() }}</div>
+        <div class="label">{{ $updated_at->diffForHumans() }}</div>
         <div class="divider"></div>
         <div class="label">By : {{ LaravelExtend::getCreatedByOrUpdatedBy($record->updated_by) }}</div>
     </div>
@@ -59,7 +64,7 @@ if ($option_array['show_as'] == "celec_datetime" || $option_array['show_as'] == 
     <div class="celec_info">
         <div class="label label-header">Created</div>
         <div class="divider"></div>
-        <div class="label">{{ $record->created_at->format($format) }}</div>
+        <div class="label">{{ $created_at->format($format) }}</div>
         <div class="divider"></div>
         <div class="label">By : {{ LaravelExtend::getCreatedByOrUpdatedBy($record->created_by) }}</div>
     </div>
@@ -67,7 +72,7 @@ if ($option_array['show_as'] == "celec_datetime" || $option_array['show_as'] == 
     <div class="celec_info">
         <div class="label label-header">Updated</div>
         <div class="divider"></div>
-        <div class="label">{{ $record->updated_at->format($format) }}</div>
+        <div class="label">{{ $updated_at->format($format) }}</div>
         <div class="divider"></div>
         <div class="label">By : {{ LaravelExtend::getCreatedByOrUpdatedBy($record->updated_by) }}</div>
     </div>

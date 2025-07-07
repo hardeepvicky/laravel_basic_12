@@ -70,6 +70,8 @@ class LoginController extends WebController
 
     protected function authenticated(Request $request, $user)
     {
+        session()->put('login_user_timezone', $request->get("timezone"));
+
         return redirect($this->redirectTo);
     }
 

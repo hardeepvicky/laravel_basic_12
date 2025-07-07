@@ -10,6 +10,7 @@ use App\Models\User;
         <form class="theme-form" method="POST" action="{{ route('check_before_login') }}">
             @csrf
             <x-Inputs.text-field type="hidden" name="user_type" value="{{ User::TYPE_INTERNAL }}" />
+            <x-Inputs.text-field type="hidden" name="timezone" class="timezone" />
             <h2 class="text-center mb-2">Login</h2>
 
             <x-Backend.session-flash />

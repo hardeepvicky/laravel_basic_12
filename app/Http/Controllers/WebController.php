@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Session;
 
 class WebController extends Controller
 {
@@ -37,6 +38,13 @@ class WebController extends Controller
             $model = new $this->modelClass();
 
             $this->tableName = $model->getTable();
+        }
+
+        $login_user_timezone = Session::get("login_user_timezone");
+
+        if ($login_user_timezone)
+        {
+            DateUtility::$login_user_time_zone = new \DateTimeZone($login_user_timezone);
         }
     }
 
@@ -366,26 +374,30 @@ class WebController extends Controller
                 break;
 
             case "date":
-                $parse_value = DateUtility::getDate($value, DateUtility::DATE_FORMAT);
+                $format = DateUtility::DATE_FORMAT;
                 break;
 
             case "from_date":
-                $parse_value = DateUtility::getDate($value, DateUtility::DATE_FORMAT);
+                $format = DateUtility::DATE_FORMAT;
                 $op = '>=';
                 break;
 
             case "to_date":
-                $parse_value = DateUtility::getDate($value, DateUtility::DATE_FORMAT);
+                $format = DateUtility::DATE_FORMAT;
                 $op = '<=';
                 break;
 
+            case "datetime":
+                $format = DateUtility::DATETIME_FORMAT;
+                break;
+
             case "from_datetime":
-                $parse_value = DateUtility::getDate($value);
+                $format = DateUtility::DATETIME_FORMAT;
                 $op = '>=';
                 break;
 
             case "to_datetime":
-                $parse_value = DateUtility::getDate($value);
+                $format = DateUtility::DATETIME_FORMAT;
                 $op = '<=';
                 break;
 
@@ -420,6 +432,10 @@ class WebController extends Controller
             default:
                 $parse_value = $value;
                 break;
+        }
+
+        if (in_array($type, ["date", "from_date", "to_date", "datetime", "from_datetime", "to_datetime"])) {
+            $parse_value = DateUtility::getDate($value, $format, DateUtility::$login_user_time_zone);
         }
 
         return [

@@ -30,8 +30,6 @@ class TaskController extends BackendController
 
         $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
 
-        // dd($records->toArray(), true);
-
         $this->setForView(compact("records"));
 
         return $this->viewIndex(__FUNCTION__);
@@ -47,8 +45,11 @@ class TaskController extends BackendController
             ["field" => "name", "type" => "string"],
             ["field" => "dept_id", "type" => "int"],
             ["field" => "assign_to_user_id", "type" => "int"],
+            ["field" => "status", "type" => "string_equal"],
             ["field" => "priority", "type" => "int"],
             ["field" => "is_draft", "type" => "int"],
+            ["field" => "start_date_time", "type" => "from_date", "view_field" => "from_start_date"],
+            ["field" => "start_date_time", "type" => "to_date", "view_field" => "to_start_date"],
         ]);
 
         $tag_conditions = $this->getConditions($cache_key . "-2", [
@@ -271,6 +272,10 @@ class TaskController extends BackendController
 
             unset($save_data['tag_name']);
 
+            $save_data = $this->model->convertTimeZoneBeforeQueryToDatabase($save_data);
+
+            // dd($save_data);
+
             $this->model->fill($save_data);
 
             if (!$this->model->save()) {
@@ -420,6 +425,8 @@ class TaskController extends BackendController
             $save_data = $this->_beforeSave($validatedData);
 
             unset($save_data['tag_name']);
+
+            $save_data = $this->model->convertTimeZoneBeforeQueryToDatabase($save_data);
 
             // dd($save_data);
 

@@ -46,6 +46,7 @@ class RecurringTaskController extends BackendController
         $conditions = $this->getConditions($cache_key, [
             ["field" => "id", "type" => "int", "cache" => false],
             ["field" => "task_type", "type" => "string_equal"],
+            ["field" => "recurring_type", "type" => "string_equal"],
             ["field" => "name", "type" => "string"],
             ["field" => "assign_to_user_id", "type" => "int"],
             ["field" => "priority", "type" => "int"],

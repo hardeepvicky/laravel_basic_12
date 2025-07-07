@@ -3,7 +3,11 @@ namespace App\Traits;
 
 use App\Exceptions\UserException;
 use App\Helpers\ArrayHelper;
+use App\Helpers\DateUtility;
+use DateTime;
+use DateTimeZone;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use ReflectionClass;
 use ReflectionMethod;
@@ -200,4 +204,218 @@ trait CommonModelTrait
 
         return $this->load($relations);
     }
+
+    public function convertTimeZoneBeforeQueryToDatabase(array $data = [])
+    {
+        if (!DateUtility::$login_user_time_zone)
+        {
+            return;
+        }
+
+        $date_fields = [];
+
+        $table_info = $this->getTableInfo($this->getTable());
+
+        foreach($this->casts as $field => $config)
+        {
+            if (strpos($config, "date") !== false)
+            {
+                $date_fields[$field] = $config;
+            }
+        }
+
+        foreach($table_info['columns'] as $field => $field_arr)
+        {
+            if (!isset($date_fields[$field]))
+            {
+                if (in_array($field_arr['Type'], ["timestamp", "date", "datetime"]))
+                {
+                    $date_fields[$field] = "datetime";
+                }
+            }
+        }
+
+        if (empty($data))
+        {
+            foreach($date_fields as $field => $config)
+            {
+                if ($this->{$field})
+                {
+                    if ($this->{$field} instanceof Carbon)
+                    {
+                        if ($this->{$field}->timezoneName != "UTC")
+                        {
+                            $this->{$field}->setTimezone("UTC");
+                        }
+                    }
+                    else if ($this->{$field} instanceof DateTime)
+                    {
+                        $timezoneObject = $this->{$field}->getTimezone();
+
+                        $timezoneName = $timezoneObject->getName();
+
+                        if ($timezoneName != "UTC")
+                        {
+                            $this->{$field}->setTimezone(new DateTimeZone("UTC"));
+                        }
+                    }
+                    else
+                    {
+                        //consider as user input
+                        $new_field = DateUtility::getDateObj($this->{$field}, DateUtility::$login_user_time_zone);
+                        $new_field->setTimezone(new DateTimeZone("UTC"));
+                        $this->{$field} = $new_field->format('c');
+                    }
+                }
+            }
+        }
+        else
+        {
+            foreach($date_fields as $field => $config)
+            {
+                if (isset($data[$field]))
+                {
+                    if ($data[$field] instanceof Carbon)
+                    {
+                        if ($data[$field]->timezoneName != "UTC")
+                        {
+                            $data[$field]->setTimezone("UTC");
+                        }
+                    }
+                    else if ($data[$field] instanceof DateTime)
+                    {
+                        $timezoneObject = $data[$field]->getTimezone();
+
+                        $timezoneName = $timezoneObject->getName();
+
+                        if ($timezoneName != "UTC")
+                        {
+                            $data[$field]->setTimezone(new DateTimeZone("UTC"));
+                        }
+                    }
+                    else
+                    {
+                        //consider as user input
+
+                        $new_field = DateUtility::getDateObj($data[$field], DateUtility::$login_user_time_zone);
+                        $new_field->setTimezone(new DateTimeZone("UTC"));
+                        $data[$field] = $new_field->format('c');
+                    }
+                }
+            }
+
+            return $data;
+        }
+    }
+
+    public function convertTimeZoneForDisplay(array $data = [])
+    {
+        if (!DateUtility::$login_user_time_zone)
+        {
+            return;
+        }
+
+        $date_fields = [];
+
+        $table_info = $this->getTableInfo($this->getTable());
+
+        foreach($this->casts as $field => $config)
+        {
+            if (strpos($config, "date") !== false)
+            {
+                $date_fields[$field] = $config;
+            }
+        }
+
+        foreach($table_info['columns'] as $field => $field_arr)
+        {
+            if (!isset($date_fields[$field]))
+            {
+                if (in_array($field_arr['Type'], ["timestamp", "date", "datetime"]))
+                {
+                    $date_fields[$field] = $field_arr['Type'];
+                }
+            }
+        }
+
+        if (empty($data))
+        {
+            foreach($date_fields as $field => $config)
+            {
+                if ($this->{$field})
+                {
+                    $new_field = $field . "_original";
+
+                    $this->{$new_field} = $this->{$field};
+
+                    if ($this->{$field} instanceof Carbon)
+                    {
+                        if ($this->{$field}->timezoneName != DateUtility::$login_user_time_zone->getName())
+                        {
+                            $this->{$field} = $this->{$field}->tz(DateUtility::$login_user_time_zone);
+                        }     
+                    }
+                    else if ($this->{$field} instanceof DateTime)
+                    {
+                        $timezoneObject = $this->{$field}->getTimezone();
+
+                        $timezoneName = $timezoneObject->getName();
+
+                        if ($timezoneName != DateUtility::$login_user_time_zone->getName())
+                        {
+                            $this->{$new_field} = $this->{$field}->setTimezone(DateUtility::$login_user_time_zone);
+                        }                   
+                    }
+                    else
+                    {
+                        //consider as UTC
+                        $new_date = DateUtility::getDateObj($this->{$field});
+                        $new_date->setTimezone(DateUtility::$login_user_time_zone);
+                        $this->{$field} = $new_date->format('Y-m-d H:i:s T');
+                    }
+                }
+            }
+        }
+        else
+        {
+            foreach($date_fields as $field => $config)
+            {
+                if ($this->{$field})
+                {
+                    $new_field = $field . "_original";
+
+                    $this->{$new_field} = $this->{$field};
+
+                    if ($data[$field] instanceof Carbon)
+                    {
+                        if ($data[$field]->timezoneName != DateUtility::$login_user_time_zone->getName())
+                        {
+                            $this->{$field} = $this->{$field}->tz(DateUtility::$login_user_time_zone);
+                        }     
+                    }
+                    else if ($data[$field] instanceof DateTime)
+                    {
+                        $timezoneObject = $data[$field]->getTimezone();
+
+                        $timezoneName = $timezoneObject->getName();
+
+                        if ($timezoneName != DateUtility::$login_user_time_zone->getName())
+                        {
+                            $data[$field] = $data[$field]->setTimezone(DateUtility::$login_user_time_zone);
+                        }
+                    }
+                    else
+                    {
+                        //consider as UTC
+                        $new_date = DateUtility::getDateObj($data[$field]);
+                        $new_date->setTimezone(DateUtility::$login_user_time_zone);
+                        $data[$field] = $new_date->format('Y-m-d H:i:s T');
+                    }
+                }
+            }
+
+            return $data;
+        }
+    }
+
 }

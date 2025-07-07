@@ -13,6 +13,8 @@
 
 namespace App\Helpers;
 
+use DateTime;
+
 class DateUtility
 {
     const DATE_FORMAT = 'Y-m-d';
@@ -32,15 +34,15 @@ class DateUtility
     const MINTUES = "minutes";
     const SECONDS = "seconds";
 
-    public static $login_user_time_zone = 'Asia/Kolkata';
+    public static \DateTimeZone $login_user_time_zone;
 
     /**
      * convert time string to standered date object 
      * @param String $date
-     * @param String $timezone
+     * @param $timezone
      * @return DateTime object
      */
-    protected static function getDateObj($date = "", $timezone = NULL)
+    public static function getDateObj($date = "", \DateTimeZone | null $timezone = NULL) : DateTime | null
     {
         if ($date) {
 
@@ -49,24 +51,19 @@ class DateUtility
             } 
             else if (is_object($date))
             {
-                $date = $date->format("Y-m-d H:i:s");
-                $timestamp = strtotime($date);
+                return $date;
             }
             else {
                 $timestamp = strtotime($date);
             }
 
             if ($timestamp == false || $timestamp == -1) {
-                return false;
+                return null;
             }
 
-            $date = new \DateTime(date(self::DATETIME_FORMAT, $timestamp));
+            $date = new \DateTime(date(self::DATETIME_FORMAT, $timestamp), $timezone);
         } else {
-            $date = new \Datetime();
-        }
-
-        if ($timezone) {
-            $date->setTimezone(new \DateTimeZone($timezone));
+            $date = new \Datetime(now());
         }
 
         return $date;
@@ -79,10 +76,10 @@ class DateUtility
      * 
      * @param String $date NULL
      * @param String $format NULL
-     * @param String $timezone NULL
+     * @param $timezone NULL
      * @return String date
      */
-    public static function getDate($date = NULL, $format = NULL, $timezone = NULL)
+    public static function getDate($date = NULL, $format = NULL, \DateTimeZone | null $timezone = NULL)
     {
         $date = self::getDateObj($date, $timezone);
 

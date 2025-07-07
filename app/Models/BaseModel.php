@@ -11,6 +11,8 @@ use App\Traits\CommonMysqlModelTrait;
 use App\Traits\ModelListTrait;
 use App\Traits\MysqlTableInfoTrait;
 use App\Traits\StorageTrait;
+use DateTime;
+use DateTimeZone;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
@@ -95,29 +97,9 @@ class BaseModel extends Model implements BaseModelInterface
         }
     }
 
-    protected function convertTimeZoneBeforeQueryToDatabase()
-    {
-        foreach($this->casts as $field => $config)
-        {
-            if (strpos($config, "date") !== false)
-            {
-                if ($this->{$field} && $this->{$field} instanceof Carbon)
-                {
-                    if ($this->{$field}->timezoneName != "UTC")
-                    {
-                        $new_field = $this->{$field}->setTimezone("UTC");
-                        $this->{$field} = $new_field;
-                    }
-                }
-            }
-        }
-    }
-
     public function afterSave()
     {
         $this->forgotCache();
-
-        
     }
 
     public function saveModuleLinksFromString()
@@ -150,6 +132,8 @@ class BaseModel extends Model implements BaseModelInterface
                 $this->{$field_url_field} = $fileUtility->getUrl($this->{$field});
             }
         }
+
+        $this->convertTimeZoneForDisplay();
     }
 
     public function parseTagsForModuleLinking()
@@ -159,24 +143,6 @@ class BaseModel extends Model implements BaseModelInterface
             if ($this->{$field})
             {
                 $this->{$field} = ModuleLink::parseStringToMakeLinks($this, $this->{$field});
-            }
-        }
-    }
-
-    public function convertTimeZoneForDisplay()
-    {
-        foreach($this->casts as $field => $config)
-        {
-            if (strpos($config, "date") !== false)
-            {
-                if ($this->{$field} && $this->{$field} instanceof Carbon)
-                {
-                    if ($this->{$field}->timezoneName != "UTC")
-                    {
-                        $new_field = $this->{$field}->setTimezone("Asia/");
-                        $this->{$field} = $new_field;
-                    }
-                }
             }
         }
     }

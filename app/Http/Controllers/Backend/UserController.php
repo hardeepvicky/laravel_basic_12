@@ -218,10 +218,13 @@ class UserController extends BackendController
 
             $validatedData['created_via'] = User::CREATED_VIA_MANUAL_ADD;
 
+            
             $save_data = $validatedData;
-
+            
             unset($save_data['roles']);
             unset($save_data['allow_ip']);
+
+            $save_data = $model->convertTimeZoneBeforeQueryToDatabase($save_data);
 
             $model->fill($save_data);
             $model->setPassword($save_data['password']);
