@@ -203,6 +203,11 @@ class User extends Authenticatable implements BaseModelInterface
                                 $foreign_field => $this->dept_id
                             ]);
                             break;
+                        case RecurringTask::class:
+                            $this->recuringTasks()->update([
+                                $foreign_field => $this->dept_id
+                            ]);
+                            break;
                     }
                     
                 }
@@ -231,6 +236,16 @@ class User extends Authenticatable implements BaseModelInterface
         }
     }
 
+    public function roles()
+    {
+        return $this->belongsToMany(Role::class, UserRole::class);
+    }
+
+    public function userRole()
+    {
+        return $this->hasMany(UserRole::class, 'user_id');
+    }
+
     public function userCategory()
     {
         return $this->belongsTo(UserCategory::class);
@@ -256,11 +271,6 @@ class User extends Authenticatable implements BaseModelInterface
         return $this->belongsTo(Designation::class, "desg_id");
     }
 
-    public function userRole()
-    {
-        return $this->hasMany(UserRole::class, 'user_id');
-    }
-
     public function userAllowIp()
     {
         return $this->hasMany(UserAllowIp::class, 'user_id');
@@ -271,9 +281,9 @@ class User extends Authenticatable implements BaseModelInterface
         return $this->hasMany(Task::class, 'assign_to_user_id');
     }
 
-    public function roles()
+    public function recuringTasks()
     {
-        return $this->belongsToMany(Role::class, UserRole::class);
+        return $this->hasMany(RecurringTask::class, 'assign_to_user_id');
     }
 
     public function getUniqueValidationRules(Request $request)
