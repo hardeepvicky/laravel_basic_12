@@ -75,14 +75,14 @@ class FileUtility
         $ret_files = array();
 
         foreach ($files as $k => $file) {
-            $f = $path . $file . "/";
+            $f = $path . "/" . $file;
 
             if ($file == '.' || $file == '..') {
             } else if ($recursive && is_dir($f)) {
                 $ret_files = array_merge($ret_files, self::getFileList($f, $exts, $recursive));
             } else if (!empty($exts) && !in_array(pathinfo($file, PATHINFO_EXTENSION), $exts)) {
             } else {
-                $ret_files[] = $path . $file;
+                $ret_files[] = $f;
             }
         }
 

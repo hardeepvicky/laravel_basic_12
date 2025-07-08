@@ -150,6 +150,9 @@ class DbRestoreCommand extends Command
         if ($choice == "Full Restore" || $choice == "Structure Restore Only") {
             foreach ($files as $k => $file) {
                 if (strpos($file, "_st.sql") !== false) {
+                    
+                    $this->info("Importing Structure..");
+
                     $command = 'mysql -P' . $db_config['port'] . ' -u' . $db_config['username'] . ' -p' . $db_config['password'] . ' ' . $db_name . ' < "' . $file . '"';
 
                     exec($command, $output, $return_var);
@@ -157,6 +160,7 @@ class DbRestoreCommand extends Command
                     if ($return_var == 2) {
                         $this->error("Command is not working");
                         $this->info($command);
+                        return;
                     }
 
                     unset($files[$k]);
@@ -164,6 +168,7 @@ class DbRestoreCommand extends Command
             }
         }
 
+        $this->info("Importing Data..");
 
         if ($choice == "Full Restore" || $choice == "Data Restore Only") {
 
