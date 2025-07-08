@@ -16,7 +16,7 @@ class DbBakupCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'db:backup';
+    protected $signature = 'db:backup {connection? : The name of connection of laravel database config}';
 
     /**
      * The console command description.
@@ -34,6 +34,8 @@ class DbBakupCommand extends Command
      */
     public function handle()
     {
+        $connection = $this->argument('connection');
+
         $this->info('Database Backup Started');
 
         $db_config_list = config("database.connections");
@@ -51,18 +53,35 @@ class DbBakupCommand extends Command
             return;
         }
 
-        $choice = $this->choice(
-            'Select Database :',
-            $options,
-        );
-
-        if (!$choice) {
-            return;
+        if ($connection)
+        {
+            if (!isset($db_config_list[$connection]))
+            {
+                $this->error("Connection not found : $connection in database.connections");
+                unset($connection);
+            }
         }
+        
 
-        $db_config_key = $flip_options[$choice];
-        // dd($db_config_key);
-        $db_config = $db_config_list[$flip_options[$choice]];
+        if ($connection)
+        {
+            $db_config_key = $connection;
+            $db_config = $db_config_list[$db_config_key];
+        }
+        else
+        {
+            $choice = $this->choice(
+                'Select Database :',
+                $options,
+            );
+
+            if (!$choice) {
+                return;
+            }
+
+            $db_config_key = $flip_options[$choice];
+            $db_config = $db_config_list[$flip_options[$choice]];
+        }
 
         $this->fileUtility = new FileUtility(self::getStorageDisk());
 
