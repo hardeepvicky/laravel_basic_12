@@ -179,8 +179,6 @@ class DbBakupCommand extends Command
 
         $zip->close();
 
-        dd($data_path);
-
         $files = FileUtility::getFileList($data_path);
 
         $this->info("Deleting Files");

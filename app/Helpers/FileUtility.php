@@ -2,6 +2,7 @@
 
 namespace App\Helpers;
 
+use App\Exceptions\UserException;
 use Exception;
 use Illuminate\Filesystem\LocalFilesystemAdapter;
 
@@ -65,8 +66,11 @@ class FileUtility
 
     public static function getFileList($path, $exts = array(), $recursive = false)
     {
-        $path = trim(trim($path), "/") . "/";
-
+        if (!(file_exists($path) && is_dir($path)))
+        {
+            throw new UserException("path not found : $path");
+        }
+        
         $files = scandir($path);
         $ret_files = array();
 
