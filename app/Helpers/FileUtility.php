@@ -91,17 +91,16 @@ class FileUtility
 
     public static function getFolderList($path)
     {
-        $path = trim(trim($path), "/") . "/";
         $files = scandir($path);
 
         $ret_files = array();
 
         foreach ($files as $k => $file) {
-            $f = $path . $file;
+            $f = $path . "/" . $file;
 
             if ($file == '.' || $file == '..') {
             } else if (is_dir($f)) {
-                $ret_files[] = $file;
+                $ret_files[] = $f;
             }
         }
 
