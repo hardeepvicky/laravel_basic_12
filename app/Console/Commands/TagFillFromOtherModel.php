@@ -16,12 +16,16 @@ use App\Models\Designation;
 use App\Models\Employee;
 use App\Models\Enquiry;
 use App\Models\ModuleLink;
+use App\Models\RecurringTask;
 use App\Models\Role;
 use App\Models\RoleRouteName;
 use App\Models\RouteName;
 use App\Models\State;
+use App\Models\SubDepartment;
 use App\Models\Tag;
 use App\Models\TagLink;
+use App\Models\Task;
+use App\Models\User;
 use App\Models\UserAllowIp;
 use App\Models\UserRole;
 use Exception;
@@ -58,43 +62,22 @@ class TagFillFromOtherModel extends Command
 
         $output = new ConsoleOutput();
 
-        $model_list = LaravelExtend::getListOfModels();
-
-        $exception_model_list = [
-            BaseModel::class,
-            BaseModelInterface::class,
-            BaseMongoModel::class,
-            AppMenu::class,
-            AppMenuRelatedLink::class,
-            Employee::class,
-            Enquiry::class,
-            City::class,
-            Tag::class,
-            ModuleLink::class,
-            UserAllowIp::class,
-            UserRole::class,
-            RoleRouteName::class,
-            RouteName::class
+        $model_list = [
+            Department::class,
+            Designation::class,
+            SubDepartment::class,
+            User::class,
+            Country::class,
+            State::class,
+            RecurringTask::class,
+            Task::class
         ];
 
-        foreach($model_list as $model_name => $model_class)
+        foreach($model_list as $model_class)
         {
-            if (in_array($model_class, $exception_model_list))
-            {
-                continue;
-            }
-
             $main_model = new $model_class();
 
-            if ($model_name != "User")
-            {
-                if (!$main_model instanceof BaseModel)
-                {
-                    continue;
-                }
-            }
-
-            $output->writeLogToConsole($model_name);
+            $output->writeLogToConsole($model_class);
 
             if (!method_exists($model_class, "getListCache"))
             {
@@ -102,20 +85,29 @@ class TagFillFromOtherModel extends Command
                 continue;
             }
 
+            $name_field = "name";
+
+            if (isset($model_class::$auto_tag_field) && $model_class::$auto_tag_field)
+            {
+                $name_field = $model_class::$auto_tag_field;
+            }
+
             $table_info = $main_model->getTableInfo($main_model->getTable());
 
             // d(array_keys($table_info["columns"]));
 
-            if  (!isset($table_info["columns"]["id"]) || !isset($table_info["columns"]["name"]))
+            if  (!isset($table_info["columns"]["id"]) || !isset($table_info["columns"][$name_field]))
             {
-                $output->writeLogToConsole("$model_name either field id or name is missing", "error");
+                $output->writeLogToConsole("$model_class either field id or $name_field is missing", "error");
                 continue;
             }
 
-            $list = $model_class::getListCache("id", "name");
+            $list = $model_class::getListCache("id", $name_field);
 
             try
             {
+                $model_class_name = str_class_name_without_namespace($model_class);
+
                 $counts = [
                     "total" => count($list),
                     "insert" => 0,
@@ -129,7 +121,7 @@ class TagFillFromOtherModel extends Command
                 foreach($list as $id => $name)
                 {
                     $condition_data = [
-                        "main_model" => $model_name,
+                        "main_model" => $model_class_name,
                         "main_table" => $main_model->getTable(),
                         "main_id" => $id
                     ];
@@ -166,7 +158,7 @@ class TagFillFromOtherModel extends Command
             {
                 DB::rollBack();
 
-                $output->writeLogToConsole("$model_name  : " . $ex->getMessage(), "error");
+                $output->writeLogToConsole("$model_class  : " . $ex->getMessage(), "error");
                 continue;
             }
         }

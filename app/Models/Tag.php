@@ -16,6 +16,15 @@ class Tag extends BaseModel
         'display_name',
     ];
 
+    public function beforeSave()
+    {
+        if(!$this->search_term)
+        {
+            $str = str_class_name_to_human_text($this->main_model);
+            $this->search_term = $str . "." . $this->name;
+        }
+    }
+
     protected function getDisplayNameAttribute()
     {
         return $this->getDisplayName();

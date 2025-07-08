@@ -1143,3 +1143,11 @@ function get_value_from_object($obj, $keys, $default = "")
 
     return $default;
 }
+
+function str_space_after_every_captial_letter(string $string): string
+{
+    // The regex `/(?=[A-Z])/` looks for a position that is immediately
+    // followed by an uppercase letter (positive lookahead).
+    // We replace this position with a space.
+    return preg_replace('/(?=[A-Z])/', ' ', $string);
+}

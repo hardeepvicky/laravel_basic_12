@@ -317,7 +317,7 @@ class LaravelExtend
     {        
         $placeholder = Str::snake($model_name);
 
-        $route_prefix = strtolower(trim($model_name));
+        $route_prefix = self::getRoutePrefixForModel($model_name);
 
         $route_postfix_array = ["index"];
 
@@ -341,5 +341,20 @@ class LaravelExtend
         }
 
         return null;
+    }
+
+    public static function getRoutePrefixForModel(String $model_name)
+    {
+        $str = trim($model_name);
+
+        $str = str_space_after_every_captial_letter($str);
+
+        $str = str_replace(" ", "-", $str);
+
+        $str = strtolower($str);
+
+        $str = trim($str, "-");
+
+        return $str;
     }
 }

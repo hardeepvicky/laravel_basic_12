@@ -77,7 +77,7 @@ use App\Models\Task;
                         <td></td>
                         <td colspan="7">
                             <div class="row">
-                                <div class="col-md-6 col-lg-4">
+                                <div class="col-sm-12">
                                     <label class="info">
                                         {{ get_value_from_list($field_labels, 'description', 'description') }}
                                         :

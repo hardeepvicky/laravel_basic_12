@@ -117,11 +117,12 @@ class ModuleLink extends BaseModel
                             {
                                 $search = "#" . $type . ".id:" . $id;
 
-                                $anchor = '<a target="_blank" href="' . $url . '">Open ' . $type . '</a>';
+                                $label = str_space_after_every_captial_letter($type);
+
+                                $anchor = '<a target="_blank" href="' . $url . '">' . $label . '</a>';
 
                                 $content = str_replace($search, $anchor, $content);
                             }
-                           
                         }
                     }
                 }
