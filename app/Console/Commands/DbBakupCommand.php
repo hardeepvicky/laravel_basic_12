@@ -81,8 +81,6 @@ class DbBakupCommand extends Command
 
         $path = $this->fileUtility->getDisk()->path(self::$path . "/" . $config_key . "/" . $sub_path) . "/";
 
-        dd($path);
-
         FileUtility::createFolder($path);
 
         $db_name = $db_config['database'];
@@ -180,6 +178,8 @@ class DbBakupCommand extends Command
         $this->info("✅DB Data Dump Done");
 
         $zip->close();
+
+        dd($data_path);
 
         $files = FileUtility::getFileList($data_path);
 
