@@ -431,25 +431,27 @@ function suggestion_list(textarea, suggestionBox, suggestion_data, url) {
                 lastHashIndex = i;
                 break;
             }
-            if (/\s/.test(text[
-                i
-            ])) { // If space/newline found before '#', it's not a direct hash trigger
-                lastHashIndex = -1;
-                break;
-            }
+
+            // if (/\s/.test(text[i])) 
+            // { 
+            //     // If space/newline found before '#', it's not a direct hash trigger
+            //     lastHashIndex = -1;
+            //     break;
+            // }
         }
 
         if (lastHashIndex !== -1 && lastHashIndex < cursorPosition) {
             currentTriggerIndex = lastHashIndex;
             // Extract the term after '#' up to the cursor or a space/newline
-            const partialTerm = text.substring(lastHashIndex + 1, cursorPosition).split(/\s/)[0];
+            const partialTerm = text.substring(lastHashIndex + 1, cursorPosition);
             currentSearchTerm = partialTerm;
-            // console.log("search term", currentSearchTerm);
+            console.log("search term", currentSearchTerm);
 
             if (currentSearchTerm.length > 0) {
                 // Debounce the fetch request
                 clearTimeout(inputTimeout);
                 inputTimeout = setTimeout(function () {
+                    currentSearchTerm = encodeURIComponent(currentSearchTerm);
                     fetchSuggestions(currentSearchTerm).done(
                         function (data) {
 

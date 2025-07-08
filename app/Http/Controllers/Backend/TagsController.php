@@ -73,7 +73,7 @@ class TagsController extends BackendController
 
             if ($search_term && strlen(trim($search_term)) > 0)
             {
-                $search_term = trim($search_term);
+                $search_term = urldecode(trim($search_term));
                 
                 $records = $this->modelClass::where("search_term", 'LIKE', '%' . $search_term . '%')
                             ->orderBy("foreign_model", "DESC")
