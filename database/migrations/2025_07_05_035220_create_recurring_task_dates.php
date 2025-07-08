@@ -19,7 +19,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->foreign('recurring_task_id')->references('id')->on('recurring_tasks')->onDelete('restrict');
-            $table->foreign('task_id')->references('id')->on('tasks')->onDelete('restrict');
+            $table->foreign('task_id')->references('id')->on('tasks')->onDelete('set null');
         });
     }
 

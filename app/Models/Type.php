@@ -54,12 +54,12 @@ class Type extends BaseModel
                 "fields" => [
                     "task_type" => "Task Type",
                     "status" => "Status",
+                    "duration_type" => "Duration Type",
                 ]
             ],
             RecurringTask::class => [
-                "fields" => [
+            "fields" => [
                     "recurring_type" => "Recurring Type",
-                    "task_should_be_complete_in" => "Should Complete in",
                 ]
             ],
         ];

@@ -85,4 +85,47 @@ class UserException extends Exception
             throw new UserException("Invalid value : $value in list, Valid values are : " . $valid);
         }
     }
+
+    public static function checkPossibleValues($find_value, array $possible_values, array $options = [])
+    {
+        if (!is_scalar($find_value))
+        {
+            throw new UserException("arg 1 find_value should be scaler");
+        }
+
+        if (in_array($find_value, $possible_values))
+        {
+            return $find_value;
+        }
+        else
+        {
+            $converted_find_value = $find_value;
+            if (isset($options['before_check_convert_string']) && is_array($options['before_check_convert_string']))
+            {
+                foreach($options['before_check_convert_string'] as $str_function_name)
+                {
+                    if (!function_exists($str_function_name))
+                    {
+                        throw new UserException("wrong function name : str_function_name");
+                    }
+                    
+                    $converted_find_value = $str_function_name($converted_find_value);
+
+                    foreach($possible_values as $k => $v)
+                    {
+                        $possible_values[$k] = $str_function_name($v);
+                    }
+                }
+            }
+
+            if (in_array($converted_find_value, $possible_values))
+            {
+                return $converted_find_value;
+            }
+            
+            $possible_value_str = str_short_with_dot(implode(", ", array_keys($possible_values)));
+
+            throw new UserException("Invalid value : $find_value, Possible values are : " . $possible_value_str);
+        }
+    }
 }

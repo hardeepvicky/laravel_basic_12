@@ -76,7 +76,7 @@ class TagsController extends BackendController
                 $search_term = trim($search_term);
                 
                 $records = $this->modelClass::where("search_term", 'LIKE', '%' . $search_term . '%')
-                            ->orderBy("main_model", "ASC")
+                            ->orderBy("foreign_model", "DESC")
                             ->orderBy("search_term", "ASC")
                             ->limit(20)
                             ->get();

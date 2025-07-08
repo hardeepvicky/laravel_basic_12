@@ -1,5 +1,6 @@
 <?php
 use App\Models\Task;
+use App\Models\RecurringTask;
 ?>
 <div class="card" id="page-summary">
     <div class="card-header">
@@ -13,13 +14,8 @@ use App\Models\Task;
                     <tr class="border-bottom-primary">
                         <th><?= sortable_anchor('id', get_value_from_list($field_labels, 'id', 'id')) ?></th>
                         <th><?= sortable_anchor('name', get_value_from_list($field_labels, 'name', 'name')) ?></th>
-                        <th><?= sortable_anchor('task_type', get_value_from_list($field_labels, 'task_type', 'task_type')) ?>
-                        </th>
-                        <th><?= sortable_anchor('description', get_value_from_list($field_labels, 'description', 'description')) ?>
-                        </th>
-                        <th>Assign To</th>
-                        <th><?= sortable_anchor('priority', get_value_from_list($field_labels, 'priority', 'priority')) ?>
-                        </th>
+                        <th><?= sortable_anchor('assignToUser.name', get_value_from_list($field_labels, 'assign_to_user_id', 'assign_to_user_id')) ?>
+                        <th><?= sortable_anchor('priority', get_value_from_list($field_labels, 'priority', 'priority')) ?> </th>
                         <th>Task created by system</th>
                         <th>Task Info</th>
                         <th>
@@ -35,14 +31,11 @@ use App\Models\Task;
                         <tr>
                             <th scope="row">{{ $record->id }}</th>
                             <td>{{ $record->name }}</td>
-                            <td>{{ get_value_from_list($task_type_list, $record->task_type) }}</td>
-                            <td>{{ $record->description }}</td>
-
                             <td>
                                 <label class="info">
-                                    {{ get_value_from_list($field_labels, 'dept_id', 'dept_id') }}
-                                    : <span>{{ $record->department?->getDisplayName() }}</span>
-                                    > {{ $record->assignToUser?->getDisplayName() }}
+                                    <span>{{ $record->department?->getDisplayName() }}</span>
+                                    >
+                                    {{ $record->assignToUser?->getDisplayName() }}
                                 </label>
                             </td>
                             <td>{{ $record->priority }}</td>
@@ -55,14 +48,17 @@ use App\Models\Task;
                                             :
                                             <span>{{ get_value_from_list($recurring_type_list, $record->recurring_type) }}</span>
                                         </label>
+
                                         <label class="info">
-                                            {{ get_value_from_list($field_labels, 'task_should_be_complete_in', 'task_should_be_complete_in') }}
-                                            :
-                                            <span>{{ get_value_from_list($complete_in_list, $record->task_should_be_complete_in) }}</span>
+                                            {{ get_value_from_list($field_labels, 'duration', 'duration') }} :
+                                            <span>{{ $record->duration }} {{ get_value_from_list($duration_type_list, $record->duration_type) }}</span>
                                         </label>
-                                        <x-Backend.celec_date_time
-                                            label="{{ get_value_from_list($field_labels, 'start_date_time', 'start_date_time') }}"
-                                            :value="$record->start_date_time" />
+
+                                        @if($record->recurring_type != RecurringTask::RECURRING_CUSTOM)
+                                            <x-Backend.celec_date_time
+                                                label="{{ get_value_from_list($field_labels, 'start_date_time', 'start_date_time') }}"
+                                                :value="$record->start_date_time" />
+                                        @endif
                                     </div>
                                 </div>
                             </td>
@@ -83,7 +79,8 @@ use App\Models\Task;
                             <td></td>
                             <td colspan="7">
                                 <div class="row">
-                                    <div class="col-md-6 col-lg-4">
+                                    @if($record->recurring_type == RecurringTask::RECURRING_CUSTOM)
+                                    <div class="col-md-6 col-xl-4">
                                         <div class="card">
                                             <div class="card-header border-l-primary card-no-border">
                                                 <h3>Recurring Custom Dates</h3>
@@ -93,15 +90,15 @@ use App\Models\Task;
                                                     <thead>
                                                         <tr>
                                                             <th>Sr. No.</th>
-                                                            <th>Date</th>
-                                                            <th>Task</th>
+                                                            <th>{{ get_value_from_list($recurring_dates_field_labels, 'date') }}</th>
+                                                            <th>{{ get_value_from_list($recurring_dates_field_labels, 'task_id') }}</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
                                                         @foreach ($record->recurringTaskDate as $i => $recurringTaskDate)
                                                             <tr>
                                                                 <td>{{ $i + 1 }}</td>
-                                                                <td>{{ if_date($recurringTaskDate->date) }}</td>
+                                                                <td>{{ if_date_time($recurringTaskDate->date) }}</td>
                                                                 <td>
                                                                     @if ($recurringTaskDate->task_id)
                                                                         <a target="_blank"
@@ -116,7 +113,8 @@ use App\Models\Task;
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-md-6 col-lg-4">
+                                    @else
+                                    <div class="col-md-6 col-xl-4">
                                         <div class="card">
                                             <div class="card-header border-l-primary card-no-border">
                                                 <h3>Task created by system</h3>
@@ -144,6 +142,14 @@ use App\Models\Task;
                                                 </table>
                                             </div>
                                         </div>
+                                    </div>
+                                    @endif
+                                    <div class="col-md-6 col-xl-4">
+                                        <label class="info">
+                                            {{ get_value_from_list($field_labels, 'description', 'description') }}
+                                            :
+                                            <span>{!! $record->description !!}</span>
+                                        </label>
                                     </div>
                                 </div>
                             </td>

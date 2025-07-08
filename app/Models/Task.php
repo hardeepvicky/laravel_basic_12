@@ -18,13 +18,14 @@ class Task extends BaseModel
     protected $casts = [
         'start_date_time' => 'datetime',
         'end_date_time' => 'datetime',
-        'cannot_edit_reason_array' => 'array'
+        'cannot_edit_reason_array' => 'array',
+        'cannot_delete_reason_array' => 'array',
     ];
 
     protected static array $fields_containg_tags = ["description"];
 
     public static array $child_model_class = [
-        
+
     ];
 
     public const TASK_TYPE_PROJECT = "PROJECT";
@@ -39,6 +40,12 @@ class Task extends BaseModel
     public const STATUS_COMPLETED = "COMPLETED";
     public const STATUS_VERIFIED = "VERIFIED";
 
+    public const DURATION_TYPE_HOUR = "HOUR";
+    public const DURATION_TYPE_DAY = "DAY";
+    public const DURATION_TYPE_WEEK = "WEEK";
+    public const DURATION_TYPE_MONTH = "MONTH";
+    public const DURATION_TYPE_YEAR = "YEAR";
+
     public function beforeSave()
     {
         if ($this->is_draft) {
@@ -50,6 +57,15 @@ class Task extends BaseModel
         }
 
         return parent::beforeSave();
+    }
+
+    public function afterFind()
+    {
+        parent::afterFind();
+
+        $this->convertTimeZoneForDisplay();
+
+        $this->parseTagsForModuleLinking();
     }
 
     public function setDefaultAttributes() {}
@@ -69,7 +85,8 @@ class Task extends BaseModel
             $rules["assign_to_user_id"] = ["required"];
             $rules["priority"] = ["required"];
             $rules["start_date_time"] = ["required"];
-            $rules["duration"] = ["required"];            
+            $rules["duration_type"] = ["required"];
+            $rules["duration"] = ["required"];
         }
 
         return $rules;
@@ -134,6 +151,31 @@ class Task extends BaseModel
         }
     }
 
+    public static function getEndDate($start_date_time, String $duration, String $duration_type)
+    {
+        $end_date_time = null;
+
+        switch ($duration_type) {
+            case self::DURATION_TYPE_HOUR:
+                $end_date_time = DateUtility::change($start_date_time, $duration, DateUtility::HOURS);
+                break;
+            case self::DURATION_TYPE_DAY:
+                $end_date_time = DateUtility::change($start_date_time, $duration, DateUtility::DAYS);
+                break;
+            case self::DURATION_TYPE_MONTH:
+                $end_date_time = DateUtility::change($start_date_time, $duration, DateUtility::MONTHS);
+                break;
+            case self::DURATION_TYPE_WEEK:
+                $end_date_time = DateUtility::change($start_date_time, $duration, DateUtility::WEEKS);
+                break;
+            case self::DURATION_TYPE_YEAR:
+                $end_date_time = DateUtility::change($start_date_time, $duration, DateUtility::YEARS);
+                break;
+        }
+
+        return $end_date_time;
+    }
+
     public static function getCodeList(String $field)
     {
         $class_info = get_class_info(static::class);
@@ -166,13 +208,11 @@ class Task extends BaseModel
                 return $list;
                 break;
 
-            case "duration":
+            case "duration_type":
                 $list = [];
 
-                $class_info = get_class_info(RecurringTask::class);
-
                 foreach ($class_info['constants'] as $constant => $label) {
-                    if (strpos($constant, "COMPLETE_TIME_") !== false) {
+                    if (strpos($constant, "DURATION_TYPE_") !== false) {
                         $list[] = $label;
                     }
                 }

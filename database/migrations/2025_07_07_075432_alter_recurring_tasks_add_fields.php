@@ -12,7 +12,11 @@ return new class extends MyMigration
      */
     public function up(): void
     {
+        $this->dropColumnsWithIndex("recurring_tasks", ["task_should_be_complete_in"]);
+
         Schema::table('recurring_tasks', function (Blueprint $table) {
+            $table->integer("duration")->nullable()->after("start_date_time");
+            $table->string("duration_type")->nullable()->after("duration");
             $table->unsignedBigInteger("dept_id")->nullable()->after("id");
             $table->foreign('dept_id')->references('id')->on('departments')->onDelete('restrict');
         });
@@ -23,6 +27,6 @@ return new class extends MyMigration
      */
     public function down(): void
     {
-        $this->dropColumnsWithIndex("recurring_tasks", ["dept_id"]);
+        $this->dropColumnsWithIndex("recurring_tasks", ["duration", "duration_type", "dept_id"]);
     }
 };

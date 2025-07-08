@@ -36,8 +36,16 @@ class ModuleLink extends BaseModel
 
             if (isset($matches[0])) {
                 $type = str_replace("#", "", $matches[0][0]);
+                $type = ucwords($type);
+                $ref_model_class_name = str_convert_multi_space_to_single_space($type);
+                
+                if (class_exists($ref_model_class_name))
+                {
+                    $model->addError("", "Invalid $type", "Tags");
+                    continue;
+                }
 
-                $ref_model_class = "App\\Models\\" . $type;
+                $ref_model_class = "App\\Models\\" . $ref_model_class_name;
 
                 $ref_model = new $ref_model_class();
 
@@ -59,6 +67,8 @@ class ModuleLink extends BaseModel
                                 "foreign_id" => $id,
                             ]);
 
+                            // d($save_data);
+
                             self::create($save_data);
 
                             $save_count++;
@@ -68,20 +78,13 @@ class ModuleLink extends BaseModel
             }
         }
 
+        // dd($save_count);
+
         return $save_count;
     }
 
     public static function parseStringToMakeLinks(Model $model, string $content)
     {
-        // $linked_smodules = ModuleLink::where("main_model", $model_name)->where("main_id", $model->id)->get();
-
-        // if (!$linked_modules)
-        // {
-        //     return $content;
-        // }
-
-        // dd($linked_modules);
-
         $pattern = '/#([a-zA-Z]+)\.([A-Za-z]+):([0-9]+)/i';
 
         preg_match_all($pattern, $content, $main_matches);
@@ -107,11 +110,6 @@ class ModuleLink extends BaseModel
                         $id = str_replace(":", "", $matches[0][0]);
 
                         if ($id) {
-                            // $tag_link = ModuleLink::where("main_model", $model_name)
-                            //         ->where("main_id", $model->id)
-                            //         ->with("tag")
-                            //         ->first();
-
 
                             $url = LaravelExtend::getViewLinkForModel($type, $id);
 
@@ -119,7 +117,7 @@ class ModuleLink extends BaseModel
                             {
                                 $search = "#" . $type . ".id:" . $id;
 
-                                $anchor = '<a target="_blank" href="' . $url . '">Open Link</a>';
+                                $anchor = '<a target="_blank" href="' . $url . '">Open ' . $type . '</a>';
 
                                 $content = str_replace($search, $anchor, $content);
                             }
@@ -129,7 +127,6 @@ class ModuleLink extends BaseModel
                 }
             }
         }
-
 
         return $content;
     }

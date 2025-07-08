@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Exceptions\UserException;
+use App\Helpers\ArrayHelper;
 use App\Helpers\FileUtility;
 use App\Helpers\LaravelExtend;
 use App\Models\Country;
@@ -449,7 +450,8 @@ class UserController extends BackendController
         $response = ["status" => 1];
 
         try {
-            $conditions = $this->getConditions(null, [
+
+            $pattern_array = [
                 ["field" => "name", "type" => "string"],
                 ["field" => "email", "type" => "string"],
                 ["field" => "mobile", "type" => "string"],
@@ -460,14 +462,30 @@ class UserController extends BackendController
                 ["field" => "dept_id", "type" => "int"],
                 ["field" => "sub_dept_id", "type" => "int"],
                 ["field" => "desg_id", "type" => "int"],
-            ]);
+            ];
+
+            $conditions = $this->getConditions(null, $pattern_array);
 
             if (empty($conditions))
             {
                 throw new UserException("No any condition applied");
             }
 
-            $records = $this->modelClass::where($conditions)->get();
+            $condition_list = $this->getConditions(null, $pattern_array, true);
+
+            $qb = $this->modelClass::where($conditions);
+
+            $default_user_id = null;
+
+            if (isset($condition_list['dept_id']) && isset($condition_list['dept_id']['value']) && $condition_list['dept_id']['value'])
+            {
+                $department = Department::with("headUser")->find($condition_list['dept_id']['value']);
+                $default_user_id = $department->headUser?->id;
+            }
+
+            $records = $qb->get();
+
+            // d(LaravelExtend::getQueryLog("", -2));
 
             $response['data'] = [];
 
@@ -475,6 +493,7 @@ class UserController extends BackendController
                 $row = [
                     "id" => $record->id,
                     "name" => $record->getDisplayName(),
+                    "auto_select" => $default_user_id == $record->id
                 ];
 
                 $response['data'][] = $row;

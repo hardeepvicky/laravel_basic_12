@@ -17,10 +17,10 @@ class Department extends BaseModel
         //     "foreignKey" => "department_id",
         //     "preventDelete" => true
         // ],
-        // User::class => [
-        //     "foreignKey" => "department_id",
-        //     "preventDelete" => true
-        // ],
+        User::class => [
+            "foreignKey" => "department_id",
+            "preventDelete" => true
+        ],
         SubDepartment::class => [
             "foreignKey" => "department_id",
             "preventDelete" => true
@@ -34,6 +34,11 @@ class Department extends BaseModel
             "preventDelete" => true,
         ],
     ];
+
+    public function headUser()
+    {
+        return $this->belongsTo(User::class, "dept_head_user_id");
+    }
 
     protected function getDisplayNameAttribute()
     {

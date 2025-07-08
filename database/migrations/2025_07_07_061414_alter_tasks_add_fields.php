@@ -14,7 +14,8 @@ return new class extends MyMigration
     public function up(): void
     {
         Schema::table('tasks', function (Blueprint $table) {
-            $table->string("duration")->nullable()->after("start_date_time");
+            $table->integer("duration")->nullable()->after("start_date_time");
+            $table->string("duration_type")->nullable()->after("duration");
             $table->unsignedBigInteger("dept_id")->nullable()->after("id");
             $table->foreign('dept_id')->references('id')->on('departments')->onDelete('restrict');
         });
@@ -25,6 +26,6 @@ return new class extends MyMigration
      */
     public function down(): void
     {
-        $this->dropColumnsWithIndex("tasks", ["duration", "dept_id"]);
+        $this->dropColumnsWithIndex("tasks", ["duration", "duration_type", "dept_id"]);
     }
 };

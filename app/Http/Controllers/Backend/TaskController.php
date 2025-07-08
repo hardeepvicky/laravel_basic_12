@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Exceptions\UserException;
+use App\Helpers\DateUtility;
 use App\Helpers\LaravelExtend;
 use App\Models\Department;
+use App\Models\FieldSetting;
 use App\Models\RecurringTask;
 use App\Models\Tag;
 use App\Models\Task;
@@ -74,12 +76,14 @@ class TaskController extends BackendController
 
             $clear_cache = request('is_sort_clear', false);
 
-            $sort_params = $this->getRequestData($cache_key_for_sort, [
+            $this->model = new $this->modelClass;
+
+            $sort = $this->getSortBy($this->model, $cache_key_for_sort, [
                 ["key" => "sort_by", "default" => "id"],
                 ["key" => "sort_dir", "default" => "DESC"],
             ], $clear_cache);
 
-            $builder->orderBy($sort_params['sort_by'], $sort_params['sort_dir']);
+            $builder->orderBy($sort['sort_by'], $sort['sort_dir']);
         }
 
         return $builder;
@@ -179,16 +183,16 @@ class TaskController extends BackendController
         $status_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
 
         $type_conditions = [];
-        $type_conditions['type'] = Type::getType(new RecurringTask(), "task_should_be_complete_in");
-        if ($this->model->duration) {
-            $saved_type_id = Type::getIdFromCode($type_conditions['type'], $this->model->duration);
+        $type_conditions['type'] = Type::getType($this->model, "duration_type");
+        if ($this->model->duration_type) {
+            $saved_type_id = Type::getIdFromCode($type_conditions['type'], $this->model->duration_type);
 
             if ($saved_type_id) {
                 $type_conditions['or_id'] = $saved_type_id;
             }
         }
 
-        $duration_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
+        $duration_type_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
 
         // d($this->model->duration);
         // d(LaravelExtend::getQueryLog());
@@ -201,9 +205,9 @@ class TaskController extends BackendController
 
         $department_list = Department::getList("id", "display_name", $dept_conditions, "list_display_order");
 
-        $field_labels = $this->model->getFieldLabels();
+        $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
-        $this->setForView(compact("user_list", "task_type_list", "status_list",  "department_list", "duration_list", "field_labels"));
+        $this->setForView(compact("user_list", "task_type_list", "status_list",  "department_list", "duration_type_list", "field_labels"));
 
         return parent::beforeViewRender();
     }
@@ -221,7 +225,9 @@ class TaskController extends BackendController
 
         $model->priority = 1;
 
-        $this->setForView(compact("model", 'form'));
+        $default_start_date_time = DateUtility::change(date('d-M-Y 10:00'), 1, DateUtility::DAYS, DateUtility::DATETIME_OUT_FORMAT);
+
+        $this->setForView(compact("model", 'form', 'default_start_date_time'));
 
         return $this->view("form");
     }
@@ -314,9 +320,9 @@ class TaskController extends BackendController
 
         $validatedData['end_date_time'] = null;
 
-        if (isset($validatedData['start_date_time']) && isset($validatedData['duration']))
+        if (isset($validatedData['start_date_time']) && isset($validatedData['duration_type']) && isset($validatedData['duration']))
         {
-            $validatedData['end_date_time'] = RecurringTask::getEndDate($validatedData['start_date_time'], $validatedData['duration']);
+            $validatedData['end_date_time'] = Task::getEndDate($validatedData['start_date_time'], $validatedData['duration'], $validatedData['duration_type']);
         }
 
         // dd($validatedData);
@@ -341,12 +347,20 @@ class TaskController extends BackendController
                     throw new UserException("could not found model_class_name");
                 }
 
+                $table_name = $this->model->getTable();
+
                 $save_data = [
                     "name" => $tag_name,
-                    "search_term" =>  $tag_name,
+                    "main_model" => $model_class_name,
+                    "main_table" => $table_name,
+                    "main_table_field" => "name",
+                    "main_id" => $this->model->id,
                     "foreign_model" => $model_class_name,
+                    "foreign_table" => $table_name,
                     "foreign_id" => $this->model->id
                 ];
+
+                $save_data['search_term'] = str_class_name_to_human_text($model_class_name) . "." . $save_data['name'];
 
                 // d($save_data, true);
 
@@ -384,6 +398,8 @@ class TaskController extends BackendController
     public function edit($id)
     {
         $model = $this->model = $this->modelClass::with("tags")->findOrFail($id);
+
+        $model->convertTimeZoneForDisplay();
 
         $this->beforeEdit($this->model);
 

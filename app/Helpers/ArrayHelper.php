@@ -130,6 +130,44 @@ class ArrayHelper
         return $arr;
     }
 
+    public function getValue($data = [], $find_value, bool $recursive = true)
+    {
+        if (!is_array($data) || empty($data))
+        {
+            $data = $this->data;
+        }
+
+        if (!is_scalar($find_value))
+        {
+            throw new UserException("arg 2nd: find_value value should be scaler");
+        }
+
+        $ret = [];
+
+        foreach($data as $k => $v)
+        {
+            if (is_scalar($v))
+            {
+                if ($v == $find_value)
+                {
+                    $ret[$k] = $v;
+                }
+            }
+
+            if (is_object($v))
+            {
+                $v = (array) $v;
+            }
+
+            if ($recursive && is_array($v))
+            {                
+                $ret[$k] = $this->getValue($v, $find_value, $recursive);
+            }
+        }
+
+        return $ret;
+    }
+
     public function getKeyIfValueExistInArray($data = [], $find_value, bool $recursive = false)
     {
         if (!is_array($data) || empty($data))

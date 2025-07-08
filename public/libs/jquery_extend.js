@@ -1095,6 +1095,36 @@ jQuery.fn.extend({
                                 response
                             );
 
+                            if (typeof new_response != "object")
+                            {
+                                settings.onError(
+                                    feature + " Error on get " + new_url,
+                                    "new_response should be object"
+                                );
+
+                                return;
+                            }
+
+                            if (typeof new_response['status'] == "undefined")
+                            {
+                                settings.onError(
+                                    feature + " Error on get " + new_url,
+                                    "status is not found in new_response"
+                                );
+
+                                return;
+                            }
+
+                            if (typeof new_response['data'] != "object")
+                            {
+                                settings.onError(
+                                    feature + " Error on get " + new_url,
+                                    "data is not onject in new_response"
+                                );
+
+                                return;
+                            }
+
                             if (new_response["status"] != "1") {
                                 settings.onError(
                                     feature + " Error on get " + new_url,
@@ -1103,29 +1133,27 @@ jQuery.fn.extend({
                                 return;
                             }
 
-                            if (typeof new_response["data"] == "undefined") {
-                                settings.onError(
-                                    feature + " Error on get " + new_url,
-                                    "data not found in response"
-                                );
-                            }
-
                             var html = "";
                             var multiple = $(target).attr("multiple");
                             if (!multiple) {
-                                var html =
-                                    "<option value=''>Please Select</option>";
+                                var html = "<option value=''>Please Select</option>";
                             }
 
                             for (var i in new_response["data"]) {
                                 var k = new_response["data"][i][settings.key];
                                 var v = new_response["data"][i][settings.text];
-                                html +=
-                                    '<option value="' +
-                                    k +
-                                    '">' +
-                                    v +
-                                    "</option>";
+
+                                var attr = 'value="' + k +'"';
+
+                                if (typeof new_response["data"][i]["auto_select"] != "undefined")
+                                {
+                                    if (new_response["data"][i]["auto_select"])
+                                    {
+                                        attr += ' selected="selected"';
+                                    }
+                                }
+
+                                html += '<option ' + attr +'>' + v +"</option>";
                             }
 
                             $(target).html(html);

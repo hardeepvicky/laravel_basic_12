@@ -2,6 +2,7 @@
 
 use App\Models\Task;
 use App\Helpers\DateUtility;
+$false = false;
 ?>
 
 @extends($layout)
@@ -17,10 +18,9 @@ $page_header_links = [['title' => 'List', 'url' => route($routePrefix . '.index'
 
 <x-Form.start action="{{ $form['url'] }}" method="{{ $form['method'] }}" />
 <div class="row">
-    <div class="col-md-12 offset-lg-1 col-lg-10">
+    <div class="col-md-12 col-xxl-10">
         <div class="card">
             <div class="card-header card-no-border pb-0">
-                <h3>Basic</h3>
             </div>
             <div class="card-body">
                 <div class="row">
@@ -32,8 +32,8 @@ $page_header_links = [['title' => 'List', 'url' => route($routePrefix . '.index'
                         <x-Inputs.checkbox :id="$field" :name="$field" :label="$label" value="{{ $model->{$field} }}" />
                     </div>
                 </div>
-                <div class="row">                    
-                    <div class="col-md-6 col-lg-4">
+                <div class="row is_draft-block is_draft-block-0">
+                    <div class="col-md-12 col-xl-6">
                         <div class="form-group mb-3">
                             <?php
                             $field = 'name';
@@ -42,24 +42,6 @@ $page_header_links = [['title' => 'List', 'url' => route($routePrefix . '.index'
                             <x-Inputs.text-field :name="$field" :label="$label" value="{{ $model->{$field} }}"
                                 placeholder="Enter {{ $label }}" mandatory="true" autocomplete="off" />
                         </div>
-                    </div>
-                    <div class="col-md-6 col-lg-4">
-                        <div class="form-group mb-3">
-                            <div class="textarea-wrapper">
-                                <?php
-                                $field = 'description';
-                                $label = get_value_from_list($field_labels, $field, $field);                                
-                                ?>
-                                <x-Inputs.text-area :id="$field" :name="$field" :label="$label"
-                                    value="{{ $model->{$field} }}" placeholder="Enter {{ $label }}" 
-                                    class="auto-suggesstion-list"/>
-                                <div id="{{ $field . '-suggestion-box' }}" class="suggestion-box hidden"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="row is_draft-block is_draft-block-0">
-                    <div class="col-md-6 col-lg-6">
                         <div class="form-group mb-3">
                             <?php
                             $field = 'dept_id';
@@ -86,7 +68,7 @@ $page_header_links = [['title' => 'List', 'url' => route($routePrefix . '.index'
                             $label = get_value_from_list($field_labels, $field, $field);
                             ?>
                             <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$task_type_list"
-                                value="{{ $model->{$field} }}" mandatory="true" class="select2" />
+                                value="{{ $model->{$field} }}" mandatory="true" class="select2" :pleaseSelect="$false" />
                         </div>
                         <div class="form-group mb-3">
                             <?php
@@ -103,26 +85,47 @@ $page_header_links = [['title' => 'List', 'url' => route($routePrefix . '.index'
                             </div>
                         </div>   
                         <div class="form-group mb-3">
-                            <?php
-                            $field = 'start_date_time';
-                            $label = get_value_from_list($field_labels, $field, $field);
-                            $value = $model->{$field};
-                            if ($value instanceof  \Illuminate\Support\Carbon) {
-                                $value = $value->format(DateUtility::DATETIME_OUT_FORMAT);
-                            }
-                            ?>
-                            <x-Inputs.text-field :id="$field" :name="$field" :label="$label" :value="$value"
-                                class="custom-date-picker" placeholder="Enter {{ $label }}" autocomplete="off"
-                                mandatory="true" />
-                        </div>
-                        <div class="form-group mb-3 ">
-                            <?php
-                            $field = 'duration';
-                            $label = get_value_from_list($field_labels, $field, $field);
-                            $false = false
-                            ?>
-                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
-                                :list="$duration_list" value="{{ $model->{$field}  }}" mandatory="true" class="select2"/>
+                            <div class="row">
+                                <div class="col-md-12 col-xxl-6">
+                                    <?php
+                                    $field = 'start_date_time';
+                                    $label = get_value_from_list($field_labels, $field, $field);
+                                    $value = $model->{$field} ?? $default_start_date_time;
+                                    if ($value instanceof  \Illuminate\Support\Carbon) {
+                                        $value = $value->format(DateUtility::DATETIME_OUT_FORMAT);
+                                    }
+                                    ?>
+                                    <x-Inputs.text-field :id="$field" :name="$field" :label="$label" :value="$value"
+                                        class="custom-date-picker" placeholder="Enter {{ $label }}" autocomplete="off"
+                                        mandatory="true" />
+                                </div>
+                                <div class="col-md-12 col-xxl-6">
+                                    <?php
+                                    $field = 'duration';
+                                    $label = get_value_from_list($field_labels, $field, $field);
+                                    ?>
+                                    @if ($label)
+                                        <label class="form-label">
+                                            {{ $label }}
+                                            <span class="mandatory">*</span>
+                                        </label>
+                                    @endif
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            <x-Inputs.text-field :id="$field" :name="$field" label=""
+                                                :value="$model->{$field}" mandatory="true" class="validate-int"/>
+                                        </div>
+                                        <div class="col-sm-8">
+                                            <?php
+                                            $field = 'duration_type';
+                                            $label = get_value_from_list($field_labels, $field, $field);
+                                            ?>
+                                            <x-Inputs.drop-down :id="$field" :name="$field" label=""
+                                                :list="$duration_type_list" :value="$model->{$field}" mandatory="true" class="select2" :pleaseSelect="$false" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                                              
                         <div class="form-group mb-3">
@@ -133,6 +136,20 @@ $page_header_links = [['title' => 'List', 'url' => route($routePrefix . '.index'
                             ?>
                             <x-Inputs.choice :id="$field" :name="$field" :label="$label" :value="$value"
                                 class="choice " placeholder="Enter {{ $label }}" />
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-6">
+                        <div class="form-group mb-3">
+                            <div class="textarea-wrapper">
+                                <?php
+                                $field = 'description';
+                                $label = get_value_from_list($field_labels, $field, $field);                                
+                                ?>
+                                <x-Inputs.text-area :id="$field" :name="$field" :label="$label" rows="8"
+                                    value="{{ $model->{$field} }}" placeholder="Enter {{ $label }}" 
+                                    class="auto-suggesstion-list"/>
+                                <div id="{{ $field . '-suggestion-box' }}" class="suggestion-box hidden"></div>
+                            </div>
                         </div>
                     </div>
                     <div class="row is_draft-block is_draft-block-0">

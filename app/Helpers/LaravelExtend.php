@@ -163,7 +163,7 @@ class LaravelExtend
         return $old_rules;
     }
 
-    public static function getQueryLog($connection = "")
+    public static function getQueryLog($connection = "", int $length = 0)
     {
         if ($connection) {
             $db_logs = DB::connection($connection)->getQueryLog();
@@ -181,6 +181,38 @@ class LaravelExtend
             unset($row['bindings']);
 
             $db_logs[$k] = $row;
+        }
+
+        $total_count = count($db_logs);
+
+        if ($total_count > 0)
+        {
+            if ($length != 0)
+            {
+                if ($length < 0)
+                {       
+                    $temp = $db_logs;
+                    unset($db_logs);
+
+                    $length = abs($length);
+                    $start = $total_count - $length;
+
+                    for($i = $start; $i < $total_count; $i++)
+                    {
+                        $db_logs[] = $temp[$i];
+                    }
+                }
+                else if ($length > 0)
+                {
+                    $temp = $db_logs;
+                    unset($db_logs);
+
+                    for($i = 0; $i < $length; $i++)
+                    {
+                        $db_logs[] = $temp[$i];
+                    }
+                }
+            }
         }
 
         return $db_logs;
@@ -240,9 +272,8 @@ class LaravelExtend
      *
      * @param Model|string $modelInstanceOrClass The model instance or fully qualified class name.
      * @param string $relationName The name of the relation method (e.g., 'posts', 'user').
-     * @return bool
      */
-    public static function mysqlModelHasRelation(Model|string $modelInstanceOrClass, string $relationName): bool
+    public static function getRelation(Model|string $modelInstanceOrClass, string $relationName) : Relation | null
     {
         try {
             $model = is_string($modelInstanceOrClass) ? app($modelInstanceOrClass) : $modelInstanceOrClass;
@@ -250,7 +281,7 @@ class LaravelExtend
 
             // Check if the method exists
             if (!$reflectionClass->hasMethod($relationName)) {
-                return false;
+                return null;
             }
 
             $method = $reflectionClass->getMethod($relationName);
@@ -258,7 +289,7 @@ class LaravelExtend
             // Check if the method is public and has no required parameters
             // (Eloquent relations are typically public methods with no mandatory params)
             if (!$method->isPublic() || $method->getNumberOfRequiredParameters() > 0) {
-                return false;
+                return null;
             }
 
             // Attempt to invoke the method on a new instance of the model
@@ -267,14 +298,18 @@ class LaravelExtend
             $relation = $method->invoke($model);
 
             // Check if the returned value is an instance of a Laravel Relation
-            return $relation instanceof Relation;
+            if ( $relation instanceof Relation)
+            {
+                return $relation;
+            }
+
         } catch (\ReflectionException $e) {
             // Method or class not found, or other reflection error
-            return false;
+            return null;
         } catch (\Throwable $e) {
             // Any other exception during invocation (e.g., if relation method relies on instantiated data)
             // This is a safety net; ideally, relation methods don't throw on clean instances.
-            return false;
+            return null;
         }
     }
 

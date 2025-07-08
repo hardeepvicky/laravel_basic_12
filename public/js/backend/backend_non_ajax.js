@@ -27,19 +27,18 @@ $(document).ready(function () {
     $(".fancybox").fancybox();
 
     $(".date-picker").flatpickr({
-        dateFormat: "d-M-Y",
+        dateFormat: constants.dateFormat
     });
 
     $(".date-time-picker").flatpickr({
-        enableTime: true,
-        time_24hr: false,
-        dateFormat: "d-M-Y h:i K",
+        enableTime: true,        
+        dateFormat: constants.dateTimeFormat
     });
 
     $(".time-picker").flatpickr({
         noCalendar: true,
         enableTime: true,
-        dateFormat: "h:i K",
+        dateFormat: constants.timeFormat,
     });
 
     // flatpickr(".date-month-picker", {
@@ -316,14 +315,14 @@ function summary_table_with_search(ele, callback) {
 function suggestion_list(textarea, suggestionBox, suggestion_data, url) {
     textarea = $(textarea);
     if (textarea.length <= 0) {
-        console.error("textarea notr found");
+        console.error("textarea not found");
         return;
     }
 
     suggestionBox = $(suggestionBox);
 
     if (suggestionBox.length <= 0) {
-        console.error("suggestionBox not foud");
+        console.error("suggestionBox not found");
         return;
     }
 
@@ -338,52 +337,6 @@ function suggestion_list(textarea, suggestionBox, suggestion_data, url) {
     let currentSearchTerm = '';
     let currentTriggerIndex = -1; // Position of the '#' character
     let activeSuggestionIndex = -1; // For keyboard navigation
-
-    // --- Dummy Data (Replace with AJAX call to Laravel backend) ---
-    // suggestion_data = [{
-    //     id: 1,
-    //     type: 'user',
-    //     name: 'Admin',
-    //     display: '#user.id:1 (Admin)'
-    // },
-    // {
-    //     id: 2,
-    //     type: 'user',
-    //     name: 'Editor',
-    //     display: '#user.id:2 (Editor)'
-    // },
-    // {
-    //     id: 3,
-    //     type: 'user',
-    //     name: 'User',
-    //     display: '#user.id:3 (User)'
-    // },
-    // {
-    //     id: 4,
-    //     type: 'user',
-    //     name: 'John Doe',
-    //     display: '#user.id:4 (John Doe)'
-    // },
-    // {
-    //     id: 5,
-    //     type: 'product',
-    //     name: 'Laptop',
-    //     display: '#product.id:5 (Laptop)'
-    // },
-    // {
-    //     id: 6,
-    //     type: 'user',
-    //     name: 'Developer',
-    //     display: '#user.id:6 (Developer)'
-    // },
-    // {
-    //     id: 7,
-    //     type: 'user',
-    //     name: 'Jane Smith',
-    //     display: '#user.id:7 (Jane Smith)'
-    // },
-    // ];
-    // --- End Dummy Data ---
 
     // Function to fetch suggestions (simulated or via AJAX)
     const fetchSuggestions = function (term) {

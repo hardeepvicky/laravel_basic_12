@@ -40,6 +40,14 @@ $false = false;
                 </div>
                 <div class="col-md-3 col-xl-2 mb-2">
                     <?php
+                    $field = "dept_id";
+                    $label = get_value_from_list($field_labels, $field, $field);
+                    ?>
+                    <x-Inputs.drop-down :name="$field" :label="$label" :value="$search[$field]" :list="$department_list"
+                        class="select2" />
+                </div>
+                <div class="col-md-3 col-xl-2 mb-2">
+                    <?php
                     $field = "assign_to_user_id";
                     $label = get_value_from_list($field_labels, $field, $field);
                     ?>

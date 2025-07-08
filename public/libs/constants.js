@@ -20,4 +20,5 @@ const constants = {
     },
     dateFormat : 'd-M-Y',
     dateTimeFormat : 'd-M-Y H:i',
+    timeFormat : 'H:i',
 };

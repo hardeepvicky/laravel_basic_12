@@ -7,7 +7,7 @@ class RecurringTaskDate extends BaseModel
     protected static Array $unique_fields = ["recurring_task_id", "date"];
 
     protected $casts = [
-        'date' => 'date',
+        'date' => 'datetime',
     ];
 
     public function task()  

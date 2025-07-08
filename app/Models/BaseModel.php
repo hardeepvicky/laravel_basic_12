@@ -100,6 +100,8 @@ class BaseModel extends Model implements BaseModelInterface
     public function afterSave()
     {
         $this->forgotCache();
+
+        $this->saveModuleLinksFromString();
     }
 
     public function saveModuleLinksFromString()
@@ -132,8 +134,6 @@ class BaseModel extends Model implements BaseModelInterface
                 $this->{$field_url_field} = $fileUtility->getUrl($this->{$field});
             }
         }
-
-        $this->convertTimeZoneForDisplay();
     }
 
     public function parseTagsForModuleLinking()

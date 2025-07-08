@@ -10,14 +10,6 @@ class FieldSetting extends BaseMongoModel
     {
         $model_class = str_class_name_without_namespace($model_class);
 
-        $cache_key = "dynamic-field-labels";
-
-        $fields = self::getCache($cache_key);
-
-        if ($fields) {
-            return $fields;
-        }
-
         $ref_model_class = "App\\Models\\" . $model_class;
 
         $ref_model = $ref_model_class::query()->first();
@@ -37,8 +29,6 @@ class FieldSetting extends BaseMongoModel
                 }
             }
         }
-
-        self::addCache($cache_key, $fields);
 
         return $fields;
     }

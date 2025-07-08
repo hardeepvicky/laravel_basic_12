@@ -94,7 +94,7 @@ class MyMigration extends Migration
     {
         $output = self::getConsoleOutput();
 
-        $output->writeLogToConsole('Fetching foreign keys');
+        $output->writeLogToConsole('Fetching Foreign keys');
 
         $databaseName = DB::connection()->getDatabaseName();
 
@@ -115,16 +115,31 @@ class MyMigration extends Migration
         return $foreignKeys;
     }
 
-    public function indexExists($table, $index)
+    public function getIndexKeys(string $tableName)
+    {
+        $output = self::getConsoleOutput();
+
+        $output->writeLogToConsole('Fetching Index keys');
+
+        $databaseName = DB::connection()->getDatabaseName();
+        $result = DB::table('information_schema.statistics')
+            ->where('table_schema', $databaseName)
+            ->where('table_name', $tableName)
+            ->get();
+
+        return $result;
+    }
+
+    public function indexExists($tableName, $index)
     {
         $output = self::getConsoleOutput();
 
         $output->writeLogToConsole('Fetching Index');
 
-        $database = DB::getDatabaseName();
+        $databaseName = DB::connection()->getDatabaseName();
         $result = DB::table('information_schema.statistics')
-            ->where('table_schema', $database)
-            ->where('table_name', $table)
+            ->where('table_schema', $databaseName)
+            ->where('table_name', $tableName)
             ->where('index_name', $index)
             ->exists();
 
@@ -134,6 +149,18 @@ class MyMigration extends Migration
     public function dropColumnsWithIndex(string $tableName, array $fields)
     {
         $output = self::getConsoleOutput();
+
+        $columns = $this->getColumns($tableName);
+
+        foreach($fields as $k => $field)
+        {
+            if (!in_array($field, $columns))
+            {
+                $output->writeLogToConsole("Field not found : $field");
+                unset($fields[$k]);
+            }
+        }
+
         $foreignKeys = $this->getForeignKeys($tableName);
 
         $output->writeLogToConsole('Droping foreign Keys');
@@ -142,7 +169,7 @@ class MyMigration extends Migration
         {
             if (in_array($foreign_key->foreign_key_column, $fields))
             {
-                $output->writeLogToConsole($foreign_key->constraint_name);
+                $output->writeLogToConsole('Droping foreign key : ' .$foreign_key->constraint_name);
 
                 Schema::table($tableName, function (Blueprint $table) use($foreign_key) {                
                     $table->dropForeign($foreign_key->constraint_name);
@@ -150,13 +177,19 @@ class MyMigration extends Migration
             }
         }
 
-        $columns = $this->getColumns($tableName);
+        $indexKeys = $this->getIndexKeys($tableName);
 
-        foreach($fields as $k => $field)
+        $output->writeLogToConsole('Droping index Keys');
+
+        foreach($indexKeys as $index_key)
         {
-            if (!in_array($field, $columns))
+            if (in_array($index_key->COLUMN_NAME, $fields))
             {
-                unset($fields[$k]);
+                $output->writeLogToConsole('Droping index key : ' . $index_key->INDEX_NAME);
+
+                Schema::table($tableName, function (Blueprint $table) use($index_key) {                
+                    $table->dropIndex($index_key->INDEX_NAME);
+                });
             }
         }
 

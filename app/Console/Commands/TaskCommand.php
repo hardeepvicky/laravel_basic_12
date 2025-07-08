@@ -59,7 +59,7 @@ class TaskCommand extends MyCommand
                 }
             }
 
-            $now = DateUtility::getDate(null, DateUtility::DATETIME_FORMAT, DateUtility::$login_user_time_zone);
+            $now = DateUtility::getDate(null, DateUtility::DATETIME_FORMAT);
 
             $records = Task::where("status", Task::STATUS_CREATED)
                 ->where("start_date_time", "<=", $now)

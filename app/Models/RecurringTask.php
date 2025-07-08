@@ -26,15 +26,17 @@ class RecurringTask extends BaseModel
     ];
 
     public static array $child_model_class = [
-        // Task::class => [
-        //     "foreignKey" => "recurring_task_id",
-        //     "preventDelete" => true,
-        // ],
+        Task::class => [
+            "foreignKey" => "recurring_task_id",
+            "preventDelete" => true,
+        ],
         RecurringTaskDate::class => [
             "foreignKey" => "recurring_task_id",
             "preventDelete" => false,
         ],
     ];
+
+    protected static array $fields_containg_tags = ["description"];
 
     public const RECURRING_DAILY = "DAILY";
     public const RECURRING_WEEKLY = "WEEKLY";
@@ -45,25 +47,22 @@ class RecurringTask extends BaseModel
     public const RECURRING_YEARLY = "YEARLY";
     public const RECURRING_CUSTOM = "CUSTOM";
 
-    public const COMPLETE_TIME_1_HOUR = "1_HOUR";
-    public const COMPLETE_TIME_2_HOUR = "2_HOUR";
-    public const COMPLETE_TIME_3_HOUR = "3_HOUR";
-    public const COMPLETE_TIME_4_HOUR = "4_HOUR";
-    public const COMPLETE_TIME_5_HOUR = "5_HOUR";
-    public const COMPLETE_TIME_6_HOUR = "9_HOUR";
-    public const COMPLETE_TIME_1_DAY = "1_DAY";
-    public const COMPLETE_TIME_2_DAY = "2_DAY";
-    public const COMPLETE_TIME_3_DAY = "3_DAY";
-    public const COMPLETE_TIME_4_DAY = "4_DAY";
-    public const COMPLETE_TIME_5_DAY = "5_DAY";
-    public const COMPLETE_TIME_WEEK = "WEEK";
-    public const COMPLETE_TIME_2_WEEK = "2_WEEK";
-    public const COMPLETE_TIME_MONTH = "MONTH";
-    public const COMPLETE_TIME_IN_3_MONTH = "IN_3_MONTH";
-    public const COMPLETE_TIME_IN_6_MONTH = "IN_6_MONTH";
-    public const COMPLETE_TIME_IN_9_MONTH = "IN_9_MONTH";
-    public const COMPLETE_TIME_IN_YEAR = "YEAR";
-    public const COMPLETE_TIME_IN_2_YEAR = "IN_2_YEAR";
+    public function afterFind()
+    {
+        parent::afterFind();
+
+        $this->convertTimeZoneForDisplay();
+
+        if ($this->recurringTaskDate?->count() > 0)
+        {
+            foreach($this->recurringTaskDate as $recurringTaskDate)
+            {
+                $recurringTaskDate->convertTimeZoneForDisplay();
+            }
+        }
+
+        $this->parseTagsForModuleLinking();
+    }
 
     public function setDefaultAttributes() {}
 
@@ -82,12 +81,13 @@ class RecurringTask extends BaseModel
             $rules['assign_to_user_id'] = ["required"];
             $rules['recurring_type'] = ["required"];
             $rules['priority'] = ["required"];
-            $rules['task_should_be_complete_in'] = ["required"];
 
             if ($request->get("recurring_type") == self::RECURRING_CUSTOM) {
                 $rules['recurringTaskDate'] = ["required"];
             } else {
                 $rules["start_date_time"] = ["required"];
+                $rules['duration'] = ["required"];
+                $rules['duration_type'] = ["required"];
             }
         }
 
@@ -142,92 +142,12 @@ class RecurringTask extends BaseModel
                 return $list;
 
                 break;
-            case "task_should_be_complete_in":
-                $list = [];
-
-                foreach ($class_info['constants'] as $constant => $label) {
-                    if (strpos($constant, "COMPLETE_TIME_") !== false) {
-                        $list[] = $label;
-                    }
-                }
-
-                return $list;
-                break;
         }
 
         return null;
     }
 
-    public static function getEndDate($start_date_time, $task_should_be_complete_in)
-    {
-        $end_date = null;
-
-        switch ($task_should_be_complete_in) {
-            case self::COMPLETE_TIME_1_HOUR:
-                $end_date = DateUtility::change($start_date_time, 1, DateUtility::HOURS);
-                break;
-            case self::COMPLETE_TIME_2_HOUR:
-                $end_date = DateUtility::change($start_date_time, 2, DateUtility::HOURS);
-                break;
-            case self::COMPLETE_TIME_3_HOUR:
-                $end_date = DateUtility::change($start_date_time, 3, DateUtility::HOURS);
-                break;
-            case self::COMPLETE_TIME_4_HOUR:
-                $end_date = DateUtility::change($start_date_time, 4, DateUtility::HOURS);
-                break;
-            case self::COMPLETE_TIME_5_HOUR:
-                $end_date = DateUtility::change($start_date_time, 5, DateUtility::HOURS);
-                break;
-            case self::COMPLETE_TIME_6_HOUR:
-                $end_date = DateUtility::change($start_date_time, 6, DateUtility::HOURS);
-                break;
-
-            case self::COMPLETE_TIME_1_DAY:
-                $end_date = DateUtility::change($start_date_time, 1, DateUtility::DAYS);
-                break;
-            case self::COMPLETE_TIME_2_DAY:
-                $end_date = DateUtility::change($start_date_time, 2, DateUtility::DAYS);
-                break;
-            case self::COMPLETE_TIME_3_DAY:
-                $end_date = DateUtility::change($start_date_time, 3, DateUtility::DAYS);
-                break;
-            case self::COMPLETE_TIME_4_DAY:
-                $end_date = DateUtility::change($start_date_time, 4, DateUtility::DAYS);
-                break;
-            case self::COMPLETE_TIME_5_DAY:
-                $end_date = DateUtility::change($start_date_time, 5, DateUtility::DAYS);
-                break;
-
-            case self::COMPLETE_TIME_WEEK:
-                $end_date = DateUtility::change($start_date_time, 7, DateUtility::DAYS);
-                break;
-            case self::COMPLETE_TIME_2_WEEK:
-                $end_date = DateUtility::change($start_date_time, 14, DateUtility::DAYS);
-                break;
-
-            case self::COMPLETE_TIME_MONTH:
-                $end_date = DateUtility::change($start_date_time, 1, DateUtility::MONTHS);
-                break;
-            case self::COMPLETE_TIME_IN_3_MONTH:
-                $end_date = DateUtility::change($start_date_time, 3, DateUtility::MONTHS);
-                break;
-            case self::COMPLETE_TIME_IN_6_MONTH:
-                $end_date = DateUtility::change($start_date_time, 6, DateUtility::MONTHS);
-                break;
-            case self::COMPLETE_TIME_IN_9_MONTH:
-                $end_date = DateUtility::change($start_date_time, 9, DateUtility::MONTHS);
-                break;
-
-            case self::COMPLETE_TIME_IN_YEAR:
-                $end_date = DateUtility::change($start_date_time, 1, DateUtility::YEARS);
-                break;
-            case self::COMPLETE_TIME_IN_2_YEAR:
-                $end_date = DateUtility::change($start_date_time, 2, DateUtility::YEARS);
-                break;
-        }
-
-        return $end_date;
-    }
+    
 
     public static function createTask(RecurringTask $recurring_task): int
     {
@@ -235,9 +155,7 @@ class RecurringTask extends BaseModel
 
         $days = 0;
 
-        $defaultTimezone = date_default_timezone_get();
-
-        $now = DateUtility::getDate(null, 'Y-m-d H:i:00', DateUtility::$login_user_time_zone);
+        $now = DateUtility::getDate(null, 'Y-m-d H:i:00');
 
         DB::beginTransaction();
 
@@ -287,12 +205,9 @@ class RecurringTask extends BaseModel
 
                         $record['start_date_time'] = $next_date;
                         $record['recurring_task_id'] = $recurring_task->id;
-                        $record['duration'] = $recurring_task->task_should_be_complete_in;
                         $record["created_by"] = $record["updated_by"] = 0;
 
-                        $record['end_date_time'] = self::getEndDate($record['start_date_time'], $record['task_should_be_complete_in']);
-
-                        // d($record, true);
+                        $record['end_date_time'] = Task::getEndDate($record['start_date_time'], $record['duration'], $record['duration_type']);
 
                         $count = Task::where("recurring_task_id", $record['recurring_task_id'])->where("start_date_time", $record['start_date_time'])->count();
 
@@ -318,8 +233,8 @@ class RecurringTask extends BaseModel
         } else {
             $recurring_task->load("recurringTaskDate");
 
-            foreach ($recurring_task->recurringTaskDate as $task_custom_date) {
-                if (DateUtility::compare($task_custom_date->date, $now) <= 0) {
+            foreach ($recurring_task->recurringTaskDate as $recurringTaskDate) {
+                if (DateUtility::compare($recurringTaskDate->date, $now) <= 0) {
                     try {
                         $model = new Task();
                         $record = $recurring_task->getAttributes();
@@ -335,13 +250,11 @@ class RecurringTask extends BaseModel
                         $record['can_edit'] = 0;
                         $record['cannot_edit_reason_array'] = ['Task created from recurring task by system'];
 
-                        $record['start_date_time'] = $task_custom_date->date->toDateString();
+                        $record['start_date_time'] = $recurringTaskDate->date->toDateTimeString();
                         $record['recurring_task_id'] = $recurring_task->id;
                         $record["created_by"] = $record["updated_by"] = 0;
 
-                        $record['end_date_time'] = self::getEndDate($record['start_date_time'], $record['task_should_be_complete_in']);
-
-                        // d($record, true);
+                        $record['end_date_time'] = Task::getEndDate($record['start_date_time'], $record['duration'], $record['duration_type']);
 
                         $count = Task::where("recurring_task_id", $record['recurring_task_id'])->where("start_date_time", $record['start_date_time'])->count();
 
@@ -349,9 +262,9 @@ class RecurringTask extends BaseModel
                             $model = new Task($record);
 
                             if ($model->save()) {
-                                $task_custom_date->task_id = $model->id;
+                                $recurringTaskDate->task_id = $model->id;
 
-                                if (!$task_custom_date->save()) {
+                                if (!$recurringTaskDate->save()) {
                                     throw new UserException("Fail To Save", UserException::ERROR_LARAVEL_FAIL);
                                 }
 

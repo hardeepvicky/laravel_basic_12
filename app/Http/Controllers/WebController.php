@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\UserException;
+use App\Helpers\ArrayHelper;
 use App\Helpers\DateUtility;
+use App\Helpers\LaravelExtend;
 use App\Models\BaseModel;
+use App\Models\BaseModelInterface;
 use App\Models\Setting;
 use App\Traits\CacheTrait;
 use Exception;
@@ -13,6 +17,7 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Str;
 
 class WebController extends Controller
 {
@@ -224,6 +229,66 @@ class WebController extends Controller
         return $params;
     }
 
+    protected function getSortBy(Model $main_model, $cache_prefix, array $array, bool $is_cache_clear = false)
+    {
+        $params = $this->getRequestData($cache_prefix, $array, $is_cache_clear);
+
+        if (isset($params['sort_by']) && $params['sort_by'] && $params['sort_dir'] && $params['sort_dir'])
+        {
+            $sort_by = $params['sort_by'];
+            $sort_dir = $params['sort_dir'];
+
+            $arrayHelper = new ArrayHelper($params);
+
+            UserException::checkPossibleValues($sort_dir, ["ASC", "DESC"], ["before_check_convert_string" => ["trim", "strtolower"]]);
+
+            if (strpos($sort_by, ".") !== false)
+            {
+                list($relation_name, $field) = explode(".", $sort_by);
+
+                $relation_name = trim($relation_name);
+                $field = trim($field);
+
+                if (!$relation_name)
+                {
+                    throw new UserException("sort_by has (.) char so system is finding relation_name, which is not found");
+                }
+
+                $relation = LaravelExtend::getRelation($main_model, $relation_name);
+
+                if (!$relation)
+                {
+                    $class_name = str_class_name_without_namespace($main_model);
+                    throw new UserException("relation : $relation_name not found on $class_name");
+                }
+
+                $foreign_key = $relation->getForeignKeyName();
+
+                $relation_class = $relation->getRelated();
+
+                $main_table_name = $main_model->getTable();
+                
+                if (!isset($params['relation_table_field']))
+                {
+                    $params['relation_table_field'] = "name";
+                }
+
+                $query_builder = $relation_class::select($params['relation_table_field'])->whereColumn('id', $main_table_name . "." . $foreign_key);
+
+                return [
+                    "sort_by" => $query_builder,
+                    "sort_dir" => $sort_dir
+                ];
+            }
+            else
+            {
+                $arrayHelper = new ArrayHelper($params);
+
+                return $arrayHelper->getOnlyWhichHaveKeys(["sort_by", "sort_dir"], false, true);
+            }
+        }
+    }
+
     protected function getConditions($cache_prefix, array $array, bool $return_key_value_pair_conditions = false)
     {
         $conditions = [];
@@ -296,11 +361,10 @@ class WebController extends Controller
 
                     $parse_value = implode(",", $value);
                     if ($return_key_value_pair_conditions) {
-                        if ($op && $op != "=") {
-                            $conditions[$field . " " . $op] = $parse_value;
-                        } else {
-                            $conditions[$field] = $parse_value;
-                        }
+                        $conditions[$field] = [
+                            "value" => $parse_value,
+                            "op" => $op,
+                        ];
                     } else {
                         $conditions[] = [$field, $op, $parse_value];
                     }
@@ -312,11 +376,10 @@ class WebController extends Controller
                 $op = $arr['op'];
 
                 if ($return_key_value_pair_conditions) {
-                    if ($op && $op != "=") {
-                        $conditions[$field . " " . $op] = $parse_value;
-                    } else {
-                        $conditions[$field] = $parse_value;
-                    }
+                    $conditions[$field] = [
+                        "value" => $parse_value,
+                        "op" => $op,
+                    ];
                 } else {
                     $conditions[] = [$field, $op, $parse_value];
                 }
@@ -617,7 +680,7 @@ class WebController extends Controller
                 $msg = "Record can not be delete";
                 if (BaseModel::tableHaveField($model->getTable(), "cannot_delete_reason_array") || array_key_exists("cannot_delete_reason_array", $model->attributes)) {
                     if ($model->cannot_delete_reason_array) {
-                        $msg .= "Reason : " . implode(", ", $model->cannot_delete_reason_array);
+                        $msg .= ", Reason : " . implode(", ", $model->cannot_delete_reason_array);
                     }
                 }
 

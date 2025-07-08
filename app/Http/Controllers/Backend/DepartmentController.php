@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Backend;
 
 use App\Helpers\LaravelExtend;
 use App\Models\Department;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Support\Facades\DB;
@@ -25,6 +26,8 @@ class DepartmentController extends BackendController
 
         $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
 
+        // d(LaravelExtend::getQueryLog("", -3));
+
         $this->setForView(compact("records"));
 
         return $this->viewIndex(__FUNCTION__);
@@ -42,18 +45,31 @@ class DepartmentController extends BackendController
 
         $builder = $this->modelClass::where($conditions);
 
+        $cache_key_for_sort = $cache_key_prefix . "-index-extra-params";
+
+        $clear_cache = request('is_sort_clear', false);
+
+        $sort_params = $this->getRequestData($cache_key_for_sort, [
+            ["key" => "sort_by", "default" => "id"],
+            ["key" => "sort_dir", "default" => "DESC"],
+        ], $clear_cache);
+        
+        $builder->with(["headUser"]);
+
         if ($apply_sort)
         {
             $cache_key_for_sort = $cache_key_prefix . "-index-extra-params";
 
             $clear_cache = request('is_sort_clear', false);
 
-            $sort_params = $this->getRequestData($cache_key_for_sort, [
+            $this->model = new $this->modelClass;
+
+            $sort = $this->getSortBy($this->model, $cache_key_for_sort, [
                 ["key" => "sort_by", "default" => "id"],
                 ["key" => "sort_dir", "default" => "DESC"],
             ], $clear_cache);
 
-            $builder->orderBy($sort_params['sort_by'], $sort_params['sort_dir']);
+            $builder->orderBy($sort['sort_by'], $sort['sort_dir']);
         }
 
         return $builder;
@@ -65,9 +81,19 @@ class DepartmentController extends BackendController
             $this->model = new $this->modelClass();
         }
 
+        $user_conditions = [
+            "type" => User::TYPE_INTERNAL,
+        ];
+
+        if ($this->model->dept_head_user_id) {
+            $user_conditions['or_id'] = $this->model->dept_head_user_id;
+        }
+
+        $user_list = User::getList("id", "display_name", $user_conditions);
+
         $field_labels = $this->model->getFieldLabels();
 
-        $this->setForView(compact("field_labels"));
+        $this->setForView(compact("user_list", "field_labels"));
 
         return parent::beforeViewRender();
     }
@@ -92,6 +118,7 @@ class DepartmentController extends BackendController
     {
         return [
             "name" => ["required"],
+            "dept_head_user_id" => ["nullable"],
             "list_display_order" => "",
             "is_active" => ""
         ];
