@@ -265,8 +265,8 @@ function add_form_to_body_and_submit(method, action, params) {
 
 function getTimeZone()
 {
-    const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
+    var userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    
     if (userTimeZone == 'Asia/Calcutta') {
         userTimeZone = 'Asia/Kolkata';
     }
