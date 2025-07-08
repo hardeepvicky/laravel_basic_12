@@ -95,7 +95,7 @@ class TagsController extends BackendController
                         else
                         {
                             $row['display'] = $record->search_term;
-                            $row['name'] = "#" . $row['display'];
+                            $row['name'] = "#" . $row['name'];
                         }
 
                         $response['data'][] = $row;
