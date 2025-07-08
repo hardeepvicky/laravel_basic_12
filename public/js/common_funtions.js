@@ -267,5 +267,9 @@ function getTimeZone()
 {
     const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
+    if (userTimeZone == 'Asia/Calcutta') {
+        userTimeZone = 'Asia/Kolkata';
+    }
+
     return userTimeZone;
 }
