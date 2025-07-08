@@ -89,12 +89,12 @@ class TagsController extends BackendController
 
                         if ($record->main_model)
                         {
-                            $row['display'] = $record->main_model . " -> " . $record->name;
+                            $row['display'] = $record->search_term;
                             $row['name'] = "#" . $record->main_model . ".id:" . $record->main_id . " (" . $record->name . ")";
                         }
                         else
                         {
-                            $row['display'] = $record->name;
+                            $row['display'] = $record->search_term;
                             $row['name'] = "#" . $row['display'];
                         }
 
