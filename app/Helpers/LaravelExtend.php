@@ -356,4 +356,22 @@ class LaravelExtend
 
         return $str;
     }
+
+    public static function checkDatabaseExist($connection = "mysql")
+    {
+        $databaseName = config('database.connections.' . $connection . '.database'); // Get configured database name
+
+        try {
+            $query = "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = ?";
+            $dbExists = DB::select($query, [$databaseName]);
+
+            if (empty($dbExists)) {
+                return false;
+            } else {
+                return true;
+            }
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
 }

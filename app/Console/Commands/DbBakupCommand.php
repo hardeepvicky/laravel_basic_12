@@ -83,22 +83,6 @@ class DbBakupCommand extends Command
 
         FileUtility::createFolder($path);
 
-        $files = FileUtility::getFileList($path);
-
-        $folder_count = 0;
-
-        if ($files) {
-            foreach ($files as $file) {
-                if (is_dir($file)) {
-                    $folder_count++;
-                }
-            }
-        }
-
-        $path .= $folder_count . "/";
-
-        FileUtility::createFolder($path);
-
         $db_name = $db_config['database'];
 
         $file = $path . $db_name . "_st.sql";
@@ -116,7 +100,8 @@ class DbBakupCommand extends Command
         exec($command, $output, $return_var);
 
         if ($return_var == 2) {
-            $this->error("$command is not working.");
+            $this->error("Command is not working");
+            $this->info($command);
             return false;
         }
 
@@ -151,7 +136,11 @@ class DbBakupCommand extends Command
         $data_path = $path . "data/";
         FileUtility::createFolder($data_path);
 
-        $ignore_tables = array();
+        $ignore_tables = [
+            "telescope_entries",
+            "telescope_entries_tags",
+            "telescope_monitoring",
+        ];
 
         $table_sql_list = [];
 
@@ -177,7 +166,8 @@ class DbBakupCommand extends Command
             exec($command, $output, $return_var);
 
             if ($return_var == 2) {
-                $this->error("$command is not working.");
+                $this->error("Command is not working");
+                $this->info($command);
             } else {
                 $this->info($table);
                 $filename = pathinfo($file, PATHINFO_BASENAME);
