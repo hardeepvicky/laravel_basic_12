@@ -101,14 +101,6 @@ class TagFillFromOtherModel extends MyCommand
             $output->writeLogToConsole($model_class);
             $output->writeLogToConsole("Fetching Table Info");
 
-            $table_info = $main_model->getTableInfo($main_model->getTable());
-
-            if  (!isset($table_info["columns"]["id"]) || !isset($table_info["columns"][$name_field]))
-            {
-                $output->writeLogToConsole("$model_class either field id or $name_field is missing", "error");
-                continue;
-            }
-
             $list = $model_class::getList("id", $name_field);
 
             $id_to_delete = $model_class::getList("id", "id");

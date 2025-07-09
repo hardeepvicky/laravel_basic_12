@@ -2,6 +2,7 @@
 
 use App\Models\Task;
 use App\Helpers\DateUtility;
+
 $false = false;
 ?>
 
@@ -33,7 +34,7 @@ $page_header_links = [['title' => 'List', 'url' => route($routePrefix . '.index'
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-md-12 col-xl-6">
+                    <div class="col-md-12 col-xxl-6">
                         <div class="form-group mb-3">
                             <?php
                             $field = 'name';
@@ -48,19 +49,18 @@ $page_header_links = [['title' => 'List', 'url' => route($routePrefix . '.index'
                             $label = get_value_from_list($field_labels, $field, $field);
                             ?>
                             <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$department_list"
-                                :value="$model->{$field}" 
+                                :value="$model->{$field}"
                                 class="select2 cascade-drop-down"
                                 data-sr-cascade-target="#assign_to_user_id"
-                                data-sr-cascade-url="/user/ajax_get_list?dept_id={v}" 
-                                mandatory="true"
-                            />
+                                data-sr-cascade-url="/user/ajax_get_list?dept_id={v}"
+                                mandatory="true" />
                         </div>
                         <div class="form-group mb-3 is_draft-block is_draft-block-0">
                             <?php
                             $field = 'assign_to_user_id';
                             $label = get_value_from_list($field_labels, $field, $field);
                             ?>
-                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" data-value="{{ $model->{$field} }}" mandatory="true" class="select2" mandatory="true"/>
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" data-value="{{ $model->{$field} }}" mandatory="true" class="select2" mandatory="true" />
                         </div>
                         <div class="form-group mb-3 is_draft-block is_draft-block-0">
                             <?php
@@ -83,60 +83,55 @@ $page_header_links = [['title' => 'List', 'url' => route($routePrefix . '.index'
                                 <output class="" for="{{ $field }}" id="{{ $field . '_value' }}"
                                     aria-hidden="true">{{ $model->{$field} }}</output>
                             </div>
-                        </div>   
+                        </div>
                         <div class="form-group mb-3 is_draft-block is_draft-block-0">
-                            <div class="row">
-                                <div class="col-md-12 col-xxl-6">
-                                    <?php
-                                        $field = 'start_date_time';
-                                        $label = get_value_from_list($field_labels, $field, $field);
-                                        $value = $model->{$field} ?? $default_start_date_time;
-                                        if ($value instanceof  \Illuminate\Support\Carbon) {
-                                            $value = $value->format(DateUtility::DATETIME_OUT_FORMAT);
-                                        }
-                                    ?>
-                                    <label class="form-label">
-                                        {{ $label }}
-                                        <span class="mandatory">*</span>
-                                    </label>
-                                    <div class="d-flex">
-                                        <div id="start_date_time_preview"></div>
-                                        <div class="ml-2">                                        
-                                            <x-Inputs.text-field :id="$field" :name="$field" :label="$false" :value="$value"
-                                                class="custom-date-picker" placeholder="Enter {{ $label }}" autocomplete="off"
-                                                mandatory="true" />
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-12 col-xxl-6">
-                                    <?php
-                                    $field = 'duration';
-                                    $label = get_value_from_list($field_labels, $field, $field);
-                                    ?>
-                                    @if ($label)
-                                        <label class="form-label">
-                                            {{ $label }}
-                                            <span class="mandatory">*</span>
-                                        </label>
-                                    @endif
-                                    <div class="row">
-                                        <div class="col-sm-4">
-                                            <x-Inputs.text-field :id="$field" :name="$field" label=""
-                                                :value="$model->{$field}" mandatory="true" class="validate-int"/>
-                                        </div>
-                                        <div class="col-sm-8">
-                                            <?php
-                                            $field = 'duration_type';
-                                            $label = get_value_from_list($field_labels, $field, $field);
-                                            ?>
-                                            <x-Inputs.drop-down :id="$field" :name="$field" label=""
-                                                :list="$duration_type_list" :value="$model->{$field}" mandatory="true" class="select2" :pleaseSelect="$false" />
-                                        </div>
-                                    </div>
+                            <?php
+                            $field = 'start_date_time';
+                            $label = get_value_from_list($field_labels, $field, $field);
+                            $value = $model->{$field} ?? $default_start_date_time;
+                            if ($value instanceof  \Illuminate\Support\Carbon) {
+                                $value = $value->format(DateUtility::DATETIME_OUT_FORMAT);
+                            }
+                            ?>
+                            <label class="form-label">
+                                {{ $label }}
+                                <span class="mandatory">*</span>
+                            </label>
+                            <div class="d-flex">
+                                <div id="start_date_time_preview"></div>
+                                <div class="ml-2">
+                                    <x-Inputs.text-field :id="$field" :name="$field" :label="$false" :value="$value"
+                                        class="custom-date-picker" placeholder="Enter {{ $label }}" autocomplete="off"
+                                        mandatory="true" />
                                 </div>
                             </div>
                         </div>
-                                             
+                        <div class="form-group mb-3 is_draft-block is_draft-block-0">
+                            <?php
+                            $field = 'duration';
+                            $label = get_value_from_list($field_labels, $field, $field);
+                            ?>
+                            @if ($label)
+                            <label class="form-label">
+                                {{ $label }}
+                                <span class="mandatory">*</span>
+                            </label>
+                            @endif
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <x-Inputs.text-field :id="$field" :name="$field" label=""
+                                        :value="$model->{$field}" mandatory="true" class="validate-int" />
+                                </div>
+                                <div class="col-sm-8">
+                                    <?php
+                                    $field = 'duration_type';
+                                    $label = get_value_from_list($field_labels, $field, $field);
+                                    ?>
+                                    <x-Inputs.drop-down :id="$field" :name="$field" label=""
+                                        :list="$duration_type_list" :value="$model->{$field}" mandatory="true" class="select2" :pleaseSelect="$false" />
+                                </div>
+                            </div>
+                        </div>
                         <div class="form-group mb-3 is_draft-block is_draft-block-0">
                             <?php
                             $field = 'tag_name';
@@ -147,96 +142,99 @@ $page_header_links = [['title' => 'List', 'url' => route($routePrefix . '.index'
                                 class="choice " placeholder="Enter {{ $label }}" />
                         </div>
                     </div>
-                    <div class="col-md-6 col-lg-6">
+                    <div class="col-md-12 col-xxl-6">
                         <div class="form-group mb-3">
                             <div class="textarea-wrapper">
                                 <?php
                                 $field = 'description';
-                                $label = get_value_from_list($field_labels, $field, $field);                                
+                                $label = get_value_from_list($field_labels, $field, $field);
                                 ?>
                                 <x-Inputs.text-area :id="$field" :name="$field" :label="$label" rows="8"
-                                    value="{{ $model->{$field} }}" placeholder="Enter {{ $label }}" 
-                                    class="auto-suggesstion-list"/>
+                                    value="{{ $model->{$field} }}" placeholder="Enter {{ $label }}"
+                                    class="auto-suggesstion-list" />
                                 <div id="{{ $field . '-suggestion-box' }}" class="suggestion-box hidden"></div>
                             </div>
                         </div>
                     </div>
-                    <div class="row is_draft-block is_draft-block-0">
-                        <div class="col-md-6 col-lg-4">
-                            <div class="form-group mb-3">
-                                <?php
-                                $field = 'is_send_notification';
-                                $label = get_value_from_list($field_labels, $field, $field);
-                                ?>
-                                <x-Inputs.checkbox :name="$field" :label="$label" value="{{ $model->{$field} }}" />
-                            </div>
+                </div>
+                <div class="row is_draft-block is_draft-block-0">
+                    <div class="col-md-6 col-lg-4">
+                        <div class="form-group mb-3">
+                            <?php
+                            $field = 'is_send_notification';
+                            $label = get_value_from_list($field_labels, $field, $field);
+                            ?>
+                            <x-Inputs.checkbox :name="$field" :label="$label" value="{{ $model->{$field} }}" />
                         </div>
                     </div>
                 </div>
             </div>
-
-            <x-Backend.form-common-footer-buttons />
         </div>
+
+        <x-Backend.form-common-footer-buttons />
     </div>
-    </form>
+</div>
+</form>
 
-    <script>
-        $(function() {
-            var screen_name = '<?= $screen_name ?>';
-            $.events.execAtLast(function() {
+<script>
+    $(function() {
+        var screen_name = '<?= $screen_name ?>';
+        $.events.execAtLast(function() {
 
-                var start_date_picker;
+            var start_date_picker;
 
-                function show_hide_field() {
+            function show_hide_field() {
 
-                    var is_draft = $("#is_draft").prop("checked");
-                    is_draft = is_draft ? 1 : 0;
+                var is_draft = $("#is_draft").prop("checked");
+                is_draft = is_draft ? 1 : 0;
 
-                    var selector = ".is_draft-block";
-                    $(selector).hide();
-                    $(selector).find("input,select").attr("disabled", true);
+                var selector = ".is_draft-block";
+                $(selector).hide();
+                $(selector).find("input,select").attr("disabled", true);
 
-                    console.log("hide", selector);
+                console.log("hide", selector);
 
-                    var selector = ".is_draft-block-any, .is_draft-block-" + is_draft;
+                var selector = ".is_draft-block-any, .is_draft-block-" + is_draft;
 
-                    if ($(selector).length > 0) {
-                        console.log("show", selector);
-                        $(selector).show();
-                        $(selector).find("input,select").removeAttr("disabled");
+                if ($(selector).length > 0) {
+                    console.log("show", selector);
+                    $(selector).show();
+                    $(selector).find("input,select").removeAttr("disabled");
+                }
+            }
+
+            $("#is_draft").change(show_hide_field);
+
+            start_date_picker = flatpickr("#start_date_time", {
+                enableTime: true,
+                dateFormat: constants.dateTimeFormat,
+                onChange: function(selectedDates, dateStr, instance) {
+                    const selectedDate = selectedDates[0];
+                    if (selectedDate) {
+                        $("#start_date_time_preview").html(get_celec_date_time(selectedDate));
                     }
                 }
-
-                $("#is_draft").change(show_hide_field);
-
-                start_date_picker = flatpickr("#start_date_time", {
-                    enableTime: true,
-                    dateFormat: constants.dateTimeFormat,
-                     onChange: function(selectedDates, dateStr, instance) {
-                        const selectedDate = selectedDates[0];
-                        if (selectedDate) {
-                            $("#start_date_time_preview").html(get_celec_date_time(selectedDate));
-                        }
-                    }
-                });
-
-                if (screen_name == "add") {
-                    start_date_picker.set("minDate", new Date());
-                }
-
-                $("#start_date_time_preview").html(get_celec_date_time(start_date_picker.selectedDates[0]));
-
-                $(document).on("input", "#priority", function() {
-                    $("#priority_value").val($(this).val());
-                });
-
-                show_hide_field();
-
-                suggestion_list($("#description"), $("#description-suggestion-box"), [], "/tags/ajax_get_list");
-
-                $(".cascade-drop-down").trigger("change", {pageLoad : true});
-                
             });
-        })
-    </script>
-    @endsection
+
+            if (screen_name == "add") {
+                start_date_picker.set("minDate", new Date());
+            }
+
+            $("#start_date_time_preview").html(get_celec_date_time(start_date_picker.selectedDates[0]));
+
+            $(document).on("input", "#priority", function() {
+                $("#priority_value").val($(this).val());
+            });
+
+            show_hide_field();
+
+            suggestion_list($("#description"), $("#description-suggestion-box"), [], "/tags/ajax_get_list");
+
+            $(".cascade-drop-down").trigger("change", {
+                pageLoad: true
+            });
+
+        });
+    })
+</script>
+@endsection

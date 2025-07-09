@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use App\Helpers\LaravelExtend;
+use App\Models\Notification;
+use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
@@ -18,6 +20,8 @@ class AppServiceProvider extends ServiceProvider
     {
         require_once app_path('define_constants.php');
         require_once app_path('basic_functions.php');
+
+        $this->app->bind(DatabaseNotification::class, Notification::class);
     }
 
     /**

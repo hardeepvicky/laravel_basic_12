@@ -4,13 +4,17 @@ namespace App\Models;
 
 use App\Exceptions\UserException;
 use App\Helpers\DateUtility;
+use App\Notifications\TaskStatusChange;
 use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class Task extends BaseModel
 {
     use HasFactory;
+
     protected $appends = [
         'display_name',
     ];
@@ -26,9 +30,7 @@ class Task extends BaseModel
 
     public string $field_for_create_tag = "name";
 
-    public static array $child_model_class = [
-
-    ];
+    public static array $child_model_class = [];
 
     public const TASK_TYPE_PROJECT = "PROJECT";
     public const TASK_TYPE_TARGET = "TARGET";
@@ -52,9 +54,7 @@ class Task extends BaseModel
     {
         if ($this->is_draft) {
             $this->status = self::STATUS_DRAFT;
-        }
-        else if (!$this->id)
-        {
+        } else if (!$this->id) {
             $this->status = self::STATUS_CREATED;
         }
 
@@ -134,23 +134,113 @@ class Task extends BaseModel
 
     public function changeStatus($status)
     {
-        $this->status = $status;
-
-        switch ($status) {
-            case self::STATUS_ASSIGNED:
-                break;
-
-            case self::STATUS_COMPLETED:
-                $this->is_completed = true;
-                break;
-            case self::STATUS_VERIFIED:
-                $this->is_verified = true;
-                break;
+        if ($this->status == $status) {
+            return false;
         }
 
-        if (!$this->save()) {
-            throw new UserException("Fail To Save", UserException::ERROR_LARAVEL_FAIL);
+        try {
+            DB::beginTransaction();
+
+
+            $old_status = $this->status;
+
+            switch ($status) {
+                case self::STATUS_ASSIGNED:
+                    break;
+
+                case self::STATUS_COMPLETED:
+                    $this->is_completed = true;
+                    break;
+                case self::STATUS_VERIFIED:
+                    $this->is_verified = true;
+                    break;
+            }
+
+            $this->status = $status;
+
+            if (!$this->save()) {
+                throw new UserException("Fail To Save", UserException::ERROR_LARAVEL_FAIL);
+            }
+
+            $user = User::find($this->created_by);
+
+            if (!$user) {
+                return null;
+            }
+
+            $type = Type::getType($this, "status");
+
+            if ($old_status) {
+                $old_status_type = Type::getByCode($type, $old_status);
+
+                if ($old_status_type->count() == 0) {
+                    throw new UserException("Type $type not found : " . $old_status);
+                } else if ($old_status_type->count() > 1) {
+                    throw new UserException("Type $type more than 1 found : " . $old_status);
+                }
+
+                $old_status_type = $old_status_type->first();
+            }
+
+            $new_status_type = Type::getByCode($type, $status);
+
+            if ($new_status_type->count() == 0) {
+                throw new UserException("Type $type not found : " . $status);
+            } else if ($new_status_type->count() > 1) {
+                throw new UserException("Type $type more than 1 found : " . $status);
+            }
+
+            $new_status_type = $new_status_type->first();
+
+            $auth_user = Auth::user();
+
+            $notification_data = [
+                'from_user_id' => $auth_user->id,
+                "sub_type" => Notification::SUB_TYPE_INFO,
+                "model_name" => get_class($this),
+                'model_id' => $this->id,
+                "link" => route("task.index", ["id" => $this->id]),
+                "msg" => ""
+            ];
+
+            if ($this->prev_status == Task::STATUS_CREATED) {
+                if ($this->task->status == Task::STATUS_ASSIGNED) {
+                    $notification_data['msg'] = "New Task assign to you";
+                }
+            } else if ($this->status == Task::STATUS_ASSIGNED) {
+                $msg = "Your Task has verified by ";
+
+                $notification_data['msg'] = $msg;
+            } else {
+                $msg = "Task Status change from ";
+
+                $msg .= $old_status_type?->name ?? "";
+
+                $msg .= " to ";
+
+                $msg .= $new_status_type?->name ?? "";
+
+                $notification_data['msg'] = $msg;
+            }
+
+            $this->load("assignToUser");
+
+            if ($this->assign_to_user_id == $auth_user->id) {
+                $user->notify(new TaskStatusChange($this, $notification_data));
+            } else {
+                $this->assignToUser->notify(new TaskStatusChange($this, $notification_data));
+            }
+
+            DB::commit();
+
+        } catch (Exception $ex) {
+
+            DB::rollBack();
+
+            throw $ex;
         }
+
+        return true;
     }
 
     public static function getEndDate($start_date_time, String $duration, String $duration_type)

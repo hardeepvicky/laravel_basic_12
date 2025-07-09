@@ -30720,7 +30720,7 @@ header .header-right svg {
 }
 
 header .header-right a {
-  color: var(--body-font-color)
+  /* color: var(--body-font-color) */
 }
 
 header .btn-activity-primary {
