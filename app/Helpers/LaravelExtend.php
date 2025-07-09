@@ -20,7 +20,7 @@ use Illuminate\Support\Str;
 
 class LaravelExtend
 {
-    public static array $warnings = [];
+    public static array $warnings = [], $errors = [];
 
     public static function getRoutes()
     {
@@ -400,6 +400,25 @@ class LaravelExtend
 
         foreach ($messages as $msg) {
             self::$warnings[$group][] = compact("label", "msg", "extra");
+        }
+    }
+
+    public static function addError($label, $messages, $group = null, $extra = [])
+    {
+        if (!is_array($messages)) {
+            $messages = [$messages];
+        }
+
+        if (!$group) {
+            $group = 0;
+        }
+
+        if (!is_scalar($group)) {
+            throw new UserException("group should be scaler value");
+        }
+
+        foreach ($messages as $msg) {
+            $this->errors[$group][] = compact("label", "msg", "extra");
         }
     }
 }

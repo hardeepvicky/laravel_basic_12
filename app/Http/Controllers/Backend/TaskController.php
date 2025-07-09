@@ -290,15 +290,12 @@ class TaskController extends BackendController
                 throw new UserException("Fail To save", UserException::ERROR_LARAVEL_FAIL);
             }
 
-            
             $this->_saveOthers($validatedData);
             
-            if ($this->custom_errors) {
-                throw new Exception("Fail to Save");
+            if (LaravelExtend::$errors) {
+                throw new Exception("There are some errors");
             }
             
-            exit;
-
             $this->updateUserInfoAfterSave($this->model);
 
             DB::commit();
@@ -309,9 +306,7 @@ class TaskController extends BackendController
 
             $this->saveSqlLog();
 
-            $this->custom_errors = array_merge_recursive($this->custom_errors, $this->model->custom_errors);
-
-            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", $this->custom_errors);
+            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", LaravelExtend::$errors);
         }
     }
 
@@ -448,8 +443,8 @@ class TaskController extends BackendController
 
             $this->_saveOthers($validatedData);
 
-            if ($this->custom_errors) {
-                throw new Exception("Fail to Save");
+            if (LaravelExtend::$errors) {
+                throw new Exception("There are some errors");
             }
 
             $this->updateUserInfoAfterSave($this->model);
@@ -462,9 +457,7 @@ class TaskController extends BackendController
 
             $this->saveSqlLog();
 
-            $this->custom_errors = array_merge_recursive($this->custom_errors, $this->model->custom_errors);
-
-            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", $this->custom_errors);
+            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", LaravelExtend::$errors);
         }
     }
 

@@ -36,6 +36,8 @@ class LoginController extends WebController
      */
     protected $redirectTo = RouteServiceProvider::HOME;
 
+    protected $user;
+
     /**
      * Create a new controller instance.
      *
@@ -184,5 +186,48 @@ class LoginController extends WebController
     public function username()
     {
         return "login_field";
+    }
+
+    /**
+     * Log the user out of the application.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
+     */
+    public function logout(Request $request)
+    {
+        $this->user = $this->guard()->getUser();
+
+        $this->guard()->logout();
+
+        $request->session()->invalidate();
+
+        $request->session()->regenerateToken();
+
+        if ($response = $this->loggedOut($request)) {
+            return $response;
+        }
+
+        return $request->wantsJson()
+            ? new JsonResponse([], 204)
+            : redirect('/');
+    }
+
+    /**
+     * The user has logged out of the application.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return mixed
+     */
+    protected function loggedOut(Request $request)
+    {
+        if ($this->user->type == User::TYPE_INTERNAL)
+        {
+            return redirect('/login');
+        }
+        else
+        {
+            return redirect('/signin');
+        }
     }
 }

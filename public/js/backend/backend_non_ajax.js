@@ -57,18 +57,10 @@ $(document).ready(function () {
 
     $(".cascade-drop-down").cascade({
         beforeGet: function (src, url) {
-            $.loader.indicator("Fetching...", $("body"), {
-                target: {
-                    position : "center"
-                }
-            });
-
+            $.loader.init().setInfo("Fetching...").show();
             return url;
         },
         afterGet: function (src, dest, response) {
-
-            $.loader.indicator(false);
-
             return response;
         },
     });

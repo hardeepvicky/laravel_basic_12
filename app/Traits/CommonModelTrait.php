@@ -4,6 +4,7 @@ namespace App\Traits;
 use App\Exceptions\UserException;
 use App\Helpers\ArrayHelper;
 use App\Helpers\DateUtility;
+use App\Helpers\LaravelExtend;
 use App\Models\Tag;
 use DateTime;
 use DateTimeZone;
@@ -176,6 +177,8 @@ trait CommonModelTrait
         foreach ($messages as $msg) {
             $this->custom_errors[$group][] = compact("label", "msg", "extra");
         }
+
+        LaravelExtend::addError($label, $messages, $group, $extra);
     }
 
     public function loadAllRelations(&$relations = [])

@@ -228,8 +228,8 @@ class RecurringTaskController extends BackendController
 
             $this->_saveOthers($validatedData);
 
-            if ($this->custom_errors) {
-                throw new Exception("Fail to Save");
+            if (LaravelExtend::$errors) {
+                throw new Exception("There are some errors");
             }
 
             $this->updateUserInfoAfterSave($this->model);
@@ -242,9 +242,7 @@ class RecurringTaskController extends BackendController
 
             $this->saveSqlLog();
 
-            $this->custom_errors = array_merge_recursive($this->custom_errors, $this->model->custom_errors);
-
-            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", $this->custom_errors);
+            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", LaravelExtend::$errors);
         }
     }
 
@@ -290,13 +288,9 @@ class RecurringTaskController extends BackendController
                         $this->model->recurringTaskDate()->create($record);
                     }
                 } catch (Exception $ex) {
-                    $this->addError("", $ex->getMessage(), "Recurring Dates");
+                    LaravelExtend::addError("", $ex->getMessage(), "Recurring Dates");
                 }
             }
-        }
-
-        if ($this->custom_errors) {
-            // d($this->custom_errors); exit;
         }
     }
 
@@ -355,8 +349,8 @@ class RecurringTaskController extends BackendController
 
             $this->_saveOthers($validatedData);
 
-            if ($this->custom_errors) {
-                throw new Exception("Fail to Save");
+            if (LaravelExtend::$errors) {
+                throw new Exception("There are some errors");
             }
 
             $this->updateUserInfoAfterSave($this->model);
@@ -369,9 +363,7 @@ class RecurringTaskController extends BackendController
 
             $this->saveSqlLog();
 
-            $this->custom_errors = array_merge_recursive($this->custom_errors, $this->model->custom_errors);
-
-            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", $this->custom_errors);
+            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", LaravelExtend::$errors);
         }
     }
 
