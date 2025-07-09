@@ -48,11 +48,12 @@ class WebController extends Controller
         {
             if ($auth_user->login_timezone)
             {
+                // LaravelExtend::addWarning("User", "Timezone is $auth_user->login_timezone", "Security");
                 DateUtility::$login_user_time_zone = new \DateTimeZone($auth_user->login_timezone);
             }
             else
             {
-                $this->addWarning("", "Users's timezone could not found, so datetime will be shown in UTC timezone");
+                LaravelExtend::addWarning("", "Users's timezone could not found, so datetime will be shown in UTC timezone", "Login");
             }
         }
     }

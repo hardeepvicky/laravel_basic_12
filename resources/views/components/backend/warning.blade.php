@@ -1,34 +1,24 @@
 <?php
 
-use Illuminate\Support\Facades\Session;
+use App\Helpers\LaravelExtend;
 
-$custom_errors = [];
-if (Session::has("custom_errors"))
-{
-    $custom_errors = Session::get("custom_errors");
-    Session::forget('custom_errors');
-}
+if (LaravelExtend::$warnings):
 ?>
 
-@if ($errors->any() || $custom_errors)
     <div class="card-wrapper rounded-3 h-100 bg-light-secondary mb-2">
-        <h6 class="sub-title f-w-600">Errors</h6>
+        <h6 class="sub-title f-w-600">Warnings</h6>
         <ol class="mb-0">
-            @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-
-            @foreach ($custom_errors as $group => $errors)
-                    @if (is_array($errors))
+            @foreach (LaravelExtend::$warnings as $group => $inner_arr)
+                    @if (is_array($inner_arr))
                     <li>
                         <b>{{ $group }}</b>
                     </li>
                     <ol>
-                        @foreach ($errors as $error)
-                            @if (isset($error['label']) && isset($error['msg']))
+                        @foreach ($inner_arr as $arr)
+                            @if (isset($arr['label']) && isset($arr['msg']))
                                 <li>
-                                    {{ $error['label'] ? $error['label'] . ' : ' : '' }} {{ $error['msg'] }}
-                                </li>
+                                    {{ $arr['label'] ? $arr['label'] . ' : ' : '' }} {{ $arr['msg'] }}
+                                </li>                            
                             @endif
                         @endforeach
                     </ol>
@@ -36,5 +26,4 @@ if (Session::has("custom_errors"))
             @endforeach
         </ol>
     </div>
-
-@endif
+<?php endif; ?>

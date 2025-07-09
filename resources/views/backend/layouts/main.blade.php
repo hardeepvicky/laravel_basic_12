@@ -75,6 +75,8 @@
             @include($partial_path . '.sidebar')
             <!-- Page sidebar end-->
             <div class="page-body">
+                <x-Backend.warning/>
+
                 @yield('content')
             </div>
             @include($partial_path . '.footer')
