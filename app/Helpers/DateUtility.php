@@ -34,7 +34,7 @@ class DateUtility
     const MINTUES = "minutes";
     const SECONDS = "seconds";
 
-    public static \DateTimeZone $login_user_time_zone;
+    public static \DateTimeZone | null $login_user_time_zone = null;
 
     /**
      * convert time string to standered date object 

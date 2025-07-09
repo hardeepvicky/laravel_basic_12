@@ -207,7 +207,9 @@ class TaskController extends BackendController
 
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
-        $this->setForView(compact("user_list", "task_type_list", "status_list",  "department_list", "duration_type_list", "field_labels"));
+        $default_start_date_time = DateUtility::change(date('d-M-Y 10:00'), 1, DateUtility::DAYS, DateUtility::DATETIME_OUT_FORMAT);
+
+        $this->setForView(compact("user_list", "task_type_list", "status_list",  "department_list", "duration_type_list", "field_labels", "default_start_date_time"));
 
         return parent::beforeViewRender();
     }
@@ -288,11 +290,14 @@ class TaskController extends BackendController
                 throw new UserException("Fail To save", UserException::ERROR_LARAVEL_FAIL);
             }
 
+            
             $this->_saveOthers($validatedData);
-
+            
             if ($this->custom_errors) {
                 throw new Exception("Fail to Save");
             }
+            
+            exit;
 
             $this->updateUserInfoAfterSave($this->model);
 
@@ -334,39 +339,28 @@ class TaskController extends BackendController
     {
         if (isset($validatedData['tag_name']))
         {
+            $model_class_name = str_class_name_without_namespace($this->modelClass);
+
+            if (!$model_class_name)
+            {
+                throw new UserException("could not found model_class_name");
+            }
+
+            $model_class_name = str_class_name_to_human_text($model_class_name);
+            
             $tag_names = explode(",", $validatedData['tag_name']);
 
             $this->model->tags()->delete();
 
             foreach($tag_names as $tag_name)
             {
-                $model_class_name = str_class_name_without_namespace($this->modelClass);
-
-                if (!$model_class_name)
-                {
-                    throw new UserException("could not found model_class_name");
-                }
-
-                $table_name = $this->model->getTable();
-
                 $save_data = [
                     "name" => $tag_name,
-                    "main_model" => $model_class_name,
-                    "main_table" => $table_name,
-                    "main_table_field" => "name",
-                    "main_id" => $this->model->id,
-                    "foreign_model" => $model_class_name,
-                    "foreign_table" => $table_name,
-                    "foreign_id" => $this->model->id
                 ];
 
-                $save_data['search_term'] = str_class_name_to_human_text($model_class_name) . "." . $save_data['name'];
+                $save_data['search_term'] = $model_class_name . "." . $save_data['name'];
 
-                // d($save_data, true);
-
-                $tag = new Tag($save_data);
-
-                $this->model->tags()->save($tag);
+                Tag::createTag($save_data, $this->model, $this->model);
             }
         }
     }

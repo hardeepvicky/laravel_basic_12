@@ -226,15 +226,25 @@ label.info {
     font-size: 12px;
 }
 
-.celec_info .label {
-    padding: 2px;
-}
-
 .celec_info .label-header {
     background-color: rgba(48, 142, 135, 0.2);
 }
 
-.celec_info .divider {
+.celec_info_inline {
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    max-width: 200px;
+    display: inline-block;
+    font-size: 12px;
+}
+
+.celec_info .label,
+.celec_info_inline .label {
+    padding: 2px;
+}
+
+.celec_info .divider,
+.celec_info_inline .divider {
     border-top: 1px solid #ced4da;
 }
 
@@ -294,22 +304,36 @@ label.info {
     width: auto;
 }
 
-.ml-1
-{
+.ml-1 {
     margin-left: 5px;
 }
 
-.ml-2
-{
+.ml-2 {
     margin-left: 10px;
 }
 
-.ml-3
-{
+.ml-3 {
     margin-left: 15px;
 }
 
-.ml-4
-{
+.ml-4 {
     margin-left: 20px;
 }
+
+.ml-50
+{
+    margin-left: 50px;
+}
+
+/* Optional: Style for the toast container to place it nicely */
+.toast-container {
+    position: fixed;
+    bottom: 20px; /* Adjust as needed */
+    right: 20px; /* Adjust as needed */
+    z-index: 1080; /* Ensure it's above other elements like modals */
+}
+/* Optional: Custom width for the toast if default is too small */
+.progress-toast {
+    min-width: 300px; /* Or a fixed width */
+}
+

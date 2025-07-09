@@ -3,6 +3,7 @@
 use App\Exceptions\UserException;
 use App\Helpers\Menu;
 use App\Http\Middleware\Authenticate;
+use App\Http\Middleware\BackendViewRender;
 use App\Http\Middleware\RolePermission;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Application;
@@ -23,6 +24,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'check_auth' => Authenticate::class,
             'role_permission' => RolePermission::class,
+            'backend_view_render' => BackendViewRender::class
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

@@ -10,6 +10,7 @@ use App\Models\CommandLog;
 use App\Models\RecurringTask;
 use App\Models\Task;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
@@ -73,10 +74,7 @@ class TaskCommand extends MyCommand
                     $counts['task_status_change_to_assigned']++;
                 }
             }
-
-            $this->logUpdate([
-                "counts" => $counts
-            ]);
+            
 
             $output = new ConsoleOutput();
 
@@ -86,12 +84,22 @@ class TaskCommand extends MyCommand
 
             $output->writeLogToConsole();
 
+            $this->output_lines = $output->output_lines;
+
+            $this->logUpdate([
+                "counts" => $counts
+            ]);
+
             $msg = $this->description . " : Completed successfully!";
-            $this->info($msg); // Output to console
-            Log::info($msg);
+            $this->info($msg);
 
         } catch (\Exception $e) {
-            $msg = "Command Error : " . $this->description . " : " . $e->getMessage();
+            $msg = $e->getMessage();
+
+            $this->logUpdate([
+                "error" => $msg
+            ]);
+
             $this->error($msg); // Output to console
             Log::error($msg, ['exception' => $e]);
         }

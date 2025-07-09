@@ -89,7 +89,7 @@ class FileUtility
         return $ret_files;
     }
 
-    public static function getFolderList($path)
+    public static function getFolderList($path, $prefix = "", bool $recursive = false)
     {
         $files = scandir($path);
 
@@ -100,7 +100,14 @@ class FileUtility
 
             if ($file == '.' || $file == '..') {
             } else if (is_dir($f)) {
-                $ret_files[] = $f;
+
+                $ret_files[] = $prefix . $file;
+
+                if ($recursive)
+                {
+                    $dir_name = pathinfo($file, PATHINFO_FILENAME);
+                    $ret_files = array_merge($ret_files, self::getFolderList($f, $dir_name . "/"));
+                }
             }
         }
 

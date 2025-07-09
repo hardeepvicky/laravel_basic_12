@@ -7,16 +7,13 @@ use App\Helpers\ArrayHelper;
 use App\Helpers\DateUtility;
 use App\Helpers\LaravelExtend;
 use App\Models\BaseModel;
-use App\Models\BaseModelInterface;
 use App\Models\Setting;
 use App\Traits\CacheTrait;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 
 class WebController extends Controller
@@ -45,11 +42,18 @@ class WebController extends Controller
             $this->tableName = $model->getTable();
         }
 
-        $login_user_timezone = Session::get("login_user_timezone");
+        $auth_user = Auth::user();
 
-        if ($login_user_timezone)
+        if ($auth_user)
         {
-            DateUtility::$login_user_time_zone = new \DateTimeZone($login_user_timezone);
+            if ($auth_user->login_timezone)
+            {
+                DateUtility::$login_user_time_zone = new \DateTimeZone($auth_user->login_timezone);
+            }
+            else
+            {
+                $this->addWarning("", "Users's timezone could not found, so datetime will be shown in UTC timezone");
+            }
         }
     }
 
@@ -565,7 +569,7 @@ class WebController extends Controller
 
     protected function updateUserInfoAfterSave(Model $model)
     {
-        if (App::environment('production')) {
+        if (!env("APP_DEBUG")) {
             return false;
         }
 
@@ -594,7 +598,7 @@ class WebController extends Controller
 
     protected function updateUserInfoForCreateBulk(array $models)
     {
-        if (App::environment('production')) {
+        if (!env("APP_DEBUG")) {
             return false;
         }
 
@@ -607,7 +611,7 @@ class WebController extends Controller
 
     protected function updateUserInfoForUpdateBulk(array $models)
     {
-        if (App::environment('production')) {
+        if (!env("APP_DEBUG")) {
             return false;
         }
 
@@ -620,7 +624,7 @@ class WebController extends Controller
 
     protected function updateUserInfoForDeleteBulk(array $models)
     {
-        if (App::environment('production')) {
+        if (!env("APP_DEBUG")) {
             return false;
         }
 

@@ -81,7 +81,6 @@
         </div>
     </div>
 
-
     <script src="{{ get_asset_url('assets/js/vendors/bootstrap/dist/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ get_asset_url('assets/js/vendors/bootstrap/dist/js/popper.min.js') }}"></script>
     <script src="{{ get_asset_url('assets/js/vendors/font-awesome/fontawesome-min.js') }}"></script>

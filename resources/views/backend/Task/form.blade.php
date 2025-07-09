@@ -32,7 +32,7 @@ $page_header_links = [['title' => 'List', 'url' => route($routePrefix . '.index'
                         <x-Inputs.checkbox :id="$field" :name="$field" :label="$label" value="{{ $model->{$field} }}" />
                     </div>
                 </div>
-                <div class="row is_draft-block is_draft-block-0">
+                <div class="row">
                     <div class="col-md-12 col-xl-6">
                         <div class="form-group mb-3">
                             <?php
@@ -42,7 +42,7 @@ $page_header_links = [['title' => 'List', 'url' => route($routePrefix . '.index'
                             <x-Inputs.text-field :name="$field" :label="$label" value="{{ $model->{$field} }}"
                                 placeholder="Enter {{ $label }}" mandatory="true" autocomplete="off" />
                         </div>
-                        <div class="form-group mb-3">
+                        <div class="form-group mb-3 is_draft-block is_draft-block-0">
                             <?php
                             $field = 'dept_id';
                             $label = get_value_from_list($field_labels, $field, $field);
@@ -55,14 +55,14 @@ $page_header_links = [['title' => 'List', 'url' => route($routePrefix . '.index'
                                 mandatory="true"
                             />
                         </div>
-                        <div class="form-group mb-3">
+                        <div class="form-group mb-3 is_draft-block is_draft-block-0">
                             <?php
                             $field = 'assign_to_user_id';
                             $label = get_value_from_list($field_labels, $field, $field);
                             ?>
                             <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" data-value="{{ $model->{$field} }}" mandatory="true" class="select2" mandatory="true"/>
                         </div>
-                        <div class="form-group mb-3">
+                        <div class="form-group mb-3 is_draft-block is_draft-block-0">
                             <?php
                             $field = 'task_type';
                             $label = get_value_from_list($field_labels, $field, $field);
@@ -70,7 +70,7 @@ $page_header_links = [['title' => 'List', 'url' => route($routePrefix . '.index'
                             <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$task_type_list"
                                 value="{{ $model->{$field} }}" mandatory="true" class="select2" :pleaseSelect="$false" />
                         </div>
-                        <div class="form-group mb-3">
+                        <div class="form-group mb-3 is_draft-block is_draft-block-0">
                             <?php
                             $field = 'priority';
                             $label = get_value_from_list($field_labels, $field, $field);
@@ -84,20 +84,29 @@ $page_header_links = [['title' => 'List', 'url' => route($routePrefix . '.index'
                                     aria-hidden="true">{{ $model->{$field} }}</output>
                             </div>
                         </div>   
-                        <div class="form-group mb-3">
+                        <div class="form-group mb-3 is_draft-block is_draft-block-0">
                             <div class="row">
                                 <div class="col-md-12 col-xxl-6">
                                     <?php
-                                    $field = 'start_date_time';
-                                    $label = get_value_from_list($field_labels, $field, $field);
-                                    $value = $model->{$field} ?? $default_start_date_time;
-                                    if ($value instanceof  \Illuminate\Support\Carbon) {
-                                        $value = $value->format(DateUtility::DATETIME_OUT_FORMAT);
-                                    }
+                                        $field = 'start_date_time';
+                                        $label = get_value_from_list($field_labels, $field, $field);
+                                        $value = $model->{$field} ?? $default_start_date_time;
+                                        if ($value instanceof  \Illuminate\Support\Carbon) {
+                                            $value = $value->format(DateUtility::DATETIME_OUT_FORMAT);
+                                        }
                                     ?>
-                                    <x-Inputs.text-field :id="$field" :name="$field" :label="$label" :value="$value"
-                                        class="custom-date-picker" placeholder="Enter {{ $label }}" autocomplete="off"
-                                        mandatory="true" />
+                                    <label class="form-label">
+                                        {{ $label }}
+                                        <span class="mandatory">*</span>
+                                    </label>
+                                    <div class="d-flex">
+                                        <div id="start_date_time_preview"></div>
+                                        <div class="ml-2">                                        
+                                            <x-Inputs.text-field :id="$field" :name="$field" :label="$false" :value="$value"
+                                                class="custom-date-picker" placeholder="Enter {{ $label }}" autocomplete="off"
+                                                mandatory="true" />
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="col-md-12 col-xxl-6">
                                     <?php
@@ -128,7 +137,7 @@ $page_header_links = [['title' => 'List', 'url' => route($routePrefix . '.index'
                             </div>
                         </div>
                                              
-                        <div class="form-group mb-3">
+                        <div class="form-group mb-3 is_draft-block is_draft-block-0">
                             <?php
                             $field = 'tag_name';
                             $label = get_value_from_list($field_labels, $field, "Tags");
@@ -202,12 +211,20 @@ $page_header_links = [['title' => 'List', 'url' => route($routePrefix . '.index'
 
                 start_date_picker = flatpickr("#start_date_time", {
                     enableTime: true,
-                    dateFormat: constants.dateTimeFormat
+                    dateFormat: constants.dateTimeFormat,
+                     onChange: function(selectedDates, dateStr, instance) {
+                        const selectedDate = selectedDates[0];
+                        if (selectedDate) {
+                            $("#start_date_time_preview").html(get_celec_date_time(selectedDate));
+                        }
+                    }
                 });
 
                 if (screen_name == "add") {
                     start_date_picker.set("minDate", new Date());
                 }
+
+                $("#start_date_time_preview").html(get_celec_date_time(start_date_picker.selectedDates[0]));
 
                 $(document).on("input", "#priority", function() {
                     $("#priority_value").val($(this).val());

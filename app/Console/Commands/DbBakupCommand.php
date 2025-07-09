@@ -4,19 +4,19 @@ namespace App\Console\Commands;
 
 use App\Exceptions\UserException;
 use App\Helpers\FileUtility;
-use Illuminate\Console\Command;
+use App\Helpers\MyCommand;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use ZipArchive;
 
-class DbBakupCommand extends Command
+class DbBakupCommand extends MyCommand
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'db:backup {connection? : The name of connection of laravel database config}';
+    protected $signature = 'db:backup {connection?}';
 
     /**
      * The console command description.
@@ -35,6 +35,11 @@ class DbBakupCommand extends Command
     public function handle()
     {
         $connection = $this->argument('connection');
+
+        $this->logCreate([
+            "command" => $this->signature,
+            "description" => $this->description
+        ]);
 
         $this->info('Database Backup Started');
 
@@ -62,7 +67,6 @@ class DbBakupCommand extends Command
             }
         }
         
-
         if ($connection)
         {
             $db_config_key = $connection;
@@ -88,6 +92,8 @@ class DbBakupCommand extends Command
         if ($db_config['driver'] == "mysql") {
             $this->backup_mysql($db_config_key, $db_config);
         }
+
+        $this->logUpdate([]);
 
         return true;
     }
@@ -188,7 +194,7 @@ class DbBakupCommand extends Command
                 $this->error("Command is not working");
                 $this->info($command);
             } else {
-                $this->info($table);
+                $this->line($table);
                 $filename = pathinfo($file, PATHINFO_BASENAME);
                 $zip->addFile($file, "data/" . $filename);
             }

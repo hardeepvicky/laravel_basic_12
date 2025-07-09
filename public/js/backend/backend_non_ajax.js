@@ -57,10 +57,18 @@ $(document).ready(function () {
 
     $(".cascade-drop-down").cascade({
         beforeGet: function (src, url) {
-            $.loader.init().setInfo("Fetching...").show();
+            $.loader.indicator("Fetching...", $("body"), {
+                target: {
+                    position : "center"
+                }
+            });
+
             return url;
         },
         afterGet: function (src, dest, response) {
+
+            $.loader.indicator(false);
+
             return response;
         },
     });
@@ -341,16 +349,24 @@ function suggestion_list(textarea, suggestionBox, suggestion_data, url) {
     // Function to fetch suggestions (simulated or via AJAX)
     const fetchSuggestions = function (term) {
         if (url) {
-            return $.get(url, { query: term })
-                .done(function (data) {
-                    var responseData = ajaxHandleResponse(url, data);
-                    return responseData['data'];
-                })
-                .fail(function (jqXHR, textStatus, errorThrown) {
-                    $.events.onAjaxError("Error fetching suggestions : " + textStatus, errorThrown);
-                    return []; // Return empty array on error
-                });
+
+            $.loader.indicator("Fetching Data...", textarea, {
+                target : {
+                    position : "top right",
+                }
+            });
+
+            return $.get(url, { query: term }).fail(function (jqXHR, textStatus, errorThrown) {
+                $.events.onAjaxError("Error fetching suggestions : " + textStatus, errorThrown);
+                return []; // Return empty array on error
+            });
         }
+
+        $.loader.indicator("Filtering Data...", textarea, {
+            target : {
+                position : "top right",
+            }
+        });
 
         return new $.Deferred().resolve(
             suggestion_data.filter(s =>
@@ -460,6 +476,8 @@ function suggestion_list(textarea, suggestionBox, suggestion_data, url) {
                                 data = ajaxHandleResponse(url, data);
                                 suggestions = data['data'];
                             }
+
+                            $.loader.indicator(false);
 
                             displaySuggestions(suggestions);
                         });

@@ -12,6 +12,7 @@ use App\Models\BaseModel;
 use App\Models\BaseMongoModel;
 use App\Models\CacheLog;
 use App\Models\SqlLog;
+use App\Models\ViewContent;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;

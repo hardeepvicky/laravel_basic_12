@@ -4,6 +4,7 @@ namespace App\Traits;
 use App\Exceptions\UserException;
 use App\Helpers\ArrayHelper;
 use App\Helpers\DateUtility;
+use App\Models\Tag;
 use DateTime;
 use DateTimeZone;
 use Illuminate\Database\Eloquent\Model;
@@ -24,14 +25,14 @@ trait CommonModelTrait
 
                 if ($save_quitely)
                 {
-                    if (!$model->save())
+                    if (!$model->saveQuietly())
                     {
                         throw new UserException("Fail To Save", UserException::ERROR_LARAVEL_FAIL);
                     }
                 }
                 else
                 {
-                    if (!$model->saveQuietly())
+                    if (!$model->save())
                     {
                         throw new UserException("Fail To Save", UserException::ERROR_LARAVEL_FAIL);
                     }
@@ -47,14 +48,15 @@ trait CommonModelTrait
 
             if ($save_quitely)
             {
-                if (!$model->save())
+                if (!$model->saveQuietly())
                 {
                     throw new UserException("Fail To Save", UserException::ERROR_LARAVEL_FAIL);
                 }
+                
             }
             else
             {
-                if (!$model->saveQuietly())
+                if (!$model->save())
                 {
                     throw new UserException("Fail To Save", UserException::ERROR_LARAVEL_FAIL);
                 }
@@ -207,7 +209,7 @@ trait CommonModelTrait
 
     public function convertTimeZoneBeforeQueryToDatabase(array $data = [])
     {
-        if (!DateUtility::$login_user_time_zone)
+        if (is_null(DateUtility::$login_user_time_zone))
         {
             return;
         }
@@ -310,7 +312,7 @@ trait CommonModelTrait
 
     public function convertTimeZoneForDisplay(array $data = [])
     {
-        if (!DateUtility::$login_user_time_zone)
+        if (is_null(DateUtility::$login_user_time_zone))
         {
             return;
         }
@@ -418,4 +420,17 @@ trait CommonModelTrait
         }
     }
 
+    public function saveAutoTags()
+    {
+        if (!isset($this->field_for_create_tag) || empty($this->field_for_create_tag))
+        {
+            return;
+        }
+
+        $save_data = [
+            "name" => $this->{$this->field_for_create_tag},
+        ];
+
+        Tag::createTag($save_data, $this);
+    }
 }

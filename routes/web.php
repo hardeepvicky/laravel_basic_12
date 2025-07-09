@@ -92,7 +92,7 @@ Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function 
     Route::any("$name/{state_id}", [$controllerClass, $name])->name($name);
 });
 
-Route::group(['middleware' => ['auth', 'check_auth', 'role_permission']], function () {
+Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend_view_render']], function () {
 
     $name = "dashboard";
     Route::get($name, [DashboardController::class, 'index'])->name($name);

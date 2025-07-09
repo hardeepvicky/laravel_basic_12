@@ -66,7 +66,6 @@ function ajaxHandleResponse(url, response, callback) {
         if (typeof callback == "function") {
             callback(responseJson);
         }
-
     } else if (typeof responseJson["msg"] != "undefined") {
         $.events.onUserError(responseJson["msg"]);
     } else {
@@ -262,14 +261,110 @@ function add_form_to_body_and_submit(method, action, params) {
     }, 100);
 }
 
-
-function getTimeZone()
-{
+function getTimeZone() {
     var userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    
-    if (userTimeZone == 'Asia/Calcutta') {
-        userTimeZone = 'Asia/Kolkata';
+
+    if (userTimeZone == "Asia/Calcutta") {
+        userTimeZone = "Asia/Kolkata";
     }
 
     return userTimeZone;
+}
+
+function get_celec_date_time(date) {
+    if (!date) {
+        date = new Date();
+    }
+
+    var divider = $('<div class="divider"></div>');
+
+    var date_div = $('<div class="label">');
+    date_div.html(DateUtil.getFormattedDateTime(date, "d-M-Y"));
+
+    var time = DateUtil.getFormattedDateTime(date, "D H:i");
+
+    console.log(time);
+
+    var time_div = $('<div class="label">');
+    time_div.html(time);
+
+    var div = $("<div>");
+    div.addClass("celec_info_inline");
+    div.append(date_div);
+    div.append(divider);
+    div.append(time_div);
+
+    return div;
+}
+
+function showProgressToast() {
+    // Create a unique ID for the toast
+    const toastId = "progressToast-" + Date.now();
+
+    // Create the toast HTML dynamically
+    const toastHtml = `
+            <div class="toast progress-toast" role="alert" aria-live="assertive" aria-atomic="true" id="${toastId}">
+                <div class="toast-header">
+                    <strong class="me-auto">Processing Data</strong>
+                    <small>...</small>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                    <p id="${toastId}-message">Initializing process...</p>
+                    <div class="progress mt-2">
+                        <div id="${toastId}-bar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+    // Append the toast HTML to the container
+    toastContainer.insertAdjacentHTML("beforeend", toastHtml);
+
+    // Get references to the specific toast elements
+    const toastElement = document.getElementById(toastId);
+    const progressBar = document.getElementById(`${toastId}-bar`);
+    const progressMessage = document.getElementById(`${toastId}-message`);
+    const toastHeaderSmall = toastElement.querySelector(".toast-header small");
+
+    // Initialize the Bootstrap Toast
+    const bsToast = new bootstrap.Toast(toastElement);
+
+    // Show the toast
+    bsToast.show();
+
+    let progress = 0;
+    let interval;
+
+    // Function to update progress
+    function updateProgress() {
+        progress += 10;
+        if (progress <= 100) {
+            progressBar.style.width = progress + "%";
+            progressBar.setAttribute("aria-valuenow", progress);
+            progressMessage.textContent = `Processing: ${progress}% complete`;
+            toastHeaderSmall.textContent = `${progress}%`;
+        }
+
+        if (progress >= 100) {
+            clearInterval(interval);
+            progressBar.classList.remove("progress-bar-animated"); // Stop animation
+            progressBar.classList.remove("progress-bar-striped");
+            progressBar.classList.add("bg-success"); // Change color to indicate completion
+            progressMessage.textContent = "Process Complete!";
+            toastHeaderSmall.textContent = `Finished`;
+
+            // Optionally, auto-hide the toast after a short delay
+            setTimeout(() => {
+                bsToast.hide();
+                // Remove the toast element from the DOM after it's hidden
+                toastElement.addEventListener("hidden.bs.toast", function () {
+                    toastElement.remove();
+                });
+            }, 2000); // Hide after 2 seconds
+        }
+    }
+
+    // Simulate progress over time
+    interval = setInterval(updateProgress, 500); // Update every 0.5 seconds
 }

@@ -2,6 +2,7 @@
 
 namespace App\Helpers;
 
+use App\Exceptions\UserException;
 use App\Jobs\Backend\JobForgotPassword;
 use App\Jobs\Backend\JobSendEmailUserOtp;
 use App\Jobs\Backend\JobSendEmailOnRegisration;
@@ -19,6 +20,8 @@ use Illuminate\Support\Str;
 
 class LaravelExtend
 {
+    public static array $warnings = [];
+
     public static function getRoutes()
     {
         $routeCollections = \Illuminate\Support\Facades\Route::getRoutes();
@@ -259,6 +262,12 @@ class LaravelExtend
 
             if (str_ends_with($file, '.php')) {
                 $model_name = pathinfo($file, PATHINFO_FILENAME);
+
+                if (in_array($model_name, ["BaseModel", "BaseModelInterface", "BaseMongoModel"]))
+                {
+                    continue;
+                }
+
                 $models[$model_name] = 'App\\Models\\' . $model_name;
             }
         }
@@ -372,6 +381,25 @@ class LaravelExtend
             }
         } catch (Exception $e) {
             throw $e;
+        }
+    }
+
+    public static function addWarning($label, $messages, $group = null, $extra = [])
+    {
+        if (!is_array($messages)) {
+            $messages = [$messages];
+        }
+
+        if (!$group) {
+            $group = 0;
+        }
+
+        if (!is_scalar($group)) {
+            throw new UserException("group should be scaler value");
+        }
+
+        foreach ($messages as $msg) {
+            self::$warnings[$group][] = compact("label", "msg", "extra");
         }
     }
 }

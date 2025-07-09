@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Helpers\ConsoleOutput;
 use App\Helpers\LaravelExtend;
+use App\Helpers\MyCommand;
 use App\Models\AppMenu;
 use App\Models\AppMenuRelatedLink;
 use App\Models\BaseModel;
@@ -32,7 +33,7 @@ use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
-class TagFillFromOtherModel extends Command
+class TagFillFromOtherModel extends MyCommand
 {
     /**
      * The name and signature of the console command.
@@ -53,6 +54,11 @@ class TagFillFromOtherModel extends Command
      */
     public function handle()
     {
+        $this->logCreate([
+            "command" => $this->signature,
+            "description" => $this->description
+        ]);
+
         $main_counters = [
             "total" => 0,
             "insert" => 0,
@@ -62,22 +68,20 @@ class TagFillFromOtherModel extends Command
 
         $output = new ConsoleOutput();
 
-        $model_list = [
-            Department::class,
-            Designation::class,
-            SubDepartment::class,
-            User::class,
-            Country::class,
-            State::class,
-            RecurringTask::class,
-            Task::class
-        ];
+        $model_list = LaravelExtend::getListOfModels();
 
-        foreach($model_list as $model_class)
+        foreach($model_list as $model_name => $model_class)
         {
             $main_model = new $model_class();
 
-            $output->writeLogToConsole($model_class);
+            if ($model_name == "User" || $main_model instanceof BaseModelInterface)
+            {
+
+            }
+            else
+            {
+                continue;
+            }
 
             if (!method_exists($model_class, "getListCache"))
             {
@@ -85,16 +89,19 @@ class TagFillFromOtherModel extends Command
                 continue;
             }
 
-            $name_field = "name";
-
-            if (isset($model_class::$auto_tag_field) && $model_class::$auto_tag_field)
+            if (isset($main_model->field_for_create_tag) && $main_model->field_for_create_tag)
             {
-                $name_field = $model_class::$auto_tag_field;
+                $name_field = $main_model->field_for_create_tag;
+            }
+            else
+            {
+                continue;
             }
 
-            $table_info = $main_model->getTableInfo($main_model->getTable());
+            $output->writeLogToConsole($model_class);
+            $output->writeLogToConsole("Fetching Table Info");
 
-            // d(array_keys($table_info["columns"]));
+            $table_info = $main_model->getTableInfo($main_model->getTable());
 
             if  (!isset($table_info["columns"]["id"]) || !isset($table_info["columns"][$name_field]))
             {
@@ -102,16 +109,17 @@ class TagFillFromOtherModel extends Command
                 continue;
             }
 
-            $list = $model_class::getListCache("id", $name_field);
+            $list = $model_class::getList("id", $name_field);
+
+            $id_to_delete = $model_class::getList("id", "id");
 
             try
             {
-                $model_class_name = str_class_name_without_namespace($model_class);
-
                 $counts = [
                     "total" => count($list),
                     "insert" => 0,
                     "update" => 0,
+                    "delete" => 0,
                 ];
 
                 $main_counters['total'] += $counts['total'];
@@ -120,28 +128,42 @@ class TagFillFromOtherModel extends Command
 
                 foreach($list as $id => $name)
                 {
-                    $condition_data = [
-                        "main_model" => $model_class_name,
-                        "main_table" => $main_model->getTable(),
-                        "main_id" => $id
+                    $save_data = [
+                        "main_id" => $id,
+                        "name" => $name,
+                        "main_table_field" => $name_field
                     ];
 
-                    $save_data = array_merge($condition_data, [
-                        "name" => $name,
-                    ]);
+                    $save_info = Tag::createTag($save_data, $main_model, null);
 
-                    $tag = Tag::updateOrCreate($condition_data, $save_data);
-
-                    if($tag->wasRecentlyCreated)
+                    if(isset($save_info['is_insert']) && $save_info['is_insert'])
                     {
                         $counts['insert']++;
                         $main_counters['insert']++;
                     }
-                    else
+                    else if(isset($save_info['is_update']) && $save_info['is_update'])
                     {
                         $counts['update']++;
                         $main_counters['update']++;
                     }
+
+                    if (isset($save_info['model']) && $save_info['model'])
+                    {
+                        unset($id_to_delete[$id]);
+                    }
+                    else
+                    {
+                        $id_to_delete = [];
+                    }
+                }
+
+                if ($id_to_delete)
+                {
+                    $counts['delete'] = count($id_to_delete);
+
+                    $main_counters['delete'] += $counts['delete'];
+
+                    Tag::destroy($id_to_delete);
                 }
 
                 DB::commit();
@@ -158,7 +180,8 @@ class TagFillFromOtherModel extends Command
             {
                 DB::rollBack();
 
-                $output->writeLogToConsole("$model_class  : " . $ex->getMessage(), "error");
+                $output->writeLogToConsole($ex->getMessage(), "error");
+
                 continue;
             }
         }
@@ -170,6 +193,12 @@ class TagFillFromOtherModel extends Command
         $output->writeLogToConsole();
 
         $output->clearLogs();
+
+        $this->output_lines = $output->output_lines;
+
+        $this->logUpdate([
+            "counts" => $main_counters
+        ]);
     }
 }
 

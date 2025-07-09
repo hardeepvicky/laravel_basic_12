@@ -16,6 +16,7 @@ use App\Helpers\Util;
                         <th>Description</th>
                         <th><?= sortable_anchor('exec_time', 'Time Taken (Seconds)') ?></th>
                         <th>Info</th>
+                        <th style="width: 30%">Output</th>
                         <th>
                             <?= sortable_anchor('created_at', 'Created') ?>
                             | <?= sortable_anchor('updated_at', 'Updated') ?>
@@ -37,6 +38,20 @@ use App\Helpers\Util;
 
                             <span class="btn btn-info btn-sm css-toggler mt-1 mb-1"
                                 data-sr-css-class-toggle-target="#info-{{ $record->id }}"
+                                data-sr-css-class-toggle-class="h-200" data-sr-css-class-toggle-applied-text="More"
+                                data-sr-css-class-toggle-not-applied-text="Less">
+                                More
+                            </span>
+                            @endif
+                        </td>
+                        <td>
+                            @if(isset($record->output) && is_array($record->output))
+                            <div id="output-{{ $record->id }}" class="h-200">
+                                {!! array_print($record->output, 80) !!}
+                            </div>
+
+                            <span class="btn btn-info btn-sm css-toggler mt-1 mb-1"
+                                data-sr-css-class-toggle-target="#output-{{ $record->id }}"
                                 data-sr-css-class-toggle-class="h-200" data-sr-css-class-toggle-applied-text="More"
                                 data-sr-css-class-toggle-not-applied-text="Less">
                                 More

@@ -37,6 +37,8 @@ class RecurringTask extends BaseModel
     ];
 
     protected static array $fields_containg_tags = ["description"];
+    
+    public string $field_for_create_tag = "name";
 
     public const RECURRING_DAILY = "DAILY";
     public const RECURRING_WEEKLY = "WEEKLY";
@@ -81,13 +83,13 @@ class RecurringTask extends BaseModel
             $rules['assign_to_user_id'] = ["required"];
             $rules['recurring_type'] = ["required"];
             $rules['priority'] = ["required"];
+            $rules['duration'] = ["required"];
+            $rules['duration_type'] = ["required"];
 
             if ($request->get("recurring_type") == self::RECURRING_CUSTOM) {
                 $rules['recurringTaskDate'] = ["required"];
             } else {
                 $rules["start_date_time"] = ["required"];
-                $rules['duration'] = ["required"];
-                $rules['duration_type'] = ["required"];
             }
         }
 

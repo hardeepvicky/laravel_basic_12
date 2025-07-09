@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Exceptions\UserException;
 use App\Helpers\FileUtility;
 use App\Helpers\LaravelExtend;
+use App\Helpers\MyCommand;
 use App\Models\AppMenu;
 use App\Models\FieldSetting;
 use App\Models\Task;
@@ -12,7 +13,7 @@ use App\Models\Type;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
 
-class ModelToJsonCommand extends Command
+class ModelToJsonCommand extends MyCommand
 {
     /**
      * The name and signature of the console command.
@@ -35,6 +36,11 @@ class ModelToJsonCommand extends Command
      */
     public function handle()
     {
+        $this->logCreate([
+            "command" => $this->signature,
+            "description" => $this->description
+        ]);
+
         $default_model_name_list = ['Type', 'AppMenu', 'FieldSetting', 'Role'];
 
         sort($default_model_name_list);
@@ -137,6 +143,8 @@ class ModelToJsonCommand extends Command
 
             $this->writeJson($records->toArray(), $model_name);
         }
+
+        $this->logUpdate([]);
     }
 
     public function writeJson(array $records, $filename)

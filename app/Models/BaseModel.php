@@ -87,7 +87,6 @@ class BaseModel extends Model implements BaseModelInterface
         });
     }
 
-
     public function beforeSave()
     {
         if ($this->custom_errors) {
@@ -100,6 +99,8 @@ class BaseModel extends Model implements BaseModelInterface
     public function afterSave()
     {
         $this->forgotCache();
+
+        $this->saveAutoTags();
 
         $this->saveModuleLinksFromString();
     }

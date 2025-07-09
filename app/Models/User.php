@@ -532,6 +532,8 @@ class User extends Authenticatable implements BaseModelInterface
 
     public function changeCreatedByUsage(BaseModel $model, $counter)
     {
+        return;
+
         $json = $this->used_in_other_table_created_by;
 
         $this->used_in_other_table_created_by = $this->_updateUsageJson($json, $model->getTable(), $model->getClassDisplayName(), $counter, [
@@ -543,6 +545,8 @@ class User extends Authenticatable implements BaseModelInterface
 
     public function changeCreatedByUsageBulk(array $models)
     {
+        return;
+
         $json = $this->used_in_other_table_created_by;
 
         foreach ($models as $model) {
@@ -558,6 +562,8 @@ class User extends Authenticatable implements BaseModelInterface
 
     public function changeUpdatedByUsage(BaseModel $model, $counter)
     {
+        return;
+
         $json = $this->_parseJsonBeforeUpdateByUsage($model, $this->used_in_other_table_updated_by);
 
         $this->used_in_other_table_updated_by = $this->_updateUsageJson($json, $model->getTable(), $model->getClassDisplayName(), $counter, [
@@ -590,6 +596,8 @@ class User extends Authenticatable implements BaseModelInterface
 
     public function changeUpdatedByUsageBulk(array $models)
     {
+        return;
+        
         $json = $this->used_in_other_table_updated_by;
 
         foreach ($models as $model) {

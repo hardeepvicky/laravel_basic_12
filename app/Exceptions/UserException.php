@@ -56,6 +56,14 @@ class UserException extends Exception
         $this->data = $data;
     }
 
+    public static function checkKeysExistOrThrowException(array $list, array $keys, array $options = [])
+    {
+        foreach($keys as $key)
+        {
+            static::checkKeyExistOrThrowException($list, $key, $options);
+        }
+    }
+
     public static function checkKeyExistOrThrowException(array $list, $key, array $options = [])
     {
         if (!is_scalar($key))

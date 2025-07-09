@@ -24,6 +24,8 @@ class Task extends BaseModel
 
     protected static array $fields_containg_tags = ["description"];
 
+    public string $field_for_create_tag = "name";
+
     public static array $child_model_class = [
 
     ];

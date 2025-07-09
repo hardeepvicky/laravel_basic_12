@@ -5,12 +5,13 @@ namespace App\Console\Commands;
 use App\Exceptions\UserException;
 use App\Helpers\FileUtility;
 use App\Helpers\LaravelExtend;
+use App\Helpers\MyCommand;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use ZipArchive;
 
-class DbRestoreCommand extends Command
+class DbRestoreCommand extends MyCommand
 {
     /**
      * The name and signature of the console command.
@@ -40,6 +41,11 @@ class DbRestoreCommand extends Command
             $this->info("Debug Mode is off, restore can be run in debug off mode");
             return;
         }
+
+        $this->logCreate([
+            "command" => $this->signature,
+            "description" => $this->description
+        ]);
 
         $db_config_list = config("database.connections");
 
@@ -75,6 +81,8 @@ class DbRestoreCommand extends Command
             $this->restore_mysql($db_config_key, $db_config);
         }
 
+        $this->logUpdate([]);
+
         return true;
     }
 
@@ -106,7 +114,7 @@ class DbRestoreCommand extends Command
             return;
         }
 
-        $path .=  "/" . $choice;
+        $path = $path . "/" . $choice;
 
         $files = FileUtility::getFileList($path, ["sql"], true);
 
@@ -128,26 +136,27 @@ class DbRestoreCommand extends Command
 
         $db_name = $db_config['database'];
 
-        if (LaravelExtend::checkDatabaseExist($config_key))
-        {
-            $user_input = $this->ask('Database already exist, would you like to drop database [Y/N] :');
-
-            $user_input = strtoupper(trim($user_input));
-
-            if ($user_input == "Y")
-            {
-                $this->info("Droping database...");
-                DB::statement("DROP DATABASE $db_name");
-            }
-        }
-        
-        if (!LaravelExtend::checkDatabaseExist($config_key))
-        {
-            $this->info("Creating database...");
-            DB::statement("CREATE DATABASE $db_name");
-        }
-
         if ($choice == "Full Restore" || $choice == "Structure Restore Only") {
+
+            if (LaravelExtend::checkDatabaseExist($config_key))
+            {
+                $user_input = $this->ask('Database already exist, would you like to drop database [Y/N] :');
+
+                $user_input = strtoupper(trim($user_input));
+
+                if ($user_input == "Y")
+                {
+                    $this->info("Droping database...");
+                    DB::statement("DROP DATABASE $db_name");
+                }
+            }
+            
+            if (!LaravelExtend::checkDatabaseExist($config_key))
+            {
+                $this->info("Creating database...");
+                DB::statement("CREATE DATABASE $db_name");
+            }
+
             foreach ($files as $k => $file) {
                 if (strpos($file, "_st.sql") !== false) {
                     
@@ -176,7 +185,7 @@ class DbRestoreCommand extends Command
             {
                 $file_name = pathinfo($file, PATHINFO_FILENAME);
 
-                $this->info($file_name);
+                $this->line($file_name);
 
                 $command = 'mysql -P' . $db_config['port'] . ' -u' . $db_config['username'] . ' -p' . $db_config['password'] . ' ' . $db_name . ' < "' . $file . '"';
 

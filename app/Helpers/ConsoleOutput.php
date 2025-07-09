@@ -7,6 +7,7 @@ use Symfony\Component\Console\Output\ConsoleOutput as OutputConsoleOutput;
 
 class ConsoleOutput extends OutputConsoleOutput
 {
+    public array $output_lines = [];
 
     private array $log_messages = [];
 
@@ -67,6 +68,7 @@ class ConsoleOutput extends OutputConsoleOutput
     {
         if ($message && is_scalar($message))
         {
+            $this->output_lines[] = "info : " . $message;
             $this->writeln('<info>' . $message. '</info>');
         }
         else
@@ -79,6 +81,8 @@ class ConsoleOutput extends OutputConsoleOutput
 
                 if  (isset($arr[0]))
                 {
+                    $this->output_lines[] = $arr[1] . " : " . $arr[0];
+
                     if ($arr[1] == "info") {
                         $this->writeln('<info>' . ($arr[0]) . '</info>');
                     } else if ($arr[1] == "error") {

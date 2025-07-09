@@ -145,7 +145,9 @@ class RecurringTaskController extends BackendController
 
         $recurring_dates_field_labels = FieldSetting::getDynamicFields(RecurringTaskDate::class);
 
-        $this->setForView(compact("user_list", "task_type_list", "recurring_type_list", "duration_type_list", "department_list", "field_labels", "recurring_dates_field_labels"));
+        $default_start_date_time = DateUtility::change(date('d-M-Y 10:00'), 1, DateUtility::DAYS, DateUtility::DATETIME_OUT_FORMAT);
+
+        $this->setForView(compact("user_list", "task_type_list", "recurring_type_list", "duration_type_list", "department_list", "field_labels", "recurring_dates_field_labels", "default_start_date_time"));
 
         return parent::beforeViewRender();
     }
@@ -163,9 +165,7 @@ class RecurringTaskController extends BackendController
 
         $model->priority = 1;
 
-        $default_start_date_time = DateUtility::change(date('d-M-Y 10:00'), 1, DateUtility::DAYS, DateUtility::DATETIME_OUT_FORMAT);
-
-        $this->setForView(compact("model", 'form', 'default_start_date_time'));
+        $this->setForView(compact("model", 'form'));
 
         return $this->view("form");
     }

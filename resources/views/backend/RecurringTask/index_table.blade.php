@@ -78,9 +78,9 @@ use App\Models\RecurringTask;
                         <tr id="record-{{ $record->id }}" class="hidden">
                             <td></td>
                             <td colspan="7">
-                                <div class="row">
-                                    @if($record->recurring_type == RecurringTask::RECURRING_CUSTOM)
+                                <div class="row">                                    
                                     <div class="col-md-6 col-xl-4">
+                                        @if($record->recurring_type == RecurringTask::RECURRING_CUSTOM)
                                         <div class="card">
                                             <div class="card-header border-l-primary card-no-border">
                                                 <h3>Recurring Custom Dates</h3>
@@ -98,7 +98,11 @@ use App\Models\RecurringTask;
                                                         @foreach ($record->recurringTaskDate as $i => $recurringTaskDate)
                                                             <tr>
                                                                 <td>{{ $i + 1 }}</td>
-                                                                <td>{{ if_date_time($recurringTaskDate->date) }}</td>
+                                                                <td>
+                                                                    <x-Backend.celec_date_time
+                                                                        label=""
+                                                                        :value="$recurringTaskDate->date" />
+                                                                </td>
                                                                 <td>
                                                                     @if ($recurringTaskDate->task_id)
                                                                         <a target="_blank"
@@ -112,9 +116,11 @@ use App\Models\RecurringTask;
                                                 </table>
                                             </div>
                                         </div>
+                                        @endif
                                     </div>
-                                    @else
+                                    
                                     <div class="col-md-6 col-xl-4">
+                                        @if($record->recurring_type != RecurringTask::RECURRING_CUSTOM)
                                         <div class="card">
                                             <div class="card-header border-l-primary card-no-border">
                                                 <h3>Task created by system</h3>
@@ -142,8 +148,9 @@ use App\Models\RecurringTask;
                                                 </table>
                                             </div>
                                         </div>
+                                        @endif
                                     </div>
-                                    @endif
+                                    
                                     <div class="col-md-6 col-xl-4">
                                         <label class="info">
                                             {{ get_value_from_list($field_labels, 'description', 'description') }}

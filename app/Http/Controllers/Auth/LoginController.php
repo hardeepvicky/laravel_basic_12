@@ -11,6 +11,7 @@ use Exception;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Request as FacadesRequest;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\ValidationException;
 
 class LoginController extends WebController
@@ -70,7 +71,8 @@ class LoginController extends WebController
 
     protected function authenticated(Request $request, $user)
     {
-        session()->put('login_user_timezone', $request->get("timezone"));
+        $user->login_timezone = $request->get("timezone");
+        $user->save();
 
         return redirect($this->redirectTo);
     }
@@ -128,6 +130,11 @@ class LoginController extends WebController
             // ]);
         }
 
+        if (!$request->get("timezone"))
+        {
+            return back()->with("fail", "timezone is required");
+        }
+
         $credentials = $this->credentials($request);
 
         // d($credentials, true);
@@ -170,7 +177,7 @@ class LoginController extends WebController
         return [
             $field => $login,
             'password' => $request->input('password'),
-            "type" => $request->input("user_type")
+            "type" => $request->input("user_type"),
         ];
     }
 
