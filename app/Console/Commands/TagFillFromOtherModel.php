@@ -109,9 +109,9 @@ class TagFillFromOtherModel extends MyCommand
                 continue;
             }
 
-            $list = $model_class::getList("id", $name_field);
+            $list = $model_class::getListCache("id", $name_field);
 
-            $id_to_delete = $model_class::getList("id", "id");
+            $id_to_delete = $model_class::getListCache("id", "id");
 
             try
             {

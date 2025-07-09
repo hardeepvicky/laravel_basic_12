@@ -31,6 +31,7 @@ use App\Http\Controllers\Frontend\EnquiryController;
 use App\Http\Controllers\Frontend\FrontendController;
 use App\Http\Controllers\HomeController;
 use App\Models\EmailLog;
+use App\Models\ProductCategory;
 use Illuminate\Support\Facades\Storage;
 use Mailjet\Resources;
 
@@ -329,6 +330,21 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
     Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
         $name = "ajax_get_list";
         Route::get($name, [$controllerClass, $name])->name($name);
+    });
+
+    $route_prefix = "product-category";
+    $controllerClass = ProductCategory::class;
+    Route::resource($route_prefix, $controllerClass);
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
+        $name = "activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "de_activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "ajax_get";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
     });
 
 

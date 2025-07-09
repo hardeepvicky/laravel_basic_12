@@ -45,15 +45,6 @@ class DepartmentController extends BackendController
 
         $builder = $this->modelClass::where($conditions);
 
-        $cache_key_for_sort = $cache_key_prefix . "-index-extra-params";
-
-        $clear_cache = request('is_sort_clear', false);
-
-        $sort_params = $this->getRequestData($cache_key_for_sort, [
-            ["key" => "sort_by", "default" => "id"],
-            ["key" => "sort_dir", "default" => "DESC"],
-        ], $clear_cache);
-        
         $builder->with(["headUser"]);
 
         if ($apply_sort)
