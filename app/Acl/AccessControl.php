@@ -300,19 +300,15 @@ class AccessControl
 
     public static function clearMenuCache(array $user_id_list = [])
     {
-        Cache::flush();
-
-        /*
         if (empty($user_id_list))
         {
-            
+            self::forgotCache();
         }
 
         foreach ($user_id_list as $user_id) {
             $cache_key = self::getMenuCacheKey($user_id);
             self::forgotCache($cache_key);
         }
-        */
     }
 
     public static function getCacheMenu($user_id)

@@ -397,7 +397,7 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
         Route::any($name, [PermissionController::class, $name])->name($name);
 
         $name = "ajax_get_permissions";
-        Route::get("$name/{id}", [PermissionController::class, $name])->name($name);
+        Route::post($name, [PermissionController::class, $name])->name($name);
 
         $name = "ajax_delete";
         Route::post($name, [PermissionController::class, $name])->name($name);

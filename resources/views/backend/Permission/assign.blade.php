@@ -23,9 +23,9 @@
                     <div class="col-lg-12">
                         {!! csrf_field() !!}
                         <div class="row mb-4">
-                            <label class="col-md-2 col-sm-23 col-form-label" style="text-align:right;">Role</label>
-                            <div class="col-md-6 col-sm-12">
-                                <select id="role_id" name="role_id" class ="form-control select2" required="required">
+                            <label class="col-md-2 col-sm-6 col-form-label" style="text-align:right;">Role</label>
+                            <div class="col-md-10 col-sm-6">
+                                <select id="role_id" name="role_id[]" class ="form-control select2" required="required" multiple="true">
                                     <option value="">Please Select</option>
                                     @foreach ($role_list as $k => $t)
                                         <option value="{{ $k }}">{{ $t }}</option>
@@ -50,7 +50,12 @@
                 var id = $(this).val();
 
                 var v = $(this).val();
-                v = v ? v : 0;
+                v = v ? v : [];
+
+                if (v.length == 0)
+                {
+                    return;
+                }
 
                 if ($("#permission_block").not(":empty").length > 0) {
                     Swal.fire({
@@ -66,10 +71,9 @@
                             $("#permission_block").html("");
                             if (v) {
                                 $.loader.show();
-                                $("#permission_block").load("/permissions/ajax_get_permissions/" +
-                                    v, () => {
-                                        $.loader.hide();
-                                    });
+                                $("#permission_block").load("/permissions/ajax_get_permissions", {role_ids : v}, function(){
+                                    $.loader.hide();
+                                });
                             }
                         }
                     });
@@ -77,7 +81,7 @@
                     $("#permission_block").html("");
                     if (v) {
                         $.loader.show();
-                        $("#permission_block").load("/permissions/ajax_get_permissions/" + v, () => {
+                        $("#permission_block").load("/permissions/ajax_get_permissions", {role_ids : v}, function(){
                             $.loader.hide();
                         });
                     }

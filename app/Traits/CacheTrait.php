@@ -54,8 +54,14 @@ trait CacheTrait
 
         $instance = Cache::tags([$base_cache_key]);
 
-        $cache_key = static::optimizeCacheKey($key);
-
-        return $instance->get($cache_key);
+        if ($key)
+        {
+            $cache_key = static::optimizeCacheKey($key);
+            $instance->forget($cache_key);
+        }
+        else
+        {
+            $instance->flush();
+        }
     }
 }

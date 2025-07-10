@@ -44,10 +44,10 @@ class SectionRoutes
 
         // d($app_menus);
 
-        
-        $sections = self::getDynamicSections($app_menus);
-        
         $sections[] = self::home();
+
+        $sections = array_merge($sections, self::getDynamicSections($app_menus));
+
         $sections[] = self::developer();
 
         $database_routes = [];
@@ -68,7 +68,7 @@ class SectionRoutes
 
         $database_routes = $qb->get()->toArray();
 
-        return self::addExtraToSections($sections, $database_routes);
+        return self::addExtraToSections($sections, $database_routes, $role_id_list);
     }
 
     public static function getDynamicSections($app_menus)
@@ -150,11 +150,11 @@ class SectionRoutes
         return $dynamic_sections;
     }
 
-    public static function addExtraToSections(array $sections, $database_routes)
+    public static function addExtraToSections(array $sections, $database_routes, $input_role_id_list)
     {
         foreach ($sections as $k => $arr) {
             if (isset($arr['children']) && $arr['children']) {
-                $arr['children'] = self::addExtraToSections($arr['children'], $database_routes);
+                $arr['children'] = self::addExtraToSections($arr['children'], $database_routes, $input_role_id_list);
             } else if (isset($arr['route_list']) && $arr['route_list']) {
 
                 $arr['database_routes'] = [];
@@ -163,19 +163,21 @@ class SectionRoutes
 
                 $arr['state']['selected'] = false;
 
+                // d($database_routes);
+
                 foreach($database_routes as $database_route)
                 {
                     if (in_array($database_route['route_name']['name'], $arr['route_list']))
                     {
                         $arr["database_routes"][] = $database_route;
-                        $arr['state']['selected'] = true;
+
 
                         $role = $database_route["role"];
 
                         if (!isset($arr['allow_role_routes'][$role['id']]))
                         {
                             $arr['allow_role_routes'][$role['id']] = $role;
-                        } 
+                        }
 
                         $arr['allow_role_routes'][$role['id']]["route_list"][$database_route['id']] = $database_route['route_name']['name'];
 
@@ -183,10 +185,13 @@ class SectionRoutes
                     }
                 }
 
-                // if (!empty($arr['allow_role_routes']))
-                // {
-                //     d($arr);
-                // }
+                if ($input_role_id_list)
+                {
+                    if (count($input_role_id_list) == count($arr['allow_role_routes']))
+                    {
+                        $arr['state']['selected'] = true;
+                    }
+                }
 
                 $arr["li_attr"] = [
                     "data-routes" => implode(",", $arr['route_list'])
@@ -281,13 +286,18 @@ class SectionRoutes
     private static function home()
     {
         $section = [
-            "text" => "Dashboard",
+            "text" => "Home",
             "children" => []
         ];
 
         $section['children'][] = [
             "text" => "Dashboard",
             "route_list" => ["dashboard"]
+        ];
+
+        $section['children'][] = [
+            "text" => "My Notification",
+            "route_list" => ["notification.my"]
         ];
 
         return $section;
@@ -345,7 +355,7 @@ class SectionRoutes
             "text" => "List",
             "route_list" => [$routePrefix . ".index"]
         ];
-        
+
         $section['children'][] = [
             "text" => "Add",
             "route_list" => [$routePrefix . ".create", $routePrefix . ".store"]
