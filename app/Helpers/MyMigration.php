@@ -201,11 +201,14 @@ class MyMigration extends Migration
         {
             if (in_array($index_key->COLUMN_NAME, $fields))
             {
-                $output->writeLogToConsole('Droping index key : ' . $index_key->INDEX_NAME);
+                if ($this->indexExists($tableName, $index_key->INDEX_NAME))
+                {
+                    $output->writeLogToConsole('Droping index key : ' . $index_key->INDEX_NAME);
 
-                Schema::table($tableName, function (Blueprint $table) use($index_key) {                
-                    $table->dropIndex($index_key->INDEX_NAME);
-                });
+                    Schema::table($tableName, function (Blueprint $table) use($index_key) {                
+                        $table->dropIndex($index_key->INDEX_NAME);
+                    });
+                }
             }
         }
     }
