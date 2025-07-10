@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Helpers\LaravelExtend;
 use App\Helpers\Util;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Unique;
@@ -23,6 +24,11 @@ class ProductCategory extends BaseModel
 
     public function beforeSave()
     {
+        if (!$this->parent_id)
+        {
+            $this->parent_id = 0;
+        }
+        
         if ($this->id)
         {
             if ($this->is_last_node)
@@ -74,17 +80,17 @@ class ProductCategory extends BaseModel
         return $field_rules;
     }
 
-    public static function getTreeRecords(array $conditions = [], $max_depth = 10) : array
+    public static function getTreeRecords(Builder $qb, $max_depth = 10) : array
     {
-        $records = self::where($conditions)->orderBy("list_display_order")->get();
+        $records = $qb->orderBy("list_display_order")->get();
 
         $records = Util::getTreeArray($records->toArray(), "parent_id", 0, $max_depth);
 
         return $records;
     }
 
-    public static function getTreeList(array $conditions = []) : array
+    public static function getTreeList(Builder $qb) : array
     {
-        return Util::getTreeListArray(self::getTreeRecords($conditions, 4), "id", "name", false, false);
+        return Util::getTreeListArray(self::getTreeRecords($qb, 4), "id", "name", false, false);
     }
 }

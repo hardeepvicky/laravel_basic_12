@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Backend;
 use App\Helpers\ArrayHelper;
 use App\Helpers\LaravelExtend;
 use App\Models\Department;
+use App\Models\FieldSetting;
 use App\Models\ProductCategory;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -69,9 +70,6 @@ class ProductCategoryController extends BackendController
         
         $conditions = $array_helper->unsetValues($conditions, ["is_find_nested_child"], true, [ArrayHelper::UNSET_VALUE_REMOVE_PARENT_IF_FOUND_CHILD]);
 
-        $array_helper =  new ArrayHelper([]);
-        $conditions = $array_helper->unsetValues($conditions, ["is_find_nested_child"], true, [ArrayHelper::UNSET_VALUE_REMOVE_PARENT_IF_FOUND_CHILD]);
-
         if($conditions)
         {
             $builder = $builder->where($conditions);
@@ -104,9 +102,9 @@ class ProductCategoryController extends BackendController
 
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
-        $tree_list = $this->modelClass::getTreeList([
-            ["is_last_node", 0]
-        ]);
+        $qb = $this->modelClass::query()->where("is_last_node", 0);
+
+        $tree_list = $this->modelClass::getTreeList($qb);
 
         $this->setForView(compact("field_labels", "tree_list"));
 

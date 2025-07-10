@@ -20,22 +20,34 @@
                         <x-Inputs.drop-down :name="$field" label="Limit" :list="$paginationList" :value="$pagination_limit" :pleaseSelect="$false"
                             class="pagination_limit" />
                     </div>
-                    <div class="col-md-3 mb-2">
+                    <div class="col-md-6 col-xxl-3 mb-2">
                         <?php
                         $field = 'product_category_id';
                         $label = get_value_from_list($field_labels, $field, $field);
                         ?>
                         <x-Inputs.drop-down :name="$field" :label="$label" :value="$search[$field]" :list="$product_category_list"
                             class="select2" />
+
+                        <?php 
+                            $field = "is_find_nested_child";
+                        ?>
+                        <x-Inputs.checkbox :name="$field" label="Find Nested Child" :value="$search[$field]" />
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-6 col-xxl-2 mb-2">
                         <?php
                         $field = 'name';
                         $label = get_value_from_list($field_labels, $field, $field);
                         ?>
                         <x-Inputs.text-field :name="$field" :label="$label" :value="$search[$field]" />
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-6 col-xxl-2 mb-2">
+                        <?php
+                        $field = 'model_name';
+                        $label = get_value_from_list($field_labels, $field, $field);
+                        ?>
+                        <x-Inputs.text-field :name="$field" :label="$label" :value="$search[$field]" />
+                    </div>
+                    <div class="col-md-6 col-xxl-2 mb-2">
                         <?php
                         $field = 'is_active';
                         $label = get_value_from_list($field_labels, $field, $field);

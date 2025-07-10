@@ -61,8 +61,6 @@ class PermissionController extends BackendController
     public function assign(Request $request)
     {
         if ($request->isMethod('post')) {
-            $sections = SectionRoutes::get();
-
             $accessControl = AccessControl::init();
             $synced_route_name_list = $accessControl->syncRouteNamesToDatabase();
 
@@ -73,10 +71,8 @@ class PermissionController extends BackendController
             $choosen_route_list = [];
 
             $counters = [
-                "total"  => 0,
-                "new"  => 0,
-                "delete"  => 0,
-                "update"  => 0,
+                "saved"  => 0,
+                "deleted"  => 0,
             ];
 
             foreach ($data['route_names'] as $route_name) {
@@ -93,8 +89,6 @@ class PermissionController extends BackendController
             }
 
             $choosen_route_list = array_unique($choosen_route_list);
-
-            $counters['total'] = count($choosen_route_list);
 
             // d($choosen_route_list, true);
 
@@ -118,18 +112,14 @@ class PermissionController extends BackendController
 
                     if ($is_insert)
                     {
-                        $counters['new']++;
-                    }
-                    else
-                    {
-                        $counters['delete']++;
+                        $counters['saved']++;
                     }
 
                     unset($old_save_id_list[$roleRouteName->id]);
                 }
             }
 
-            $counters['delete'] = count($old_save_id_list);
+            $counters['deleted'] = count($old_save_id_list);
 
             RoleRouteName::withoutEvents(function() use ($old_save_id_list){
                 RoleRouteName::destroy($old_save_id_list);            

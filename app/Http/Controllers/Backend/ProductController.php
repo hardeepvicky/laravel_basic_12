@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Exceptions\UserException;
+use App\Helpers\ArrayHelper;
 use App\Helpers\LaravelExtend;
 use App\Helpers\Util;
 use App\Models\Department;
@@ -34,7 +35,11 @@ class ProductController extends BackendController
 
         // dd($records->toArray());
 
-        $this->setForView(compact("records"));
+        $product_category_records = ProductCategory::getTreeRecords(ProductCategory::query());
+
+        $product_category_list = Util::getTreeListArray($product_category_records, "id", "name", false, false);
+
+        $this->setForView(compact("records", "product_category_list"));
 
         return $this->viewIndex(__FUNCTION__);
     }
@@ -46,12 +51,33 @@ class ProductController extends BackendController
         $conditions = $this->getConditions($cache_key, [
             ["field" => "id", "type" => "int", "cache" => false],
             ["field" => "product_category_id", "type" => "int"],
+            ["field" => "is_find_nested_child", "type" => "bool", "view_field" => "is_find_nested_child"],
             ["field" => "name", "type" => "string"],
             ["field" => "short_name", "type" => "string"],
+            ["field" => "model_name", "type" => "string"],
             ["field" => "is_active", "type" => "int"],
         ]);
 
         $builder = $this->modelClass::query();
+
+        $array_helper =  new ArrayHelper($conditions);
+        $condition_list = $array_helper->convertModelSearchConditionToList();
+
+        if (
+            (isset($condition_list["product_category_id"]) && $condition_list["product_category_id"])
+            && (isset($condition_list["is_find_nested_child"]) && $condition_list["is_find_nested_child"])
+        )
+        {
+            $child_id_list = ProductCategory::getChildIdList([$condition_list["product_category_id"]]);
+
+            if ($child_id_list)
+            {
+                $builder->whereIn("product_category_id", $child_id_list);
+                $conditions = $array_helper->unsetValues($conditions, ["product_category_id"], true, [ArrayHelper::UNSET_VALUE_REMOVE_PARENT_IF_FOUND_CHILD]);
+            }
+        }
+        
+        $conditions = $array_helper->unsetValues($conditions, ["is_find_nested_child"], true, [ArrayHelper::UNSET_VALUE_REMOVE_PARENT_IF_FOUND_CHILD]);
 
         // d($conditions, true);
 
@@ -81,19 +107,9 @@ class ProductController extends BackendController
             $this->model = new $this->modelClass();
         }
 
-        $category_conditions = [];
-
-        if ($this->model->product_category_id) {
-            $dept_conditions['or_id'] = $this->model->product_category_id;
-        }
-
-        $product_category_records = ProductCategory::getTreeRecords();
-
-        $product_category_list = Util::getTreeListArray($product_category_records, "id", "name",);
-
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
-        $this->setForView(compact("field_labels", "product_category_list"));
+        $this->setForView(compact("field_labels"));
 
         return parent::beforeViewRender();
     }
@@ -111,7 +127,27 @@ class ProductController extends BackendController
 
         $this->setForView(compact("model", 'form'));
 
+        $this->set_data_for_add_edit($model);
+
         return $this->view("form");
+    }
+
+    private function set_data_for_add_edit($model)
+    {
+        $qb = ProductCategory::where("is_active", 1);
+
+        $conditions = ["is_active" => 1];
+
+        if ($model->product_category_id)
+        {
+            $qb->orWhere("id", $model->product_category_id);
+        }
+
+        $product_category_records = ProductCategory::getTreeRecords($qb);
+
+        $product_category_list = Util::getTreeListArray($product_category_records, "id", "name");
+
+        $this->setForView(compact("product_category_list"));
     }
 
     private function _common_validation_rules()
@@ -119,6 +155,8 @@ class ProductController extends BackendController
         return [
             "product_category_id" => ["required"],
             "name" => ["required"],
+            "model_name" => ["required"],
+            "description" => ["nullable"],
             "short_name" => ["nullable"],
             "list_display_order" => "",
             "is_active" => "",
@@ -184,6 +222,8 @@ class ProductController extends BackendController
 
         $this->setForView(compact("model", "form"));
 
+        $this->set_data_for_add_edit($model);
+
         return $this->view("form");
     }
 
@@ -242,6 +282,8 @@ class ProductController extends BackendController
         ];
 
         $this->setForView(compact("model", "form"));
+
+        $this->set_data_for_add_edit($model);
 
         return $this->view("form");
     }
