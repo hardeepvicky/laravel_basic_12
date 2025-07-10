@@ -77,6 +77,7 @@ use App\Models\Notification;
                             </a>
                         </h3>
                         <ul class="activity-timeline">
+                            @if(isset($unread_notifications) && $unread_notifications)
                             @foreach($unread_notifications as $notification):
                             <li class="d-flex align-items-start">
                                 <div class="activity-line"></div>
@@ -110,8 +111,9 @@ use App\Models\Notification;
                                         @endif
                                     </p>
                                 </div>
-                            </li>
+                            </li>                            
                             @endforeach
+                            @endif
                         </ul>
                     </div>
                 </li>
