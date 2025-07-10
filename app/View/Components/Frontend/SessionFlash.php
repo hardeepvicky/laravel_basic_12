@@ -1,6 +1,6 @@
 <?php
 
-namespace App\View\Components\Backend;
+namespace App\View\Components\Frontend;
 
 use App\View\Components\FrontendComponent;
 
