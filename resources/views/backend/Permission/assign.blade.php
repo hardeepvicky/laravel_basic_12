@@ -31,6 +31,8 @@
                                         <option value="{{ $k }}">{{ $t }}</option>
                                     @endforeach
                                 </select>
+
+                                <span class="btn btn-primary" id="get_permissions">Search</span>
                             </div>
                         </div>
 
@@ -46,10 +48,9 @@
     <script type="text/javascript">
         $(document).ready(function() {
 
-            $("select#role_id").change(function() {
-                var id = $(this).val();
+            $("#get_permissions").click(function() {
 
-                var v = $(this).val();
+                var v = $("#role_id").val();
                 v = v ? v : [];
 
                 if (v.length == 0)
@@ -89,6 +90,19 @@
             });
 
             $("form").submit(function() {
+
+                var v = $("#role_id").val();
+
+                if (v.length == 0)
+                {
+                    Swal.fire(
+                        'Error!',
+                        'Please Select At One Role',
+                        'error'
+                    )
+                    return false;
+                }
+
                 var len = $("#hidden_routes input").length;
 
                 if (len <= 0) {
