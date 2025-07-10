@@ -70,8 +70,10 @@ class TaskCommand extends MyCommand
             {
                 foreach($records as $record)
                 {
-                    $record->changeStatus(Task::STATUS_ASSIGNED);
-                    $counts['task_status_change_to_assigned']++;
+                    if ($record->changeStatus(Task::STATUS_ASSIGNED))
+                    {
+                        $counts['task_status_change_to_assigned']++;
+                    }
                 }
             }
             

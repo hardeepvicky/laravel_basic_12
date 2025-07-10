@@ -15,6 +15,7 @@ use App\Traits\StorageTrait;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Http\Request;
 use Illuminate\Notifications\Notifiable;
@@ -70,6 +71,8 @@ class User extends Authenticatable implements BaseModelInterface
     protected $appends = [
         'display_name',
     ];
+
+    public string $field_for_create_tag = "display_name";
 
      /**
      * The attributes that should be cast.
@@ -284,6 +287,17 @@ class User extends Authenticatable implements BaseModelInterface
     public function recuringTasks()
     {
         return $this->hasMany(RecurringTask::class, 'assign_to_user_id');
+    }
+
+    /**
+     * Get the entity's notifications.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
+     */
+    public function notifications(): MorphMany
+    {
+        // Tell Laravel to use your custom Notification model for this relationship
+        return $this->morphMany(Notification::class, 'notifiable')->orderBy('created_at', 'desc'); // Optional: order them
     }
 
     public function getUniqueValidationRules(Request $request)

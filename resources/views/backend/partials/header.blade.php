@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Helpers\FileUtility;
+use App\Models\Notification;
+
 ?>
 <header class="page-header row">
     <div class="logo-wrapper d-flex align-items-center col-auto">
@@ -61,72 +63,57 @@ use App\Helpers\FileUtility;
                             <use href="/assets/svg/iconly-sprite.svg#notification"></use>
                         </svg>
                     </a>
-                    <span class="badge rounded-pill badge-primary">4</span>
+                    
+                    @if(isset($unread_notification_count) && $unread_notification_count)
+                    <span class="badge rounded-pill badge-primary">
+                        {{ $unread_notification_count }}
+                    </span>
+                    @endif
+                    
                     <div class="custom-menu notification-dropdown py-0 overflow-hidden">
-                        <h3 class="title bg-primary-light dropdown-title">Notification <span class="font-primary">View
-                                all</span></h3>
+                        <h3 class="title bg-primary-light dropdown-title">Notification 
+                            <span class="font-primary">View all</span>
+                        </h3>
                         <ul class="activity-timeline">
+                            @foreach($unread_notifications as $notification):
                             <li class="d-flex align-items-start">
                                 <div class="activity-line"></div>
-                                <div class="activity-dot-primary"></div>
+                                @if($notification->sub_type == Notification::SUB_TYPE_INFO)
+                                    <div class="activity-dot-primary"></div>
+                                @elseif($notification->sub_type == Notification::SUB_TYPE_CRITICAL)
+                                    <div class="activity-dot-danger"></div>
+                                @else
+                                    <div class="activity-dot-secondary"></div>
+                                @endif
+
                                 <div class="flex-grow-1">
                                     <h6 class="f-w-600 font-primary">
-                                        30-04-2024<span>Today</span>
+                                        <span>{{ if_date($notification->created_at) }}</span>
+                                        {{ $notification->created_at->diffForHumans() }}
                                         <span class="circle-dot-primary float-end">
                                             <svg class="circle-color">
                                                 <use href="/assets/svg/iconly-sprite.svg#circle"></use>
                                             </svg>
                                         </span>
                                     </h6>
-                                    <h5>Alice Goodwin</h5>
-                                    <p class="mb-0">Fashion should be fun. It shouldn't be labelled intellectual.</p>
+                                    <h5>
+                                        @if($notification->from_user_id === 0)
+                                            System
+                                        @else
+                                            {{ $notification->fromUser?->getDisplayName() ?? "NA" }}
+                                        @endif
+                                    </h5>
+                                    <p class="mb-0">
+                                        @if(isset($notification->data['msg']) && $notification->data['msg'])
+                                            <span>{{ $notification->data['msg'] }}</span>
+                                        @endif
+                                        @if(isset($notification->data['link']) && $notification->data['link'])
+                                            <a href="{{ $notification->data['link'] }}">Open Link</a>
+                                        @endif
+                                    </p>
                                 </div>
                             </li>
-                            <li class="d-flex align-items-start">
-                                <div class="activity-dot-secondary"></div>
-                                <div class="flex-grow-1">
-                                    <h6 class="f-w-600 font-secondary">
-                                        28-06-2024<span>1 hour ago</span>
-                                        <span class="float-end circle-dot-secondary">
-                                            <svg class="circle-color">
-                                                <use href="/assets/svg/iconly-sprite.svg#circle"></use>
-                                            </svg>
-                                        </span>
-                                    </h6>
-                                    <h5>Herry Venter</h5>
-                                    <p>I am convinced that there can be luxury in simplicity.</p>
-                                </div>
-                            </li>
-                            <li class="d-flex align-items-start">
-                                <div class="activity-dot-primary"></div>
-                                <div class="flex-grow-1">
-                                    <h6 class="f-w-600 font-primary">
-                                        04-08-2024<span>Today</span>
-                                        <span class="float-end circle-dot-primary">
-                                            <svg class="circle-color">
-                                                <use href="/assets/svg/iconly-sprite.svg#circle"></use>
-                                            </svg>
-                                        </span>
-                                    </h6>
-                                    <h5>Loain Deo</h5>
-                                    <p>I feel that things happen for open new opportunities.</p>
-                                </div>
-                            </li>
-                            <li class="d-flex align-items-start">
-                                <div class="activity-dot-secondary"></div>
-                                <div class="flex-grow-1">
-                                    <h6 class="f-w-600 font-secondary">
-                                        12-11-2024<span>Yesterday</span>
-                                        <span class="float-end circle-dot-secondary">
-                                            <svg class="circle-color">
-                                                <use href="/assets/svg/iconly-sprite.svg#circle"></use>
-                                            </svg>
-                                        </span>
-                                    </h6>
-                                    <h5>Fenter Jessy</h5>
-                                    <p>Sometimes the simplest things are the most profound.</p>
-                                </div>
-                            </li>
+                            @endforeach
                         </ul>
                     </div>
                 </li>
@@ -138,34 +125,34 @@ use App\Helpers\FileUtility;
                     </a>
                 </li>
                 @auth
-                    @php
-                        $user = Auth::user();
-                    @endphp
-                    <li class="profile-nav custom-dropdown">
-                        <div class="user-wrap">
-                            @if (isset($user) && $user)
-                                <div class="user-img">
-                                    <img src="{{ $user->getProfileImage() }}" alt="user" style="background:none" />
-                                </div>
-                            @endif
-                            <div class="user-content">
-                                <!-- <h6>Ava Davis</h6> -->
-                                <p class="mb-0">{{ $user->name }}<i class="fa-solid fa-chevron-down"></i></p>
-                            </div>
+                @php
+                $user = Auth::user();
+                @endphp
+                <li class="profile-nav custom-dropdown">
+                    <div class="user-wrap">
+                        @if (isset($user) && $user)
+                        <div class="user-img">
+                            <img src="{{ $user->getProfileImage() }}" alt="user" style="background:none" />
                         </div>
-                        <div class="custom-menu overflow-hidden">
-                            <ul class="profile-body">
-                                <li class="d-flex">
-                                    <svg class="svg-color">
-                                        <use href="/assets/svg/iconly-sprite.svg#Profile"></use>
-                                    </svg>
-                                    @if (Route::has('user.change.password'))
-                                        <a class="ms-2" href="{{ route('user.change.password') }}">Change Password</a>
-                                    @else
-                                        Route not exist : user.change.password
-                                    @endif
-                                </li>
-                                <!-- <li class="d-flex">
+                        @endif
+                        <div class="user-content">
+                            <!-- <h6>Ava Davis</h6> -->
+                            <p class="mb-0">{{ $user->name }}<i class="fa-solid fa-chevron-down"></i></p>
+                        </div>
+                    </div>
+                    <div class="custom-menu overflow-hidden">
+                        <ul class="profile-body">
+                            <li class="d-flex">
+                                <svg class="svg-color">
+                                    <use href="/assets/svg/iconly-sprite.svg#Profile"></use>
+                                </svg>
+                                @if (Route::has('user.change.password'))
+                                <a class="ms-2" href="{{ route('user.change.password') }}">Change Password</a>
+                                @else
+                                Route not exist : user.change.password
+                                @endif
+                            </li>
+                            <!-- <li class="d-flex">
                                                                                     <svg class="svg-color">
                                                                                         <use href="../assets/svg/iconly-sprite.svg#Message"></use>
                                                                                     </svg>
@@ -178,20 +165,20 @@ use App\Helpers\FileUtility;
                                                                                     <a class="ms-2" href="to-do.html">Task</a>
                                                                                 </li> -->
 
-                                <li class="d-flex">
-                                    <svg class="svg-color">
-                                        <use href="/assets/svg/iconly-sprite.svg#Login"></use>
-                                    </svg>
-                                    <form class="ms-2" action="{{ route('logout') }}" method="POST"
-                                        style="margin-block-end:0">
-                                        @csrf
-                                        <button type="submit" class="dropdown-item">Logout</button>
-                                    </form>
+                            <li class="d-flex">
+                                <svg class="svg-color">
+                                    <use href="/assets/svg/iconly-sprite.svg#Login"></use>
+                                </svg>
+                                <form class="ms-2" action="{{ route('logout') }}" method="POST"
+                                    style="margin-block-end:0">
+                                    @csrf
+                                    <button type="submit" class="dropdown-item">Logout</button>
+                                </form>
 
-                                </li>
-                            </ul>
-                        </div>
-                    </li>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
                 @endauth
             </ul>
         </div>

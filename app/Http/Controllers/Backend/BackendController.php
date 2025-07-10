@@ -9,6 +9,7 @@ use App\Models\BaseModel;
 use App\Models\SummaryAndFormSetting;
 use App\Models\User;
 use Exception;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -53,6 +54,12 @@ class BackendController extends WebController
         $header_menu_list = Menu::getList($menus);
         $breadcums = Menu::getBreadcums($menus);
 
+        $auth_user = Auth::user();
+
+        $unread_notifications = $auth_user->unreadNotifications()->limit(5)->get();
+
+        $unread_notification_count = $auth_user->unreadNotifications()->count();
+
         $userListCache = User::getListCache();
 
         $partial_path = "backend.partials";
@@ -70,7 +77,10 @@ class BackendController extends WebController
             "show_as" => "celec_datetime"
         ];
 
-        $this->setForView(compact("current_route_name", "current_url", "menus", "header_menu_list", "partial_path", "breadcums", "userListCache", "auth_user", "screen_name", "index_table_info_options"));
+        $this->setForView(compact(
+            "current_route_name", "current_url", "menus", "header_menu_list", "partial_path", "breadcums", "userListCache", "auth_user", "screen_name", 
+            "index_table_info_options", "unread_notifications", "unread_notification_count"
+        ));
 
         $this->saveSqlLog();
 

@@ -58,7 +58,7 @@ class Type extends BaseModel
                 ]
             ],
             RecurringTask::class => [
-            "fields" => [
+                "fields" => [
                     "recurring_type" => "Recurring Type",
                 ]
             ],
@@ -189,5 +189,12 @@ class Type extends BaseModel
         $id_list = self::where("type", $type)->where("code", $code)->pluck("id")->toArray();
 
         return $id_list;
+    }
+
+    public static function getByCode($type, $code)
+    {
+        $records = self::where("type", $type)->where("code", $code)->get();
+
+        return $records;
     }
 }

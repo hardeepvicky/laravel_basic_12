@@ -246,6 +246,7 @@ class TaskController extends BackendController
         ];
 
         $model->priority = 1;
+        $model->duration = 1;
 
         $default_start_date_time = DateUtility::change(date('d-M-Y 10:00'), 1, DateUtility::DAYS, DateUtility::DATETIME_OUT_FORMAT);
 
