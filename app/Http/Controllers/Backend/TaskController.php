@@ -9,6 +9,7 @@ use App\Models\Department;
 use App\Models\FieldSetting;
 use App\Models\RecurringTask;
 use App\Models\Role;
+use App\Models\SqlLog;
 use App\Models\Tag;
 use App\Models\Task;
 use App\Models\Type;
@@ -120,6 +121,8 @@ class TaskController extends BackendController
 
         $builder->orderBy($sort_params['sort_by'], $sort_params['sort_dir']);
 
+        SqlLog::addSelectQuery($builder);
+
         $my_tasks = $builder->get();
 
         $cache_key = $cache_key_prefix . "-2";
@@ -140,7 +143,10 @@ class TaskController extends BackendController
         else
         {
             $child_user_id_list = $auth_user->designation->getUserIdListBasedOnDesignationLevel();
-            $builder->whereIn("assign_to_user_id", $child_user_id_list);
+            if ($child_user_id_list)
+            {
+                $builder->whereIn("assign_to_user_id", $child_user_id_list);
+            }
         }
 
         
@@ -151,6 +157,8 @@ class TaskController extends BackendController
         $builder->with([
             "assignToUser"
         ]);
+
+        SqlLog::addSelectQuery($builder);
 
         $records = $builder->get();
 
@@ -167,6 +175,8 @@ class TaskController extends BackendController
         $msg = "In the Screen, " . $msg;
 
         LaravelExtend::addInfo($msg, "primary");
+
+        $this->saveSqlLog();
 
         return $this->viewIndex(__FUNCTION__);
     }

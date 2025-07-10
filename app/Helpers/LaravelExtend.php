@@ -194,7 +194,7 @@ class LaravelExtend
             if ($length != 0)
             {
                 if ($length < 0)
-                {       
+                {
                     $temp = $db_logs;
                     unset($db_logs);
 
@@ -323,8 +323,8 @@ class LaravelExtend
         }
     }
 
-    public static function getViewLinkForModel(String $model_name, $id)    
-    {        
+    public static function getViewLinkForModel(String $model_name, $id)
+    {
         $placeholder = Str::snake($model_name);
 
         $route_prefix = self::getRoutePrefixForModel($model_name);
@@ -503,10 +503,18 @@ class LaravelExtend
 
             if (isset($db_logs['select_sql_list']) && $db_logs['select_sql_list'])
             {
-                $db_logs['select_sql_list'] = ["Query", "Found"] + $db_logs['select_sql_list'];
+                $list = [];
+                $keys = array_keys($db_logs['select_sql_list'][0]);
+
+                $list[] = implode(",", $keys);
+
+                foreach($db_logs['select_sql_list'] as $arr)
+                {
+                    $list[] = implode(",", $arr);
+                }
 
                 $filename = $connectionName . "_" . $base_file_name . "select.txt";
-                $content = implode(PHP_EOL, $db_logs['select_sql_list']);
+                $content = implode(PHP_EOL, $list);
 
                 $fileUtility->writeContent($path, $filename, $content);
 
@@ -517,10 +525,10 @@ class LaravelExtend
                 ];
             }
 
-            if (isset($db_logs['dml_sql_list']) && $db_logs['dml_sql_list']) 
+            if (isset($db_logs['dml_sql_list']) && $db_logs['dml_sql_list'])
             {
                 $sqlLogModel->dml_query_count += count($db_logs['dml_sql_list']);
-                
+
                 $filename = $connectionName . "_" . $base_file_name . "dml.sql";
 
                 $content = implode(";" . PHP_EOL, $db_logs['dml_sql_list']);
@@ -543,11 +551,20 @@ class LaravelExtend
 
                 $sqlLogModel->heavy_query_count += count($db_logs['heavy_sql_list']);
 
-                $db_logs['heavy_sql_list'] = ["Query", "Time Milli Seconds"] + $db_logs['heavy_sql_list'];
+                $list = [];
+
+                $keys = array_keys($db_logs['heavy_sql_list'][0]);
+
+                $list[] = implode(",", $keys);
+
+                foreach($db_logs['heavy_sql_list'] as $arr)
+                {
+                    $list[] = implode(",", $arr);
+                }
 
                 $filename = $connectionName . "_" . $base_file_name . "heavy.txt";
 
-                $content = implode(PHP_EOL, $db_logs['heavy_sql_list']);
+                $content = implode(PHP_EOL, $list);
 
                 $fileUtility->writeContent($path, $filename, $content);
 

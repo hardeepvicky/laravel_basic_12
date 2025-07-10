@@ -41,8 +41,6 @@ class DbBakupCommand extends MyCommand
             "description" => $this->description
         ]);
 
-        $this->info('Database Backup Started');
-
         $db_config_list = config("database.connections");
 
         $options = $flip_options = [];

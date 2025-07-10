@@ -88,8 +88,6 @@ class BackendController extends WebController
             "index_table_info_options", "unread_notifications", "unread_notification_count"
         ));
 
-        $this->saveSqlLog();
-
         return true;
     }
 
