@@ -2,28 +2,23 @@
 
 namespace App\View\Components\Backend;
 
+use App\View\Components\BackendComponent;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
 
-class CelecDateTime extends Component
+class CelecDateTime extends BackendComponent
 {
     /**
      * Create a new component instance.
      */
     public function __construct(
             public $label = "",
-            public $value
+            public $value = ""
     )
     {
         //
-    }
 
-    /**
-     * Get the view / contents that represent the component.
-     */
-    public function render(): View|Closure|string
-    {
-        return view('components.backend.celec-date-time');
+        $this->view_path = "celec-date-time";
     }
 }

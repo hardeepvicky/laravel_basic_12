@@ -455,7 +455,9 @@ class HomeMenu extends BaseMenu
 
         $links[] = self::getLink("dashboard", "Dashboard", 'fa-solid fa-gauge');
 
-        return self::getModule("Dashboard", 'fas fa-home', $links);
+        $links[] = self::getLink("notification.my", "My Notification", 'fa-solid fa-bell');
+
+        return self::getModule("Home", 'fas fa-home', $links);
     }
 }
 

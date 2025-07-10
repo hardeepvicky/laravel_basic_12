@@ -16,7 +16,7 @@ use App\Helpers\Util;
                         <th>Description</th>
                         <th><?= sortable_anchor('exec_time', 'Time Taken (Seconds)') ?></th>
                         <th>Info</th>
-                        <th style="width: 30%">Output</th>
+                        <th style="width: 30%">Console Output</th>
                         <th>
                             <?= sortable_anchor('created_at', 'Created') ?>
                             | <?= sortable_anchor('updated_at', 'Updated') ?>
@@ -63,18 +63,10 @@ use App\Helpers\Util;
                                 :options="$index_table_info_options" />
                         </td>
                         <td>
+                            @if($record->sql_log_id)
                             <div class="mt-2 mb-2">
-                                @if (isset($record->sql_log_file_url))
-                                <a href="{{ $record->sql_log_file_url }}" class="btn btn-outline-secondary mb-2">
-                                    <i class="fas fa-download"></i>
-                                    SQL Log
-                                </a>
-                                @endif
-
-                                @if (isset($record->sql_dml_log_file_url))
-                                <a href="{{ $record->sql_dml_log_file_url }}" class="btn btn-outline-secondary mb-2">
-                                    <i class="fas fa-download"></i>
-                                    DML SQL Log
+                                <a href="{{ route('developer.sql_logs', ['id' => $record->sql_log_id ])  }}">
+                                    Open SQL Log Link
                                 </a>
                             </div>
                             @endif

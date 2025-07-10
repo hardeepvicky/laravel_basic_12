@@ -10,4 +10,9 @@ class CommandLog extends BaseMongoModel
     {
         return "logs/command/";
     }
+
+    public function sqlLog()
+    {
+        return $this->belongsTo(SqlLog::class);
+    }
 }

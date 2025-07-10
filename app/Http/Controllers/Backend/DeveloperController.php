@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Backend;
 
+use App\Helpers\ArrayHelper;
 use App\Helpers\LaravelExtend;
 use App\Models\AjaxLog;
 use App\Models\CommandLog;
@@ -140,16 +141,37 @@ class DeveloperController extends BackendController
         $cache_key_prefix = Route::currentRouteName();
 
         $conditions = $this->getConditions($cache_key_prefix, [
-            ["field" => "route_name_or_url", "type" => "string", "view_field" => "route_name_or_url"],
+            ["field" => "id", "type" => "", "cache" => false],
+            ["field" => "route_name", "type" => "string"],
+            ["field" => "request_method", "type" => "string"],
+            ["field" => "url", "type" => "string"],
             ["field" => "created_at", "type" => "from_date", "view_field" => "from_date"],
-            ["field" => "created_at", "type" => "to_date", "view_field" => "to_date"],
+            ["field" => "created_at", "type" => "to_date", "view_field" => "to_date"],            
+            ["field" => "auth_user_id", "type" => "int"],
             ["field" => "have_dml_query", "type" => "int"],
             ["field" => "have_heavy_query", "type" => "int"],
         ]);
 
+        $arry_helper = new ArrayHelper($conditions);
+        $condition_list = $arry_helper->convertModelSearchConditionToList();
+
         // dd($conditions);
 
         $builder = SqlLog::where($conditions);
+
+        if (isset($condition_list['id']))
+        {
+
+        }
+        else
+        {
+            $builder->where(function ($q) {
+                $q->orWhere(function($q2){
+                    $q2->whereNotNull("route_name");
+                    $q2->whereNotNull("url");
+                });
+            });
+        }
 
         $cache_key_for_sort = $cache_key_prefix . "-extra-params";
 
@@ -209,9 +231,6 @@ class DeveloperController extends BackendController
 
         $conditions = $this->getConditions($cache_key_prefix, [
             ["field" => "command", "type" => "string"],
-            ["field" => "description", "type" => "string"],
-            ["field" => "have_dml_query", "type" => "bool", "view_field" => "have_dml_query"],
-            ["field" => "have_heavy_query", "type" => "bool", "view_field" => "have_heavy_query"],
             ["field" => "created_at", "type" => "from_date", "view_field" => "from_date"],
             ["field" => "created_at", "type" => "to_date", "view_field" => "to_date"],
         ]);
@@ -219,6 +238,7 @@ class DeveloperController extends BackendController
         // dd($conditions);
 
         $builder = CommandLog::where($conditions);
+        $builder->with(["sqlLog"]);
 
         $cache_key_for_sort = $cache_key_prefix . "-extra-params";
 

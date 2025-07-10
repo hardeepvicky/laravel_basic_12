@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Exceptions\UserException;
 use App\Helpers\DateUtility;
+use App\Helpers\LaravelExtend;
 use App\Notifications\TaskStatusChange;
 use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -180,7 +181,6 @@ class Task extends BaseModel
         try {
             DB::beginTransaction();
 
-
             $old_status = $this->status;
 
             switch ($status) {
@@ -197,15 +197,13 @@ class Task extends BaseModel
 
             $this->status = $status;
 
-            if (!$this->save()) {
+            if (!$this->saveQuietly()) {
                 throw new UserException("Fail To Save", UserException::ERROR_LARAVEL_FAIL);
             }
 
-            $user = User::find($this->created_by);
+            $this->load("assignToUser");
 
-            if (!$user) {
-                return null;
-            }
+            $created_by_user = User::find($this->created_by);
 
             $type = Type::getType($this, "status");
 
@@ -231,10 +229,8 @@ class Task extends BaseModel
 
             $new_status_type = $new_status_type->first();
 
-            $auth_user = Auth::user();
-
             $notification_data = [
-                'from_user_id' => $auth_user->id,
+                'from_user_id' => LaravelExtend::getAuthUserId(),
                 "sub_type" => Notification::SUB_TYPE_INFO,
                 "model_name" => get_class($this),
                 'model_id' => $this->id,
@@ -244,14 +240,14 @@ class Task extends BaseModel
 
             if ($this->prev_status == Task::STATUS_CREATED) {
                 if ($this->task->status == Task::STATUS_ASSIGNED) {
-                    $notification_data['msg'] = "New Task assign to you";
+                    $notification_data['msg'] = "New Task assign to " . $this->assignToUser?->getDisplayName();
                 }
-            } else if ($this->status == Task::STATUS_ASSIGNED) {
-                $msg = "Your Task has verified by ";
+            } else if ($this->status == Task::STATUS_VERIFIED) {
+                $msg = "Task $this->name has verified";
 
                 $notification_data['msg'] = $msg;
             } else {
-                $msg = "Task Status change from ";
+                $msg = "Task $this->name 's status change from ";
 
                 $msg .= $old_status_type?->name ?? "";
 
@@ -262,10 +258,11 @@ class Task extends BaseModel
                 $notification_data['msg'] = $msg;
             }
 
-            $this->load("assignToUser");
-
-            if ($this->assign_to_user_id == $auth_user->id) {
-                $user->notify(new TaskStatusChange($this, $notification_data));
+            if ($this->assign_to_user_id == LaravelExtend::getAuthUserId()) {
+                if ($created_by_user)
+                {
+                    $created_by_user->notify(new TaskStatusChange($this, $notification_data));
+                }
             } else {
                 $this->assignToUser->notify(new TaskStatusChange($this, $notification_data));
             }

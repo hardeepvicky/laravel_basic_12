@@ -6,6 +6,7 @@ use App\Helpers\DateUtility;
 use App\Helpers\Menu;
 use App\Http\Controllers\WebController;
 use App\Models\BaseModel;
+use App\Models\SqlLog;
 use App\Models\SummaryAndFormSetting;
 use App\Models\User;
 use Exception;
@@ -57,6 +58,11 @@ class BackendController extends WebController
         $auth_user = Auth::user();
 
         $unread_notifications = $auth_user->unreadNotifications()->limit(5)->get();
+
+        foreach($unread_notifications as $unread_notification)
+        {
+            $unread_notification->afterFind();
+        }
 
         $unread_notification_count = $auth_user->unreadNotifications()->count();
 

@@ -57,7 +57,7 @@ use App\Models\Notification;
                         </svg>
                     </a>
                 </li>
-                <li class="custom-dropdown">
+                <li class="custom-dropdown open-notification-panel">
                     <a href="javascript:void(0)">
                         <svg>
                             <use href="/assets/svg/iconly-sprite.svg#notification"></use>
@@ -65,14 +65,16 @@ use App\Models\Notification;
                     </a>
                     
                     @if(isset($unread_notification_count) && $unread_notification_count)
-                    <span class="badge rounded-pill badge-primary">
-                        {{ $unread_notification_count }}
-                    </span>
+                        <span class="badge rounded-pill badge-primary">
+                            {{ $unread_notification_count }}
+                        </span>
                     @endif
                     
                     <div class="custom-menu notification-dropdown py-0 overflow-hidden">
                         <h3 class="title bg-primary-light dropdown-title">Notification 
-                            <span class="font-primary">View all</span>
+                            <a class="font-primary" href="{{ route('notification.my') }}">
+                                View all
+                            </a>
                         </h3>
                         <ul class="activity-timeline">
                             @foreach($unread_notifications as $notification):
@@ -89,12 +91,7 @@ use App\Models\Notification;
                                 <div class="flex-grow-1">
                                     <h6 class="f-w-600 font-primary">
                                         <span>{{ if_date($notification->created_at) }}</span>
-                                        {{ $notification->created_at->diffForHumans() }}
-                                        <span class="circle-dot-primary float-end">
-                                            <svg class="circle-color">
-                                                <use href="/assets/svg/iconly-sprite.svg#circle"></use>
-                                            </svg>
-                                        </span>
+                                        {{ $notification->created_at_original->diffForHumans() }}
                                     </h6>
                                     <h5>
                                         @if($notification->from_user_id === 0)
@@ -107,6 +104,7 @@ use App\Models\Notification;
                                         @if(isset($notification->data['msg']) && $notification->data['msg'])
                                             <span>{{ $notification->data['msg'] }}</span>
                                         @endif
+                                        
                                         @if(isset($notification->data['link']) && $notification->data['link'])
                                             <a href="{{ $notification->data['link'] }}">Open Link</a>
                                         @endif
@@ -184,3 +182,23 @@ use App\Models\Notification;
         </div>
     </div>
 </header>
+
+<script>
+    $(function(){
+        $(".open-notification-panel").click(function(){
+
+            var unread_notification_count = parseInt('<?= $unread_notification_count ?? 0 ?>');
+
+            if (unread_notification_count)
+            {
+                var url = "/notification/ajax_mark_read";
+                
+                $.get(url, function(response){
+                    ajaxHandleResponse(url, response, function(response){
+
+                    });
+                });
+            }
+        });
+    });
+</script>

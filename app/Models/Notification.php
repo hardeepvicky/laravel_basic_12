@@ -48,34 +48,7 @@ class Notification extends DatabaseNotification // Extend DatabaseNotification f
     const SUB_TYPE_WARNING = "WARNING";
     const SUB_TYPE_CRITICAL = "CRITICAL";
 
-    public static function classDisplayName(): string
-    {
-        $class_name = str_class_name_to_human_text(static::class);
-
-        return $class_name;
-    }
-
-    public static function getCacheKey(): string
-    {
-        $str = static::class;
-
-        return static::optimizeCacheKey($str);
-    }
     
-    public static function getFileFields()
-    {
-        return static::$file_fields;
-    }
-
-    public static function getListFields()
-    {
-        return [];
-    }
-
-    public static function getUniqueFields()
-    {
-        return static::$unique_fields;
-    }
 
     public static function boot()
     {
@@ -116,5 +89,66 @@ class Notification extends DatabaseNotification // Extend DatabaseNotification f
     public function fromUser()
     {
         return $this->belongsTo(User::class, "from_user_id");
+    }
+
+    public function afterFind()
+    {
+        $this->convertTimeZoneForDisplay();
+    }
+
+    public static function classDisplayName(): string
+    {
+        $class_name = str_class_name_to_human_text(static::class);
+
+        return $class_name;
+    }
+
+    public static function getCacheKey(): string
+    {
+        $str = static::class;
+
+        return static::optimizeCacheKey($str);
+    }
+    
+    public static function getFileFields()
+    {
+        return static::$file_fields;
+    }
+
+    public function getClassDisplayName()
+    {
+        return self::classDisplayName();
+    }
+
+    public static function getListFields()
+    {
+        return [];
+    }
+
+    public static function getUniqueFields()
+    {
+        return static::$unique_fields;
+    }
+
+    public static function getCodeList(String $field)
+    {
+        $class_info = get_class_info(static::class);
+
+
+        switch ($field) {
+            case "sub_type":
+
+                $list = [];
+
+                foreach ($class_info['constants'] as $constant => $label) {
+                    if (strpos($constant, "SUB_TYPE_") !== false) {
+                        $list[] = $label;
+                    }
+                }
+
+                return $list;
+
+                break;
+        }
     }
 }

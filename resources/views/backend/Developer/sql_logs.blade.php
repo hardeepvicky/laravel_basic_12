@@ -14,8 +14,10 @@ $page_header_links = [];
             <input type="hidden" name="is_sort_clear" value="1" />
             <div class="row mb-4">
                 <div class="col-md-3 mb-2">
-                    <x-Inputs.text-field name="route_name_or_url" label="Route Name or URL"
-                        :value="$search['route_name_or_url']" />
+                    <x-Inputs.text-field name="route_name" label="Route Name" :value="$search['route_name']" />
+                </div>
+                <div class="col-md-3 mb-2">
+                    <x-Inputs.text-field name="request_method" label="Request Method" :value="$search['request_method']" />
                 </div>
                 <div class="col-md-3 mb-2">
                     <x-Inputs.text-field id="from_date" name="from_date" label="From Created Date"

@@ -62,6 +62,11 @@ class Type extends BaseModel
                     "recurring_type" => "Recurring Type",
                 ]
             ],
+            Notification::class => [
+                "fields" => [
+                    "sub_type" => "Sub Type"
+                ]
+            ]
         ];
 
         return $types;
@@ -164,7 +169,7 @@ class Type extends BaseModel
         return $data;
     }
 
-    public static function getType(BaseModelInterface $find_model_class, String $find_field)
+    public static function getType($find_model_class, String $find_field)
     {
         $types = self::getTypes($find_field);
 

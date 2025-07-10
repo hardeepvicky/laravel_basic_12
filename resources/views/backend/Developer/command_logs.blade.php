@@ -26,14 +26,6 @@ $page_header_links = [];
                     <x-Inputs.text-field id="to_date" name="to_date" label="To Created Date" :value="$search['to_date']"
                         class="form-control date-picker" data-date-start="input#from_date" autocomplete="off" />
                 </div>
-                <div class="col-md-3 mb-2">
-                    <x-Inputs.drop-down name="have_dml_query" label="Have DML Query" :list="$yes_no_list"
-                        :value="$search['have_dml_query']" class="select2" />
-                </div>
-                <div class="col-md-3 mb-2">
-                    <x-Inputs.drop-down name="have_heavy_query" label="Have Heavy Query" :list="$yes_no_list"
-                        :value="$search['have_heavy_query']" class="select2" />
-                </div>
             </div>
             <x-Backend.summary-search-form-footer :selectedPaginationLimit="$pagination_limit" />
         </form>

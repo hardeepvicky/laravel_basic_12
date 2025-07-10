@@ -7,10 +7,12 @@ use App\Jobs\Backend\JobForgotPassword;
 use App\Jobs\Backend\JobSendEmailUserOtp;
 use App\Jobs\Backend\JobSendEmailOnRegisration;
 use App\Models\BaseModelInterface;
+use App\Models\SqlLog;
 use App\Models\User;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Route;
@@ -431,5 +433,134 @@ class LaravelExtend
         foreach ($messages as $msg) {
             self::$info[$group][] = compact("msg", "extra");
         }
+    }
+
+    public static function getAuthUserId()
+    {
+        $auth_user = Auth::user();
+
+        if ($auth_user)
+        {
+            return $auth_user->id;
+        }
+
+        return 0;
+    }
+
+    public static function saveSqlLog(array $save_data = []) : SqlLog
+    {
+        $sqlLogModel = new SqlLog();
+
+        $sqlLogModel->fill($save_data);
+
+        $logs = SqlLog::fetchSqlLog();
+
+        if (count($logs) == 0) {
+            return $sqlLogModel;
+        }
+
+        // d($logs, true);
+
+        $sqlLogModel->auth_user_id = LaravelExtend::getAuthUserId();
+        $sqlLogModel->have_dml_query = 0;
+        $sqlLogModel->have_heavy_query = 0;
+        $sqlLogModel->files = [];
+
+        if (!$sqlLogModel->saveQuietly()) {
+            throw new UserException("Fail to Save Sql Log");
+        }
+
+        $base_file_name = date_get_for_file_name() . "_";
+
+        $disk = SqlLog::getStorageDisk();
+
+        $fileUtility = new FileUtility($disk);
+
+        $path = SqlLog::getStoragePath();
+
+        $files = [];
+
+        foreach($logs as $connectionName => $db_logs)
+        {
+            if (isset($db_logs['sql_list']) && $db_logs['sql_list'])
+            {
+                $filename = $connectionName . "_" . $base_file_name . ".sql";
+                $content = implode(";" . PHP_EOL, $db_logs['sql_list']);
+
+                $fileUtility->writeContent($path, $filename, $content);
+
+                $files[] = [
+                    "larvel_connection_key" => $connectionName,
+                    "label" => "SQL",
+                    "file" => $path . $filename
+                ];
+            }
+
+            if (isset($db_logs['select_sql_list']) && $db_logs['select_sql_list'])
+            {
+                $db_logs['select_sql_list'] = ["Query", "Found"] + $db_logs['select_sql_list'];
+
+                $filename = $connectionName . "_" . $base_file_name . "select.txt";
+                $content = implode(PHP_EOL, $db_logs['select_sql_list']);
+
+                $fileUtility->writeContent($path, $filename, $content);
+
+                $files[] = [
+                    "larvel_connection_key" => $connectionName,
+                    "label" => "Select SQL",
+                    "file" => $path . $filename
+                ];
+            }
+
+            if (isset($db_logs['dml_sql_list']) && $db_logs['dml_sql_list']) 
+            {
+                $filename = $connectionName . "_" . $base_file_name . "dml.sql";
+
+                $content = implode(";" . PHP_EOL, $db_logs['dml_sql_list']);
+
+                $fileUtility->writeContent($path, $filename, $content);
+
+                $files[] = [
+                    "larvel_connection_key" => $connectionName,
+                    "label" => "DML SQL",
+                    "file" => $path . $filename
+                ];
+
+                if ($db_logs['have_dml_query'])
+                {
+                    $sqlLogModel->have_dml_query = 1;
+                }
+            }
+
+            if (isset($db_logs['heavy_sql_list']) && $db_logs['heavy_sql_list']) {
+
+                $db_logs['heavy_sql_list'] = ["Query", "Time Milli Seconds"] + $db_logs['heavy_sql_list'];
+
+                $filename = $connectionName . "_" . $base_file_name . "heavy.txt";
+
+                $content = implode(PHP_EOL, $db_logs['heavy_sql_list']);
+
+                $fileUtility->writeContent($path, $filename, $content);
+
+                $files[] = [
+                    "larvel_connection_key" => $connectionName,
+                    "label" => "Heavy SQL",
+                    "file" => $path . $filename
+                ];
+
+                if ($db_logs['have_heavy_query'])
+                {
+                    $sqlLogModel->have_heavy_query = 1;
+                }
+            }
+        }
+
+        $sqlLogModel->files = $files;
+
+        if (!$sqlLogModel->saveQuietly()) {
+            throw new Exception("Fail to Save Sql Log");
+        }
+
+        return $sqlLogModel;
     }
 }

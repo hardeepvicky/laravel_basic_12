@@ -111,7 +111,7 @@ class BaseModel extends Model implements BaseModelInterface
         {
             if ($this->{$field})
             {
-                ModuleLink::saveLinksFromStringPattern($this, $this->{$field});
+                ModuleLink::saveLinksFromStringPattern($this, $field, $this->{$field});
             }
         }
     } 

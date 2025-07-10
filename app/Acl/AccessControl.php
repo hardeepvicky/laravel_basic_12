@@ -60,7 +60,7 @@ class AccessControl
                     role_route_names RRN
                     INNER JOIN route_names RR ON RR.id = RRN.route_name_id
                 WHERE
-                    RRN.role_id IN ($role_ids) AND RR.name = '$route_name';
+                    RRN.role_id IN ($role_ids) AND RR.name = '$route_name'
             ";
 
             $record = DB::select($q);

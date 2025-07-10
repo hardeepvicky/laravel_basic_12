@@ -101,19 +101,11 @@ class TaskController extends BackendController
             Task::STATUS_ASSIGNED, Task::STATUS_CONFIRM, Task::STATUS_IN_PROGRESS, TASK::STATUS_COMPLETED
         ];
 
-        $str = "'" . implode("','", $status_code_list) . "'" ;
-
-        $default_conditions[] = ['status', "IN", $str];
-
-        $builder = $this->modelClass::where($default_conditions);
+        $builder = $this->modelClass::whereIn("status", $status_code_list);
 
         $auth_user_id = $this->getAuthUserId();
 
         $builder->where("assign_to_user_id", $auth_user_id);
-
-        $builder->where(function ($query) {
-            $query->whereNotIn("status", [TASK::STATUS_CREATED, TASK::STATUS_VERIFIED]);
-        });
 
         $cache_key_for_sort = $cache_key_prefix . "-extra-params-" . __FUNCTION__;
 
@@ -135,7 +127,7 @@ class TaskController extends BackendController
             ["field" => "assign_to_user_id", "type" => "int", "view_field" => "other_assign_to_user_id"],
         ]);
 
-        $builder = $this->modelClass::where($default_conditions)->where($conditions);
+        $builder = $this->modelClass::whereIn("status", $status_code_list)->where($conditions);
         $builder->where(function ($query) use ($auth_user_id) {
             $query->whereNot("assign_to_user_id", $auth_user_id);
         });

@@ -1,6 +1,6 @@
 <?php
 use App\Helpers\DateUtility;
-
+if (isset($value) && $value):
 $created_array = DateUtility::getCelecDate($value);
 if ($created_array):
 ?>
@@ -13,4 +13,5 @@ if ($created_array):
     <div class="divider"></div>
     <div class="label">{{ $created_array['day'] }} {{ $created_array['time'] }}</div>
 </div>
+<?php endif; ?>
 <?php endif; ?>

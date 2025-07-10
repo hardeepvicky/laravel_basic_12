@@ -34,6 +34,11 @@ class AppMenu extends BaseModel
 
     public function beforeSave()
     {
+        if (!$this->parent_id)
+        {
+            $this->parent_id = 0;
+        }
+        
         if ($this->id)
         {
             if ($this->is_link)

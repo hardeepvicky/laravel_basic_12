@@ -173,6 +173,8 @@ class WebController extends Controller
 
             $sub_title = str_replace("create", "Add", $method_name);
 
+            $sub_title = str_replace("my", "", $method_name);
+
             $sub_title = str_function_name_to_human_text($sub_title);
         }
 

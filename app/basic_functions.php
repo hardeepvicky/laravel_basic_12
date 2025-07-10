@@ -957,7 +957,7 @@ function date_get_for_file_name()
 {
     $dt = new DateTime();
 
-    return $dt->format("Y-m-d_H-i-s-u");
+    return $dt->format("Y-m-d_H-i-s");
 }
 
 

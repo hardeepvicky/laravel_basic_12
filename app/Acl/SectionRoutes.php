@@ -13,6 +13,8 @@ class SectionRoutes
      */
     public const ALLOW_ROUTES_FOR_ANY_LOGIN_USER = [
         "dashboard",
+        "notification.my",
+        "notification.ajax_mark_read",
         "user.my-profile",
         "user.change.password",
 

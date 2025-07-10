@@ -8,6 +8,7 @@ use App\Helpers\MyCommand;
 use App\Models\AutomateTask;
 use App\Models\CommandLog;
 use App\Models\RecurringTask;
+use App\Models\SqlLog;
 use App\Models\Task;
 use Carbon\Carbon;
 use Exception;
@@ -45,26 +46,47 @@ class TaskCommand extends MyCommand
         $logModel->save();
 
         try {
-            $counts = [
-                'task_created' => 0,
-                "task_status_change_to_assigned" => 0,
+            $counters = [
+                "found" => 0,
+                "insert" => 0,
+                "update" => 0,
+                "delete" => 0,
             ];
+
+            $main_counts = [
+                "recurring_task" => $counters,
+                "task" => $counters,
+            ];
+
+            $main_counts['task']['status_change'] = 0;
+
+            $qb = RecurringTask::where("is_draft", 0);
+
+            SqlLog::addSelectQuery($qb);
             
-            $records = RecurringTask::where("is_draft", 0)->get();
+            $records = $qb->get();
+
+            $main_counts['recurring_task']['found'] += $records->count();
 
             if ($records && $records->count() > 0)
             {
                 foreach($records as $record)
                 {
-                    $counts['task_created'] += RecurringTask::createTask($record);
+                    $main_counts['task']['insert'] += RecurringTask::createTask($record);
                 }
             }
 
             $now = DateUtility::getDate(null, DateUtility::DATETIME_FORMAT);
 
-            $records = Task::where("status", Task::STATUS_CREATED)
-                ->where("start_date_time", "<=", $now)
-                ->get();
+
+            $qb = Task::where("status", Task::STATUS_CREATED)
+                ->where("start_date_time", "<=", $now);
+
+            SqlLog::addSelectQuery($qb);
+
+            $records = $qb->get();
+
+            $main_counts['task']['found'] += $records->count();
 
             if ($records && $records->count() > 0)
             {
@@ -72,15 +94,14 @@ class TaskCommand extends MyCommand
                 {
                     if ($record->changeStatus(Task::STATUS_ASSIGNED))
                     {
-                        $counts['task_status_change_to_assigned']++;
+                        $main_counts['task']['status_change']++;
                     }
                 }
             }
-            
 
             $output = new ConsoleOutput();
 
-            $counts = array_human_keys($counts);
+            $counts = array_human_keys($main_counts);
 
             $output->addLog($counts);
 
@@ -102,7 +123,8 @@ class TaskCommand extends MyCommand
                 "error" => $msg
             ]);
 
-            $this->error($msg); // Output to console
+            $this->error($msg);
+            
             Log::error($msg, ['exception' => $e]);
         }
 

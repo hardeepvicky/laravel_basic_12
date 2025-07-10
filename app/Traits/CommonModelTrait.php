@@ -350,11 +350,11 @@ trait CommonModelTrait
                 if ($this->{$field})
                 {
                     $new_field = $field . "_original";
-
-                    $this->{$new_field} = $this->{$field};
-
+                    
                     if ($this->{$field} instanceof Carbon)
                     {
+                        $this->{$new_field} = $this->{$field}->clone();
+
                         if ($this->{$field}->timezoneName != DateUtility::$login_user_time_zone->getName())
                         {
                             $this->{$field} = $this->{$field}->tz(DateUtility::$login_user_time_zone);
@@ -362,6 +362,8 @@ trait CommonModelTrait
                     }
                     else if ($this->{$field} instanceof DateTime)
                     {
+                        $this->{$new_field} = $this->{$field}->clone();
+
                         $timezoneObject = $this->{$field}->getTimezone();
 
                         $timezoneName = $timezoneObject->getName();
@@ -373,6 +375,8 @@ trait CommonModelTrait
                     }
                     else
                     {
+                        $this->{$new_field} = $$this->{$field};
+
                         //consider as UTC
                         $new_date = DateUtility::getDateObj($this->{$field});
                         $new_date->setTimezone(DateUtility::$login_user_time_zone);
@@ -431,6 +435,7 @@ trait CommonModelTrait
         }
 
         $save_data = [
+            "main_table_field" => $this->field_for_create_tag,
             "name" => $this->{$this->field_for_create_tag},
         ];
 

@@ -8,18 +8,20 @@ use Illuminate\Support\Facades\Log;
 
 class ModuleLink extends BaseModel
 {
-    public static function saveLinksFromStringPattern(Model $model, string $content)
+    public static function saveLinksFromStringPattern(Model $model, string $field, string $content)
     {
         $save_count = 0;
 
         $base_save_data = [
-            "main_id" => $model->id,
             "main_table" => $model->getTable(),
+            "main_table_field" => $field,
+            "main_id" => $model->id,
         ];
 
         $base_save_data['main_model'] = str_class_name_without_namespace(get_class($model));
         
         self::where("main_model", $base_save_data['main_model'])
+                ->where("main_table_field", $field)
                 ->where("main_id", $base_save_data['main_id'])
                 ->delete();
                 

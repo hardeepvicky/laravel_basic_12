@@ -177,6 +177,22 @@ class MyMigration extends Migration
             }
         }
 
+        $this->dropIndexIfExist($tableName, $fields);
+
+        $output = self::getConsoleOutput();
+
+        $output->writeLogToConsole('Droping fields : ' . implode(",", $fields));
+
+        if ($fields)
+        {
+            Schema::dropColumns($tableName, $fields);
+        }
+    }
+
+    public function dropIndexIfExist(string $tableName, array $fields)
+    {
+        $output = self::getConsoleOutput();
+
         $indexKeys = $this->getIndexKeys($tableName);
 
         $output->writeLogToConsole('Droping index Keys');
@@ -191,15 +207,6 @@ class MyMigration extends Migration
                     $table->dropIndex($index_key->INDEX_NAME);
                 });
             }
-        }
-
-        $output = self::getConsoleOutput();
-
-        $output->writeLogToConsole('Droping fields : ' . implode(",", $fields));
-
-        if ($fields)
-        {
-            Schema::dropColumns($tableName, $fields);
         }
     }
 }

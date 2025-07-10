@@ -14,6 +14,7 @@ use App\Http\Controllers\Backend\DesignationController;
 use App\Http\Controllers\Backend\DeveloperController;
 use App\Http\Controllers\Backend\EmployeeController;
 use App\Http\Controllers\Backend\EnquiryController as BackendEnquiryController;
+use App\Http\Controllers\Backend\NotificationController;
 use App\Http\Controllers\Backend\PermissionController;
 use App\Http\Controllers\Backend\ProductCategoryController;
 use App\Http\Controllers\Backend\ProductController;
@@ -30,10 +31,8 @@ use App\Http\Controllers\Backend\TypeController;
 use App\Http\Controllers\Backend\UserCategoryController;
 use App\Http\Controllers\Backend\UserController;
 use App\Http\Controllers\Frontend\EnquiryController;
-use App\Http\Controllers\Frontend\FrontendController;
 use App\Http\Controllers\HomeController;
 use App\Models\EmailLog;
-use App\Models\ProductCategory;
 use Illuminate\Support\Facades\Storage;
 use Mailjet\Resources;
 
@@ -373,6 +372,18 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
     Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
         Route::get("/", [BackendEnquiryController::class, "index"])->name("index");
     });
+
+    Route::group(['prefix' => 'notification', 'as' => 'notification.'], function () {
+
+        $name = "index";
+        Route::get($name, [NotificationController::class, $name])->name($name);
+
+        $name = "my";
+        Route::any($name, [NotificationController::class, $name])->name($name);
+        
+        $name = "ajax_mark_read";
+        Route::get($name, [NotificationController::class, $name])->name($name);
+    });    
 
     Route::group(['prefix' => 'permissions', 'as' => 'permissions.'], function () {
 

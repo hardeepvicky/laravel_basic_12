@@ -13,7 +13,7 @@ class ConsoleOutput extends OutputConsoleOutput
 
     private array $log_types = ["info", "error"];
 
-    public function addLog(string | array $data, $depth = 0)
+    public function addLog(string | array $data, $depth = 0, string $label = "")
     {
         if ($depth > 3)
         {
@@ -33,13 +33,21 @@ class ConsoleOutput extends OutputConsoleOutput
 
                     $msg_list[] = $k . ":" . $v;
                 } else {
-                    $this->addLog($v, $depth + 1);
+                    $this->addLog($v, $depth + 1, $k);
                 }
             }
 
             if ($msg_list)
             {
-                $this->addLogMessage(implode(", ", $msg_list));
+                $msg = "";
+                if ($label)
+                {
+                    $msg = $label . " : ";
+                }
+
+                $msg .= implode(", ", $msg_list);
+
+                $this->addLogMessage($msg);
             }
         }
 
