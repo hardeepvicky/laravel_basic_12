@@ -1,3 +1,6 @@
+<?php
+use App\Helpers\LaravelExtend;
+?>
 <!doctype html>
 <html lang="en">
 
@@ -75,7 +78,11 @@
             @include($partial_path . '.sidebar')
             <!-- Page sidebar end-->
             <div class="page-body">
-                <x-Backend.warning/>
+                <x-Backend.warning />
+
+                <?php $primary_info = LaravelExtend::$info['primary'] ?? []; ?>
+                
+                <x-Backend.information :info="$primary_info"/>
 
                 @yield('content')
             </div>

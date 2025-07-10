@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Backend;
 
 use App\Helpers\LaravelExtend;
 use App\Models\Designation;
+use App\Models\FieldSetting;
 use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Support\Facades\DB;
@@ -66,7 +67,7 @@ class DesignationController extends BackendController
             $this->model = new $this->modelClass();
         }
 
-        $field_labels = $this->model->getFieldLabels();
+        $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
         $this->setForView(compact("field_labels"));
 
@@ -143,9 +144,7 @@ class DesignationController extends BackendController
             
             $this->saveSqlLog();
 
-            $this->custom_errors = array_merge_recursive($this->custom_errors, $this->model->custom_errors);
-
-            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", $this->custom_errors);
+            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", LaravelExtend::$errors);
         }
     }
 
@@ -202,9 +201,7 @@ class DesignationController extends BackendController
 
             $this->saveSqlLog();
 
-            $this->custom_errors = array_merge_recursive($this->custom_errors, $this->model->custom_errors);
-
-            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", $this->custom_errors);
+            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", LaravelExtend::$errors);
         }
     }
 }

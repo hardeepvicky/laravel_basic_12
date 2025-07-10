@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId("product_category_id")->constrained("product_categories")->onDelete('restrict');
             $table->string("name");
+            $table->string("short_name")->nullable();
             $table->text("description")->nullable();
             $table->boolean("is_active")->default(1);
             $table->integer("list_display_order");            

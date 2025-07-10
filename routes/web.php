@@ -15,6 +15,8 @@ use App\Http\Controllers\Backend\DeveloperController;
 use App\Http\Controllers\Backend\EmployeeController;
 use App\Http\Controllers\Backend\EnquiryController as BackendEnquiryController;
 use App\Http\Controllers\Backend\PermissionController;
+use App\Http\Controllers\Backend\ProductCategoryController;
+use App\Http\Controllers\Backend\ProductController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Backend\PublicController;
 use App\Http\Controllers\Backend\RecurringTaskController;
@@ -333,10 +335,28 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
     });
 
     $route_prefix = "product-category";
-    $controllerClass = ProductCategory::class;
+    $controllerClass = ProductCategoryController::class;
     Route::resource($route_prefix, $controllerClass);
     Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
 
+        $name = "activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "de_activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "ajax_get";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+    });
+
+    $route_prefix = "product";
+    $controllerClass = ProductController::class;
+    Route::resource($route_prefix, $controllerClass);
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
+        $name = "copy";
+        Route::get("{id}/" . $name, [$controllerClass, $name])->name($name);
+        
         $name = "activate";
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
 

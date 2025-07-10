@@ -474,6 +474,7 @@ class UserController extends BackendController
             $condition_list = $this->getConditions(null, $pattern_array, true);
 
             $qb = $this->modelClass::where($conditions);
+            $qb->where("is_active", 1);
 
             $default_user_id = null;
 

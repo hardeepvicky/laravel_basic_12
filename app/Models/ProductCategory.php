@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Helpers\LaravelExtend;
+use App\Helpers\Util;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Unique;
@@ -13,11 +15,34 @@ class ProductCategory extends BaseModel
     ];
 
     public static array $child_model_class = [
-        User::class => [
-            "foreignKey" => "department_id",
+        Product::class => [
+            "foreignKey" => "product_category_id",
             "preventDelete" => true
         ],
     ];
+
+    public function beforeSave()
+    {
+        if ($this->id)
+        {
+            if ($this->is_last_node)
+            {
+                $child_id_list = self::getChildIdList([$this->id]);
+
+                if ($child_id_list)
+                {
+                    $this->addError("Parent", "This Record has child category, can not make as last node", $this->getClassDisplayName());
+                }
+            }
+
+            if ($this->id == $this->parent_id)
+            {
+                $this->addError("Parent", "Category can not be parent of itself", $this->getClassDisplayName());
+            }
+        }
+
+        return parent::beforeSave();
+    }
 
     protected function getDisplayNameAttribute()
     {
@@ -47,5 +72,19 @@ class ProductCategory extends BaseModel
         }
 
         return $field_rules;
+    }
+
+    public static function getTreeRecords(array $conditions = [], $max_depth = 10) : array
+    {
+        $records = self::where($conditions)->orderBy("list_display_order")->get();
+
+        $records = Util::getTreeArray($records->toArray(), "parent_id", 0, $max_depth);
+
+        return $records;
+    }
+
+    public static function getTreeList(array $conditions = []) : array
+    {
+        return Util::getTreeListArray(self::getTreeRecords($conditions, 4), "id", "name", false, false);
     }
 }

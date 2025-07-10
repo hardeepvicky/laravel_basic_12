@@ -93,8 +93,17 @@ class TaskController extends BackendController
     {
         $cache_key_prefix = Route::currentRouteName();
 
-        $default_conditions[] = ['is_draft', 0];
-        $default_conditions[] = ['is_verified', 0];
+        if (is_null($this->model)) {
+            $this->model = new Task();
+        }
+
+        $status_code_list = [
+            Task::STATUS_ASSIGNED, Task::STATUS_CONFIRM, Task::STATUS_IN_PROGRESS, TASK::STATUS_COMPLETED
+        ];
+
+        $str = "'" . implode("','", $status_code_list) . "'" ;
+
+        $default_conditions[] = ['status', "IN", $str];
 
         $builder = $this->modelClass::where($default_conditions);
 
@@ -128,7 +137,6 @@ class TaskController extends BackendController
 
         $builder = $this->modelClass::where($default_conditions)->where($conditions);
         $builder->where(function ($query) use ($auth_user_id) {
-            $query->whereNotIn("status", [TASK::STATUS_CREATED, TASK::STATUS_VERIFIED]);
             $query->whereNot("assign_to_user_id", $auth_user_id);
         });
 
@@ -139,6 +147,18 @@ class TaskController extends BackendController
         $records = $builder->get();
 
         $this->setForView(compact("records", "my_tasks"));
+
+        $type_conditions = [
+            "code" => $status_code_list
+        ];
+        $type_conditions['type'] = Type::getType($this->model, "status");
+        $status_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
+
+        $msg = "Only those tasks display whose have status of " . implode(", ", $status_list);
+
+        $msg = "In the Screen, " . $msg;
+
+        LaravelExtend::addInfo($msg, "primary");
 
         return $this->viewIndex(__FUNCTION__);
     }
@@ -173,7 +193,7 @@ class TaskController extends BackendController
 
         $type_conditions = [];
         $type_conditions['type'] = Type::getType($this->model, "status");
-        if ($this->model->recurring_type) {
+        if ($this->model->status) {
             $saved_type_id = Type::getIdFromCode($type_conditions['type'], $this->model->status);
 
             if ($saved_type_id) {
@@ -364,26 +384,26 @@ class TaskController extends BackendController
     {
         parent::beforeEdit($model);
 
-        if (in_array($model->status, [Task::STATUS_CONFIRM, Task::STATUS_IN_PROGRESS, Task::STATUS_COMPLETED, Task::STATUS_VERIFIED])) {
-            $type_conditions = [];
-            $type_conditions['type'] = Type::getType($this->model, "status");
-            $status_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
+        $error_msg = "";
 
-            $msg = "Can't edit, Task Status is " . $status_list[$model->status];
-
-            $edit_status_label = [];
-
-            foreach ([Task::STATUS_DRAFT, Task::STATUS_CREATED, Task::STATUS_ASSIGNED] as $status) {
-                $edit_status_label[] = $status_list[$status];
-            }
-
-            $msg .= ", Only Status with " . implode(", ", $edit_status_label);
-
-            $msg .= " can be edit";
-
-            abort(ACTION_NOT_PROCEED, $msg);
+        if (!$model->canEditOrDelete($error_msg))
+        {
+            throw new UserException($error_msg, UserException::ERROR_USER_ACTION_RESTRICT);
         }
     }
+
+    protected function beforeDelete($model)
+    {
+        parent::beforeDelete($model);
+
+        $error_msg = "";
+
+        if (!$model->canEditOrDelete($error_msg))
+        {
+            throw new UserException($error_msg, UserException::ERROR_USER_ACTION_RESTRICT);
+        }
+    }
+
     public function edit($id)
     {
         $model = $this->model = $this->modelClass::with("tags")->findOrFail($id);

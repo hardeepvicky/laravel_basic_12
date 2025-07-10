@@ -17,6 +17,7 @@
             <x-Backend.form-errors />
         </p>
 
+        @if(isset($file_name) && isset($file_line_no))
         <div class="info-for-developer mb-2">
             <div>
                 File : {{ $file_name }}
@@ -27,9 +28,10 @@
             <div class="mt-2">
                 URL : {{ $current_url }}
             </div>
-
-            {!! $html !!}
         </div>
+        @endif
+        
+        {!! $html !!}
 
         <div class="help-links text-center">
             @if (is_ajax_request())

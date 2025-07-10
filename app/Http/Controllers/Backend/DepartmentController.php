@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Backend;
 
 use App\Helpers\LaravelExtend;
 use App\Models\Department;
+use App\Models\FieldSetting;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Exception;
@@ -82,7 +83,7 @@ class DepartmentController extends BackendController
 
         $user_list = User::getList("id", "display_name", $user_conditions);
 
-        $field_labels = $this->model->getFieldLabels();
+        $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
         $this->setForView(compact("user_list", "field_labels"));
 
@@ -159,9 +160,7 @@ class DepartmentController extends BackendController
             
             $this->saveSqlLog();
 
-            $this->custom_errors = array_merge_recursive($this->custom_errors, $this->model->custom_errors);
-
-            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", $this->custom_errors);
+            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", LaravelExtend::$errors);
         }
     }
 
@@ -218,9 +217,7 @@ class DepartmentController extends BackendController
 
             $this->saveSqlLog();
 
-            $this->custom_errors = array_merge_recursive($this->custom_errors, $this->model->custom_errors);
-
-            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", $this->custom_errors);
+            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", LaravelExtend::$errors);
         }
     }
 }

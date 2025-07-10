@@ -18,22 +18,20 @@ $page_header_links = [['title' => 'List', 'url' => route($routePrefix . '.index'
 
 <x-Form.start action="{{ $form['url'] }}" method="{{ $form['method'] }}" />
 <div class="row">
-    <div class="col-md-12 col-xxl-10">
+    <div class="col-xxl-10">
         <div class="card">
             <div class="card-header card-no-border pb-0">
             </div>
             <div class="card-body">
                 <div class="row">
-                    <div class="col-md-6 col-xl-2">
-                        <?php
-                        $field = 'is_draft';
-                        $label = get_value_from_list($field_labels, $field, $field);
-                        ?>
-                        <x-Inputs.checkbox :id="$field" :name="$field" :label="$label" value="{{ $model->{$field} }}" />
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-12 col-xl-6">
+                    <div class="col-md-12 col-xxl-6">
+                        <div class="form-group mb-3">
+                            <?php
+                            $field = 'is_draft';
+                            $label = get_value_from_list($field_labels, $field, $field);
+                            ?>
+                            <x-Inputs.checkbox :id="$field" :name="$field" :label="$label" value="{{ $model->{$field} }}" />
+                        </div>
                         <div class="form-group mb-3">
                             <?php
                             $field = 'name';
@@ -147,7 +145,7 @@ $page_header_links = [['title' => 'List', 'url' => route($routePrefix . '.index'
                                 class="choice " placeholder="Enter {{ $label }}" />
                         </div>
                     </div>
-                    <div class="col-md-6 col-lg-6">
+                    <div class="col-md-12 col-xxl-6">
                         <div class="form-group mb-3">
                             <div class="textarea-wrapper">
                                 <?php
@@ -161,15 +159,13 @@ $page_header_links = [['title' => 'List', 'url' => route($routePrefix . '.index'
                             </div>
                         </div>
                     </div>
-                    <div class="row is_draft-block is_draft-block-0">
-                        <div class="col-md-6 col-lg-4">
-                            <div class="form-group mb-3">
-                                <?php
-                                $field = 'is_send_notification';
-                                $label = get_value_from_list($field_labels, $field, $field);
-                                ?>
-                                <x-Inputs.checkbox :name="$field" :label="$label" value="{{ $model->{$field} }}" />
-                            </div>
+                    <div class="col-md-12 col-xxl-6">
+                        <div class="form-group mb-3 is_draft-block is_draft-block-0">
+                            <?php
+                            $field = 'is_send_notification';
+                            $label = get_value_from_list($field_labels, $field, $field);
+                            ?>
+                            <x-Inputs.checkbox :name="$field" :label="$label" value="{{ $model->{$field} }}" />
                         </div>
                     </div>
                 </div>

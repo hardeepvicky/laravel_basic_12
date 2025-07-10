@@ -200,4 +200,21 @@ class ArrayHelper
 
         return $keys;
     }
+
+    public function convertModelSearchConditionToList(array $data = [])
+    {
+        if (empty($data))
+        {
+            $data = $this->data;
+        }
+
+        $list = [];
+
+        foreach($data as $arr)
+        {
+            $list[$arr[0]] = $arr[2] ?? $arr[1];
+        }
+
+        return $list;
+    }
 }

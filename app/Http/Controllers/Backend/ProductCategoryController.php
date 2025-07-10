@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Backend;
 
+use App\Helpers\ArrayHelper;
 use App\Helpers\LaravelExtend;
 use App\Models\Department;
 use App\Models\ProductCategory;
@@ -40,11 +41,41 @@ class ProductCategoryController extends BackendController
 
         $conditions = $this->getConditions($cache_key, [
             ["field" => "id", "type" => "int", "cache" => false],
+            ["field" => "parent_id", "type" => "int", "view_field" => "parent_id"],
+            ["field" => "is_find_nested_child", "type" => "bool", "view_field" => "is_find_nested_child"],
             ["field" => "name", "type" => "string", "view_field" => "name"],
+            ["field" => "is_last_node", "type" => "", "view_field" => "is_last_node"],
             ["field" => "is_active", "type" => "", "view_field" => "is_active"],
         ]);
 
-        $builder = $this->modelClass::where($conditions);
+        $builder = $this->modelClass::query();
+
+        $array_helper =  new ArrayHelper($conditions);
+        $condition_list = $array_helper->convertModelSearchConditionToList();
+
+        if (
+            (isset($condition_list["parent_id"]) && $condition_list["parent_id"])
+            && (isset($condition_list["is_find_nested_child"]) && $condition_list["is_find_nested_child"])
+        )
+        {
+            $child_id_list = $this->modelClass::getChildIdList([$condition_list["parent_id"]]);
+
+            if ($child_id_list)
+            {
+                $builder->whereIn("id", $child_id_list);
+                $conditions = $array_helper->unsetValues($conditions, ["parent_id"], true, [ArrayHelper::UNSET_VALUE_REMOVE_PARENT_IF_FOUND_CHILD]);
+            }
+        }
+        
+        $conditions = $array_helper->unsetValues($conditions, ["is_find_nested_child"], true, [ArrayHelper::UNSET_VALUE_REMOVE_PARENT_IF_FOUND_CHILD]);
+
+        $array_helper =  new ArrayHelper([]);
+        $conditions = $array_helper->unsetValues($conditions, ["is_find_nested_child"], true, [ArrayHelper::UNSET_VALUE_REMOVE_PARENT_IF_FOUND_CHILD]);
+
+        if($conditions)
+        {
+            $builder = $builder->where($conditions);
+        }
 
         if ($apply_sort)
         {
@@ -71,9 +102,13 @@ class ProductCategoryController extends BackendController
             $this->model = new $this->modelClass();
         }
 
-        $field_labels = $this->model->getFieldLabels();
+        $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
-        $this->setForView(compact("field_labels"));
+        $tree_list = $this->modelClass::getTreeList([
+            ["is_last_node", 0]
+        ]);
+
+        $this->setForView(compact("field_labels", "tree_list"));
 
         return parent::beforeViewRender();
     }
@@ -98,7 +133,10 @@ class ProductCategoryController extends BackendController
     {
         return [
             "name" => ["required"],
+            "parent_id" => ["nullable"],
+            "short_name" => ["nullable"],
             "list_display_order" => "",
+            "is_last_node" => "",
             "is_active" => ""
         ];
     }

@@ -20,7 +20,7 @@ use Illuminate\Support\Str;
 
 class LaravelExtend
 {
-    public static array $warnings = [], $errors = [];
+    public static array $warnings = [], $errors = [], $info = [];
 
     public static function getRoutes()
     {
@@ -418,7 +418,18 @@ class LaravelExtend
         }
 
         foreach ($messages as $msg) {
-            $this->errors[$group][] = compact("label", "msg", "extra");
+            self::$errors[$group][] = compact("label", "msg", "extra");
+        }
+    }
+
+    public static function addInfo($messages, string $group, $extra = [])
+    {
+        if (!is_array($messages)) {
+            $messages = [$messages];
+        }
+
+        foreach ($messages as $msg) {
+            self::$info[$group][] = compact("msg", "extra");
         }
     }
 }

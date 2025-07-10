@@ -90,7 +90,7 @@ class BaseModel extends Model implements BaseModelInterface
     public function beforeSave()
     {
         if ($this->custom_errors) {
-            throw new UserException("Some errors in model while saving", UserException::ERROR_USER_DATA_WRONG, [
+            throw new UserException("Some errors occurs while saving", UserException::ERROR_USER_DATA_WRONG, [
                 "custom_errors" => $this->custom_errors
             ]);
         }

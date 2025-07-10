@@ -34,14 +34,22 @@ class AppMenu extends BaseModel
 
     public function beforeSave()
     {
-        if (!$this->parent_id)
+        if ($this->id)
         {
-            $this->parent_id = 0;
-        }
+            if ($this->is_link)
+            {
+                $child_id_list = self::getChildIdList([$this->id]);
 
-        if ($this->id > 0 && $this->parent_id == $this->id)
-        {
-            $this->addError("Parent", "Parent and name are same", "Menu");
+                if ($child_id_list)
+                {
+                    $this->addError("Parent", "This Record has children, can not make as link", $this->getClassDisplayName());
+                }
+            }
+
+            if ($this->id == $this->parent_id)
+            {
+                $this->addError("Parent", "Menu can not be parent of itself", $this->getClassDisplayName());
+            }
         }
 
         return parent::beforeSave();
@@ -171,20 +179,5 @@ class AppMenu extends BaseModel
         {
             $this->getChildren();
         }
-    }
-
-    public static function getChildIdList(array $parent_id_list)
-    {
-        $qb = self::query();
-        $qb->whereIn("parent_id", $parent_id_list);
-
-        $id_list = $qb->pluck("id")->toArray();
-
-        if ($id_list)
-        {
-            $id_list = array_merge($id_list, self::getChildIdList($id_list));
-        }
-
-        return $id_list;
     }
 }

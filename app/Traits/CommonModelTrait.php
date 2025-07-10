@@ -436,4 +436,19 @@ trait CommonModelTrait
 
         Tag::createTag($save_data, $this);
     }
+
+    public static function getChildIdList(array $parent_id_list, string $parent_field = "parent_id")
+    {
+        $qb = self::query();
+        $qb->whereIn($parent_field, $parent_id_list);
+
+        $id_list = $qb->pluck("id")->toArray();
+
+        if ($id_list)
+        {
+            $id_list = array_merge($id_list, self::getChildIdList($id_list));
+        }
+
+        return $id_list;
+    }
 }

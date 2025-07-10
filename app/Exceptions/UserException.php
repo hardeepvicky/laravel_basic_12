@@ -23,8 +23,6 @@ class UserException extends Exception
     public function setData($data)
     {
         $data['error_title'] = "Unknown Error";
-        $data['file_name'] = $this->getFile();
-        $data['file_line_no'] = $this->getLine();
 
         if (!isset($data['html']))
         {
@@ -36,7 +34,7 @@ class UserException extends Exception
                 $data['error_title'] = "Error bcoz of Developer's mistake";
                 break;
 
-            case self::ERROR_LARAVEL_FAIL:                
+            case self::ERROR_LARAVEL_FAIL:
                 $data['error_title'] = "Error bcoz of Laravel internal failure";
                 break;
 
@@ -46,11 +44,18 @@ class UserException extends Exception
 
             case self::ERROR_USER_ACTION_RESTRICT:
                 $data['error_title'] = "Restriction";
+                $data['error_msg'] = $this->getMessage();
                 break;
 
             case self::ERROR_USER_DATA_WRONG:
                 $data['error_title'] = "Error due to wrong or missing data in database";
                 break;
+        }
+
+        if (in_array($this->code, [self::ERROR_GENERAL, self::ERROR_LARAVEL_FAIL]))
+        {
+            $data['file_name'] = $this->getFile();
+            $data['file_line_no'] = $this->getLine();
         }
 
         $this->data = $data;
@@ -116,7 +121,7 @@ class UserException extends Exception
                     {
                         throw new UserException("wrong function name : str_function_name");
                     }
-                    
+
                     $converted_find_value = $str_function_name($converted_find_value);
 
                     foreach($possible_values as $k => $v)
@@ -130,7 +135,7 @@ class UserException extends Exception
             {
                 return $converted_find_value;
             }
-            
+
             $possible_value_str = str_short_with_dot(implode(", ", array_keys($possible_values)));
 
             throw new UserException("Invalid value : $find_value, Possible values are : " . $possible_value_str);

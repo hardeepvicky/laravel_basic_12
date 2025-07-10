@@ -7,6 +7,7 @@ use App\Helpers\DateUtility;
 use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class Task extends BaseModel
 {
@@ -132,6 +133,45 @@ class Task extends BaseModel
         return $labels;
     }
 
+    public function isAutorizeForChangeStatusToVerify(string &$error_msg)
+    {
+        $auth_user = Auth::user();
+        if ($auth_user->hasRole(Role::TYPE_SYSTEM_ADMIN))
+        {
+            return true;
+        }
+
+        if ($this->created_by == $auth_user->id)
+        {
+            return true;
+        }
+
+        $error_msg = "Only Admin or Task creator can verify the task";
+
+        return false;
+    }
+
+    public function canEditOrDelete(string &$error_msg)
+    {
+        $type_conditions = [];
+        $type_conditions['type'] = Type::getType($this, "status");
+        $status_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
+
+        $error_msg = "Can't Edit or Delete, Task Status is " . $status_list[$this->status];
+
+        $editable_status_label = [];
+
+        foreach ([Task::STATUS_DRAFT, Task::STATUS_CREATED, Task::STATUS_ASSIGNED] as $status) {
+            $editable_status_label[] = $status_list[$status];
+        }
+
+        $error_msg .= ", Only Status with " . implode(", ", $editable_status_label);
+
+        $error_msg .= " can be edit or delete";
+
+        return false;
+    }
+
     public function changeStatus($status)
     {
         $this->status = $status;
@@ -144,7 +184,16 @@ class Task extends BaseModel
                 $this->is_completed = true;
                 break;
             case self::STATUS_VERIFIED:
-                $this->is_verified = true;
+                $error_msg = "";
+                if ($this->isAutorizeForChangeStatusToVerify($error_msg))
+                {
+                    $this->is_verified = true;
+                }
+                else
+                {
+                    throw new UserException($error_msg, UserException::ERROR_USER_ACTION_RESTRICT);
+                }
+
                 break;
         }
 

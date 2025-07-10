@@ -33,13 +33,13 @@ trait ModelListTrait
         }
 
         $builder->orWhere(function ($query) use ($conditions) {
-            foreach ($conditions as $k => $v) {
-                if (is_array($v)) {
-                    if (!empty($v)) {
-                        $query->whereIn($k, $v);
+            foreach ($conditions as $k => $value) {
+                if (is_array($value)) {
+                    if (!empty($value)) {
+                        $query->whereIn($k, $value);
                     }
                 } else {
-                    $query->where($k, $v);
+                    $query->where($k, $value);
                 }
             }
         });

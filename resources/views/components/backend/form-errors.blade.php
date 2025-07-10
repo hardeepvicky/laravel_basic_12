@@ -19,19 +19,21 @@ if (Session::has("custom_errors"))
             @endforeach
 
             @foreach ($custom_errors as $group => $errors)
-                    @if (is_array($errors))
+                @if (is_array($errors))
+                    @if(is_string($group))
                     <li>
                         <b>{{ $group }}</b>
                     </li>
-                    <ol>
-                        @foreach ($errors as $error)
-                            @if (isset($error['label']) && isset($error['msg']))
-                                <li>
-                                    {{ $error['label'] ? $error['label'] . ' : ' : '' }} {{ $error['msg'] }}
-                                </li>
-                            @endif
-                        @endforeach
-                    </ol>
+                    @endif
+                <ol>
+                    @foreach ($errors as $error)
+                        @if (isset($error['label']) && isset($error['msg']))
+                            <li>
+                                {{ $error['label'] ? $error['label'] . ' : ' : '' }} {{ $error['msg'] }}
+                            </li>
+                        @endif
+                    @endforeach
+                </ol>
                 @endif
             @endforeach
         </ol>

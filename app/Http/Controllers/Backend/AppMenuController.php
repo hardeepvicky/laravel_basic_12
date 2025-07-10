@@ -61,28 +61,27 @@ class AppMenuController extends BackendController
 
         $builder = $this->modelClass::query();
 
+        $array_helper =  new ArrayHelper($conditions);
+        $condition_list = $array_helper->convertModelSearchConditionToList();
+
         if (
-            (isset($conditions[0]) && $conditions[0][0] == "parent_id" && strlen($conditions[0][2]) > 0)
-            && 
-            (isset($conditions[1]) && $conditions[1][0] == "is_find_nested_child" && strlen($conditions[1][2]) > 0)
+            (isset($condition_list["parent_id"]) && $condition_list["parent_id"])
+            && (isset($condition_list["is_find_nested_child"]) && $condition_list["is_find_nested_child"])
         )
         {
-            $child_id_list = AppMenu::getChildIdList([$conditions[0][2]]);
+            $child_id_list = AppMenu::getChildIdList([$condition_list["parent_id"]]);
 
             if ($child_id_list)
             {
                 $builder->whereIn("id", $child_id_list);
-                unset($conditions[0]);
+                $conditions = $array_helper->unsetValues($conditions, ["parent_id"], true, [ArrayHelper::UNSET_VALUE_REMOVE_PARENT_IF_FOUND_CHILD]);
             }
         }
-
-        $array_helper =  new ArrayHelper([]);
+        
         $conditions = $array_helper->unsetValues($conditions, ["is_find_nested_child"], true, [ArrayHelper::UNSET_VALUE_REMOVE_PARENT_IF_FOUND_CHILD]);
 
         if($conditions)
         {
-            // d($conditions, true);
-
             $builder = $builder->where($conditions);
         }
 
