@@ -8,12 +8,14 @@ use App\Helpers\LaravelExtend;
 use App\Models\Department;
 use App\Models\FieldSetting;
 use App\Models\RecurringTask;
+use App\Models\Role;
 use App\Models\Tag;
 use App\Models\Task;
 use App\Models\Type;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Exception;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
@@ -127,7 +129,21 @@ class TaskController extends BackendController
             ["field" => "assign_to_user_id", "type" => "int", "view_field" => "other_assign_to_user_id"],
         ]);
 
+        $auth_user = Auth::user();
+
         $builder = $this->modelClass::whereIn("status", $status_code_list)->where($conditions);
+
+        if ($auth_user->hasRole(Role::TYPE_SYSTEM_ADMIN))
+        {
+            
+        }
+        else
+        {
+            $child_user_id_list = $auth_user->designation->getUserIdListBasedOnDesignationLevel();
+            $builder->whereIn("assign_to_user_id", $child_user_id_list);
+        }
+
+        
         $builder->where(function ($query) use ($auth_user_id) {
             $query->whereNot("assign_to_user_id", $auth_user_id);
         });

@@ -17,6 +17,8 @@ class SqlLog extends BaseMongoModel
 
     public function afterFind()
     {
+        parent::afterFind();
+
         $fileUtility = new FileUtility(static::getStorageDisk());
 
         $files = [];
@@ -30,6 +32,8 @@ class SqlLog extends BaseMongoModel
         }
 
         $this->files = $files;
+
+        $this->convertTimeZoneForDisplay();
     }
 
     public static function addSelectQuery(Builder $qb, string $connection = "")

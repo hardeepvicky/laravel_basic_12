@@ -32,7 +32,7 @@ class DeveloperController extends BackendController
         }
 
         $index_table_info_options = [
-            "show_as" => "full_datetime"
+            "show_as" => "human_date"
         ];
 
         // d($index_table_info_options);
@@ -185,6 +185,8 @@ class DeveloperController extends BackendController
         $builder->orderBy($sort_params['sort_by'], $sort_params['sort_dir']);
 
         $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
+
+        // d($records->toArray(), true);
 
         $this->setForView(compact("records"));
 

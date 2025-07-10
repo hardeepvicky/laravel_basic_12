@@ -219,8 +219,6 @@ trait CommonModelTrait
 
         $date_fields = [];
 
-        $table_info = $this->getTableInfo($this->getTable());
-
         foreach($this->casts as $field => $config)
         {
             if (strpos($config, "date") !== false)
@@ -229,13 +227,18 @@ trait CommonModelTrait
             }
         }
 
-        foreach($table_info['columns'] as $field => $field_arr)
+        if (method_exists($this, "getTableInfo"))
         {
-            if (!isset($date_fields[$field]))
+            $table_info = $this->getTableInfo($this->getTable());
+
+            foreach($table_info['columns'] as $field => $field_arr)
             {
-                if (in_array($field_arr['Type'], ["timestamp", "date", "datetime"]))
+                if (!isset($date_fields[$field]))
                 {
-                    $date_fields[$field] = "datetime";
+                    if (in_array($field_arr['Type'], ["timestamp", "date", "datetime"]))
+                    {
+                        $date_fields[$field] = "datetime";
+                    }
                 }
             }
         }
@@ -322,8 +325,6 @@ trait CommonModelTrait
 
         $date_fields = [];
 
-        $table_info = $this->getTableInfo($this->getTable());
-
         foreach($this->casts as $field => $config)
         {
             if (strpos($config, "date") !== false)
@@ -332,13 +333,18 @@ trait CommonModelTrait
             }
         }
 
-        foreach($table_info['columns'] as $field => $field_arr)
+        if (method_exists($this, "getTableInfo"))
         {
-            if (!isset($date_fields[$field]))
+            $table_info = $this->getTableInfo($this->getTable());
+
+            foreach($table_info['columns'] as $field => $field_arr)
             {
-                if (in_array($field_arr['Type'], ["timestamp", "date", "datetime"]))
+                if (!isset($date_fields[$field]))
                 {
-                    $date_fields[$field] = $field_arr['Type'];
+                    if (in_array($field_arr['Type'], ["timestamp", "date", "datetime"]))
+                    {
+                        $date_fields[$field] = $field_arr['Type'];
+                    }
                 }
             }
         }

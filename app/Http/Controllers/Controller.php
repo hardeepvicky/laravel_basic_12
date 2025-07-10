@@ -150,7 +150,7 @@ abstract class Controller
 
             $save["exec_time"] = microtime(true) - LARAVEL_START;
 
-            $ajaxLog = new AjaxLog($save);
+            $ajaxLog = new AjaxLog($save);            
 
             if (!$ajaxLog->saveQuietly()) {
                 throw new UserException("Fail To Save Ajax Log", UserException::ERROR_LARAVEL_FAIL);
