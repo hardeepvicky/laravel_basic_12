@@ -13,14 +13,13 @@ use App\Helpers\Util;
             <table class="table table-striped table-bordered table-hover">
                 <thead>
                     <tr class="border-bottom-primary">
-                        <th>
-                            Route Name
-                            <hr>
-                            <?= sortable_anchor('request_method', 'Request Method') ?>
+                        <th style="width: 20%">                  
+                            <?= sortable_anchor('route_name', 'Route Name') ?>
+                            | <?= sortable_anchor('request_method', 'Request Method') ?>
                         </th>
                         <th><?= sortable_anchor('exec_time', 'Time Taken (Seconds)') ?></th>
                         <th>Request</th>
-                        <th>Response</th>
+                        <th style="width:25%">Response</th>
                         <th>
                             <?= sortable_anchor('created_at', 'Created') ?>
                             | <?= sortable_anchor('updated_at', 'Updated') ?>
@@ -32,13 +31,13 @@ use App\Helpers\Util;
                     @foreach ($records as $record)
                     <tr>
                         <td>
-                            {{ $record->route_name_or_url }}
+                            {{ $record->route_name }}
 
                             <label class="info">
                                 Request Method : <span>{{ $record->request_method }}</span>
                             </label>
 
-                            <div id="url-{{ $record->id }}" class="h-200">
+                            <div id="url-{{ $record->id }}" class="h-200 w-300">
                                 <label class="info">
                                     Url : <span>{{ str_short_with_dot($record->url, 180) }}</span>
                                 </label>
@@ -53,7 +52,7 @@ use App\Helpers\Util;
                         </td>
                         <td>{{ Util::niceTime($record->exec_time) }}</td>
                         <td>
-                            <div id="request-{{ $record->id }}" class="h-200">
+                            <div id="request-{{ $record->id }}" class="h-200 w-300">
                                 {!! array_print($record->request, 100) !!}
                             </div>
 
@@ -65,7 +64,7 @@ use App\Helpers\Util;
                             </span>
                         </td>
                         <td>
-                            <div id="response-{{ $record->id }}" class="h-200">
+                            <div id="response-{{ $record->id }}" class="h-200 w-300">
                                 {!! array_print($record->response, 100) !!}
                             </div>
 
@@ -81,20 +80,10 @@ use App\Helpers\Util;
                                 :options="$index_table_info_options" />
                         </td>
                         <td>
+                            @if($record->sql_log_id)
                             <div class="mt-2 mb-2">
-                                @if (isset($record->sql_model['sql_log_file_url']))
-                                <a href="{{ $record->sql_model['sql_log_file_url'] }}"
-                                    class="btn btn-outline-secondary mb-2">
-                                    <i class="fas fa-download"></i>
-                                    SQL Log
-                                </a>
-                                @endif
-
-                                @if (isset($record->sql_model['sql_dml_log_file_url']))
-                                <a href="{{ $record->sql_model['sql_dml_log_file_url'] }}"
-                                    class="btn btn-outline-secondary mb-2">
-                                    <i class="fas fa-download"></i>
-                                    DML SQL Log
+                                <a href="{{ route('developer.sql_logs', ['id' => $record->sql_log_id ])  }}">
+                                    Open SQL Log Link
                                 </a>
                             </div>
                             @endif

@@ -195,8 +195,17 @@
     padding: 3px;
 }
 
+.w-200 {
+    width: 200px;
+}
+
+.w-300{
+    width: 300px;
+}
+
 label.info {
     display: block;
+    overflow-wrap: break-word;
 }
 
 .pointer {

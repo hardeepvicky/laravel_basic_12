@@ -16,6 +16,7 @@ use App\Models\RecurringTask;
                         <th><?= sortable_anchor('name', get_value_from_list($field_labels, 'name', 'name')) ?></th>
                         <th><?= sortable_anchor('assignToUser.name', get_value_from_list($field_labels, 'assign_to_user_id', 'assign_to_user_id')) ?>
                         <th><?= sortable_anchor('priority', get_value_from_list($field_labels, 'priority', 'priority')) ?> </th>
+                        <th><?= sortable_anchor('is_draft', get_value_from_list($field_labels, 'is_draft', 'is_draft')) ?> </th>
                         <th>Task created by system</th>
                         <th>Task Info</th>
                         <th>
@@ -39,6 +40,7 @@ use App\Models\RecurringTask;
                                 </label>
                             </td>
                             <td>{{ $record->priority }}</td>
+                            <td>{{ $record->is_draft ? "Draft" : "" }}</td>
                             <td>{{ $record->tasks->count() }}</td>
                             <td>
                                 <div class="row" id="record-info-{{ $record->id }}">

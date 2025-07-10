@@ -15,4 +15,9 @@ class AjaxLog extends BaseMongoModel
     {
         return $this->belongsTo(CacheLog::class);
     }
+
+    public function sqlLog()
+    {
+        return $this->belongsTo(SqlLog::class);
+    }
 }

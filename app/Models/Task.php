@@ -151,23 +151,34 @@ class Task extends BaseModel
         return false;
     }
 
-    public function canEditOrDelete(string &$error_msg)
+    public function canDelete(string &$error_msg)
     {
+        $status_codes = [Task::STATUS_DRAFT, Task::STATUS_CREATED, Task::STATUS_ASSIGNED, Task::STATUS_CONFIRM];
+
+        if (in_array($this->status, $status_codes) )
+        {
+            return true;
+        }
+
         $type_conditions = [];
         $type_conditions['type'] = Type::getType($this, "status");
         $status_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
-
-        $error_msg = "Can't Edit or Delete, Task Status is " . $status_list[$this->status];
+        
+        $error_msg = "Can't Delete, Task Status is " . $status_list[$this->status];
 
         $editable_status_label = [];
 
-        foreach ([Task::STATUS_DRAFT, Task::STATUS_CREATED, Task::STATUS_ASSIGNED] as $status) {
-            $editable_status_label[] = $status_list[$status];
+        foreach($status_list as $status_code => $label)
+        {
+            if (!in_array($status_code, $status_codes))
+            {
+                $editable_status_label[] = $label;
+            }
         }
-
+        
         $error_msg .= ", Only Status with " . implode(", ", $editable_status_label);
 
-        $error_msg .= " can be edit or delete";
+        $error_msg .= " can be delete";
 
         return false;
     }

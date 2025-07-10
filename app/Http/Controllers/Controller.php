@@ -119,13 +119,28 @@ abstract class Controller
         if (is_ajax_request()) {
             $request = request();
 
+            $request_params = [];
+
+            foreach($request->all() as $k => $v)
+            {
+                if (in_array($k, ["_"]))
+                {
+
+                }
+                else
+                {
+                    $request_params[$k] = urldecode($v);
+                }
+            }
+
+
             $method = Request::method();
 
             $save = [
                 "route_name" => Route::currentRouteName(),
                 "url" => $_SERVER['REQUEST_URI'],
                 "request_method" => $method,
-                "request" => $request->all(),
+                "request" => $request_params,
                 "response" => $response,
                 "sql_log_id" => $sql_model?->id,
             ];

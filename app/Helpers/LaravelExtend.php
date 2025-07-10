@@ -464,6 +464,9 @@ class LaravelExtend
         $sqlLogModel->auth_user_id = LaravelExtend::getAuthUserId();
         $sqlLogModel->have_dml_query = 0;
         $sqlLogModel->have_heavy_query = 0;
+        $sqlLogModel->sql_query_count = 0;
+        $sqlLogModel->dml_query_count = 0;
+        $sqlLogModel->heavy_query_count = 0;
         $sqlLogModel->files = [];
 
         if (!$sqlLogModel->saveQuietly()) {
@@ -484,6 +487,8 @@ class LaravelExtend
         {
             if (isset($db_logs['sql_list']) && $db_logs['sql_list'])
             {
+                $sqlLogModel->sql_query_count += count($db_logs['sql_list']);
+
                 $filename = $connectionName . "_" . $base_file_name . ".sql";
                 $content = implode(";" . PHP_EOL, $db_logs['sql_list']);
 
@@ -514,6 +519,8 @@ class LaravelExtend
 
             if (isset($db_logs['dml_sql_list']) && $db_logs['dml_sql_list']) 
             {
+                $sqlLogModel->dml_query_count += count($db_logs['dml_sql_list']);
+                
                 $filename = $connectionName . "_" . $base_file_name . "dml.sql";
 
                 $content = implode(";" . PHP_EOL, $db_logs['dml_sql_list']);
@@ -533,6 +540,8 @@ class LaravelExtend
             }
 
             if (isset($db_logs['heavy_sql_list']) && $db_logs['heavy_sql_list']) {
+
+                $sqlLogModel->heavy_query_count += count($db_logs['heavy_sql_list']);
 
                 $db_logs['heavy_sql_list'] = ["Query", "Time Milli Seconds"] + $db_logs['heavy_sql_list'];
 

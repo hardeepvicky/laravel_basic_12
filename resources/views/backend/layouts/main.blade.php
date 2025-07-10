@@ -51,6 +51,7 @@ use App\Helpers\LaravelExtend;
     <link rel="stylesheet" type="text/css" href="{{ get_asset_url('libs/loader/loader.css') }}" />
     <link rel="stylesheet" type="text/css" href="{{ get_asset_url('libs/i-data-table/style.css') }}" />
     <link rel="stylesheet" type="text/css" href="{{ get_asset_url('libs/style-for-custom-lib.css') }}" />
+    <link rel="stylesheet" type="text/css" href="{{ get_asset_url('css/bootstarp_extend.css') }}" />
     <link rel="stylesheet" type="text/css" href="{{ get_asset_url('css/common.css') }}" />
     <link rel="stylesheet" type="text/css" href="{{ get_asset_url('css/backend.css') }}" />
 

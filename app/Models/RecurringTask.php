@@ -81,6 +81,7 @@ class RecurringTask extends BaseModel
         } else {
             $rules['dept_id'] = ["required"];
             $rules['assign_to_user_id'] = ["required"];
+            $rules['task_type'] = ["required"];
             $rules['recurring_type'] = ["required"];
             $rules['priority'] = ["required"];
             $rules['duration'] = ["required"];

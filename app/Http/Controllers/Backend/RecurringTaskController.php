@@ -164,6 +164,8 @@ class RecurringTaskController extends BackendController
         ];
 
         $model->priority = 1;
+        $model->duration = 1;
+        $model->duration_type = Task::DURATION_TYPE_DAY;
 
         $this->setForView(compact("model", 'form'));
 
@@ -173,10 +175,8 @@ class RecurringTaskController extends BackendController
     private function _common_validation_rules()
     {
         return [
-            "task_type" => ["required"],
             "name" => ["required"],
-            "description" => ["nullable"],
-            "recurringTaskDate" => [],
+            "description" => ["nullable"],            
             "is_send_notification" => "",
             "is_draft" => "",
         ];
@@ -261,9 +261,10 @@ class RecurringTaskController extends BackendController
     {
         unset($validatedData['recurringTaskDate']['(sr-id)']);
 
-        $this->model->recurringTaskDate()->delete();
-
+        
         if (isset($validatedData['recurringTaskDate'])) {
+            
+            $this->model->recurringTaskDate()->delete();
 
             $rules = [
                 "date" => ["required"],
@@ -330,6 +331,8 @@ class RecurringTaskController extends BackendController
         $messages = array_merge($messages, []);
 
         $validatedData = $request->validate($rules, $messages);
+
+        // d($validatedData, true);
 
         DB::beginTransaction();
 

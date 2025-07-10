@@ -239,10 +239,9 @@ class TaskController extends BackendController
 
         $model->priority = 1;
         $model->duration = 1;
+        $model->duration_type = Task::DURATION_TYPE_DAY;
 
-        $default_start_date_time = DateUtility::change(date('d-M-Y 10:00'), 1, DateUtility::DAYS, DateUtility::DATETIME_OUT_FORMAT);
-
-        $this->setForView(compact("model", 'form', 'default_start_date_time'));
+        $this->setForView(compact("model", 'form'));
 
         return $this->view("form");
     }
@@ -363,6 +362,7 @@ class TaskController extends BackendController
             foreach($tag_names as $tag_name)
             {
                 $save_data = [
+                    "main_table_field" => "name",
                     "name" => $tag_name,
                 ];
 
@@ -379,8 +379,27 @@ class TaskController extends BackendController
 
         $error_msg = "";
 
-        if (!$model->canEditOrDelete($error_msg))
+        $not_editable_status_codes = [Task::STATUS_COMPLETED, Task::STATUS_VERIFIED];
+
+        if (in_array($model->status, $not_editable_status_codes) )
         {
+            $type_conditions = [];
+            $type_conditions['type'] = Type::getType($this, "status");
+            $status_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
+            
+            $error_msg = "Can't Edit, Task Status is " . $status_list[$model->status];
+
+            $not_delete_label = [];
+
+            foreach($not_editable_status_codes as $status_code)
+            {
+                $not_delete_label[] = $status_list[$status_code];                
+            }
+            
+            $error_msg .= ", Status with " . implode(", ", $not_delete_label);
+
+            $error_msg .= " can not be delete";
+
             throw new UserException($error_msg, UserException::ERROR_USER_ACTION_RESTRICT);
         }
     }
@@ -391,7 +410,7 @@ class TaskController extends BackendController
 
         $error_msg = "";
 
-        if (!$model->canEditOrDelete($error_msg))
+        if (!$model->canDelete($error_msg))
         {
             throw new UserException($error_msg, UserException::ERROR_USER_ACTION_RESTRICT);
         }
