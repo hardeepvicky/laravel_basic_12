@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string("short_name")->nullable();
             $table->text("description")->nullable();
             $table->boolean("is_active")->default(1);
-            $table->integer("list_display_order");            
+            $table->integer("list_display_order");
             $table->timestamps();
             $table->bigInteger("created_by")->nullable();
             $table->bigInteger("updated_by")->nullable();

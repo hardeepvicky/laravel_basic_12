@@ -331,6 +331,9 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
     Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
         $name = "ajax_get_list";
         Route::get($name, [$controllerClass, $name])->name($name);
+
+        $name = "ajax_get_list_for_header";
+        Route::get($name, [$controllerClass, $name])->name($name);
     });
 
     $route_prefix = "product-category";

@@ -7,6 +7,8 @@ use App\Helpers\LaravelExtend;
 use App\Models\Department;
 use App\Models\FieldSetting;
 use App\Models\ProductCategory;
+use App\Models\ProductCategoryAttribute;
+use App\Models\Type;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Exception;
@@ -102,11 +104,31 @@ class ProductCategoryController extends BackendController
 
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
+        $category_attribute_field_labels = FieldSetting::getDynamicFields(ProductCategoryAttribute::class);
+
         $qb = $this->modelClass::query()->where("is_last_node", 0);
 
         $tree_list = $this->modelClass::getTreeList($qb);
 
-        $this->setForView(compact("field_labels", "tree_list"));
+        $product_category_attribute = new ProductCategoryAttribute();
+
+        $type_conditions = [];
+        $type_conditions['type'] = Type::getType($product_category_attribute, "input_type");
+
+        foreach($this->model->categoryAttribute as $categoryAttribute)
+        {
+            if ($categoryAttribute->input_type) {
+                $saved_type_id = Type::getIdFromCode($type_conditions['type'], $categoryAttribute->input_type);
+
+                if ($saved_type_id) {
+                    $type_conditions['or_id'][] = $saved_type_id;
+                }
+            }
+        }
+
+        $input_type_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
+
+        $this->setForView(compact("field_labels", "category_attribute_field_labels", "input_type_list", "tree_list"));
 
         return parent::beforeViewRender();
     }
@@ -135,7 +157,8 @@ class ProductCategoryController extends BackendController
             "short_name" => ["nullable"],
             "list_display_order" => "",
             "is_last_node" => "",
-            "is_active" => ""
+            "is_active" => "",
+            "productCategoryAttribute" => [],
         ];
     }
 
@@ -163,17 +186,23 @@ class ProductCategoryController extends BackendController
 
         try
         {
-            $model = $this->modelClass::create($validatedData);
+            $save_data = $validatedData;
 
-            if ($this->custom_errors) { 
+            unset($save_data['categoryAttribute']);
+
+            $this->model = $this->modelClass::create($save_data);
+
+            $this->_saveOthers($validatedData);
+
+            d(LaravelExtend::getQueryLog("", -6));
+            
+            if (LaravelExtend::$errors) { 
                 throw new Exception("Fail to Save");
             }
             
-            $this->updateUserInfoAfterSave($model);
-            
             DB::commit();
 
-            return $this->afterSave($model);
+            return $this->afterSave($this->model);
         }
         catch(Exception $ex)
         {
@@ -185,9 +214,59 @@ class ProductCategoryController extends BackendController
         }
     }
 
+    private function _saveOthers(array $validatedData)
+    {
+        unset($validatedData['productCategoryAttribute']['(sr-id)']);
+
+        // d($validatedData, true);
+
+        if (isset($validatedData['productCategoryAttribute']))
+        {
+            $rules = [
+                "name" => ["required"],
+                "input_type" => ["required"],
+                "dropdown_type" => ["required"],
+                "is_active" => "",
+                "list_display_order" => "",
+            ];
+
+            $child_model = new ProductCategoryAttribute();
+
+            $validatedData['product_category_id'] = $this->model->id;
+
+            $rules = LaravelExtend::merge_validation_rules($rules, $child_model->getUniqueValidationRules($validatedData));
+
+            $display_order = 0;
+
+            foreach($validatedData['productCategoryAttribute'] as $categoryAttribute)
+            {
+                $display_order++;
+                if ($categoryAttribute['id'])
+                {
+                    $child_model = ProductCategoryAttribute::find($categoryAttribute['id']);
+
+                    if (!$child_model)
+                    {
+                        $child_model = new ProductCategoryAttribute();
+                    }
+                }
+                else
+                {
+                    $child_model = new ProductCategoryAttribute();
+                }
+
+                $categoryAttribute['list_display_order'] = $display_order;
+
+                $child_model->fill($categoryAttribute);
+
+                $this->model->categoryAttribute()->save($child_model);
+            }
+        }
+    }
+
     public function edit($id)
     {
-        $model = $this->model = $this->modelClass::findOrFail($id);
+        $model = $this->model = $this->modelClass::with(["categoryAttribute"])->findOrFail($id);
 
         $this->beforeEdit($model);
 
@@ -196,7 +275,9 @@ class ProductCategoryController extends BackendController
             'method' => 'PUT',
         ];
 
-        $this->setForView(compact("model", "form"));
+        $productCategoryAttribute = $this->model->categoryAttribute?->toArray() ?? [];
+
+        $this->setForView(compact("model", "form", "productCategoryAttribute"));
 
         return $this->view("form");
     }
@@ -218,13 +299,20 @@ class ProductCategoryController extends BackendController
         DB::beginTransaction();
 
         try {
+            
             $save_data = $validatedData;
+
+            unset($save_data['categoryAttribute']);
 
             $this->model->fill($save_data);
 
             $this->model->save();
 
-            $this->updateUserInfoAfterSave($this->model);
+            $this->_saveOthers($validatedData);
+
+            if (LaravelExtend::$errors) { 
+                throw new Exception("Fail to Save");
+            }
 
             DB::commit();
 

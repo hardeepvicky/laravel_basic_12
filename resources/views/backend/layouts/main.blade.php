@@ -34,14 +34,15 @@ use App\Helpers\LaravelExtend;
     <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/css/vendors/slick-theme.css') }}" />
 
     <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/libs/select2/select2.min.css') }}" />
-    <link rel="stylesheet" type="text/css"
-        href="{{ get_asset_url('assets/libs/select2/select2-bootstrap-5-theme.min.css') }}" />
+    <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/libs/select2/select2-bootstrap-5-theme.min.css') }}" />
     <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/libs/select2/select2-dark.css') }}" />
     <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/libs/Croppie-2.6.4/croppie.css') }}" />
-    <link rel="stylesheet" type="text/css"
-        href="{{ get_asset_url('assets/libs/fancybox/dist/jquery.fancybox.min.css') }}" />
-    <link rel="stylesheet" type="text/css"
-        href="{{ get_asset_url('assets/css/vendors/flatpickr/flatpickr.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/libs/fancybox/dist/jquery.fancybox.min.css') }}" />
+    <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/css/vendors/flatpickr/flatpickr.min.css') }}">    
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js@11.1.0/public/assets/styles/choices.min.css">
+
+    
 
     <!-- Theme Specfic -->
     <link id="color" rel="stylesheet" href="{{ get_asset_url('assets/css/color-1.css') }}" media="screen" />
@@ -58,8 +59,7 @@ use App\Helpers\LaravelExtend;
     <script src="{{ get_asset_url('assets/js/vendors/jquery/jquery.min.js') }}"></script>
     <script src="{{ get_asset_url('libs/events.js') }}"></script>
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js@11.1.0/public/assets/styles/choices.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/choices.js@11.1.0/public/assets/scripts/choices.min.js"></script>
+    
 </head>
 
 <body>
@@ -82,7 +82,7 @@ use App\Helpers\LaravelExtend;
                 <x-Backend.warning />
 
                 <?php $primary_info = LaravelExtend::$info['primary'] ?? []; ?>
-                
+
                 <x-Backend.information :info="$primary_info"/>
 
                 @yield('content')
@@ -112,6 +112,7 @@ use App\Helpers\LaravelExtend;
     <script src="{{ get_asset_url('assets/libs/fancybox/dist/jquery.fancybox.min.js') }}"></script>
     <script src="{{ get_asset_url('assets/libs/ejs.min.js') }}"></script>
     <script src="{{ get_asset_url('assets/libs/jquery.form.min.js') }}"></script>
+    <script src="{{ get_asset_url('assets/libs/typeahead.js-0.11.1/dist/typeahead.bundle.min.js') }}"></script>
 
     <script src="{{ get_asset_url('assets/js/config.js') }}"></script>
     <script src="{{ get_asset_url('assets/js/script.js') }}"></script>
@@ -123,6 +124,8 @@ use App\Helpers\LaravelExtend;
     <script src="{{ get_asset_url('assets/js/range/rangeslider.umd.min.js') }}"></script>
 
     <script src="{{ get_asset_url('assets/js/theme-customizer/customizer.js') }}"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/choices.js@11.1.0/public/assets/scripts/choices.min.js"></script>
 
     <!-- Project Lib -->
     <script src="{{ get_asset_url('libs/constants.js') }}"></script>

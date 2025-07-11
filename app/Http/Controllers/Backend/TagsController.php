@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Backend;
 
+use App\Helpers\LaravelExtend;
 use App\Models\City;
 use App\Models\State;
 use App\Models\Tag;
@@ -81,27 +82,103 @@ class TagsController extends BackendController
                             ->limit(20)
                             ->get();
 
-                if  ($records && $records->count() > 0)
-                {
-                    foreach($records as $record)
-                    {
-                        $row = [];
-
-                        if ($record->main_model)
-                        {
-                            $row['display'] = $record->search_term;
-                            $row['name'] = "#" . $record->main_model . ".id:" . $record->main_id . " (" . $record->name . ")";
-                        }
-                        else
-                        {
-                            $row['display'] = $record->search_term;
-                            $row['name'] = "#" . $row['name'];
-                        }
-
-                        $response['data'][] = $row;
-                    }
-                }     
+                 
             }
+            else 
+            {
+                $limit = $request->get("limit");
+
+                if ($limit)
+                {
+                    $records = $this->modelClass::orderBy("foreign_model", "DESC")
+                                ->orderBy("search_term", "ASC")
+                                ->limit($limit)
+                                ->get();
+                }
+            }
+
+            if  (isset($records) && $records->count() > 0)
+            {
+                foreach($records as $record)
+                {
+                    $row = [];
+
+                    if ($record->main_model)
+                    {
+                        $row['display'] = $record->search_term;
+                        $row['name'] = "#" . $record->main_model . ".id:" . $record->main_id . " (" . $record->name . ")";
+                    }
+                    else
+                    {
+                        $row['display'] = $record->search_term;
+                        $row['name'] = "#" . $row['name'];
+                    }
+
+                    $response['data'][] = $row;
+                }
+            }    
+        }
+        catch(Exception $ex)
+        {
+            // Log::error($ex->getMessage());
+            throw $ex;
+        }
+
+        return $this->responseJson($response);
+    }
+
+    public function ajax_get_list_for_header(Request $request)
+    {
+        $response = ["status" => 1, "data" => []];
+
+        try
+        {
+            $search_term = $request->get("query");
+
+            if ($search_term && strlen(trim($search_term)) > 0)
+            {
+                $search_term = urldecode(trim($search_term));
+                
+                $records = $this->modelClass::where("search_term", 'LIKE', '%' . $search_term . '%')
+                            ->orderBy("foreign_model", "DESC")
+                            ->orderBy("search_term", "ASC")
+                            ->limit(30)
+                            ->get();
+                 
+            }
+            else 
+            {
+                $limit = $request->get("limit");
+
+                if ($limit)
+                {
+                    $records = $this->modelClass::orderBy("foreign_model", "DESC")
+                                ->orderBy("search_term", "ASC")
+                                ->limit($limit)
+                                ->get();
+                }
+            }
+
+            if  (isset($records) && $records->count() > 0)
+            {
+                foreach($records as $record)
+                {
+                    $row = [];
+
+                    if ($record->main_model)
+                    {
+                        $row['display'] = $record->search_term;
+                        $row['url'] = LaravelExtend::getViewLinkForModel($record->main_model, $record->main_id);
+                    }
+                    else
+                    {
+                        $row['display'] = $record->search_term;
+                        $row['url'] = "#";
+                    }
+
+                    $response['data'][] = $row;
+                }
+            }    
         }
         catch(Exception $ex)
         {

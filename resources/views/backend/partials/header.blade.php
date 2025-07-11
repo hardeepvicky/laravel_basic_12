@@ -34,8 +34,8 @@ use App\Models\Notification;
             <div class="form-group-header d-lg-block d-none">
                 <div class="Typeahead Typeahead--twitterUsers">
                     <div class="u-posRelative d-flex align-items-center">
-                        <input class="demo-input py-0 Typeahead-input form-control-plaintext w-100" type="text"
-                            placeholder="Type to Search..." name="q" title="" /><i
+                        <input id="header-search" class="demo-input py-0 Typeahead-input form-control-plaintext w-100"
+                            type="text" placeholder="Type to Search..." name="q" title="" /><i
                             class="search-bg iconly-Search icli"></i>
                     </div>
                 </div>
@@ -63,56 +63,57 @@ use App\Models\Notification;
                             <use href="/assets/svg/iconly-sprite.svg#notification"></use>
                         </svg>
                     </a>
-                    
-                    @if(isset($unread_notification_count) && $unread_notification_count)
+
+                    @if (isset($unread_notification_count) && $unread_notification_count)
                         <span class="badge rounded-pill badge-primary">
                             {{ $unread_notification_count }}
                         </span>
                     @endif
-                    
+
                     <div class="custom-menu notification-dropdown py-0 overflow-hidden">
-                        <h3 class="title bg-primary-light dropdown-title">Notification 
+                        <h3 class="title bg-primary-light dropdown-title">Notification
                             <a class="font-primary" href="{{ route('notification.my') }}">
                                 View all
                             </a>
                         </h3>
                         <ul class="activity-timeline">
-                            @if(isset($unread_notifications) && $unread_notifications)
-                            @foreach($unread_notifications as $notification):
-                            <li class="d-flex align-items-start">
-                                <div class="activity-line"></div>
-                                @if($notification->sub_type == Notification::SUB_TYPE_INFO)
-                                    <div class="activity-dot-primary"></div>
-                                @elseif($notification->sub_type == Notification::SUB_TYPE_CRITICAL)
-                                    <div class="activity-dot-danger"></div>
-                                @else
-                                    <div class="activity-dot-secondary"></div>
-                                @endif
-
-                                <div class="flex-grow-1">
-                                    <h6 class="f-w-600 font-primary">
-                                        <span>{{ if_date($notification->created_at) }}</span>
-                                        {{ $notification->created_at_original->diffForHumans() }}
-                                    </h6>
-                                    <h5>
-                                        @if($notification->from_user_id === 0)
-                                            System
+                            @if (isset($unread_notifications) && $unread_notifications)
+                                @foreach ($unread_notifications as $notification)
+                                    :
+                                    <li class="d-flex align-items-start">
+                                        <div class="activity-line"></div>
+                                        @if ($notification->sub_type == Notification::SUB_TYPE_INFO)
+                                            <div class="activity-dot-primary"></div>
+                                        @elseif($notification->sub_type == Notification::SUB_TYPE_CRITICAL)
+                                            <div class="activity-dot-danger"></div>
                                         @else
-                                            {{ $notification->fromUser?->getDisplayName() ?? "NA" }}
+                                            <div class="activity-dot-secondary"></div>
                                         @endif
-                                    </h5>
-                                    <p class="mb-0">
-                                        @if(isset($notification->data['msg']) && $notification->data['msg'])
-                                            <span>{{ $notification->data['msg'] }}</span>
-                                        @endif
-                                        
-                                        @if(isset($notification->data['link']) && $notification->data['link'])
-                                            <a href="{{ $notification->data['link'] }}">Open Link</a>
-                                        @endif
-                                    </p>
-                                </div>
-                            </li>                            
-                            @endforeach
+
+                                        <div class="flex-grow-1">
+                                            <h6 class="f-w-600 font-primary">
+                                                <span>{{ if_date($notification->created_at) }}</span>
+                                                {{ $notification->created_at_original->diffForHumans() }}
+                                            </h6>
+                                            <h5>
+                                                @if ($notification->from_user_id === 0)
+                                                    System
+                                                @else
+                                                    {{ $notification->fromUser?->getDisplayName() ?? 'NA' }}
+                                                @endif
+                                            </h5>
+                                            <p class="mb-0">
+                                                @if (isset($notification->data['msg']) && $notification->data['msg'])
+                                                    <span>{{ $notification->data['msg'] }}</span>
+                                                @endif
+
+                                                @if (isset($notification->data['link']) && $notification->data['link'])
+                                                    <a href="{{ $notification->data['link'] }}">Open Link</a>
+                                                @endif
+                                            </p>
+                                        </div>
+                                    </li>
+                                @endforeach
                             @endif
                         </ul>
                     </div>
@@ -125,82 +126,162 @@ use App\Models\Notification;
                     </a>
                 </li>
                 @auth
-                @php
-                $user = Auth::user();
-                @endphp
-                <li class="profile-nav custom-dropdown">
-                    <div class="user-wrap">
-                        @if (isset($user) && $user)
-                        <div class="user-img">
-                            <img src="{{ $user->getProfileImage() }}" alt="user" style="background:none" />
+                    @php
+                        $user = Auth::user();
+                    @endphp
+                    <li class="profile-nav custom-dropdown">
+                        <div class="user-wrap">
+                            @if (isset($user) && $user)
+                                <div class="user-img">
+                                    <img src="{{ $user->getProfileImage() }}" alt="user" style="background:none" />
+                                </div>
+                            @endif
+                            <div class="user-content">
+                                <!-- <h6>Ava Davis</h6> -->
+                                <p class="mb-0">{{ $user->name }}<i class="fa-solid fa-chevron-down"></i></p>
+                            </div>
                         </div>
-                        @endif
-                        <div class="user-content">
-                            <!-- <h6>Ava Davis</h6> -->
-                            <p class="mb-0">{{ $user->name }}<i class="fa-solid fa-chevron-down"></i></p>
+                        <div class="custom-menu overflow-hidden">
+                            <ul class="profile-body">
+                                <li class="d-flex">
+                                    <svg class="svg-color">
+                                        <use href="/assets/svg/iconly-sprite.svg#Profile"></use>
+                                    </svg>
+                                    @if (Route::has('user.change.password'))
+                                        <a class="ms-2" href="{{ route('user.change.password') }}">Change Password</a>
+                                    @else
+                                        Route not exist : user.change.password
+                                    @endif
+                                </li>
+                                <!-- <li class="d-flex">
+                                                                                        <svg class="svg-color">
+                                                                                            <use href="../assets/svg/iconly-sprite.svg#Message"></use>
+                                                                                        </svg>
+                                                                                        <a class="ms-2" href="letter-box.html">Inbox</a>
+                                                                                    </li>
+                                                                                    <li class="d-flex">
+                                                                                        <svg class="svg-color">
+                                                                                            <use href="../assets/svg/iconly-sprite.svg#Document"></use>
+                                                                                        </svg>
+                                                                                        <a class="ms-2" href="to-do.html">Task</a>
+                                                                                    </li> -->
+
+                                <li class="d-flex">
+                                    <svg class="svg-color">
+                                        <use href="/assets/svg/iconly-sprite.svg#Login"></use>
+                                    </svg>
+                                    <form class="ms-2" action="{{ route('logout') }}" method="POST"
+                                        style="margin-block-end:0">
+                                        @csrf
+                                        <button type="submit" class="dropdown-item">Logout</button>
+                                    </form>
+
+                                </li>
+                            </ul>
                         </div>
-                    </div>
-                    <div class="custom-menu overflow-hidden">
-                        <ul class="profile-body">
-                            <li class="d-flex">
-                                <svg class="svg-color">
-                                    <use href="/assets/svg/iconly-sprite.svg#Profile"></use>
-                                </svg>
-                                @if (Route::has('user.change.password'))
-                                <a class="ms-2" href="{{ route('user.change.password') }}">Change Password</a>
-                                @else
-                                Route not exist : user.change.password
-                                @endif
-                            </li>
-                            <!-- <li class="d-flex">
-                                                                                    <svg class="svg-color">
-                                                                                        <use href="../assets/svg/iconly-sprite.svg#Message"></use>
-                                                                                    </svg>
-                                                                                    <a class="ms-2" href="letter-box.html">Inbox</a>
-                                                                                </li>
-                                                                                <li class="d-flex">
-                                                                                    <svg class="svg-color">
-                                                                                        <use href="../assets/svg/iconly-sprite.svg#Document"></use>
-                                                                                    </svg>
-                                                                                    <a class="ms-2" href="to-do.html">Task</a>
-                                                                                </li> -->
-
-                            <li class="d-flex">
-                                <svg class="svg-color">
-                                    <use href="/assets/svg/iconly-sprite.svg#Login"></use>
-                                </svg>
-                                <form class="ms-2" action="{{ route('logout') }}" method="POST"
-                                    style="margin-block-end:0">
-                                    @csrf
-                                    <button type="submit" class="dropdown-item">Logout</button>
-                                </form>
-
-                            </li>
-                        </ul>
-                    </div>
-                </li>
+                    </li>
                 @endauth
             </ul>
         </div>
     </div>
 </header>
 
+<style>
+    .tt-suggestion {
+        padding: 3px 20px;
+        line-height: 24px;
+        cursor: pointer;
+    }
+
+    .tt-suggestion.tt-cursor {
+    }
+
+    .tt-suggestion p {
+        margin: 0;
+    }
+
+    .tt-highlight {
+        /* For highlighting query matches */
+        font-weight: bold;
+    }
+
+    .twitter-typeahead{
+        width: 95%;
+    }
+
+    .twitter-typeahead .tt-menu{
+        min-width: 30rem;
+    }
+</style>
+
+
 <script>
-    $(function(){
-        $(".open-notification-panel").click(function(){
+    $(function() {
+        $(".open-notification-panel").click(function() {
 
             var unread_notification_count = parseInt('<?= $unread_notification_count ?? 0 ?>');
 
-            if (unread_notification_count)
-            {
+            if (unread_notification_count) {
                 var url = "/notification/ajax_mark_read";
-                
-                $.get(url, function(response){
-                    ajaxHandleResponse(url, response, function(response){
+
+                $.get(url, function(response) {
+                    ajaxHandleResponse(url, response, function(response) {
 
                     });
                 });
             }
         });
+
+        $.events.execAtLast(function() {
+
+            // constructs the suggestion engine
+            var tagEngine = new Bloodhound({
+                datumTokenizer: Bloodhound.tokenizers.whitespace,
+                queryTokenizer: Bloodhound.tokenizers.whitespace,
+                prefetch: '/tags/ajax_get_list_for_header?limit=5',
+                remote: {
+                    url: '/tags/ajax_get_list_for_header?query=%QUERY',
+                    wildcard: '%QUERY',
+                    transform: function(response) {
+                        var result = $.map(response['data'], function(item) {
+                            return item;
+                        });
+
+                        console.log(result)
+                        return result;
+                    }
+                },
+            });
+
+            function search(q, sync) {
+                if (q === '') {
+                    // sync(tagEngine.get('Detroit Lions', 'Green Bay Packers', 'Chicago Bears'));
+                } else {
+                    tagEngine.search(q, sync);
+                }
+            }
+
+            $('#header-search').typeahead({
+                hint: true,
+                highlight: true,
+                minLength: 1
+            }, {
+                name: 'tags',
+                display : 'display',
+                source: tagEngine,
+                templates: {
+                    suggestion: function(data) {
+                        return `<div>
+                            <a href="${data.url}">
+                                <span> ${data.display}</span>
+                            </a>
+                        </div>
+                    `;
+                    }
+                }
+            });
+        });
+
+
     });
 </script>

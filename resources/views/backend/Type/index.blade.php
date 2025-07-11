@@ -31,7 +31,7 @@
                             class="select2" />
                     </div>
                 </div>
-                <x-Backend.summary-search-form-footer :selectedPaginationLimit="$pagination_limit" />
+                <x-Backend.summary-search-form-footer :selectedPaginationLimit="$pagination_limit" :paginationListOptions="$paginationList" />
             </form>
         </div>
     </div>

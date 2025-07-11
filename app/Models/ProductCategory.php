@@ -20,6 +20,10 @@ class ProductCategory extends BaseModel
             "foreignKey" => "product_category_id",
             "preventDelete" => true
         ],
+        ProductCategoryAttribute::class => [
+            "foreignKey" => "product_category_id",
+            "preventDelete" => false
+        ],
     ];
 
     public function beforeSave()
@@ -48,6 +52,16 @@ class ProductCategory extends BaseModel
         }
 
         return parent::beforeSave();
+    }
+
+    public function product()
+    {
+        return $this->hasMany(Product::class);
+    }
+
+    public function categoryAttribute()
+    {
+        return $this->hasMany(ProductCategoryAttribute::class);
     }
 
     protected function getDisplayNameAttribute()

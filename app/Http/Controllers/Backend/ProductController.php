@@ -189,11 +189,9 @@ class ProductController extends BackendController
             // dd($validatedData);
             $this->model = $this->modelClass::create($validatedData);
 
-            if ($this->custom_errors) {
+            if (LaravelExtend::$errors) {
                 throw new Exception("Fail to Save");
             }
-
-            $this->updateUserInfoAfterSave($this->model);
 
             DB::commit();
 
@@ -203,9 +201,7 @@ class ProductController extends BackendController
 
             $this->saveSqlLog();
 
-            $this->custom_errors = array_merge_recursive($this->custom_errors, $this->model->custom_errors);
-
-            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", $this->custom_errors);
+            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", LaravelExtend::$errors);
         }
     }
 
@@ -250,11 +246,9 @@ class ProductController extends BackendController
 
             $this->model->save();
 
-            if ($this->custom_errors) {
+            if (LaravelExtend::$errors) {
                 throw new Exception("Fail to Save");
             }
-
-            $this->updateUserInfoAfterSave($this->model);
 
             DB::commit();
 
@@ -264,9 +258,7 @@ class ProductController extends BackendController
 
             $this->saveSqlLog();
 
-            $this->custom_errors = array_merge_recursive($this->custom_errors, $this->model->custom_errors);
-
-            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", $this->custom_errors);
+            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", LaravelExtend::$errors);
         }
     }
 

@@ -66,7 +66,12 @@ class Type extends BaseModel
                 "fields" => [
                     "sub_type" => "Sub Type"
                 ]
-            ]
+            ],
+            ProductCategoryAttribute::class => [
+                "fields" => [
+                    "input_type" => "Input Type",
+                ]
+            ],
         ];
 
         return $types;

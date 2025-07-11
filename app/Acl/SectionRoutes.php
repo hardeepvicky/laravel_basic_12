@@ -18,6 +18,8 @@ class SectionRoutes
         "user.my-profile",
         "user.change.password",
 
+        "tags.ajax_get_list_for_header",
+
         "*.ajax_get_list",
         "*.ajax_get_code_list",
         "*.ajax_get_count",
