@@ -165,15 +165,15 @@ class WebController extends Controller
         } else if ($method_name == "show") {
             $sub_title = "View";
         } else if ($method_name == "showLoginForm") {
-            $module_name = "Login";
+            $sub_title = "Login";
         } else if ($method_name == "sign_in_form") {
-            $module_name = "Sign In";
+            $sub_title = "Sign In";
         } else {
             $sub_title = str_replace("index", "List", $method_name);
 
-            $sub_title = str_replace("create", "Add", $method_name);
+            $sub_title = str_replace("create", "Add", $sub_title);
 
-            $sub_title = str_replace("my", "", $method_name);
+            $sub_title = str_replace("my", "", $sub_title);
 
             $sub_title = str_function_name_to_human_text($sub_title);
         }

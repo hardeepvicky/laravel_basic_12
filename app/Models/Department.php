@@ -18,7 +18,7 @@ class Department extends BaseModel
         //     "preventDelete" => true
         // ],
         User::class => [
-            "foreignKey" => "department_id",
+            "foreignKey" => "dept_id",
             "preventDelete" => true
         ],
         SubDepartment::class => [

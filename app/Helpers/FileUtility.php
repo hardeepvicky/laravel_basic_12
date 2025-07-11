@@ -324,8 +324,6 @@ class FileUtility
 
     public function getContent(string $filepath)
     {
-        $filepath = str_path_normalize_to_save_to_data_base($filepath);
-
         $contents = $this->disk->get($filepath);
 
         return $contents;
