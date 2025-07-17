@@ -202,9 +202,7 @@ class RecurringTask extends BaseModel
 
                         $record['is_draft'] = 0;
                         $record['is_completed'] = 0;
-                        $record['is_verified'] = 0;
-                        $record['can_edit'] = 0;
-                        $record['cannot_edit_reason_array'] = ['Task created from recurring task by system'];
+                        $record['is_verified'] = 0;                        
 
                         $record['start_date_time'] = $next_date;
                         $record['recurring_task_id'] = $recurring_task->id;
@@ -249,9 +247,7 @@ class RecurringTask extends BaseModel
 
                         $record['is_draft'] = 0;
                         $record['is_completed'] = 0;
-                        $record['is_verified'] = 0;
-                        $record['can_edit'] = 0;
-                        $record['cannot_edit_reason_array'] = ['Task created from recurring task by system'];
+                        $record['is_verified'] = 0;                        
 
                         $record['start_date_time'] = $recurringTaskDate->date->toDateTimeString();
                         $record['recurring_task_id'] = $recurring_task->id;
