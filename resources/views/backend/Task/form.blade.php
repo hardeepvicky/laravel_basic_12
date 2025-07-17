@@ -20,6 +20,7 @@ $false = false;
     <x-Form.start action="{{ $form['url'] }}" method="{{ $form['method'] }}" />
     <div class="card">
         <div class="card-header card-no-border pb-0">
+            <a href="{{ route('recurring-task.create') }}">Open Recurring Task Form</a>
         </div>
         <div class="card-body">
             <div class="row">
@@ -127,37 +128,51 @@ $false = false;
                             </div>
                         </div>
                     </div>
-                <div class="form-group mb-3 is_draft-block is_draft-block-0">
-                    <?php
-                    $field = 'tag_name';
-                    $label = get_value_from_list($field_labels, $field, 'Tags');
-                    $value = implode(',', $model->tags?->pluck('name')->toArray()) ?? [];
-                    ?>
-                    <x-Inputs.choice :id="$field" :name="$field" :label="$label" :value="$value"
-                        class="choice " placeholder="Enter {{ $label }}" />
-                </div>
-            </div>
-            <div class="col-md-12 col-xxl-6">
-                <div class="form-group mb-3">
-                    <div class="textarea-wrapper">
+                    <div class="form-group mb-3 is_draft-block is_draft-block-0">
                         <?php
-                        $field = 'description';
+                        $field = 'tag_name';
+                        $label = get_value_from_list($field_labels, $field, 'Tags');
+                        $value = implode(',', $model->tags?->pluck('name')->toArray()) ?? [];
+                        ?>
+                        <x-Inputs.choice :id="$field" :name="$field" :label="$label" :value="$value"
+                            class="choice " placeholder="Enter {{ $label }}" />
+                    </div>
+                    <div class="form-group mb-3 is_draft-block is_draft-block-0">
+                        <?php
+                        $value = implode(',', $model->taskUser->pluck('user_id')->toArray());
+                        ?>
+                        <x-Inputs.drop-down name="taskUser[]" label="Link Users" :list="$user_list" :value="$value"
+                            class="select2" multiple="multiple"  />
+
+                        <?php
+                        $field = 'is_send_notification';
                         $label = get_value_from_list($field_labels, $field, $field);
                         ?>
-                        <x-Inputs.text-area :id="$field" :name="$field" :label="$label" rows="8"
-                            value="{{ $model->{$field} }}" placeholder="Enter {{ $label }}"
-                            class="auto-suggesstion-list" />
-                        <div id="{{ $field . '-suggestion-box' }}" class="suggestion-box hidden"></div>
+                        <x-Inputs.checkbox :id="$field" :name="$field" :label="$label"
+                            value="{{ $model->{$field} }}" />
+                    </div>
+                </div>
+                <div class="col-md-12 col-xxl-6">
+                    <div class="form-group mb-3">
+                        <div class="textarea-wrapper">
+                            <?php
+                            $field = 'description';
+                            $label = get_value_from_list($field_labels, $field, $field);
+                            ?>
+                            <x-Inputs.text-area :id="$field" :name="$field" :label="$label" rows="8"
+                                value="{{ $model->{$field} }}" placeholder="Enter {{ $label }}"
+                                class="auto-suggesstion-list" />
+                            <div id="{{ $field . '-suggestion-box' }}" class="suggestion-box hidden"></div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="row">
-            <div class="col-xl-8">
-                <x-Backend.form-common-footer-buttons />
+            <div class="row">
+                <div class="col-xl-8">
+                    <x-Backend.form-common-footer-buttons />
+                </div>
             </div>
         </div>
-    </div>
     </div>
     </form>
 

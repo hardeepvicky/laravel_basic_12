@@ -199,7 +199,7 @@
     width: 200px;
 }
 
-.w-300{
+.w-300 {
     width: 300px;
 }
 
@@ -329,8 +329,7 @@ label.info {
     margin-left: 20px;
 }
 
-.ml-50
-{
+.ml-50 {
     margin-left: 50px;
 }
 
@@ -345,4 +344,3 @@ label.info {
 .progress-toast {
     min-width: 300px; /* Or a fixed width */
 }
-

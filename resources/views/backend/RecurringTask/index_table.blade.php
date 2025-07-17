@@ -17,6 +17,7 @@ use App\Models\RecurringTask;
                         <th><?= sortable_anchor('assignToUser.name', get_value_from_list($field_labels, 'assign_to_user_id', 'assign_to_user_id')) ?>
                         <th><?= sortable_anchor('priority', get_value_from_list($field_labels, 'priority', 'priority')) ?> </th>
                         <th><?= sortable_anchor('is_draft', get_value_from_list($field_labels, 'is_draft', 'is_draft')) ?> </th>
+                        <th><?= sortable_anchor('is_active', get_value_from_list($field_labels, 'is_active', 'is_active')) ?> </th>
                         <th>Task created by system</th>
                         <th>Task Info</th>
                         <th>
@@ -24,13 +25,14 @@ use App\Models\RecurringTask;
                             |
                             <?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?>
                         </th>
-                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach ($records as $record)
                         <tr>
-                            <th scope="row">{{ $record->id }}</th>
+                            <th scope="row">                                
+                                <x-Backend.celec-summary-table-first-column :record="$record" :routePrefix="$routePrefix" />
+                            </th>
                             <td>{{ $record->name }}</td>
                             <td>
                                 <label class="info">
@@ -41,6 +43,9 @@ use App\Models\RecurringTask;
                             </td>
                             <td>{{ $record->priority }}</td>
                             <td>{{ $record->is_draft ? "Draft" : "" }}</td>
+                            <td>
+                                <x-Backend.active_deactive :isActive="$record->is_active" :id="$record->id" :routePrefix="$routePrefix" />
+                            </td>
                             <td>{{ $record->tasks->count() }}</td>
                             <td>
                                 <div class="row" id="record-info-{{ $record->id }}">
@@ -67,18 +72,9 @@ use App\Models\RecurringTask;
                             <td>
                                 <x-Backend.index-table-info :record="$record" :userList="$userListCache" />
                             </td>
-                            <td>
-                                <x-Backend.summary-comman-actions :id="$record->id" :routePrefix="$routePrefix" />
-                                <span class="btn btn-info btn-sm css-toggler mt-1 mb-1"
-                                    data-sr-css-class-toggle-target="#record-{{ $record->id }}"
-                                    data-sr-css-class-toggle-class="hidden" data-sr-css-class-toggle-applied-text="Show"
-                                    data-sr-css-class-toggle-not-applied-text="Hide">
-                                    Show
-                                </span>
-                            </td>
                         </tr>
                         <tr id="record-{{ $record->id }}" class="hidden">
-                            <td></td>
+                            <td style="background-color: #FFF;"></td>
                             <td colspan="7">
                                 <div class="row">                                    
                                     <div class="col-md-6 col-xl-4">

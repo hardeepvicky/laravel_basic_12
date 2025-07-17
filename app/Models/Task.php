@@ -112,6 +112,16 @@ class Task extends BaseModel
         return $this->hasMany(Tag::class, 'foreign_id')->where("foreign_model", $class_name);
     }
 
+    public function user()
+    {
+        return $this->belongsToMany(User::class, TaskUser::class);
+    }
+
+    public function taskUser()
+    {
+        return $this->hasMany(TaskUser::class, 'task_id');
+    }
+
     protected function getDisplayNameAttribute()
     {
         return $this->getDisplayName();
@@ -212,7 +222,7 @@ class Task extends BaseModel
                 throw new UserException("Fail To Save", UserException::ERROR_LARAVEL_FAIL);
             }
 
-            $this->load("assignToUser");
+            $this->load(["assignToUser", "user"]);
 
             $created_by_user = User::find($this->created_by);
 
@@ -269,13 +279,20 @@ class Task extends BaseModel
                 $notification_data['msg'] = $msg;
             }
 
+            $notificationObj = new TaskStatusChange($this, $notification_data);
+
             if ($this->assign_to_user_id == LaravelExtend::getAuthUserId()) {
                 if ($created_by_user)
                 {
-                    $created_by_user->notify(new TaskStatusChange($this, $notification_data));
+                    $created_by_user->notify($notificationObj);
                 }
             } else {
-                $this->assignToUser->notify(new TaskStatusChange($this, $notification_data));
+                $this->assignToUser->notify($notificationObj);
+            }
+
+            if ($this->is_send_notification && $this->user->count() > 0)
+            {
+                \Illuminate\Support\Facades\Notification::send($this->user, $notificationObj);   
             }
 
             DB::commit();

@@ -18,6 +18,7 @@ $false = false;
     <x-Form.start action="{{ $form['url'] }}" method="{{ $form['method'] }}" />
     <div class="card">
         <div class="card-header card-no-border pb-0">
+            <a href="{{ route('task.create') }}">Open Task From</a>
         </div>
         <div class="card-body">
             <div class="row">

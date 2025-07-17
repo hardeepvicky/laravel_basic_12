@@ -64,7 +64,7 @@ class TaskController extends BackendController
         $builder = $this->modelClass::where($conditions);
 
         $builder->with([
-            "department", "assignToUser", "tags",
+            "department", "assignToUser", "tags", "user"
         ]);
 
         if ($tag_conditions)
@@ -191,8 +191,19 @@ class TaskController extends BackendController
             "type" => User::TYPE_INTERNAL,
         ];
 
+        $exist_user_ids = [];
+
+        if ($this->model->taskUser) {
+            $exist_user_ids = $this->model->taskUser->pluck("user_id")->toArray();
+        }
+
         if ($this->model->assign_to_user_id) {
-            $user_conditions['or_id'] = $this->model->assign_to_user_id;
+            $exist_user_ids[] = $this->model->assign_to_user_id;
+        }
+
+        if ($exist_user_ids)
+        {
+            $conditions['or_id'] = $exist_user_ids;
         }
 
         $user_list = User::getList("id", "display_name", $user_conditions);
@@ -283,7 +294,8 @@ class TaskController extends BackendController
             "end_date_time" => [],
             "priority" => [],
             "is_send_notification" => "",
-            "tag_name" => []
+            "tag_name" => [],
+            "taskUser" => [],
         ];
     }
 
@@ -317,6 +329,7 @@ class TaskController extends BackendController
             $save_data = $this->_beforeSave($validatedData);
 
             unset($save_data['tag_name']);
+            unset($save_data['taskUser']);
 
             $save_data = $this->model->convertTimeZoneBeforeQueryToDatabase($save_data);
 
@@ -370,6 +383,12 @@ class TaskController extends BackendController
 
     private function _saveOthers($validatedData)
     {
+        if (isset($validatedData['taskUser']) && is_array($validatedData['taskUser']))
+        {
+            $users = User::find($validatedData['taskUser']);            
+            $this->model->user()->sync($users);
+        }
+
         if (isset($validatedData['tag_name']))
         {
             $model_class_name = str_class_name_without_namespace($this->modelClass);
@@ -444,7 +463,7 @@ class TaskController extends BackendController
 
     public function edit($id)
     {
-        $model = $this->model = $this->modelClass::with("tags")->findOrFail($id);
+        $model = $this->model = $this->modelClass::with(["tags", "taskUser"])->findOrFail($id);
 
         $model->convertTimeZoneForDisplay();
 
@@ -488,6 +507,7 @@ class TaskController extends BackendController
             $save_data = $this->_beforeSave($validatedData);
 
             unset($save_data['tag_name']);
+            unset($save_data['taskUser']);
 
             $save_data = $this->model->convertTimeZoneBeforeQueryToDatabase($save_data);
 

@@ -26,13 +26,14 @@ use App\Models\Task;
                             |
                             <?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?>
                         </th>
-                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach ($records as $record)
                     <tr>
-                        <th scope="row">{{ $record->id }}</th>
+                        <th scope="row">
+                            <x-Backend.celec-summary-table-first-column :record="$record" :routePrefix="$routePrefix" />
+                        </th>
                         <td>{{ $record->name }}</td>
                         <td>
                             <label class="info">
@@ -63,25 +64,31 @@ use App\Models\Task;
                         <td>
                             <x-Backend.index-table-info :record="$record" :userList="$userListCache" />
                         </td>
-                        <td>
-                            <x-Backend.summary-comman-actions :id="$record->id" :routePrefix="$routePrefix" />
-                            <span class="btn btn-info btn-sm css-toggler mt-1 mb-1"
-                                data-sr-css-class-toggle-target="#record-{{ $record->id }}"
-                                data-sr-css-class-toggle-class="hidden" data-sr-css-class-toggle-applied-text="Show"
-                                data-sr-css-class-toggle-not-applied-text="Hide">
-                                Show
-                            </span>
-                        </td>
                     </tr>
                     <tr id="record-{{ $record->id }}" class="hidden">
-                        <td></td>
-                        <td colspan="7">
+                        <td style="background-color: #FFF"></td>
+                        <td colspan="5">
                             <div class="row">
                                 <div class="col-sm-12">
                                     <label class="info">
                                         {{ get_value_from_list($field_labels, 'description', 'description') }}
                                         :
                                         <span>{!! $record->description !!}</span>
+                                    </label>
+                                    <h5>
+                                        Link Users
+                                    </h5>
+                                    <ol>
+                                        @foreach ($record->user as $user)
+                                        <li>{{ $user->getDisplayName() }}</li>
+                                        @endforeach
+                                    </ol>
+                                    <label class="info">
+                                        {{ get_value_from_list($field_labels, 'is_send_notification', 'is_send_notification') }} 
+                                        : 
+                                        <span>
+                                            {{ get_value_from_list($yes_no_list, $record->is_send_notification) }}
+                                        </span>
                                     </label>
                                 </div>
                             </div>

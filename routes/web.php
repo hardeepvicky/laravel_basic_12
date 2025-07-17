@@ -301,6 +301,12 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
     Route::resource($route_prefix, $controllerClass);
     Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
 
+        $name = "activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "de_activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
         $name = "ajax_get";
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
 

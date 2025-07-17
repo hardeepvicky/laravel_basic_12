@@ -173,6 +173,11 @@ class TagsController extends BackendController
                     else
                     {
                         $row['display'] = $record->search_term;
+                        $row['url'] = null;
+                    }
+
+                    if (!$row['url'])
+                    {
                         $row['url'] = "#";
                     }
 
