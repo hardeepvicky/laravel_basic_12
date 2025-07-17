@@ -27,7 +27,7 @@
                                     </th>
                                     <th><?= sortable_anchor('priority', get_value_from_list($field_labels, 'priority', 'priority')) ?>
                                     <th><?= sortable_anchor('start_date_time', get_value_from_list($field_labels, 'start_date_time', 'start_date_time')) ?>
-                                    <th><?= sortable_anchor('end_date_time', get_value_from_list($field_labels, 'end_date_time', 'end_date_time')) ?>
+                                    <th>Duration</th>
                                     <th>Status</th>
                                     <th>Actions</th>
                                 </tr>
@@ -39,10 +39,10 @@
                                         <td>{{ $record->name }}</td>
                                         <td>{{ $record->priority }}</td>
                                         <td>
-                                            {{ if_date($record->start_date_time) }}
+                                            {{ if_date_time($record->start_date_time) }}
                                         </td>
                                         <td>
-                                            {{ if_date($record->end_date_time) }}
+                                            {{ $record->duration }} {{ get_value_from_list($duration_type_list, $record->duration_type) }}
                                         </td>
                                         <td>
                                             {{ get_value_from_list($status_list, $record->status) }}
@@ -134,7 +134,7 @@
                                     <th>Assign To</th>
                                     <th><?= sortable_anchor('priority', get_value_from_list($field_labels, 'priority', 'priority')) ?>
                                     <th><?= sortable_anchor('start_date_time', get_value_from_list($field_labels, 'start_date_time', 'start_date_time')) ?>
-                                    <th><?= sortable_anchor('end_date_time', get_value_from_list($field_labels, 'end_date_time', 'end_date_time')) ?>
+                                    <th>Duration</th>
                                     <th>Status</th>
                                     <th>Actions</th>
                                 </tr>
@@ -150,7 +150,7 @@
                                             {{ if_date($record->start_date_time) }}
                                         </td>
                                         <td>
-                                            {{ if_date($record->end_date_time) }}
+                                            {{ $record->duration }} {{ get_value_from_list($duration_type_list, $record->duration_type) }}
                                         </td>
                                         <td>
                                             {{ get_value_from_list($status_list, $record->status) }}
