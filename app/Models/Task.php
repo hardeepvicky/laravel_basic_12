@@ -200,9 +200,54 @@ class Task extends BaseModel
         }
 
         try {
+            $this->load(["assignToUser", "user"]);
+
             DB::beginTransaction();
 
             $old_status = $this->status;
+
+            if ($status == self::STATUS_COMPLETED)
+            {
+                $user_id_list = [];
+                $user_id_list[] = $this->assignToUser->id;
+                $user_id_list = array_merge($user_id_list, $this->user->pluck("id")->toArray());
+
+                $user_name_list = [];
+                $user_name_list[] = $this->assignToUser->getDisplayName();
+                foreach($this->user as $user)
+                {
+                    $user_name_list[] = $user->getDisplayName();
+                }
+                
+                if (!in_array(LaravelExtend::getAuthUserId(), $user_id_list))
+                {
+                    $msg = "Only " . implode(", ", $user_name_list);
+                    $msg .= " can mark complete for task " . $this->name;
+
+                    throw new UserException($msg, UserException::ERROR_USER_ACTION_RESTRICT);
+                }
+            }
+
+            if ($status == self::STATUS_VERIFIED)
+            {
+                $user_id_list = $this->assignToUser->designation->getUserIdListBasedOnDesignationLevel();
+                $user_id_list[] = $this->created_by;
+
+                $users = User::find($user_id_list);
+                $user_name_list = [];
+                foreach($users as $user)
+                {
+                    $user_name_list[] = $user->getDisplayName();
+                }
+                
+                if (!in_array(LaravelExtend::getAuthUserId(), $user_id_list))
+                {
+                    $msg = "Only " . implode(", ", $user_name_list);
+                    $msg .= " can verify the task " . $this->name;
+
+                    throw new UserException($msg, UserException::ERROR_USER_ACTION_RESTRICT);
+                }
+            }
 
             switch ($status) {
                 case self::STATUS_ASSIGNED:
@@ -221,10 +266,6 @@ class Task extends BaseModel
             if (!$this->saveQuietly()) {
                 throw new UserException("Fail To Save", UserException::ERROR_LARAVEL_FAIL);
             }
-
-            $this->load(["assignToUser", "user"]);
-
-            $created_by_user = User::find($this->created_by);
 
             $type = Type::getType($this, "status");
 
@@ -268,7 +309,7 @@ class Task extends BaseModel
 
                 $notification_data['msg'] = $msg;
             } else {
-                $msg = "Task $this->name 's status change from ";
+                $msg = "Status of Task $this->name change from ";
 
                 $msg .= $old_status_type?->name ?? "";
 
@@ -282,6 +323,7 @@ class Task extends BaseModel
             $notificationObj = new TaskStatusChange($this, $notification_data);
 
             if ($this->assign_to_user_id == LaravelExtend::getAuthUserId()) {
+                $created_by_user = User::find($this->created_by);
                 if ($created_by_user)
                 {
                     $created_by_user->notify($notificationObj);

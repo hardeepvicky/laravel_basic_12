@@ -567,37 +567,73 @@ class TaskController extends BackendController
 
     public function status_confirm($id)
     {
-        $this->model = $this->modelClass::findOrFail($id);
+        try {
+            $this->model = $this->modelClass::findOrFail($id);
 
-        $this->model->changeStatus(Task::STATUS_CONFIRM);
+            $this->model->changeStatus(Task::STATUS_CONFIRM);
 
-        return back()->with("success", "Status Changed Successfully");
+            $this->saveSqlLog();
+
+            return back()->with("success", "Status Changed Successfully");
+        }
+        catch(Exception $ex)
+        {
+            $this->saveSqlLog();
+            throw $ex;
+        }
     }
 
     public function status_in_progress($id)
     {
-        $this->model = $this->modelClass::findOrFail($id);
+        try {
+            $this->model = $this->modelClass::findOrFail($id);
 
-        $this->model->changeStatus(Task::STATUS_IN_PROGRESS);
+            $this->model->changeStatus(Task::STATUS_IN_PROGRESS);
 
-        return back()->with("success", "Status Changed Successfully");
+            $this->saveSqlLog();
+
+            return back()->with("success", "Status Changed Successfully");
+        }
+        catch(Exception $ex)
+        {
+            $this->saveSqlLog();
+            throw $ex;
+        }
     }
 
     public function status_complete($id)
     {
-        $this->model = $this->modelClass::findOrFail($id);
+        try {
+            $this->model = $this->modelClass::findOrFail($id);
 
-        $this->model->changeStatus(Task::STATUS_COMPLETED);
+            $this->model->changeStatus(Task::STATUS_COMPLETED);
 
-        return back()->with("success", "Status Changed Successfully");
+            $this->saveSqlLog();
+
+            return back()->with("success", "Status Changed Successfully");
+        }
+        catch(Exception $ex)
+        {
+            $this->saveSqlLog();
+            throw $ex;
+        }
     }
 
     public function status_verified($id)
     {
-        $this->model = $this->modelClass::findOrFail($id);
+        try {
+            $this->model = $this->modelClass::findOrFail($id);
 
-        $this->model->changeStatus(Task::STATUS_VERIFIED);
+            $this->model->changeStatus(Task::STATUS_VERIFIED);
 
-        return back()->with("success", "Status Changed Successfully");
+            $this->saveSqlLog();
+
+            return back()->with("success", "Status Changed Successfully");
+        }
+        catch(Exception $ex)
+        {
+            $this->saveSqlLog();
+            throw $ex;
+        }
     }
 }

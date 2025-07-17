@@ -39,7 +39,7 @@
                     <div class="col-md-3 mb-2">
                         <?php
                         $field = 'to_user_id';
-                        $label = get_value_from_list($field_labels, $field, $field);
+                        $label = get_value_from_list($field_labels, 'notifiable_id', 'notifiable_id');
                         ?>
                         <x-Inputs.drop-down :name="$field" :label="$label" :value="$search[$field]" :list="$to_user_list"
                             class="select2" />
