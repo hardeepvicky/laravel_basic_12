@@ -70,4 +70,11 @@ class Department extends BaseModel
 
         return $field_rules;
     }
+
+    public function afterFind()
+    {
+        parent::afterFind();
+
+        $this->convertTimeZoneForDisplay();
+    }
 }
