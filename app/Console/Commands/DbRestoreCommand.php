@@ -183,17 +183,20 @@ class DbRestoreCommand extends MyCommand
 
             foreach ($files as $k => $file)
             {
-                $file_name = pathinfo($file, PATHINFO_FILENAME);
+                if (strpos($file, "_st.sql") === false) 
+                {
+                    $file_name = pathinfo($file, PATHINFO_FILENAME);
 
-                $this->line($file_name);
+                    $this->line($file_name);
 
-                $command = 'mysql -P' . $db_config['port'] . ' -u' . $db_config['username'] . ' -p' . $db_config['password'] . ' ' . $db_name . ' < "' . $file . '"';
+                    $command = 'mysql -P' . $db_config['port'] . ' -u' . $db_config['username'] . ' -p' . $db_config['password'] . ' ' . $db_name . ' < "' . $file . '"';
 
-                exec($command, $output, $return_var);
+                    exec($command, $output, $return_var);
 
-                if ($return_var == 2) {
-                    $this->error("Command is not working");
-                    $this->info($command);
+                    if ($return_var == 2) {
+                        $this->error("Command is not working");
+                        $this->info($command);
+                    }
                 }
             }
         }
