@@ -11,7 +11,9 @@ class DropDownValue extends BaseModel
     protected $appends = [
         'display_name',
     ];
-    
+
+    protected static array $unique_fields = ["type", "name"];
+
     const TASK_ACTION_TAKEN = "TASK_ACTION_TAKEN";
     const TASK_RESPONSE = "TASK_RESPONSE";
 
