@@ -1,7 +1,15 @@
-
+<?php
+use App\Helpers\LaravelExtend;
+?>
 <div class="celec_info">
-    <div class="label text-center">{{ $record->id }}</div>
-    <div class="divider"></div>
+    @if (isset($labelInfo) && $labelInfo)
+        @foreach($labelInfo as $label)
+            <div class="label text-center">{!! $label !!}</div>
+            <div class="divider"></div>
+        @endforeach
+    @endif
+    
+
     <div class="p-1">
         <x-Backend.summary-comman-actions :id="$record->id" :routePrefix="$routePrefix" :buttons="$buttons"/>
         <span class="btn btn-info btn-xs css-toggler mt-1 mb-1"
