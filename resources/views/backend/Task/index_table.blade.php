@@ -20,11 +20,8 @@ use App\Models\Task;
                         <th style="width:8%">Time & Duration</th>
                         <th style="width:5%"><?= sortable_anchor('status', get_value_from_list($field_labels, 'status', 'status')) ?> </th>
                         <th style="width:10%">{{ get_value_from_list($field_labels, 'tag_name', 'tag_name') }}</th>
-                        <th style="width:10%">
-                            <?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?>
-                            |
-                            <?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?>
-                        </th>
+                        <th style="width:6%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
+                        <th style="width:6%"><?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -53,7 +50,10 @@ use App\Models\Task;
                         <td>{{ get_value_from_list($status_list, $record->status) }}</td>
                         <td>{{ implode(", ", $record->tags->pluck("name")->toArray()) }}</td>
                         <td>
-                            <x-Backend.index-table-info :record="$record" :userList="$userListCache" />
+                            <x-Backend.created-and-by :datetime="$record->created_at" :userId="$record->created_by" />
+                        </td>
+                        <td>
+                            <x-Backend.created-and-by :datetime="$record->updated_at" :userId="$record->updated_by" />
                         </td>
                     </tr>
                     <tr id="record-{{ $record->id }}" class="hidden">

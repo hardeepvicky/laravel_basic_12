@@ -14,7 +14,7 @@ class Tag extends BaseModel
        
     ];
 
-    protected static array $unique_fields = ["main_model", "main_table_field", "main_id"];
+    protected static array $unique_fields = ["main_model", "main_table_field", "main_id", "name"];
 
     protected $appends = [
         'display_name',

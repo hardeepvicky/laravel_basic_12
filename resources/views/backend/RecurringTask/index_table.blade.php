@@ -20,13 +20,10 @@ use App\Models\RecurringTask;
                         <th style="width:10%">Time & Duration</th>
                         <th style="width:8%"><?= sortable_anchor('recurring_type', get_value_from_list($field_labels, 'recurring_type', 'recurring_type')) ?></th>
                         <th style="width:5%"><?= sortable_anchor('is_draft', get_value_from_list($field_labels, 'is_draft', 'is_draft')) ?></th>
-                        <th style="width:5%"><?= sortable_anchor('is_active', get_value_from_list($field_labels, 'is_active', 'is_active')) ?></th>
+                        <th style="width:8%"><?= sortable_anchor('is_active', get_value_from_list($field_labels, 'is_active', 'is_active')) ?></th>
                         <th style="width:8%">Task created by system</th>
-                        <th style="width:10%">
-                            <?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?>
-                            |
-                            <?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?>
-                        </th>
+                        <th style="width:6%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
+                        <th style="width:6%"><?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -59,7 +56,10 @@ use App\Models\RecurringTask;
                             </td>
                             <td>{{ $record->tasks->count() }}</td>
                             <td>
-                                <x-Backend.index-table-info :record="$record" :userList="$userListCache" />
+                                <x-Backend.created-and-by :datetime="$record->created_at" :userId="$record->created_by" />
+                            </td>
+                            <td>
+                                <x-Backend.created-and-by :datetime="$record->updated_at" :userId="$record->updated_by" />
                             </td>
                         </tr>
                         <tr id="record-{{ $record->id }}" class="hidden">

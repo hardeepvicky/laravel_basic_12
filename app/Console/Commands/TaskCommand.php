@@ -60,7 +60,7 @@ class TaskCommand extends MyCommand
 
             $main_counts['task']['status_change'] = 0;
 
-            $qb = RecurringTask::where("is_draft", 0);
+            $qb = RecurringTask::where("is_draft", 0)->where("is_active", 1);
 
             SqlLog::addSelectQuery($qb);
             
