@@ -7,6 +7,8 @@ use Illuminate\Validation\Rules\Unique;
 
 class ProductCategoryAttribute extends BaseModel
 {
+    protected static array $unique_fields = ["product_category_id", "name"];
+    
     public static array $child_model_class = [
         // User::class => [
         //     "foreignKey" => ["sub_department_id"],

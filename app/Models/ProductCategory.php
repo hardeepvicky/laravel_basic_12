@@ -15,6 +15,8 @@ class ProductCategory extends BaseModel
         'display_name',
     ];
 
+    protected static array $unique_fields = ["parent_id", "name"];
+
     public static array $child_model_class = [
         Product::class => [
             "foreignKey" => "product_category_id",
@@ -77,7 +79,7 @@ class ProductCategory extends BaseModel
     public function getUniqueValidationRules(Request $request)
     {
         $field_rules = [
-            "name" => [Rule::unique($this->connection . "." . $this->getTable(), "name")],
+            "name" => [Rule::unique($this->connection . "." . $this->getTable(), "name")->where("parent_id", $request->get("parent_id"))],
         ];
 
         if ($this->id) {
