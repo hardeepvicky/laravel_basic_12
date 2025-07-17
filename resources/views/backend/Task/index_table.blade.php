@@ -32,7 +32,7 @@ use App\Models\Task;
                     @foreach ($records as $record)
                     <tr>
                         <th scope="row">
-                            <x-Backend.celec-summary-table-first-column :record="$record" :routePrefix="$routePrefix" />
+                            <x-Backend.celec-summary-table-first-column :record="$record" :routePrefix="$routePrefix" buttons="history,edit,delete"/>
                         </th>
                         <td>{{ $record->name }}</td>
                         <td>

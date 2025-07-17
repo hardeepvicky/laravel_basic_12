@@ -701,8 +701,6 @@ class WebController extends Controller
         try {
             DB::beginTransaction();
 
-            $this->beforeDelete($model);
-
             $this->deleteCascade($model);
 
             DB::commit();

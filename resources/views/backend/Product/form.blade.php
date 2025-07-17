@@ -25,7 +25,7 @@
                                 $label = get_value_from_list($field_labels, $field, $field);
                                 ?>
                                 <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$product_category_list"
-                                    value="{{ $model->{$field} }}" class="select2"/>
+                                    value="{{ $model->{$field} }}" class="select2" mandatory="true" />
                             </div>
                             <div class="form-group mb-3">
                                 <?php

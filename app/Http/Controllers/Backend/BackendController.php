@@ -98,6 +98,8 @@ class BackendController extends WebController
         try {
             $model = $this->modelClass::findOrFail($id);
 
+            $this->beforeDelete($model);
+
             if (!$this->delete($model)) {
                 throw new Exception("Fail to Delete");
             }

@@ -8,6 +8,14 @@
     </li>
     @endif
 
+    @if(in_array("history", $buttonList))
+    <li>
+        <a class="btn btn-outline-info summary-action-button" href="{{ route($routePrefix . '.history',[$id]) }}">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+        </a>
+    </li>
+    @endif
+
     @if(in_array("edit", $buttonList))
     <li>
         <a class="btn btn-outline-primary summary-action-button" href="{{ route($routePrefix . '.edit',[$id]) }}">

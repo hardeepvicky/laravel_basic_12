@@ -122,6 +122,11 @@ class Task extends BaseModel
         return $this->hasMany(TaskUser::class, 'task_id');
     }
 
+    public function taskTakenAction()
+    {
+        return $this->hasMany(TaskTakenAction::class, 'task_id');
+    }
+
     protected function getDisplayNameAttribute()
     {
         return $this->getDisplayName();

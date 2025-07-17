@@ -6,12 +6,14 @@ use App\Exceptions\UserException;
 use App\Helpers\DateUtility;
 use App\Helpers\LaravelExtend;
 use App\Models\Department;
+use App\Models\DropDownValue;
 use App\Models\FieldSetting;
 use App\Models\RecurringTask;
 use App\Models\Role;
 use App\Models\SqlLog;
 use App\Models\Tag;
 use App\Models\Task;
+use App\Models\TaskTakenAction;
 use App\Models\Type;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -64,12 +66,14 @@ class TaskController extends BackendController
         $builder = $this->modelClass::where($conditions);
 
         $builder->with([
-            "department", "assignToUser", "tags", "user"
+            "department",
+            "assignToUser",
+            "tags",
+            "user"
         ]);
 
-        if ($tag_conditions)
-        {
-            $builder->wherehas("tags", function($query) use($tag_conditions) {
+        if ($tag_conditions) {
+            $builder->wherehas("tags", function ($query) use ($tag_conditions) {
                 $query->where($tag_conditions);
             });
         }
@@ -101,7 +105,10 @@ class TaskController extends BackendController
         }
 
         $status_code_list = [
-            Task::STATUS_ASSIGNED, Task::STATUS_CONFIRM, Task::STATUS_IN_PROGRESS, TASK::STATUS_COMPLETED
+            Task::STATUS_ASSIGNED,
+            Task::STATUS_CONFIRM,
+            Task::STATUS_IN_PROGRESS,
+            TASK::STATUS_COMPLETED
         ];
 
         $builder = $this->modelClass::whereIn("status", $status_code_list);
@@ -136,20 +143,15 @@ class TaskController extends BackendController
 
         $builder = $this->modelClass::whereIn("status", $status_code_list)->where($conditions);
 
-        if ($auth_user->hasRole(Role::TYPE_SYSTEM_ADMIN))
-        {
-            
-        }
-        else
-        {
+        if ($auth_user->hasRole(Role::TYPE_SYSTEM_ADMIN)) {
+        } else {
             $child_user_id_list = $auth_user->designation->getUserIdListBasedOnDesignationLevel();
-            if ($child_user_id_list)
-            {
+            if ($child_user_id_list) {
                 $builder->whereIn("assign_to_user_id", $child_user_id_list);
             }
         }
 
-        
+
         $builder->where(function ($query) use ($auth_user_id) {
             $query->whereNot("assign_to_user_id", $auth_user_id);
         });
@@ -201,8 +203,7 @@ class TaskController extends BackendController
             $exist_user_ids[] = $this->model->assign_to_user_id;
         }
 
-        if ($exist_user_ids)
-        {
+        if ($exist_user_ids) {
             $conditions['or_id'] = $exist_user_ids;
         }
 
@@ -342,11 +343,11 @@ class TaskController extends BackendController
             }
 
             $this->_saveOthers($validatedData);
-            
+
             if (LaravelExtend::$errors) {
                 throw new Exception("There are some errors");
             }
-            
+
             $this->updateUserInfoAfterSave($this->model);
 
             DB::commit();
@@ -371,8 +372,7 @@ class TaskController extends BackendController
 
         $validatedData['end_date_time'] = null;
 
-        if (isset($validatedData['start_date_time']) && isset($validatedData['duration_type']) && isset($validatedData['duration']))
-        {
+        if (isset($validatedData['start_date_time']) && isset($validatedData['duration_type']) && isset($validatedData['duration'])) {
             $validatedData['end_date_time'] = Task::getEndDate($validatedData['start_date_time'], $validatedData['duration'], $validatedData['duration_type']);
         }
 
@@ -383,29 +383,25 @@ class TaskController extends BackendController
 
     private function _saveOthers($validatedData)
     {
-        if (isset($validatedData['taskUser']) && is_array($validatedData['taskUser']))
-        {
-            $users = User::find($validatedData['taskUser']);            
+        if (isset($validatedData['taskUser']) && is_array($validatedData['taskUser'])) {
+            $users = User::find($validatedData['taskUser']);
             $this->model->user()->sync($users);
         }
 
-        if (isset($validatedData['tag_name']))
-        {
+        if (isset($validatedData['tag_name'])) {
             $model_class_name = str_class_name_without_namespace($this->modelClass);
 
-            if (!$model_class_name)
-            {
+            if (!$model_class_name) {
                 throw new UserException("could not found model_class_name");
             }
 
             $model_class_name = str_class_name_to_human_text($model_class_name);
-            
+
             $tag_names = explode(",", $validatedData['tag_name']);
 
             $this->model->tags()->delete();
 
-            foreach($tag_names as $tag_name)
-            {
+            foreach ($tag_names as $tag_name) {
                 $save_data = [
                     "main_table_field" => "name",
                     "name" => $tag_name,
@@ -426,21 +422,19 @@ class TaskController extends BackendController
 
         $not_editable_status_codes = [Task::STATUS_COMPLETED, Task::STATUS_VERIFIED];
 
-        if (in_array($model->status, $not_editable_status_codes) )
-        {
+        if (in_array($model->status, $not_editable_status_codes)) {
             $type_conditions = [];
             $type_conditions['type'] = Type::getType($this, "status");
             $status_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
-            
+
             $error_msg = "Can't Edit, Task Status is " . $status_list[$model->status];
 
             $not_delete_label = [];
 
-            foreach($not_editable_status_codes as $status_code)
-            {
-                $not_delete_label[] = $status_list[$status_code];                
+            foreach ($not_editable_status_codes as $status_code) {
+                $not_delete_label[] = $status_list[$status_code];
             }
-            
+
             $error_msg .= ", Status with " . implode(", ", $not_delete_label);
 
             $error_msg .= " can not be delete";
@@ -455,8 +449,7 @@ class TaskController extends BackendController
 
         $error_msg = "";
 
-        if (!$model->canDelete($error_msg))
-        {
+        if (!$model->canDelete($error_msg)) {
             throw new UserException($error_msg, UserException::ERROR_USER_ACTION_RESTRICT);
         }
     }
@@ -575,9 +568,7 @@ class TaskController extends BackendController
             $this->saveSqlLog();
 
             return back()->with("success", "Status Changed Successfully");
-        }
-        catch(Exception $ex)
-        {
+        } catch (Exception $ex) {
             $this->saveSqlLog();
             throw $ex;
         }
@@ -593,9 +584,7 @@ class TaskController extends BackendController
             $this->saveSqlLog();
 
             return back()->with("success", "Status Changed Successfully");
-        }
-        catch(Exception $ex)
-        {
+        } catch (Exception $ex) {
             $this->saveSqlLog();
             throw $ex;
         }
@@ -611,9 +600,7 @@ class TaskController extends BackendController
             $this->saveSqlLog();
 
             return back()->with("success", "Status Changed Successfully");
-        }
-        catch(Exception $ex)
-        {
+        } catch (Exception $ex) {
             $this->saveSqlLog();
             throw $ex;
         }
@@ -629,11 +616,111 @@ class TaskController extends BackendController
             $this->saveSqlLog();
 
             return back()->with("success", "Status Changed Successfully");
-        }
-        catch(Exception $ex)
-        {
+        } catch (Exception $ex) {
             $this->saveSqlLog();
             throw $ex;
+        }
+    }
+
+    public function history($id, Request $request)
+    {
+        $record = $this->modelClass::with(["tags", "taskUser", "taskTakenAction"])->findOrFail($id);
+
+        $model = new TaskTakenAction();
+
+        if ($request->isMethod('post')) {
+            $rules = [
+                "action_taken_id" => ["required"],
+                "response_taken_id" => ["required"],
+                "remarks" => "",
+            ];
+
+            $validatedData = $request->validate($rules);
+
+            DB::beginTransaction();
+
+            try {
+
+                $save_data = $validatedData;
+
+                $save_data = $model->convertTimeZoneBeforeQueryToDatabase($save_data);
+
+                // dd($save_data);
+
+                $save_data['task_id'] = $id;
+
+                $model->fill($save_data);
+
+                if (!$model->save()) {
+                    throw new UserException("Fail To save", UserException::ERROR_LARAVEL_FAIL);
+                }
+
+                if (LaravelExtend::$errors) {
+                    throw new Exception("There are some errors");
+                }
+
+                DB::commit();
+
+                return back()->with('success', "History has saved");
+
+            } catch (Exception $ex) {
+                DB::rollBack();
+
+                $this->saveSqlLog();
+
+                return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", LaravelExtend::$errors);
+            }
+        }
+
+        $record->convertTimeZoneForDisplay();
+
+        $history_records = TaskTakenAction::where("task_id", $id)->orderBy("id", "DESC")->get();
+
+        $form = [
+            'url' => route($this->routePrefix . '.history', $id),
+            'method' => 'POST',
+        ];
+
+        $task_taken_actions_fields = FieldSetting::getDynamicFields($model);
+
+        $action_list = DropDownValue::getList("id", "display_name", ["type" => DropDownValue::TASK_ACTION_TAKEN]);
+
+        $response_list = DropDownValue::getList("id", "display_name", ["type" => DropDownValue::TASK_RESPONSE]);
+
+        $this->setForView(compact("record", "form", "model", "task_taken_actions_fields", "action_list", "response_list", "history_records"));
+
+        return $this->view(__FUNCTION__);
+    }
+
+    public function history_destroy($id)
+    {
+        $request = request();
+
+        try {
+            $model = TaskTakenAction::findOrFail($id);
+
+            if (!$this->delete($model)) {
+                throw new Exception("Fail to Delete");
+            }
+
+            $msg = "Task History deleted successfully";
+
+            $this->saveSqlLog();
+
+            if ($request->ajax()) {
+                return response()->json(['status' => 1, 'msg' => $msg]);
+            }
+
+            return back()->with('success', $msg);
+
+        } catch (\Exception $ex) {
+            if ($request->ajax()) {
+                return $this->responseJson(['status' => 0, 'msg' => $ex->getMessage()]);
+            }
+
+            $this->saveSqlLog();
+
+            return back()->with('fail', $ex->getMessage());
         }
     }
 }

@@ -113,6 +113,7 @@ use App\Helpers\LaravelExtend;
     <script src="{{ get_asset_url('assets/libs/ejs.min.js') }}"></script>
     <script src="{{ get_asset_url('assets/libs/jquery.form.min.js') }}"></script>
     <script src="{{ get_asset_url('assets/libs/typeahead.js-0.11.1/dist/typeahead.bundle.min.js') }}"></script>
+    <script src="{{ get_asset_url('assets/js/custom-card/custom-card.js') }}"></script>
 
     <script src="{{ get_asset_url('assets/js/config.js') }}"></script>
     <script src="{{ get_asset_url('assets/js/script.js') }}"></script>

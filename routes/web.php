@@ -12,6 +12,7 @@ use App\Http\Controllers\Backend\DashboardController;
 use App\Http\Controllers\Backend\DepartmentController;
 use App\Http\Controllers\Backend\DesignationController;
 use App\Http\Controllers\Backend\DeveloperController;
+use App\Http\Controllers\Backend\DropDownValueController;
 use App\Http\Controllers\Backend\EmployeeController;
 use App\Http\Controllers\Backend\EnquiryController as BackendEnquiryController;
 use App\Http\Controllers\Backend\NotificationController;
@@ -237,6 +238,21 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
         Route::get($name . "/{type}", [$controllerClass, $name])->name($name);
     });
 
+    $route_prefix = "drop-down-value";
+    $controllerClass = DropDownValueController::class;
+    Route::resource($route_prefix, $controllerClass);
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
+        $name = "activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "de_activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "ajax_get_list";
+        Route::get($name . "/{type}", [$controllerClass, $name])->name($name);
+    });
+
     $route_prefix = "user-category";
     $controllerClass = UserCategoryController::class;
     Route::resource($route_prefix, $controllerClass);
@@ -285,6 +301,12 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
 
         $name = "status_verified";
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "history";
+        Route::any($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "history_destroy";
+        Route::delete($name . "/{id}", [$controllerClass, $name])->name($name);
 
         $name = "ajax_get";
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
