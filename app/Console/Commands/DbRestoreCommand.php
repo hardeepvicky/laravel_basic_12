@@ -52,7 +52,7 @@ class DbRestoreCommand extends MyCommand
         $options = $flip_options = [];
 
         foreach ($db_config_list as $key => $arr) {
-            $name =  $arr['database'] . " (" . $arr['driver'] . ")";
+            $name =  $key . " (" . $arr['driver'] . ")";
             $options[] = $name;
             $flip_options[$name] = $key;
         }
@@ -94,7 +94,7 @@ class DbRestoreCommand extends MyCommand
 
         if (!file_exists($path))
         {
-            $this->info("there is no any folder at self::$path");
+            $this->info("there is no any folder at " . self::$path);
             return;
         }
 
