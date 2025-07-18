@@ -12,6 +12,8 @@ use App\Http\Controllers\Backend\DashboardController;
 use App\Http\Controllers\Backend\DepartmentController;
 use App\Http\Controllers\Backend\DesignationController;
 use App\Http\Controllers\Backend\DeveloperController;
+use App\Http\Controllers\Backend\DocumentCategoryController;
+use App\Http\Controllers\Backend\DocumentFileController;
 use App\Http\Controllers\Backend\DropDownValueController;
 use App\Http\Controllers\Backend\EmployeeController;
 use App\Http\Controllers\Backend\EnquiryController as BackendEnquiryController;
@@ -397,6 +399,32 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
     });
 
+    $route_prefix = "document-category";
+    $controllerClass = DocumentCategoryController::class;
+    Route::resource($route_prefix, $controllerClass);
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
+        $name = "activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "de_activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "ajax_get";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+    });
+
+    $route_prefix = "document-file";
+    $controllerClass = DocumentFileController::class;
+    Route::resource($route_prefix, $controllerClass);
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
+        $name = "add_via_upload";
+        Route::get($name, [$controllerClass, $name])->name($name);
+
+        $name = "ajax_get";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+    });
 
     $route_prefix = "enquiries";
     $controllerClass = EnquiryController::class;

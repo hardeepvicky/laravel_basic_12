@@ -262,10 +262,18 @@ class Menu
         $list = [];
         foreach ($menus as $menu) {
             if (isset($menu['route_name'])) {
-                $list[] = [
+
+                $row = [
                     "title" => $prefix . $menu['title'],
-                    "url" => route($menu['route_name'])
+                    'url' => '#'
                 ];
+
+                if (Route::has($menu['route_name']))
+                {
+                    $row['url'] = route($menu['route_name']);
+                }
+
+                $list[] = $row;
             } else if (isset($menu["links"])) {
                 $list = array_merge($list, self::getList($menu["links"], $prefix . $menu['title'] . " -> "));
             }

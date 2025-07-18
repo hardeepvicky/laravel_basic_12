@@ -663,6 +663,12 @@ class WebController extends Controller
             throw_exception("msg variable required");
         }
 
+        $request = request();
+
+        if ($request->ajax()) {
+            return $this->responseJson(['status' => 1, 'msg' => $msg]);
+        }
+
         $this->saveSqlLog();
 
         $redirect_to_index = (bool) request("redirect_to_index", false);

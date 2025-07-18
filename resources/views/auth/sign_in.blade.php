@@ -72,6 +72,12 @@ use App\Models\User;
                         Register
                     </a>
                 </div>
+                <div class="col-md-6 mb-3">
+                    <a href="/login" class="btn btn-have-icon d-flex align-items-center justify-content-center">
+                        <i class="fa-solid fa-user-secret"></i>
+                        Login
+                    </a>
+                </div>
             </div>
         </form>
 

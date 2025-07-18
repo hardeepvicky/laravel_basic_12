@@ -368,3 +368,31 @@ function showProgressToast() {
     // Simulate progress over time
     interval = setInterval(updateProgress, 500); // Update every 0.5 seconds
 }
+
+
+function getBasenameFromPath(path) {
+    // Find the last occurrence of '/' or '\'
+    const lastSlashIndex = Math.max(path.lastIndexOf('/'), path.lastIndexOf('\\'));
+
+    // If a slash is found, return the substring after it
+    if (lastSlashIndex !== -1) {
+        return path.substring(lastSlashIndex + 1);
+    }
+
+    // If no slash is found, the whole path is likely the filename
+    return path;
+}
+
+function getFilenameFromPath(path)
+{
+    path = getBasenameFromPath(path);
+
+    const lastIndex = path.lastIndexOf('.');
+
+    // If a slash is found, return the substring after it
+    if (lastIndex !== -1) {
+        return path.substring(0, lastIndex);
+    }
+
+    return path;
+}

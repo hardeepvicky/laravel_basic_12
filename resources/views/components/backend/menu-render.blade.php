@@ -1,4 +1,5 @@
 <?php 
+use Illuminate\Support\Facades\Route;
 if (!isset($level))
 {
     $level = 0;
@@ -8,12 +9,19 @@ if (!isset($level))
 <ul {{ $attributes->merge() }} style="display: none;" data-level="{{ $level }}">
     <?php foreach($menus as $menu): ?>
     <li>
-        <?php if(isset($menu['route_name']) && $menu['route_name']): ?>
-        <a href="{{ route($menu['route_name']) }}"
-            class="menu-a {{ $menu['is_active'] ? 'active' : '' }}">
-            <i class="{{ $menu['icon'] }}"></i>
-            <span>{{ $menu['title'] }}</span>
-        </a>
+        <?php 
+        if(isset($menu['route_name']) && $menu['route_name']): 
+            $url = "#";
+            if (Route::has($menu['route_name']))
+            {
+                $url = route($menu['route_name']);
+            }
+        ?>
+
+            <a href="{{ $url }}" class="menu-a {{ $menu['is_active'] ? 'active' : '' }}">
+                <i class="{{ $menu['icon'] }}"></i>
+                <span>{{ $menu['title'] }}</span>
+            </a>
         <?php else: ?>
         <a href="javascript:void(0);" class="accordian-title-level-{{ $level }}" data-level="{{ $level }}">
             <i class="{{ $menu['icon'] }}"></i>

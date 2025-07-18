@@ -18,7 +18,7 @@ class FileUtility
     }
 
     /**
-     * return filename which which will be save 
+     * return filename which which will be save
      * @param string $filename
      * @param string $ext
      * @param string $dest_path
@@ -26,7 +26,7 @@ class FileUtility
      */
     public static function getAutoincreamentFileName($filename, $ext, $dest_path, $sep = "_", $i = 0)
     {
-        $temp_name = $i > 0 ? $filename . $sep . $i : $filename;
+        $temp_name = $i > 0 ? ($filename . $sep . $i) : $filename;
 
         if (file_exists($dest_path . $temp_name . "." . $ext)) {
             return self::getAutoincreamentFileName($filename, $ext, $dest_path, $sep, $i + 1);
@@ -70,7 +70,7 @@ class FileUtility
         {
             throw new UserException("path not found : $path");
         }
-        
+
         $files = scandir($path);
         $ret_files = array();
 
@@ -336,5 +336,120 @@ class FileUtility
         }
 
         return null;
+    }
+
+    public static function getFileTypeFromExt($ext)
+    {
+        $ext_types = [
+            'js'   => 'javascript',
+            'json' => 'json',
+            'xml'  => 'xml',
+            'csv'  => 'csv',
+            'php'  => 'php',
+            'psd'  => 'psd',
+            'pdf'  => 'pdf',
+            'doc'  => 'doc',
+            'docx' => 'docx',
+            'xls'  => 'xls',
+            'xlsx' => 'xlsx',
+            'ppt'  => 'ppt',
+            'pptx' => 'pptx',
+            'odt'  => 'document',
+            'ods'  => 'spreadsheet',
+            'odp'  => 'presentation',
+            'zip'  => 'zip',
+            'rar'  => 'rar',
+            'tar'  => 'tar',
+            'gz'   => 'gzip',
+            '7z'   => '7z',
+            'apk'  => 'apk',
+            'dmg'  => 'dmg',
+            'exe'  => 'exe',
+            'bin'  => 'bin',
+            'dll'  => 'dll',
+        ];
+
+        if (isset($ext_types[$ext]))
+        {
+            return $ext_types[$ext];
+        }
+
+        $mime_type = get_mime_type_from_extension($ext);
+
+        $arr = explode("/", $mime_type);
+
+        return $arr[0];
+    }
+
+    public static function getFontAwesomeOnType($type)
+    {
+        switch($type)
+        {
+            case "csv";
+                return "fa-solid fa-file-csv";
+            break;
+
+            case "pdf";
+                return "fa-solid fa-file-pdf";
+            break;
+
+            case "xls";
+            case "xlsx";
+                return "fa-solid fa-file-excel";
+            break;
+
+            case "doc";
+            case "docx";            
+                return "fa-solid fa-file-word";
+            break;
+
+            case "ppt":
+            case "pptx":
+                return "fa-solid fa-file-ppt";
+                break;
+
+            case "document";
+                return "fa-solid fa-file-doc";
+                break;
+
+            case "spreadsheet":
+            case "csv":
+                return "fa-solid fa-file-spreadsheet";
+                break;
+            
+            case "presentation":
+                return "fa-solid fa-file-powerpoint";
+                break;
+
+            case "zip":
+            case "rar":
+            case "tar":
+            case "gzip":
+            case "7z":
+                return "fa-solid fa-file-zip";
+                break;
+
+            case "bin":
+                return "fa-solid fa-square-binary";
+                break;
+
+            case "text":
+                return "fa-solid fa-file-lines";
+                break;
+
+            case "audio":
+                return "fa-solid fa-file-audio";
+                break;
+
+            case "video":
+                return "fa-solid fa-file-video";
+                break;
+
+            case "image":
+                return "fa-solid fa-file-image";
+                break;
+        }
+
+        return "fa-solid fa-file";
     }
 }

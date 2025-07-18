@@ -38,6 +38,8 @@ use App\Helpers\LaravelExtend;
     <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/libs/select2/select2-dark.css') }}" />
     <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/libs/Croppie-2.6.4/croppie.css') }}" />
     <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/libs/fancybox/dist/jquery.fancybox.min.css') }}" />
+    <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/libs/jquery-file-validator/css/file-validator.css') }}" />
+
     <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/css/vendors/flatpickr/flatpickr.min.css') }}">    
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js@11.1.0/public/assets/styles/choices.min.css">
@@ -113,8 +115,9 @@ use App\Helpers\LaravelExtend;
     <script src="{{ get_asset_url('assets/libs/ejs.min.js') }}"></script>
     <script src="{{ get_asset_url('assets/libs/jquery.form.min.js') }}"></script>
     <script src="{{ get_asset_url('assets/libs/typeahead.js-0.11.1/dist/typeahead.bundle.min.js') }}"></script>
+    <script src="{{ get_asset_url('assets/libs/jquery-file-validator/js/file-validator.js') }}"></script>
+    
     <script src="{{ get_asset_url('assets/js/custom-card/custom-card.js') }}"></script>
-
     <script src="{{ get_asset_url('assets/js/config.js') }}"></script>
     <script src="{{ get_asset_url('assets/js/script.js') }}"></script>
     <script src="{{ get_asset_url('assets/js/height-equal.js') }}"></script>
@@ -123,6 +126,7 @@ use App\Helpers\LaravelExtend;
     <script src="{{ get_asset_url('assets/js/scrollbar/custom.js') }}"></script>
     <script src="{{ get_asset_url('assets/js/range/rangeslider.nostyle.umd.min.js') }}"></script>
     <script src="{{ get_asset_url('assets/js/range/rangeslider.umd.min.js') }}"></script>
+    <script src="{{ get_asset_url('assets/js/clipboard/clipboard.min.js') }}"></script>
 
     <script src="{{ get_asset_url('assets/js/theme-customizer/customizer.js') }}"></script>
 

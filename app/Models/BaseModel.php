@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\Auth;
 class BaseModel extends Model implements BaseModelInterface
 {
     use StorageTrait, CacheTrait, ModelListTrait, CommonModelTrait, MysqlTableInfoTrait, CommonMysqlModelTrait;
-    
+
     /**
      * set extra relationship array to overcome problem of accidential delete
      * this variable used in Controller.php -> delete()
@@ -58,7 +58,7 @@ class BaseModel extends Model implements BaseModelInterface
             $model->beforeSave();
         });
 
-        self::created(function ($model) {            
+        self::created(function ($model) {
             $model->afterSave();
         });
 
@@ -82,7 +82,7 @@ class BaseModel extends Model implements BaseModelInterface
             $model->beforeDelete();
         });
 
-        self::deleted(function ($model) {            
+        self::deleted(function ($model) {
             $model->forgotCache();
         });
     }
@@ -114,7 +114,7 @@ class BaseModel extends Model implements BaseModelInterface
                 ModuleLink::saveLinksFromStringPattern($this, $field, $this->{$field});
             }
         }
-    } 
+    }
 
     public function beforeDelete() {
         if ($this->custom_errors) {
@@ -192,7 +192,7 @@ class BaseModel extends Model implements BaseModelInterface
 
         return static::optimizeCacheKey($str);
     }
-    
+
     public static function getFileFields()
     {
         return static::$file_fields;
