@@ -1,16 +1,65 @@
 @extends($layout)
 
 @section('content')
-    <div class="file-content">
-        <div class="card">
-            <div class="card-header d-md-block d-none card-no-border pb-0">
+    <?php
+    $false = false;
+    $paginationList = [
+        10 => 10,
+        15 => 15,
+        20 => 20,
+        25 => 25,
+        30 => 30,
+        40 => 40,
+        50 => 50,
+    ];
+    ?>
+    <div class="card">
+        <div class="card-header d-md-block d-none card-no-border pb-0">
+            <div class="file-content b-b-primary p-2">
                 <div class="d-md-flex d-sm-block align-items-center">
-                    <form class="form-inline basic-form" action="#" method="get">
-                        <div class="form-group d-flex mb-0 align-items-center"><i class="fa-solid fa-magnifying-glass"></i>
-                            <input class="form-control-plaintext" type="text" placeholder="Search...">
-                        </div>
-                    </form>
-                    <div class="flex-grow-1 text-end">
+                    <div class="flex-grow-1">
+                        <form method="GET" class="summary_search" action="{{ route($current_route_name) }}">
+                            <input type="hidden" name="is_sort_clear" value="1" />
+                            <div class="row">
+                                <div class="col-md-1 mb-2">
+                                    <?php
+                                    $field = 'pagination_limit';
+                                    ?>
+                                    <x-Inputs.drop-down :name="$field" label="Limit" :list="$paginationList" :value="$pagination_limit" :pleaseSelect="$false"
+                                        class="pagination_limit" />
+                                </div>
+                                <div class="col-md-6 col-xxl-3 mb-2">
+                                    <?php 
+                                        $field = "type";
+                                        $label = get_value_from_list($field_labels, $field, $field);
+                                    ?>
+                                    <x-Inputs.drop-down :name="$field" :label="$label" :value="$search[$field]" :list="$type_list" class="select2" />
+                                </div>
+                                <div class="col-md-6 col-xxl-3 mb-2">
+                                    <?php 
+                                        $field = "document_category_id";
+                                        $label = get_value_from_list($field_labels, $field, $field);
+                                        $category_list = [0 => "-"] + $category_list;
+                                    ?>
+                                    <x-Inputs.drop-down :name="$field" :label="$label" :value="$search[$field]" :list="$category_list" class="select2" />
+
+                                    <?php 
+                                        $field = "is_find_nested_child";
+                                    ?>
+                                    <x-Inputs.checkbox :name="$field" label="Find Nested Child" :value="$search[$field]" />
+                                </div>
+                                <div class="col-md-3 col-xxl-2 mb-2">
+                                    <?php
+                                    $field = 'name';
+                                    $label = get_value_from_list($field_labels, $field, $field);
+                                    ?>
+                                    <x-Inputs.text-field :name="$field" :label="$label" :value="$search[$field]" />
+                                </div>
+                            </div>
+                            <x-Backend.summary-search-form-footer :showPaginationDropDown="$false" />
+                        </form>
+                    </div>
+                    <div class="flex-shrink-0 text-end">
                         <form class="d-inline-flex">
                             <button class="btn btn-outline-primary">
                                 Add Via URL
@@ -24,25 +73,10 @@
                     </div>
                 </div>
             </div>
-            <div class="card-body file-manager">
-                <h4 class="mb-2">Quick Access</h4>
-                <ul class="quick-file d-flex flex-row">
-                    <li>
-                        <div class="quick-box"><i class="fa-brands fa-youtube text-danger"></i></div>
-                        <h6 class="mb-2">Videos</h6>
-                    </li>
-                    <li>
-                        <div class="quick-box"><i class="fa-solid fa-music text-warning"> </i></div>
-                        <h6 class="mb-2">Music</h6>
-                    </li>
-                    <li>
-                        <div class="quick-box"><i class="fa-solid fa-file text-secondary"></i></div>
-                        <h6 class="mb-2">Document</h6>
-                    </li>
-                </ul>
-                <h4 class="mt-4 mb-2 mb-2 mb-2">Files</h4>
-
-                @include($viewPrefix . ".index_records")
+        </div>
+        <div class="card-body file-manager">            
+            <div id="index_table">
+                @include($viewPrefix . '.index_records')
             </div>
         </div>
     </div>
@@ -78,26 +112,26 @@
 
                     $('#modal-add-via-upload').find(".modal-body").load(form_url, function() {
                         $('#modal-add-via-upload').find(".modal-body form").ajaxForm({
-                            beforeSubmit: function(arr, $form, options) { 
+                            beforeSubmit: function(arr, $form, options) {
 
                                 $.loader.init().setInfo("Uploading....").show();
-                                
+
                                 return true;
                             },
-                            uploadProgress : function(event, position, total, percentComplete)
-                            {
-                                $.loader.setInfo("Uploading " + percentComplete + "%");
+                            uploadProgress: function(event, position, total,
+                                percentComplete) {
+                                $.loader.setInfo("Uploading " +
+                                    percentComplete + "%");
                             },
-                            error : function()
-                            {
+                            error: function() {
                                 $.loader.hide();
                             },
-                            success : function(responseText, statusText, xhr)
-                            {
-                                ajaxHandleResponse(form_url, responseText, function(response)
-                                {
-                                    $('#modal-add-via-upload').modal("hide");
-                                })
+                            success: function(responseText, statusText, xhr) {
+                                ajaxHandleResponse(form_url, responseText,
+                                    function(response) {
+                                        $('#modal-add-via-upload').modal(
+                                            "hide");
+                                    })
                             }
                         });
                     });
@@ -106,6 +140,22 @@
                 $('#modal-add-via-upload .submit').click(function() {
                     $('#modal-add-via-upload form').trigger("submit");
                 });
+            });
+
+            $(document).on("click", "a.document-file-archive", function(){
+                var _li = $(this).closest("li.folder-box");
+
+                var url = $(this).attr("href");
+
+                ajaxGetJson(url, function(response){
+                    _li.remove();
+                });
+
+                return false;
+            });
+
+            $(document).on("click", ".file-block", function(){                
+                $(this).toggleClass("active");
             });
         });
     </script>

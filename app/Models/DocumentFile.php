@@ -3,17 +3,16 @@
 namespace App\Models;
 
 use App\Helpers\FileUtility;
-use App\Helpers\Util;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\Unique;
+use Illuminate\Support\Facades\DB;
 
 class DocumentFile extends BaseModel
 {
     protected $appends = [
         'display_name',
     ];
+
+    protected static array $file_fields = ["file"];
 
     public static array $child_model_class = [
         // Product::class => [
@@ -59,5 +58,17 @@ class DocumentFile extends BaseModel
         parent::afterFind();
 
         $this->font_awesome_icon = FileUtility::getFontAwesomeOnType($this->type);
+    }
+
+    public function getTypeList()
+    {
+        $list = DB::table($this->getTable())->select('type')->distinct()->get()->pluck("type", "type")->toArray();
+
+        foreach($list as $k => $v)
+        {
+            $list[$k] = ucwords($v);
+        }
+
+        return $list;
     }
 }

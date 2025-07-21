@@ -29,11 +29,42 @@ class DocumentFileController extends BackendController
 
         $builder = $this->_getBuildeForIndex($cache_key_prefix);
 
+        $builder->where("is_archive", 0);
+
         $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
+
+        // d($records->toArray(), true);
 
         // d(LaravelExtend::getQueryLog("", -3));
 
-        $this->setForView(compact("records"));
+        $category_records = DocumentCategory::getTreeRecords(DocumentCategory::query());
+
+        $category_list = Util::getTreeListArray($category_records, "id", "name", false, false);
+
+        $this->setForView(compact("records", "category_list"));
+
+        return $this->viewIndex(__FUNCTION__);
+    }
+
+    public function archive_index()
+    {
+        $cache_key_prefix = Route::currentRouteName();
+
+        $builder = $this->_getBuildeForIndex($cache_key_prefix);
+
+        $builder->where("is_archive", 1);
+
+        $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
+
+        // d($records->toArray(), true);
+
+        // d(LaravelExtend::getQueryLog("", -3));
+
+        $category_records = DocumentCategory::getTreeRecords(DocumentCategory::query());
+
+        $category_list = Util::getTreeListArray($category_records, "id", "name", false, false);
+
+        $this->setForView(compact("records", "category_list"));
 
         return $this->viewIndex(__FUNCTION__);
     }
@@ -44,10 +75,34 @@ class DocumentFileController extends BackendController
 
         $conditions = $this->getConditions($cache_key, [
             ["field" => "id", "type" => "int", "cache" => false],
+            ["field" => "document_category_id", "type" => "int"],
+            ["field" => "is_find_nested_child", "type" => "int"],
+            ["field" => "type", "type" => "string_equal"],
             ["field" => "name", "type" => "string"],
         ]);
 
         $builder = $this->modelClass::query();
+
+        $array_helper =  new ArrayHelper($conditions);
+        $condition_list = $array_helper->convertModelSearchConditionToList();
+
+        if (
+            (isset($condition_list["document_category_id"]) && $condition_list["document_category_id"])
+            && (isset($condition_list["is_find_nested_child"]) && $condition_list["is_find_nested_child"])
+        )
+        {
+            $child_id_list = DocumentCategory::getChildIdList([$condition_list["document_category_id"]]);
+
+            if ($child_id_list)
+            {
+                $builder->whereIn("document_category_id", $child_id_list);
+                $conditions = $array_helper->unsetValues($conditions, ["document_category_id"], true, [ArrayHelper::UNSET_VALUE_REMOVE_PARENT_IF_FOUND_CHILD]);
+            }
+        }
+        
+        $conditions = $array_helper->unsetValues($conditions, ["is_find_nested_child"], true, [ArrayHelper::UNSET_VALUE_REMOVE_PARENT_IF_FOUND_CHILD]);
+
+        // d($conditions, true);
 
         if($conditions)
         {
@@ -79,9 +134,11 @@ class DocumentFileController extends BackendController
             $this->model = new $this->modelClass();
         }
 
+        $type_list = $this->model->getTypeList();
+
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
-        $this->setForView(compact("field_labels"));
+        $this->setForView(compact("field_labels", "type_list"));
 
         return parent::beforeViewRender();
     }
@@ -272,61 +329,67 @@ class DocumentFileController extends BackendController
         return $validatedData;
     }
 
-    public function edit($id)
+    public function archive($id)
     {
-        $model = $this->model = $this->modelClass::with(["categoryAttribute"])->findOrFail($id);
-
-        $this->beforeEdit($model);
-
-        $form = [
-            'url' => route($this->routePrefix . '.update', $id),
-            'method' => 'PUT',
-        ];
-
-        $this->setForView(compact("model", "form"));
-
-        return $this->view("form");
-    }
-
-    public function update($id, Request $request)
-    {
-        $model = $this->model = $this->modelClass::findOrFail($id);
-
-        $this->beforeEdit($model);
-
-        $rules = $this->_common_validation_rules();
-
-        $rules = LaravelExtend::merge_validation_rules($rules, $this->model->getUniqueValidationRules($request));
-
-        $messages = $this->_common_validation_messages();
-
-        $validatedData = $request->validate($rules, $messages);
-
-        DB::beginTransaction();
+        $request = request();
 
         try {
+            $model = $this->modelClass::findOrFail($id);
 
-            $save_data = $validatedData;
+            $model->is_archive = 1;
 
-            $this->model->fill($save_data);
-
-            $this->model->save();
-
-            $this->_saveOthers($validatedData);
-
-            if (LaravelExtend::$errors) {
+            if (!$model->save()) {
                 throw new Exception("Fail to Save");
             }
 
-            DB::commit();
+            $msg = $model->name . " archived successfully";
 
-            return $this->afterSave($this->model);
-        } catch (Exception $ex) {
-            DB::rollBack();
+            if ($request->ajax()) {
+                return $this->responseJson(['status' => 1, 'msg' => $msg]);
+            }
+
+            return back()->with('success', $msg);
+
+        } catch (\Exception $ex) {
+            if ($request->ajax()) {
+                return $this->responseJson(['status' => 0, 'msg' => $ex->getMessage()]);
+            }
 
             $this->saveSqlLog();
 
-            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", LaravelExtend::$errors);
+            return back()->with('fail', $ex->getMessage());
+        }
+    }
+
+    public function unarchive($id)
+    {
+        $request = request();
+
+        try {
+            $model = $this->modelClass::findOrFail($id);
+
+            $model->is_archive = 0;
+
+            if (!$model->save()) {
+                throw new Exception("Fail to Save");
+            }
+
+            $msg = $model->name . " un-archived successfully";
+
+            if ($request->ajax()) {
+                return $this->responseJson(['status' => 1, 'msg' => $msg]);
+            }
+
+            return back()->with('success', $msg);
+
+        } catch (\Exception $ex) {
+            if ($request->ajax()) {
+                return $this->responseJson(['status' => 0, 'msg' => $ex->getMessage()]);
+            }
+
+            $this->saveSqlLog();
+
+            return back()->with('fail', $ex->getMessage());
         }
     }
 }

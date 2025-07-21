@@ -417,6 +417,10 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
     $route_prefix = "document-file";
     $controllerClass = DocumentFileController::class;
     Route::resource($route_prefix, $controllerClass);
+
+    $name = "archive_index";
+    Route::get($route_prefix . "-" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
+
     Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
 
         $name = "add_via_upload";
@@ -424,6 +428,14 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
 
         $name = "ajax_get";
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "archive";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "unarchive";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        
     });
 
     $route_prefix = "enquiries";
