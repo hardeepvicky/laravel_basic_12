@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Exceptions\UserException;
+use App\Models\FieldSetting;
 use Illuminate\Http\Request;
 use App\Models\Role;
 use Exception;
@@ -59,6 +60,15 @@ class RoleController extends BackendController
         }
 
         return $builder;
+    }
+
+    protected function beforeViewRender()
+    {
+        $field_labels = FieldSetting::getDynamicFields($this->modelClass);
+
+        $this->setForView(compact("field_labels"));
+
+        return parent::beforeViewRender();
     }
 
     public function create()

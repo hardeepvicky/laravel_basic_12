@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Models\Country;
+use App\Models\FieldSetting;
 use App\Models\State;
 use Illuminate\Http\Request;
 use Exception;
@@ -64,7 +65,9 @@ class StateController extends BackendController
 
         $my_country = Country::getMyCountry();
 
-        $this->setForView(compact("country_list", "my_country"));
+        $field_labels = FieldSetting::getDynamicFields($this->modelClass);
+
+        $this->setForView(compact("country_list", "my_country", "field_labels"));
 
         return parent::beforeViewRender();
     }

@@ -13,7 +13,8 @@
                         <th><?= sortable_anchor('name', get_value_from_list($field_labels, 'name', 'name')) ?></th>
                         <th><?= sortable_anchor('list_display_order', get_value_from_list($field_labels, 'list_display_order', 'list_display_order')) ?></th>
                         <th><?= sortable_anchor('is_active', 'Activate / De-Active') ?></th>
-                        <th>Info</th>
+                        <th style="width:6%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
+                        <th style="width:6%"><?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?></th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -28,7 +29,10 @@
                                 <x-Backend.active_deactive :isActive="$record->is_active" :id="$record->id" :routePrefix="$routePrefix" />
                             </td>
                             <td>
-                                <x-Backend.index-table-info :record="$record" :userList="$userListCache" />
+                                <x-Backend.created-and-by :datetime="$record->created_at" :userId="$record->created_by" />
+                            </td>
+                            <td>
+                                <x-Backend.created-and-by :datetime="$record->updated_at" :userId="$record->updated_by" />
                             </td>
                             <td>
                                 <x-Backend.summary-comman-actions :id="$record->id" :routePrefix="$routePrefix" buttons="edit,copy,delete" />

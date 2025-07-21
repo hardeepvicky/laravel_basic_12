@@ -15,7 +15,8 @@
                         <th>Timezone</th>
                         <th><?= sortable_anchor('iso3', 'Phone Name') ?></th>
                         <th><?= sortable_anchor('currency_name', 'Currency') ?></th>
-                        <th>Info</th>
+                        <th style="width:6%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
+                        <th style="width:6%"><?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?></th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -30,7 +31,10 @@
                             <td>{{ $record->iso3 }}</td>
                             <td>{{ $record->currency_name }}</td>
                             <td>
-                                <x-Backend.index-table-info :record="$record" :userList="$userListCache" />
+                                <x-Backend.created-and-by :datetime="$record->created_at" :userId="$record->created_by" />
+                            </td>
+                            <td>
+                                <x-Backend.created-and-by :datetime="$record->updated_at" :userId="$record->updated_by" />
                             </td>
                             <td>
                                 <x-Backend.summary-comman-actions :id="$record->id" :routePrefix="$routePrefix" />

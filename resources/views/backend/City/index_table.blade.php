@@ -11,9 +11,9 @@
                         <th><?= sortable_anchor('id', 'ID') ?></th>
                         <th><?= sortable_anchor('name', 'Name') ?></th>
                         <th>State</th>
-                        <th>Info</th>
+                        <th style="width:6%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
+                        <th style="width:6%"><?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?></th>
                         <th>Actions</th>
-                        
                     </tr>
                 </thead>
                 <tbody>
@@ -22,11 +22,11 @@
                             <th scope="row">{{ $record->id }}</th>
                             <td>{{ $record->name }}</td>
                             <td>{{ $record->state->name }}</td>
-
-
-
                             <td>
-                                <x-Backend.index-table-info :record="$record" :userList="$userListCache" />
+                                <x-Backend.created-and-by :datetime="$record->created_at" :userId="$record->created_by" />
+                            </td>
+                            <td>
+                                <x-Backend.created-and-by :datetime="$record->updated_at" :userId="$record->updated_by" />
                             </td>
                             <td>
                                 <x-Backend.summary-comman-actions :id="$record->id" :routePrefix="$routePrefix" />

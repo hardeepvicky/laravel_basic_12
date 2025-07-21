@@ -16,7 +16,8 @@
                         <th><?= sortable_anchor('name', 'Name') ?></th>
                         <th><?= sortable_anchor('is_active', 'Active / De-Active') ?></th>
                         <th><?= sortable_anchor('is_pre_defined', 'Pre-Defined') ?></th>
-                        <th>Info</th>
+                        <th style="width:6%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
+                        <th style="width:6%"><?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?></th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -32,7 +33,10 @@
                                 <x-Backend.yes-no-label :value="$record->is_pre_defined" />
                             </td>
                             <td>
-                                <x-Backend.index-table-info :record="$record" :userList="$userListCache" />
+                                <x-Backend.created-and-by :datetime="$record->created_at" :userId="$record->created_by" />
+                            </td>
+                            <td>
+                                <x-Backend.created-and-by :datetime="$record->updated_at" :userId="$record->updated_by" />
                             </td>
                             <td>
                                 <x-Backend.summary-comman-actions :id="$record->id" :routePrefix="$routePrefix" />

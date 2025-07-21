@@ -25,6 +25,8 @@ use App\Models\User;
                         <th><?= sortable_anchor('mobile', get_value_from_list($field_labels, 'mobile')) ?></th>
                         <th><?= get_value_from_list($field_labels, 'profile_image') ?></th>
                         <th><?= sortable_anchor('is_active', get_value_from_list($field_labels, 'is_active')) ?></th>
+                        <th style="width:6%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
+                        <th style="width:6%"><?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?></th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -47,6 +49,12 @@ use App\Models\User;
                         <td>
                             <x-Backend.active_deactive :isActive="$record->is_active" :id="$record->id"
                                 :routePrefix="$routePrefix" />
+                        </td>
+                        <td>
+                            <x-Backend.created-and-by :datetime="$record->created_at" :userId="$record->created_by" />
+                        </td>
+                        <td>
+                            <x-Backend.created-and-by :datetime="$record->updated_at" :userId="$record->updated_by" />
                         </td>
                         <td>
                             <x-Backend.summary-comman-actions :id="$record->id" :routePrefix="$routePrefix" />
@@ -101,9 +109,7 @@ use App\Models\User;
                                     </div>
                                 </div>
                                 <div class="col-md-6 col-lg-8">
-                                    <x-Backend.index-table-info :record="$record" :userList="$userListCache" />
-
-                                    <div class="row mt-3">
+                                    <div class="row">
                                         <div class="col-md-12 col-lg-6">
                                             <div class="card">
                                                 <div class="card-header border-l-secondary card-no-border">
