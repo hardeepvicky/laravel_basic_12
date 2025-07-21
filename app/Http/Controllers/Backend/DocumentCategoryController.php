@@ -192,7 +192,7 @@ class DocumentCategoryController extends BackendController
 
     public function edit($id)
     {
-        $model = $this->model = $this->modelClass::with(["categoryAttribute"])->findOrFail($id);
+        $model = $this->model = $this->modelClass::findOrFail($id);
 
         $this->beforeEdit($model);
 

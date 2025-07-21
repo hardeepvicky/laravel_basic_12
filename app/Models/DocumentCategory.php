@@ -55,16 +55,6 @@ class DocumentCategory extends BaseModel
         return parent::beforeSave();
     }
 
-    public function product()
-    {
-        return $this->hasMany(Product::class);
-    }
-
-    public function categoryAttribute()
-    {
-        return $this->hasMany(ProductCategoryAttribute::class);
-    }
-
     protected function getDisplayNameAttribute()
     {
         return $this->getDisplayName();
