@@ -20,8 +20,9 @@
                     <div class="flex-grow-1">
                         <form method="GET" class="summary_search" action="{{ route($current_route_name) }}">
                             <input type="hidden" name="is_sort_clear" value="1" />
+                            <input type="hidden" name="value" value="{{ $selected_value ?? "" }}" />
                             <div class="row">
-                                <div class="col-md-1 mb-2">
+                                <div class="col-md-3  col-xxl-1 mb-2">
                                     <?php
                                     $field = 'pagination_limit';
                                     ?>
@@ -55,15 +56,31 @@
                                     ?>
                                     <x-Inputs.text-field :name="$field" :label="$label" :value="$search[$field]" />
                                 </div>
+                                <div class="col-md-6 col-xxl-3 mb-2">
+                                    <label class="form-label">Sort</label>
+                                    <div class="d-flex">
+                                        <?php 
+                                            $field = "sort_by";
+                                            $label = get_value_from_list($field_labels, $field, $field);
+                                        ?>
+                                        <x-Inputs.drop-down :name="$field" :label="$false" :value="$sort_by" :list="$sort_by_list" class="input-inline" />
+                                        <?php 
+                                            $field = "sort_dir";
+                                            $label = get_value_from_list($field_labels, $field, $field);
+                                        ?>
+                                        <x-Inputs.drop-down :name="$field" :label="$false" :value="$sort_dir" :list="$sort_dir_list" class="input-inline" :pleaseSelect="$false"/>
+                                    </div>
+                                </div>
                             </div>
                             <x-Backend.summary-search-form-footer :showPaginationDropDown="$false" />
                         </form>
                     </div>
                     <div class="flex-shrink-0 text-end">
                         <form class="d-inline-flex">
-                            <button class="btn btn-outline-primary">
+                            <span class="btn btn-outline-primary" data-bs-toggle="modal"
+                                data-bs-target="#modal-add-via-url">
                                 Add Via URL
-                            </button>
+                            </span>
 
                             <span class="btn btn-outline-primary ms-2" data-bs-toggle="modal"
                                 data-bs-target="#modal-add-via-upload">
@@ -81,82 +98,4 @@
         </div>
     </div>
 
-    <div class="modal fade" id="modal-add-via-upload" tabindex="-1" aria-labelledby="modal-add-via-upload"
-        style="display: none;" aria-hidden="true">
-        <div class="modal-dialog modal-xl" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3 class="modal-title fs-5">Add Via Upload</h3>
-                    <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    Loading...
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Close</button>
-                    <button class="btn btn-primary submit" type="button">Submit</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        $(function() {
-            $.events.execAtLast(function() {
-
-                $('#modal-add-via-upload').on('show.bs.modal', function() {
-
-                    var form_url = "/document-file/create?add_via=upload";
-
-                    $('#modal-add-via-upload').find(".modal-body").html("Loading....");
-
-                    $('#modal-add-via-upload').find(".modal-body").load(form_url, function() {
-                        $('#modal-add-via-upload').find(".modal-body form").ajaxForm({
-                            beforeSubmit: function(arr, $form, options) {
-
-                                $.loader.init().setInfo("Uploading....").show();
-
-                                return true;
-                            },
-                            uploadProgress: function(event, position, total,
-                                percentComplete) {
-                                $.loader.setInfo("Uploading " +
-                                    percentComplete + "%");
-                            },
-                            error: function() {
-                                $.loader.hide();
-                            },
-                            success: function(responseText, statusText, xhr) {
-                                ajaxHandleResponse(form_url, responseText,
-                                    function(response) {
-                                        $('#modal-add-via-upload').modal(
-                                            "hide");
-                                    })
-                            }
-                        });
-                    });
-                });
-
-                $('#modal-add-via-upload .submit').click(function() {
-                    $('#modal-add-via-upload form').trigger("submit");
-                });
-            });
-
-            $(document).on("click", "a.document-file-archive", function(){
-                var _li = $(this).closest("li.folder-box");
-
-                var url = $(this).attr("href");
-
-                ajaxGetJson(url, function(response){
-                    _li.remove();
-                });
-
-                return false;
-            });
-
-            $(document).on("click", ".file-block", function(){                
-                $(this).toggleClass("active");
-            });
-        });
-    </script>
 @endsection

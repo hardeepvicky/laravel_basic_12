@@ -16,7 +16,7 @@ $false = false;
         <form method="GET" class="summary_search" action="{{ route($routePrefix . '.index') }}">
             <input type="hidden" name="is_sort_clear" value="1" />
             <div class="row mb-4">
-                <div class="col-sm-6 col-md-1 mb-2">
+                <div class="col-md-3 col-xxl-1 mb-2">
                     <?php
                     $field = 'pagination_limit';
                     ?>

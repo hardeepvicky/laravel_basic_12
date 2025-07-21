@@ -242,8 +242,6 @@ for (var i = 1; i <= 5; i++) {
     }
 }
 
-console.log(accordianMenu);
-
 var url = window.location.href;
 const urlLink = url.includes("#") ? url.split("#")[0] : url;
 const submenuLinks = document.querySelectorAll(".sidebar-menu li a");

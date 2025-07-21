@@ -6,6 +6,7 @@ use App\Exceptions\UserException;
 use App\Helpers\DateUtility;
 use App\Helpers\LaravelExtend;
 use App\Models\Department;
+use App\Models\DocumentFile;
 use App\Models\DropDownValue;
 use App\Models\FieldSetting;
 use App\Models\RecurringTask;
@@ -297,6 +298,7 @@ class TaskController extends BackendController
             "is_send_notification" => "",
             "tag_name" => [],
             "taskUser" => [],
+            "taskFile" => "",
         ];
     }
 
@@ -386,6 +388,15 @@ class TaskController extends BackendController
         if (isset($validatedData['taskUser']) && is_array($validatedData['taskUser'])) {
             $users = User::find($validatedData['taskUser']);
             $this->model->user()->sync($users);
+        }
+
+        if (isset($validatedData['taskFile'])) {
+
+            $ids = explode(",", $validatedData['taskFile']);
+
+            $document_files = DocumentFile::find($ids);
+            
+            $this->model->documentFile()->sync($document_files);
         }
 
         if (isset($validatedData['tag_name'])) {

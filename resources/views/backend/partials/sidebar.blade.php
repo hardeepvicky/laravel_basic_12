@@ -48,7 +48,6 @@
 
 <script type="text/javascript">
     $(function() {
-        console.log("Active menu a : " + $(".menu-a.active").length);
         $(".menu-a.active").parents("li").addClass("active");
         $(".menu-a.active").parents("ul").show();
         $(".menu-a.active").closest("li.sidebar-list").find("> a.sidebar-link").addClass("active");

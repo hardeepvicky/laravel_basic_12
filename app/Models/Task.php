@@ -122,6 +122,17 @@ class Task extends BaseModel
         return $this->hasMany(TaskUser::class, 'task_id');
     }
 
+
+    public function documentFile()
+    {
+        return $this->belongsToMany(DocumentFile::class, TaskFile::class);
+    }
+
+    public function taskFile()
+    {
+        return $this->hasMany(TaskFile::class, 'task_id');
+    }
+    
     public function taskTakenAction()
     {
         return $this->hasMany(TaskTakenAction::class, 'task_id');
@@ -144,6 +155,8 @@ class Task extends BaseModel
         $labels['tag_name'] = "Tags";
         $labels['from_start_date'] = "From Start Date";
         $labels['to_start_date'] = "To Start Date";
+        $labels['taskUser'] = "Link Users";
+        $labels['taskFile'] = "Files";
 
         return $labels;
     }

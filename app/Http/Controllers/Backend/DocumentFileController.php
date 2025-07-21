@@ -9,6 +9,7 @@ use App\Helpers\LaravelExtend;
 use App\Helpers\Util;
 use App\Models\DocumentCategory;
 use App\Models\DocumentFile;
+use App\Models\DropDownValue;
 use App\Models\FieldSetting;
 use Illuminate\Http\Request;
 use Exception;
@@ -35,7 +36,7 @@ class DocumentFileController extends BackendController
 
         // d($records->toArray(), true);
 
-        // d(LaravelExtend::getQueryLog("", -3));
+        // d(LaravelExtend::getQueryLog("", -2));
 
         $category_records = DocumentCategory::getTreeRecords(DocumentCategory::query());
 
@@ -89,40 +90,73 @@ class DocumentFileController extends BackendController
         if (
             (isset($condition_list["document_category_id"]) && $condition_list["document_category_id"])
             && (isset($condition_list["is_find_nested_child"]) && $condition_list["is_find_nested_child"])
-        )
-        {
+        ) {
             $child_id_list = DocumentCategory::getChildIdList([$condition_list["document_category_id"]]);
 
-            if ($child_id_list)
-            {
+            if ($child_id_list) {
                 $builder->whereIn("document_category_id", $child_id_list);
                 $conditions = $array_helper->unsetValues($conditions, ["document_category_id"], true, [ArrayHelper::UNSET_VALUE_REMOVE_PARENT_IF_FOUND_CHILD]);
             }
         }
-        
+
         $conditions = $array_helper->unsetValues($conditions, ["is_find_nested_child"], true, [ArrayHelper::UNSET_VALUE_REMOVE_PARENT_IF_FOUND_CHILD]);
 
         // d($conditions, true);
 
-        if($conditions)
-        {
+        if ($conditions) {
             $builder = $builder->where($conditions);
         }
 
-        if ($apply_sort)
-        {
-            $cache_key_for_sort = $cache_key_prefix . "-index-extra-params";
-
-            $clear_cache = request('is_sort_clear', false);
-
+        if ($apply_sort) {
             $this->model = new $this->modelClass;
 
-            $sort = $this->getSortBy($this->model, $cache_key_for_sort, [
-                ["key" => "sort_by", "default" => "id"],
-                ["key" => "sort_dir", "default" => "DESC"],
-            ], $clear_cache);
+            $cache_key_for_sort = $cache_key_prefix . "-index-extra-params";
 
-            $builder->orderBy($sort['sort_by'], $sort['sort_dir']);
+            $sort_by_list = [
+                "id" => "ID",
+                "name" => "Name",
+                "type" => "Type",
+                "document_category_id" => "Document Category",
+                "created_at" => "Created",
+                "updated_at" => "Updated",
+                "created_by" => "Created By",
+                "updated_by" => "Updated By",
+            ];
+
+            $sort_dir_list = [
+                "ASC" => "Ascending",
+                "DESC" => "Descending"
+            ];
+
+            $this->setForView(compact("sort_by_list", "sort_dir_list"));
+
+            $clear_cache = request('is_sort_clear', false);
+            $value = request('value', false);
+
+            if ($value) {
+                $builder->orderByRaw('FIELD(id,' . $value . ') DESC');
+                $builder->orderBy("id", "DESC");
+
+                $this->setForView([
+                    "selected_value" => $value,
+                    "selected_id_list" => explode(",", $value)
+                ]);
+
+                $sort = [
+                    'sort_by' => 'id',
+                    'sort_dir' => 'DESC'
+                ];
+
+            } else {
+                $sort = $this->getSortBy($this->model, $cache_key_for_sort, [
+                    ["key" => "sort_by", "default" => "id"],
+                    ["key" => "sort_dir", "default" => "DESC"],
+                ], $clear_cache);
+
+                $builder->orderBy($sort['sort_by'], $sort['sort_dir']);
+            }
+
+            $this->setForView($sort);
         }
 
         return $builder;
@@ -162,8 +196,7 @@ class DocumentFileController extends BackendController
 
         $view_name = "form";
 
-        if ($add_via)
-        {
+        if ($add_via) {
             $view_name = "add_via_" . $add_via;
         }
 
@@ -172,11 +205,17 @@ class DocumentFileController extends BackendController
 
     private function _common_validation_rules($add_via)
     {
-        if ($add_via == "upload")
-        {
+        if ($add_via == "upload") {
             return [
                 "name" => ["required"],
                 "file_original" => ["required", "file"],
+                "document_category_id" => ["required"],
+            ];
+        } else if ($add_via == "url") {
+            return [
+                "name" => ["required"],
+                "url" => ["required"],
+                "file_ext" => ["required"],
                 "document_category_id" => ["required"],
             ];
         }
@@ -186,8 +225,7 @@ class DocumentFileController extends BackendController
 
     private function _common_validation_messages()
     {
-        return [
-        ];
+        return [];
     }
 
     private function set_data_for_add_edit($model)
@@ -196,8 +234,7 @@ class DocumentFileController extends BackendController
 
         $conditions = ["is_active" => 1];
 
-        if ($model->document_category_id)
-        {
+        if ($model->document_category_id) {
             $qb->orWhere("id", $model->document_category_id);
         }
 
@@ -205,7 +242,9 @@ class DocumentFileController extends BackendController
 
         $document_category_list = Util::getTreeListArray($document_category_records, "id", "name");
 
-        $this->setForView(compact("document_category_list"));
+        $ext_list = DropDownValue::getList("short_name", "display_name", ["type" => DropDownValue::FILE_EXTENSION]);
+
+        $this->setForView(compact("document_category_list", "ext_list"));
     }
 
     public function store(Request $request)
@@ -224,8 +263,7 @@ class DocumentFileController extends BackendController
 
         DB::beginTransaction();
 
-        try
-        {
+        try {
             // dd($validatedData);
             $validatedData = $this->_beforeSave($request, $validatedData);
 
@@ -242,9 +280,7 @@ class DocumentFileController extends BackendController
             DB::commit();
 
             return $this->afterSave($this->model);
-        }
-        catch(Exception $ex)
-        {
+        } catch (Exception $ex) {
             DB::rollBack();
 
             if ($request->ajax()) {
@@ -259,7 +295,7 @@ class DocumentFileController extends BackendController
 
     private function _beforeSave(Request $request, array $validatedData)
     {
-        if ($request->hasFile('file_original')) {         
+        if ($request->hasFile('file_original')) {
             $path = rtrim(DocumentFile::getStoragePath(), "/");
 
             $file = $request->file('file_original');
@@ -277,24 +313,21 @@ class DocumentFileController extends BackendController
 
             $full_file_path = DocumentFile::getStorageDisk()->path($filepath);
 
-            if ($validatedData['type'] == "image")
-            {
+            if ($validatedData['type'] == "image") {
                 $imageInfo = getimagesize($full_file_path);
 
                 if ($imageInfo !== false) {
-                    $width = $imageInfo[0]; 
+                    $width = $imageInfo[0];
                     $height = $imageInfo[1];
 
                     $validatedData['image_height'] = $height;
                     $validatedData['image_width'] = $width;
 
-                    if ($width >= 1024)
-                    {
+                    if ($width >= 1024) {
                         $width = 1024;
                     }
 
-                    if ($height >= 768)
-                    {
+                    if ($height >= 768) {
                         $height = 768;
                     }
 
@@ -311,9 +344,8 @@ class DocumentFileController extends BackendController
                     $imgUtility->resize($width, $height);
                 }
             }
-            
-            if (!isset($validatedData['file']))
-            {
+
+            if (!isset($validatedData['file'])) {
                 $validatedData['file'] = $validatedData['file_original'];
             }
 
@@ -324,6 +356,9 @@ class DocumentFileController extends BackendController
             $size = filesize($validatedData['storage_base_path'] . $validatedData['file']);
             $size = $size / (1024 * 1024);
             $validatedData['file_size_in_mb'] = $size;
+        } else if (isset($validatedData['url'])) {
+            $validatedData['file_name'] = $validatedData['name'];
+            $validatedData['type'] = FileUtility::getFileTypeFromExt($validatedData['file_ext']);
         }
 
         return $validatedData;
@@ -349,7 +384,6 @@ class DocumentFileController extends BackendController
             }
 
             return back()->with('success', $msg);
-
         } catch (\Exception $ex) {
             if ($request->ajax()) {
                 return $this->responseJson(['status' => 0, 'msg' => $ex->getMessage()]);
@@ -381,7 +415,6 @@ class DocumentFileController extends BackendController
             }
 
             return back()->with('success', $msg);
-
         } catch (\Exception $ex) {
             if ($request->ajax()) {
                 return $this->responseJson(['status' => 0, 'msg' => $ex->getMessage()]);

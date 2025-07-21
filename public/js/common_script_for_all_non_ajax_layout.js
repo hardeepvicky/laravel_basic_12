@@ -26,6 +26,9 @@ $(document).ajaxError(function (event, xhr, settings, errorString) {
     if (xhr.status == 403) {
         $.events.onAjaxError(errorString, "Session is expired. Please Login");
     } 
+    else if (xhr.status == 422) {
+        //laravel validation error        
+    } 
     else if (
         typeof xhr.responseText == "string" &&
         xhr.responseText.length > 0

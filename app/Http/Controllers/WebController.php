@@ -12,6 +12,7 @@ use App\Traits\CacheTrait;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -105,7 +106,7 @@ class WebController extends Controller
 
     protected function viewIndex($view_name)
     {
-        if (request()->ajax()) {
+        if (request()->ajax() && !request("full_view")) {
             $view_name = "ajax_" . $view_name;
         }
 
@@ -737,11 +738,11 @@ class WebController extends Controller
             throw_exception("msg variable required");
         }
 
-        $this->saveSqlLog();
-
         if ($request->ajax()) {
-            return response()->json(['status' => 1, 'msg' => $msg]);
+            return $this->responseJson(['status' => 1, 'msg' => $msg]);
         }
+
+        $this->saveSqlLog();
 
         $redirect_to = request("redirect_to", "index");
 

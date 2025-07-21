@@ -40,11 +40,11 @@ use App\Helpers\LaravelExtend;
     <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/libs/fancybox/dist/jquery.fancybox.min.css') }}" />
     <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/libs/jquery-file-validator/css/file-validator.css') }}" />
 
-    <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/css/vendors/flatpickr/flatpickr.min.css') }}">    
+    <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/css/vendors/flatpickr/flatpickr.min.css') }}">
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js@11.1.0/public/assets/styles/choices.min.css">
 
-    
+
 
     <!-- Theme Specfic -->
     <link id="color" rel="stylesheet" href="{{ get_asset_url('assets/css/color-1.css') }}" media="screen" />
@@ -61,7 +61,7 @@ use App\Helpers\LaravelExtend;
     <script src="{{ get_asset_url('assets/js/vendors/jquery/jquery.min.js') }}"></script>
     <script src="{{ get_asset_url('libs/events.js') }}"></script>
 
-    
+
 </head>
 
 <body>
@@ -116,7 +116,7 @@ use App\Helpers\LaravelExtend;
     <script src="{{ get_asset_url('assets/libs/jquery.form.min.js') }}"></script>
     <script src="{{ get_asset_url('assets/libs/typeahead.js-0.11.1/dist/typeahead.bundle.min.js') }}"></script>
     <script src="{{ get_asset_url('assets/libs/jquery-file-validator/js/file-validator.js') }}"></script>
-    
+
     <script src="{{ get_asset_url('assets/js/custom-card/custom-card.js') }}"></script>
     <script src="{{ get_asset_url('assets/js/config.js') }}"></script>
     <script src="{{ get_asset_url('assets/js/script.js') }}"></script>
@@ -144,12 +144,201 @@ use App\Helpers\LaravelExtend;
     <!-- Project JS -->
     <script src="{{ get_asset_url('js/common_funtions.js') }}"></script>
     <script src="{{ get_asset_url('js/common_script_for_all_non_ajax_layout.js') }}"></script>
+    <script src="{{ get_asset_url('js/backend/file-gallery.js') }}"></script>
     <script src="{{ get_asset_url('js/backend/backend_non_ajax.js') }}"></script>
+    <script src="{{ get_asset_url('js/common.js') }}"></script>
     <script>
         $(function() {
             $.loader.init();
             $.events.lastCallbacks.map(function(cb) {
                 cb();
+            });
+        });
+    </script>
+
+
+    <div class="modal fade" id="modal-add-via-upload" tabindex="-1" aria-labelledby="modal-add-via-upload"
+        style="display: none;" aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title fs-5">Add Via Upload</h3>
+                    <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Loading...
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Close</button>
+                    <button class="btn btn-primary submit" type="button">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal-add-via-url" tabindex="-1" aria-labelledby="modal-add-via-upload"
+        style="display: none;" aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title fs-5">Add Via URL</h3>
+                    <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Loading...
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Close</button>
+                    <button class="btn btn-primary submit" type="button">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(function() {
+
+            function after_modal_load(form_url, modal)
+            {
+                setTimeout(() => {
+                    $('.modal-select2').select2({
+                        placeHolder: "Please Select",
+                        theme: "bootstrap-5",
+                        dropdownParent: modal
+                    });
+                }, 500);
+
+                modal.find(".modal-body form").ajaxForm({
+                    beforeSubmit: function(arr, $form, options) {
+
+                        $.loader.init().setInfo("Uploading....").show();
+
+                        return true;
+                    },
+                    uploadProgress: function(event, position, total,
+                        percentComplete) {
+                        $.loader.setInfo("Uploading " +
+                            percentComplete + "%");
+                    },
+                    error: function(xhr, status, errorString) {
+                        $.loader.hide();
+
+                        response = xhr.responseText.trim();
+
+                        if (response.length == 0) {
+                            $.events.onAjaxError("JSON Parse Error", "Empty Response");
+                            return false;
+                        }
+
+                        try
+                        {
+                            var responseJson = JSON.parse(response);
+                        }
+                        catch(e)
+                        {
+                            $.events.onAjaxError("JSON Parse Error", response);
+                            return false;
+                        }
+
+                        modal.find("form").find(".error-message").remove();
+
+                        if (typeof responseJson['errors'] == "object")
+                        {
+                            for (var field_name in responseJson['errors'])
+                            {
+                                var errors = responseJson['errors'][field_name];
+
+                                var field = modal.find("form").find("[name='"+ field_name +"']");
+                                if (field.length > 0)
+                                {
+                                    var html = "";
+
+                                    for (var a in errors)
+                                    {
+                                        html += '<span class="error-message">' + errors[a] + '</span>';
+                                    }
+
+                                    field.parent().append(html);
+                                }
+                            }
+                        }
+                        else if (typeof responseJson['message'] == "string")
+                        {
+                            $.events.onUserError(responseJson['message']);
+                        }
+                    },
+                    success: function(responseText, statusText, xhr) {
+                        ajaxHandleResponse(form_url, responseText,
+                            function(response) {
+                                modal.modal("hide");
+                                if ($("#gallery-modal--main").length > 0)
+                                {
+                                    $("#gallery-modal--main").refresh();
+                                    $("#gallery-modal--main").modal('show');
+                                }
+                            })
+                    }
+                });
+            }
+
+            $('#modal-add-via-upload').on('show.bs.modal', function() {
+
+                var form_url = "/document-file/create?add_via=upload";
+
+                $('#modal-add-via-upload').find(".modal-body").html("Loading....");
+
+                $('#modal-add-via-upload').find(".modal-body").load(form_url, function()
+                {
+                    after_modal_load(form_url, $('#modal-add-via-upload'));
+                });
+            });
+
+            $('#modal-add-via-upload .submit').click(function() {
+                $('#modal-add-via-upload form').trigger("submit");
+            });
+
+            $('#modal-add-via-url').on('show.bs.modal', function() {
+
+                var form_url = "/document-file/create?add_via=url";
+
+                $('#modal-add-via-url').find(".modal-body").html("Loading....");
+
+                $('#modal-add-via-url').find(".modal-body").load(form_url, function()
+                {
+                    after_modal_load(form_url, $('#modal-add-via-url'));
+                });
+            });
+
+            $('#modal-add-via-url .submit').click(function() {
+                $('#modal-add-via-url form').trigger("submit");
+            });
+
+            $(document).on("click", "a.document-file-archive", function(){
+                var _li = $(this).closest("li.folder-box");
+
+                var url = $(this).attr("href");
+
+                ajaxGetJson(url, function(response){
+                    _li.remove();
+                });
+
+                return false;
+            });
+
+            $(document).on("click", "a.document-file-unarchive", function(){
+                var _li = $(this).closest("li.folder-box");
+
+                var url = $(this).attr("href");
+
+                ajaxGetJson(url, function(response){
+                    _li.remove();
+                });
+
+                return false;
+            });
+
+            $(document).on("click", ".file-block", function(){
+                $(this).toggleClass("active");
             });
         });
     </script>

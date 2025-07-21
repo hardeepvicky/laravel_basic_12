@@ -67,7 +67,6 @@ $(document).ready(function () {
 
     $(".sr-paragraph").srParagraph();
 
-
     /** -------------------------------------------------------- */
 
     $("input.invalid-char").on("keypress", function (event) {
@@ -154,19 +153,13 @@ $(document).ready(function () {
         _form.trigger("submit");
     });
 
-    $(document).on(
-        "change",
-        "form.summary_search select.pagination_limit",
-        function () {
+    $(document).on("change", "form.summary_search select.pagination_limit", function () {
             var _form = $(this).closest("form");
             _form.trigger("submit");
         }
     );
 
-    $("#index_table").on(
-        "click",
-        ".pagination a.page-link, a.sortable",
-        function () {
+    $(document).on("click", "#index_table .pagination a.page-link, #index_table a.sortable", function(){
             var href = $(this).attr("href");
             $.loader.show();
 

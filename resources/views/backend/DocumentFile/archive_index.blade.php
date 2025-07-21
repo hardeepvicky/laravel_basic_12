@@ -68,24 +68,4 @@
             </div>
         </div>
     </div>
-
-    <script>
-        $(function() {
-            $(document).on("click", "a.document-file-unarchive", function(){
-                var _li = $(this).closest("li.folder-box");
-
-                var url = $(this).attr("href");
-
-                ajaxGetJson(url, function(response){
-                    _li.remove();
-                });
-
-                return false;
-            });
-
-            $(document).on("click", ".file-block", function(){                
-                $(this).toggleClass("active");
-            });
-        });
-    </script>
 @endsection

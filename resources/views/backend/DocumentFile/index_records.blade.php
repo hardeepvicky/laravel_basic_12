@@ -8,15 +8,27 @@ use App\Helpers\LaravelExtend;
     @foreach($records as $record)
     <?php
         $mime_type = get_mime_type_from_extension($record->file_ext);
-    ?>
+
+        $file_block_active_css = "";
+
+        if (isset($selected_id_list))
+        {
+            if (in_array($record->id, $selected_id_list))
+            {
+                $file_block_active_css = "active";
+            }
+        }
+    ?>    
     <li class="folder-box d-flex align-items-center">
-        @if(in_array($record->type, ["image", "video", "audio"]))
-            <div class="file-block card" data-id="{{ $record->id }}">
+        @if($record->file_url && in_array($record->type, ["image", "video", "audio"]))
+            <div class="file-block card {{ $file_block_active_css }}" data-id="{{ $record->id }}">
                 <i class="fas fa-check check-icon"></i>
                 <div class="card-header">
-                    @if($record->type =="image")                
-                        <a href="{{ $record->file_url }}" class="fancybox" data-fancybox="image">
-                            <img class="full-img" src="{{ $record->file_url }}" alt="{{ $record->file_name }}"/>
+                    @if($record->type =="image")
+                        <a href="{{ $record->file_url }}" class="fancybox image-container" data-fancybox="image">
+                            <img class="full-img lazy-load-image" src="{{ $record->file_url }}" alt="{{ $record->file_name }}"/>
+                            <div class="image-loader"></div>
+                            <div class="error-icon" aria-hidden="true">&#x26A0;</div>
                         </a>
                     @elseif($record->type =="video")
                         <video class="full-video" controls src="{{ $record->file_url }}"></video>
@@ -40,13 +52,13 @@ use App\Helpers\LaravelExtend;
                         </div>
                         <div class="flex-shrink-0 text-end">
                             @if($record->is_archive)
-                                <a href="{{ route($routePrefix .'.unarchive', ['id' => $record->id]) }}" 
+                                <a href="{{ route($routePrefix .'.unarchive', ['id' => $record->id]) }}"
                                     class="btn btn-outline-success summary-action-button document-file-unarchive"
                                     >
                                     <i class="fa-solid fa-trash-can-arrow-up label-icon"></i>
                                 </a>
                             @else
-                                <a href="{{ route($routePrefix .'.archive', ['id' => $record->id]) }}" 
+                                <a href="{{ route($routePrefix .'.archive', ['id' => $record->id]) }}"
                                     class="btn btn-outline-danger summary-action-button document-file-archive"
                                     >
                                     <i class="<?= ICON_SUMMARY_DELETE ?> label-icon"></i>
@@ -57,10 +69,10 @@ use App\Helpers\LaravelExtend;
                 </div>
             </div>
         @else
-        <div class="file-block p-2" data-id="{{ $record->id }}">
+        <div class="file-block  {{ $file_block_active_css }} p-2" data-id="{{ $record->id }}">
             <i class="fas fa-check check-icon"></i>
             <div class="d-flex align-items-center files-list">
-                <div class="flex-shrink-0 file-left"> 
+                <div class="flex-shrink-0 file-left">
                     <i class="{{ $record->font_awesome_icon }} text-info fs-4"></i>
                 </div>
                 <div class="flex-grow-1 d-flex align-items-center ml-1">
@@ -68,16 +80,24 @@ use App\Helpers\LaravelExtend;
                         <h5 class="f-w-600">{{ $record->name }}</h5>
                         <span>By : {{ LaravelExtend::getCreatedByOrUpdatedBy($record->created_by) }}</span>
                         <p>
-                            {{ $record->created_at->diffForHumans() }} ,
-
-                            {{ round($record->file_size_in_mb, 2) }} MB
+                            {{ $record->created_at->diffForHumans() }}
+                            @if ($record->file)
+                                , {{ round($record->file_size_in_mb, 2) }} MB
+                            @endif
                         </p>
                     </div>
                 </div>
             </div>
             <div class="text-end">
+                <?php
+                    $url = $record->file_url ?? $record->url;
+                ?>
+                <a target="_blank" href="{{ $url }}" class="btn btn-secondary btn-sm btn-round">
+                    Open
+                </a>
+
                 @if($record->is_archive)
-                    <a href="{{ route($routePrefix .'.unarchive', ['id' => $record->id]) }}" 
+                    <a href="{{ route($routePrefix .'.unarchive', ['id' => $record->id]) }}"
                         class="btn btn-outline-success summary-action-button document-file-unarchive"
                         >
                         <i class="fa-solid fa-trash-can-arrow-up label-icon"></i>

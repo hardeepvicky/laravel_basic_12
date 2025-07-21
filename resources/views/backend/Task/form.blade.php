@@ -139,9 +139,11 @@ $false = false;
                     </div>
                     <div class="form-group mb-3 is_draft-block is_draft-block-0">
                         <?php
+                        $field = "taskUser";
+                        $label = get_value_from_list($field_labels, $field, $field);
                         $value = implode(',', $model->taskUser->pluck('user_id')->toArray());
                         ?>
-                        <x-Inputs.drop-down name="taskUser[]" label="Link Users" :list="$user_list" :value="$value"
+                        <x-Inputs.drop-down name="taskUser[]" :label="$label" :list="$user_list" :value="$value"
                             class="select2" multiple="multiple"  />
 
                         <?php
@@ -150,6 +152,15 @@ $false = false;
                         ?>
                         <x-Inputs.checkbox :id="$field" :name="$field" :label="$label"
                             value="{{ $model->{$field} }}" />
+                    </div>
+                    <div class="form-group mb-3 is_draft-block is_draft-block-0">
+                        <?php
+                        $field = "taskFile";
+                        $label = get_value_from_list($field_labels, $field, $field);
+                        $value = implode(',', $model->taskFile->pluck('document_file_id')->toArray());
+                        ?>
+                        <x-Inputs.text-field :id="$field" :name="$field" :label="$label" :value="$value" multiple="multiple"  />                        
+                        <span id="files-choose" class="btn btn-secondary">Choose Files</span>
                     </div>
                 </div>
                 <div class="col-md-12 col-xxl-6">
@@ -164,7 +175,7 @@ $false = false;
                                 class="auto-suggesstion-list" />
                             <div id="{{ $field . '-suggestion-box' }}" class="suggestion-box hidden"></div>
                         </div>
-                    </div>
+                    </div>                    
                 </div>
             </div>
             <div class="row">
@@ -234,6 +245,10 @@ $false = false;
 
                 $(".cascade-drop-down").trigger("change", {
                     pageLoad: true
+                });
+
+                $("#taskFile").browseGallery({
+                    opener : "#files-choose"
                 });
 
             });
