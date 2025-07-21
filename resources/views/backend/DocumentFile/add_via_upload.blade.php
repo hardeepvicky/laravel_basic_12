@@ -44,7 +44,7 @@
     <script>
         $(function() {
             $("#file_original").fileValidator({
-                maxSize: '200m',
+                maxSize: '2048m',
                 onValidation: function(files) {
                     $(this).attr('class','form-control');
                 },

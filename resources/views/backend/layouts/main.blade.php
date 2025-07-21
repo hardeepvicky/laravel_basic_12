@@ -271,6 +271,9 @@ use App\Helpers\LaravelExtend;
                         ajaxHandleResponse(form_url, responseText,
                             function(response) {
                                 modal.modal("hide");
+                                
+                                $("form.summary_search").find(".clear_form_search_conditions").trigger("click");
+
                                 if ($("#gallery-modal--main").length > 0)
                                 {
                                     $("#gallery-modal--main").refresh();
