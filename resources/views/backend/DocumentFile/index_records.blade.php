@@ -42,7 +42,7 @@ use App\Helpers\LaravelExtend;
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="flex-grow-1">
-                            <h5 class="f-w-600">{{ $record->name }}</h5>
+                            <h5 class="f-w-600">{{ str_short_with_dot($record->name) }}</h5>
                             <span>By : {{ LaravelExtend::getCreatedByOrUpdatedBy($record->created_by) }}</span>
                             <p>
                                 {{ $record->created_at->diffForHumans() }} ,
@@ -77,7 +77,7 @@ use App\Helpers\LaravelExtend;
                 </div>
                 <div class="flex-grow-1 d-flex align-items-center ml-1">
                     <div class="flex-grow-1">
-                        <h5 class="f-w-600">{{ $record->name }}</h5>
+                        <h5 class="f-w-600">{{ str_short_with_dot($record->name) }}</h5>
                         <span>By : {{ LaravelExtend::getCreatedByOrUpdatedBy($record->created_by) }}</span>
                         <p>
                             {{ $record->created_at->diffForHumans() }}

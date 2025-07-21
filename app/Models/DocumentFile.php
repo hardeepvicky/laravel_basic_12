@@ -60,6 +60,22 @@ class DocumentFile extends BaseModel
         $this->font_awesome_icon = FileUtility::getFontAwesomeOnType($this->type);
     }
 
+    public function beforeDelete() {
+        parent::beforeDelete();
+
+        $fileUtility = new FileUtility(self::getStorageDisk());
+
+        if ($this->file)
+        {
+            $fileUtility->delete($this->file);
+        }
+
+        if ($this->file_original)
+        {
+            $fileUtility->delete($this->file_original);
+        }
+    }
+
     public function getTypeList()
     {
         $list = DB::table($this->getTable())->select('type')->distinct()->get()->pluck("type", "type")->toArray();

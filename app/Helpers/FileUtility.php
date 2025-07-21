@@ -188,13 +188,15 @@ class FileUtility
         return "/" . $path;
     }
 
-    public static function delete($file, $aws = true)
+    public function delete($file, $aws = true)
     {
+        $file = trim($file);
         $file = explode("?", $file)[0];
 
-        if (file_exists($file)) {
-            if (!unlink($file)) {
-                return false;
+        if ($this->disk->fileExists($file)) 
+        {
+            if (!$this->disk->delete($file)) {
+                throw new UserException("Fail To Delete File $file", UserException::ERROR_LARAVEL_FAIL);
             }
         }
 
@@ -215,7 +217,7 @@ class FileUtility
         $file = trim($file);
         $file = explode("?", $file)[0];
 
-        if (!$file) {
+        if (!$this->disk->fileExists($file)) {
             return false;
         }
 
