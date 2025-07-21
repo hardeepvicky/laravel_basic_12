@@ -636,7 +636,7 @@ class TaskController extends BackendController
 
     public function history($id, Request $request)
     {
-        $record = $this->modelClass::with(["tags", "taskUser", "taskTakenAction"])->findOrFail($id);
+        $record = $this->modelClass::with(["tags", "taskUser", "taskFile", "taskTakenAction"])->findOrFail($id);
 
         $model = new TaskTakenAction();
 
@@ -699,7 +699,11 @@ class TaskController extends BackendController
 
         $response_list = DropDownValue::getList("id", "display_name", ["type" => DropDownValue::TASK_RESPONSE]);
 
-        $this->setForView(compact("record", "form", "model", "task_taken_actions_fields", "action_list", "response_list", "history_records"));
+        $id_list = $record->taskFile->pluck("document_file_id")->toArray();
+
+        $document_files = DocumentFile::find($id_list);
+
+        $this->setForView(compact("record", "form", "model", "task_taken_actions_fields", "action_list", "response_list", "history_records", "document_files"));
 
         return $this->view(__FUNCTION__);
     }
