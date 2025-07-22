@@ -8,6 +8,10 @@ use App\Models\Task;
     </div>
 
     <div class="card-body p-1">
+        <div class="m-2">
+            <a href="{{ route($routePrefix . ".export.csv") }}" class="btn btn-secondary">Export CSV</a>
+        </div>
+
         <div class="table-responsive">
             <table class="table table-bordered summary-table">
                 <thead>
@@ -81,6 +85,38 @@ use App\Models\Task;
                                             {{ get_value_from_list($yes_no_list, $record->is_send_notification) }}
                                         </span>
                                     </label>
+
+                                    @if($record->is_completed)
+                                        <x-Backend.celec-date-time :value="$record->complete_date_time" 
+                                            label="Completed"
+                                            by="{{ get_value_from_list($userListCache, $record->complete_by) }}"
+                                        />                                    
+                                    @endif
+
+                                    @if($record->is_verified)
+                                        <x-Backend.celec-date-time :value="$record->verified_date_time" 
+                                            label="Verified"
+                                            by="{{ get_value_from_list($userListCache, $record->verified_by) }}"
+                                        />
+
+                                        <label class="info">
+                                            {{ get_value_from_list($field_labels, 'rating', 'rating') }} 
+                                            : 
+                                            <span>
+                                                {{ $record->rating }}
+                                            </span>
+                                        </label>
+
+                                        <label class="info">
+                                            {{ get_value_from_list($field_labels, 'review_remarks', 'review_remarks') }} 
+                                            : 
+                                            <span>
+                                                {{ $record->review_remarks }}
+                                            </span>
+                                        </label>
+                                    @endif
+
+                                    
                                 </div>
                             </div>
                         </td>

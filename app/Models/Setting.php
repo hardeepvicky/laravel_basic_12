@@ -2,13 +2,8 @@
 
 namespace App\Models;
 
-use Exception;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-
-class Setting extends BaseModel
+class Setting extends BaseMongoModel
 {
-    use HasFactory;
-
     public const LABELS = [
         "company_name" => "Company Name",
         "company_email" => "Company Email",

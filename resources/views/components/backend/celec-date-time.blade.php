@@ -12,6 +12,10 @@ if ($created_array):
     <div class="label">{{ $created_array['date'] }}</div>
     <div class="divider"></div>
     <div class="label">{{ $created_array['day'] }} {{ $created_array['time'] }}</div>
+    <?php if (isset($by) && $by): ?>
+        <div class="divider"></div>
+        <div class="label">By : {{ $by }}</div>
+    <?php endif; ?>
 </div>
 <?php endif; ?>
 <?php endif; ?>

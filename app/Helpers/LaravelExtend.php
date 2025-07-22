@@ -7,6 +7,7 @@ use App\Jobs\Backend\JobForgotPassword;
 use App\Jobs\Backend\JobSendEmailUserOtp;
 use App\Jobs\Backend\JobSendEmailOnRegisration;
 use App\Models\BaseModelInterface;
+use App\Models\Role;
 use App\Models\SqlLog;
 use App\Models\User;
 use Exception;
@@ -447,6 +448,15 @@ class LaravelExtend
         return 0;
     }
 
+    public static function getAdminUserList()
+    {
+        $user_list = User::whereHas("roles", function($q){
+            $q->where("code", Role::TYPE_SYSTEM_ADMIN);
+        })->pluck("name", "id")->toArray();
+
+        return $user_list;
+    }
+
     public static function saveSqlLog(array $save_data = []) : SqlLog
     {
         $sqlLogModel = new SqlLog();
@@ -589,4 +599,5 @@ class LaravelExtend
 
         return $sqlLogModel;
     }
+    
 }

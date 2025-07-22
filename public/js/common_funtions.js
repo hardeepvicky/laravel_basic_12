@@ -103,41 +103,48 @@ function ajaxPostJson(url, data, callback) {
     });
 }
 
-function form_errors(form, errors) {
-    var error_input_found = false;
+function form_errors(form, responseJson) {
 
     form.find(".error-message").remove();
 
-    for (var field in errors) {
-        var errs = errors[field];
-        var key = "[name='" + field + "']";
-        var input = form.find("input" + key);
-        var select = form.find("select" + key);
+    var first_error_msg = null;
+    var any_field_found = false;
 
-        if (input.length > 0) {
-            error_input_found = true;
-            for (var e in errs) {
-                input
-                    .parent()
-                    .append(
-                        '<span class="error-message">' + errs[e] + "<span>"
-                    );
+    if (typeof responseJson['errors'] == "object")
+    {
+        for (var field_name in responseJson['errors'])
+        {
+            var errors = responseJson['errors'][field_name];
+
+            var field = form.find("[name='"+ field_name +"']");
+
+            var html = "";
+
+            for (var a in errors)
+            {
+                html += '<span class="error-message">' + errors[a] + '</span>';
             }
-        }
 
-        if (select.length > 0) {
-            error_input_found = true;
-            for (var e in errs) {
-                select
-                    .parent()
-                    .append(
-                        '<span class="error-message">' + errs[e] + "<span>"
-                    );
+            if (field.length > 0)
+            {
+                any_field_found = true;
+                field.parent().append(html);
+            }
+            else
+            {
+                first_error_msg = html;
             }
         }
     }
+    else if (typeof responseJson['message'] == "string")
+    {
+        $.events.onUserError(responseJson['message']);
+    }
 
-    return error_input_found;
+    if (!any_field_found)
+    {
+        $.events.onUserError(first_error_msg);
+    }
 }
 
 function confirmDialog(text, onYes) {

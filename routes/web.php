@@ -303,7 +303,7 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
 
         $name = "status_verified";
-        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+        Route::put($name . "/{id}", [$controllerClass, $name])->name($name);
 
         $name = "history";
         Route::any($name . "/{id}", [$controllerClass, $name])->name($name);
@@ -319,6 +319,15 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
 
         $name = "ajax_get_count";
         Route::get($name, [$controllerClass, $name])->name($name);
+
+        $route_prefix = "export";
+        Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+            $name = "csv";
+            Route::get($name, [$controllerClass, $name])->name($name);
+
+            $name = "csv_history";
+            Route::get($name, [$controllerClass, $name])->name($name);
+        });
     });
 
     $route_prefix = "recurring-task";

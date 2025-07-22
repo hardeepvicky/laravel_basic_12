@@ -82,6 +82,11 @@ class Task extends BaseModel
         $this->parseTagsForModuleLinking();
     }
 
+    public function afterFindForCsv()
+    {
+        parent::afterFind();
+    }
+
     public function setDefaultAttributes() {}
 
     public function getUniqueValidationRules(Request $request)
@@ -235,9 +240,11 @@ class Task extends BaseModel
 
             $old_status = $this->status;
 
+            $admin_user_list = LaravelExtend::getAdminUserList();
+
             if ($status == self::STATUS_COMPLETED)
             {
-                $user_id_list = [];
+                $user_id_list = array_keys($admin_user_list);
                 $user_id_list[] = $this->assignToUser->id;
                 $user_id_list = array_merge($user_id_list, $this->user->pluck("id")->toArray());
 
@@ -247,7 +254,7 @@ class Task extends BaseModel
                 {
                     $user_name_list[] = $user->getDisplayName();
                 }
-                
+
                 if (!in_array(LaravelExtend::getAuthUserId(), $user_id_list))
                 {
                     $msg = "Only " . implode(", ", $user_name_list);
@@ -260,6 +267,7 @@ class Task extends BaseModel
             if ($status == self::STATUS_VERIFIED)
             {
                 $user_id_list = $this->assignToUser->designation->getUserIdListBasedOnDesignationLevel();
+                $user_id_list = array_merge($user_id_list, array_keys($admin_user_list));
                 $user_id_list[] = $this->created_by;
 
                 $users = User::find($user_id_list);
@@ -268,7 +276,7 @@ class Task extends BaseModel
                 {
                     $user_name_list[] = $user->getDisplayName();
                 }
-                
+
                 if (!in_array(LaravelExtend::getAuthUserId(), $user_id_list))
                 {
                     $msg = "Only " . implode(", ", $user_name_list);
@@ -284,9 +292,14 @@ class Task extends BaseModel
 
                 case self::STATUS_COMPLETED:
                     $this->is_completed = true;
+                    $this->complete_date_time = DateUtility::getDate(null, DateUtility::DATETIME_FORMAT);
+                    $this->complete_by = LaravelExtend::getAuthUserId();
                     break;
+
                 case self::STATUS_VERIFIED:
                     $this->is_verified = true;
+                    $this->verified_date_time = DateUtility::getDate(null, DateUtility::DATETIME_FORMAT);
+                    $this->verified_by = LaravelExtend::getAuthUserId();
                     break;
             }
 

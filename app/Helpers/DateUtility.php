@@ -24,7 +24,7 @@ class DateUtility
     const DATE_OUT_FORMAT = "d-M-Y";
     const TIME_OUT_FORMAT = "H:i";
     const DATETIME_OUT_FORMAT = 'd-M-Y H:i';
-    const DATETIME_OUT_FORMAT_FILE = 'd-M-Y_H-i-s';
+    const DATETIME_OUT_FORMAT_FILE = 'd-M-Y_H-i';
 
     const YEARS = "years";
     const MONTHS = "months";

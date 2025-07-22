@@ -127,6 +127,7 @@ use App\Helpers\LaravelExtend;
     <script src="{{ get_asset_url('assets/js/range/rangeslider.nostyle.umd.min.js') }}"></script>
     <script src="{{ get_asset_url('assets/js/range/rangeslider.umd.min.js') }}"></script>
     <script src="{{ get_asset_url('assets/js/clipboard/clipboard.min.js') }}"></script>
+    
 
     <script src="{{ get_asset_url('assets/js/theme-customizer/customizer.js') }}"></script>
 
