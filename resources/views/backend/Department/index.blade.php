@@ -23,14 +23,21 @@
                             class="pagination_limit" />
                     </div>
 
-                    <div class="col-md-3">
+                    <div class="col-md-3 col-xxl-2 mb-2">
                         <?php
                         $field = 'name';
                         $label = get_value_from_list($field_labels, $field, $field);
                         ?>
                         <x-Inputs.text-field :name="$field" :label="$label" :value="$search[$field]" />
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-3 col-xxl-2 mb-2">
+                        <?php
+                        $field = 'short_name';
+                        $label = get_value_from_list($field_labels, $field, $field);
+                        ?>
+                        <x-Inputs.text-field :name="$field" :label="$label" :value="$search[$field]" />
+                    </div>
+                    <div class="col-md-3 col-xxl-2 mb-2">
                         <?php
                         $field = 'is_active';
                         $label = get_value_from_list($field_labels, $field, $field);

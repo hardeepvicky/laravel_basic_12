@@ -11,10 +11,10 @@ if ($created_array):
     <?php endif; ?>
     <div class="label">{{ $created_array['date'] }}</div>
     <div class="divider"></div>
-    <div class="label">{{ $created_array['day'] }} {{ $created_array['time'] }}</div>
+    <div class="label text-end">{{ $created_array['day'] }} {{ $created_array['time'] }}</div>
     <?php if (isset($by) && $by): ?>
         <div class="divider"></div>
-        <div class="label">By : {{ $by }}</div>
+        <div class="label text-end">{{ $by }}</div>
     <?php endif; ?>
 </div>
 <?php endif; ?>

@@ -25,7 +25,7 @@
                                 $label = get_value_from_list($field_labels, $field, $field);
                                 ?>
                                 <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$dept_list"
-                                    value="{{ $model->{$field} }}" class="select2"/>
+                                    value="{{ $model->{$field} }}" class="select2" mandatory="true" />
                             </div>
                             <div class="form-group mb-3">
                                 <?php
@@ -33,6 +33,14 @@
                                 $label = get_value_from_list($field_labels, $field, $field);
                                 ?>
                                 <x-Inputs.text-field :name="$field" :label="$label" value="{{ $model->{$field} }}"
+                                    placeholder="Enter {{ $label }}" mandatory="true" autocomplete="off" />
+                            </div>
+                            <div class="form-group mb-3">
+                                <?php
+                                $field = 'short_name';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <x-Inputs.text-field :name="$field" :label="$label" :value="$model->{$field}"
                                     placeholder="Enter {{ $label }}" mandatory="true" autocomplete="off" />
                             </div>
                             <div class="form-group mb-3">

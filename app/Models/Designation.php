@@ -30,7 +30,7 @@ class Designation extends BaseModel
 
     public function getDisplayName()
     {
-        return $this->name;
+        return $this->short_name;
     }
 
     public function getUniqueValidationRules(Request $request)
@@ -44,7 +44,6 @@ class Designation extends BaseModel
             foreach ($field_rules as $field => $rules) {
                 foreach ($rules as $rule) {
                     if ($rule instanceof Unique) {
-                        // d([$field => $this->id]);
                         $rule->ignore($this->id, $this->primaryKey);
                     }
                 }

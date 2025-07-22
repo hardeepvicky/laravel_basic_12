@@ -53,4 +53,14 @@
         </a>
     </li>
     @endif
+
+    @if(in_array("tr_details", $buttonList))
+    <li>
+        <span class="btn btn-outline-light text-dark summary-action-button css-toggler"
+            data-sr-css-class-toggle-target="#record-{{ $id }}"
+            data-sr-css-class-toggle-class="hidden">
+            <i class="fa-solid fa-circle-info"></i>
+        </span>
+    </li>
+    @endif
 </ul>

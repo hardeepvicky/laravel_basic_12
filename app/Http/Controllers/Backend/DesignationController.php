@@ -38,6 +38,7 @@ class DesignationController extends BackendController
         $conditions = $this->getConditions($cache_key, [
             ["field" => "id", "type" => "int", "cache" => false],
             ["field" => "name", "type" => "string"],
+            ["field" => "short_name", "type" => "string"],
             ["field" => "level", "type" => "int"],
             ["field" => "is_active", "type" => "int"],
         ]);
@@ -94,6 +95,7 @@ class DesignationController extends BackendController
     {
         return [
             "name" => ["required"],
+            "short_name" => ["required"],
             "level" => ["required"],
             "list_display_order" => "",
             "is_active" => ""

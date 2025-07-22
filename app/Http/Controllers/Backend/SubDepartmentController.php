@@ -44,6 +44,7 @@ class SubDepartmentController extends BackendController
             ["field" => "id", "type" => "int", "cache" => false],
             ["field" => "department_id", "type" => "int"],
             ["field" => "name", "type" => "string"],
+            ["field" => "short_name", "type" => "string"],
             ["field" => "is_active", "type" => "int"],
         ]);
 
@@ -111,6 +112,7 @@ class SubDepartmentController extends BackendController
         return [
             "department_id" => ["required"],
             "name" => ["required"],       
+            "short_name" => ["required"],       
             "list_display_order" => "",     
             "is_active" => "",
         ];

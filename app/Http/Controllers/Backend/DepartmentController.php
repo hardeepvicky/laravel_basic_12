@@ -40,8 +40,9 @@ class DepartmentController extends BackendController
 
         $conditions = $this->getConditions($cache_key, [
             ["field" => "id", "type" => "int", "cache" => false],
-            ["field" => "name", "type" => "string", "view_field" => "name"],
-            ["field" => "is_active", "type" => "", "view_field" => "is_active"],
+            ["field" => "name", "type" => "string"],
+            ["field" => "short_name", "type" => "string"],
+            ["field" => "is_active", "type" => "int"],
         ]);
 
         $builder = $this->modelClass::where($conditions);
@@ -110,6 +111,7 @@ class DepartmentController extends BackendController
     {
         return [
             "name" => ["required"],
+            "short_name" => ["required"],
             "dept_head_user_id" => ["nullable"],
             "list_display_order" => "",
             "is_active" => ""

@@ -10,6 +10,7 @@
                     <tr class="border-bottom-primary">
                         <th><?= sortable_anchor('id', get_value_from_list($field_labels, 'id', 'id')) ?></th>
                         <th><?= sortable_anchor('name', get_value_from_list($field_labels, 'name', 'name')) ?></th>
+                        <th><?= sortable_anchor('short_name', get_value_from_list($field_labels, 'short_name', 'short_name')) ?></th>
                         <th><?= sortable_anchor('level', get_value_from_list($field_labels, 'level', 'level')) ?></th>
                         <th><?= sortable_anchor('list_display_order', get_value_from_list($field_labels, 'list_display_order', 'list_display_order')) ?></th>
                         <th><?= sortable_anchor('is_active', 'Activate / De-Active') ?></th>
@@ -23,6 +24,7 @@
                         <tr>
                             <th scope="row">{{ $record->id }}</th>
                             <td>{{ $record->name }}</td>
+                            <td>{{ $record->short_name }}</td>
                             <td>{{ $record->level }}</td>
                             <td>{{ $record->list_display_order }}</td>
                             <td>

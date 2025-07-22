@@ -47,7 +47,7 @@ class Department extends BaseModel
 
     public function getDisplayName()
     {
-        return $this->name;
+        return $this->short_name;
     }
 
     public function getUniqueValidationRules(Request $request)

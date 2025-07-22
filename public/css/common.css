@@ -227,12 +227,20 @@ label.info {
 }
 
 .celec_info {
-    margin: 0 5px 2px 0;
-    border: 1px solid #ced4da;
-    border-radius: 5px;
+    margin: 0 5px 2px 0;    
     max-width: 200px;
     display: inline-block;
     font-size: 12px;
+
+    background: linear-gradient(to bottom right, #FFF 0%, #EEE 100%);
+    box-shadow: 2px 2px 2px -2px black !important;
+    border: 1px solid #888;
+    border-radius: 5px;
+    vertical-align: top;
+}
+
+.dark-only .celec_info {
+    background: var(--body--bs-body-bg);
 }
 
 .celec_info .label-header {

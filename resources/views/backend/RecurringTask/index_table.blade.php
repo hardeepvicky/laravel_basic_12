@@ -1,6 +1,7 @@
 <?php
 use App\Models\Task;
 use App\Models\RecurringTask;
+$false = false;
 ?>
 <div class="card" id="page-summary">
     <div class="card-header">
@@ -11,18 +12,27 @@ use App\Models\RecurringTask;
         <div class="table-responsive">
             <table class="table table-bordered summary-table">
                 <thead>
+                    <tr>
+                        <th style="width:10%">
+                            <?php
+                            $field = "assign_to_user_id";
+                            ?>
+                            <x-Inputs.drop-down :name="$field" :label="$false" :value="$search[$field]" :list="$user_list" class="table-thead-search"/>
+                        </th>
+                    </tr>
                     <tr class="border-bottom-primary">
-                        <th style="width:8%"><?= sortable_anchor('id', get_value_from_list($field_labels, 'id', 'id')) ?></th>
+                        <th style="width:10%">
+                            <?= sortable_anchor('id', get_value_from_list($field_labels, 'id', 'id')) ?>
+                            | <?= sortable_anchor('assignToUser.name', get_value_from_list($field_labels, 'assign_to_user_id', 'assign_to_user_id')) ?>
+                        </th>
                         <th style="width:10%"><?= sortable_anchor('name', get_value_from_list($field_labels, 'name', 'name')) ?></th>
-                        <th style="width:10%"><?= sortable_anchor('department.name', get_value_from_list($field_labels, 'dept_id', 'dept_id')) ?>
-                        <th style="width:10%"><?= sortable_anchor('assignToUser.name', get_value_from_list($field_labels, 'assign_to_user_id', 'assign_to_user_id')) ?>
+                        <th style="width:5%"><?= sortable_anchor('department.name', get_value_from_list($field_labels, 'dept_id', 'dept_id')) ?>
                         <th style="width:5%"><?= sortable_anchor('priority', get_value_from_list($field_labels, 'priority', 'priority')) ?> </th>
-                        <th style="width:10%">Time & Duration</th>
                         <th style="width:8%"><?= sortable_anchor('recurring_type', get_value_from_list($field_labels, 'recurring_type', 'recurring_type')) ?></th>
                         <th style="width:5%"><?= sortable_anchor('is_draft', get_value_from_list($field_labels, 'is_draft', 'is_draft')) ?></th>
                         <th style="width:8%"><?= sortable_anchor('is_active', get_value_from_list($field_labels, 'is_active', 'is_active')) ?></th>
-                        <th style="width:8%">Task created by system</th>
-                        <th style="width:10%">{{ get_value_from_list($field_labels, 'tag_name', 'tag_name') }}</th>
+                        <th style="width:6%">Task created by system</th>
+                        <th style="width:8%">Time & Duration</th>
                         <th style="width:6%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
                         <th style="width:6%"><?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?></th>
                     </tr>
@@ -30,17 +40,23 @@ use App\Models\RecurringTask;
                 <tbody>
                     @foreach ($records as $record)
                         <?php
-                        $first_col_info = [$record->id, $record->assignToUser?->getDisplayName()];
+                        $first_col_info = [
+                            $record->id . " | " . $record->assignToUser?->getDisplayName()
+                        ];
                         ?>
                         <tr>
                             <th scope="row">
-                                <x-Backend.celec-summary-table-first-column :record="$record" :routePrefix="$routePrefix" :labelInfo="$first_col_info"/>
+                                <x-Backend.celec-summary-table-first-column :record="$record" :routePrefix="$routePrefix" :labelInfo="$first_col_info" buttons="edit,delete,tr_details" />
                             </th>
                             <td>{{ $record->name }}</td>
                             <td>{{ $record->department?->getDisplayName() }}</td>
-                            <td>{{ $record->assignToUser?->getDisplayName() }}</td>
                             <td>{{ $record->priority }}</td>
-                            
+                            <td>{{ get_value_from_list($recurring_type_list, $record->recurring_type) }}</td>
+                            <td>{{ $record->is_draft ? 'Draft' : '' }}</td>
+                            <td>
+                                <x-Backend.active_deactive :isActive="$record->is_active" :id="$record->id" :routePrefix="$routePrefix" />
+                            </td>
+                            <td>{{ $record->tasks->count() }}</td>
                             <td>
                                 @if ($record->recurring_type != RecurringTask::RECURRING_CUSTOM)
                                     <x-Backend.celec-date-time :value="$record->start_date_time"/>
@@ -50,13 +66,6 @@ use App\Models\RecurringTask;
                                     <span>{{ $record->duration }} {{ get_value_from_list($duration_type_list, $record->duration_type) }}</span>
                                 </label>
                             </td>
-                            <td>{{ get_value_from_list($recurring_type_list, $record->recurring_type) }}</td>
-                            <td>{{ $record->is_draft ? 'Draft' : '' }}</td>
-                            <td>
-                                <x-Backend.active_deactive :isActive="$record->is_active" :id="$record->id" :routePrefix="$routePrefix" />
-                            </td>
-                            <td>{{ $record->tasks->count() }}</td>
-                            <td>{{ implode(", ", $record->tags->pluck("name")->toArray()) }}</td>
                             <td>
                                 <x-Backend.created-and-by :datetime="$record->created_at" :userId="$record->created_by" />
                             </td>
@@ -65,7 +74,7 @@ use App\Models\RecurringTask;
                             </td>
                         </tr>
                         <tr id="record-{{ $record->id }}" class="hidden">
-                            <td style="background-color: #FFF;"></td>
+                            <td style="background-color: var(--body--bs-body-bg)"></td>
                             <td colspan="9">
                                 <div class="row">
                                     <div class="col-md-6 col-xl-4">
@@ -128,9 +137,8 @@ use App\Models\RecurringTask;
                                                                 <tr>
                                                                     <td>{{ $i + 1 }}</td>
                                                                     <td>
-                                                                        <a target="_blank"
-                                                                            href="{{ route('task.index', ['id' => $task->id]) }}">
-                                                                            {{ $task->getDisplayName() }}
+                                                                        <a target="_blank" href="{{ route('task.index', ['id' => $task->id]) }}">
+                                                                            #{{ $task->id }}
                                                                         </a>
                                                                     </td>
                                                                 </tr>

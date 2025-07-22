@@ -378,7 +378,10 @@ class User extends Authenticatable implements BaseModelInterface
             $name .= " (External)";
         } else {
             if ($this->person_name && strtolower($this->person_name) != strtolower($name)) {
-                $name .= " >> " . $this->person_name;
+
+                $sub_str = trim(substr($this->person_name, 0, strpos($this->person_name, " ")));
+
+                $name = $sub_str . " >> " . $this->name;
             }
         }
 

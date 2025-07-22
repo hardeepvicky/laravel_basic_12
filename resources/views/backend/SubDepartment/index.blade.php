@@ -20,7 +20,7 @@
                         <x-Inputs.drop-down :name="$field" label="Limit" :list="$paginationList" :value="$pagination_limit" :pleaseSelect="$false"
                             class="pagination_limit" />
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-3 col-xxl-2 mb-2">
                         <?php
                         $field = 'department_id';
                         $label = get_value_from_list($field_labels, $field, $field);
@@ -28,14 +28,14 @@
                         <x-Inputs.drop-down :name="$field" :label="$label" :value="$search[$field]" :list="$dept_list"
                             class="select2" />
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-3 col-xxl-2 mb-2">
                         <?php
                         $field = 'name';
                         $label = get_value_from_list($field_labels, $field, $field);
                         ?>
                         <x-Inputs.text-field :name="$field" :label="$label" :value="$search[$field]" />
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-3 col-xxl-2 mb-2">
                         <?php
                         $field = 'is_active';
                         $label = get_value_from_list($field_labels, $field, $field);

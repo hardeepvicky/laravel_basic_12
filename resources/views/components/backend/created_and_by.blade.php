@@ -11,22 +11,22 @@ if ($option_array['show_as'] == "celec_datetime" || $option_array['show_as'] == 
     <div class="celec_info">
         <div class="label">{{ $date_array['date'] }}</div>
         <div class="divider"></div>
-        <div class="label">{{ $date_array['day'] }} {{ $date_array['time'] }}</div>
+        <div class="label text-end">{{ $date_array['day'] }} {{ $date_array['time'] }}</div>
         <div class="divider"></div>
-        <div class="label">By : {{ LaravelExtend::getCreatedByOrUpdatedBy($userId) }}</div>
+        <div class="label text-end">{{ LaravelExtend::getCreatedByOrUpdatedBy($userId) }}</div>
     </div>
 <?php elseif ($option_array['show_as'] == "human_date" || $option_array['show_as'] == "human_datetime"): 
 ?>
     <div class="celec_info">
         <div class="label">{{ $datetime->diffForHumans() }}</div>
         <div class="divider"></div>
-        <div class="label">By : {{ LaravelExtend::getCreatedByOrUpdatedBy($userId) }}</div>
+        <div class="label">{{ LaravelExtend::getCreatedByOrUpdatedBy($userId) }}</div>
     </div>
 
     <div class="celec_info">
         <div class="label">{{ $datetime->diffForHumans() }}</div>
         <div class="divider"></div>
-        <div class="label">By : {{ LaravelExtend::getCreatedByOrUpdatedBy($userId) }}</div>
+        <div class="label">{{ LaravelExtend::getCreatedByOrUpdatedBy($userId) }}</div>
     </div>
 <?php else: ?>
     <?php
@@ -43,12 +43,12 @@ if ($option_array['show_as'] == "celec_datetime" || $option_array['show_as'] == 
     <div class="celec_info">
         <div class="label">{{ $datetime->format($format) }}</div>
         <div class="divider"></div>
-        <div class="label">By : {{ LaravelExtend::getCreatedByOrUpdatedBy($userId) }}</div>
+        <div class="label">{{ LaravelExtend::getCreatedByOrUpdatedBy($userId) }}</div>
     </div>
 
     <div class="celec_info">
         <div class="label">{{ $datetime->format($format) }}</div>
         <div class="divider"></div>
-        <div class="label">By : {{ LaravelExtend::getCreatedByOrUpdatedBy($userId) }}</div>
+        <div class="label">{{ LaravelExtend::getCreatedByOrUpdatedBy($userId) }}</div>
     </div>
 <?php endif; ?>
