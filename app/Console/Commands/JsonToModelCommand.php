@@ -101,13 +101,20 @@ class JsonToModelCommand extends MyCommand
                 $will_truncate = true;                
             }
 
-            $this->save($filename, Util::objToArray($records), $will_truncate);
+            $records = Util::objToArray($records);
+
+            if (isset($records[0]['parent_id']))
+            {
+                $records = Util::getTreeArray($records, "parent_id");
+            }
+
+            $this->save($filename, $records, $will_truncate);
         }
 
         $this->logUpdate($this->log_info);
     }
 
-    public function save($filename, array $records, bool $will_truncate = false)
+    public function save($filename, array $records, bool $will_truncate = false, $info_prefix = "")
     {
         $model_class = "App\\Models\\" . $filename;
 
@@ -124,14 +131,9 @@ class JsonToModelCommand extends MyCommand
             "truncate" => 0,
         ];
 
-        if (isset($records[0]['parent_id']))
-        {
-            $records = Util::getTreeArray($records, "parent_id");
-        }
-
         $count = count($records);
 
-        $this->info("Working on $filename, " . " Count : " . $count);
+        $this->info("Working on $filename, Count : " . $count);
 
         $db_count = $model_class::count();
 
@@ -180,6 +182,11 @@ class JsonToModelCommand extends MyCommand
                 {
                     $counters['update']++;
                 }
+
+                if (isset($tree_record["children"]) && $tree_record["children"])
+                {
+                    $this->save($filename, $tree_record["children"], false, $info_prefix . $tree_record['id'] . "->" );
+                }
             }
         }
 
@@ -189,7 +196,7 @@ class JsonToModelCommand extends MyCommand
 
         $output = new ConsoleOutput();
 
-        $output->addLog($counts);
+        $output->addLog($counts, 0, $info_prefix);
 
         $output->writeLogToConsole();
     }
