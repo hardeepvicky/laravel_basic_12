@@ -141,7 +141,7 @@ $false = false;
                         <?php
                         $field = "taskUser";
                         $label = get_value_from_list($field_labels, $field, $field);
-                        $value = implode(',', $model->taskUser->pluck('user_id')->toArray());
+                        $value = implode(',', $model->taskUser?->pluck('user_id')->toArray());
                         ?>
                         <x-Inputs.drop-down name="taskUser[]" :label="$label" :list="$user_list" :value="$value"
                             class="select2" multiple="multiple"  />
@@ -157,7 +157,7 @@ $false = false;
                         <?php
                         $field = "taskFile";
                         $label = get_value_from_list($field_labels, $field, $field);
-                        $value = implode(',', $model->taskFile->pluck('document_file_id')->toArray());
+                        $value = implode(',', $model->taskFile?->pluck('document_file_id')->toArray());
                         ?>
                         <x-Inputs.text-field :id="$field" :name="$field" :label="$label" :value="$value" multiple="multiple"  />                        
                         <span id="files-choose" class="btn btn-secondary">Choose Files</span>

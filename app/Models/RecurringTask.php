@@ -34,6 +34,10 @@ class RecurringTask extends BaseModel
             "foreignKey" => "recurring_task_id",
             "preventDelete" => false,
         ],
+        RecurringTaskUser::class => [
+            "foreignKey" => "recurring_task_id",
+            "preventDelete" => false
+        ],
     ];
 
     protected static array $fields_containg_tags = ["description"];
@@ -104,6 +108,23 @@ class RecurringTask extends BaseModel
     {
         return $this->belongsTo(User::class, "assign_to_user_id");
     }
+    
+    public function tags()
+    {
+        $class_name = str_class_name_without_namespace($this);
+
+        return $this->hasMany(Tag::class, 'foreign_id')->where("foreign_model", $class_name);
+    }
+
+    public function documentFile()
+    {
+        return $this->belongsToMany(DocumentFile::class, RecurringTaskFile::class);
+    }
+
+    public function recurringTaskFile()
+    {
+        return $this->hasMany(RecurringTaskFile::class, 'recurring_task_id');
+    }
 
     public function recurringTaskDate()
     {
@@ -113,6 +134,16 @@ class RecurringTask extends BaseModel
     public function tasks()
     {
         return $this->hasMany(Task::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsToMany(User::class, RecurringTaskUser::class);
+    }
+
+    public function recurringTaskUser()
+    {
+        return $this->hasMany(RecurringTaskUser::class, 'recurring_task_id');
     }
 
     protected function getDisplayNameAttribute()
@@ -148,7 +179,16 @@ class RecurringTask extends BaseModel
         return null;
     }
 
-    
+    public function getFieldLabels()
+    {
+        $labels = parent::getFieldLabels();
+
+        $labels['tag_name'] = "Tags";
+        $labels['taskUser'] = "Link Users";
+        $labels['taskFile'] = "Files";
+
+        return $labels;
+    }
 
     public static function createTask(RecurringTask $recurring_task): int
     {
@@ -215,6 +255,9 @@ class RecurringTask extends BaseModel
                             $model = new Task($record);
 
                             if ($model->save()) {
+
+                                $recurring_task->_saveOther($model);
+
                                 $save_count++;
                             } else {
                                 throw new UserException("Fail To Save", UserException::ERROR_LARAVEL_FAIL);
@@ -230,8 +273,6 @@ class RecurringTask extends BaseModel
                 }
             }
         } else {
-            $recurring_task->load("recurringTaskDate");
-
             foreach ($recurring_task->recurringTaskDate as $recurringTaskDate) {
                 if (DateUtility::compare($recurringTaskDate->date, $now) <= 0) {
                     try {
@@ -259,6 +300,8 @@ class RecurringTask extends BaseModel
                             $model = new Task($record);
 
                             if ($model->save()) {
+                                $recurring_task->_saveOther($model);
+
                                 $recurringTaskDate->task_id = $model->id;
 
                                 if (!$recurringTaskDate->save()) {
@@ -282,5 +325,32 @@ class RecurringTask extends BaseModel
         DB::commit();
 
         return $save_count;
+    }
+
+    private function _saveOther(Task $model)
+    {
+        $model->user()->sync($this->user);
+
+        $model->documentFile()->sync($this->documentFile);
+
+        foreach($this->tags as $tag)
+        {
+            $model_class_name = str_class_name_without_namespace($model);
+
+            if (!$model_class_name) {
+                throw new UserException("could not found model_class_name");
+            }
+
+            $model_class_name = str_class_name_to_human_text($model_class_name);
+
+            $save_data = [
+                "main_table_field" => "name",
+                "name" => $tag->name,
+            ];
+
+            $save_data['search_term'] = $model_class_name . "." . $save_data['name'];
+
+            Tag::createTag($save_data, $model, $model);
+        }
     }
 }

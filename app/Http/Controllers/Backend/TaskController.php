@@ -207,7 +207,7 @@ class TaskController extends BackendController
         }
 
         if ($exist_user_ids) {
-            $conditions['or_id'] = $exist_user_ids;
+            $user_conditions['or_id'] = $exist_user_ids;
         }
 
         $user_list = User::getList("id", "display_name", $user_conditions);
@@ -300,7 +300,7 @@ class TaskController extends BackendController
             "is_send_notification" => "",
             "tag_name" => [],
             "taskUser" => [],
-            "taskFile" => "",
+            "taskFile" => [],
         ];
     }
 
@@ -470,7 +470,7 @@ class TaskController extends BackendController
 
     public function edit($id)
     {
-        $model = $this->model = $this->modelClass::with(["tags", "taskUser"])->findOrFail($id);
+        $model = $this->model = $this->modelClass::with(["tags", "taskUser", "taskFile"])->findOrFail($id);
 
         $model->convertTimeZoneForDisplay();
 

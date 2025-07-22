@@ -6,9 +6,11 @@ use App\Exceptions\UserException;
 use App\Helpers\DateUtility;
 use App\Helpers\LaravelExtend;
 use App\Models\Department;
+use App\Models\DocumentFile;
 use App\Models\FieldSetting;
 use App\Models\RecurringTask;
 use App\Models\RecurringTaskDate;
+use App\Models\Tag;
 use App\Models\Task;
 use App\Models\TaskRecurringDate;
 use App\Models\Type;
@@ -54,14 +56,25 @@ class RecurringTaskController extends BackendController
             ["field" => "is_draft", "type" => "int"],
         ]);
 
+        $tag_conditions = $this->getConditions($cache_key . "-2", [
+            ["field" => "name", "type" => "string", "view_field" => "tag_name"],
+        ]);
+
         $builder = $this->modelClass::where($conditions);
 
         $builder->with([
             "department",
             "assignToUser",
             "recurringTaskDate",
-            "tasks"
+            "tags",
+            "user"
         ]);
+
+        if ($tag_conditions) {
+            $builder->wherehas("tags", function ($query) use ($tag_conditions) {
+                $query->where($tag_conditions);
+            });
+        }
 
         if ($apply_sort) {
             $cache_key_for_sort = $cache_key_prefix . "-index-extra-params";
@@ -91,8 +104,18 @@ class RecurringTaskController extends BackendController
             "type" => User::TYPE_INTERNAL,
         ];
 
+        $exist_user_ids = [];
+
+        if ($this->model->recurringTaskUser) {
+            $exist_user_ids = $this->model->recurringTaskUser->pluck("user_id")->toArray();
+        }
+
         if ($this->model->assign_to_user_id) {
-            $user_conditions['or_id'] = $this->model->assign_to_user_id;
+            $exist_user_ids[] = $this->model->assign_to_user_id;
+        }
+
+        if ($exist_user_ids) {
+            $user_conditions['or_id'] = $exist_user_ids;
         }
 
         $user_list = User::getList("id", "display_name", $user_conditions);
@@ -179,6 +202,10 @@ class RecurringTaskController extends BackendController
             "description" => ["nullable"],            
             "is_send_notification" => "",
             "is_draft" => "",
+            "is_send_notification" => "",
+            "tag_name" => [],
+            "taskUser" => [],
+            "taskFile" => [],
         ];
     }
 
@@ -246,6 +273,7 @@ class RecurringTaskController extends BackendController
         }
     }
 
+
     private function _beforeSave($validatedData)
     {
         $validatedData['status'] = Task::STATUS_CREATED;
@@ -259,9 +287,47 @@ class RecurringTaskController extends BackendController
 
     private function _saveOthers($validatedData)
     {
-        unset($validatedData['recurringTaskDate']['(sr-id)']);
+        if (isset($validatedData['taskUser']) && is_array($validatedData['taskUser'])) {
+            $users = User::find($validatedData['taskUser']);
+            $this->model->user()->sync($users);
+        }
 
-        
+        if (isset($validatedData['taskFile'])) {
+
+            $ids = explode(",", $validatedData['taskFile']);
+
+            $document_files = DocumentFile::find($ids);
+            
+            $this->model->documentFile()->sync($document_files);
+        }
+
+        if (isset($validatedData['tag_name'])) {
+            // dd($validatedData['tag_name']);
+            $model_class_name = str_class_name_without_namespace($this->modelClass);
+
+            if (!$model_class_name) {
+                throw new UserException("could not found model_class_name");
+            }
+
+            $model_class_name = str_class_name_to_human_text($model_class_name);
+
+            $tag_names = explode(",", $validatedData['tag_name']);
+
+            $this->model->tags()->delete();
+
+            foreach ($tag_names as $tag_name) {
+                $save_data = [
+                    "main_table_field" => "name",
+                    "name" => $tag_name,
+                ];
+
+                $save_data['search_term'] = $model_class_name . "." . $save_data['name'];
+
+                Tag::createTag($save_data, $this->model, $this->model);
+            }
+        }
+
+        unset($validatedData['recurringTaskDate']['(sr-id)']);
         if (isset($validatedData['recurringTaskDate'])) {
             
             $this->model->recurringTaskDate()->delete();
@@ -297,7 +363,7 @@ class RecurringTaskController extends BackendController
 
     public function edit($id)
     {
-        $model = $this->model = $this->modelClass::with(["recurringTaskDate"])->findOrFail($id);
+        $model = $this->model = $this->modelClass::with(["recurringTaskDate", "tags", "recurringTaskUser", "recurringTaskFile"])->findOrFail($id);
 
         $model->convertTimeZoneForDisplay();
 

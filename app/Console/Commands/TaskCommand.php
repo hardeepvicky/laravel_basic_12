@@ -5,12 +5,9 @@ namespace App\Console\Commands;
 use App\Helpers\ConsoleOutput;
 use App\Helpers\DateUtility;
 use App\Helpers\MyCommand;
-use App\Models\AutomateTask;
-use App\Models\CommandLog;
 use App\Models\RecurringTask;
 use App\Models\SqlLog;
 use App\Models\Task;
-use Carbon\Carbon;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
@@ -60,8 +57,13 @@ class TaskCommand extends MyCommand
 
             $main_counts['task']['status_change'] = 0;
 
-            $qb = RecurringTask::where("is_draft", 0)->where("is_active", 1);
-
+            
+            $qb = RecurringTask::where("is_draft", 0)->where("is_active", 1)
+            ->with([
+                "recurringTaskDate", "tags", "recurringTaskUser", "recurringTaskFile"
+            ]);
+            
+            
             SqlLog::addSelectQuery($qb);
             
             $records = $qb->get();
@@ -77,7 +79,6 @@ class TaskCommand extends MyCommand
             }
 
             $now = DateUtility::getDate(null, DateUtility::DATETIME_FORMAT);
-
 
             $qb = Task::where("status", Task::STATUS_CREATED)
                 ->where("start_date_time", "<=", $now);

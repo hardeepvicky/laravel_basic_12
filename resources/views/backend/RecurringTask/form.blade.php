@@ -135,6 +135,41 @@ $false = false;
                             </div>
                         </div>
                     </div>
+
+                    <div class="form-group mb-3 is_draft-block is_draft-block-0">
+                        <?php
+                        $field = 'tag_name';
+                        $label = get_value_from_list($field_labels, $field, 'Tags');
+                        $value = implode(',', $model->tags?->pluck('name')->toArray()) ?? [];
+                        ?>
+                        <x-Inputs.choice :id="$field" :name="$field" :label="$label" :value="$value"
+                            class="choice " placeholder="Enter {{ $label }}" />
+                    </div>
+                    <div class="form-group mb-3 is_draft-block is_draft-block-0">
+                        <?php
+                        $field = "taskUser";
+                        $label = get_value_from_list($field_labels, $field, $field);
+                        $value = implode(',', $model->recurringTaskUser?->pluck('user_id')->toArray());
+                        ?>
+                        <x-Inputs.drop-down name="taskUser[]" :label="$label" :list="$user_list" :value="$value"
+                            class="select2" multiple="multiple"  />
+
+                        <?php
+                        $field = 'is_send_notification';
+                        $label = get_value_from_list($field_labels, $field, $field);
+                        ?>
+                        <x-Inputs.checkbox :id="$field" :name="$field" :label="$label"
+                            value="{{ $model->{$field} }}" />
+                    </div>
+                    <div class="form-group mb-3 is_draft-block is_draft-block-0">
+                        <?php
+                        $field = "taskFile";
+                        $label = get_value_from_list($field_labels, $field, $field);
+                        $value = implode(',', $model->recurringTaskFile?->pluck('document_file_id')->toArray());
+                        ?>
+                        <x-Inputs.text-field :id="$field" :name="$field" :label="$label" :value="$value" multiple="multiple"  />                        
+                        <span id="files-choose" class="btn btn-secondary">Choose Files</span>
+                    </div>
                 </div>
 
                 <div class="col-md-12 col-xxl-6">
@@ -355,9 +390,13 @@ $false = false;
                     pageLoad: true
                 });
 
+                $("#taskFile").browseGallery({
+                    opener : "#files-choose"
+                });
+
                 show_hide_field();
             })
-        })
+        });
 
         function custom_date_time_picker_apply(element) {
             if ($(element).length == 0) {

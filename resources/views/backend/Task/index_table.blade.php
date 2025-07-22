@@ -70,6 +70,7 @@ use App\Models\Task;
                                         :
                                         <span>{!! $record->description !!}</span>
                                     </label>
+
                                     <h5>
                                         Link Users
                                     </h5>
@@ -78,6 +79,7 @@ use App\Models\Task;
                                         <li>{{ $user->getDisplayName() }}</li>
                                         @endforeach
                                     </ol>
+                                    
                                     <label class="info">
                                         {{ get_value_from_list($field_labels, 'is_send_notification', 'is_send_notification') }} 
                                         : 

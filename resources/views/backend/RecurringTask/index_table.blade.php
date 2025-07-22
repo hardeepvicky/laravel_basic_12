@@ -22,6 +22,7 @@ use App\Models\RecurringTask;
                         <th style="width:5%"><?= sortable_anchor('is_draft', get_value_from_list($field_labels, 'is_draft', 'is_draft')) ?></th>
                         <th style="width:8%"><?= sortable_anchor('is_active', get_value_from_list($field_labels, 'is_active', 'is_active')) ?></th>
                         <th style="width:8%">Task created by system</th>
+                        <th style="width:10%">{{ get_value_from_list($field_labels, 'tag_name', 'tag_name') }}</th>
                         <th style="width:6%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
                         <th style="width:6%"><?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?></th>
                     </tr>
@@ -55,6 +56,7 @@ use App\Models\RecurringTask;
                                 <x-Backend.active_deactive :isActive="$record->is_active" :id="$record->id" :routePrefix="$routePrefix" />
                             </td>
                             <td>{{ $record->tasks->count() }}</td>
+                            <td>{{ implode(", ", $record->tags->pluck("name")->toArray()) }}</td>
                             <td>
                                 <x-Backend.created-and-by :datetime="$record->created_at" :userId="$record->created_by" />
                             </td>
@@ -146,6 +148,15 @@ use App\Models\RecurringTask;
                                             :
                                             <span>{!! $record->description !!}</span>
                                         </label>
+
+                                        <h5>
+                                            Link Users
+                                        </h5>
+                                        <ol>
+                                            @foreach ($record->user as $user)
+                                            <li>{{ $user->getDisplayName() }}</li>
+                                            @endforeach
+                                        </ol>
                                     </div>
                                 </div>
                             </td>

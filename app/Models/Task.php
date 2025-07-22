@@ -138,7 +138,6 @@ class Task extends BaseModel
         return $this->hasMany(TaskUser::class, 'task_id');
     }
 
-
     public function documentFile()
     {
         return $this->belongsToMany(DocumentFile::class, TaskFile::class);
