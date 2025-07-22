@@ -260,11 +260,29 @@ $(document).ready(function () {
         summary_table_with_search(_this);
     });
 
-
-    $(".auto-suggesstion-list").each(function () {
-
+    $(document).on("change", ".table-thead-search", function()
+    {
+        table_thead_form_ajax_submit($(this));
     });
 });
+
+function table_thead_form_ajax_submit(ele)
+{
+    $(ele).closest("form").ajaxSubmit({
+        target: "#index_table",
+        beforeSubmit: function (formData, jqForm, options) {
+            $.loader.show();
+        },
+        success: function (responseText, statusText, xhr, $form) {
+            $.loader.hide();
+        },
+        error: function () {
+            $.loader.hide();
+        },
+    });
+
+    return false;
+}
 
 function summary_table_with_search(ele, callback) {
     var base_url = $(ele).data("base_url");
