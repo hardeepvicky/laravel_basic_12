@@ -52,7 +52,17 @@ class BackendController extends WebController
 
         // d($menus, true);
 
-        $header_menu_list = Menu::getList($menus);
+        $header_menus = Menu::getList($menus);
+        $header_menu_list = [];
+
+        foreach($header_menus as $header_menu)
+        {
+            if ($header_menu['url'] && $header_menu['url'] != "#")
+            {
+                $header_menu_list[$header_menu['url']] = $header_menu['title'];
+            }
+        }
+
         $breadcums = Menu::getBreadcums($menus);
 
         $auth_user = Auth::user();

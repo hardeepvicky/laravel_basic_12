@@ -32,7 +32,7 @@ class DeveloperController extends BackendController
         }
 
         $index_table_info_options = [
-            "show_as" => "human_date"
+            "show_as" => "full_datetime"
         ];
 
         // d($index_table_info_options);

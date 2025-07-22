@@ -4,8 +4,8 @@ use App\Helpers\DateUtility;
 use App\Helpers\LaravelExtend;
 use Illuminate\Support\Carbon;
 
-$created_at = $record->created_at;
-$updated_at = $record->updated_at;
+$created_at = $record->created_at_user_tz ?? $record->created_at;
+$updated_at = $record->updated_at_user_tz ?? $record->updated_at;
 
 if ($option_array['show_as'] == "celec_datetime" || $option_array['show_as'] == "celec_date"):
 

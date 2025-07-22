@@ -35,7 +35,7 @@ use App\Models\Notification;
                 <div class="Typeahead Typeahead--twitterUsers">
                     <div class="u-posRelative d-flex align-items-center">
                         <input id="header-search" class="demo-input py-0 Typeahead-input form-control-plaintext w-100"
-                            type="text" placeholder="Type to Search..." name="q" title="" /><i
+                            type="text" placeholder="(F2) Type to Search..." name="q" title="" /><i
                             class="search-bg iconly-Search icli"></i>
                     </div>
                 </div>
@@ -187,17 +187,23 @@ use App\Models\Notification;
 </header>
 
 <style>
-    .tt-suggestion {
+    .twitter-typeahead .tt-suggestion {
         padding: 3px 20px;
         line-height: 24px;
         cursor: pointer;
+        opacity: 1;
+    }
+
+    .tt-suggestion:hover
+    {
+        background-color: rgba(48, 142, 135, .2);
     }
 
     .tt-suggestion.tt-cursor {
     }
 
     .tt-suggestion p {
-        margin: 0;
+        margin: 0;        
     }
 
     .tt-highlight {
@@ -211,6 +217,10 @@ use App\Models\Notification;
 
     .twitter-typeahead .tt-menu{
         min-width: 30rem;
+    }
+
+    .twitter-typeahead .tt-menu{
+        margin-top: 12px;
     }
 </style>
 
@@ -279,9 +289,24 @@ use App\Models\Notification;
                     `;
                     }
                 }
+            }).bind('typeahead:select', function(ev, suggestion) {
+                if (typeof suggestion.url == "string")
+                {
+                    $.loader.init().setInfo("Redirecting....").show();
+                    window.location.href = suggestion.url;
+                }
             });
         });
 
 
+        $(document).on('keydown', function(event) {
+            // event.which is deprecated, but widely supported.
+            // event.key is more modern, but F-keys can be tricky with it.
+            // event.code is also an option.
+            if (event.which === 113) {
+                event.preventDefault();
+                $("#header-search").focus();
+            }
+        });
     });
 </script>

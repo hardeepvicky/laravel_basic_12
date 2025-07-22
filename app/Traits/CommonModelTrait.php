@@ -348,6 +348,11 @@ trait CommonModelTrait
                 }
             }
         }
+        else
+        {
+            $date_fields['created_at'] = 'timestamp';
+            $date_fields['updated_at'] = 'timestamp';
+        }
 
         if (empty($data))
         {
@@ -355,20 +360,13 @@ trait CommonModelTrait
             {
                 if ($this->{$field})
                 {
-                    $new_field = $field . "_original";
-                    
-                    if ($this->{$field} instanceof Carbon)
-                    {
-                        $this->{$new_field} = $this->{$field}->clone();
+                    $original_field = $field . "_original";
 
-                        if ($this->{$field}->timezoneName != DateUtility::$login_user_time_zone->getName())
-                        {
-                            $this->{$field} = $this->{$field}->tz(DateUtility::$login_user_time_zone);
-                        }     
-                    }
-                    else if ($this->{$field} instanceof DateTime)
+                    $new_field = $field . "_user_tz";
+
+                    if ($this->{$field} instanceof DateTime || $this->{$field} instanceof Carbon)
                     {
-                        $this->{$new_field} = $this->{$field}->clone();
+                        $this->{$original_field} = $this->{$field}->clone();
 
                         $timezoneObject = $this->{$field}->getTimezone();
 
@@ -376,12 +374,12 @@ trait CommonModelTrait
 
                         if ($timezoneName != DateUtility::$login_user_time_zone->getName())
                         {
-                            $this->{$new_field} = $this->{$field}->setTimezone(DateUtility::$login_user_time_zone);
+                            $this->{$field} = $this->{$new_field} = $this->{$field}->setTimezone(DateUtility::$login_user_time_zone);
                         }                   
                     }
                     else
                     {
-                        $this->{$new_field} = $$this->{$field};
+                        $this->{$original_field} = $this->{$field};
 
                         //consider as UTC
                         $new_date = DateUtility::getDateObj($this->{$field});
@@ -397,19 +395,12 @@ trait CommonModelTrait
             {
                 if ($this->{$field})
                 {
-                    $new_field = $field . "_original";
-
-                    $this->{$new_field} = $this->{$field};
-
-                    if ($data[$field] instanceof Carbon)
+                    $original_field = $field . "_original";
+                    
+                    if ($data[$field] instanceof DateTime || $data[$field] instanceof Carbon)
                     {
-                        if ($data[$field]->timezoneName != DateUtility::$login_user_time_zone->getName())
-                        {
-                            $this->{$field} = $this->{$field}->tz(DateUtility::$login_user_time_zone);
-                        }     
-                    }
-                    else if ($data[$field] instanceof DateTime)
-                    {
+                        $data[$original_field] = $data[$field]->clone();
+
                         $timezoneObject = $data[$field]->getTimezone();
 
                         $timezoneName = $timezoneObject->getName();
@@ -421,6 +412,7 @@ trait CommonModelTrait
                     }
                     else
                     {
+                        $data[$original_field] = $data[$field];
                         //consider as UTC
                         $new_date = DateUtility::getDateObj($data[$field]);
                         $new_date->setTimezone(DateUtility::$login_user_time_zone);
