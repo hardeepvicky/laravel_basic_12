@@ -18,11 +18,7 @@ class Uom extends BaseModel
 
     protected static array $list_fields = ["id", "name", "short_name"];
 
-    public static array $child_model_class = [
-        Product::class => [
-            "foreignKey" => "uom_id",
-            "preventDelete" => true
-        ],
+    public static array $child_model_class = [        
         ProductCategoryAttribute::class => [
             "foreignKey" => "uom_id",
             "preventDelete" => true

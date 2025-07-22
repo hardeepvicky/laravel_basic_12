@@ -81,21 +81,35 @@ class JsonToModelCommand extends MyCommand
         if ($records === null && json_last_error() !== JSON_ERROR_NONE) {
             $this->error("cound not decode json from " . $filename);
         } else {
-            $this->save($filename, Util::objToArray($records));
+
+            $model_class = "App\\Models\\" . $filename;
+
+            if (!class_exists($model_class))
+            {
+                $this->error("Class does not exist " . $model_class);
+                return;
+            }
+
+            $db_count = $model_class::count();
+
+            $user_input = $this->ask("Table have $db_count records, Do You still want to truncate (Yes/No) [Default:No]");
+
+            $will_truncate = false;
+
+            if (strtolower(trim($user_input)) == "yes") {
+                $this->info("User reply : $user_input");
+                $will_truncate = true;                
+            }
+
+            $this->save($filename, Util::objToArray($records), $will_truncate);
         }
 
         $this->logUpdate($this->log_info);
     }
 
-    public function save($filename, array $records)
+    public function save($filename, array $records, bool $will_truncate = false)
     {
         $model_class = "App\\Models\\" . $filename;
-
-        if (!class_exists($model_class))
-        {
-            $this->error("Class does not exist " . $model_class);
-            return;
-        }
 
         if (count($records) <= 0)
         {
@@ -107,6 +121,7 @@ class JsonToModelCommand extends MyCommand
             "insert" => 0,
             "update" => 0,
             "delete" => 0,
+            "truncate" => 0,
         ];
 
         if (isset($records[0]['parent_id']))
@@ -120,11 +135,20 @@ class JsonToModelCommand extends MyCommand
 
         $db_count = $model_class::count();
 
-        $user_input = $this->ask("Table have $db_count records, where $count records will be save, Do You still want to proceed (Yes/No) [Default:Yes]");
+        if ($will_truncate)
+        {
+            $this->info("truncating...");
+            $model_class::truncate();
+            $counters['truncate'] += $db_count;
+        }
+        else
+        {
+            $user_input = $this->ask("Table have $db_count records, where $count records will be save, Do You still want to proceed (Yes/No) [Default:Yes]");
 
-        if (strtolower(trim($user_input)) == "no") {
-            $this->info("User reply : $user_input");
-            return;
+            if (strtolower(trim($user_input)) == "no") {
+                $this->info("User reply : $user_input");
+                return;
+            }
         }
 
         foreach($records as $tree_record)
