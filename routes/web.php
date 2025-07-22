@@ -31,6 +31,7 @@ use App\Http\Controllers\Backend\SubDepartmentController;
 use App\Http\Controllers\Backend\TagsController;
 use App\Http\Controllers\Backend\TaskController;
 use App\Http\Controllers\Backend\TypeController;
+use App\Http\Controllers\Backend\UomController;
 use App\Http\Controllers\Backend\UserCategoryController;
 use App\Http\Controllers\Backend\UserController;
 use App\Http\Controllers\Frontend\EnquiryController;
@@ -434,8 +435,24 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
 
         $name = "unarchive";
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+    });
 
-        
+    $route_prefix = "uom";
+    $controllerClass = UomController::class;
+    Route::resource($route_prefix, $controllerClass);
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
+        $name = "activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "de_activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "ajax_get";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "ajax_get_list";
+        Route::get($name, [$controllerClass, $name])->name($name);
     });
 
     $route_prefix = "enquiries";

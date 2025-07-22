@@ -54,13 +54,6 @@ class Designation extends BaseModel
         return $field_rules;
     }
 
-    public function afterFind()
-    {
-        parent::afterFind();
-
-        $this->convertTimeZoneForDisplay();
-    }
-
     public function getUserIdListBasedOnDesignationLevel()
     {
         $desg_id_list = self::where("level", "<", $this->level)->pluck("id")->toArray();

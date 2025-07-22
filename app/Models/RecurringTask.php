@@ -53,8 +53,6 @@ class RecurringTask extends BaseModel
     {
         parent::afterFind();
 
-        $this->convertTimeZoneForDisplay();
-
         if ($this->recurringTaskDate?->count() > 0)
         {
             foreach($this->recurringTaskDate as $recurringTaskDate)

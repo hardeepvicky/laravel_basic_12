@@ -79,6 +79,7 @@ use App\Models\ProductCategoryAttribute;
                                         <th style="width:30%">{{ get_value_from_list($category_attribute_field_labels, 'name') }}</th>
                                         <th style="width:20%">{{ get_value_from_list($category_attribute_field_labels, 'input_type') }}</th>
                                         <th style="width:30%">{{ get_value_from_list($category_attribute_field_labels, 'dropdown_type') }}</th>
+                                        <th style="width:30%">{{ get_value_from_list($category_attribute_field_labels, 'uom_id') }}</th>
                                         <th style="width:10%">{{ get_value_from_list($category_attribute_field_labels, 'is_active') }}</th>
                                     </tr>
                                 </thead>
@@ -124,7 +125,19 @@ use App\Models\ProductCategoryAttribute;
                                                     $field = "dropdown_type";
                                                 ?>
                                                 <x-inputs.drop-down name="productCategoryAttribute[(sr-id)][{{ $field }}]" label=""
+                                                    :list="$dropdown_type_list"
                                                     class="will-select2 dropdown_type"
+                                                />
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="input_type_uom">
+                                                <?php
+                                                    $field = "uom_id";
+                                                ?>
+                                                <x-inputs.drop-down name="productCategoryAttribute[(sr-id)][{{ $field }}]" label=""
+                                                    :list="$uom_list"
+                                                    class="will-select2"
                                                 />
                                             </div>
                                         </td>
@@ -186,8 +199,22 @@ use App\Models\ProductCategoryAttribute;
                                                             $value = $child_arr[$field] ?? "";
                                                         ?>
                                                         <x-inputs.drop-down name="productCategoryAttribute[{{ $k }}][{{ $field }}]" label=""
-                                                            class="will-select2 dropdown_type"
+                                                            :list="$dropdown_type_list"
                                                             :value="$value"
+                                                            class="will-select2 dropdown_type"
+                                                        />
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="input_type_uom">
+                                                        <?php
+                                                            $field = "uom_id";
+                                                            $value = $child_arr[$field] ?? "";
+                                                        ?>
+                                                        <x-inputs.drop-down name="productCategoryAttribute[{{ $k }}][{{ $field }}]" label=""
+                                                            :list="$uom_list"
+                                                            :value="$value"
+                                                            class="will-select2"
                                                         />
                                                     </div>
                                                 </td>
@@ -258,16 +285,23 @@ use App\Models\ProductCategoryAttribute;
 
                         var input_type = _tr.find(".input_type").val();
 
-                        if (input_type)
-                        {
-                            _tr.find(".input_type_dropdown").hide();
-                            _tr.find(".input_type_dropdown").find("input,select").attr("disabled", true);
+                        _tr.find(".input_type_dropdown, .input_type_uom").hide();
+                        _tr.find(".input_type_dropdown, .input_type_uom").find("input,select").attr("disabled", true);
 
-                            if (input_type == "{{ ProductCategoryAttribute::INPUT_TYPE_DROPDOWN }}")
-                            {
-                                _tr.find(".input_type_dropdown").show();
-                                _tr.find(".input_type_dropdown").find("input,select").removeAttr("disabled");
-                            }
+                        if (input_type == "{{ ProductCategoryAttribute::INPUT_TYPE_DROPDOWN }}")
+                        {
+                            _tr.find(".input_type_dropdown").show();
+                            _tr.find(".input_type_dropdown").find("input,select").removeAttr("disabled");
+                        }
+
+                        if (
+                            input_type == "{{ ProductCategoryAttribute::INPUT_TYPE_INT }}" 
+                            || input_type == "{{ ProductCategoryAttribute::INPUT_TYPE_DECIMAL }}"
+                            || input_type == "{{ ProductCategoryAttribute::INPUT_TYPE_TEXT }}"
+                        )
+                        {
+                            _tr.find(".input_type_uom").show();
+                            _tr.find(".input_type_uom").find("input,select").removeAttr("disabled");
                         }
                     });
                 }

@@ -9,10 +9,10 @@ use Illuminate\Validation\Rules\Unique;
 class SubDepartment extends BaseModel
 {
     public static array $child_model_class = [
-        // User::class => [
-        //     "foreignKey" => ["sub_department_id"],
-        //     "preventDelete" => true
-        // ]
+        User::class => [
+            "foreignKey" => ["sub_dept_id"],
+            "preventDelete" => true
+        ]
     ];
 
     public function department()
@@ -48,12 +48,5 @@ class SubDepartment extends BaseModel
         }
 
         return $field_rules;
-    }
-
-    public function afterFind()
-    {
-        parent::afterFind();
-
-        $this->convertTimeZoneForDisplay();
     }
 }

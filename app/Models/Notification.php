@@ -91,11 +91,6 @@ class Notification extends DatabaseNotification // Extend DatabaseNotification f
         return $this->belongsTo(User::class, "from_user_id");
     }
 
-    public function afterFind()
-    {
-        $this->convertTimeZoneForDisplay();
-    }
-
     public static function classDisplayName(): string
     {
         $class_name = str_class_name_to_human_text(static::class);

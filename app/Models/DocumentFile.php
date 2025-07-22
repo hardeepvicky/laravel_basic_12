@@ -15,14 +15,10 @@ class DocumentFile extends BaseModel
     protected static array $file_fields = ["file"];
 
     public static array $child_model_class = [
-        // Product::class => [
-        //     "foreignKey" => "product_category_id",
-        //     "preventDelete" => true
-        // ],
-        // ProductCategoryAttribute::class => [
-        //     "foreignKey" => "product_category_id",
-        //     "preventDelete" => false
-        // ],
+        TaskFile::class => [
+            "foreignKey" => "document_file_id",
+            "preventDelete" => true
+        ],
     ];
 
     public function product()

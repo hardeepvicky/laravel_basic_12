@@ -12,5 +12,5 @@ Artisan::command('inspire', function () {
 
 
 Schedule::command('task:init')->everyMinute();
-Schedule::command('db:backup mysql')->dailyAt('03:00');
-Schedule::command('document-file:delete')->dailyAt('06:00');
+Schedule::command('db:backup mysql')->dailyAt('00:00');
+Schedule::command('document-file:delete')->dailyAt('01:00');

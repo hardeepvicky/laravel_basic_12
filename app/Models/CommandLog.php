@@ -13,11 +13,4 @@ class CommandLog extends BaseMongoModel
     {
         return $this->belongsTo(SqlLog::class);
     }
-
-    public function afterFind()
-    {
-        parent::afterFind();
-        
-        $this->convertTimeZoneForDisplay();
-    }
 }

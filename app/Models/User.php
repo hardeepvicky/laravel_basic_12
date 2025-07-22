@@ -99,7 +99,11 @@ class User extends Authenticatable implements BaseModelInterface
         Task::class => [
             "foreignKey" => "assign_to_user_id",
             "preventDelete" => true,
-        ]
+        ],
+        TaskUser::class => [
+            "foreignKey" => "task_id",
+            "preventDelete" => true
+        ],
     ];
 
     protected static array $unique_fields = ["email"];

@@ -10,11 +10,4 @@ class EmailLog extends BaseMongoModel
     {
         return "logs/email/";
     }
-
-    public function afterFind()
-    {
-        parent::afterFind();
-        
-        $this->convertTimeZoneForDisplay();
-    }
 }

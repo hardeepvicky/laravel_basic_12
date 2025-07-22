@@ -32,8 +32,6 @@ class SqlLog extends BaseMongoModel
         }
 
         $this->files = $files;
-
-        $this->convertTimeZoneForDisplay();
     }
 
     public static function addSelectQuery(Builder $qb, string $connection = "")

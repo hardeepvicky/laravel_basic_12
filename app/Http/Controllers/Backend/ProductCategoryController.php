@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Backend;
 use App\Helpers\ArrayHelper;
 use App\Helpers\LaravelExtend;
 use App\Models\Department;
+use App\Models\DropDownValue;
 use App\Models\FieldSetting;
 use App\Models\ProductCategory;
 use App\Models\ProductCategoryAttribute;
 use App\Models\Type;
+use App\Models\Uom;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Exception;
@@ -128,7 +130,11 @@ class ProductCategoryController extends BackendController
 
         $input_type_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
 
-        $this->setForView(compact("field_labels", "category_attribute_field_labels", "input_type_list", "tree_list"));
+        $dropdown_type_list = DropDownValue::getTypeList();
+
+        $uom_list = Uom::getList("id", "name_short_name", [], "list_display_order");
+
+        $this->setForView(compact("field_labels", "category_attribute_field_labels", "input_type_list", "tree_list", "dropdown_type_list", "uom_list"));
 
         return parent::beforeViewRender();
     }
@@ -194,7 +200,7 @@ class ProductCategoryController extends BackendController
 
             $this->_saveOthers($validatedData);
 
-            d(LaravelExtend::getQueryLog("", -6));
+            // d(LaravelExtend::getQueryLog("", -6));
             
             if (LaravelExtend::$errors) { 
                 throw new Exception("Fail to Save");
@@ -232,6 +238,8 @@ class ProductCategoryController extends BackendController
 
             $child_model = new ProductCategoryAttribute();
 
+            $existing_id_list = $this->model->categoryAttribute()->pluck("id", "id")->toArray();
+
             $validatedData['product_category_id'] = $this->model->id;
 
             $rules = LaravelExtend::merge_validation_rules($rules, $child_model->getUniqueValidationRules($validatedData));
@@ -249,6 +257,10 @@ class ProductCategoryController extends BackendController
                     {
                         $child_model = new ProductCategoryAttribute();
                     }
+                    else
+                    {
+                        unset($existing_id_list[$categoryAttribute['id']]);
+                    }
                 }
                 else
                 {
@@ -260,6 +272,11 @@ class ProductCategoryController extends BackendController
                 $child_model->fill($categoryAttribute);
 
                 $this->model->categoryAttribute()->save($child_model);
+            }
+
+            if ($existing_id_list)
+            {
+                $this->model->categoryAttribute()->where("id", $existing_id_list)->delete();
             }
         }
     }

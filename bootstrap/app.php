@@ -67,7 +67,16 @@ return Application::configure(basePath: dirname(__DIR__))
 
                     $menus = Menu::get(Auth::user()->id);
 
-                    $header_menu_list = Menu::getList($menus);
+                    $header_menus = Menu::getList($menus);
+                    $header_menu_list = [];
+
+                    foreach($header_menus as $header_menu)
+                    {
+                        if ($header_menu['url'] && $header_menu['url'] != "#")
+                        {
+                            $header_menu_list[$header_menu['url']] = $header_menu['title'];
+                        }
+                    }
 
                     $partial_path = "backend.partials";
 
@@ -122,7 +131,16 @@ return Application::configure(basePath: dirname(__DIR__))
 
                     $menus = Menu::get(Auth::user()->id);
 
-                    $header_menu_list = Menu::getList($menus);
+                    $header_menus = Menu::getList($menus);
+                    $header_menu_list = [];
+
+                    foreach($header_menus as $header_menu)
+                    {
+                        if ($header_menu['url'] && $header_menu['url'] != "#")
+                        {
+                            $header_menu_list[$header_menu['url']] = $header_menu['title'];
+                        }
+                    }
 
                     $partial_path = "backend.partials";
 

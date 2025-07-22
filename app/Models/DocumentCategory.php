@@ -17,14 +17,10 @@ class DocumentCategory extends BaseModel
     protected static array $unique_fields = ["parent_id", "name"];
 
     public static array $child_model_class = [
-        // Product::class => [
-        //     "foreignKey" => "product_category_id",
-        //     "preventDelete" => true
-        // ],
-        // ProductCategoryAttribute::class => [
-        //     "foreignKey" => "product_category_id",
-        //     "preventDelete" => false
-        // ],
+        DocumentFile::class => [
+            "foreignKey" => "document_category_id",
+            "preventDelete" => true
+        ],        
     ];
 
     public function beforeSave()

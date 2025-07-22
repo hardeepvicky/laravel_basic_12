@@ -118,6 +118,8 @@ class BaseMongoModel extends Model implements BaseModelInterface
                 $this->{$field_url_field} = $fileUtility->getUrl($this->{$field});
             }
         }
+
+        $this->convertTimeZoneForDisplay();
     }
 
     public static function getFileFields()

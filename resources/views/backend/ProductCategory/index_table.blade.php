@@ -36,7 +36,7 @@
                                 <x-Backend.created-and-by :datetime="$record->created_at" :userId="$record->created_by" />
                             </td>
                             <td>
-                                <x-Backend.created-and-by :datetime="$record->updated_at" :userId="$record->updated_by" />
+                                <x-Backend.created-and-by :datetime="$record->updated_at_user_tz" :userId="$record->updated_by" />
                             </td>
                             <td>
                                 <x-Backend.summary-comman-actions :id="$record->id" :routePrefix="$routePrefix"/>

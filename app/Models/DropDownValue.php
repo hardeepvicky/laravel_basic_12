@@ -19,6 +19,7 @@ class DropDownValue extends BaseModel
     const TASK_ACTION_TAKEN = "TASK_ACTION_TAKEN";
     const TASK_RESPONSE = "TASK_RESPONSE";
     const FILE_EXTENSION = "FILE_EXTENSION";
+    const COLOR = "COLOR";
 
     public static array $child_model_class = [
         // User::class => [
@@ -70,6 +71,7 @@ class DropDownValue extends BaseModel
             self::TASK_ACTION_TAKEN => "Task Action Taken",
             self::TASK_RESPONSE => "Task Response",
             self::FILE_EXTENSION => "File Extension",
+            self::COLOR => "Colour",
         ];
 
         return $list;

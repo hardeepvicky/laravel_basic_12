@@ -31,7 +31,20 @@ class Task extends BaseModel
 
     public string $field_for_create_tag = "name";
 
-    public static array $child_model_class = [];
+    public static array $child_model_class = [
+        TaskFile::class => [
+            "foreignKey" => "task_id",
+            "preventDelete" => false
+        ],
+        TaskUser::class => [
+            "foreignKey" => "task_id",
+            "preventDelete" => false
+        ],
+        TaskTakenAction::class => [
+            "foreignKey" => "task_id",
+            "preventDelete" => false
+        ],
+    ];
 
     public const TASK_TYPE_PROJECT = "PROJECT";
     public const TASK_TYPE_TARGET = "TARGET";
@@ -65,8 +78,6 @@ class Task extends BaseModel
     public function afterFind()
     {
         parent::afterFind();
-
-        $this->convertTimeZoneForDisplay();
 
         $this->parseTagsForModuleLinking();
     }
