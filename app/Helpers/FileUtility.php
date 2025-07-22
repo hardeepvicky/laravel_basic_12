@@ -3,6 +3,7 @@
 namespace App\Helpers;
 
 use App\Exceptions\UserException;
+use DateTime;
 use Exception;
 use Illuminate\Filesystem\LocalFilesystemAdapter;
 
@@ -453,5 +454,57 @@ class FileUtility
         }
 
         return "fa-solid fa-file";
+    }
+
+    public static function getFilesAndFolderOlderthan(String $path, $last_datetime, array $exts = [], bool $recursive = false)
+    {
+        if (!(file_exists($path) && is_dir($path)))
+        {
+            throw new UserException("path not found : $path");
+        }
+
+        $files = scandir($path);
+        $ret = [
+            "folders" => [],
+            "files" => [],
+        ];
+
+        foreach ($files as $k => $file) {
+            $f = $path . "/" . $file;
+
+            if ($file == '.' || $file == '..')
+            {
+            }
+            else if (is_dir($f))
+            {
+                if (DateUtility::compare($last_datetime, get_modified_time_of_file_or_dir($f)) > 0)
+                {
+                    $ret['folders'][] = $f;
+                }
+            }
+
+            if ($file == '.' || $file == '..') 
+            {
+            } 
+            else if ($recursive && is_dir($f)) 
+            {
+                $ret2 = self::getFilesAndFolderOlderthan($f, $last_datetime, $exts, $recursive);
+
+                $ret = array_merge_recursive($ret2, $ret);
+            } 
+            else if (!empty($exts) && !in_array(pathinfo($file, PATHINFO_EXTENSION), $exts)) 
+            {
+            } 
+            else if (!is_dir($f))
+            {
+                if (DateUtility::compare($last_datetime, get_modified_time_of_file_or_dir($f)) > 0)
+                {
+                    $ret['files'][] = $f;
+                }
+
+            }
+        }
+
+        return $ret;
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Exceptions\UserException;
+use App\Helpers\DateUtility;
 use App\Helpers\FileUtility;
 use App\Helpers\MyCommand;
 use Illuminate\Support\Facades\DB;
@@ -89,6 +90,7 @@ class DbBakupCommand extends MyCommand
 
         if ($db_config['driver'] == "mysql") {
             $this->backup_mysql($db_config_key, $db_config);
+            $this->delete_old_backup($db_config_key, $db_config);
         }
 
         $this->logUpdate([]);
@@ -217,6 +219,71 @@ class DbBakupCommand extends MyCommand
         }
 
         $this->info("All Files Located at $path");
+    }
+
+    public function delete_old_backup($config_key, $db_config)
+    {
+        $last_date_time = DateUtility::change(null, -15, DateUtility::DAYS, DateUtility::DATE_FORMAT);
+
+        $this->info('Deleting Old Backup older than ' . $last_date_time);
+
+        $counters = [
+            "files" => [
+                "found" => 0,
+                "delete" => 0,
+            ],
+            "folders" => [
+                "found" => 0,
+                "delete" => 0,
+            ],
+        ];
+
+        $path = $this->fileUtility->getDisk()->path(self::$path . "/" . $config_key);
+
+        $files_folders = FileUtility::getFilesAndFolderOlderthan($path, $last_date_time, [], true);
+        
+        // dd($files_folders);
+
+        $counters['files']['found'] = count($files_folders['files']);
+        $counters['folders']['found'] = count($files_folders['folders']);
+
+        foreach($files_folders['files'] as $file)
+        {
+            if (unlink($file)) 
+            {
+                $counters['files']['delete']++;
+            }
+            else
+            {
+                throw new UserException("Fail to Delete File : $file", UserException::ERROR_PHP_FAIL);
+            }
+        }
+
+        foreach($files_folders['folders'] as $folder)
+        {
+            $files = FileUtility::getFileList($folder, [], true);
+            if (!$files)
+            {
+                if (rmdir($folder)) 
+                {
+                    $counters['folders']['delete']++;
+                }
+            }
+        }
+
+        foreach($counters as $label => $arr)
+        {
+            $arr = array_human_keys($arr);
+
+            $list = [];
+
+            foreach($arr as $k => $v)
+            {
+                $list[] = $k . ":" . $v;
+            }
+
+            $this->info($label . " : " . implode(", ", $list));
+        }
     }
 
     public static function getStorageDisk()
