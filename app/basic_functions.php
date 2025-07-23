@@ -972,6 +972,17 @@ function is_developer_role_login()
     return false;
 }
 
+function is_admin_role_login()
+{
+    $auth_user = Auth::user();
+
+    if ($auth_user) {
+        return $auth_user->hasRole(Role::TYPE_SYSTEM_ADMIN);
+    }
+
+    return false;
+}
+
 function get_value_from_list($list, $find_key, $default = "")
 {
     if (is_null($find_key))

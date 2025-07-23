@@ -484,3 +484,10 @@ label.info {
     display: inline-block;
     width: auto;
 }
+
+.small-widget{
+    width : 250px;
+    display: inline-block;
+    margin-left: 10px;
+    margin-bottom: 10px;
+}

@@ -88,7 +88,6 @@ class SettingsController extends BackendController
             AjaxLog::class,
             EmailLog::class,
             SqlLog::class,
-            CacheLog::class,
             CommandLog::class,
             BaseModel::class,
             BaseModelInterface::class,

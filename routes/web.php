@@ -100,9 +100,10 @@ Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function 
 
 Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend_view_render']], function () {
 
-    $name = "dashboard";
-    Route::get($name, [DashboardController::class, 'index'])->name($name);
-
+    $route_prefix = "dashboard";
+    $controllerClass = DashboardController::class;
+    Route::get($route_prefix, [DashboardController::class, 'index'])->name($route_prefix);
+    
     $route_prefix = "user";
     $controllerClass = UserController::class;
     Route::resource($route_prefix, $controllerClass)->except("show");
