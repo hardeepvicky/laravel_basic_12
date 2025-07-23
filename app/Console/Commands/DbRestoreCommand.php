@@ -6,6 +6,7 @@ use App\Exceptions\UserException;
 use App\Helpers\FileUtility;
 use App\Helpers\LaravelExtend;
 use App\Helpers\MyCommand;
+use App\Models\BaseMongoModel;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -80,6 +81,9 @@ class DbRestoreCommand extends MyCommand
         if ($db_config['driver'] == "mysql") {
             $this->restore_mysql($db_config_key, $db_config);
         }
+        else if ($db_config['driver'] == "mongodb") {
+            $this->restore_mongodb($db_config_key, $db_config);
+        }
 
         $this->logUpdate([]);
 
@@ -88,7 +92,7 @@ class DbRestoreCommand extends MyCommand
 
     public function restore_mysql($config_key, $db_config)
     {
-        $this->info('Database restore Started');
+        $this->info('Mysql restore Started');
 
         $path = $this->fileUtility->getDisk()->path(self::$path . "/" . $config_key);
 
@@ -201,7 +205,108 @@ class DbRestoreCommand extends MyCommand
             }
         }
 
-        $this->info("✅DB Import Done");
+        $this->info("✅Mysql Import Done");
+    }
+
+    public function restore_mongodb($config_key, $db_config)
+    {
+        $this->info('Mongodb Backup Started');
+
+        $path = $this->fileUtility->getDisk()->path(self::$path . "/" . $config_key);
+
+        if (!file_exists($path))
+        {
+            $this->info("there is no any folder at " . self::$path);
+            return;
+        }
+
+        $folder_list = FileUtility::getFolderList($path);
+
+        if (empty($folder_list)) {
+            $this->info("there is no any folder at $path");
+            return;
+        }
+
+        $choice = $this->choice(
+            'Select Folder :',
+            $folder_list,
+        );
+
+        if (!$choice) {
+            return;
+        }
+
+        $path = $path . "/" . $choice;
+
+        $files = FileUtility::getFileList($path, ["json"], true);
+
+        if (empty($files)) {
+            $this->info("No JSON file found");
+            return;
+        }
+
+        $options = ["Full Restore", "Data Restore Only"];
+
+        $choice = $this->choice(
+            'Select :',
+            $options,
+        );
+
+        if (!$choice) {
+            return;
+        }
+
+        $db_info = BaseMongoModel::getCollections($config_key);
+
+        $db_name = $db_config['database'];
+
+        if ($choice == "Full Restore") 
+        {
+            if ($db_info)
+            {
+                $user_input = $this->ask('Database already exist, would you like to drop database [Y/N] :');
+
+                $user_input = strtoupper(trim($user_input));
+
+                if ($user_input == "Y")
+                {
+                    $this->info("Droping database...");
+                    $result = DB::connection($config_key)->command(['dropDatabase' => 1]);
+                    
+                    if (isset($result->ok) && $result->ok == 1)
+                    {
+
+                    }
+                    else
+                    {
+                        $this->error("fail to drop database $db_name");
+                        return;
+                    }
+                }
+            }
+        }
+
+        $this->info("Importing Data..");
+
+        foreach ($files as $k => $file)
+        {
+            $file_name = pathinfo($file, PATHINFO_FILENAME);
+
+            $this->line($file_name);
+
+            $command = "mongoimport --uri " . $db_config['dsn'] . " --db $db_name --collection $file_name --drop --file $file";
+
+            // d($command);
+
+            exec($command, $output, $return_var);
+
+            if ($return_var == 2) {
+                $this->error("Command is not working");
+                $this->info($command);
+            }
+        }
+
+        $this->info("✅Mongodb Import Done");
     }
 
     public static function getStorageDisk()

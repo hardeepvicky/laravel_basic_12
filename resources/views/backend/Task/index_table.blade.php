@@ -45,8 +45,8 @@ $false = false;
                             <th style="width:5%"><?= sortable_anchor('priority', get_value_from_list($field_labels, 'priority', 'priority')) ?> </th>
                             <th style="width:5%"><?= sortable_anchor('status', get_value_from_list($field_labels, 'status', 'status')) ?> </th>
                             <th style="width:8%">Time & Duration</th>
-                            <th style="width:6%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
                             <th style="width:6%"><?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?></th>
+                            <th style="width:6%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -71,13 +71,14 @@ $false = false;
                                     <span>{{ $record->duration }} {{ get_value_from_list($duration_type_list, $record->duration_type) }}</span>
                                 </label>
                             </td>
-
-                            <td>
-                                <x-Backend.created-and-by :datetime="$record->created_at_user_tz" :userId="$record->created_by" />
-                            </td>
+                            
                             <td>
                                 <x-Backend.created-and-by :datetime="$record->updated_at_user_tz" :userId="$record->updated_by" />
                             </td>
+                            <td>
+                                <x-Backend.created-and-by :datetime="$record->created_at_user_tz" :userId="$record->created_by" />
+                            </td>
+                            
                         </tr>
                         <tr id="record-{{ $record->id }}" class="hidden">
                             <td style="background-color: var(--body--bs-body-bg)"></td>

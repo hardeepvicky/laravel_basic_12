@@ -8,6 +8,7 @@ use App\Traits\CacheTrait;
 use App\Traits\CommonModelTrait;
 use App\Traits\StorageTrait;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use MongoDB\Laravel\Eloquent\Builder;
 use MongoDB\Laravel\Eloquent\Model;
 use ReflectionClass;
@@ -220,6 +221,22 @@ class BaseMongoModel extends Model implements BaseModelInterface
         self::addCache($key, $list);
 
         return $list;
+    }
+
+    public static function getCollections($connection = "mongodb")
+    {
+        $databaseName = DB::connection($connection)->getDatabaseName();
+
+        $collections = DB::connection($connection)->listCollections();
+
+        $collectionNames = array_map(function($collection) {
+            return $collection->getName();
+        }, iterator_to_array($collections)); // Convert cursor to array
+
+        return [
+            'database' => $databaseName,
+            'collections' => $collectionNames
+        ];
     }
 
     /*------------------------------------------------------------------*/

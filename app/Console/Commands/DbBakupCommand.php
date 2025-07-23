@@ -6,6 +6,7 @@ use App\Exceptions\UserException;
 use App\Helpers\DateUtility;
 use App\Helpers\FileUtility;
 use App\Helpers\MyCommand;
+use App\Models\BaseMongoModel;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use ZipArchive;
@@ -93,6 +94,11 @@ class DbBakupCommand extends MyCommand
             $this->delete_old_backup($db_config_key, $db_config);
         }
 
+        if ($db_config['driver'] == "mongodb") {
+            $this->backup_mongodb($db_config_key, $db_config);
+            $this->delete_old_backup($db_config_key, $db_config);
+        }
+
         $this->logUpdate([]);
 
         return true;
@@ -100,7 +106,7 @@ class DbBakupCommand extends MyCommand
 
     public function backup_mysql($config_key, $db_config)
     {
-        $this->info('Database Backup Started');
+        $this->info('Mysql Backup Started');
 
         $sub_path = date("d-M-Y");
 
@@ -200,7 +206,7 @@ class DbBakupCommand extends MyCommand
             }
         }
 
-        $this->info("✅DB Data Dump Done");
+        $this->info("✅Mysql Data Dump Done");
 
         $zip->close();
 
@@ -284,6 +290,41 @@ class DbBakupCommand extends MyCommand
 
             $this->info($label . " : " . implode(", ", $list));
         }
+    }
+
+    public function backup_mongodb($config_key, $db_config)
+    {
+        $this->info('Mongodb Backup Started');
+
+        $sub_path = date("d-M-Y");
+
+        $path = $this->fileUtility->getDisk()->path(self::$path . "/" . $config_key . "/" . $sub_path) . "/";
+
+        FileUtility::createFolder($path);
+
+        $db_info = BaseMongoModel::getCollections();
+
+        $db_name = $db_info['database'];
+
+        foreach($db_info['collections'] as $collection_name)
+        {
+            $file = $path . $collection_name . ".json";
+
+            $command = "mongoexport --uri " . $db_config['dsn'] . " --db $db_name --collection $collection_name --out $file";
+
+            exec($command, $output, $return_var);
+
+            if ($return_var == 2) {
+                $this->error("Command is not working");
+                $this->info($command);
+            } else {
+                $this->line($collection_name);
+            }
+        }
+
+        $this->info("✅Mongodb Data Dump Done");
+
+        $this->info("All Files Located at $path");
     }
 
     public static function getStorageDisk()

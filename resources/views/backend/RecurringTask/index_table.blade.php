@@ -34,8 +34,8 @@ $false = false;
                         <th style="width:8%"><?= sortable_anchor('is_active', get_value_from_list($field_labels, 'is_active', 'is_active')) ?></th>
                         <th style="width:6%">Task created by system</th>
                         <th style="width:8%">Time & Duration</th>
-                        <th style="width:6%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
                         <th style="width:6%"><?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?></th>
+                        <th style="width:6%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -68,10 +68,10 @@ $false = false;
                                 </label>
                             </td>
                             <td>
-                                <x-Backend.created-and-by :datetime="$record->created_at" :userId="$record->created_by" />
+                                <x-Backend.created-and-by :datetime="$record->updated_at" :userId="$record->updated_by" />
                             </td>
                             <td>
-                                <x-Backend.created-and-by :datetime="$record->updated_at" :userId="$record->updated_by" />
+                                <x-Backend.created-and-by :datetime="$record->created_at" :userId="$record->created_by" />
                             </td>
                         </tr>
                         <tr id="record-{{ $record->id }}" class="hidden">
