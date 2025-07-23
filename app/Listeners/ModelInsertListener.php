@@ -9,7 +9,7 @@ use Illuminate\Queue\InteractsWithQueue;
 
 class ModelInsertListener implements ShouldQueue
 {
-     use InteractsWithQueue;
+    use InteractsWithQueue;
     /**
      * Create the event listener.
      */

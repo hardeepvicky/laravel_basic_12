@@ -7,8 +7,9 @@ use App\Models\RecordHistory;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 
-class ModelUpdateListener
+class ModelUpdateListener  implements ShouldQueue
 {
+    use InteractsWithQueue;
     /**
      * Create the event listener.
      */
