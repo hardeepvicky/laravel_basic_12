@@ -11,8 +11,7 @@
                         <th><?= sortable_anchor('id', get_value_from_list($field_labels, 'id')) ?></th>
                         <th><?= sortable_anchor('type', get_value_from_list($field_labels, 'type')) ?></th>
                         <th><?= sortable_anchor('name', get_value_from_list($field_labels, 'name')) ?></th>
-                        <th><?= sortable_anchor('description', get_value_from_list($field_labels, 'description')) ?>
-                        </th>
+                        <th><?= sortable_anchor('description', get_value_from_list($field_labels, 'description')) ?></th>
                         <th><?= get_value_from_list($field_labels, 'is_active') ?></th>
                         <th style="width:6%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
                         <th style="width:6%"><?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?></th>
@@ -27,8 +26,7 @@
                         <td>{{ $record->name }}</td>
                         <td>{{ $record->description }}</td>
                         <td>
-                            <x-Backend.active_deactive :isActive="$record->is_active" :id="$record->id"
-                                :routePrefix="$routePrefix" />
+                            <x-Backend.active_deactive :isActive="$record->is_active" :id="$record->id" :routePrefix="$routePrefix" />
                         </td>
                         <td>
                             <x-Backend.created-and-by :datetime="$record->created_at" :userId="$record->created_by" />

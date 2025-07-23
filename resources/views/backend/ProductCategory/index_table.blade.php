@@ -28,7 +28,14 @@
                             <td>{{ $record->name }}</td>
                             <td>{{ $record->short_name }}</td>
                             <td>{{ $record->is_last_node ? "Last Node" : "" }}</td>
-                            <td>{{ $record->list_display_order }}</td>
+                            <td>
+                                <a class="x-editable" href="#" id="list_display_order" data-type="number"
+                                    data-pk="{{ $record->id }}"
+                                    data-url="{{ route($routePrefix . '.ajax_update_field') }}"
+                                    data-title="Enter Display Order">
+                                    {{ $record->list_display_order }}
+                                </a>
+                            </td>
                             <td>
                                 <x-Backend.active_deactive :isActive="$record->is_active" :id="$record->id" :routePrefix="$routePrefix" />
                             </td>

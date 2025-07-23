@@ -2,18 +2,14 @@
 
 namespace App\Http\Controllers\Backend;
 
-use App\Helpers\DateUtility;
+use App\Exceptions\UserException;
 use App\Helpers\Menu;
 use App\Http\Controllers\WebController;
-use App\Models\BaseModel;
-use App\Models\SqlLog;
-use App\Models\SummaryAndFormSetting;
 use App\Models\User;
 use Exception;
-use Illuminate\Support\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class BackendController extends WebController
 {
@@ -173,5 +169,38 @@ class BackendController extends WebController
         }
 
         return $this->responseJson($response);
+    }
+
+    public function ajax_update_field(Request $request)
+    {
+        try {
+
+            $validatedData = $request->validate([
+                "pk" => "required",
+                "name" => "required",
+                "value" => "required",
+            ]);
+
+            $record = $this->modelClass::where("id", $validatedData['pk'])->first();
+
+            if (!$record)
+            {
+                throw new Exception("Wrong ID : " . $validatedData['pk']);
+            }
+
+            $record->{$validatedData['name']} = $validatedData['value'];
+
+            if (!$record->save())
+            {
+                throw new UserException("Fail To Save", UserException::ERROR_LARAVEL_FAIL);
+            }
+
+            $response = $validatedData;
+
+            return $this->responseJson($response);
+            
+        } catch (Exception $ex) {
+            throw $ex;
+        }
     }
 }
