@@ -11,6 +11,7 @@ use App\Models\AutomateTask;
 use App\Models\CommandLog;
 use App\Models\DocumentFile;
 use App\Models\EmailLog;
+use App\Models\RecordHistory;
 use App\Models\RecurringTask;
 use App\Models\SqlLog;
 use App\Models\Task;
@@ -18,6 +19,7 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
+use Twilio\TwiML\Voice\Record;
 
 class LogsOldCommand extends MyCommand
 {
@@ -54,16 +56,19 @@ class LogsOldCommand extends MyCommand
 
             $_7_days_before = DateUtility::change($now, -7, DateUtility::DAYS);
 
+            $_90_days_before = DateUtility::change($now, -90, DateUtility::DAYS);
+
             $models = [
-                AjaxLog::class,
-                CommandLog::class,
-                EmailLog::class,
-                SqlLog::class,
+                AjaxLog::class => $_7_days_before,
+                CommandLog::class => $_7_days_before,
+                EmailLog::class => $_7_days_before,
+                SqlLog::class => $_7_days_before,
+                RecordHistory::class => $_90_days_before
             ];
 
             $log_info = [];
 
-            foreach($models as $model)
+            foreach($models as $model => $days_before)
             {
                 $counters = [
                     "found" => 0,
@@ -72,7 +77,7 @@ class LogsOldCommand extends MyCommand
                     "delete" => 0,
                 ];
                 
-                $qb = $model::where("created_at", "<", $_7_days_before);
+                $qb = $model::where("created_at", "<", $days_before);
                 $qb->select(["id"]);
                 $records = $qb->get();
 

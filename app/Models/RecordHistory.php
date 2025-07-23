@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Helpers\DateUtility;
+use App\Http\Middleware\RolePermission;
 use Carbon\Carbon;
 use DateTime;
 
@@ -49,7 +50,9 @@ class RecordHistory extends BaseMongoModel
             TaskUser::class,
             RecurringTaskDate::class,
             RecurringTaskFile::class,
-            RecurringTaskUser::class
+            RecurringTaskUser::class,
+            RouteName::class,
+            RoleRouteName::class,
         ];
 
         $model_class = get_class($model);
