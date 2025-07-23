@@ -2,16 +2,11 @@
 
 namespace App\Notifications;
 
-use App\Exceptions\UserException;
-use App\Helpers\LaravelExtend;
 use App\Models\Task;
-use App\Models\Type;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Messages\DatabaseMessage;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-use Illuminate\Support\Facades\Auth;
 
 class TaskStatusChange extends Notification implements ShouldQueue
 {

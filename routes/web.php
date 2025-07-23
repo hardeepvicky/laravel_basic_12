@@ -23,6 +23,7 @@ use App\Http\Controllers\Backend\ProductCategoryController;
 use App\Http\Controllers\Backend\ProductController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Backend\PublicController;
+use App\Http\Controllers\Backend\RecordHistoryController;
 use App\Http\Controllers\Backend\RecurringTaskController;
 use App\Http\Controllers\Backend\RoleController;
 use App\Http\Controllers\Backend\SettingsController;
@@ -515,6 +516,12 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
         $name = "ajax_mark_read";
         Route::get($name, [NotificationController::class, $name])->name($name);
     });    
+
+    $route_prefix = "change-history";
+    $controllerClass = RecordHistoryController::class;
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+        Route::get("/", [$controllerClass, "index"])->name("index");
+    });
 
     Route::group(['prefix' => 'permissions', 'as' => 'permissions.'], function () {
 

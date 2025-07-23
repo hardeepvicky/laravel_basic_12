@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Events\ModelDelete;
+use App\Events\ModelInsert;
+use App\Events\ModelUpdate;
 use App\Exceptions\UserException;
 use App\Helpers\DateUtility;
 use App\Helpers\FileUtility;
@@ -60,6 +63,7 @@ class BaseModel extends Model implements BaseModelInterface
 
         self::created(function ($model) {
             $model->afterSave();
+            event(new ModelInsert($model));
         });
 
         self::updating(function ($model) {
@@ -76,6 +80,7 @@ class BaseModel extends Model implements BaseModelInterface
 
         self::updated(function ($model) {
             $model->afterSave();
+            event(new ModelUpdate($model));
         });
 
         self::deleting(function ($model) {
@@ -84,6 +89,7 @@ class BaseModel extends Model implements BaseModelInterface
 
         self::deleted(function ($model) {
             $model->forgotCache();
+            event(new ModelDelete($model));
         });
     }
 

@@ -10,6 +10,7 @@ use App\Models\BaseModelInterface;
 use App\Models\Role;
 use App\Models\SqlLog;
 use App\Models\User;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -599,5 +600,98 @@ class LaravelExtend
 
         return $sqlLogModel;
     }
-    
+
+    public static function getMongodbParseCondition($value, String $type)
+    {
+        $data_type = gettype($value);
+
+        $type = strtolower(trim($type));
+
+        if (in_array($type, ["string", "date", "from_date", "to_date", "datetime", "from_datetime", "to_datetime"])) {
+            if ($data_type != "string") {
+                throw_exception("input value is not typeof string");
+            }
+        }
+
+        $parse_value = null;
+        $op = '=';
+
+        switch ($type) {
+            case "string":
+                $parse_value = "%" . (string) $value . "%";
+                $op = 'LIKE';
+                break;
+
+            case "string_equal":
+                $parse_value = (string) $value;
+                break;
+
+            case "date":
+                $parse_value = Carbon::parse($value);
+                break;
+
+            case "from_date":
+                $parse_value = Carbon::parse($value);
+                $op = '>=';
+                break;
+
+            case "to_date":
+                $parse_value = Carbon::parse($value);
+                $parse_value->addHours(23.99);
+                $op = '<=';
+                break;
+
+            case "from_datetime":
+                $parse_value = Carbon::parse($value);
+                $op = '>=';
+                break;
+
+            case "to_datetime":
+                $parse_value = Carbon::parse($value);
+                $op = '<=';
+                break;
+
+            case "int":
+                $parse_value = (int) $value;
+                break;
+
+            case "from_int":
+                $parse_value = (int) $value;
+                $op = '>=';
+                break;
+
+            case "to_int":
+                $parse_value = (int) $value;
+                $op = '<=';
+                break;
+
+            case "float":
+                $parse_value = (float) $value;
+                break;
+
+            case "from_float":
+                $parse_value = (float) $value;
+                $op = '>=';
+                break;
+
+            case "to_float":
+                $parse_value = (float) $value;
+                $op = '<=';
+                break;
+
+            case "bool":
+            case "boolean":
+                $parse_value = (bool) $value;
+                break;
+
+            default:
+                $parse_value = $value;
+                break;
+        }
+
+        return [
+            "value" => $parse_value,
+            "op" => $op
+        ];
+    }
 }
