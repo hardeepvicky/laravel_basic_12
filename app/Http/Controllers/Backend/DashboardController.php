@@ -30,6 +30,10 @@ class DashboardController extends BackendController
         $view_name = "admin";
 
         $task_figures = [
+            'new' => [
+                'label' => "New (Assigned)",
+                'value' => 0
+            ],
             'pending' => [
                 'label' => "Pending (Confirm)",
                 'value' => 0
@@ -54,6 +58,7 @@ class DashboardController extends BackendController
             ["created_at", ">", $last_year_date],
         ];
 
+        $task_figures['new']['value'] = Task::where($default_conditions)->where("status", Task::STATUS_ASSIGNED)->count();
         $task_figures['pending']['value'] = Task::where($default_conditions)->where("status", Task::STATUS_CONFIRM)->count();
         $task_figures['in_progress']['value'] = Task::where($default_conditions)->where("status", Task::STATUS_IN_PROGRESS)->count();
         $task_figures['completed']['value'] = Task::where($default_conditions)->where("is_completed", 1)->count();
