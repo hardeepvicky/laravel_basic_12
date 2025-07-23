@@ -59,6 +59,7 @@ class DocumentFileDeleteOldCommand extends MyCommand
             $_7_days_before = DateUtility::change($now, -7, DateUtility::DAYS);
 
             $qb = DocumentFile::where("is_archive", 1)->where("updated_at", "<", $_7_days_before);
+            $qb->select(["id"]);
 
             SqlLog::addSelectQuery($qb);
             
