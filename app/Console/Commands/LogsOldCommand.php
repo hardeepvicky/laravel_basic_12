@@ -61,6 +61,8 @@ class LogsOldCommand extends MyCommand
                 SqlLog::class,
             ];
 
+            $log_info = [];
+
             foreach($models as $model)
             {
                 $counters = [
@@ -99,15 +101,13 @@ class LogsOldCommand extends MyCommand
 
                 $output->writeLogToConsole();
 
-                $this->output_lines = $output->output_lines;
-
-                $this->logUpdate([
-                    "counts" => $counts
-                ]);
+                $log_info[$model_class_name] = $counts;
             }
 
             $msg = $this->description . " : Completed successfully!";
             $this->info($msg);
+
+            $this->logUpdate($log_info);
 
         } catch (\Exception $e) {
             $msg = $e->getMessage();
