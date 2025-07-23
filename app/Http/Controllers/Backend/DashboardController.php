@@ -30,6 +30,14 @@ class DashboardController extends BackendController
         $view_name = "admin";
 
         $task_figures = [
+            'pending' => [
+                'label' => "Pending (Confirm)",
+                'value' => 0
+            ],
+            'in_progress' => [
+                'label' => "In-Progress",
+                'value' => 0
+            ],
             'completed' => [
                 'label' => "Completed",
                 'value' => 0
@@ -46,6 +54,8 @@ class DashboardController extends BackendController
             ["created_at", ">", $last_year_date],
         ];
 
+        $task_figures['pending']['value'] = Task::where($default_conditions)->where("status", Task::STATUS_CONFIRM)->count();
+        $task_figures['in_progress']['value'] = Task::where($default_conditions)->where("status", Task::STATUS_IN_PROGRESS)->count();
         $task_figures['completed']['value'] = Task::where($default_conditions)->where("is_completed", 1)->count();
         $task_figures['verified']['value'] = Task::where($default_conditions)->where("is_verified", 1)->count();
 
@@ -65,6 +75,14 @@ class DashboardController extends BackendController
             ],
             'new' => [
                 'label' => "New (Assigned)",
+                'value' => 0
+            ],
+            'pending' => [
+                'label' => "Pending (Confirm)",
+                'value' => 0
+            ],
+            'in_progress' => [
+                'label' => "In-Progress",
                 'value' => 0
             ],
             'completed' => [
@@ -89,6 +107,8 @@ class DashboardController extends BackendController
         $task_figures['rating']['value'] = round($task_figures['rating']['value'], 2);
 
         $task_figures['new']['value'] = Task::where($default_conditions)->where("status", Task::STATUS_ASSIGNED)->count();
+        $task_figures['pending']['value'] = Task::where($default_conditions)->where("status", Task::STATUS_CONFIRM)->count();
+        $task_figures['in_progress']['value'] = Task::where($default_conditions)->where("status", Task::STATUS_IN_PROGRESS)->count();
         $task_figures['completed']['value'] = Task::where($default_conditions)->where("is_completed", 1)->count();
         $task_figures['verified']['value'] = Task::where($default_conditions)->where("is_verified", 1)->count();
 
