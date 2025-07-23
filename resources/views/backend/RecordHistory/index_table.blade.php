@@ -23,7 +23,12 @@
                     @foreach ($records as $record)
                         <tr>
                             <th scope="row">
-                                {{ str_class_name_to_human_text( $record->model_class ) }} | # {{ $record->model_id }}
+                                {{ str_class_name_to_human_text( $record->model_class ) }} 
+                                | #{{ $record->model_id }}
+
+                                @if($record->model_display_name)
+                                | {{ $record->model_display_name }}
+                                @endif
                             </th>
                             <td>{{ $record->action }}</td>
                             <td>

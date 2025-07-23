@@ -64,8 +64,14 @@ class RecordHistory extends BaseMongoModel
 
         $conditions = [
             "model_class" => str_class_name_without_namespace($model),
-            "model_id" => $model->id
+            "model_id" => $model->id,
+            "model_display_name" => $model->name
         ];
+
+        if (method_exists($model, "getDisplayName"))
+        {
+            $conditions['model_display_name'] = $model->getDisplayName();
+        }
 
         $save_model = null;
 
