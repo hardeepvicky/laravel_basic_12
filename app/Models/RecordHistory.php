@@ -75,9 +75,38 @@ class RecordHistory extends BaseMongoModel
 
         if ($is_deleted)
         {
+            $change_counters = [
+                "removed" => 0,
+            ];
+
+            $changes = [];
+            
+            foreach($model_data as $field => $value)
+            {
+                $parse_value = self::getParseValue($value);
+
+                if (in_array($field, $ignore_fields))
+                {
+
+                }
+                else if (!is_null($parse_value))
+                {
+                    $change_counters['removed']++;
+
+                    $changes[$field] = [
+                        "type" => "removed",
+                        "label" => get_value_from_list($field_labels, $field, $field),
+                        "previous" => $parse_value,
+                        "current" => null
+                    ];
+                }
+            }
+            
             $save_data = $conditions;
             $save_data['action'] = SELF::ACTION_DELETE;
             $save_data['model_data'] = $model_data;
+            $save_data['changes'] = $changes;
+            $save_data['change_counters'] = $change_counters;
 
             $save_model = self::create($save_data);
         }
