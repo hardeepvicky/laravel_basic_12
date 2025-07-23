@@ -63,6 +63,22 @@ class State extends BaseModel
         return $field_rules;
     }
 
+    public function getRefDisplayName($field, $value)
+    {
+        $ret_array = [];
+
+        switch($field)
+        {
+            case "country_id":
+                $ret_array = [
+                    $field => $this->country->getDisplayName()
+                ];
+                break;
+        }
+
+        return $ret_array;
+    }
+
     public static function createShortName($name)
     {
         if (!$name) {

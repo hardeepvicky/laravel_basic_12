@@ -82,7 +82,9 @@ class RecordHistoryController extends BackendController
 
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
-        $this->setForView(compact("index_table_info_options", "model_list", "action_list", "field_labels"));
+        $page_title = "Change History";
+
+        $this->setForView(compact("index_table_info_options", "model_list", "action_list", "field_labels", "page_title"));
 
         return true;
     }

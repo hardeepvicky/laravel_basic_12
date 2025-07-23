@@ -17,7 +17,6 @@
                         <th style="width:10%">Change Counters</th>
                         <th style="width:60%">Changes</th>
                         <th style="width:6%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
-                        <th style="width:6%"><?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?></th>                        
                     </tr>
                 </thead>
                 <tbody>
@@ -73,9 +72,6 @@
                             </td>
                             <td>
                                 <x-Backend.created-and-by :datetime="$record->created_at" :userId="$record->created_by" />
-                            </td>
-                            <td>
-                                <x-Backend.created-and-by :datetime="$record->updated_at" userId="0"/>
                             </td>
                         </tr>
                     @endforeach

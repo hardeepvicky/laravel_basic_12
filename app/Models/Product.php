@@ -51,4 +51,20 @@ class Product extends BaseModel
 
         return $field_rules;
     }
+
+    public function getRefDisplayName($field, $value)
+    {
+        $ret_array = [];
+
+        switch($field)
+        {
+            case "product_category_id":
+                $ret_array = [
+                    $field => $this->category->getDisplayName()
+                ];
+                break;
+        }
+
+        return $ret_array;
+    }
 }

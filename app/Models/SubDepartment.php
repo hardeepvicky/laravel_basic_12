@@ -57,4 +57,20 @@ class SubDepartment extends BaseModel
 
         return $field_rules;
     }
+
+    public function getRefDisplayName($field, $value)
+    {
+        $ret_array = [];
+
+        switch($field)
+        {
+            case "department_id":
+                $ret_array = [
+                    $field => $this->department->getDisplayName()
+                ];
+                break;
+        }
+
+        return $ret_array;
+    }
 }

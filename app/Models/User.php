@@ -711,4 +711,40 @@ class User extends Authenticatable implements BaseModelInterface
 
         return $labels;
     }
+
+    public function getRefDisplayName($field, $value)
+    {
+        $ret_array = [];
+
+        switch($field)
+        {
+            case "user_category_id":
+                $ret_array = [
+                    $field => $this->userCategory->getDisplayName()
+                ];
+                break;
+            case "dept_id":
+                $ret_array = [
+                    $field => $this->department->getDisplayName()
+                ];
+                break;
+            case "sub_dept_id":
+                $ret_array = [
+                    $field => $this->subDepartment->getDisplayName()
+                ];
+                break;
+            case "desg_id":
+                $ret_array = [
+                    $field => $this->designation->getDisplayName()
+                ];
+                break;
+            case "country_id":
+                $ret_array = [
+                    $field => $this->country->getDisplayName()
+                ];
+                break;
+        }
+
+        return $ret_array;
+    }
 }
