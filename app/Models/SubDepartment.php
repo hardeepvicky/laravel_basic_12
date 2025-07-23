@@ -8,6 +8,14 @@ use Illuminate\Validation\Rules\Unique;
 
 class SubDepartment extends BaseModel
 {
+    protected $appends = [
+        'display_name',
+    ];
+
+    protected static array $unique_fields = ["department_id", "name"];
+
+    protected static array $list_fields = ["id", "department_id", "name", "short_name"];
+
     public static array $child_model_class = [
         User::class => [
             "foreignKey" => ["sub_dept_id"],

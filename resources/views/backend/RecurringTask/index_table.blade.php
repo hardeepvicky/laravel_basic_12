@@ -9,16 +9,15 @@ $false = false;
     </div>
 
     <div class="card-body p-1">
-        <form method="GET" class="summary_search" action="{{ route($routePrefix . '.index') }}">
         <div class="table-responsive">
-            <table class="table table-bordered summary-table">
+            <table class="table table-bordered summary-table summary_table_with_search">
                 <thead>
                     <tr>
                         <th style="width:10%">
                             <?php
                             $field = "assign_to_user_id";
                             ?>
-                            <x-Inputs.drop-down :name="$field" :label="$false" :value="$search[$field]" :list="$user_list" class="table-thead-search"/>
+                            <x-Inputs.drop-down :name="$field" :label="$false" :value="$search[$field]" :list="$user_list"/>
                         </th>
                     </tr>
                     <tr class="border-bottom-primary">
@@ -174,7 +173,6 @@ $false = false;
                 </tbody>
             </table>
         </div>
-        </form>
     </div>
     <div class="card-footer">
         <x-Backend.pagination-links :records="$records" />

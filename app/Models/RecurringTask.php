@@ -188,6 +188,29 @@ class RecurringTask extends BaseModel
         $labels['taskFile'] = "Files";
 
         return $labels;
+        
+    }
+
+    public function getRefDisplayName($field, $value)
+    {
+        $ret_array = [];
+
+        switch($field)
+        {
+            case "dept_id":
+                $ret_array = [
+                    $field => $this->department->getDisplayName()
+                ];
+                break;
+
+            case "assign_to_user_id":
+                $ret_array = [
+                    $field => $this->assignToUser->getDisplayName()
+                ];
+                break;
+        }
+
+        return $ret_array;
     }
 
     public static function createTask(RecurringTask $recurring_task): int

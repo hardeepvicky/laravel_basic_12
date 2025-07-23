@@ -12,7 +12,7 @@ use Illuminate\Queue\SerializesModels;
 
 class ModelUpdate
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+    use Dispatchable, InteractsWithSockets, SerializesModels, EventTrait;
 
     /**
      * Create a new event instance.
@@ -20,13 +20,6 @@ class ModelUpdate
     public function __construct(public $model)
     {
         //
-    }
-
-    public function getData() : array
-    {
-        $data = $this->model->toArray();
-
-        return $data;
     }
 
     /**

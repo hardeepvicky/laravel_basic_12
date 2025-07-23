@@ -176,6 +176,28 @@ class Task extends BaseModel
         return $labels;
     }
 
+    public function getRefDisplayName($field, $value)
+    {
+        $ret_array = [];
+
+        switch($field)
+        {
+            case "dept_id":
+                $ret_array = [
+                    $field => $this->department->getDisplayName()
+                ];
+                break;
+
+            case "assign_to_user_id":
+                $ret_array = [
+                    $field => $this->assignToUser->getDisplayName()
+                ];
+                break;
+        }
+
+        return $ret_array;
+    }
+
     public function isAutorizeForChangeStatusToVerify(string &$error_msg)
     {
         $auth_user = Auth::user();

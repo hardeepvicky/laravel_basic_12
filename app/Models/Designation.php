@@ -8,6 +8,14 @@ use Illuminate\Validation\Rules\Unique;
 
 class Designation extends BaseModel
 {
+    protected $appends = [
+        'display_name',
+    ];
+
+    protected static array $unique_fields = ["name"];
+
+    protected static array $list_fields = ["id", "name", "short_name"];
+
     public static array $child_model_class = [
         // Employee::class => [
         //     "foreignKey" => "designation_id",
@@ -17,10 +25,6 @@ class Designation extends BaseModel
         //     "foreignKey" => "designation_id",
         //     "preventDelete" => true
         // ],
-    ];
-
-    protected $appends = [
-        'display_name',
     ];
 
     protected function getDisplayNameAttribute()

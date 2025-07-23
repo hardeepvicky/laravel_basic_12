@@ -39,6 +39,22 @@ class RecordHistory extends BaseMongoModel
 
     public static function createHistory(BaseModelInterface $model, array $model_data, bool $is_deleted = false)
     {
+        $ignore_models = [
+            Tag::class,
+            TaskFile::class,
+            TaskUser::class,
+            RecurringTaskDate::class,
+            RecurringTaskFile::class,
+            RecurringTaskUser::class
+        ];
+
+        $model_class = get_class($model);
+
+        if (in_array($model_class, $ignore_models))
+        {
+            return;
+        }
+
         $conditions = [
             "model_class" => str_class_name_without_namespace($model),
             "model_id" => $model->id
@@ -50,6 +66,8 @@ class RecordHistory extends BaseMongoModel
             "created_at", "updated_at", 
             "created_by", "updated_by"
         ];
+
+        $field_labels = FieldSetting::getDynamicFields($model);
 
         if ($is_deleted)
         {
@@ -65,8 +83,6 @@ class RecordHistory extends BaseMongoModel
 
             if ($last_history && $last_history->model_data)
             {
-                $field_labels = FieldSetting::getDynamicFields($model);
-
                 $change_counters = [
                     "new" => 0,
                     "changed" => 0,
@@ -81,10 +97,7 @@ class RecordHistory extends BaseMongoModel
                 {
                     $fields_found[] = $field;
 
-                    if (is_null($last_history->model_data[$field]) && is_null($value))
-                    {
-                    }
-                    else if (in_array($field, $ignore_fields))
+                    if (in_array($field, $ignore_fields))
                     {
 
                     }
@@ -98,19 +111,19 @@ class RecordHistory extends BaseMongoModel
 
                                 $changes[$field] = [
                                     "type" => "changed",
-                                    "label" => $field_labels[$field],
-                                    "previous" => $last_history->model_data[$field],
+                                    "label" => get_value_from_list($field_labels, $field, $field),
+                                    "previous" => get_value_from_list($last_history->model_data, $field),
                                     "current" => $value
                                 ];
                             }
                         }
-                        else
+                        else if (!is_null($value))
                         {
                             $change_counters['new']++;
 
                             $changes[$field] = [
                                 "type" => "new",
-                                "label" => $field_labels[$field],
+                                "label" => get_value_from_list($field_labels, $field, $field),
                                 "previous" => null,
                                 "current" => $value
                             ];
@@ -129,7 +142,7 @@ class RecordHistory extends BaseMongoModel
                         $change_counters['removed']++;                            
                         $changes[$field] = [
                             "type" => "removed",
-                            "label" => $field_labels[$field],
+                            "label" => get_value_from_list($field_labels, $field, $field),
                             "previous" => $value,
                             "current" => null
                         ];
@@ -146,9 +159,36 @@ class RecordHistory extends BaseMongoModel
             }
             else
             {
+                $change_counters = [
+                    "new" => 0,
+                ];
+
+                $changes = [];
+                
+                foreach($model_data as $field => $value)
+                {
+                    if (in_array($field, $ignore_fields))
+                    {
+
+                    }
+                    else
+                    {
+                        $change_counters['new']++;
+
+                        $changes[$field] = [
+                            "type" => "new",
+                            "label" => get_value_from_list($field_labels, $field, $field),
+                            "previous" => null,
+                            "current" => $value
+                        ];
+                    }
+                }
+                
                 $save_data = $conditions;
                 $save_data['action'] = SELF::ACTION_INSERT;
                 $save_data['model_data'] = $model_data;
+                $save_data['changes'] = $changes;
+                $save_data['change_counters'] = $change_counters;
 
                 $save_model = self::create($save_data);
             }

@@ -235,7 +235,7 @@ $(document).ready(function () {
         }
     });
 
-    $(document).on("change", ".summary_table_with_search", function () {
+    $(document).on("change", ".summary_table_with_search select, .summary_table_with_search input", function () {
         summary_table_with_search($(this));
     });
 
@@ -248,79 +248,44 @@ $(document).ready(function () {
         }
 
         if (e.which == 13 || e.which == 27) {
-            summary_table_with_search(_this.closest(".summary_table_with_search"), function () {
+            summary_table_with_search(_this, function () {
                 $("input[name='" + name + "']").focus();
             });
         }
     });
 
-    $(document).on("click", ".summary_table_with_search .clear_search", function () {
+    $(document).on("input", ".summary_table_with_search input", function (e) {
         var _this = $(this);
-        _this.clearForm();
-        summary_table_with_search(_this);
-    });
+        var name = $(this).attr("name");
 
-    $(document).on("change", ".table-thead-search", function()
-    {
-        table_thead_form_ajax_submit($(this));
+        if (e.which == 13 || e.which == 27) {
+            summary_table_with_search(_this, function () {
+                $("input[name='" + name + "']").focus();
+            });
+        }
     });
 });
-
-function table_thead_form_ajax_submit(ele)
-{
-    $(ele).closest("form").ajaxSubmit({
-        target: "#index_table",
-        beforeSubmit: function (formData, jqForm, options) {
-            $.loader.show();
-        },
-        success: function (responseText, statusText, xhr, $form) {
-            $.loader.hide();
-        },
-        error: function () {
-            $.loader.hide();
-        },
-    });
-
-    return false;
-}
+    
 
 function summary_table_with_search(ele, callback) {
-    var base_url = $(ele).data("base_url");
+    var name = $(ele).attr("name");
 
-    var form_data = {};
+    var search_input = $("form.summary_search [name='" + name + "']");
 
-    $(ele).find("thead input, thead select, .search_field").each(function () {
+    if (search_input.length == 0)
+    {
+        console.error(`summary_table_with_search -> element with name : ${name} not found in form.summary_search`);
+        return;
+    }
+    else if (search_input.length > 1)
+    {
+        console.error(`summary_table_with_search -> element with name : ${name} more than 1 found in form.summary_search`);
+        return;
+    }
 
-        var val = $(this).val();
-
-        var type = $(this).attr("type");
-
-        if (type == "checkbox" || type == "radio") {
-            val = $(this).prop("checked");
-        }
-
-        form_data[$(this).attr("name")] = val;
-    });
-
-    console.log(base_url, form_data);
-
-    $(ele).ajaxSubmit({
-        target: "#index_table",
-        method: "GET",
-        data: form_data,
-        beforeSubmit: function (formData, jqForm, options) {
-            $.loader.show();
-        },
-        success: function (responseText, statusText, xhr, $form) {
-            $.loader.hide();
-            if (typeof callback == "function") {
-                callback();
-            }
-        },
-        error: function () {
-            $.loader.hide();
-        },
-    });
+    search_input.val($(ele).val()).trigger("change");
+    
+    $("form.summary_search").trigger("submit");
 }
 
 function suggestion_list(textarea, suggestionBox, suggestion_data, url) {

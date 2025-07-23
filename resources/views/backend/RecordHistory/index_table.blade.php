@@ -24,7 +24,7 @@
                     @foreach ($records as $record)
                         <tr>
                             <th scope="row">
-                                {{ $record->model_class }} | # {{ $record->model_id }}
+                                {{ str_class_name_to_human_text( $record->model_class ) }} | # {{ $record->model_id }}
                             </th>
                             <td>{{ $record->action }}</td>
                             <td>
@@ -37,12 +37,12 @@
                             <td>
                                 @if (isset($record->changes) && is_array($record->changes))
                                 <div id="change-{{ $record->id }}" class="h-200">
-                                    <table class="table table-sm summary-table table-bordered">
+                                    <table class="table table-sm summary-table table-bordered i-data-table">
                                         <thead>
                                             <tr>
-                                                <th>Sr.No.</th>
-                                                <th>Sub Action</th>
-                                                <th>Field</th>
+                                                <th style="width:3%">Sr.No.</th>
+                                                <th style="width:10%" data-sort="text">Sub Action</th>
+                                                <th data-search="like" data-sort="text">Field</th>
                                                 <th>Previous Value</th>
                                                 <th>New Value</th>
                                             </tr>

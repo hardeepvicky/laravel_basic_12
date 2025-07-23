@@ -12,6 +12,10 @@ class Department extends BaseModel
         'display_name',
     ];
 
+    protected static array $unique_fields = ["name"];
+
+    protected static array $list_fields = ["id", "name", "short_name"];
+
     public static array $child_model_class = [
         // Employee::class => [
         //     "foreignKey" => "department_id",
