@@ -103,7 +103,7 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
     $route_prefix = "dashboard";
     $controllerClass = DashboardController::class;
     Route::get($route_prefix, [DashboardController::class, 'index'])->name($route_prefix);
-    
+
     $route_prefix = "user";
     $controllerClass = UserController::class;
     Route::resource($route_prefix, $controllerClass)->except("show");
@@ -365,6 +365,9 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
 
         $name = "de_activate";
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "ajax_update_field";
+        Route::post($name, [$controllerClass, $name])->name($name);
     });
 
     $route_prefix = "tags";

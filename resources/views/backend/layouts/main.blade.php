@@ -39,16 +39,15 @@ use App\Helpers\LaravelExtend;
     <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/libs/Croppie-2.6.4/croppie.css') }}" />
     <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/libs/fancybox/dist/jquery.fancybox.min.css') }}" />
     <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/libs/jquery-file-validator/css/file-validator.css') }}" />
-
     <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/css/vendors/flatpickr/flatpickr.min.css') }}">
-
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js@11.1.0/public/assets/styles/choices.min.css">
-
-
+    <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/libs/doomEdit/assets/doomEdit.css') }}">
 
     <!-- Theme Specfic -->
     <link id="color" rel="stylesheet" href="{{ get_asset_url('assets/css/color-1.css') }}" media="screen" />
     <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/css/style.css') }}" />
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js@11.1.0/public/assets/styles/choices.min.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/css/bootstrap-editable.css" />
 
     <!-- Project related CSS -->
     <link rel="stylesheet" type="text/css" href="{{ get_asset_url('libs/loader/loader.css') }}" />
@@ -61,6 +60,7 @@ use App\Helpers\LaravelExtend;
     <script src="{{ get_asset_url('assets/js/vendors/jquery/jquery.min.js') }}"></script>
     <script src="{{ get_asset_url('libs/events.js') }}"></script>
 
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 
 </head>
 
@@ -110,13 +110,6 @@ use App\Helpers\LaravelExtend;
     <script src="{{ get_asset_url('assets/libs/bootbox/5.5.3/bootbox.min.js') }}"></script>
     <script src="{{ get_asset_url('assets/libs/select2/select2.min.js') }}"></script>
     <script src="{{ get_asset_url('assets/js/flat-pickr/flatpickr.js') }}"></script>
-    <script src="{{ get_asset_url('assets/libs/Croppie-2.6.4/croppie.min.js') }}"></script>
-    <script src="{{ get_asset_url('assets/libs/fancybox/dist/jquery.fancybox.min.js') }}"></script>
-    <script src="{{ get_asset_url('assets/libs/ejs.min.js') }}"></script>
-    <script src="{{ get_asset_url('assets/libs/jquery.form.min.js') }}"></script>
-    <script src="{{ get_asset_url('assets/libs/typeahead.js-0.11.1/dist/typeahead.bundle.min.js') }}"></script>
-    <script src="{{ get_asset_url('assets/libs/jquery-file-validator/js/file-validator.js') }}"></script>
-
     <script src="{{ get_asset_url('assets/js/custom-card/custom-card.js') }}"></script>
     <script src="{{ get_asset_url('assets/js/config.js') }}"></script>
     <script src="{{ get_asset_url('assets/js/script.js') }}"></script>
@@ -127,11 +120,17 @@ use App\Helpers\LaravelExtend;
     <script src="{{ get_asset_url('assets/js/range/rangeslider.nostyle.umd.min.js') }}"></script>
     <script src="{{ get_asset_url('assets/js/range/rangeslider.umd.min.js') }}"></script>
     <script src="{{ get_asset_url('assets/js/clipboard/clipboard.min.js') }}"></script>
-    
-
     <script src="{{ get_asset_url('assets/js/theme-customizer/customizer.js') }}"></script>
 
-    <script src="https://cdn.jsdelivr.net/npm/choices.js@11.1.0/public/assets/scripts/choices.min.js"></script>
+    <script src="{{ get_asset_url('assets/libs/Croppie-2.6.4/croppie.min.js') }}"></script>
+    <script src="{{ get_asset_url('assets/libs/fancybox/dist/jquery.fancybox.min.js') }}"></script>
+    <script src="{{ get_asset_url('assets/libs/ejs.min.js') }}"></script>
+    <script src="{{ get_asset_url('assets/libs/jquery.form.min.js') }}"></script>
+    <script src="{{ get_asset_url('assets/libs/typeahead.js-0.11.1/dist/typeahead.bundle.min.js') }}"></script>
+    <script src="{{ get_asset_url('assets/libs/jquery-file-validator/js/file-validator.js') }}"></script>
+    <script src="{{ get_asset_url('assets/libs/doomEdit/assets/jquery.doomEdit.js') }}"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/choices.js@11.1.0/public/assets/scripts/choices.min.js"></script>    
 
     <!-- Project Lib -->
     <script src="{{ get_asset_url('libs/constants.js') }}"></script>
@@ -151,6 +150,7 @@ use App\Helpers\LaravelExtend;
     <script>
         $(function() {
             $.loader.init();
+
             $.events.lastCallbacks.map(function(cb) {
                 cb();
             });

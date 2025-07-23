@@ -13,5 +13,16 @@ $(function()
         {
             $(this).trigger('load');
         }
-    })
+    });
+
+    const elements = document.getElementsByClassName('x-editable');
+    elements.forEach(element => {                
+        const popover = new DarkEditable(element, {
+            ajaxOptions : {
+                headers: {
+                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+                },
+            }
+        });
+    });
 });

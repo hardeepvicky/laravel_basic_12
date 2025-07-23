@@ -396,4 +396,37 @@ class AppMenuController extends BackendController
 
         return $this->responseJson($response);
     }
+
+    public function ajax_update_field(Request $request)
+    {
+        try {
+
+            $validatedData = $request->validate([
+                "pk" => "required",
+                "name" => "required",
+                "value" => "required",
+            ]);
+
+            $record = $this->modelClass::where("id", $validatedData['pk'])->first();
+
+            if (!$record)
+            {
+                throw new Exception("Wrong ID : " . $validatedData['pk']);
+            }
+
+            $record->{$validatedData['name']} = $validatedData['value'];
+
+            if (!$record->save())
+            {
+                throw new UserException("Fail To Save", UserException::ERROR_LARAVEL_FAIL);
+            }
+
+            $response = $validatedData;
+
+            return $this->responseJson($response);
+            
+        } catch (Exception $ex) {
+            throw $ex;
+        }
+    }
 }

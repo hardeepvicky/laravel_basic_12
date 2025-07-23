@@ -28,7 +28,16 @@
                         <th scope="row">{{ $record->id }}</th>
                         <td>{{ get_value_from_list($tree_list, $record->parent_id) }}</td>
                         <td>{{ $record->name }}</td>
-                        <td>{{ $record->menu_display_order }}</td>
+                        <td>
+                            <a class="x-editable" href="#" id="menu_display_order" 
+                                data-type="number" 
+                                data-pk="{{ $record->id }}" 
+                                data-url="{{ route($routePrefix . ".ajax_update_field") }}" 
+                                data-title="Enter Display Order"
+                            >
+                                {{ $record->menu_display_order }}
+                            </a>
+                        </td>
                         <td>{{ $record->is_link ? 'Yes' : "No" }}</td>
                         <td>
                             <x-Backend.active_deactive :isActive="$record->is_active" :id="$record->id"
