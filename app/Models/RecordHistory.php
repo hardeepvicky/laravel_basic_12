@@ -2,6 +2,10 @@
 
 namespace App\Models;
 
+use App\Helpers\DateUtility;
+use Carbon\Carbon;
+use DateTime;
+
 class RecordHistory extends BaseMongoModel
 {
     protected static array $unique_fields = ["model_class", "model_id"];
@@ -95,13 +99,15 @@ class RecordHistory extends BaseMongoModel
 
                 foreach($model_data as $field => $value)
                 {
+                    $parse_value = self::getParseValue($value);
+
                     $fields_found[] = $field;
 
                     if (in_array($field, $ignore_fields))
                     {
 
                     }
-                    else
+                    else if (!is_null($parse_value))
                     {
                         if (isset($last_history->model_data[$field]))
                         {
@@ -112,12 +118,12 @@ class RecordHistory extends BaseMongoModel
                                 $changes[$field] = [
                                     "type" => "changed",
                                     "label" => get_value_from_list($field_labels, $field, $field),
-                                    "previous" => get_value_from_list($last_history->model_data, $field),
-                                    "current" => $value
+                                    "previous" => self::getParseValue(get_value_from_list($last_history->model_data, $field)),
+                                    "current" => $parse_value
                                 ];
                             }
                         }
-                        else if (!is_null($value))
+                        else
                         {
                             $change_counters['new']++;
 
@@ -125,7 +131,7 @@ class RecordHistory extends BaseMongoModel
                                 "type" => "new",
                                 "label" => get_value_from_list($field_labels, $field, $field),
                                 "previous" => null,
-                                "current" => $value
+                                "current" => $parse_value
                             ];
                         }
                     }
@@ -133,17 +139,19 @@ class RecordHistory extends BaseMongoModel
 
                 foreach($last_history->model_data as $field => $value)
                 {
+                    $parse_value = self::getParseValue($value);
+
                     if (in_array($field, $ignore_fields))
                     {
                         
                     }
-                    else if (!in_array($field, $fields_found))
+                    else if (!in_array($field, $fields_found) && !is_null($parse_value))
                     {
                         $change_counters['removed']++;                            
                         $changes[$field] = [
                             "type" => "removed",
                             "label" => get_value_from_list($field_labels, $field, $field),
-                            "previous" => $value,
+                            "previous" => $parse_value,
                             "current" => null
                         ];
                     }
@@ -167,11 +175,13 @@ class RecordHistory extends BaseMongoModel
                 
                 foreach($model_data as $field => $value)
                 {
+                    $parse_value = self::getParseValue($value);
+
                     if (in_array($field, $ignore_fields))
                     {
 
                     }
-                    else
+                    else if (!is_null($parse_value))
                     {
                         $change_counters['new']++;
 
@@ -179,7 +189,7 @@ class RecordHistory extends BaseMongoModel
                             "type" => "new",
                             "label" => get_value_from_list($field_labels, $field, $field),
                             "previous" => null,
-                            "current" => $value
+                            "current" => $parse_value
                         ];
                     }
                 }
@@ -195,5 +205,47 @@ class RecordHistory extends BaseMongoModel
         }
         
         return $save_model;
+    }
+
+    private static function getParseValue($value)
+    {
+        $parse_value = $value;
+
+        if (is_object($value))
+        {
+            $parse_value = (array) $value;
+        }
+        else if (is_array($value))
+        {
+            $parse_value = implode(",", $value);
+        }
+        else if (is_bool($value))
+        {
+            $parse_value = $value ? "Yes" : "No";
+        }
+        else
+        {
+            $format = "Y-m-d";
+            $sub_value = $parse_value;
+
+            if (strpos($parse_value, "T") !== false)
+            {
+                $sub_value = substr($parse_value, 0, strpos($parse_value, "T"));
+            }
+
+            if (strpos($parse_value, " ")  !== false)
+            {
+                $sub_value = substr($parse_value, 0, strpos($parse_value, " "));
+            }
+
+            $dateTime = \DateTime::createFromFormat($format, $sub_value);
+
+            if ($dateTime && $dateTime->format($format) === $sub_value)
+            {
+                $parse_value = DateUtility::getDate($parse_value, DateUtility::DATETIME_OUT_FORMAT);
+            }
+        }
+
+        return $parse_value;
     }
 }
