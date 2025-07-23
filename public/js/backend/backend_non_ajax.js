@@ -264,6 +264,36 @@ $(document).ready(function () {
             });
         }
     });
+
+    $(document).on("click", "a.ajaxify", function(e){
+        e.preventDefault();
+
+        var callback = $(this).data("callback");
+        var process_info = $(this).data("process_info");
+
+        if (!process_info)
+        {
+            process_info = "Sending Request....";
+        }
+
+        $.loader.init().setInfo(process_info).show();
+
+        $.get($(this).attr("href"), function(response){
+
+            $.loader.hide();
+
+            if (typeof callback == "string")
+            {
+                eval(`${callback}();`);
+            }
+            else if (typeof callback == "function")
+            {
+                callback();
+            }
+        })
+
+        return false;
+    })
 });
     
 

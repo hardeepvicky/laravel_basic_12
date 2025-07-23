@@ -5,12 +5,17 @@ namespace App\Http\Controllers\Backend;
 use App\Acl\AccessControl;
 use App\Acl\SectionRoutes;
 use App\Exceptions\UserException;
+use App\Helpers\LaravelExtend;
+use App\Models\Notification;
 use App\Models\Role;
 use App\Models\RoleRouteName;
 use App\Models\User;
+use App\Notifications\GeneralNotification;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification as FacadesNotification;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 
@@ -209,6 +214,49 @@ class PermissionController extends BackendController
             $respone["msg"] = "Success";
         } catch (Exception $ex) {
             DB::rollBack();
+            $respone['msg'] = $ex->getMessage();
+        }
+
+        return $this->responseJson($respone);
+    }
+
+    public function ajax_request_access($route_name)
+    {
+        $respone = ["status" => 0, "msg" => "Unkown Error"];
+
+        try {
+            if (!$route_name)
+            {
+                throw new Exception("Route Name : $route_name not is found");
+            }
+
+            $auth_user = Auth::user();
+
+            $notification_data = [
+                'from_user_id' => $auth_user->id,
+                "sub_type" => Notification::SUB_TYPE_CRITICAL,
+                "msg" => $auth_user->getDisplayName() .  " is requesting for permission"
+            ];
+
+            $section_list = SectionRoutes::getList();
+
+            foreach($section_list as $label => $route_list)
+            {
+                if (in_array($route_name, $route_list))
+                {
+                    $notification_data['msg'] .= " of " . $label;
+                }
+            }
+
+            $users = $user_list = User::whereHas("roles", function($q){
+                $q->where("code", Role::TYPE_SYSTEM_ADMIN);
+            })->get();
+
+            FacadesNotification::send($users, new GeneralNotification($notification_data));
+
+            $respone["status"] = 1;
+            $respone["msg"] = "Success";
+        } catch (Exception $ex) {
             $respone['msg'] = $ex->getMessage();
         }
 

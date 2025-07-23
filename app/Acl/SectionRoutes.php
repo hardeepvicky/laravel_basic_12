@@ -25,6 +25,7 @@ class SectionRoutes
         "*.ajax_get_count",
         "*.ajax_get",
         "*.ajax_update_field",
+        "*.ajax_request_access",
     ];
 
     /**

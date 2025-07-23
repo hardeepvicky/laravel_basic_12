@@ -52,10 +52,34 @@ class UserException extends Exception
                 break;
         }
 
-        if (in_array($this->code, [self::ERROR_GENERAL, self::ERROR_LARAVEL_FAIL]))
+        if (in_array($this->code, [self::ERROR_GENERAL, self::ERROR_LARAVEL_FAIL, self::ERROR_PHP_FAIL]))
         {
             $data['file_name'] = $this->getFile();
             $data['file_line_no'] = $this->getLine();
+
+            $data['history'] = [];
+
+            foreach(debug_backtrace() as $i => $callBy)
+            {
+                if ($i > 0 && $i < 8)
+                {
+                    $arr = [
+                        "File" => $callBy['file'],
+                        "Line No." => $callBy['line'],
+                    ];
+
+                    if (isset($callBy['class'])) 
+                    {
+                        $arr['class'] = $callBy['class'];
+                    }
+
+                    if (isset($callBy['function'])) {
+                        $arr['function'] = $callBy['function'];
+                    }
+
+                    $data['history'][] = $arr;
+                }
+            }
         }
 
         $this->data = $data;

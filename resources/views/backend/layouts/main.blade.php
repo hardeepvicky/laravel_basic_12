@@ -40,13 +40,11 @@ use App\Helpers\LaravelExtend;
     <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/libs/fancybox/dist/jquery.fancybox.min.css') }}" />
     <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/libs/jquery-file-validator/css/file-validator.css') }}" />
     <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/css/vendors/flatpickr/flatpickr.min.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/libs/doomEdit/assets/doomEdit.css') }}">
 
     <!-- Theme Specfic -->
     <link id="color" rel="stylesheet" href="{{ get_asset_url('assets/css/color-1.css') }}" media="screen" />
     <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/css/style.css') }}" />
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js@11.1.0/public/assets/styles/choices.min.css">
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/css/bootstrap-editable.css" />
 
     <!-- Project related CSS -->
@@ -128,9 +126,6 @@ use App\Helpers\LaravelExtend;
     <script src="{{ get_asset_url('assets/libs/jquery.form.min.js') }}"></script>
     <script src="{{ get_asset_url('assets/libs/typeahead.js-0.11.1/dist/typeahead.bundle.min.js') }}"></script>
     <script src="{{ get_asset_url('assets/libs/jquery-file-validator/js/file-validator.js') }}"></script>
-    <script src="{{ get_asset_url('assets/libs/doomEdit/assets/jquery.doomEdit.js') }}"></script>
-
-    <script src="https://cdn.jsdelivr.net/npm/choices.js@11.1.0/public/assets/scripts/choices.min.js"></script>    
 
     <!-- Project Lib -->
     <script src="{{ get_asset_url('libs/constants.js') }}"></script>

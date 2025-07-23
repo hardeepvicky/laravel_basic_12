@@ -438,7 +438,7 @@ class TaskController extends BackendController
 
         if (in_array($model->status, $not_editable_status_codes)) {
             $type_conditions = [];
-            $type_conditions['type'] = Type::getType($this, "status");
+            $type_conditions['type'] = Type::getType($model, "status");
             $status_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
 
             $error_msg = "Can't Edit, Task Status is " . $status_list[$model->status];
