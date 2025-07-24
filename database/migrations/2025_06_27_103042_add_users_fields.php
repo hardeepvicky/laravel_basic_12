@@ -1,10 +1,11 @@
 <?php
 
+use App\Helpers\MyMigration;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
+return new class extends MyMigration
 {
     /**
      * Run the migrations.
@@ -25,12 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropForeign(["user_category_id"]);
-            $table->dropColumn('user_category_id');
-
-            $table->dropForeign(["country_id"]);
-            $table->dropColumn('country_id');
-        });
+        $this->dropColumnsWithIndex("users", ["user_category_id", "country_id"]);
     }
 };

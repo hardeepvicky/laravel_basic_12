@@ -13,11 +13,7 @@ return new class extends MyMigration
      */
     public function up(): void
     {
-        if($this->indexExists("users", "mobile_UNIQUE"))
-        {
-            $q = "ALTER TABLE `users` DROP INDEX `mobile_UNIQUE`;";
-            DB::statement($q);
-        }
+        $this->dropIndexIfExist("users", ["mobile"]);
     }
 
     /**

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Helpers\DateUtility;
 use App\Helpers\LaravelExtend;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\WebController;
 use App\Models\Setting;
 use App\Models\User;
 use Exception;
@@ -14,7 +15,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
 
-class RegisterController extends Controller
+class RegisterController extends WebController
 {
     /*
     |--------------------------------------------------------------------------
@@ -49,6 +50,11 @@ class RegisterController extends Controller
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
+    }
+
+    public function register_form()
+    {
+        return $this->view("register");
     }
 
     public function register()
@@ -253,5 +259,18 @@ class RegisterController extends Controller
             "layout" => "auth.layouts.login",
             "company_name" => $company_name,
         ]);
+    }
+
+    protected function beforeViewRender()
+    {
+        if (!parent::beforeViewRender()) {
+            return false;
+        }
+
+        $this->routePrefix = "";
+
+        $this->viewPrefix = "auth";
+
+        $this->layout = "auth.layouts.login";
     }
 }

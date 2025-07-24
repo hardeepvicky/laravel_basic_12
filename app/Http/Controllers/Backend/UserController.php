@@ -13,8 +13,10 @@ use App\Models\FieldSetting;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Role;
+use App\Models\Type;
 use App\Models\UserAllowIp;
 use App\Models\UserCategory;
+use App\Rules\MobileNumber;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
@@ -26,6 +28,8 @@ class UserController extends BackendController
     public String $routePrefix = "user";
 
     protected $modelClass = User::class;
+
+    protected User | null $model = null;
 
     public function index()
     {
@@ -50,22 +54,7 @@ class UserController extends BackendController
         return $this->viewIndex(__FUNCTION__);
     }
 
-    protected function beforeViewRender()
-    {
-        $type_list = User::TYPE_LIST;
-
-        $country_list = Country::getListCache();
-
-        $my_country = Country::getMyCountry();
-
-        $field_labels = FieldSetting::getDynamicFields($this->modelClass);
-
-        $user_allow_ip_field_labels = FieldSetting::getDynamicFields("UserAllowIp");
-
-        $this->setForView(compact("type_list", "country_list", "my_country", "field_labels", "user_allow_ip_field_labels"));
-
-        return parent::beforeViewRender();
-    }
+    
 
     private function _getBuildeForIndex($cache_key_prefix, $apply_sort = true)
     {
@@ -113,6 +102,33 @@ class UserController extends BackendController
         }
 
         return $builder;
+    }
+
+    protected function beforeViewRender()
+    {
+        if (is_null($this->model)) {
+            $this->model = new $this->modelClass();
+        }
+        
+        $type_list = User::TYPE_LIST;
+
+        $country_list = Country::getListCache();
+
+        $my_country = Country::getMyCountry();
+
+        $type_conditions = [
+            "type" => Type::getType($this->model, "sub_type")
+        ];
+
+        $sub_type_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
+
+        $field_labels = FieldSetting::getDynamicFields($this->modelClass);
+
+        $user_allow_ip_field_labels = FieldSetting::getDynamicFields("UserAllowIp");
+
+        $this->setForView(compact("type_list", "country_list", "my_country", "sub_type_list", "field_labels", "user_allow_ip_field_labels"));
+
+        return parent::beforeViewRender();
     }
 
     public function create()
@@ -167,12 +183,15 @@ class UserController extends BackendController
     {
         return [
             'name' => ['required'],
-            'person_name' => ['nullable'],
+            'person_name' => ['required'],
+            'person_last_name' => ['nullable'],
             'email' => ['required'],
             'type' => ['required'],
+            'sub_type' => ['required'],
             'user_category_id' => ['required'],
             'country_id' => ['required'],
-            'mobile' => ['nullable'],
+            'mobile' => ['nullable', new MobileNumber],
+            'whatsapp_mobile' => ['nullable', new MobileNumber],
             'roles' => ["required"],
             'allow_ip' => [],
             "dont_send_email" => "",

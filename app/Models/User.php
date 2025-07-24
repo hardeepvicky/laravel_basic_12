@@ -38,6 +38,7 @@ class User extends Authenticatable implements BaseModelInterface
      */
     protected $fillable = [
         'type',
+        'sub_type',
         'user_category_id',
         'dept_id',
         'sub_dept_id',
@@ -45,6 +46,7 @@ class User extends Authenticatable implements BaseModelInterface
         'country_id',
         'name',
         'person_name',
+        'person_last_name',
         'email',
         'mobile',
         'whatsapp_mobile',
@@ -131,6 +133,15 @@ class User extends Authenticatable implements BaseModelInterface
         self::CREATED_VIA_GOOGLE => "Google",
         self::CREATED_VIA_APPLE => "Apple",
     ];
+
+    public const SUB_TYPE_TEAM_MEMBER = "TEAM_MEMBER";
+    public const SUB_TYPE_DEMO = "DEMO";
+    public const SUB_TYPE_EXISTING_BUYER = "EXISTING_BUYER";
+    public const SUB_TYPE_RESELLER = "RESELLER";
+    public const SUB_TYPE_OEM = "OEM";
+    public const SUB_TYPE_VENDOR = "VENDOR";
+    public const SUB_TYPE_FEANCHISE = "FEANCHISE";
+    public const SUB_TYPE_SUPPLIER = "SUPPLIER";
 
     public array $custom_errors = [];
 
@@ -345,6 +356,7 @@ class User extends Authenticatable implements BaseModelInterface
         if ($request->get("type") == self::TYPE_INTERNAL) {
             $field_rules["name"] = ["required"];
             $field_rules["dept_id"] = ["required"];
+            $field_rules["sub_dept_id"] = ["nullable"];
             $field_rules["desg_id"] = ["required"];
         }
 
@@ -746,5 +758,26 @@ class User extends Authenticatable implements BaseModelInterface
         }
 
         return $ret_array;
+    }
+
+    public static function getCodeList(String $field)
+    {
+        $class_info = get_class_info(static::class);
+
+        switch ($field) {
+            case "sub_type":
+
+                $list = [];
+
+                foreach ($class_info['constants'] as $constant => $label) {
+                    if (strpos($constant, "SUB_TYPE_") !== false) {
+                        $list[] = $label;
+                    }
+                }
+
+                return $list;
+
+                break;
+        }
     }
 }

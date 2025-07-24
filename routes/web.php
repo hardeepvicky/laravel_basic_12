@@ -77,6 +77,9 @@ Route::get('/auth/google/redirect', [GoogleAuthController::class, 'redirect'])->
 // Route to handle the callback from Google
 Route::get('/auth/google/callback', [GoogleAuthController::class, 'callback'])->name('auth.google.callback');
 
+Route::get('register', [RegisterController::class, 'register_form'])->name('register');
+Route::post('register', [RegisterController::class, 'register'])->name('register');
+
 Route::group(['prefix' => 'public', 'as' => 'public.'], function () {
     Route::post('ajax_upload', [PublicController::class, 'ajax_upload']);
     Route::post('ajax_upload_base64', [PublicController::class, 'ajax_upload_base64']);

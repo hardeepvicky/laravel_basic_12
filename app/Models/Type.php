@@ -72,6 +72,11 @@ class Type extends BaseModel
                     "input_type" => "Input Type",
                 ]
             ],
+            User::class => [
+                "fields" => [
+                    "sub_type" => "Sub Type"
+                ]
+            ]
         ];
 
         return $types;

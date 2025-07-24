@@ -1,10 +1,11 @@
 <?php
 
+use App\Helpers\MyMigration;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
+return new class extends MyMigration
 {
     /**
      * Run the migrations.
@@ -24,11 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('person_name');
-            $table->dropColumn('avatar');
-            $table->dropColumn('created_via');
-            $table->dropColumn('is_secure_login');
-        });
+        $this->dropColumnsWithIndex("users", ["person_name", "avatar", "created_via", "is_secure_login"]);
     }
 };

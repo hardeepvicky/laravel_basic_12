@@ -196,67 +196,24 @@ class TaskController extends BackendController
             "type" => User::TYPE_INTERNAL,
         ];
 
-        $exist_user_ids = [];
-
-        if ($this->model->taskUser) {
-            $exist_user_ids = $this->model->taskUser->pluck("user_id")->toArray();
-        }
-
-        if ($this->model->assign_to_user_id) {
-            $exist_user_ids[] = $this->model->assign_to_user_id;
-        }
-
-        if ($exist_user_ids) {
-            $user_conditions['or_id'] = $exist_user_ids;
-        }
-
         $user_list = User::getList("id", "display_name", $user_conditions);
 
-        $type_conditions = [];
-        $type_conditions['type'] = Type::getType($this->model, "task_type");
-
-        if ($this->model->type) {
-            $saved_type_id = Type::getIdFromCode($type_conditions['type'], $this->model->type);
-
-            if ($saved_type_id) {
-                $type_conditions['or_id'] = $saved_type_id;
-            }
-        }
+        $type_conditions = [
+            'type' => Type::getType($this->model, "task_type")
+        ];
         $task_type_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
 
-        $type_conditions = [];
-        $type_conditions['type'] = Type::getType($this->model, "status");
-        if ($this->model->status) {
-            $saved_type_id = Type::getIdFromCode($type_conditions['type'], $this->model->status);
-
-            if ($saved_type_id) {
-                $type_conditions['or_id'] = $saved_type_id;
-            }
-        }
+        $type_conditions = [
+            'type' => Type::getType($this->model, "status")
+        ];        
         $status_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
 
-        $type_conditions = [];
-        $type_conditions['type'] = Type::getType($this->model, "duration_type");
-        if ($this->model->duration_type) {
-            $saved_type_id = Type::getIdFromCode($type_conditions['type'], $this->model->duration_type);
-
-            if ($saved_type_id) {
-                $type_conditions['or_id'] = $saved_type_id;
-            }
-        }
-
+        $type_conditions = [
+            'type' => Type::getType($this->model, "duration_type")
+        ]; 
         $duration_type_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
 
-        // d($this->model->duration);
-        // d(LaravelExtend::getQueryLog());
-        // d($duration_list, true);
-
-        $dept_conditions = [];
-        if ($this->model->dept_id) {
-            $dept_conditions['or_id'] = $this->model->dept_id;
-        }
-
-        $department_list = Department::getList("id", "display_name", $dept_conditions, "list_display_order");
+        $department_list = Department::getList("id", "display_name", [], "list_display_order");
 
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
