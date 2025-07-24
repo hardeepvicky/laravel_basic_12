@@ -278,7 +278,7 @@ label.info {
     padding: 10px;
 }
 
-.array_print {
+.array_print .array_print {
     margin-left: 1em;
 }
 
@@ -486,7 +486,7 @@ label.info {
 }
 
 .small-widget{
-    width : 250px;
+    width : 230px;
     display: inline-block;
     margin-left: 10px;
     margin-bottom: 10px;

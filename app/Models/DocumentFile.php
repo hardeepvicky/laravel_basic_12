@@ -38,7 +38,7 @@ class DocumentFile extends BaseModel
 
     public function getDisplayName()
     {
-        return $this->name;
+        return $this->name . ' (' . $this->file_name . ')';
     }
 
     public function getUniqueValidationRules(Request $request)

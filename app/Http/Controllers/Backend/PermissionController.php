@@ -13,9 +13,10 @@ use App\Models\User;
 use App\Notifications\GeneralNotification;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Notification as FacadesNotification;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 
@@ -245,19 +246,43 @@ class PermissionController extends BackendController
                 if (in_array($route_name, $route_list))
                 {
                     $notification_data['msg'] .= " of " . $label;
+                    break;
                 }
             }
 
-            $users = $user_list = User::whereHas("roles", function($q){
+            $users = User::whereHas("roles", function($q){
                 $q->where("code", Role::TYPE_SYSTEM_ADMIN);
             })->get();
 
-            FacadesNotification::send($users, new GeneralNotification($notification_data));
+            $notifyObj = new GeneralNotification($notification_data);
+
+            foreach($users as $user)
+            {
+                $notification_class_name = str_class_name_without_namespace(GeneralNotification::class);
+
+                $count = Notification::where("notifiable_id", $user->id)
+                            ->whereNull("read_at")
+                            ->where("type", 'like', '%'. $notification_class_name)
+                            ->where("sub_type", Notification::SUB_TYPE_CRITICAL)
+                            ->where("from_user_id", $notification_data['from_user_id'])
+                            ->count();
+
+                if ($count == 0)
+                {
+                    $user->notify($notifyObj);
+                }
+            }
+
+            $db_logs = LaravelExtend::getQueryLog("", -5);
+
+            LaravelExtend::writeQueryLog($db_logs);
 
             $respone["status"] = 1;
             $respone["msg"] = "Success";
         } catch (Exception $ex) {
+            $respone["status"] = 0;
             $respone['msg'] = $ex->getMessage();
+            throw $ex;
         }
 
         return $this->responseJson($respone);

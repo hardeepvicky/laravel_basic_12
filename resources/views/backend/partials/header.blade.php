@@ -20,12 +20,10 @@ use App\Models\Notification;
             <form class="form-inline search-full col" action="#" method="get">
                 <div class="form-group w-100">
                     <div class="Typeahead Typeahead--twitterUsers">
-                        <div class="u-posRelative">
-                            <input class="demo-input Typeahead-input form-control-plaintext w-100" type="text"
-                                placeholder="Search Admiro .." name="q" title="" autofocus="autofocus" />
-                            <div class="spinner-border Typeahead-spinner" role="status"><span
-                                    class="sr-only">Loading...</span></div>
-                            <i class="close-search" data-feather="x"></i>
+                        <div class="u-posRelative d-flex align-items-center">
+                            <input class="header-search demo-input py-0 Typeahead-input form-control-plaintext w-100"
+                            type="text" placeholder="Type to Search..." name="q" title="" /><i
+                            class="search-bg iconly-Search icli"></i>
                         </div>
                         <div class="Typeahead-menu"></div>
                     </div>
@@ -34,7 +32,7 @@ use App\Models\Notification;
             <div class="form-group-header d-lg-block d-none">
                 <div class="Typeahead Typeahead--twitterUsers">
                     <div class="u-posRelative d-flex align-items-center">
-                        <input id="header-search" class="demo-input py-0 Typeahead-input form-control-plaintext w-100"
+                        <input id="header-search" class="header-search demo-input py-0 Typeahead-input form-control-plaintext w-100"
                             type="text" placeholder="(F2) Type to Search..." name="q" title="" /><i
                             class="search-bg iconly-Search icli"></i>
                     </div>
@@ -271,7 +269,7 @@ use App\Models\Notification;
                 }
             }
 
-            $('#header-search').typeahead({
+            $('.header-search').typeahead({
                 hint: true,
                 highlight: true,
                 minLength: 1

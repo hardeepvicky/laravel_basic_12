@@ -163,7 +163,7 @@ class RecordHistory extends BaseMongoModel
             $save_data['model_data'] = $model_data;
             $save_data['changes'] = $changes;
             $save_data['change_counters'] = $change_counters;
-            $save_data['created_by'] = $model_data['updated_by'];
+            $save_data['created_by'] = $model_data['updated_by'] ?? $model_data['created_by'] ?? 0;
 
             $save_model = self::create($save_data);
         }
@@ -248,7 +248,7 @@ class RecordHistory extends BaseMongoModel
                 $save_data['model_data'] = $model_data;
                 $save_data['changes'] = $changes;
                 $save_data['change_counters'] = $change_counters;
-                $save_data['created_by'] = $model_data['updated_by'];
+                $save_data['created_by'] = $model_data['updated_by'] ?? $model_data['created_by'] ?? 0;
 
                 $save_model = self::create($save_data);
             }
@@ -286,7 +286,7 @@ class RecordHistory extends BaseMongoModel
                 $save_data['model_data'] = $model_data;
                 $save_data['changes'] = $changes;
                 $save_data['change_counters'] = $change_counters;
-                $save_data['created_by'] = $model_data['updated_by'];
+                $save_data['created_by'] = $model_data['updated_by'] ?? $model_data['created_by'] ?? 0;
 
                 $save_model = self::create($save_data);
             }
@@ -311,23 +311,8 @@ class RecordHistory extends BaseMongoModel
         {
             $parse_value = $value ? "Yes" : "No";
         }
-        else
+        else if (is_string($parse_value))
         {
-            $format = "Y-m-d";
-            $sub_value = $parse_value;
-
-            if (strpos($parse_value, "T") !== false)
-            {
-                $sub_value = substr($parse_value, 0, strpos($parse_value, "T"));
-            }
-
-            if (strpos($parse_value, " ")  !== false)
-            {
-                $sub_value = substr($parse_value, 0, strpos($parse_value, " "));
-            }
-
-            $dateTime = \DateTime::createFromFormat($format, $sub_value);
-
             if (check_string_is_date_time($parse_value))
             {
                 $parse_value = DateUtility::getDate($parse_value, DateUtility::DATETIME_OUT_FORMAT);

@@ -8,7 +8,7 @@
             <table class="table table-striped table-bordered table-hover">
                 <thead>
                     <tr class="border-bottom-primary">
-                        <th>
+                        <th style="width:10%">
                             <?= sortable_anchor('model_class', get_value_from_list($field_labels, 'model_class', 'model_class')) ?>
                             | 
                             <?= sortable_anchor('model_id', get_value_from_list($field_labels, 'model_id', 'model_id')) ?>
@@ -16,7 +16,7 @@
                         <th style="width:6%"><?= sortable_anchor('action', get_value_from_list($field_labels, 'action', 'action')) ?></th>                        
                         <th style="width:10%">Change Counters</th>
                         <th style="width:60%">Changes</th>
-                        <th style="width:6%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
+                        <th style="width:10%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -44,11 +44,11 @@
                                     <table class="table table-sm summary-table table-bordered i-data-table">
                                         <thead>
                                             <tr>
-                                                <th style="width:3%">Sr.No.</th>
-                                                <th style="width:10%" data-sort="text">Sub Action</th>
-                                                <th data-search="like" data-sort="text">Field</th>
-                                                <th data-search="like" data-sort="text">Previous Value</th>
-                                                <th data-search="like" data-sort="text">New Value</th>
+                                                <th style="width:5%">Sr.No.</th>
+                                                <th style="width:5%" data-sort="text">Sub Action</th>
+                                                <th style="width:20%" data-search="like" data-sort="text">Field</th>
+                                                <th style="width:35%" data-search="like" data-sort="text">Previous Value</th>
+                                                <th style="width:35%" data-search="like" data-sort="text">New Value</th>
                                             </tr>
                                         </thead>
                                         <tbody>

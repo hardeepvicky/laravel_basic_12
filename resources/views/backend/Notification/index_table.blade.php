@@ -33,7 +33,7 @@
                             </td>                            
                             <td>
                                 <x-Backend.celec-date-time :value="$record->created_at" />
-
+                                <br/>
                                 ({{ $record->created_at_original->diffForHumans() }})
                             </td>   
                             <td>

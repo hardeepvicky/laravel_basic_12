@@ -14,8 +14,10 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Route;
 use PDOException;
@@ -693,5 +695,54 @@ class LaravelExtend
             "value" => $parse_value,
             "op" => $op
         ];
+    }
+
+    public static function writeQueryLog(array $db_logs)
+    {
+        $auth_user = Auth::user();
+
+        $history = [];
+
+        Log::info("-------------------------------QUERY LOG-------------------------------");
+
+        if ($auth_user)
+        {
+            Log::info("--- Created By : " . $auth_user->getDisplayName() . " ---");
+        }
+
+        foreach(debug_backtrace() as $i => $callBy)
+        {
+            if ($i > 0 && $i < 6)
+            {
+                $arr = [
+                    "File" => $callBy['file'],
+                    "Line No." => $callBy['line'],
+                ];
+
+                if (isset($callBy['class'])) 
+                {
+                    $arr['class'] = $callBy['class'];
+                }
+
+                if (isset($callBy['function'])) {
+                    $arr['function'] = $callBy['function'];
+                }
+
+                $history[] = $arr;
+            }
+        }
+
+        foreach($db_logs as $db_log)
+        {
+            Log::debug("Query :" . $db_log['query']);
+
+            unset($db_log['query']);
+
+            Log::info("Query Info", $db_log);
+        }
+
+        Log::debug($history);
+
+        Log::info("-------------------------------END QUERY LOG-------------------------------");
     }
 }
