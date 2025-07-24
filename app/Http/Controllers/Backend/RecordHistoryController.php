@@ -43,8 +43,6 @@ class RecordHistoryController extends BackendController
 
         $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
 
-        // d($records->toArray(), true);
-
         $this->setForView(compact("records"));
 
         return $this->viewIndex(__FUNCTION__);

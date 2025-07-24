@@ -316,18 +316,16 @@ trait CommonModelTrait
         }
     }
 
-    public function convertTimeZoneForDisplay(array $data = [])
+    public function convertTimeZoneForDisplay(array $data = [], array $date_fields = [])
     {
         if (is_null(DateUtility::$login_user_time_zone))
         {
             return;
         }
 
-        $date_fields = [];
-
         foreach($this->casts as $field => $config)
         {
-            if (strpos($config, "date") !== false)
+            if (strpos($config, "date") !== false || strpos($config, "timestamp") !== false)
             {
                 $date_fields[$field] = $config;
             }
@@ -356,7 +354,7 @@ trait CommonModelTrait
 
         if (empty($data))
         {
-            foreach($date_fields as $field => $config)
+            foreach($date_fields as $field => $date_config)
             {
                 if ($this->{$field})
                 {
@@ -379,21 +377,31 @@ trait CommonModelTrait
                     }
                     else
                     {
+                        $format = 'Y-m-d H:i:s T';
+
+                        if (strpos($date_config, ":") !== false)
+                        {
+                            $format = substr($date_config, strpos($date_config, ":") + 1);
+                        }
+
                         $this->{$original_field} = $this->{$field};
 
                         //consider as UTC
                         $new_date = DateUtility::getDateObj($this->{$field});
-                        $new_date->setTimezone(DateUtility::$login_user_time_zone);
-                        $this->{$field} = $new_date->format('Y-m-d H:i:s T');
+                        if ($new_date)
+                        {
+                            $new_date->setTimezone(DateUtility::$login_user_time_zone);
+                            $this->{$field} = $new_date->format($format);
+                        }
                     }
                 }
             }
         }
         else
         {
-            foreach($date_fields as $field => $config)
+            foreach($date_fields as $field => $date_config)
             {
-                if ($this->{$field})
+                if (isset($data[$field]) && $data[$field])
                 {
                     $original_field = $field . "_original";
                     
@@ -412,11 +420,21 @@ trait CommonModelTrait
                     }
                     else
                     {
+                        $format = 'Y-m-d H:i:s T';
+
+                        if (strpos($date_config, ":") !== false)
+                        {
+                            $format = substr($date_config, strpos($date_config, ":") + 1);
+                        }
+
                         $data[$original_field] = $data[$field];
                         //consider as UTC
                         $new_date = DateUtility::getDateObj($data[$field]);
-                        $new_date->setTimezone(DateUtility::$login_user_time_zone);
-                        $data[$field] = $new_date->format('Y-m-d H:i:s T');
+                        if ($new_date)
+                        {
+                            $new_date->setTimezone(DateUtility::$login_user_time_zone);
+                            $data[$field] = $new_date->format($format);
+                        }
                     }
                 }
             }

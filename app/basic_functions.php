@@ -1162,3 +1162,31 @@ function str_space_after_every_captial_letter(string $string): string
     // We replace this position with a space.
     return preg_replace('/(?=[A-Z])/', ' ', $string);
 }
+
+function check_string_is_date_time(string $str, string $format = "Y-m-d H:i:s")
+{
+    $sub_value = $str;
+
+    if (strpos($str, "T") !== false)
+    {
+        $sub_value = substr($str, 0, strpos($str, "T"));
+        $format = substr($format, 0, strpos($format, "T"));
+    }
+    else if (strpos($str, " ")  !== false)
+    {
+        $sub_value = substr($str, 0, strpos($str, " "));
+        $format = substr($format, 0, strpos($format, " "));
+    }
+
+    if ($format && $sub_value)
+    {
+        $dateTime = \DateTime::createFromFormat($format, $sub_value);
+
+        if ($dateTime && $dateTime->format($format) === $sub_value)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}

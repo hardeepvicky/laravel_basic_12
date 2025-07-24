@@ -2,6 +2,7 @@
 
 use App\Exceptions\UserException;
 use App\Helpers\Menu;
+use App\Http\Middleware\AddLogContext;
 use App\Http\Middleware\Authenticate;
 use App\Http\Middleware\BackendViewRender;
 use App\Http\Middleware\RolePermission;

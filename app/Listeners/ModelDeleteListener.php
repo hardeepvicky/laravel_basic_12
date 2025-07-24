@@ -7,10 +7,8 @@ use App\Models\RecordHistory;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 
-class ModelDeleteListener implements ShouldQueue
+class ModelDeleteListener
 {
-    use InteractsWithQueue;
-    
     /**
      * Create the event listener.
      */

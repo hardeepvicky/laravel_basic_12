@@ -85,10 +85,6 @@ class BaseMongoModel extends Model implements BaseModelInterface
         self::deleted(function ($model) {
             $model->forgotCache();
         });
-
-        self::retrieved(function ($model) {
-            $model->afterFind();
-        });
     }
 
     public function beforeSave()

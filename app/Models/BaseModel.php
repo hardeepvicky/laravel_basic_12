@@ -85,11 +85,11 @@ class BaseModel extends Model implements BaseModelInterface
 
         self::deleting(function ($model) {
             $model->beforeDelete();
+            event(new ModelDelete($model));
         });
 
         self::deleted(function ($model) {
             $model->forgotCache();
-            event(new ModelDelete($model));
         });
     }
 

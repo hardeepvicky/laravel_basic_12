@@ -47,8 +47,8 @@
                                                 <th style="width:3%">Sr.No.</th>
                                                 <th style="width:10%" data-sort="text">Sub Action</th>
                                                 <th data-search="like" data-sort="text">Field</th>
-                                                <th>Previous Value</th>
-                                                <th>New Value</th>
+                                                <th data-search="like" data-sort="text">Previous Value</th>
+                                                <th data-search="like" data-sort="text">New Value</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -76,7 +76,7 @@
                                 @endif
                             </td>
                             <td>
-                                <x-Backend.created-and-by :datetime="$record->created_at" :userId="$record->created_by" />
+                                <x-Backend.created-and-by :datetime="$record->created_at_user_tz" :userId="$record->created_by" />
                             </td>
                         </tr>
                     @endforeach
