@@ -194,6 +194,22 @@ class TypeController extends BackendController
         }
     }
 
+    public function copy($id)
+    {
+        $model = $this->modelClass::findOrFail($id);
+
+        $this->beforeEdit($model);
+
+        $form = [
+            'url' => route($this->routePrefix . '.store', $id),
+            'method' => 'POST',
+        ];
+
+        $this->setForView(compact("model", "form"));
+
+        return $this->view("form");
+    }
+
     public function ajax_get_code_list($type)
     {
         $response = ["status" => 1, "data" => []];

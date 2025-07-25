@@ -338,6 +338,7 @@ class WebController extends Controller
             $view_field = $row['view_field'] ?? $row['field'];
             $search_variables[$view_field] = "";
             $value = null;
+            $extra = $row['extra'] ?? [];
 
             if (isset($row['default']) && !empty($row['default'])) {
                 $value = $row['default'];
@@ -366,7 +367,7 @@ class WebController extends Controller
                             $v = trim($v);
                         }
 
-                        $arr = $this->parseConditionValue($v, $row['type']);
+                        $arr = $this->parseConditionValue($v, $row['type'], $extra);
                         $value[$k] = $arr['value'];
                     }
 
@@ -381,7 +382,7 @@ class WebController extends Controller
                     }
                 }
             } else if (strlen($value) > 0) {
-                $arr = $this->parseConditionValue($value, $row['type']);
+                $arr = $this->parseConditionValue($value, $row['type'], $extra);
 
                 $parse_value = $arr['value'];
                 $op = $arr['op'];
@@ -422,7 +423,7 @@ class WebController extends Controller
         return $conditions;
     }
 
-    protected function parseConditionValue($value, String $type)
+    protected function parseConditionValue($value, String $type, array $extra = [])
     {
         $data_type = gettype($value);
 

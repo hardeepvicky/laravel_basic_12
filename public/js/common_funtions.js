@@ -79,7 +79,7 @@ function ajaxHandleResponse(url, response, callback) {
 
 function ajaxGetJson(url, callback) {
     $.loader.init();
-    $.loader.setInfo("Loading...").show();
+    $.loader.setInfo("Sending Request...").show();
 
     $.get(url, function (response) {
         $.loader.hide();
@@ -92,7 +92,7 @@ function ajaxGetJson(url, callback) {
 
 function ajaxPostJson(url, data, callback) {
     $.loader.init();
-    $.loader.setInfo("Loading...").show();
+    $.loader.setInfo("Sending Request...").show();
 
     $.post(url, data, function (response) {
         $.loader.hide();
@@ -224,8 +224,8 @@ function send_email_user_otp(user, callback) {
     });
 }
 
-function send_whatsapp_user_otp(user_id, callback) {
-    ajaxGetJson("/send_whatsapp_user_otp/" + user_id, function (response) {
+function send_whatsapp_user_otp(user, callback) {
+    ajaxGetJson("/send_whatsapp_user_otp/" + user.uid, function (response) {
         if (typeof callback == "function") {
             callback(response);
         }
@@ -342,4 +342,20 @@ function get_array_to_url(data)
     }
 
     return list.join("&");
+}
+
+function parseBool(value) {
+    if (typeof value === 'boolean') {
+        return value; // Already a boolean
+    }
+    if (typeof value === 'string') {
+        value = value.toLowerCase().trim(); // Case-insensitive and trim whitespace
+        if (value === 'true' || value === '1' || value === 'yes') {
+            return true;
+        }
+        if (value === 'false' || value === '0' || value === 'no') {
+            return false;
+        }
+    }
+    return null;
 }

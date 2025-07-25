@@ -138,7 +138,7 @@ class EmailHelper
 
     public function addAttachment($file, $filename = "")
     {
-        if (!FileUtility::isExist($file)) {
+        if (!file_exists($file)) {
             throw new Exception("file $file is not exist");
         }
 
@@ -176,7 +176,7 @@ class EmailHelper
 
         $this->emailLog = new EmailLog();
 
-        $path =  $this->emailLog->getFilePath();
+        $path =  $this->emailLog->getStoragePath();
 
         $file = $this->emailLog->getNextId() . ".html";
 

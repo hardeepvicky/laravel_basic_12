@@ -16,7 +16,7 @@ use App\Models\User;
             <x-Backend.session-flash />
             <x-Backend.form-errors />
 
-            <x-Inputs.text-field name="login_field" label="Email OR Name" placeholder="Enter Email OR Name" />
+            <x-Inputs.text-field name="login_field" label="Email OR Username" placeholder="Enter Email OR Username" />
             <div class="form-group">
                 <label class="col-form-label">Password</label>
                 <div class="form-input position-relative">
@@ -42,15 +42,23 @@ use App\Models\User;
                 <hr class="flex-grow-1">
             </div>
 
-            <a href="{{ route('auto.login') }}" class="btn btn-have-icon d-flex align-items-center justify-content-center">
-                <i class="fa-solid fa-user-secret"></i>
-                Auto Login
-            </a>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <a href="/signin" class="btn btn-have-icon d-flex align-items-center justify-content-center">
+                        <i class="fa-solid fa-user-secret"></i>
+                        Signin
+                    </a>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <a href="{{ route('auto.login') }}"
+                        class="btn btn-have-icon d-flex align-items-center justify-content-center">
+                        <i class="fa-solid fa-user-secret"></i>
+                        Auto Login
+                    </a>
+                </div>
+            </div>
         </form>
 
-        <div class="mt-4 text-center text-sm text-gray-500">
-            By signing in, you agree to our <a href="#" class="font-medium text-blue-600 hover:text-blue-500">Terms of
-                Service</a> and <a href="#" class="font-medium text-blue-600 hover:text-blue-500">Privacy Policy</a>.
-        </div>
+        @include('auth.partials.footer')
     </div>
 @endsection

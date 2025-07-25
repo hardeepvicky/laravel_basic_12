@@ -34,7 +34,7 @@ class JobSendEmailUserOtp implements ShouldQueue
 
         $emaiHelper->setType(laravel_constant("msg_type.otp"));
 
-        $emaiHelper->setTo($this->email, $this->name);
+        $emaiHelper->addTo($this->email, $this->name);
 
         $company_name = Setting::getValue("company_name");
 

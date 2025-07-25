@@ -136,7 +136,7 @@ function print_for_debug($arg, $label = "", bool $show_data_type = false, $depth
     echo '</ul>';
 }
 
-function array_print($array, $max_string_len = 45, $indent = 0)
+function array_print($array, int $max_string_len = 45, int $indent = 0)
 {
     if (is_array($array)) {
         $array = array_short_string_with_dot($array, $max_string_len, false);

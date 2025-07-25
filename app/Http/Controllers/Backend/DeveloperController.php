@@ -8,7 +8,7 @@ use App\Models\AjaxLog;
 use App\Models\CommandLog;
 use App\Models\EmailLog;
 use App\Models\SqlLog;
-use Carbon\Carbon;
+use App\Models\WhatsappLog;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
@@ -42,9 +42,9 @@ class DeveloperController extends BackendController
         return true;
     }
 
-    protected function parseConditionValue($value, String $type)
+    protected function parseConditionValue($value, String $type, array $extra = [])
     {
-        return LaravelExtend::getMongodbParseCondition($value, $type);
+        return LaravelExtend::getMongodbParseCondition($value, $type, $extra);
     }
 
     public function sql_logs()
@@ -57,7 +57,7 @@ class DeveloperController extends BackendController
             ["field" => "request_method", "type" => "string"],
             ["field" => "url", "type" => "string"],
             ["field" => "created_at", "type" => "from_date", "view_field" => "from_date"],
-            ["field" => "created_at", "type" => "to_date", "view_field" => "to_date"],            
+            ["field" => "created_at", "type" => "to_date", "view_field" => "to_date"],
             ["field" => "auth_user_id", "type" => "int"],
             ["field" => "have_dml_query", "type" => "int"],
             ["field" => "have_heavy_query", "type" => "int"],
@@ -70,14 +70,10 @@ class DeveloperController extends BackendController
 
         $builder = SqlLog::where($conditions);
 
-        if (isset($condition_list['id']))
-        {
-
-        }
-        else
-        {
+        if (isset($condition_list['id'])) {
+        } else {
             $builder->where(function ($q) {
-                $q->orWhere(function($q2){
+                $q->orWhere(function ($q2) {
                     $q2->whereNotNull("route_name");
                     $q2->whereNotNull("url");
                 });
@@ -183,6 +179,72 @@ class DeveloperController extends BackendController
         ]);
 
         $builder = EmailLog::where($conditions);
+
+        $cache_key_for_sort = $cache_key_prefix . "-extra-params";
+
+        $clear_cache = request('is_sort_clear', false);
+
+        $sort_params = $this->getRequestData($cache_key_for_sort, [
+            ["key" => "sort_by", "default" => "created_at"],
+            ["key" => "sort_dir", "default" => "DESC"],
+        ], $clear_cache);
+
+        $builder->orderBy($sort_params['sort_by'], $sort_params['sort_dir']);
+
+        $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
+
+        //dd($records);
+
+        $this->setForView(compact("records"));
+
+        return $this->viewIndex(__FUNCTION__);
+    }
+
+    public function whatsapp_logs()
+    {
+        $cache_key_prefix = Route::currentRouteName();
+
+        $conditions = $this->getConditions(Route::currentRouteName(), [
+            ["field" => "api_platform", "type" => "string"],
+            ["field" => "template_name", "type" => "string"],
+            ["field" => "template_lanugage", "type" => "string"],
+            [
+                "field" => "to",
+                "type" => "elemMatch",
+                "view_field" => "name",
+                "extra" => [
+                    "elemMatch_field" => "name",
+                    "elemMatch_type" => "string",
+                ]
+            ],
+            [
+                "field" => "to",
+                "type" => "elemMatch",
+                "view_field" => "mobile_no",
+                "extra" => [
+                    "elemMatch_field" => "mobile_no",
+                    "elemMatch_type" => "string",
+                ]
+            ],
+            [
+                "field" => "to",
+                "type" => "elemMatch",
+                "view_field" => "user_id",
+                "extra" => [
+                    "elemMatch_field" => "user_id",
+                    "elemMatch_type" => "int",
+                ]
+            ],
+            ["field" => "created", "type" => "from_date", "view_field" => "from_date"],
+            ["field" => "created", "type" => "to_date", "view_field" => "to_date"],
+        ]);
+
+        // if ($conditions)
+        // {
+        //     d($conditions);
+        // }
+
+        $builder = WhatsappLog::where($conditions);
 
         $cache_key_for_sort = $cache_key_prefix . "-extra-params";
 

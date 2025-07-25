@@ -60,13 +60,11 @@ Route::get('/theme', [HomeController::class, 'theme']);
 Route::get('/developer-components', [HomeController::class, 'developer_components']);
 Route::get('/test', [HomeController::class, 'test']);
 
-Route::get('/otp_verify/{uid}', [OtpVerifyController::class, 'index'])->name("otp_verify");
-Route::get('/send_email_user_otp/{uid}', [OtpVerifyController::class, 'send_email_user_otp'])->name("send_email_user_otp");
-Route::get('/send_whatsapp_user_otp/{uid}', [OtpVerifyController::class, 'send_whatsapp_user_otp'])->name("send_whatsapp_user_otp");
-
-Route::get('/ajax_send_email_otp/{id}', [RegisterController::class, 'ajax_send_email_otp']);
-Route::get('/email_otp_verify/{uid}', [RegisterController::class, 'email_otp_verify'])->name("email_otp_verify");
-Route::post('/ajax_email_otp_verify', [RegisterController::class, 'ajax_email_otp_verify']);
+$controllerClass = OtpVerifyController::class;
+Route::get('otp_verify/{uid}', [$controllerClass, 'index'])->name("otp_verify");
+Route::get('send_email_user_otp/{uid}', [$controllerClass, 'send_email_user_otp'])->name("send_email_user_otp");
+Route::get('send_whatsapp_user_otp/{uid}', [$controllerClass, 'send_whatsapp_user_otp'])->name("send_whatsapp_user_otp");
+Route::post('ajax_otp_verify', [$controllerClass, 'ajax_otp_verify']);
 
 Route::any('/create_password/{uid}', [RegisterController::class, 'create_password'])->name("create_password");
 Route::any('/forgot_password', [RegisterController::class, 'forgot_password'])->name("forgot_password");
@@ -77,7 +75,7 @@ Route::get('/auth/google/redirect', [GoogleAuthController::class, 'redirect'])->
 // Route to handle the callback from Google
 Route::get('/auth/google/callback', [GoogleAuthController::class, 'callback'])->name('auth.google.callback');
 
-Route::get('register', [RegisterController::class, 'register_form'])->name('register');
+Route::get('register', [RegisterController::class, 'signup_form'])->name('register');
 Route::post('register', [RegisterController::class, 'register'])->name('register');
 
 Route::group(['prefix' => 'public', 'as' => 'public.'], function () {
@@ -100,6 +98,25 @@ Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function 
 
     $name = "ajax_get_city_list";
     Route::any("$name/{state_id}", [$controllerClass, $name])->name($name);
+});
+
+$route_prefix = "country";
+$controllerClass = CountryController::class;
+Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
+    $name = "ajax_get";
+    Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+});
+
+$route_prefix = "state";
+$controllerClass = StateController::class;
+Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
+    $name = "ajax_get";
+    Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+    $name = "ajax_get_list";
+    Route::get($name . "/{country_id}", [$controllerClass, $name])->name($name);
 });
 
 Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend_view_render']], function () {
@@ -146,16 +163,12 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
     $controllerClass = CountryController::class;
     Route::resource($route_prefix, $controllerClass);
     Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
-        $name = "ajax_get";
-        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
     });
 
     $route_prefix = "state";
     $controllerClass = StateController::class;
     Route::resource($route_prefix, $controllerClass);
     Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
-        $name = "ajax_get_list";
-        Route::get($name . "/{country_id}", [$controllerClass, $name])->name($name);
 
         $name = "activate";
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
@@ -241,6 +254,9 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
     $controllerClass = TypeController::class;
     Route::resource($route_prefix, $controllerClass);
     Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
+        $name = "copy";
+        Route::get("{id}/" . $name, [$controllerClass, $name])->name($name);
 
         $name = "activate";
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
@@ -558,10 +574,10 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
 
     Route::group(['prefix' => "developer", 'as' => "developer."], function () {
 
-        $name = "laravel_routes_index";
+        $name = "email_logs";
         Route::get($name, [DeveloperController::class, $name])->name($name);
 
-        $name = "email_logs";
+        $name = "whatsapp_logs";
         Route::get($name, [DeveloperController::class, $name])->name($name);
 
         $name = "sql_logs";
@@ -571,6 +587,9 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
         Route::get($name, [DeveloperController::class, $name])->name($name);
 
         $name = "command_logs";
+        Route::get($name, [DeveloperController::class, $name])->name($name);
+
+        $name = "laravel_routes_index";
         Route::get($name, [DeveloperController::class, $name])->name($name);
     });
 });

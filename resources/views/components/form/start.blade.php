@@ -8,5 +8,5 @@ if ($form_method == 'GET') {
 }
 ?>
 <form action="{{ $action }}" method="{{ $form_method }}" {{ $attributes->merge($my_attributes) }}>
-    {!! csrf_field() !!}
+     @csrf
     {{ method_field($method) }}

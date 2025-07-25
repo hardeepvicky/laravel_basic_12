@@ -79,8 +79,7 @@
                             <x-Backend.created-and-by :datetime="$record->updated_at" :userId="$record->updated_by" />
                         </td>
                         <td>
-                            <x-Backend.summary-comman-actions :id="$record->id" :routePrefix="$routePrefix"
-                                buttons="edit,copy,delete" />
+                            <x-Backend.summary-comman-actions :id="$record->id" :routePrefix="$routePrefix" buttons="edit,copy,delete" />
                         </td>
                     </tr>
                     @endforeach

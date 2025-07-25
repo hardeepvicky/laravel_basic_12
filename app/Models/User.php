@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Acl\AccessControl;
+use App\Events\UserInsert;
 use App\Exceptions\UserException;
 use App\Helpers\FileUtility;
 use App\Helpers\Util;
@@ -72,6 +73,7 @@ class User extends Authenticatable implements BaseModelInterface
 
     protected $appends = [
         'display_name',
+        'full_name'
     ];
 
     public string $field_for_create_tag = "display_name";
@@ -163,6 +165,8 @@ class User extends Authenticatable implements BaseModelInterface
 
         self::created(function ($model) {
             $model->afterSave();
+
+            event(new UserInsert($model));
         });
 
         self::updating(function ($model) {
@@ -252,6 +256,56 @@ class User extends Authenticatable implements BaseModelInterface
                 $this->{$field_url_field} = $fileUtility->getUrl($this->{$field});
             }
         }
+    }
+
+    protected function getFullNameAttribute()
+    {
+        return trim($this->person_name . " " . ($this->person_last_name ?? ""));
+    }
+
+    protected function getDisplayNameAttribute()
+    {
+        return $this->getDisplayName();
+    }
+
+    public function getDisplayName()
+    {
+        if ($this->type == self::TYPE_EXTERNAL) {
+            return $this->name;
+        }
+
+        $name = $this->name;
+
+        if ($this->type == self::TYPE_EXTERNAL) {
+            $name .= " (External)";
+        } else {
+            if ($this->person_name && strtolower($this->person_name) != strtolower($name)) {
+
+                if (strpos($this->person_name, " ") !== false)
+                {
+                    $sub_str = trim(substr($this->person_name, 0, strpos($this->person_name, " ")));    
+                }
+                else
+                {
+                    $sub_str = $this->person_name;
+                }
+
+                $name = $sub_str . " >> " . $this->name;
+            }
+        }
+
+        return $name;
+    }
+
+    public function getFullMobileNo($field = "mobile")
+    {
+        $phonecode = $this->country?->phonecode ?? "";
+
+        if ($phonecode) {
+            return "+" . $phonecode . $this->{$field};
+        }
+
+        return $this->{$field};
     }
 
     public function roles()
@@ -373,50 +427,7 @@ class User extends Authenticatable implements BaseModelInterface
         return static::$unique_fields;
     }
 
-    protected function getDisplayNameAttribute()
-    {
-        return $this->getDisplayName();
-    }
-
-    public function getDisplayName()
-    {
-        if ($this->type == self::TYPE_EXTERNAL) {
-            return $this->name;
-        }
-
-        $name = $this->name;
-
-        if ($this->type == self::TYPE_EXTERNAL) {
-            $name .= " (External)";
-        } else {
-            if ($this->person_name && strtolower($this->person_name) != strtolower($name)) {
-
-                if (strpos($this->person_name, " ") !== false)
-                {
-                    $sub_str = trim(substr($this->person_name, 0, strpos($this->person_name, " ")));    
-                }
-                else
-                {
-                    $sub_str = $this->person_name;
-                }
-
-                $name = $sub_str . " >> " . $this->name;
-            }
-        }
-
-        return $name;
-    }
-
-    public function getFullMobileNo($field = "mobile")
-    {
-        $phonecode = $this->country?->phonecode ?? "";
-
-        if ($phonecode) {
-            return "+" . $phonecode . $this->{$field};
-        }
-
-        return $this->{$field};
-    }
+    
 
     public function isRquireOTPVerificationOnLogin()
     {
@@ -772,6 +783,24 @@ class User extends Authenticatable implements BaseModelInterface
                 foreach ($class_info['constants'] as $constant => $label) {
                     if (strpos($constant, "SUB_TYPE_") !== false) {
                         $list[] = $label;
+                    }
+                }
+
+                return $list;
+
+                break;
+
+            case "sub_type_for_signup_form":
+
+                $list = [];
+
+                foreach ($class_info['constants'] as $constant => $label) {
+                    if (strpos($constant, "SUB_TYPE_") !== false) 
+                    {
+                        if (!in_array($constant, [self::SUB_TYPE_TEAM_MEMBER]))
+                        {
+                            $list[] = $label;
+                        }
                     }
                 }
 

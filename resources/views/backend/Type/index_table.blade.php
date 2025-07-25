@@ -46,7 +46,8 @@
                                 <x-Backend.created-and-by :datetime="$record->updated_at" :userId="$record->updated_by" />
                             </td>
                             <td>
-                                <x-Backend.summary-comman-actions :id="$record->id" :routePrefix="$routePrefix" />
+                                <x-Backend.summary-comman-actions :id="$record->id" :routePrefix="$routePrefix" buttons="edit,copy,delete" />
+
                                 <span class="btn btn-info btn-sm css-toggler mt-1 mb-1"
                                     data-sr-css-class-toggle-target="#record-{{ $record->id }}"
                                     data-sr-css-class-toggle-class="hidden" data-sr-css-class-toggle-applied-text="Show"

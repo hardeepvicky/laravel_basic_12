@@ -67,7 +67,7 @@ use App\Models\User;
                         </td>
                     </tr>
                     <tr id="record-{{ $record->id }}" class="hidden">
-                        <td></td>
+                        <td style="background-color: var(--body--bs-body-bg)"></td>
                         <td colspan="7">
                             <div class="row">
                                 <div class="col-md-6 col-lg-4">

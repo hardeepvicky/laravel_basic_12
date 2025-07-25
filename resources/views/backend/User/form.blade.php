@@ -93,7 +93,7 @@ use App\Models\User;
                         ?>
                         <x-Inputs.text-field :id="$field" :name="$field" :label="$label" :value="$model->{$field}"
                             mandatory="true" placeholder="Enter {{ $label }}" />
-                        <div class="help-block">This will use as login username</div>
+                        <div class="help-block">This will use as login id</div>
                     </div>
 
                     <div class="form-group mb-3">
@@ -103,7 +103,7 @@ use App\Models\User;
                         ?>
                         <x-Inputs.text-field type="email" :id="$field" :name="$field" :label="$label"
                             :value="$model->{$field}" mandatory="true" placeholder="Enter {{ $label }}" />
-                        <div class="help-block">This will use as login username</div>
+                        <div class="help-block">This will use as login id</div>
                     </div>
 
                     @if ($is_add_form)
@@ -165,6 +165,7 @@ use App\Models\User;
                                 <x-Inputs.group-text-field :id="$field" :name="$field" :label="$label"
                                     :value="$model->{$field}" class="validate-mobile"
                                     placeholder="Enter {{ $label }}"
+                                    mandatory="true"
                                     secondaryText='<span id="mobile_country_code" class="input-group-text">+91</span>' />
                             </div>
                         </div>
@@ -177,6 +178,7 @@ use App\Models\User;
                                 <x-Inputs.text-field :id="$field" :name="$field" :label="$label"
                                     :value="$model->{$field}" class="validate-mobile" 
                                     placeholder="Enter {{ $label }}"
+                                    mandatory="true"
                                 />
                             </div>
                         </div>

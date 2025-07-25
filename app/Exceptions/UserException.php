@@ -12,6 +12,7 @@ class UserException extends Exception
     public const ERROR_FROM_VALIDATION = 515;
     public const ERROR_USER_ACTION_RESTRICT = 516;
     public const ERROR_USER_DATA_WRONG = 517;
+    public const ERROR_API_FAIL = 518;
 
     public $data;
     public function __construct(String $message, int $code = 512, $data = [])

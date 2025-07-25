@@ -74,7 +74,8 @@ class Type extends BaseModel
             ],
             User::class => [
                 "fields" => [
-                    "sub_type" => "Sub Type"
+                    "sub_type" => "Sub Type",
+                    "sub_type_for_signup_form" => "Sub Type For Signup Form"
                 ]
             ]
         ];

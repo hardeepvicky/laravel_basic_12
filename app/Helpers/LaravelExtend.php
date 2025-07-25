@@ -6,6 +6,7 @@ use App\Exceptions\UserException;
 use App\Jobs\Backend\JobForgotPassword;
 use App\Jobs\Backend\JobSendEmailUserOtp;
 use App\Jobs\Backend\JobSendEmailOnRegisration;
+use App\Jobs\Backend\JobSendWhatappUserOtp;
 use App\Models\BaseModelInterface;
 use App\Models\Role;
 use App\Models\SqlLog;
@@ -70,13 +71,18 @@ class LaravelExtend
 
         $link =  config("url") . "/otp_verify/" . $user->uid;
 
-        $job = new JobSendEmailUserOtp($user->name, $user->email, $user->otp, $link);
+        $job = new JobSendEmailUserOtp($user->full_name, $user->email, $user->otp, $link);
 
         dispatch($job);
     }
 
     public static function send_whatsapp_user_otp(User $user)
     {
+        if (!$user->whatsapp_mobile)
+        {
+            throw new UserException("Whatsapp Mobile No. not found in database");
+        }
+
         $user->otp = Util::getRandomString(6, "1234567890");
         $user->otp_sent_datetime = date("Y-m-d H:i:s");
 
@@ -84,16 +90,14 @@ class LaravelExtend
             throw_exception("User Save Failed");
         }
 
-        $link =  config("url") . "/otp_verify/" . $user->uid;
-
-        $job = new JobSendEmailUserOtp($user->name, $user->email, $user->otp, $link);
+        $job = new JobSendWhatappUserOtp($user->full_name, $user->whatsapp_mobile, $user->otp, $user->id);
 
         dispatch($job);
     }
 
     public static function send_email_on_registeration(User $user)
     {
-        $job = new JobSendEmailOnRegisration($user->name, $user->email);
+        $job = new JobSendEmailOnRegisration($user->full_name, $user->email);
 
         dispatch($job);
     }
@@ -106,7 +110,7 @@ class LaravelExtend
 
         $link =  config("url") . "/create_password/" . $user->uid;
 
-        $job = new JobForgotPassword($user->name, $user->email, $link);
+        $job = new JobForgotPassword($user->full_name, $user->email, $link);
 
         dispatch($job);
     }
@@ -603,7 +607,7 @@ class LaravelExtend
         return $sqlLogModel;
     }
 
-    public static function getMongodbParseCondition($value, String $type)
+    public static function getMongodbParseCondition($value, String $type, array $extra = [])
     {
         $data_type = gettype($value);
 
@@ -686,6 +690,25 @@ class LaravelExtend
                 $parse_value = (bool) $value;
                 break;
 
+            case "elemmatch":
+                $op = "elemMatch";
+
+                switch($extra['elemMatch_type'])
+                {
+                    case "string":
+                        $sub_value = new \MongoDB\BSON\Regex($value, 'i');
+                        break;
+
+                    default:
+                        $sub_value = self::getParseValueForMongoDB($value, $extra['elemMatch_type']);
+                    break;
+                }
+                
+                $parse_value = [
+                    $extra['elemMatch_field'] => $sub_value
+                ];
+                break;
+
             default:
                 $parse_value = $value;
                 break;
@@ -695,6 +718,38 @@ class LaravelExtend
             "value" => $parse_value,
             "op" => $op
         ];
+    }
+
+    public static function getParseValueForMongoDB($value, String $type)
+    {
+        switch($value)
+        {
+            case "date":
+                $parse_value = Carbon::parse($value);
+                break;
+
+            case "to_datetime":
+                $parse_value = Carbon::parse($value);
+                break;
+
+            case "int":
+                $parse_value = (int) $value;
+                break;
+
+            case "float":
+                $parse_value = (float) $value;
+                break;                
+
+            case "bool":
+            case "boolean":
+                $parse_value = (bool) $value;
+                break;
+
+            default:
+                $parse_value = $value;
+        }
+
+        return $parse_value;
     }
 
     public static function writeQueryLog(array $db_logs)

@@ -3,6 +3,7 @@
 namespace App\Jobs\Backend;
 
 use App\Helpers\EmailHelper;
+use App\Helpers\WhatsappHelper;
 use App\Models\Setting;
 use Exception;
 use Illuminate\Bus\Queueable;
@@ -21,7 +22,7 @@ class JobSendWhatappUserOtp implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(public String $name, public String $mobile, public String $otp) {}
+    public function __construct(public String $name, public String $mobile, public String $otp, public $user_id = null) {}
 
     /**
      * Execute the job.
@@ -30,39 +31,19 @@ class JobSendWhatappUserOtp implements ShouldQueue
      */
     public function handle()
     {
-        $emaiHelper = new EmailHelper();
+        $whatsappHelper = new WhatsappHelper();
+        $whatsappHelper->setTemplate("otp", "en_GB")
+            ->setBodyValues([$this->otp])
+            ->setButtonValues([
+                "1" => [
+                    "Copy"
+                ]
+            ])
+            ->setCountryCode("+91")
+            ->addTo($this->mobile, $this->name, $this->user_id)
+            ->setSandbox(false)
+        ;
 
-        $emaiHelper->setType(laravel_constant("msg_type.otp"));
-
-        $emaiHelper->setTo($this->email, $this->name);
-
-        $company_name = Setting::getValue("company_name");
-
-        if (!$company_name) {
-            throw new Exception("Setting : Company Name is not set yet");
-        }
-
-        $company_email = Setting::getValue("company_email");
-
-        if (!$company_email) {
-            throw new Exception("Setting : Company Email is not set yet");
-        }
-
-        $emaiHelper->setSubject("Login OTP");
-
-        $html = view("mail.backend.login", [
-            "company_name" => $company_name,
-            "company_email" => $company_email,
-            "name" => $this->name,
-            "otp" => $this->otp,
-            "verify_link" => $this->verify_screen_link
-        ]);
-
-        // echo $html;
-        // exit;
-
-        $emaiHelper->setBody((string) $html);
-
-        $emaiHelper->send();
+        $whatsappHelper->send();
     }
 }
