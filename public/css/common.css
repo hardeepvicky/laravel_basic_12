@@ -482,52 +482,52 @@ label.info {
 
 .h-100 {
     height: 200px;
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 
 .h-200 {
     height: 200px;
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 
 .h-300 {
     height: 200px;
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 
 .h-400 {
     height: 200px;
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 
 .h-500 {
     height: 200px;
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 
 .w-100 {
     width: 100px;
-    overflow-x: scroll;
+    overflow-x: auto;
 }
 
 .w-200 {
     width: 200px;
-    overflow-x: scroll;
+    overflow-x: auto;
 }
 
 .w-300 {
     width: 300px;
-    overflow-x: scroll;
+    overflow-x: auto;
 }
 
 .w-400 {
     width: 400px;
-    overflow-x: scroll;
+    overflow-x: auto;
 }
 
 .w-500 {
     width: 500px;
-    overflow-x: scroll;
+    overflow-x: auto;
 }
 
 .mx-h-200 {

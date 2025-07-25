@@ -77,14 +77,19 @@ class UserController extends BackendController
             ["field" => "role_id", "type" => "int"],
         ], true);
 
-        $builder = $this->modelClass::where($conditions)->whereHas(
-            'userRole',
-            function ($q) use ($role_condition) {
-                if (isset($role_condition['role_id'])) {
-                    $q->where("role_id", $role_condition['role_id']);
+        $builder = $this->modelClass::where($conditions);
+
+        if ($role_condition)
+        {
+            $builder = $builder->whereHas(
+                'userRole',
+                function ($q) use ($role_condition) {
+                    if (isset($role_condition['role_id'])) {
+                        $q->where("role_id", $role_condition['role_id']);
+                    }
                 }
-            }
-        );
+            );
+        }
 
         $builder->with(["userCategory", "userAllowIp", "department", "subDepartment", "designation"]);
 

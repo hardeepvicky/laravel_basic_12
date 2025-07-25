@@ -56,13 +56,13 @@ use App\Models\User;
         <div class="row">
             <div class="col-md-6 mb-3">
                 <a href="{{ route('auth.google.redirect') }}"
-                    class="btn btn-have-icon d-flex align-items-center justify-content-center">
+                    class="btn btn-have-icon d-flex align-items-center justify-content-center signin-with-third-party">
                     <i class="fa-brands fa-google"></i>
                     Signin with Google
                 </a>
             </div>
             <div class="col-md-6 mb-3">
-                <a href="#" class="btn btn-have-icon d-flex align-items-center justify-content-center">
+                <a href="#" class="btn btn-have-icon d-flex align-items-center justify-content-center signin-with-third-party">
                     <i class="fa-brands fa-apple"></i>
                     Signin with Apple
                 </a>
@@ -84,4 +84,35 @@ use App\Models\User;
 
         @include("auth.partials.footer")
     </div>
+
+    <script>
+        $(function(){
+            $("a.signin-with-third-party").click(function(e){
+                e.preventDefault();
+
+                var url = $(this).attr("href");
+
+                $.loader.setInfo("Please Wait...").show();
+
+                $.ajax({
+                    url : "{{ route('signin.with.third.party.save.data.before.signin') }}",
+                    method: "POST",
+                    data : {
+                        timezone : getTimeZone()
+                    }
+                }).done(function( ) {
+                    
+                    $.loader.setInfo("Redirecting to external URL...").show();
+
+                    location.href = url;
+                }).fail(function(jqXHR, textStatus, errorThrown) {
+                    $.events.onAjaxError(textStatus, errorThrown, {
+                        url: url
+                    });
+                })
+
+                return false;
+            });
+        });
+    </script>
 @endsection

@@ -78,6 +78,9 @@ Route::get('/auth/google/callback', [GoogleAuthController::class, 'callback'])->
 Route::get('register', [RegisterController::class, 'signup_form'])->name('register');
 Route::post('register', [RegisterController::class, 'register'])->name('register');
 
+Route::post("signup_with_third_party/save_data_before_signup", [RegisterController::class, 'save_data_before_signup'])->name("signup.with.third.party.save.data.before.signup");
+Route::post("signin_with_third_party/save_data_before_signin", [RegisterController::class, 'save_data_before_signin'])->name("signin.with.third.party.save.data.before.signin");
+
 Route::group(['prefix' => 'public', 'as' => 'public.'], function () {
     Route::post('ajax_upload', [PublicController::class, 'ajax_upload']);
     Route::post('ajax_upload_base64', [PublicController::class, 'ajax_upload_base64']);

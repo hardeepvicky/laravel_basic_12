@@ -131,11 +131,11 @@ class LoginController extends WebController
         $guard = $this->guard();
 
         if ($request->get("user_type") == User::TYPE_EXTERNAL) {
-            // $request->validate([
-            //     'g-recaptcha-response' => ['required', new ReCaptcha]
-            // ], [
-            //     "g-recaptcha-response.required" => "Google Capcha verification required"
-            // ]);
+            $request->validate([
+                'g-recaptcha-response' => ['required', new ReCaptcha]
+            ], [
+                "g-recaptcha-response.required" => "Google Capcha verification required"
+            ]);
         }
 
         if (!$request->get("timezone"))
@@ -227,7 +227,7 @@ class LoginController extends WebController
      */
     protected function loggedOut(Request $request)
     {
-        if ($this->user->type == User::TYPE_INTERNAL)
+        if (isset($this->user->type) && $this->user->type == User::TYPE_INTERNAL)
         {
             return redirect('/login');
         }

@@ -136,7 +136,7 @@ use App\Models\Notification;
                             @endif
                             <div class="user-content">
                                 <!-- <h6>Ava Davis</h6> -->
-                                <p class="mb-0">{{ $user->name }}<i class="fa-solid fa-chevron-down"></i></p>
+                                <p class="mb-0">{{ $user->person_name }}<i class="fa-solid fa-chevron-down"></i></p>
                             </div>
                         </div>
                         <div class="custom-menu overflow-hidden">

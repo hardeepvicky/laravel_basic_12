@@ -59,6 +59,8 @@ class User extends Authenticatable implements BaseModelInterface
         'is_active',
         'created_via',
         'is_secure_login',
+        'google_id',
+        'apple_id',
     ];
 
     /**

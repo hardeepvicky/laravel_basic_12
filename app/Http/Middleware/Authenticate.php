@@ -29,7 +29,14 @@ class Authenticate extends Middleware
                 return response("User is de-activated", 401);
             }
 
-            return redirect("/login");
+            if (isset($auth_user->type) && $auth_user->type == User::TYPE_INTERNAL)
+            {
+                return redirect('/login');
+            }
+            else
+            {
+                return redirect('/signin');
+            }
         }
 
         return $result;

@@ -2,15 +2,17 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Exceptions\UserException;
 use App\Helpers\LaravelExtend;
-use App\Http\Controllers\Controller;
 use App\Http\Controllers\WebController;
 use App\Models\Country;
 use App\Models\FieldSetting;
+use App\Models\Role;
 use App\Models\Setting;
 use App\Models\Type;
 use App\Models\User;
 use App\Rules\MobileNumber;
+use App\Rules\ReCaptcha;
 use Exception;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Http\Request;
@@ -59,7 +61,12 @@ class RegisterController extends WebController
             'whatsapp_mobile' => ['required', new MobileNumber],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:6', 'confirmed'],
-        ]);
+            "g-recaptcha-response" => ['required', new ReCaptcha]
+        ],
+        [
+            "g-recaptcha-response.required" => "Google Capcha verification required"
+        ]
+        );
     }
 
     public function signup_form()
@@ -91,63 +98,46 @@ class RegisterController extends WebController
     {
         $request = request();
 
-        // $recaptcha_response = $request->input('g-recaptcha-response');
+        $data = $request->all();
 
-        // if (is_null($recaptcha_response)) {
-        //     return redirect()->back()->with('fail', 'Please Complete the Recaptcha to proceed');
-        // }
+        $validateData = $this->validator($data)->validate();
 
-        // $url = "https://www.google.com/recaptcha/api/siteverify";
+        DB::beginTransaction();
 
-        // $body = [
-        //     'secret' => config('services.recaptcha.secret'),
-        //     'response' => $recaptcha_response,
-        //     'remoteip' => $request->ip() //anonymize the ip to be GDPR compliant. Otherwise just pass the default ip address
-        // ];
+        try
+        {
+            $role = Role::where("code", "external_user")->first();
 
-        // $response = Http::asForm()->post($url, $body);
-
-        // $result = json_decode($response);
-
-        // if ($response->successful() && $result->success == true) {
-
-            $data = request()->all();
-
-            $validateData = $this->validator($data)->validate();
-
-            DB::beginTransaction();
-
-            try
-            {
-                $user = new User();
-                
-                $validateData['name'] = $user->getNextId();
-
-                $validateData['password'] = Hash::make($validateData['password']);
-
-                $user = User::create($validateData);
-
-                $url = url()->query(config("url") . "/otp_verify/" . $user->uid, ["otp_sent" => true]);
-
-                DB::commit();
-                
-                return redirect($url);
+            if (!$role) {
+                throw new UserException("Role Not Found: external_user");
             }
-            catch(Exception $ex)
-            {
-                DB::rollBack();
+            
+            $user = new User();
+            
+            $validateData['name'] = $user->getNextId();
 
-                throw $ex;
+            $validateData['password'] = Hash::make($validateData['password']);
 
-                return redirect()->back()->with('fail', $ex->getMessage());
-            }
+            $validateData["created_via"] = User::CREATED_VIA_REGISTRATION;
 
+            $user = User::create($validateData);
 
-        // } else {
-        //     return redirect()->back()->with('fail', 'Please Complete the Recaptcha Again to proceed');
-        // }
+            $user->assignRoles([$role->id]);
 
-        // return null;
+            $url = url()->query(config("url") . "/otp_verify/" . $user->uid, ["otp_sent" => true]);
+
+            DB::commit();
+            
+            return redirect($url);
+        }
+        catch(Exception $ex)
+        {
+            DB::rollBack();
+
+            throw $ex;
+
+            return redirect()->back()->with('fail', $ex->getMessage());
+        }
     }
 
 
@@ -217,6 +207,34 @@ class RegisterController extends WebController
             "layout" => "auth.layouts.login",
             "company_name" => $company_name,
         ]);
+    }
+
+    
+    public function save_data_before_signup(Request $request)
+    {
+        $response = ["status" => 1];
+
+        $data = $request->except([
+            "sub_type", "country_id"
+        ]);
+
+        session([
+            "save_data_before_signup" => $data,
+            "user_timezone" => $request->get("timezone")
+        ]);
+
+        return $this->responseJson($response);
+    }
+
+    public function save_data_before_signin(Request $request)
+    {
+        $response = ["status" => 1];
+
+        session([
+            "user_timezone" => $request->get("timezone")
+        ]);
+
+        return $this->responseJson($response);
     }
 
     protected function beforeViewRender()
