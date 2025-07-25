@@ -86,45 +86,45 @@ class ModelToJsonCommand extends MyCommand
 
         $records = $model_class::all();
 
-        // foreach ($records as $k => $record) {
-        //     $child_records = [];
+        foreach ($records as $k => $record) {
+            $child_records = [];
 
-        //     if (property_exists($model_class, "child_model_class")) 
-        //     {
-        //         if (isset($model_class::$child_model_class) && is_array($model_class::$child_model_class)) {
-        //             foreach ($model_class::$child_model_class as $child_model_class => $child_model_arr) {
-        //                 if ($child_model_class != $model_class) {
-        //                     $child_model_class_name = str_class_name_without_namespace($child_model_class);
+            if (property_exists($model_class, "child_model_class")) 
+            {
+                if (isset($model_class::$child_model_class) && is_array($model_class::$child_model_class)) {
+                    foreach ($model_class::$child_model_class as $child_model_class => $child_model_arr) {
+                        if ($child_model_class != $model_class) {
+                            $child_model_class_name = str_class_name_without_namespace($child_model_class);
 
-        //                     $conditions = [];
-        //                     if (isset($child_model_arr['foreignKey']) && is_array($child_model_arr['foreignKey'])) {
-        //                         foreach ($child_model_arr['foreignKey'] as $foreignKey) {
-        //                             if (is_string($foreignKey)) {
-        //                                 $conditions[] = [$foreignKey, $record->id];
-        //                             }
-        //                         }
-        //                     } else {
-        //                         $conditions[] = [$child_model_arr['foreignKey'], $record->id];
-        //                     }
+                            $conditions = [];
+                            if (isset($child_model_arr['foreignKey']) && is_array($child_model_arr['foreignKey'])) {
+                                foreach ($child_model_arr['foreignKey'] as $foreignKey) {
+                                    if (is_string($foreignKey)) {
+                                        $conditions[] = [$foreignKey, $record->id];
+                                    }
+                                }
+                            } else {
+                                $conditions[] = [$child_model_arr['foreignKey'], $record->id];
+                            }
 
-        //                     $qb = $child_model_class::where($conditions);
+                            $qb = $child_model_class::where($conditions);
 
-        //                     $count = $qb->count();
+                            $count = $qb->count();
 
-        //                     $main_counters[$child_model_class_name] = $count;
+                            $main_counters[$child_model_class_name] = $count;
 
-        //                     if ($count > 1000) {
-        //                         $this->info("Working on $child_model_class_name");
-        //                     }
+                            if ($count > 1000) {
+                                $this->info("Working on $child_model_class_name");
+                            }
 
-        //                     $child_records[$child_model_class_name] = $qb->get()->toArray();
-        //                 }
-        //             }
-        //         }
-        //     }
+                            $child_records[$child_model_class_name] = $qb->get()->toArray();
+                        }
+                    }
+                }
+            }
 
-        //     $records[$k]->child_records = $child_records;
-        // }
+            $records[$k]->child_records = $child_records;
+        }
 
         $this->writeJson($records->toArray(), $model_name);
 
