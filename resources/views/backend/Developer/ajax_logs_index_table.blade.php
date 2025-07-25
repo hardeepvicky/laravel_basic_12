@@ -37,7 +37,7 @@ use App\Helpers\Util;
                                 Request Method : <span>{{ $record->request_method }}</span>
                             </label>
 
-                            <div id="url-{{ $record->id }}" class="h-200 w-300">
+                            <div id="url-{{ $record->id }}" class="mx-h-200 w-300">
                                 <label class="info">
                                     Url : <span>{{ str_short_with_dot($record->url, 180) }}</span>
                                 </label>
@@ -45,32 +45,32 @@ use App\Helpers\Util;
 
                             <span class="btn btn-info btn-sm css-toggler mt-1 mb-1"
                                 data-sr-css-class-toggle-target="#url-{{ $record->id }}"
-                                data-sr-css-class-toggle-class="h-200" data-sr-css-class-toggle-applied-text="More"
+                                data-sr-css-class-toggle-class="mx-h-200" data-sr-css-class-toggle-applied-text="More"
                                 data-sr-css-class-toggle-not-applied-text="Less">
                                 More
                             </span>
                         </td>
                         <td>{{ Util::niceTime($record->exec_time) }}</td>
                         <td>
-                            <div id="request-{{ $record->id }}" class="h-200 w-300">
+                            <div id="request-{{ $record->id }}" class="mx-h-200 w-300">
                                 {!! array_print($record->request, 100) !!}
                             </div>
 
                             <span class="btn btn-info btn-sm css-toggler mt-1 mb-1"
                                 data-sr-css-class-toggle-target="#request-{{ $record->id }}"
-                                data-sr-css-class-toggle-class="h-200" data-sr-css-class-toggle-applied-text="More"
+                                data-sr-css-class-toggle-class="mx-h-200" data-sr-css-class-toggle-applied-text="More"
                                 data-sr-css-class-toggle-not-applied-text="Less">
                                 More
                             </span>
                         </td>
                         <td>
-                            <div id="response-{{ $record->id }}" class="h-200 w-300">
+                            <div id="response-{{ $record->id }}" class="mx-h-200 w-300">
                                 {!! array_print($record->response, 100) !!}
                             </div>
 
                             <span class="btn btn-info btn-sm css-toggler mt-1 mb-1"
                                 data-sr-css-class-toggle-target="#response-{{ $record->id }}"
-                                data-sr-css-class-toggle-class="h-200" data-sr-css-class-toggle-applied-text="More"
+                                data-sr-css-class-toggle-class="mx-h-200" data-sr-css-class-toggle-applied-text="More"
                                 data-sr-css-class-toggle-not-applied-text="Less">
                                 More
                             </span>

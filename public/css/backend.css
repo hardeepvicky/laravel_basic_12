@@ -328,6 +328,7 @@ label.form-label {
     color: var(--theme-default);
 }
 
-.dark-only {
-
+.chart-block{
+    width: 100%;
+    max-height: 80vh;
 }

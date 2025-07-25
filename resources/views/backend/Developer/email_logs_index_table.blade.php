@@ -34,7 +34,7 @@
                             <span class="btn btn-info btn-sm css-toggler ajax-load"
                                 data-sr-css-class-toggle-target="#record-{{ $record->id }}"
                                 data-sr-css-class-toggle-class="hidden"
-                                data-sr-ajax-load-url="/{{ $record->content_file }}"
+                                data-sr-ajax-load-url="{{ $record->content_file_url }}"
                                 data-sr-ajax-load-target="#record-{{ $record->id }} .details">
                                 Details
                             </span>

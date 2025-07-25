@@ -172,8 +172,9 @@ class DeveloperController extends BackendController
         $cache_key_prefix = Route::currentRouteName();
 
         $conditions = $this->getConditions(Route::currentRouteName(), [
-            ["field" => "from_email", "type" => "string", "view_field" => "from_email"],
-            ["field" => "to_email", "type" => "string", "view_field" => "to_email"],
+            ["field" => "subject", "type" => "string"],
+            ["field" => "from_email", "type" => "string"],
+            ["field" => "to_email", "type" => "string"],
             ["field" => "created", "type" => "from_date", "view_field" => "from_date"],
             ["field" => "created", "type" => "to_date", "view_field" => "to_date"],
         ]);

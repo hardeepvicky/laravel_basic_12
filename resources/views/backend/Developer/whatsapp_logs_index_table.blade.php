@@ -42,7 +42,7 @@
                         <td>{{ $record->is_sent == 1 ? "Sent" : ($record->is_sent == 0 ? "Fail" : "-") }}</td>
                         <td>
                             @if (isset($record->to) && is_array($record->to))
-                            <div id="to-{{ $record->id }}" class="h-200">
+                            <div id="to-{{ $record->id }}" class="mx-h-200">
                                 <table class="table table-sm summary-table table-bordered i-data-table">
                                     <thead>
                                         <tr>
@@ -67,7 +67,7 @@
 
                             <span class="btn btn-info btn-sm css-toggler mt-1 mb-1"
                                 data-sr-css-class-toggle-target="#change-{{ $record->id }}"
-                                data-sr-css-class-toggle-class="h-200" data-sr-css-class-toggle-applied-text="More"
+                                data-sr-css-class-toggle-class="mx-h-200" data-sr-css-class-toggle-applied-text="More"
                                 data-sr-css-class-toggle-not-applied-text="Less">
                                 More
                             </span>
@@ -90,7 +90,7 @@
                         <td colspan="6">
                             <div class="row">
                                 <div class="col-md-6 col-xxl-4">
-                                    <div id="other-info-{{ $record->id }}" class="h-200">
+                                    <div id="other-info-{{ $record->id }}" class="mx-h-200">
                                         @if (isset($record->header_values) && is_array($record->header_values))
                                             <label class="label label-info">
                                                 Header Values
@@ -115,7 +115,7 @@
 
                                     <span class="btn btn-info btn-sm css-toggler mt-1 mb-1"
                                         data-sr-css-class-toggle-target="#other-info-{{ $record->id }}"
-                                        data-sr-css-class-toggle-class="h-200" data-sr-css-class-toggle-applied-text="More"
+                                        data-sr-css-class-toggle-class="mx-h-200" data-sr-css-class-toggle-applied-text="More"
                                         data-sr-css-class-toggle-not-applied-text="Less">
                                         More
                                     </span>

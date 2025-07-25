@@ -127,6 +127,10 @@ use App\Helpers\LaravelExtend;
     <script src="{{ get_asset_url('assets/libs/typeahead.js-0.11.1/dist/typeahead.bundle.min.js') }}"></script>
     <script src="{{ get_asset_url('assets/libs/jquery-file-validator/js/file-validator.js') }}"></script>
 
+    <script src="https://cdn.amcharts.com/lib/5/index.js"></script>
+    <script src="https://cdn.amcharts.com/lib/5/percent.js"></script>
+    <script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
+
     <!-- Project Lib -->
     <script src="{{ get_asset_url('libs/constants.js') }}"></script>
 

@@ -33,14 +33,14 @@
                             <td>{{ $record->action }}</td>
                             <td>
                                 @if (isset($record->changes) && is_array($record->changes))
-                                <div class="h-200">
+                                <div class="mx-h-200">
                                     {!! array_print($record->change_counters, 100) !!}
                                 </div>
                                 @endif
                             </td>
                             <td>
                                 @if (isset($record->changes) && is_array($record->changes))
-                                <div id="change-{{ $record->id }}" class="h-200">
+                                <div id="change-{{ $record->id }}" class="mx-h-200">
                                     <table class="table table-sm summary-table table-bordered i-data-table">
                                         <thead>
                                             <tr>
@@ -69,7 +69,7 @@
 
                                 <span class="btn btn-info btn-sm css-toggler mt-1 mb-1"
                                     data-sr-css-class-toggle-target="#change-{{ $record->id }}"
-                                    data-sr-css-class-toggle-class="h-200" data-sr-css-class-toggle-applied-text="More"
+                                    data-sr-css-class-toggle-class="mx-h-200" data-sr-css-class-toggle-applied-text="More"
                                     data-sr-css-class-toggle-not-applied-text="Less">
                                     More
                                 </span>

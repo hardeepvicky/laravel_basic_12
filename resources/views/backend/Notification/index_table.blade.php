@@ -38,13 +38,13 @@
                             </td>   
                             <td>
                             @if(isset($record->data) && is_array($record->data))
-                                <div id="data-{{ $record->id }}" class="h-200">
+                                <div id="data-{{ $record->id }}" class="mx-h-200">
                                     {!! array_print($record->data, 80) !!}
                                 </div>
 
                                 <span class="btn btn-info btn-sm css-toggler mt-1 mb-1"
                                     data-sr-css-class-toggle-target="#data-{{ $record->id }}"
-                                    data-sr-css-class-toggle-class="h-200" data-sr-css-class-toggle-applied-text="More"
+                                    data-sr-css-class-toggle-class="mx-h-200" data-sr-css-class-toggle-applied-text="More"
                                     data-sr-css-class-toggle-not-applied-text="Less">
                                     More
                                 </span>

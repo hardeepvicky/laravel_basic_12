@@ -32,7 +32,7 @@
                                 Request Method : <span>{{ $record->request_method }}</span>
                             </label>
 
-                            <div id="url-{{ $record->id }}" class="h-200 w-300">
+                            <div id="url-{{ $record->id }}" class="mx-h-200 w-300">
                                 <label class="info">
                                     Url : <span>{{ str_short_with_dot($record->url, 180) }}</span>
                                 </label>
@@ -40,7 +40,7 @@
 
                             <span class="btn btn-info btn-sm css-toggler mt-1 mb-1"
                                 data-sr-css-class-toggle-target="#url-{{ $record->id }}"
-                                data-sr-css-class-toggle-class="h-200" data-sr-css-class-toggle-applied-text="More"
+                                data-sr-css-class-toggle-class="mx-h-200" data-sr-css-class-toggle-applied-text="More"
                                 data-sr-css-class-toggle-not-applied-text="Less">
                                 More
                             </span>
