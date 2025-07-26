@@ -1,5 +1,11 @@
 <?php
 use App\Helpers\LaravelExtend;
+
+if (!isset($partial_path))
+{
+    $partial_path = "backend.partials";
+}
+
 ?>
 <!doctype html>
 <html lang="en">
@@ -146,16 +152,6 @@ use App\Helpers\LaravelExtend;
     <script src="{{ get_asset_url('js/backend/file-gallery.js') }}"></script>
     <script src="{{ get_asset_url('js/backend/backend_non_ajax.js') }}"></script>
     <script src="{{ get_asset_url('js/common.js') }}"></script>
-    <script>
-        $(function() {
-            $.loader.init();
-
-            $.events.lastCallbacks.map(function(cb) {
-                cb();
-            });
-        });
-    </script>
-
 
     <div class="modal fade" id="modal-add-via-upload" tabindex="-1" aria-labelledby="modal-add-via-upload"
         style="display: none;" aria-hidden="true">
