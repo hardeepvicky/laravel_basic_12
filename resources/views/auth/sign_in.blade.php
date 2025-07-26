@@ -90,16 +90,18 @@ use App\Models\User;
             $("a.signin-with-third-party").click(function(e){
                 e.preventDefault();
 
-                var url = $(this).attr("href");
+                const url = $(this).attr("href");
 
                 $.loader.setInfo("Please Wait...").show();
 
                 var post_data = {
                     timezone : getTimeZone()
                 };
-                
-                $.post(url, post_data, function(response){
-                    ajaxHandleResponse("{{ route('signin.with.third.party.save.data.before.signin') }}", response, function(response){
+
+                const save_data_before_redirect_url = "{{ route('signin.with.third.party.save.data.before.signin') }}";
+
+                $.post(save_data_before_redirect_url, post_data, function(response){
+                    ajaxHandleResponse(save_data_before_redirect_url, response, function(response){
                         $.loader.setInfo("Redirecting to external URL...").show();
 
                         location.href = url;
