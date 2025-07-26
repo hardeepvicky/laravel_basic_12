@@ -33,7 +33,7 @@ class JsonToModelCommand extends MyCommand
      */
     public function handle()
     {
-        $arg_model = $this->argument('model');
+        $arg_model = $this->argument('model');        
 
         $this->logCreate([
             "command" => $this->signature,
@@ -73,7 +73,7 @@ class JsonToModelCommand extends MyCommand
 
         if (isset($arg_model) && $arg_model)
         {
-            $filename = $arg_model;
+            $filename = $arg_model;            
         }
         else
         {

@@ -655,27 +655,27 @@ class User extends Authenticatable implements BaseModelInterface
         switch ($field) {
             case "user_category_id":
                 $ret_array = [
-                    $field => $this->userCategory->getDisplayName()
+                    $field => $this->userCategory?->getDisplayName()
                 ];
                 break;
             case "dept_id":
                 $ret_array = [
-                    $field => $this->department->getDisplayName()
+                    $field => $this->department?->getDisplayName()
                 ];
                 break;
             case "sub_dept_id":
                 $ret_array = [
-                    $field => $this->subDepartment->getDisplayName()
+                    $field => $this->subDepartment?->getDisplayName()
                 ];
                 break;
             case "desg_id":
                 $ret_array = [
-                    $field => $this->designation->getDisplayName()
+                    $field => $this->designation?->getDisplayName()
                 ];
                 break;
             case "country_id":
                 $ret_array = [
-                    $field => $this->country->getDisplayName()
+                    $field => $this->country?->getDisplayName()
                 ];
                 break;
         }
