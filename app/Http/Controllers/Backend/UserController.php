@@ -67,6 +67,7 @@ class UserController extends BackendController
             ["field" => "mobile", "type" => "string"],
             ["field" => "is_active", "type" => "int"],
             ["field" => "type", "type" => "string_equal"],
+            ["field" => "sub_type", "type" => "string_equal"],
             ["field" => "user_category_id", "type" => "int"],
             ["field" => "country_id", "type" => "int"],
         ]);

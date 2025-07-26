@@ -65,6 +65,8 @@ class DocumentFileController extends BackendController
 
         $category_list = Util::getTreeListArray($category_records, "id", "name", false, false);
 
+        LaravelExtend::addInfo("Files will be delete permanently after 7 days", "primary");
+
         $this->setForView(compact("records", "category_list"));
 
         return $this->viewIndex(__FUNCTION__);
