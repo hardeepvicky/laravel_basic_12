@@ -33,13 +33,9 @@ use App\Models\User;
                     <a class="link" href="{{ route('forgot_password') }}">Forgot password?</a>
                 </div>
 
-                <strong>ReCaptcha:</strong>
-
-                <div class="g-recaptcha" data-sitekey="{{ env('GOOGLE_RECAPTCHA_SITE_KEY') }}"></div>
-
-                @if ($errors->has('g-recaptcha-response'))
-                    <span class="text-danger">{{ $errors->first('g-recaptcha-response') }}</span>
-                @endif
+                <div class="mb-2">
+                    <x-google-capacha/>
+                </div>
 
                 <div class="text-end mt-3">
                     <button class="btn btn-primary btn-block w-100" type="submit">Sign In</button>

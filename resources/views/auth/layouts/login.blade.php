@@ -50,15 +50,6 @@
         @include("partials.common_script_links");
 
         <script src="{{ get_asset_url('js/backend/login_non_ajax.js') }}"></script>
-        
-        <script>
-            $(function() {
-                $.loader.init();
-                $.events.lastCallbacks.map(function(cb) {
-                    cb();
-                });
-            });
-        </script>
     </div>
 </body>
 

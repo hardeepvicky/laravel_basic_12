@@ -4,8 +4,6 @@
  */
 
 $(document).ready(function () {
-    $.loader.init();
-
     $("form")
         .find("div.pristine-error")
         .parents(".form-group")

@@ -1,11 +1,9 @@
 /**
  * @author : Hardeep
- * this file only for backend
+ * this file only for Login Layout
  */
 
 $(document).ready(function () {
-    $.loader.init();
-
     $("form")
         .find("div.pristine-error")
         .parents(".form-group")

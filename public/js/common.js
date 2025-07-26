@@ -1,6 +1,8 @@
 
 $(function()
 {
+    $.loader.init();    
+    
     $('img.lazy-load-image').on('load', function() {
         $(this).closest(".image-container").addClass("loaded");
 
@@ -24,5 +26,9 @@ $(function()
                 },
             }
         });
+    });
+
+    $.events.lastCallbacks.map(function(cb) {
+        cb();
     });
 });
