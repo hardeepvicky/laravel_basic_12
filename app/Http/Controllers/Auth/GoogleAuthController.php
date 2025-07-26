@@ -33,7 +33,7 @@ class GoogleAuthController extends Controller
             // Get the user information from Google
             $user = Socialite::driver('google')->user();
         } catch (Throwable $e) {
-            return redirect('/')->with('error', 'Google authentication failed.');
+            return redirect('/')->with('fail', 'Google authentication failed.');
         }
 
 
