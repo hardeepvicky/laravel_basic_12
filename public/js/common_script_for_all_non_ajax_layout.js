@@ -12,13 +12,8 @@ $.ajaxSetup({
     cache: false,
     beforeSend : function(xhr)
     {
-        //$.loader.init().setInfo("Loading...").show();
     },
     complete : function (xhr, status) {
-        if (typeof $.loader == "object")
-        {
-            $.loader.hide();
-        }
     }
 });
 
