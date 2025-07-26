@@ -312,9 +312,20 @@
                     },
                     success: function(responseText, statusText, xhr) {
                         ajaxHandleResponse(null, responseText, function(response) {
-                            var modal = $('#modal-task-verify');
-                            modal.modal("hide");
-                            location.reload(true);
+
+                            if (response['status'] == 1)
+                            {
+                                var modal = $('#modal-task-verify');
+                                modal.modal("hide");
+
+                                $.loader.setInfo("Reloading Page...");
+
+                                location.reload(true);
+                            }
+                            else
+                            {
+                                $.loader.hide();
+                            }
                         });
                     }
                 });
