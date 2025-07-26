@@ -4,11 +4,8 @@ namespace App\Console\Commands;
 
 use App\Helpers\ConsoleOutput;
 use App\Helpers\FileUtility;
-use App\Helpers\LaravelExtend;
 use App\Helpers\MyCommand;
 use App\Helpers\Util;
-use App\Models\BaseModelInterface;
-use Illuminate\Support\Facades\Storage;
 
 class JsonToModelCommand extends MyCommand
 {
@@ -17,7 +14,7 @@ class JsonToModelCommand extends MyCommand
      *
      * @var string
      */
-    protected $signature = 'json:model';
+    protected $signature = 'json:model {model?}';
 
     /**
      * The console command description.
@@ -36,6 +33,8 @@ class JsonToModelCommand extends MyCommand
      */
     public function handle()
     {
+        $arg_model = $this->argument('model');
+
         $this->logCreate([
             "command" => $this->signature,
             "description" => $this->description
@@ -63,13 +62,29 @@ class JsonToModelCommand extends MyCommand
             $files[$k] = pathinfo($file, PATHINFO_FILENAME);
         }
 
-        $filename = $this->choice(
-            'Select File :',
-            $files,
-        );
+        if ($arg_model)
+        {
+            if (!in_array($arg_model, $files))
+            {
+                $this->error("file not found : $arg_model");
+                return;
+            }
+        }
 
-        if (!$filename) {
-            return;
+        if (isset($arg_model) && $arg_model)
+        {
+            $filename = $arg_model;
+        }
+        else
+        {
+            $filename = $this->choice(
+                'Select File :',
+                $files,
+            );
+
+            if (!$filename) {
+                return;
+            }
         }
 
         $file_path = ModelToJsonCommand::$path . "/" . $filename . ".json";

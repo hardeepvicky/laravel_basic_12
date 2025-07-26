@@ -68,7 +68,7 @@ class GoogleAuthController extends Controller
             
             if (!$db_user && !$data_before_signup)
             {
-                abort("Email " . $user->getEmail() . " is not registed with us", ACTION_NOT_PROCEED);
+                abort(ACTION_NOT_PROCEED, "Email " . $user->getEmail() . " is not registed with us");
             }
 
             if (is_array($data_before_signup) && $data_before_signup)

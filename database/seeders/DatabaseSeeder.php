@@ -22,5 +22,6 @@ class DatabaseSeeder extends Seeder
         $this->call(TypeSeeder::class);
         $this->call(AppMenuSeeder::class);
         $this->call(FieldSettingSeeder::class);
+        $this->call(UniversalSeeder::class);
     }
 }

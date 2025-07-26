@@ -67,7 +67,7 @@ class DbBakupCommand extends MyCommand
             }
         }
         
-        if ($connection)
+        if (isset($connection) && $connection)
         {
             $db_config_key = $connection;
             $db_config = $db_config_list[$db_config_key];
