@@ -99,7 +99,7 @@ use App\Models\User;
                     timezone : getTimeZone()
                 };
                 $.post(url, post_data, function(response){
-                    ajaxHandleResponse(url, responseText, function(response){
+                    ajaxHandleResponse(url, response, function(response){
                         $.loader.setInfo("Redirecting to external URL...").show();
 
                         location.href = url;
