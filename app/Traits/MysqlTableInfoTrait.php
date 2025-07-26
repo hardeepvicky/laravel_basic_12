@@ -1,6 +1,7 @@
 <?php
 namespace App\Traits;
 
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 
 trait MysqlTableInfoTrait
@@ -28,7 +29,14 @@ trait MysqlTableInfoTrait
             $table_info['columns'][$column->Field] = (array) $column;
         }
 
-        self::addCache($cache_key, $table_info, 60);
+        $cache_time = 300;
+
+        if (App::isProduction())
+        {
+            $cache_time = 60 * 60 * 24;
+        }
+
+        self::addCache($cache_key, $table_info, $cache_time);
 
         return $table_info;
     }
