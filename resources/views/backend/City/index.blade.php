@@ -16,10 +16,10 @@ $page_header_links = [
         <form method="GET" class="summary_search" action="{{ route($routePrefix . '.index') }}">
             <input type="hidden" name="is_sort_clear" value="1"/>
             <div class="row mb-4">
-                <div class="col-md-3">
+                <div class="col-md-4 col-lg-3 col-xxxl-2 mb-2">
                     <x-Inputs.text-field name="name" label="Name" :value="$search['name']" autocomplete="off" />
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-4 col-lg-3 col-xxxl-2 mb-2">
                     <x-Inputs.drop-down name="state_id" label="State"
                         :value="$search['state_id']"
                         :list="$state_list"

@@ -15,7 +15,7 @@ $paginationList = [
     <input type="hidden" name="is_sort_clear" value="1" />
     <input type="hidden" name="value" value="{{ $selected_value ?? '' }}" />
     <div class="row m-1">
-            <div class="col-md-2 col-lg-1 mb-2">
+        <div class="col-sm-6 col-md-2 col-lg-1 mb-2">
             <?php
             $field = 'pagination_limit';
             ?>
