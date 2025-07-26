@@ -94,20 +94,15 @@ use App\Models\User;
 
                 $.loader.setInfo("Please Wait...").show();
 
-                $.ajax({
-                    url : "{{ route('signin.with.third.party.save.data.before.signin') }}",
-                    method: "POST",
-                    data : {
-                        timezone : getTimeZone()
-                    }
-                }).done(function( ) {
-                    
-                    $.loader.setInfo("Redirecting to external URL...").show();
+                var url = "{{ route('signin.with.third.party.save.data.before.signin') }}"
+                var post_data = {
+                    timezone : getTimeZone()
+                };
+                $.post(url, post_data, function(response){
+                    ajaxHandleResponse(url, responseText, function(response){
+                        $.loader.setInfo("Redirecting to external URL...").show();
 
-                    location.href = url;
-                }).fail(function(jqXHR, textStatus, errorThrown) {
-                    $.events.onAjaxError(textStatus, errorThrown, {
-                        url: url
+                        location.href = url;
                     });
                 })
 

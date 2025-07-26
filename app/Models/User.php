@@ -80,7 +80,7 @@ class User extends Authenticatable implements BaseModelInterface
 
     public string $field_for_create_tag = "display_name";
 
-     /**
+    /**
      * The attributes that should be cast.
      *
      * @var array<string, string>
@@ -116,7 +116,7 @@ class User extends Authenticatable implements BaseModelInterface
 
     protected static array $file_fields = ["profile_image"];
 
-    protected static array $list_fields = ["id", "name", "type", "person_name"];
+    protected static array $list_fields = ["id", "name", "type", "sub_type", "person_name"];
 
     public const TYPE_INTERNAL = "internal";
     public const TYPE_EXTERNAL = "external";
@@ -209,19 +209,14 @@ class User extends Authenticatable implements BaseModelInterface
     {
         $this->forgotCache();
 
-        foreach(Department::$child_model_class as $child_model_class => $arr)
-        {
-            if (isset($arr['foreignKey']))
-            {
-                if (!is_array($arr['foreignKey']))
-                {
+        foreach (Department::$child_model_class as $child_model_class => $arr) {
+            if (isset($arr['foreignKey'])) {
+                if (!is_array($arr['foreignKey'])) {
                     $arr['foreignKey'] = [$arr['foreignKey']];
                 }
 
-                foreach($arr['foreignKey'] as $foreign_field)
-                {
-                    switch($child_model_class)
-                    {
+                foreach ($arr['foreignKey'] as $foreign_field) {
+                    switch ($child_model_class) {
                         case Task::class:
                             $this->tasks()->update([
                                 $foreign_field => $this->dept_id
@@ -233,13 +228,13 @@ class User extends Authenticatable implements BaseModelInterface
                             ]);
                             break;
                     }
-                    
                 }
             }
         }
     }
 
-    public function beforeDelete() {
+    public function beforeDelete()
+    {
         if ($this->custom_errors) {
             throw new UserException("Some errors in model while deleting", UserException::ERROR_USER_DATA_WRONG, [
                 "custom_errors" => $this->custom_errors
@@ -272,31 +267,60 @@ class User extends Authenticatable implements BaseModelInterface
 
     public function getDisplayName()
     {
-        if ($this->type == self::TYPE_EXTERNAL) {
-            return $this->name;
+        $sub_type_list = self::getCache("sub_type_list");
+
+        if (!$sub_type_list) {
+            $type_conditions = [
+                "type" => Type::getType($this, "sub_type")
+            ];
+
+            $sub_type_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
+
+            self::addCache("sub_type_list", $sub_type_list);
         }
 
-        $name = $this->name;
-
         if ($this->type == self::TYPE_EXTERNAL) {
-            $name .= " (External)";
-        } else {
-            if ($this->person_name && strtolower($this->person_name) != strtolower($name)) {
 
-                if (strpos($this->person_name, " ") !== false)
-                {
-                    $sub_str = trim(substr($this->person_name, 0, strpos($this->person_name, " ")));    
-                }
-                else
-                {
-                    $sub_str = $this->person_name;
-                }
+            $sub_title = "(External)";
 
-                $name = $sub_str . " >> " . $this->name;
+            if (isset($sub_type_list[$this->sub_type])) {
+                $sub_title = "(" . $sub_type_list[$this->sub_type] . ")";
             }
-        }
 
-        return $name;
+            return $this->full_name . " " . $sub_title;
+        } else {
+
+            $name = $this->name;
+
+            if ($this->type == self::TYPE_EXTERNAL) {
+                $name .= " (External)";
+            } else {
+                if ($this->person_name && strtolower($this->person_name) != strtolower($name)) {
+
+                    if (strpos($this->person_name, " ") !== false) {
+                        $sub_str = trim(substr($this->person_name, 0, strpos($this->person_name, " ")));
+                    } else {
+                        $sub_str = $this->person_name;
+                    }
+
+                    $name = $sub_str . " >> " . $this->name;
+                }
+            }
+
+            $sub_title = "";
+
+            if (isset($sub_type_list[$this->sub_type]) && $this->sub_type != self::SUB_TYPE_TEAM_MEMBER)
+            {
+                $sub_title = "(" . $sub_type_list[$this->sub_type] . ")";
+            }
+            
+            if ($sub_title)
+            {
+                $name .= " " . $sub_title;
+            }
+            
+            return $name;
+        }
     }
 
     public function getFullMobileNo($field = "mobile")
@@ -411,9 +435,11 @@ class User extends Authenticatable implements BaseModelInterface
 
         if ($request->get("type") == self::TYPE_INTERNAL) {
             $field_rules["name"] = ["required"];
+            $field_rules["user_category_id"] = ["required"];
             $field_rules["dept_id"] = ["required"];
             $field_rules["sub_dept_id"] = ["nullable"];
             $field_rules["desg_id"] = ["required"];
+        } else {
         }
 
         return $field_rules;
@@ -429,7 +455,7 @@ class User extends Authenticatable implements BaseModelInterface
         return static::$unique_fields;
     }
 
-    
+
 
     public function isRquireOTPVerificationOnLogin()
     {
@@ -499,7 +525,7 @@ class User extends Authenticatable implements BaseModelInterface
     {
         return self::classDisplayName();
     }
-    
+
     public static function getCacheKey(): string
     {
         $str = "User";
@@ -650,7 +676,7 @@ class User extends Authenticatable implements BaseModelInterface
     public function changeUpdatedByUsageBulk(array $models)
     {
         return;
-        
+
         $json = $this->used_in_other_table_updated_by;
 
         foreach ($models as $model) {
@@ -702,7 +728,9 @@ class User extends Authenticatable implements BaseModelInterface
 
     public function getFieldLabels()
     {
-        $labels = [];
+        $labels = [
+            'full_name' => "Full Name"
+        ];
 
         $table_info = $this->getTableInfo($this->getTable());
 
@@ -741,8 +769,7 @@ class User extends Authenticatable implements BaseModelInterface
     {
         $ret_array = [];
 
-        switch($field)
-        {
+        switch ($field) {
             case "user_category_id":
                 $ret_array = [
                     $field => $this->userCategory->getDisplayName()
@@ -797,10 +824,8 @@ class User extends Authenticatable implements BaseModelInterface
                 $list = [];
 
                 foreach ($class_info['constants'] as $constant => $label) {
-                    if (strpos($constant, "SUB_TYPE_") !== false) 
-                    {
-                        if (!in_array($constant, [self::SUB_TYPE_TEAM_MEMBER]))
-                        {
+                    if (strpos($constant, "SUB_TYPE_") !== false) {
+                        if (!in_array($constant, [self::SUB_TYPE_TEAM_MEMBER])) {
                             $list[] = $label;
                         }
                     }

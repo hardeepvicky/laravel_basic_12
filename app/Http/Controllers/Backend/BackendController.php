@@ -72,7 +72,7 @@ class BackendController extends WebController
 
         $unread_notification_count = $auth_user->unreadNotifications()->count();
 
-        $userListCache = User::getListCache();
+        $userListCache = User::getListCache("id", "display_name", "person_name");
 
         $partial_path = "backend.partials";
 

@@ -20,7 +20,7 @@
                         <x-Inputs.drop-down :name="$field" label="Limit" :list="$paginationList" :value="$pagination_limit" :pleaseSelect="$false"
                             class="pagination_limit" />
                     </div>
-                    <div class="col-md-3 mb-2">
+                    <div class="col-md-3 col-xxl-2 mb-2">
                         <?php
                         $field = 'sub_type';
                         $label = get_value_from_list($field_labels, $field, $field);
@@ -28,7 +28,7 @@
                         <x-Inputs.drop-down :name="$field" :label="$label" :value="$search[$field]" :list="$notification_type_list"
                             class="select2" />
                     </div>
-                    <div class="col-md-3 mb-2">
+                    <div class="col-md-3 col-xxl-2 mb-2">
                         <?php
                         $field = 'from_user_id';
                         $label = get_value_from_list($field_labels, $field, $field);
@@ -36,7 +36,7 @@
                         <x-Inputs.drop-down :name="$field" :label="$label" :value="$search[$field]" :list="$from_list"
                             class="select2" />
                     </div>
-                    <div class="col-md-3 mb-2">
+                    <div class="col-md-3 col-xxl-2 mb-2">
                         <?php
                         $field = 'to_user_id';
                         $label = get_value_from_list($field_labels, 'notifiable_id', 'notifiable_id');
@@ -44,18 +44,18 @@
                         <x-Inputs.drop-down :name="$field" :label="$label" :value="$search[$field]" :list="$to_user_list"
                             class="select2" />
                     </div>                    
-                    <div class="col-md-3 mb-2">
-                        <x-Inputs.text-field id="from_date" name="from_date" label="From Created Date"
+                    <div class="col-md-3 col-xxl-2 mb-2">
+                        <x-Inputs.text-field id="from_date" name="from_date" label="From Date"
                             :value="$search['from_date']" class="form-control date-picker" data-date-end="input#to_date"
                             autocomplete="off" />
                     </div>
-                    <div class="col-md-3 mb-2">
-                        <x-Inputs.text-field id="to_date" name="to_date" label="To Created Date" :value="$search['to_date']"
+                    <div class="col-md-3 col-xxl-2 mb-2">
+                        <x-Inputs.text-field id="to_date" name="to_date" label="To Date" :value="$search['to_date']"
                             class="form-control date-picker" data-date-start="input#from_date" autocomplete="off" />
                     </div>                    
                 </div>
                 <div class="row mb-4">
-                    <div class="col-md-3 mb-2">
+                    <div class="col-md-3 col-xxl-2 mb-2">
                         <?php 
                             $field = "unread_only";
                         ?>

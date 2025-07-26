@@ -9,6 +9,7 @@ use App\Helpers\LaravelExtend;
 use App\Models\Country;
 use App\Models\Department;
 use App\Models\Designation;
+use App\Models\DropDownValue;
 use App\Models\FieldSetting;
 use Illuminate\Http\Request;
 use App\Models\User;
@@ -17,6 +18,7 @@ use App\Models\Type;
 use App\Models\UserAllowIp;
 use App\Models\UserCategory;
 use App\Rules\MobileNumber;
+use App\View\Components\Inputs\DropDown;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
@@ -43,13 +45,11 @@ class UserController extends BackendController
 
         $role_list = Role::getListCache();
 
-        $user_category_list = UserCategory::getListCache();
-
         $department_list = Department::getListCache();
 
         $designation_list = Designation::getListCache();
 
-        $this->setForView(compact("records", "role_list", "user_category_list", "department_list", "designation_list"));
+        $this->setForView(compact("records", "role_list","department_list", "designation_list"));
 
         return $this->viewIndex(__FUNCTION__);
     }
@@ -127,11 +127,13 @@ class UserController extends BackendController
 
         $sub_type_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
 
+        $user_category_list = DropDownValue::getList("id", "display_name", ["type" => DropDownValue::USER_CATEGORY], "name");
+
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
         $user_allow_ip_field_labels = FieldSetting::getDynamicFields("UserAllowIp");
 
-        $this->setForView(compact("type_list", "country_list", "my_country", "sub_type_list", "field_labels", "user_allow_ip_field_labels"));
+        $this->setForView(compact("type_list", "country_list", "my_country", "sub_type_list", "user_category_list", "field_labels", "user_allow_ip_field_labels"));
 
         return parent::beforeViewRender();
     }
@@ -192,11 +194,11 @@ class UserController extends BackendController
             'person_last_name' => ['nullable'],
             'email' => ['required'],
             'type' => ['required'],
-            'sub_type' => ['required'],
-            'user_category_id' => ['required'],
             'country_id' => ['required'],
-            'mobile' => ['nullable', new MobileNumber],
-            'whatsapp_mobile' => ['nullable', new MobileNumber],
+            'sub_type' => ["required"],
+            'user_category_id' => [],
+            'mobile' => ['required', new MobileNumber],
+            'whatsapp_mobile' => ['required', new MobileNumber],
             'roles' => ["required"],
             'allow_ip' => [],
             "dont_send_email" => "",

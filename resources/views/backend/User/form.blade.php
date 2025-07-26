@@ -49,34 +49,31 @@ use App\Models\User;
                                 $label = get_value_from_list($field_labels, $field, $field);
                                 ?>
                                 <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$type_list"
-                                    :value="$model->{$field}"
-                                    class="select2 cascade-drop-down"
-                                    data-sr-cascade-target="#user_category_id"
-                                    data-sr-cascade-url="/user-category/ajax_get_list/{v}"
-                                    mandatory="true"
-                                />
+                                    :value="$model->{$field}" class="select2" mandatory="true" />
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <div class="form-group mb-3">
+                            <div class="form-group mb-3 ">
                                 <?php
                                 $field = 'sub_type';
                                 $label = get_value_from_list($field_labels, $field, $field);
                                 ?>
                                 <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$sub_type_list"
+                                    :value="$model->{$field}" class="select2 sub_type" mandatory="true" />
+                            </div>
+                        </div>
+                        <div class="col-md-6 type-block type-block-{{ User::TYPE_INTERNAL }}">
+                            <div class="form-group mb-3">
+                                <?php
+                                $field = 'user_category_id';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$user_category_list"
                                     :value="$model->{$field}" class="select2" mandatory="true" />
                             </div>
                         </div>
                     </div>
-
-                    <div class="form-group mb-3">
-                        <?php
-                        $field = 'user_category_id';
-                        $label = get_value_from_list($field_labels, $field, $field);
-                        ?>
-                        <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$empty_list"
-                            :value="$model->{$field}" class="select2" mandatory="true" />
-                    </div>
+                    
                     <div class="form-group mb-3 type-block type-block-{{ User::TYPE_EXTERNAL }}">
                         <?php
                         $field = 'country_id';
@@ -137,10 +134,8 @@ use App\Models\User;
                                 $field = 'person_name';
                                 $label = get_value_from_list($field_labels, $field, $field);
                                 ?>
-                                <x-Inputs.text-field :id="$field" :name="$field" :label="$label" :value="$model->{$field}"
-                                    mandatory="true"
-                                    placeholder="Enter {{ $label }}"
-                                    />
+                                <x-Inputs.text-field :id="$field" :name="$field" :label="$label"
+                                    :value="$model->{$field}" mandatory="true" placeholder="Enter {{ $label }}" />
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -149,8 +144,8 @@ use App\Models\User;
                                 $field = 'person_last_name';
                                 $label = get_value_from_list($field_labels, $field, $field);
                                 ?>
-                                <x-Inputs.text-field :id="$field" :name="$field" :label="$label" :value="$model->{$field}"
-                                    placeholder="Enter {{ $label }}" />
+                                <x-Inputs.text-field :id="$field" :name="$field" :label="$label"
+                                    :value="$model->{$field}" placeholder="Enter {{ $label }}" />
                             </div>
                         </div>
                     </div>
@@ -163,8 +158,7 @@ use App\Models\User;
                                 $label = get_value_from_list($field_labels, $field, $field);
                                 ?>
                                 <x-Inputs.group-text-field :id="$field" :name="$field" :label="$label"
-                                    :value="$model->{$field}" class="validate-mobile"
-                                    placeholder="Enter {{ $label }}"
+                                    :value="$model->{$field}" class="validate-mobile" placeholder="Enter {{ $label }}"
                                     mandatory="true"
                                     secondaryText='<span id="mobile_country_code" class="input-group-text">+91</span>' />
                             </div>
@@ -176,35 +170,34 @@ use App\Models\User;
                                 $label = get_value_from_list($field_labels, $field, $field);
                                 ?>
                                 <x-Inputs.text-field :id="$field" :name="$field" :label="$label"
-                                    :value="$model->{$field}" class="validate-mobile" 
-                                    placeholder="Enter {{ $label }}"
-                                    mandatory="true"
-                                />
+                                    :value="$model->{$field}" class="validate-mobile" placeholder="Enter {{ $label }}"
+                                    mandatory="true" />
                             </div>
                         </div>
                     </div>
                     <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group mb-3 type-block type-block-{{ User::TYPE_INTERNAL }}">
-                                    <?php
-                                    $field = 'dept_id';
-                                    $label = get_value_from_list($field_labels, $field, $field);
-                                    ?>
-                                    <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$department_list"
-                                        :value="$model->{$field}" class="select2 cascade-drop-down" data-sr-cascade-target="#sub_dept_id"
-                                        data-sr-cascade-url="/sub-department/ajax_get_list/{v}" mandatory="true" />
-                                </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3 type-block type-block-{{ User::TYPE_INTERNAL }}">
+                                <?php
+                                $field = 'dept_id';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
+                                    :list="$department_list" :value="$model->{$field}" class="select2 cascade-drop-down"
+                                    data-sr-cascade-target="#sub_dept_id"
+                                    data-sr-cascade-url="/sub-department/ajax_get_list/{v}" mandatory="true" />
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-group mb-3 type-block type-block-{{ User::TYPE_INTERNAL }}">
-                                    <?php
-                                    $field = 'sub_dept_id';
-                                    $label = get_value_from_list($field_labels, $field, $field);
-                                    ?>
-                                    <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$empty_list"
-                                        :value="$model->{$field}" class="select2" />
-                                </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3 type-block type-block-{{ User::TYPE_INTERNAL }}">
+                                <?php
+                                $field = 'sub_dept_id';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
+                                    :list="$empty_list" :value="$model->{$field}" class="select2" />
                             </div>
+                        </div>
                     </div>
                     <div class="form-group mb-3 type-block type-block-{{ User::TYPE_INTERNAL }}">
                         <?php
@@ -221,11 +214,100 @@ use App\Models\User;
                         <x-Inputs.drop-down name="roles[]" label="Roles" :list="$role_list" :value="$value"
                             class="select2" multiple="multiple" mandatory="true" />
                     </div>
+
+                    <div class="form-group mb-3 type-block type-block-{{ User::TYPE_INTERNAL }}">
+                        <table class="table table-sm table-striped table-bordered order-column template-table"
+                            data-sr-table-t emplate-min-row="0">
+                            <thead>
+                                <tr>
+                                    <th class="text-center" style="width : 80px;">
+                                        <span class="sr-table-template-add">
+                                            <i class="fas fa-plus-circle text-success icon"></i>
+                                        </span>
+                                    </th>
+                                    <th style="width : 30%;">Allow IP For Auto Login</th>
+                                    <th style="width : 50%;">Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="sr-table-template-row hidden">
+                                    <td>
+                                        <div class="block">
+                                            <div class="left-block">
+
+                                            </div>
+                                            <div class="right-block">
+                                                <span class="sr-table-template-delete">
+                                                    <i class=" fas fa-times-circle text-danger icon"></i>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <x-inputs.text-field type="hidden" name="allow_ip[(sr-id)][id]"
+                                            label="" />
+                                    </td>
+                                    <td>
+                                        <x-inputs.text-field name="allow_ip[(sr-id)][ip]" label=""
+                                            placeholder="Enter IP" />
+                                    </td>
+                                    <td>
+                                        <x-inputs.text-field name="allow_ip[(sr-id)][description]" label=""
+                                            placeholder="Enter Description" />
+                                    </td>
+                                </tr>
+                                @php
+                                    $allow_ip = old('allow_ip', $allow_ip ?? []);
+                                    unset($allow_ip['(sr-id)']);
+                                @endphp
+                                @if (isset($allow_ip))
+                                    @foreach ($allow_ip as $k => $allow_arr)
+                                        <tr class="" sr-id="{{ $allow_arr['id'] }}"
+                                            sr-counter="{{ $k }}">
+                                            <td>
+                                                <div class="block">
+                                                    <div class="left-block">
+                                                    </div>
+                                                    <div class="right-block">
+                                                        <span class="sr-table-template-delete">
+                                                            <i class=" fas fa-times-circle text-danger icon"></i>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <input type="hidden" name="allow_ip[{{ $k }}][id]"
+                                                    value="{{ $allow_arr['id'] }}" />
+                                            </td>
+                                            <td>
+                                                <?php $value = $allow_arr['ip']; ?>
+                                                <x-inputs.text-field name="allow_ip[{{ $k }}][ip]"
+                                                    label="" :value="$value" placeholder="Enter IP" />
+                                            </td>
+                                            <td>
+                                                <?php $value = $allow_arr['description']; ?>
+                                                <x-inputs.text-field name="allow_ip[{{ $k }}][description]"
+                                                    label="" placeholder="Enter Description"
+                                                    :value="$value" />
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                @endif
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th class="text-center" style="width : 80px;">
+                                        <span class="sr-table-template-add">
+                                            <i class="fas fa-plus-circle text-success icon"></i>
+                                        </span>
+                                    </th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group mb-3 text-center">
                                 @if ($model->profile_image_url)
-                                    <a id="profile_photo_block" class="fancybox" data-fancybox="group-{{ $model->id }}"
+                                    <a id="profile_photo_block" class="fancybox"
+                                        data-fancybox="group-{{ $model->id }}"
                                         href="{{ $model->profile_image_url }}">
                                         <img class="img-thumbnail rounded-circle avatar-xl"
                                             src="{{ $model->profile_image_url }}" />
@@ -250,7 +332,7 @@ use App\Models\User;
                 </div>
             </div>
 
-            
+
         </div>
         <x-Backend.form-common-footer-buttons />
     </div>
@@ -410,6 +492,15 @@ use App\Models\User;
                         $("#name").addClass("validate-alpha-numeric");
                         $("#country_id").val(my_country['id']).trigger("change");
                     }
+
+                    if (v == '{{ User::TYPE_INTERNAL }}') {
+                        $(".sub_type").val('<?= User::SUB_TYPE_TEAM_MEMBER ?>').trigger("change");
+                    }
+                    else
+                    {
+                        $(".sub_type").val("").trigger("change");
+                    }
+
                 }).trigger("change", {
                     pageLoad: true
                 });

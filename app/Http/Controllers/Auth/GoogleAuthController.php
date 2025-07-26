@@ -36,91 +36,80 @@ class GoogleAuthController extends Controller
             return redirect('/')->with('error', 'Google authentication failed.');
         }
 
-        // Check if the user already exists in the database
-        $existingUser = User::where('email', $user->email)->first();
 
-        if ($existingUser) {
-            // Log the user in if they already exist
-            Auth::login($existingUser);
+        DB::beginTransaction();
 
-            return redirect('/home');
+        try
+        {
+            $db_user = User::where("email", $user->getEmail())->first();
 
-        } else {
+            $data = [
+                "person_name" => $user->getName(),
+                "email" => $user->getEmail(),
+                "avatar" => $user->getAvatar(),
+                "google_id" => $user->id,
+                "created_via" => User::CREATED_VIA_GOOGLE
+            ];
 
-            DB::beginTransaction();
+            $data['person_last_name'] = "";
 
-            try
+            if (strpos($data['person_name'], " ") !== false)
             {
-                $db_user = User::where("email", $user->getEmail())->first();
+                $arr = explode(" ", $data['person_name']);
 
-                $data = [
-                    "person_name" => $user->getName(),
-                    "email" => $user->getEmail(),
-                    "avatar" => $user->getAvatar(),
-                    "google_id" => $user->id,
-                    "created_via" => User::CREATED_VIA_GOOGLE
-                ];
+                $data['person_name'] = $arr[0];
 
-                $data['person_last_name'] = "";
+                unset($arr[0]);
 
-                if (strpos($data['person_name'], " ") !== false)
-                {
-                    $arr = explode(" ", $data['person_name']);
-
-                    $data['person_name'] = $arr[0];
-
-                    unset($arr[0]);
-
-                    $data['person_last_name'] = implode(" ", $arr);
-                }
-
-                $data_before_signup = session("save_data_before_signup");
-
-                if (!$db_user && !$data_before_signup)
-                {
-                    abort("Email " . $user->getEmail() . " is not registed with us", ACTION_NOT_PROCEED);
-                }
-
-                if (is_array($data_before_signup) && $data_before_signup)
-                {
-                    $data = array_merge($data, $data_before_signup);
-                }
-                
-                $role = Role::where("code", "external_user")->first();
-
-                if (!$role) {
-                    throw new UserException("Role Not Found: external_user");
-                }
-                
-                $user = new User();
-                
-                if (!$db_user)
-                {
-                    $data['type'] = User::TYPE_EXTERNAL;
-                    $data['name'] = $user->getNextId();
-                    $data['password'] = "";
-                }
-
-                $user = User::insertOrUpdate($data);
-
-                $user->is_active = true;
-                $user->login_timezone = session("user_timezone");
-                $user->save();
-
-                $user->assignRoles([$role->id]);
-                
-                DB::commit();
-                
-                Auth::login($user);
-
-                return redirect("/home");
+                $data['person_last_name'] = implode(" ", $arr);
             }
-            catch(Exception $ex)
+
+            $data_before_signup = session("save_data_before_signup");
+            
+            if (!$db_user && !$data_before_signup)
             {
-                DB::rollBack();
-
-                throw $ex;
+                abort("Email " . $user->getEmail() . " is not registed with us", ACTION_NOT_PROCEED);
             }
+
+            if (is_array($data_before_signup) && $data_before_signup)
+            {
+                $data = array_merge($data, $data_before_signup);
+            }
+            
+            $role = Role::where("code", "external_user")->first();
+
+            if (!$role) {
+                throw new UserException("Role Not Found: external_user");
+            }
+            
+            $user = new User();
+            
+            if (!$db_user)
+            {
+                $data['type'] = User::TYPE_EXTERNAL;
+                $data['name'] = $user->getNextId();
+                $data['password'] = "";
+            }
+
+            $user = User::insertOrUpdate($data);
+
+            $user->is_active = true;
+            $user->login_timezone = session("user_timezone");
+            $user->save();
+
+            $user->assignRoles([$role->id]);
+            
+            DB::commit();
+            
+            Auth::login($user);
+
+            return redirect("/home");
+        }
+        catch(Exception $ex)
+        {
+            DB::rollBack();
+
+            throw $ex;
         }
     }
 }

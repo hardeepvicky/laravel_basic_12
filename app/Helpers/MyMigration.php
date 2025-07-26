@@ -161,6 +161,24 @@ class MyMigration extends Migration
             }
         }
 
+        $this->dropForeignKeyIfExist($tableName, $fields);
+
+        $this->dropIndexIfExist($tableName, $fields);
+
+        $output = self::getConsoleOutput();
+
+        $output->writeLogToConsole('Droping fields : ' . implode(",", $fields));
+
+        if ($fields)
+        {
+            Schema::dropColumns($tableName, $fields);
+        }
+    }
+
+    public function dropForeignKeyIfExist(string $tableName, array $fields)
+    {
+        $output = self::getConsoleOutput();
+
         $foreignKeys = $this->getForeignKeys($tableName);
 
         $output->writeLogToConsole('Droping foreign Keys');
@@ -175,17 +193,6 @@ class MyMigration extends Migration
                     $table->dropForeign($foreign_key->constraint_name);
                 });
             }
-        }
-
-        $this->dropIndexIfExist($tableName, $fields);
-
-        $output = self::getConsoleOutput();
-
-        $output->writeLogToConsole('Droping fields : ' . implode(",", $fields));
-
-        if ($fields)
-        {
-            Schema::dropColumns($tableName, $fields);
         }
     }
 

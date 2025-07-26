@@ -19,6 +19,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
 
 class RegisterController extends WebController
@@ -214,15 +215,13 @@ class RegisterController extends WebController
     {
         $response = ["status" => 1];
 
-        $data = $request->except([
+        $data = $request->only([
             "sub_type", "country_id"
         ]);
 
-        session([
-            "save_data_before_signup" => $data,
-            "user_timezone" => $request->get("timezone")
-        ]);
-
+        Session::put("save_data_before_signup", $data);
+        Session::put("user_timezone", $request->get("timezone"));
+        
         return $this->responseJson($response);
     }
 
@@ -230,10 +229,8 @@ class RegisterController extends WebController
     {
         $response = ["status" => 1];
 
-        session([
-            "user_timezone" => $request->get("timezone")
-        ]);
-
+        Session::put("user_timezone", $request->get("timezone"));
+        
         return $this->responseJson($response);
     }
 

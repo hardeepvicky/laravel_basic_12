@@ -196,9 +196,11 @@ use App\Models\User;
                         },
                         success: function (responseText, statusText, xhr, $form) {
 
-                            $.loader.setInfo("Redirecting to external URL...").show();
+                            ajaxHandleResponse(url, responseText, function(response){
+                                $.loader.setInfo("Redirecting to external URL...").show();
 
-                            location.href = url;
+                                location.href = url;
+                            });
                         },
                         error: function () {
                             $.loader.hide();

@@ -9,10 +9,14 @@
                 <thead>
                     <tr class="border-bottom-primary">
                         <th style="width:6%"><?= sortable_anchor('id', get_value_from_list($field_labels, 'id', 'id')) ?></th>
-                        <th style="width:8%">{{ get_value_from_list($field_labels, 'sub_type', 'sub_type') }}</th>
+                        <th style="width:8%">
+                            <?= sortable_anchor('sub_type', get_value_from_list($field_labels, 'sub_type', 'sub_type')) ?>
+                        </th>
                         <th style="width:10%">{{ get_value_from_list($field_labels, 'from_user_id', 'from_user_id') }}</th>
                         <th>Message</th>
-                        <th style="width:20%">Date Time</th>
+                        <th style="width:20%">
+                            <?= sortable_anchor('created_at', 'Date Time') ?>
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
