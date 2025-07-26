@@ -18,11 +18,11 @@ use App\Models\User;
             <x-Backend.form-errors />
 
             <div class="form-group">
-                <x-Inputs.drop-down name="sub_type" label="Type" :list="$sub_type_list" class="select2_drop_down" mandatory="true" />
+                <x-Inputs.drop-down name="sub_type" label="Type" :list="$sub_type_list" class="select2" mandatory="true" />
             </div>
             <div class="form-group">
                 <x-Inputs.drop-down id="country_id" name="country_id" label="Country" :list="$country_list" :value="$model->country_id"
-                    class="select2_drop_down" mandatory="true" />
+                    class="select2" mandatory="true" />
             </div>
 
             <div class="form-group">

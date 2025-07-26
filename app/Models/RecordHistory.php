@@ -29,7 +29,8 @@ class RecordHistory extends BaseMongoModel
     {
         $field_labels = [
             "model_class" => "Module",
-            "model_id" => "Module ID",
+            "model_id" => "ID",
+            "model_display_name" => "Name",
             "action" => "Action",
             "model_data" => "model_data",
             "changes" => "Changes",
@@ -303,9 +304,10 @@ class RecordHistory extends BaseMongoModel
         {
             $parse_value = (array) $value;
         }
-        else if (is_array($value))
+        
+        if (is_array($value))
         {
-            $parse_value = implode(",", $value);
+            $parse_value = implode(",", array_get_only_scaler_values($value));
         }
         else if (is_bool($value))
         {

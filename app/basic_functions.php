@@ -869,6 +869,17 @@ function array_check_data_type_and_throw_error(array $array, array $valid_data_t
     }
 }
 
+function array_get_only_scaler_values(array $array)
+{
+    foreach ($array as $k => $v) {
+        if (!is_scalar($v)) {
+            unset($array[$k]);
+        }
+    }
+
+    return $array;
+}
+
 
 function array_check_value_is_scaler_and_throw_error(array $array, bool $recursive = false, $msg = "", $msg_prefix = "")
 {
@@ -1189,4 +1200,16 @@ function check_string_is_date_time(string $str, string $format = "Y-m-d H:i:s")
     }
 
     return false;
+}
+
+function get_exception_display_message(Exception $ex)
+{
+    $msg = $ex->getMessage();
+
+    if (env("APP_DEBUG"))
+    {
+        $msg .= ", File : " . $ex->getFile() . ":" . $ex->getLine();
+    }
+
+    return $msg;
 }

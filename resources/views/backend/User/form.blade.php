@@ -68,12 +68,12 @@ use App\Models\User;
                                 $field = 'user_category_id';
                                 $label = get_value_from_list($field_labels, $field, $field);
                                 ?>
-                                <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$user_category_list"
-                                    :value="$model->{$field}" class="select2" mandatory="true" />
+                                <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
+                                    :list="$user_category_list" :value="$model->{$field}" class="select2" mandatory="true" />
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="form-group mb-3 type-block type-block-{{ User::TYPE_EXTERNAL }}">
                         <?php
                         $field = 'country_id';
@@ -83,24 +83,29 @@ use App\Models\User;
                             :value="$model->{$field}" class="select2" mandatory="true" />
                     </div>
 
-                    <div class="form-group mb-3 type-block type-block-{{ User::TYPE_INTERNAL }}">
-                        <?php
-                        $field = 'name';
-                        $label = get_value_from_list($field_labels, $field, $field);
-                        ?>
-                        <x-Inputs.text-field :id="$field" :name="$field" :label="$label" :value="$model->{$field}"
-                            mandatory="true" placeholder="Enter {{ $label }}" />
-                        <div class="help-block">This will use as login id</div>
-                    </div>
-
-                    <div class="form-group mb-3">
-                        <?php
-                        $field = 'email';
-                        $label = get_value_from_list($field_labels, $field, $field);
-                        ?>
-                        <x-Inputs.text-field type="email" :id="$field" :name="$field" :label="$label"
-                            :value="$model->{$field}" mandatory="true" placeholder="Enter {{ $label }}" />
-                        <div class="help-block">This will use as login id</div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <?php
+                                $field = 'name';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <x-Inputs.text-field :id="$field" :name="$field" :label="$label"
+                                    :value="$model->{$field}" mandatory="true" placeholder="Enter {{ $label }}" />
+                                <div class="help-block">This will use as login id</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <?php
+                                $field = 'email';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <x-Inputs.text-field type="email" :id="$field" :name="$field" :label="$label"
+                                    :value="$model->{$field}" mandatory="true" placeholder="Enter {{ $label }}" />
+                                <div class="help-block">This will use as login id</div>
+                            </div>
+                        </div>
                     </div>
 
                     @if ($is_add_form)
@@ -169,8 +174,9 @@ use App\Models\User;
                                 $field = 'whatsapp_mobile';
                                 $label = get_value_from_list($field_labels, $field, $field);
                                 ?>
-                                <x-Inputs.text-field :id="$field" :name="$field" :label="$label"
-                                    :value="$model->{$field}" class="validate-mobile" placeholder="Enter {{ $label }}"
+                                <x-Inputs.group-text-field :id="$field" :name="$field" :label="$label"
+                                    class="validate-mobile" :value="$model->{$field}" placeholder="Enter {{ $label }}"
+                                    secondaryText='<span class="input-group-text text-center"><span id="same_as_mobile" class="btn btn-secondary btn-sm">Same As Mobile</span></span>'
                                     mandatory="true" />
                             </div>
                         </div>
@@ -283,8 +289,7 @@ use App\Models\User;
                                             <td>
                                                 <?php $value = $allow_arr['description']; ?>
                                                 <x-inputs.text-field name="allow_ip[{{ $k }}][description]"
-                                                    label="" placeholder="Enter Description"
-                                                    :value="$value" />
+                                                    label="" placeholder="Enter Description" :value="$value" />
                                             </td>
                                         </tr>
                                     @endforeach
@@ -496,10 +501,6 @@ use App\Models\User;
                     if (v == '{{ User::TYPE_INTERNAL }}') {
                         $(".sub_type").val('<?= User::SUB_TYPE_TEAM_MEMBER ?>').trigger("change");
                     }
-                    else
-                    {
-                        $(".sub_type").val("").trigger("change");
-                    }
 
                 }).trigger("change", {
                     pageLoad: true
@@ -526,6 +527,10 @@ use App\Models\User;
 
                 $("#dept_id").trigger("change", {
                     pageLoad: true
+                });
+
+                $("#same_as_mobile").click(function() {
+                    $("#whatsapp_mobile").val($("#mobile").val());
                 });
             });
         });

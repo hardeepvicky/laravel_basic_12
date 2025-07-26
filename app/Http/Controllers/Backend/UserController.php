@@ -360,7 +360,7 @@ class UserController extends BackendController
 
             $this->saveSqlLog();
 
-            return back()->with('fail', $ex->getMessage())->withInput()->with("custom_errors", $this->custom_errors);
+            return back()->with('fail', get_exception_display_message($ex))->withInput()->with("custom_errors", $this->custom_errors);
         }
     }
 

@@ -22,6 +22,7 @@ class RecordHistoryController extends BackendController
             ["field" => "id", "type" => "", "cache" => false],
             ["field" => "action", "type" => "string_equal"],
             ["field" => "model_class", "type" => "string_equal"],
+            ["field" => "model_display_name", "type" => "string"],
             ["field" => "model_id", "type" => "int"],
             ["field" => "created_at", "type" => "from_date", "view_field" => "from_date"],
             ["field" => "created_at", "type" => "to_date", "view_field" => "to_date"],
@@ -87,8 +88,8 @@ class RecordHistoryController extends BackendController
         return true;
     }
 
-    protected function parseConditionValue($value, String $type)
+    protected function parseConditionValue($value, String $type, array $extra = [])
     {
-        return LaravelExtend::getMongodbParseCondition($value, $type);
+        return LaravelExtend::getMongodbParseCondition($value, $type, $extra);
     }
 }

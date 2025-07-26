@@ -11,6 +11,8 @@ class Country extends BaseModel
         'display_name',
     ];
 
+    protected static array $list_fields = ["id", "name", "short_name"];
+
     public function getUniqueValidationRules()
     {
         $field_rules = [

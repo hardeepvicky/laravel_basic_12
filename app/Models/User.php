@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Acl\AccessControl;
+use App\Events\ModelDelete;
+use App\Events\ModelUpdate;
 use App\Events\UserInsert;
 use App\Exceptions\UserException;
 use App\Helpers\FileUtility;
@@ -187,9 +189,13 @@ class User extends Authenticatable implements BaseModelInterface
 
         self::updated(function ($model) {
             $model->afterSave();
+
+            event(new ModelUpdate($model));
         });
 
-        self::deleting(function ($model) {});
+        self::deleting(function ($model) {
+            event(new ModelDelete($model));
+        });
 
         self::deleted(function ($model) {
             $model->forgotCache();
@@ -346,7 +352,7 @@ class User extends Authenticatable implements BaseModelInterface
 
     public function userCategory()
     {
-        return $this->belongsTo(UserCategory::class);
+        return $this->belongsTo(DropDownValue::class);
     }
 
     public function country()
@@ -454,8 +460,6 @@ class User extends Authenticatable implements BaseModelInterface
     {
         return static::$unique_fields;
     }
-
-
 
     public function isRquireOTPVerificationOnLogin()
     {
@@ -569,6 +573,156 @@ class User extends Authenticatable implements BaseModelInterface
         return $list;
     }
 
+
+    public function getProfileImage($defalut = "img/user.png")
+    {
+        if (isset($this->profile_image_url) && $this->profile_image_url) {
+            return $this->profile_image_url;
+        }
+
+        if ($this->profile_image) {
+            $fileUtility = new FileUtility($this->getStorageDisk());
+            $url = $fileUtility->getUrl($this->profile_image);
+
+            if ($url) {
+                return $url;
+            }
+
+            return "/" . NOT_FOUND_IMAGE_PATH;
+        }
+
+        if ($this->avatar) {
+            return $this->avatar;
+        }
+
+        return $defalut;
+    }
+
+    public static function generateUID()
+    {
+        return Util::getRandomString(10) . time();
+    }
+
+    public function setPassword($plain_password)
+    {
+        $this->plain_password = $plain_password;
+        $this->password = bcrypt($plain_password);
+    }
+
+    public function getFieldLabels()
+    {
+        $labels = [
+            'full_name' => "Full Name"
+        ];
+
+        $table_info = $this->getTableInfo($this->getTable());
+
+        // d($table_info, true);
+
+        $eception_list = [
+            "code",
+            "can_edit",
+            "cannot_edit_reason_array",
+            "can_delete",
+            "cannot_delete_reason_array",
+            "used_in_other_table_created_by",
+            "used_in_other_table_updated_by",
+            "uid",
+            "plain_password",
+            "password",
+            "remember_token",
+            "remember_token",
+        ];
+
+        foreach ($table_info['columns'] as $field => $field_attr) {
+
+            if (!in_array($field, $eception_list)) {
+                $text = str_replace(["_id", "is_"], "", $field);
+
+                $labels[$field] = ucwords(str_function_name_to_human_text($text));
+            }
+        }
+
+        // d($labels, true);
+
+        return $labels;
+    }
+
+    public function getRefDisplayName($field, $value)
+    {
+        $ret_array = [];
+
+        switch ($field) {
+            case "user_category_id":
+                $ret_array = [
+                    $field => $this->userCategory->getDisplayName()
+                ];
+                break;
+            case "dept_id":
+                $ret_array = [
+                    $field => $this->department->getDisplayName()
+                ];
+                break;
+            case "sub_dept_id":
+                $ret_array = [
+                    $field => $this->subDepartment->getDisplayName()
+                ];
+                break;
+            case "desg_id":
+                $ret_array = [
+                    $field => $this->designation->getDisplayName()
+                ];
+                break;
+            case "country_id":
+                $ret_array = [
+                    $field => $this->country->getDisplayName()
+                ];
+                break;
+        }
+
+        // dd($ret_array);
+
+        return $ret_array;
+    }
+
+    public static function getCodeList(String $field)
+    {
+        $class_info = get_class_info(static::class);
+
+        switch ($field) {
+            case "sub_type":
+
+                $list = [];
+
+                foreach ($class_info['constants'] as $constant => $label) {
+                    if (strpos($constant, "SUB_TYPE_") !== false) {
+                        $list[] = $label;
+                    }
+                }
+
+                return $list;
+
+                break;
+
+            case "sub_type_for_signup_form":
+
+                $list = [];
+
+                foreach ($class_info['constants'] as $constant => $label) {
+                    if (strpos($constant, "SUB_TYPE_") !== false) {
+                        if (!in_array($constant, [self::SUB_TYPE_TEAM_MEMBER])) {
+                            $list[] = $label;
+                        }
+                    }
+                }
+
+                return $list;
+
+                break;
+        }
+    }
+
+    
     private function _updateUsageJson($json, $table, $label, $counter, $extra = [])
     {
         if (!is_array($json)) {
@@ -689,151 +843,5 @@ class User extends Authenticatable implements BaseModelInterface
         }
 
         $this->save();
-    }
-
-    public function getProfileImage($defalut = "img/user.png")
-    {
-        if (isset($this->profile_image_url) && $this->profile_image_url) {
-            return $this->profile_image_url;
-        }
-
-        if ($this->profile_image) {
-            $fileUtility = new FileUtility($this->getStorageDisk());
-            $url = $fileUtility->getUrl($this->profile_image);
-
-            if ($url) {
-                return $url;
-            }
-
-            return "/" . NOT_FOUND_IMAGE_PATH;
-        }
-
-        if ($this->avatar) {
-            return $this->avatar;
-        }
-
-        return $defalut;
-    }
-
-    public static function generateUID()
-    {
-        return Util::getRandomString(10) . time();
-    }
-
-    public function setPassword($plain_password)
-    {
-        $this->plain_password = $plain_password;
-        $this->password = bcrypt($plain_password);
-    }
-
-    public function getFieldLabels()
-    {
-        $labels = [
-            'full_name' => "Full Name"
-        ];
-
-        $table_info = $this->getTableInfo($this->getTable());
-
-        // d($table_info, true);
-
-        $eception_list = [
-            "code",
-            "can_edit",
-            "cannot_edit_reason_array",
-            "can_delete",
-            "cannot_delete_reason_array",
-            "used_in_other_table_created_by",
-            "used_in_other_table_updated_by",
-            "uid",
-            "plain_password",
-            "password",
-            "remember_token",
-            "remember_token",
-        ];
-
-        foreach ($table_info['columns'] as $field => $field_attr) {
-
-            if (!in_array($field, $eception_list)) {
-                $text = str_replace(["_id", "is_"], "", $field);
-
-                $labels[$field] = ucwords(str_function_name_to_human_text($text));
-            }
-        }
-
-        // d($labels, true);
-
-        return $labels;
-    }
-
-    public function getRefDisplayName($field, $value)
-    {
-        $ret_array = [];
-
-        switch ($field) {
-            case "user_category_id":
-                $ret_array = [
-                    $field => $this->userCategory->getDisplayName()
-                ];
-                break;
-            case "dept_id":
-                $ret_array = [
-                    $field => $this->department->getDisplayName()
-                ];
-                break;
-            case "sub_dept_id":
-                $ret_array = [
-                    $field => $this->subDepartment->getDisplayName()
-                ];
-                break;
-            case "desg_id":
-                $ret_array = [
-                    $field => $this->designation->getDisplayName()
-                ];
-                break;
-            case "country_id":
-                $ret_array = [
-                    $field => $this->country->getDisplayName()
-                ];
-                break;
-        }
-
-        return $ret_array;
-    }
-
-    public static function getCodeList(String $field)
-    {
-        $class_info = get_class_info(static::class);
-
-        switch ($field) {
-            case "sub_type":
-
-                $list = [];
-
-                foreach ($class_info['constants'] as $constant => $label) {
-                    if (strpos($constant, "SUB_TYPE_") !== false) {
-                        $list[] = $label;
-                    }
-                }
-
-                return $list;
-
-                break;
-
-            case "sub_type_for_signup_form":
-
-                $list = [];
-
-                foreach ($class_info['constants'] as $constant => $label) {
-                    if (strpos($constant, "SUB_TYPE_") !== false) {
-                        if (!in_array($constant, [self::SUB_TYPE_TEAM_MEMBER])) {
-                            $list[] = $label;
-                        }
-                    }
-                }
-
-                return $list;
-
-                break;
-        }
     }
 }
