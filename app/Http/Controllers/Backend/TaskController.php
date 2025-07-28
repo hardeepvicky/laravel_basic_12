@@ -7,6 +7,7 @@ use App\Helpers\CsvUtility;
 use App\Helpers\DateUtility;
 use App\Helpers\FileUtility;
 use App\Helpers\LaravelExtend;
+use App\Helpers\Util;
 use App\Models\Department;
 use App\Models\DocumentFile;
 use App\Models\DropDownValue;
@@ -100,11 +101,22 @@ class TaskController extends BackendController
 
     public function today()
     {
-        $cache_key_prefix = Route::currentRouteName();
+        $this->today_my_task(false);
 
-        if (is_null($this->model)) {
-            $this->model = new Task();
-        }
+        $this->today_other_task(false);
+
+        
+
+        $this->saveSqlLog();
+
+        return $this->viewIndex(__FUNCTION__);
+    }
+
+    public function today_my_task(bool $render = true)
+    {
+        $this->model = new $this->modelClass;
+
+        $cache_key_prefix = Route::currentRouteName();
 
         $status_code_list = [
             Task::STATUS_ASSIGNED,
@@ -115,15 +127,13 @@ class TaskController extends BackendController
 
         $builder = $this->modelClass::whereIn("status", $status_code_list);
 
-        $auth_user_id = $this->getAuthUserId();
-
-        $builder->where("assign_to_user_id", $auth_user_id);
+        $builder->where("assign_to_user_id", LaravelExtend::getAuthUserId());
 
         $cache_key_for_sort = $cache_key_prefix . "-extra-params-" . __FUNCTION__;
 
         $clear_cache = request('is_sort_clear', false);
 
-        $sort_params = $this->getRequestData($cache_key_for_sort, [
+        $sort_params = $this->getSortBy(new $this->modelClass, $cache_key_for_sort, [
             ["key" => "sort_by", "default" => "start_date_time"],
             ["key" => "sort_dir", "default" => "DESC"],
         ], $clear_cache);
@@ -134,39 +144,16 @@ class TaskController extends BackendController
 
         $my_tasks = $builder->get();
 
-        $cache_key = $cache_key_prefix . "-2";
+        foreach($my_tasks as $record)
+        {
+            $seconds_left = DateUtility::diff($record->end_date_time, DateUtility::getDate(null));
 
-        $conditions = $this->getConditions($cache_key, [
-            ["field" => "status", "type" => "string_equal", "view_field" => "other_task_status"],
-            ["field" => "assign_to_user_id", "type" => "int", "view_field" => "other_assign_to_user_id"],
-        ]);
+            $record->time_left = Util::niceTime($seconds_left);
 
-        $auth_user = Auth::user();
-
-        $builder = $this->modelClass::whereIn("status", $status_code_list)->where($conditions);
-
-        if ($auth_user->hasRole(Role::TYPE_SYSTEM_ADMIN)) {
-        } else {
-            $child_user_id_list = $auth_user->designation->getUserIdListBasedOnDesignationLevel();
-            if ($child_user_id_list) {
-                $builder->whereIn("assign_to_user_id", $child_user_id_list);
-            }
+            $record->afterFind();
         }
 
-
-        $builder->where(function ($query) use ($auth_user_id) {
-            $query->whereNot("assign_to_user_id", $auth_user_id);
-        });
-
-        $builder->with([
-            "assignToUser"
-        ]);
-
-        SqlLog::addSelectQuery($builder);
-
-        $records = $builder->get();
-
-        $this->setForView(compact("records", "my_tasks"));
+        $this->setForView(compact("my_tasks"));
 
         $type_conditions = [
             "code" => $status_code_list
@@ -181,9 +168,98 @@ class TaskController extends BackendController
 
         LaravelExtend::addInfo($msg, "primary");
 
-        $this->saveSqlLog();
+        if ($render)
+        {
+            return $this->view("ajax_today_my_task");
+        }
+    }
 
-        return $this->viewIndex(__FUNCTION__);
+    public function today_other_task(bool $render = true)
+    {
+        $this->model = new $this->modelClass;
+
+        $status_code_list = [
+            Task::STATUS_ASSIGNED,
+            Task::STATUS_CONFIRM,
+            Task::STATUS_IN_PROGRESS,
+            TASK::STATUS_COMPLETED
+        ];
+
+        $cache_key_prefix = Route::currentRouteName();
+
+        $cache_key = $cache_key_prefix;
+
+        $conditions = $this->getConditions($cache_key, [
+            ["field" => "dept_id", "type" => "int", "view_field" => "other_dept_id"],
+            ["field" => "assign_to_user_id", "type" => "int", "view_field" => "other_assign_to_user_id"],
+            ["field" => "status", "type" => "string_equal", "view_field" => "other_task_status"],
+            ["field" => "name", "type" => "string", "view_field" => "other_task_name"],
+        ]);
+
+        $cache_key = $cache_key_prefix . "-2";
+
+        $tag_conditions = $this->getConditions($cache_key . "-2", [
+            ["field" => "name", "type" => "string", "view_field" => "other_tag_name"],
+        ]);
+
+        $builder = $this->modelClass::where($conditions);
+
+        $builder = $this->modelClass::whereIn("status", $status_code_list)->where($conditions);
+
+        if ($tag_conditions) {
+            $builder->wherehas("tags", function ($query) use ($tag_conditions) {
+                $query->where($tag_conditions);
+            });
+        }
+
+        $auth_user = Auth::user();
+
+        if ($auth_user->hasRole(Role::TYPE_SYSTEM_ADMIN)) {
+        } else {
+            $child_user_id_list = $auth_user->designation->getUserIdListBasedOnDesignationLevel();
+            if ($child_user_id_list) {
+                $builder->whereIn("assign_to_user_id", $child_user_id_list);
+            }
+        }
+
+        $builder->where(function ($query)  {
+            $query->whereNot("assign_to_user_id", LaravelExtend::getAuthUserId());
+        });
+
+        $builder->with([
+            "assignToUser"
+        ]);
+
+        $cache_key_for_sort = $cache_key_prefix . "-extra-params-" . __FUNCTION__;
+
+        $clear_cache = request('is_sort_clear', false);
+
+        $sort_params = $this->getSortBy($this->model, $cache_key_for_sort, [
+            ["key" => "sort_by", "default" => "start_date_time"],
+            ["key" => "sort_dir", "default" => "DESC"],
+        ], $clear_cache);
+
+        $builder->orderBy($sort_params['sort_by'], $sort_params['sort_dir']);
+
+        SqlLog::addSelectQuery($builder);
+
+        $other_tasks = $builder->paginate($this->paginationLimit);
+
+        foreach($other_tasks as $record)
+        {
+            $seconds_left = DateUtility::diff($record->end_date_time, DateUtility::getDate(null));
+
+            $record->time_left = Util::niceTime($seconds_left);
+
+            $record->afterFind();
+        }
+
+        $this->setForView(compact("other_tasks"));
+
+        if ($render)
+        {
+            return $this->view("ajax_today_other_task");
+        }
     }
 
     protected function beforeViewRender()
@@ -205,12 +281,12 @@ class TaskController extends BackendController
 
         $type_conditions = [
             'type' => Type::getType($this->model, "status")
-        ];        
+        ];
         $status_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
 
         $type_conditions = [
             'type' => Type::getType($this->model, "duration_type")
-        ]; 
+        ];
         $duration_type_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
 
         $department_list = Department::getList("id", "display_name", [], "list_display_order");
@@ -354,7 +430,7 @@ class TaskController extends BackendController
             $ids = explode(",", $validatedData['taskFile']);
 
             $document_files = DocumentFile::find($ids);
-            
+
             $this->model->documentFile()->sync($document_files);
         }
 
@@ -731,7 +807,7 @@ class TaskController extends BackendController
         {
             $record->afterFindForCsv();
         }
-        
+
         $records = $records->toArray();
 
         // d($records, true);

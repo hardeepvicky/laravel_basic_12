@@ -11,22 +11,34 @@
 
     @include($partial_path . '.page_header')
 
-    <div class="row">
-        <div class="col-md-12 col-lg-5">
-            <div class="card">
-                <div class="card-header border-l-primary card-no-border">
-                    <h3>My Tasks</h3>
-                </div>
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link text-primary active" id="tab_my_task" data-bs-toggle="tab" href="#tab_my_task_block"
+                role="tab" aria-controls="tab_my_task_block" aria-selected="true">
+                My Tasks
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-primary" id="tab_other_task" data-bs-toggle="tab" href="#tab_other_task_block" role="tab"
+                aria-controls="tab_other_task_block" aria-selected="true">
+                Assign To Others
+            </a>
+        </li>
+    </ul>
+    <div class="tab-content">
+        <div class="tab-pane active show fade" id="tab_my_task_block" role="tabpanel" aria-labelledby="tab_my_task">
+            <div class="card" style="border-radius: 0">
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-bordered summary-table table-sm">
                             <thead>
                                 <tr class="border-bottom-primary">
                                     <th>Sr. No.</th>
-                                    <th><?= sortable_anchor('name', get_value_from_list($field_labels, 'name', 'name')) ?></th>
-                                    <th><?= sortable_anchor('priority', get_value_from_list($field_labels, 'priority', 'priority')) ?>
-                                    <th><?= sortable_anchor('start_date_time', get_value_from_list($field_labels, 'start_date_time', 'start_date_time')) ?>
+                                    <th>{!! sortable_anchor('name', get_value_from_list($field_labels, 'name', 'name'))  !!}</th>
+                                    <th>{!! sortable_anchor('priority', get_value_from_list($field_labels, 'priority', 'priority')) !!}</th>
+                                    <th>{!! sortable_anchor('start_date_time', get_value_from_list($field_labels, 'start_date_time', 'start_date_time')) !!} </th>
                                     <th>Duration</th>
+                                    <th>Time Left</th>
                                     <th>Status</th>
                                     <th>Actions</th>
                                 </tr>
@@ -44,6 +56,7 @@
                                             {{ $record->duration }}
                                             {{ get_value_from_list($duration_type_list, $record->duration_type) }}
                                         </td>
+                                        <td>{{ $record->time_left }}</td>
                                         <td>
                                             {{ get_value_from_list($status_list, $record->status) }}
                                         </td>
@@ -85,6 +98,11 @@
                                                     Verify Now
                                                 </a>
                                             @endif
+
+                                            <a class="btn btn-secondary btn-sm mb-2"
+                                                href="{{ route($routePrefix . '.index', ['id' => $record->id]) }}">
+                                                Go To List
+                                            </a>
                                         </td>
                                     </tr>
                                 @endforeach
@@ -94,85 +112,61 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-12 col-lg-7">
-            <div class="card">
-                <div class="card-header border-1-secondary card-no-border">
-                    <h3>Assign To Others</h3>
-                </div>
+        <div class="tab-pane" id="tab_other_task_block" role="tabpanel" aria-labelledby="tab_other_task">
+            <div class="card" style="border-radius: 0">
                 <div class="card-body">
-                    <form method="GET" action="{{ route($routePrefix . '.today') }}">
+                    <form method="GET" id="form_today_other_task" class="summary_search" action="{{ route($routePrefix . '.today_other_task') }}" data-load_html_at="#today_other_task">
                         <input type="hidden" name="is_sort_clear" value="1" />
-                        <div class="row mb-4">
-                            <div class="col-md-6">
-                                <?php
-                                $field = 'status';
+                        <div class="row mb-4">                        
+                            <div class="col-md-4 col-lg-3 col-xxxl-2 mb-2">
+                                @php
+                                $field = "dept_id";
                                 $label = get_value_from_list($field_labels, $field, $field);
-                                ?>
-                                <x-Inputs.drop-down name="other_task_status" :label="$label" :value="$search['other_task_status']"
-                                    :list="$status_list" class="select2" />
+                                @endphp
+                                <x-Inputs.drop-down name="other_dept_id" :label="$label" :value="$search['other_dept_id']" :list="$department_list"
+                                    class="select2" />
                             </div>
-                            <div class="col-md-6">
-                                <?php
+                            <div class="col-md-4 col-lg-3 col-xxxl-2 mb-2">
+                                @php
                                 $field = 'assign_to_user_id';
                                 $label = get_value_from_list($field_labels, $field, $field);
-                                ?>
+                                @endphp
                                 <x-Inputs.drop-down name="other_assign_to_user_id" :label="$label" :value="$search['other_assign_to_user_id']"
                                     :list="$user_list" class="select2" />
                             </div>
+                            <div class="col-md-4 col-lg-3 col-xxxl-2 mb-2">
+                                @php
+                                $field = 'status';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                @endphp
+                                <x-Inputs.drop-down name="other_task_status" :label="$label" :value="$search['other_task_status']" :list="$status_list"
+                                    class="select2" />
+                            </div>
+                            <div class="col-md-4 col-lg-3 col-xxxl-2 mb-2">
+                                @php
+                                $field = "name";
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                @endphp
+                                <x-Inputs.text-field name="other_task_name" :label="$label" value="{{ $search["other_task_name"] }}" />
+                            </div>
+                            <div class="col-md-4 col-lg-3 col-xxxl-2 mb-2">
+                                @php
+                                $field = "tag_name";
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                @endphp
+                                <x-Inputs.text-field name="other_tag_name" :label="$label" value="{{ $search["other_tag_name"] }}" />
+                            </div>
                         </div>
-                        <?php $false = false; ?>
+                        @php $false = false; @endphp
                         <x-Backend.summary-search-form-footer :showPaginationDropDown="$false" />
-                    </form>
-
-                    <div class="table-responsive mt-2">
-                        <table class="table table-bordered summary-table table-sm">
-                            <thead>
-                                <tr class="border-bottom-secondary">
-                                    <th>Sr. No.</th>
-                                    <th><?= sortable_anchor('name', get_value_from_list($field_labels, 'name', 'name')) ?></th>
-                                    <th>Assign To</th>
-                                    <th><?= sortable_anchor('priority', get_value_from_list($field_labels, 'priority', 'priority')) ?>
-                                    <th><?= sortable_anchor('start_date_time', get_value_from_list($field_labels, 'start_date_time', 'start_date_time')) ?>
-                                    <th>Duration</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($records as $i => $record)
-                                    <tr>
-                                        <th scope="row">{{ $i + 1 }}</th>
-                                        <td class="name">{{ $record->name }}</td>
-                                        <td class="assignToUser">{{ $record->assignToUser?->getDisplayName() }}</td>
-                                        <td>{{ $record->priority }}</td>
-                                        <td>
-                                            {{ if_date($record->start_date_time) }}
-                                        </td>
-                                        <td>
-                                            {{ $record->duration }}
-                                            {{ get_value_from_list($duration_type_list, $record->duration_type) }}
-                                        </td>
-                                        <td>
-                                            {{ get_value_from_list($status_list, $record->status) }}
-                                        </td>
-                                        <td>
-                                            @if (in_array($record->status, [Task::STATUS_COMPLETED]))
-                                                <a class="btn btn-secondary btn-sm mb-2 status_verified"
-                                                    href="{{ route($routePrefix . '.status_verified', ['id' => $record->id]) }}">
-                                                    Verify Now
-                                                </a>
-                                            @endif
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
+                    </form>                    
                 </div>
+            </div>
+
+            <div id="today_other_task" class="index_table">                
             </div>
         </div>
     </div>
-
 
     <div class="modal fade" id="modal-task-verify" tabindex="-1" style="display: none;" aria-hidden="true">
         <div class="modal-dialog" role="document">
@@ -188,7 +182,7 @@
                         <div class="card-header card-no-border pb-0">
                             <h3>Rate It</h3>
                             <p class="desc mb-0 mt-1">
-                                
+
                             </p>
                         </div>
                         <div class="card-body">
@@ -231,11 +225,12 @@
                         </div>
                     </div>
                     <div class="form-group mb-3">
-                        <?php
+                        @php
                         $field = 'review_remarks';
                         $label = get_value_from_list($field_labels, $field, $field);
-                        ?>
-                        <x-Inputs.text-area :id="$field" :name="$field" :label="$label" rows="5" placeholder="Enter {{ $label }}"/>
+                        @endphp
+                        <x-Inputs.text-area :id="$field" :name="$field" :label="$label" rows="5"
+                            placeholder="Enter {{ $label }}" />
                     </div>
                     </form>
                 </div>
@@ -248,9 +243,9 @@
     </div>
 
     <script>
-        $(function(){
-            $.events.execAtLast(function(){
-                $("a.status_verified").click(function(e){
+        $(function() {
+            $.events.execAtLast(function() {
+                $("a.status_verified").click(function(e) {
 
                     var _tr = $(this).closest("tr");
 
@@ -263,8 +258,7 @@
                     modal.find("form").attr("action", $(this).attr("href"));
 
                     var html = "";
-                    if (_tr.find(".assignToUser").length > 0)
-                    {
+                    if (_tr.find(".assignToUser").length > 0) {
                         html += _tr.find(".assignToUser").html();
 
                         html += " -> ";
@@ -284,8 +278,7 @@
 
                         return true;
                     },
-                    uploadProgress: function(event, position, total, percentComplete) {                        
-                    },
+                    uploadProgress: function(event, position, total, percentComplete) {},
                     error: function(xhr, status, errorString) {
                         $.loader.hide();
 
@@ -296,12 +289,9 @@
                             return false;
                         }
 
-                        try
-                        {
+                        try {
                             var responseJson = JSON.parse(response);
-                        }
-                        catch(e)
-                        {
+                        } catch (e) {
                             $.events.onAjaxError("JSON Parse Error", response);
                             return false;
                         }
@@ -325,6 +315,8 @@
                 $('#modal-task-verify .submit').click(function() {
                     $('#modal-task-verify form').trigger("submit");
                 });
+
+                $("#form_today_other_task").trigger("submit", {pageLoad : true});
             });
         })
     </script>

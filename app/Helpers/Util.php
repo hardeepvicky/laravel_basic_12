@@ -268,8 +268,15 @@ class Util
     {
         $time = round($time, 1);
 
+        $prefix = "";
+        if ($time < 0)
+        {
+            $prefix = "-";
+            $time = abs($time);
+        }
+
         if ($time < 60) {
-            return $time . " s";
+            return $prefix . $time . " s";
         }
 
         $min = floor($time / 60);
@@ -280,7 +287,7 @@ class Util
                 return $min . " m $seconds s";
             }
 
-            return $min . " m ";
+            return $prefix . $min . " m ";
         }
 
         $hour = floor($min / 60);
@@ -288,20 +295,20 @@ class Util
 
         if ($hour < 24) {
             if ($min) {
-                return $hour . " h $min m";
+                return $prefix . $hour . " h $min m";
             }
 
-            return $hour . " h ";
+            return $prefix . $hour . " h ";
         }
 
         $days = floor($hour / 24);
         $hour = $hour % 24;
 
         if ($hour) {
-            return $days . " d $hour h $min m";
+            return $prefix . $days . " d $hour h $min m";
         }
 
-        return $days . " d";
+        return $prefix . $days . " d";
     }
 
     public static function niceNumber($number, $count = 0)

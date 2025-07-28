@@ -10,8 +10,27 @@ $.loader = {
      */
     jqueryObj : null,
 
-    init: function () {
-        this.jqueryObj = $("body .loader-container");
+    init: function (selector) {
+
+        if (typeof selector == "undefined")
+        {
+            selector = "body";
+        }
+        else
+        {
+            if ($(selector).length == 0)
+            {
+                console.error(`${selector} not found by jquery`);
+                return;
+            }
+            else if ($(selector).length > 1)
+            {
+                console.error(`${selector} more than 1 found by jquery`);
+                return;
+            }
+        }
+
+        this.jqueryObj = $(selector).find(".loader-container");
 
         if (this.jqueryObj.length > 0) {
             return this;
@@ -25,9 +44,9 @@ $.loader = {
             html += "</div>";
         html += "</div>";
 
-        $("body").append(html).addClass("loader-applied");
+        $(selector).append(html).addClass("loader-applied");
 
-        this.jqueryObj = $("body .loader-container");
+        this.jqueryObj = $(selector).find(".loader-container");
 
         return this;
     },

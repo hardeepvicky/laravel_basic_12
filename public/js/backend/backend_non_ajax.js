@@ -119,8 +119,38 @@ $(document).ready(function () {
     });
 
     $(document).on("submit", "form.summary_search", function () {
+
+        var load_html_at = $(this).data("load_html_at");
+        load_html_at = load_html_at ?? "#index_table";
+
+        if (load_html_at)
+        {
+            var target = $(load_html_at);
+
+            if(target.length > 0)
+            {
+                if(target.length > 1)
+                {
+                    console.error(`${load_html_at} more than 1 found by jquery`);
+                    return;
+                }
+
+                $.loader.init(target);
+            }
+            else
+            {
+                $.loader.init();
+                target = $("#index_table");
+            }
+        }
+        else
+        {
+            load_html_at = "#index_table";
+            var target = $(load_html_at);
+        }
+
         $(this).ajaxSubmit({
-            target: "#index_table",
+            target: load_html_at,
             beforeSubmit: function (formData, jqForm, options) {
                 $.loader.show();
             },
@@ -157,11 +187,36 @@ $(document).ready(function () {
         }
     );
 
-    $(document).on("click", "#index_table .pagination a.page-link, #index_table a.sortable", function(){
+    $(document).on("click", ".pagination a.page-link, a.sortable", function(){
             var href = $(this).attr("href");
+
+            var target = $(this).closest(".index_table");
+
+            if(target.length > 0)
+            {
+                if(target.length > 1)
+                {
+                    console.error(`.index_table more than 1 found by jquery`);
+                    return;
+                }
+                
+                $.loader.init(target);
+            }
+            else
+            {
+                $.loader.init();
+                target = $("#index_table");
+            }
+
+            if(target.length == 0)
+            {
+                console.error(`either .index_table or #index_table not found by jquery`);
+                return;
+            }
+
             $.loader.show();
 
-            $("#index_table").load(href, function () {
+            $(target).load(href, function () {
                 $.loader.hide();
             });
 
