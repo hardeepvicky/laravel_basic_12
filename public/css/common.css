@@ -534,3 +534,7 @@ label.info {
     max-height: 200px;
     overflow: hidden;
 }
+
+.note-hint-popover{
+    position: absolute;
+}

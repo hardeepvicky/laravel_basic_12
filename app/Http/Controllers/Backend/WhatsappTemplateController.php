@@ -42,7 +42,7 @@ class WhatsappTemplateController extends BackendController
             ["field" => "id", "type" => "int", "cache" => false],
             ["field" => "name", "type" => "string"],
             ["field" => "language", "type" => "string"],
-            ["field" => "is_active", "type" => "", "view_field" => "is_active"],
+            ["field" => "is_active", "type" => "int"],
         ]);
 
         $builder = $this->modelClass::where($conditions);

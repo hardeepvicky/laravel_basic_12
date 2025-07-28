@@ -368,6 +368,7 @@ class TaskController extends BackendController
 
             unset($save_data['tag_name']);
             unset($save_data['taskUser']);
+            unset($save_data['taskFile']);
 
             $save_data = $this->model->convertTimeZoneBeforeQueryToDatabase($save_data);
 
@@ -548,6 +549,7 @@ class TaskController extends BackendController
 
             unset($save_data['tag_name']);
             unset($save_data['taskUser']);
+            unset($save_data['taskFile']);
 
             $save_data = $this->model->convertTimeZoneBeforeQueryToDatabase($save_data);
 

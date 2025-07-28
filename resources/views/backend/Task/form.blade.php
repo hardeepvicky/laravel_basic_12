@@ -240,8 +240,7 @@ $false = false;
 
                 show_hide_field();
 
-                suggestion_list($("#description"), $("#description-suggestion-box"), [],
-                    "/tags/ajax_get_list");
+                suggestion_list($("#description"), $("#description-suggestion-box"), [], "/tags/ajax_get_list");
 
                 $(".cascade-drop-down").trigger("change", {
                     pageLoad: true

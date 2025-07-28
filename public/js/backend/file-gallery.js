@@ -26,10 +26,14 @@ jQuery.fn.extend({
             var value = $(this).val();
             var multiple = $(this).attr("multiple");
             multiple = multiple ? 1 : 0;
+            
+            var file_info = $(this).parent().find(".gallery-files-info");
 
-            var btn = "<div><span class='gallery-files-info' style='margin-left:5px;'></span><div>";
-
-            $(this).parent().append(btn);
+            if (file_info.length == 0)
+            {
+                var html = "<div><span class='gallery-files-info' style='margin-left:5px;'></span><div>";
+                $(this).parent().append(html);
+            }
 
             var modal_id = 'gallery-modal-' + obj.postfix;
 

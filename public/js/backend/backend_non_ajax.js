@@ -59,6 +59,7 @@ $(document).ready(function () {
             return url;
         },
         afterGet: function (src, dest, response) {
+            $.loader.init().hide();
             return response;
         },
     });

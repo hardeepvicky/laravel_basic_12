@@ -15,6 +15,7 @@ use App\Http\Controllers\Backend\DeveloperController;
 use App\Http\Controllers\Backend\DocumentCategoryController;
 use App\Http\Controllers\Backend\DocumentFileController;
 use App\Http\Controllers\Backend\DropDownValueController;
+use App\Http\Controllers\Backend\EmailTemplateController;
 use App\Http\Controllers\Backend\EmployeeController;
 use App\Http\Controllers\Backend\EnquiryController as BackendEnquiryController;
 use App\Http\Controllers\Backend\NotificationController;
@@ -464,7 +465,7 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
 
         $name = "copy";
         Route::get("{id}/" . $name, [$controllerClass, $name])->name($name);
-        
+
         $name = "activate";
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
 
@@ -552,10 +553,10 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
 
         $name = "my";
         Route::any($name, [NotificationController::class, $name])->name($name);
-        
+
         $name = "ajax_mark_read";
         Route::get($name, [NotificationController::class, $name])->name($name);
-    });    
+    });
 
     $route_prefix = "change-history";
     $controllerClass = RecordHistoryController::class;
@@ -565,6 +566,21 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
 
     $route_prefix = "whatsapp-template";
     $controllerClass = WhatsappTemplateController::class;
+    Route::resource($route_prefix, $controllerClass);
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
+        $name = "copy";
+        Route::get("{id}/" . $name, [$controllerClass, $name])->name($name);
+
+        $name = "activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "de_activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+    });
+
+    $route_prefix = "email-template";
+    $controllerClass = EmailTemplateController::class;
     Route::resource($route_prefix, $controllerClass);
     Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
 

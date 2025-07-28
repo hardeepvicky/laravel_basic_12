@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Acl\AccessControl;
+use App\Helpers\LaravelExtend;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -35,6 +36,10 @@ class RolePermission
         $accessControl = AccessControl::init();
 
         if (!$accessControl->isAllow($route_name, $role_id_list)) {
+            d($route_name);
+            d($role_id_list);
+            d(LaravelExtend::getQueryLog("", -3));
+            exit;
             abort(401);
         }
 
