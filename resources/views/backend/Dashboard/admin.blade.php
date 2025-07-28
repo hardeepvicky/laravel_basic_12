@@ -41,7 +41,7 @@
                                 @endforeach
                             </div>
                             <div class="col-lg-6">
-                                <div id="task-chart" class="chart-block h-300"></div>
+                                <x-widget.task-status-chart />
                             </div>
                         </div>
                     </div>
@@ -50,46 +50,4 @@
 
         </div>
     </div>
-
-    <script>
-        $(function() {
-            var task_figures = JSON.parse('<?= json_encode(array_values($task_figures)); ?>');
-            $.events.execAtLast(function() {
-
-                am5.ready(function() {
-
-                    var root = am5.Root.new("task-chart");
-
-                    root.setThemes([
-                        am5themes_Animated.new(root)
-                    ]);
-
-                    var chart = root.container.children.push(
-                        am5percent.PieChart.new(root, {
-                            endAngle: 270
-                        })
-                    );
-
-                    var series = chart.series.push(
-                        am5percent.PieSeries.new(root, {
-                            valueField: "value",
-                            categoryField: "label",
-                            endAngle: 270
-                        })
-                    );
-
-                    series.states.create("hidden", {
-                        endAngle: -90
-                    });
-
-                    console.log(task_figures);
-
-                    series.data.setAll(task_figures);
-
-                    series.appear(1000, 100);
-
-                }); // end am5.ready()
-            })
-        })
-    </script>
 @endsection
