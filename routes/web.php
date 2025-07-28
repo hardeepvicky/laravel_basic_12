@@ -50,8 +50,11 @@ Route::get("/", function () {
 });
 
 Route::any("whatsapp-hook", function(Request $request){
+
     $data = $request->all();
     Log::channel("hooks")->debug("Whatsapp Hook", $data);
+
+    header('HTTP/1.1 200 OK');
 });
 
 // Route::get('/', [FrontendController::class, "index"]);
