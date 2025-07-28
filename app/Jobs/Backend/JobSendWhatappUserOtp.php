@@ -2,9 +2,12 @@
 
 namespace App\Jobs\Backend;
 
+use App\Exceptions\UserException;
 use App\Helpers\EmailHelper;
+use App\Helpers\LaravelExtend;
 use App\Helpers\WhatsappHelper;
 use App\Models\Setting;
+use App\Models\WhatsappTemplate;
 use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -22,7 +25,7 @@ class JobSendWhatappUserOtp implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(public String $name, public String $mobile, public String $otp, public $user_id = null) {}
+    public function __construct(public String $name, public String $mobile, public String $country_code, public String $otp, public $user_id = null) {}
 
     /**
      * Execute the job.
@@ -31,15 +34,16 @@ class JobSendWhatappUserOtp implements ShouldQueue
      */
     public function handle()
     {
+        $template = WhatsappTemplate::where("name", "OTP")->first();
+        if (!$template)
+        {
+            throw new UserException("Template not found : OTP", UserException::ERROR_USER_DATA_WRONG);
+        }
+
         $whatsappHelper = new WhatsappHelper();
-        $whatsappHelper->setTemplate("otp", "en_GB")
-            ->setBodyValues([$this->otp])
-            ->setButtonValues([
-                "1" => [
-                    "Copy"
-                ]
-            ])
-            ->setCountryCode("+91")
+        $whatsappHelper->setTemplate($template->name, $template->language)
+            ->setBodyValues([$this->otp])            
+            ->setCountryCode("+" . $this->country_code)
             ->addTo($this->mobile, $this->name, $this->user_id)
             ->setSandbox(false)
         ;

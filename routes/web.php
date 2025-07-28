@@ -35,15 +35,23 @@ use App\Http\Controllers\Backend\TypeController;
 use App\Http\Controllers\Backend\UomController;
 use App\Http\Controllers\Backend\UserCategoryController;
 use App\Http\Controllers\Backend\UserController;
+use App\Http\Controllers\Backend\WhatsappTemplateController;
 use App\Http\Controllers\Frontend\EnquiryController;
 use App\Http\Controllers\HomeController;
 use App\Models\EmailLog;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Mailjet\Resources;
 
 
 Route::get("/", function () {
     return redirect("/home");
+});
+
+Route::any("whatsapp-hook", function(Request $request){
+    $data = $request->all();
+    Log::channel("hooks")->debug("Whatsapp Hook", $data);
 });
 
 // Route::get('/', [FrontendController::class, "index"]);
@@ -550,6 +558,21 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
     $controllerClass = RecordHistoryController::class;
     Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
         Route::get("/", [$controllerClass, "index"])->name("index");
+    });
+
+    $route_prefix = "whatsapp-template";
+    $controllerClass = WhatsappTemplateController::class;
+    Route::resource($route_prefix, $controllerClass);
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
+        $name = "copy";
+        Route::get("{id}/" . $name, [$controllerClass, $name])->name($name);
+
+        $name = "activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "de_activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
     });
 
     Route::group(['prefix' => 'permissions', 'as' => 'permissions.'], function () {

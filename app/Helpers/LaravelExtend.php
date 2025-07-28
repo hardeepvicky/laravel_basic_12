@@ -90,7 +90,9 @@ class LaravelExtend
             throw_exception("User Save Failed");
         }
 
-        $job = new JobSendWhatappUserOtp($user->full_name, $user->whatsapp_mobile, $user->otp, $user->id);
+        $user->load("country");
+
+        $job = new JobSendWhatappUserOtp($user->full_name, $user->whatsapp_mobile, $user->country->phonecode, $user->otp, $user->id);
 
         dispatch($job);
     }

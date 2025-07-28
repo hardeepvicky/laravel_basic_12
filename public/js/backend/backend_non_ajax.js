@@ -121,7 +121,6 @@ $(document).ready(function () {
     $(document).on("submit", "form.summary_search", function () {
 
         var load_html_at = $(this).data("load_html_at");
-        load_html_at = load_html_at ?? "#index_table";
 
         if (load_html_at)
         {
