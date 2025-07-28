@@ -50,19 +50,16 @@ use App\Models\User;
         </div>
 
         <div class="row">
-            <div class="col-md-6 mb-3">
+            <div class="col-md-12 mb-3">
                 <a href="{{ route('auth.google.redirect') }}"
                     class="btn btn-have-icon d-flex align-items-center justify-content-center signin-with-third-party">
                     <i class="fa-brands fa-google"></i>
                     Signin with Google
                 </a>
-            </div>
-            <div class="col-md-6 mb-3">
-                <a href="#" class="btn btn-have-icon d-flex align-items-center justify-content-center signin-with-third-party">
-                    <i class="fa-brands fa-apple"></i>
-                    Signin with Apple
-                </a>
-            </div>
+            </div>          
+            
+            <hr>
+            
             <div class="col-md-6 mb-3">
                 <a href="/register" class="btn btn-have-icon d-flex align-items-center justify-content-center">
                     <i class="fa-solid fa-user-secret"></i>

@@ -36,11 +36,7 @@ use App\Models\User;
                 </div>
             </div>
 
-            <div class="d-flex align-items-center my-4">
-                <hr class="flex-grow-1">
-                <span class="px-3 text-muted text-sm">OR</span>
-                <hr class="flex-grow-1">
-            </div>
+            <hr>
 
             <div class="row">
                 <div class="col-md-6 mb-3">

@@ -95,20 +95,15 @@ use App\Models\User;
         </div>
 
         <div class="row">
-            <div class="col-md-6 mb-3">
+            <div class="col-md-12 mb-3">
                 <a href="{{ route('auth.google.redirect') }}"
                     class="btn btn-have-icon d-flex align-items-center justify-content-center signup-with-third-party">
                     <i class="fa-brands fa-google"></i>
                     Signup with Google
                 </a>
             </div>
-            <div class="col-md-6 mb-3">
-                <a href="#"
-                    class="btn btn-have-icon d-flex align-items-center justify-content-center signup-with-third-party">
-                    <i class="fa-brands fa-apple"></i>
-                    Signup with Apple
-                </a>
-            </div>
+
+            <hr>
 
             <div class="col-md-6 mb-3">
                 <a href="/signin" class="btn btn-have-icon d-flex align-items-center justify-content-center">
@@ -143,11 +138,11 @@ use App\Models\User;
                         <x-Inputs.text-field type="hidden" name="timezone" class="timezone" />
                         <div class="form-group">
                             <x-Inputs.drop-down id="sub_type" name="sub_type" label="Type" :list="$sub_type_list"
-                                class="select2_drop_down" mandatory="true" />
+                                class="select2" mandatory="true" />
                         </div>
                         <div class="form-group">
                             <x-Inputs.drop-down id="country_id" name="country_id" label="Country" :list="$country_list"
-                                :value="$model->country_id" class="select2_drop_down" mandatory="true" />
+                                :value="$model->country_id" class="select2" mandatory="true" />
                         </div>
                     </form>
                 </div>
