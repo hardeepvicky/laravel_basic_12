@@ -178,6 +178,10 @@ class JsonToModelCommand extends MyCommand
                 {
                     $record[$field] = $value;
                 }
+                else if (is_array($value))
+                {
+                    $record[$field] = $value;
+                }
             }
 
             $is_insert = $is_update = false;
