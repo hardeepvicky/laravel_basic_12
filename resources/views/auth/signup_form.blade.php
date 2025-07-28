@@ -8,11 +8,26 @@ use App\Models\User;
 
 @section('content')
     <div class="login-main">
+
+        <div class="col-md-12 mb-3">
+            <a href="{{ route('auth.google.redirect') }}"
+                class="btn btn-have-icon d-flex align-items-center justify-content-center signup-with-third-party">
+                <i class="fa-brands fa-google"></i>
+                Signup with Google
+            </a>
+        </div>
+        
+        <div class="d-flex align-items-center my-4">
+            <hr class="flex-grow-1">
+            <span class="px-3 text-muted text-sm">or</span>
+            <hr class="flex-grow-1">
+        </div>
+        
         <form class="theme-form" method="POST" action="{{ route('register') }}">
             @csrf
             <x-Inputs.text-field type="hidden" name="type" value="{{ User::TYPE_EXTERNAL }}" />
             <x-Inputs.text-field type="hidden" name="timezone" class="timezone" />
-            <h2 class="text-center mb-2">Sign Up</h2>
+            <h2 class="text-center mb-2">Register</h2>
 
             <x-Backend.session-flash />
             <x-Backend.form-errors />
@@ -88,23 +103,10 @@ use App\Models\User;
             </div>
         </form>
 
-        <div class="d-flex align-items-center my-4">
-            <hr class="flex-grow-1">
-            <span class="px-3 text-muted text-sm">or</span>
-            <hr class="flex-grow-1">
-        </div>
+
+        <hr>
 
         <div class="row">
-            <div class="col-md-12 mb-3">
-                <a href="{{ route('auth.google.redirect') }}"
-                    class="btn btn-have-icon d-flex align-items-center justify-content-center signup-with-third-party">
-                    <i class="fa-brands fa-google"></i>
-                    Signup with Google
-                </a>
-            </div>
-
-            <hr>
-
             <div class="col-md-6 mb-3">
                 <a href="/signin" class="btn btn-have-icon d-flex align-items-center justify-content-center">
                     <i class="fa-solid fa-user-secret"></i>
