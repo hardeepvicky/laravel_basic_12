@@ -118,9 +118,11 @@ class ProductController extends BackendController
             $this->model = new $this->modelClass();
         }
 
+        $uom_list = Uom::getListCache();
+
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
-        $this->setForView(compact("field_labels"));
+        $this->setForView(compact("field_labels", "uom_list"));
 
         return parent::beforeViewRender();
     }
