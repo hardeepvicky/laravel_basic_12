@@ -17,4 +17,19 @@ $(document).ready(function()
     $(".fancybox").fancybox();
 
     $(".i-data-table").idataTable();
+
+    $(".date-picker").flatpickr({
+        dateFormat: constants.dateFormat
+    });
+
+    $(".date-time-picker").flatpickr({
+        enableTime: true,        
+        dateFormat: constants.dateTimeFormat
+    });
+
+    $(".time-picker").flatpickr({
+        noCalendar: true,
+        enableTime: true,
+        dateFormat: constants.timeFormat,
+    });
 });
