@@ -51,21 +51,11 @@ class AccessControl
         }
 
         if ($role_id_list) {
-            $role_ids = implode(",", $role_id_list);
+            $count = RoleRouteName::whereIn("role_id", $role_id_list)->whereHas("routeName", function($q) use($route_name) {
+                $q->where("name", $route_name);
+            })->count();
 
-            $q = "
-                SELECT
-                    COUNT(1) AS c
-                FROM
-                    role_route_names RRN
-                    INNER JOIN route_names RR ON RR.id = RRN.route_name_id
-                WHERE
-                    RRN.role_id IN ($role_ids) AND RR.name = '$route_name'
-            ";
-
-            $record = DB::select($q);
-
-            if ($record && $record[0]->c > 0) {
+            if ($count > 0) {
                 return true;
             }
 

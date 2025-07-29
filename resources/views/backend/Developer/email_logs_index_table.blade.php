@@ -22,7 +22,7 @@
                         <?= sortable_anchor('created_at', 'Created') ?>
                         | <?= sortable_anchor('updated_at', 'Updated') ?>
                     </th>
-                    <th>Actions</th>
+                    <th style="width:12%">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -50,10 +50,10 @@
                     </tr>
                     <tr id="record-{{ $record->id }}" class="hidden">
                         <td style="background-color: var(--body--bs-body-bg)"></td>
-                        <td class="details" colspan="5">
+                        <td class="details" colspan="4">
 
                         </td>
-                        <td colspan="3">
+                        <td colspan="4">
                             @if(isset($record->error_code))
                                 <h4 class="mb-2 b-b-danger">
                                     Error Code : {{ $record->error_code }}
