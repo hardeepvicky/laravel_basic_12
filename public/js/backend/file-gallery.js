@@ -86,7 +86,7 @@ jQuery.fn.extend({
 
                     _this.val(list.join(","));
 
-                    $(gallery_modal).modal('hide');
+                    $('.modal').modal('hide');
 
                     if (typeof obj.onSelect == "function")
                     {
@@ -98,6 +98,7 @@ jQuery.fn.extend({
             gallery_modal.find(".modal-footer button.de-select").click(function()
             {
                 $(".file-block").removeClass("active");
+                gallery_modal.find(".modal-footer button.select").trigger("click");
             });
 
 
