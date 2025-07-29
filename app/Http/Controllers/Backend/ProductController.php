@@ -87,7 +87,9 @@ class ProductController extends BackendController
 
         $builder = $builder->where($conditions);
 
-        $builder->with(["productAttributes.categoryAttribute"]);
+        $builder->with([            
+            "productAttributes.categoryAttribute"
+        ]);
 
         if ($apply_sort) {
             $cache_key_for_sort = $cache_key_prefix . "-index-extra-params";
@@ -367,7 +369,11 @@ class ProductController extends BackendController
 
     public function ajax_load_attribute_fields($category_id, $id = 0)
     {
-        $category = ProductCategory::with(['categoryAttribute'])->findOrFail($category_id);
+        $category = ProductCategory::with([
+            "categoryAttribute" => function($q){
+                $q->orderBy("list_display_order", "ASC");
+            },
+            ])->findOrFail($category_id);
 
         if ($id)
         {
