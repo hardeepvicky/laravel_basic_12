@@ -392,12 +392,14 @@ label.info {
 .full-audio {
     width: 100%;
     max-width: 280px;
+    max-height: 190px;
     height: auto;
 }
 
 .full-video {
     width: 100%;
     max-width: 280px;
+    max-height: 190px;
     height: auto;
 }
 
