@@ -1,6 +1,10 @@
 <?php
 use App\Models\ProductCategoryAttribute;
 ?>
+@extends($layout)
+
+@section('content')
+
 <div class="b-info p-1 mb-2">
     <h3 class="b-b-info">
         Custom Attributes
@@ -48,3 +52,5 @@ use App\Models\ProductCategoryAttribute;
     </div>
     @endforeach
 </div>
+
+@endsection
