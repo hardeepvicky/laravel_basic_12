@@ -38,7 +38,7 @@
                         <td>{{ $record->template_name }}</td>
                         <td>{{ $record->template_lanugage }}</td>
                         <td>{{ $record->country_code }}</td>
-                        <td>{{ $record->is_sandbox ? "Yes" : "No" }}</td>
+                        <td>{{ get_value_from_list($yes_no_list, $record->is_sandbox) }}</td>
                         <td>{{ $record->is_sent == 1 ? "Sent" : ($record->is_sent == 0 ? "Fail" : "-") }}</td>
                         <td>
                             @if (isset($record->to) && is_array($record->to))
