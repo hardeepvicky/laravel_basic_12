@@ -245,4 +245,77 @@ class BaseModel extends Model implements BaseModelInterface
         $this->is_active = 0;
         $this->save();
     }
+
+    public function safeDelete(Model $model)
+    {
+        $class_name = get_class($model);
+
+        $class_display_name = "";
+        if (method_exists($model, 'getClassDisplayName')) {
+            $class_display_name = $model->getClassDisplayName();
+        } else {
+            throw new UserException("Please Declare getClassDisplayName() method in $class_name");
+        }
+
+        if (!property_exists($class_name, "child_model_class")) {
+            throw new UserException("child_model_class Array is not set in $class_name");
+        }
+
+        foreach (static::$child_model_class as $childClass => $arr) 
+        {
+            $child_class_display_name = $childClass::classDisplayName();
+
+            if (!$child_class_display_name) {
+                if (isset($arr['label']) && !empty($arr['label']) && is_string($arr['label'])) {
+                    $child_class_display_name = $arr['label'];
+                }
+            }
+
+            if (!$child_class_display_name) {
+                throw_exception("Please Add label in child_model_class of $class_name");
+            }
+            array_check_key_and_throw_error($arr, ["preventDelete", "foreignKey"], "$class_name - child_model_class : {key} not found");
+            array_check_value_and_throw_error($arr, ["foreignKey"], "$class_name - child_model_class : {key} is empty");
+
+            if (is_array($arr['foreignKey'])) {
+                $foreign_fields = $arr['foreignKey'];
+            } else {
+                $foreign_fields = [$arr['foreignKey']];
+            }
+
+            if ($arr['preventDelete']) {
+                foreach ($foreign_fields as $foreign_field) {
+                    $count = $childClass::where($foreign_field, $model->id)->count();
+
+                    if ($count > 0) {
+                        return false;
+                    }
+                }
+            } else {
+                foreach ($foreign_fields as $foreign_field) {
+                    $child_records = $childClass::where($foreign_field, $model->id)->get();
+
+                    if ($child_records->count() > 0) {
+                        foreach ($child_records as $child_record) {
+                            $result = $model->safeDelete($child_record);
+
+                            if (!$result)
+                            {
+                                return false;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if ($model->delete())
+        {
+            return true;
+        }
+
+        return false;
+    }
 }
+
+

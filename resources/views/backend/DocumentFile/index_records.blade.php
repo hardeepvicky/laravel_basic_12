@@ -45,7 +45,7 @@ use App\Helpers\LaravelExtend;
                             <h5 class="f-w-600">{{ str_short_with_dot($record->name) }}</h5>
                             <span>By : {{ LaravelExtend::getCreatedByOrUpdatedBy($record->created_by) }}</span>
                             <p>
-                                {{ $record->created_at->diffForHumans() }} ,
+                                {{ $record->created_at_user_tz->diffForHumans() }} ,
 
                                 {{ round($record->file_size_in_mb, 2) }} MB
                             </p>
@@ -80,7 +80,7 @@ use App\Helpers\LaravelExtend;
                         <h5 class="f-w-600">{{ str_short_with_dot($record->name) }}</h5>
                         <span>By : {{ LaravelExtend::getCreatedByOrUpdatedBy($record->created_by) }}</span>
                         <p>
-                            {{ $record->created_at->diffForHumans() }}
+                            {{ $record->created_at_user_tz->diffForHumans() }}
                             @if ($record->file)
                                 , {{ round($record->file_size_in_mb, 2) }} MB
                             @endif

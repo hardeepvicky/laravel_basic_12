@@ -73,7 +73,7 @@ class DocumentFileDeleteOldCommand extends MyCommand
             {
                 foreach($records as $record)
                 {
-                    if ($record->delete())
+                    if ($record->safeDelete($record))
                     {
                         $counters['delete'] += 1;
                     }

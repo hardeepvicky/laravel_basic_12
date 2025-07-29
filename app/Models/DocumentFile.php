@@ -19,6 +19,14 @@ class DocumentFile extends BaseModel
             "foreignKey" => "document_file_id",
             "preventDelete" => true
         ],
+        RecurringTaskFile::class => [
+            "foreignKey" => "document_file_id",
+            "preventDelete" => true
+        ],
+        EmailTemplateFile::class => [
+            "foreignKey" => "document_file_id",
+            "preventDelete" => true
+        ],
     ];
 
     public function product()
