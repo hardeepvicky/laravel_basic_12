@@ -402,12 +402,6 @@ class TaskController extends BackendController
 
     private function _beforeSave($validatedData)
     {
-        $validatedData['status'] = Task::STATUS_CREATED;
-
-        if (isset($validatedData['is_draft']) && $validatedData['is_draft'] == 1) {
-            $validatedData['status'] = Task::STATUS_DRAFT;
-        }
-
         $validatedData['end_date_time'] = null;
 
         if (isset($validatedData['start_date_time']) && isset($validatedData['duration_type']) && isset($validatedData['duration'])) {

@@ -334,8 +334,19 @@ class FileUtility
 
     public function getUrl($file)
     {
+        $root_path = $this->disk->path("/");
+
         if ($this->disk->fileExists($file)) {
-            return route("get_file_url", ["file_path" => urlencode($file)]);
+
+            if (strpos($root_path, "/hdd") !== false && file_exists($root_path . "storage/app/public/erp_test"))
+            {
+                //external
+                return "/storage/erp_test/" . $file;
+            }
+            else
+            {
+                return "/storage/" . $file;
+            }
         }
 
         return null;

@@ -68,7 +68,7 @@ class Task extends BaseModel
     {
         if ($this->is_draft) {
             $this->status = self::STATUS_DRAFT;
-        } else if (!$this->id) {
+        } else if (!$this->id && !$this->status) {
             $this->status = self::STATUS_CREATED;
         }
 
