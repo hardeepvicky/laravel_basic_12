@@ -104,6 +104,9 @@ $false = false;
                     </thead>
                     <tbody>
                         @foreach ($history_records as $record)
+                        <?php
+                            $record->convertTimeZoneForDisplay();
+                        ?>
                             <tr>
                                 <th scope="row">
                                     {{ $record->id }}
