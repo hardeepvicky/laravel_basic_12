@@ -8,6 +8,10 @@ use Illuminate\Validation\Rules\Unique;
 
 class Product extends BaseModel
 {
+    protected $appends = [
+        'display_name'
+    ];
+
     protected static array $unique_fields = ["product_category_id", "name"];
 
     public static array $child_model_class = [

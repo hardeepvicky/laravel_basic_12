@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\Unique;
 
 class ProductAttribute extends BaseModel
 {
+    protected $appends = [
+        'display_name', 'display_value'
+    ];
+
     protected static array $unique_fields = ["product_id", "product_category_attribute_id"];
     
     public static array $child_model_class = [        
@@ -28,6 +30,16 @@ class ProductAttribute extends BaseModel
     }
 
     public function getDisplayName()
+    {
+        return $this->name;
+    }
+
+    protected function getDisplayValueAttribute()
+    {
+        return $this->getDisplayValue();
+    }
+
+    public function getDisplayValue()
     {
         if ($this->categoryAttribute?->input_type == ProductCategoryAttribute::INPUT_TYPE_DROPDOWN)
         {

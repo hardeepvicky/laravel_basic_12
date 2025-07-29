@@ -235,9 +235,13 @@ class ProductController extends BackendController
 
             foreach($validatedData['product_attributes'] as $category_id => $value)
             {
+                $categoryAttribute = ProductCategoryAttribute::findOrFail($category_id);
+
                 $child_model = new ProductAttribute([
                     "product_category_attribute_id" => $category_id,
-                    "value" => $value
+                    "name" => $categoryAttribute->name,
+                    "value" => $value,
+                    "display_order" => $categoryAttribute->list_display_order
                 ]);
 
                 $this->model->productAttributes()->save($child_model);

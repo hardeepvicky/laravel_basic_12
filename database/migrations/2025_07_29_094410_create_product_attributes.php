@@ -17,7 +17,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId("product_id")->constrained("products")->onDelete('restrict');
             $table->foreignId("product_category_attribute_id")->constrained("product_category_attributes")->onDelete('restrict');
+            $table->text("name");
             $table->text("value");
+            $table->integer("display_order")->default(0);
             $table->timestamps();
             $table->bigInteger("created_by")->nullable();
             $table->bigInteger("updated_by")->nullable();

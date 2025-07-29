@@ -78,7 +78,7 @@
                                                 <tr>
                                                     <td>{{ $a }}</td>
                                                     <td>{{ $productAttribute->categoryAttribute?->getDisplayName() }}</td>
-                                                    <td>{{ $productAttribute->getDisplayName() }}</td>
+                                                    <td>{{ $productAttribute->getDisplayValue() }}</td>
                                                     <td>{{ get_value_from_list($uom_list, $productAttribute->categoryAttribute?->uom_id) }}
                                                 </tr>
                                                 @endforeach
