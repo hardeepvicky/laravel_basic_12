@@ -7,10 +7,14 @@ use App\Helpers\ArrayHelper;
 use App\Helpers\LaravelExtend;
 use App\Helpers\Util;
 use App\Models\Department;
+use App\Models\DropDownValue;
 use App\Models\FieldSetting;
 use App\Models\Product;
+use App\Models\ProductAttribute;
 use App\Models\ProductCategory;
+use App\Models\ProductCategoryAttribute;
 use App\Models\SubDepartment;
+use App\Models\Uom;
 use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Support\Facades\DB;
@@ -33,7 +37,7 @@ class ProductController extends BackendController
 
         $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
 
-        // dd($records->toArray());
+        // dd($records->toArray(), true);
 
         $product_category_records = ProductCategory::getTreeRecords(ProductCategory::query());
 
@@ -83,6 +87,8 @@ class ProductController extends BackendController
 
         $builder = $builder->where($conditions);
 
+        $builder->with(["productAttributes.categoryAttribute"]);
+
         if ($apply_sort) {
             $cache_key_for_sort = $cache_key_prefix . "-index-extra-params";
 
@@ -107,9 +113,11 @@ class ProductController extends BackendController
             $this->model = new $this->modelClass();
         }
 
+        $uom_list = Uom::getListCache();
+
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
-        $this->setForView(compact("field_labels"));
+        $this->setForView(compact("field_labels", "uom_list"));
 
         return parent::beforeViewRender();
     }
@@ -158,6 +166,7 @@ class ProductController extends BackendController
             "model_name" => ["required"],
             "description" => ["nullable"],
             "short_name" => ["nullable"],
+            "product_attributes" => [],
             "list_display_order" => "",
             "is_active" => "",
         ];
@@ -187,7 +196,18 @@ class ProductController extends BackendController
 
         try {
             // dd($validatedData);
-            $this->model = $this->modelClass::create($validatedData);
+
+            $save_data = $validatedData;
+            unset($save_data['product_attributes']);
+
+            $this->model->fill($save_data);
+
+            if (!$this->model->save())
+            {
+                throw new UserException("Fail To save", UserException::ERROR_LARAVEL_FAIL);
+            }
+
+            $this->_saveOthers($validatedData);
 
             if (LaravelExtend::$errors) {
                 throw new Exception("Fail to Save");
@@ -202,6 +222,24 @@ class ProductController extends BackendController
             $this->saveSqlLog();
 
             return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", LaravelExtend::$errors);
+        }
+    }
+
+    private function _saveOthers($validatedData)
+    {
+        if (isset($validatedData['product_attributes']))
+        {
+            $this->model->productAttributes()->delete();
+
+            foreach($validatedData['product_attributes'] as $category_id => $value)
+            {
+                $child_model = new ProductAttribute([
+                    "product_category_attribute_id" => $category_id,
+                    "value" => $value
+                ]);
+
+                $this->model->productAttributes()->save($child_model);
+            }
         }
     }
 
@@ -241,10 +279,16 @@ class ProductController extends BackendController
 
         try {
             $save_data = $validatedData;
+            unset($save_data['product_attributes']);
 
             $this->model->fill($save_data);
 
-            $this->model->save();
+            if (!$this->model->save())
+            {
+                throw new UserException("Fail To save", UserException::ERROR_LARAVEL_FAIL);
+            }
+
+            $this->_saveOthers($validatedData);
 
             if (LaravelExtend::$errors) {
                 throw new Exception("Fail to Save");
@@ -319,5 +363,43 @@ class ProductController extends BackendController
         }
 
         return $this->responseJson($response);
+    }
+
+    public function ajax_load_attribute_fields($category_id, $id = 0)
+    {
+        $category = ProductCategory::with(['categoryAttribute'])->findOrFail($category_id);
+
+        if ($id)
+        {
+            $model = $this->modelClass::with(["productAttributes"])->find($id);  
+        }
+        else
+        {
+            $model = new $this->modelClass();
+        }
+
+        $drop_down_lists = [];
+
+        foreach($category->categoryAttribute as $categoryAttribute)
+        {
+            $categoryAttribute->value = "";
+
+            if ($categoryAttribute->input_type == ProductCategoryAttribute::INPUT_TYPE_DROPDOWN)
+            {
+                $drop_down_lists[$categoryAttribute->id] = DropDownValue::getList("id", "display_name", ["type" => $categoryAttribute->dropdown_type]);
+            }
+
+            foreach($model->productAttributes as $productAttribute)
+            {
+                if ($productAttribute->product_category_attribute_id == $categoryAttribute->id)
+                {
+                    $categoryAttribute->value = $productAttribute->value;
+                }
+            }
+        }
+
+        $this->setForView(compact("category", "model", "drop_down_lists"));
+
+        return $this->view(__FUNCTION__);
     }
 }

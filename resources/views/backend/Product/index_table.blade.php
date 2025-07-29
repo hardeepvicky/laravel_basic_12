@@ -47,6 +47,45 @@
                             </td>
                             <td>
                                 <x-Backend.summary-comman-actions :id="$record->id" :routePrefix="$routePrefix" buttons="edit,copy,delete" />
+                                
+                                <span class="btn btn-info btn-sm css-toggler m-1"
+                                    data-sr-css-class-toggle-target="#record-{{ $record->id }}"
+                                    data-sr-css-class-toggle-class="hidden"
+                                    data-sr-ajax-load-url="{{ $record->content_file_url }}"
+                                    data-sr-ajax-load-target="#record-{{ $record->id }} .details">
+                                    Details
+                                </span>
+                            </td>
+                        </tr>
+                        <tr id="record-{{ $record->id }}" class="hidden">
+                            <td style="background-color: var(--body--bs-body-bg)"></td>                            
+                            <td colspan="7">
+                                <div class="row">
+                                    <div class="col-md-12 col-xl-6">
+                                        <table class="table table-sm summary-table table-bordered i-data-table">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width:5%">Sr.No.</th>
+                                                    <th style="width:60%" data-search="like" data-sort="text">Custom Attrbute</th>
+                                                    <th style="width:30%" data-search="like" data-sort="text">Value</th>
+                                                    <th style="width:30%" data-search="like" data-sort="text">UOM</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <?php $a = 0; ?>
+                                                @foreach($record->productAttributes as $productAttribute)
+                                                <?php $a++; ?>
+                                                <tr>
+                                                    <td>{{ $a }}</td>
+                                                    <td>{{ $productAttribute->categoryAttribute?->getDisplayName() }}</td>
+                                                    <td>{{ $productAttribute->getDisplayName() }}</td>
+                                                    <td>{{ get_value_from_list($uom_list, $productAttribute->categoryAttribute?->uom_id) }}
+                                                </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
                             </td>
                         </tr>
                     @endforeach

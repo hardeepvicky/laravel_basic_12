@@ -59,6 +59,8 @@
                                 <x-Inputs.text-area :name="$field" :label="$label" value="{{ $model->{$field} }}"
                                     placeholder="Enter {{ $label }}" />
                             </div>
+                            <div id="load_field_block">
+                            </div>
                             <div class="row">
                                 <div class="col-xl-6">
                                     <div class="form-group mb-3">
@@ -89,4 +91,23 @@
         </div>
     </div>
     </form>
+
+    <script>
+        var id = '<?= $model->id ?? 0 ?>';
+        $(function(){
+            $("#product_category_id").change(function(){
+                var v = $(this).val();
+
+                $("#load_field_block").html("");
+
+                if (v)
+                {
+                    $.loader.init().show();
+                    $("#load_field_block").load("/product/ajax_load_attribute_fields/" + v + "/" + id, function(){
+                        $.loader.hide();
+                    })
+                }
+            }).trigger("change", {pageLoad : true});
+        });
+    </script>
 @endsection

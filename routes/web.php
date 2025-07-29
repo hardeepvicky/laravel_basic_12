@@ -480,6 +480,9 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
 
         $name = "ajax_update_field";
         Route::post($name, [$controllerClass, $name])->name($name);
+
+        $name = "ajax_load_attribute_fields";
+        Route::get($name . "/{category_id}/{id?}", [$controllerClass, $name])->name($name);
     });
 
     $route_prefix = "document-category";

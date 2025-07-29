@@ -22,6 +22,11 @@ class Product extends BaseModel
         return $this->belongsTo(ProductCategory::class);
     }
 
+    public function productAttributes()
+    {
+        return $this->hasMany(ProductAttribute::class);
+    }
+
     protected function getDisplayNameAttribute()
     {
         return $this->getDisplayName();
@@ -60,7 +65,7 @@ class Product extends BaseModel
         {
             case "product_category_id":
                 $ret_array = [
-                    $field => $this->category->getDisplayName()
+                    $field => $this->category?->getDisplayName()
                 ];
                 break;
         }
