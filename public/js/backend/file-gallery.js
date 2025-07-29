@@ -86,7 +86,9 @@ jQuery.fn.extend({
 
                     _this.val(list.join(","));
 
-                    $('.modal').modal('hide');
+                    gallery_modal.modal('hide');
+
+                    $(".modal-backdrop").remove();
 
                     if (typeof obj.onSelect == "function")
                     {
