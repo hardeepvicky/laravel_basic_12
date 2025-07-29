@@ -10,10 +10,10 @@ class ProductCategoryAttribute extends BaseModel
     protected static array $unique_fields = ["product_category_id", "name"];
     
     public static array $child_model_class = [
-        // User::class => [
-        //     "foreignKey" => ["sub_department_id"],
-        //     "preventDelete" => true
-        // ]
+        ProductAttribute::class => [
+            "foreignKey" => ["product_category_attribute_id"],
+            "preventDelete" => true
+        ]
     ];
 
     const INPUT_TYPE_TEXT = "TEXT";
