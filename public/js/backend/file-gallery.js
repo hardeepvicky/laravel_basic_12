@@ -8,7 +8,7 @@ jQuery.fn.extend({
 
         if (typeof obj.postfix == "undefined")
         {
-            obj.postfix = "-main";
+            obj.postfix = "main";
         }
 
         if (typeof obj.opener == "undefined")
@@ -54,7 +54,7 @@ jQuery.fn.extend({
             html += '</div>';
             html += '</div>';
 
-
+            console.log(modal_id);
             var gallery_modal = $("#" + modal_id);
 
             var list = value ? value.split(",") : [];

@@ -6,20 +6,18 @@ use App\Exceptions\UserException;
 use App\Helpers\ArrayHelper;
 use App\Helpers\LaravelExtend;
 use App\Helpers\Util;
-use App\Models\Department;
+use App\Models\DocumentFile;
 use App\Models\DropDownValue;
 use App\Models\FieldSetting;
 use App\Models\Product;
 use App\Models\ProductAttribute;
 use App\Models\ProductCategory;
 use App\Models\ProductCategoryAttribute;
-use App\Models\SubDepartment;
 use App\Models\Uom;
 use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Validator;
 
 class ProductController extends BackendController
 {
@@ -38,6 +36,14 @@ class ProductController extends BackendController
         $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
 
         // dd($records->toArray(), true);
+
+        foreach($records as $record)
+        {
+            if ($record->mainImage?->id)
+            {
+                $record->mainImage->afterFind();
+            }
+        }
 
         $product_category_records = ProductCategory::getTreeRecords(ProductCategory::query());
 
@@ -91,7 +97,9 @@ class ProductController extends BackendController
             "productAttributes" => function($q){
                 $q->orderBy("display_order", "ASC");
             },
-            "productAttributes.categoryAttribute"
+            "productAttributes.categoryAttribute",
+            "mainImage",
+            "documentFile"
         ]);
 
         if ($apply_sort) {
@@ -172,6 +180,8 @@ class ProductController extends BackendController
             "description" => ["nullable"],
             "short_name" => ["nullable"],
             "product_attributes" => [],
+            "productFile" => [],
+            "main_image_id" => "",
             "list_display_order" => "",
             "is_active" => "",
         ];
@@ -204,6 +214,7 @@ class ProductController extends BackendController
 
             $save_data = $validatedData;
             unset($save_data['product_attributes']);
+            unset($save_data['productFile']);
 
             $this->model->fill($save_data);
 
@@ -250,6 +261,15 @@ class ProductController extends BackendController
                 $this->model->productAttributes()->save($child_model);
             }
         }
+
+        if (isset($validatedData['productFile'])) {
+
+            $ids = explode(",", $validatedData['productFile']);
+
+            $document_files = DocumentFile::find($ids);
+
+            $this->model->documentFile()->sync($document_files);
+        }
     }
 
     public function edit($id)
@@ -289,6 +309,7 @@ class ProductController extends BackendController
         try {
             $save_data = $validatedData;
             unset($save_data['product_attributes']);
+            unset($save_data['productFile']);
 
             $this->model->fill($save_data);
 

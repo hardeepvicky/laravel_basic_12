@@ -14,6 +14,7 @@
                         <th><?= sortable_anchor('model_name', get_value_from_list($field_labels, 'model_name', 'model_name')) ?></th>
                         <th><?= sortable_anchor('short_name', get_value_from_list($field_labels, 'short_name', 'short_name')) ?></th>
                         <th><?= sortable_anchor('list_display_order', get_value_from_list($field_labels, 'list_display_order', 'list_display_order')) ?></th>
+                        <th>{{ get_value_from_list($field_labels, 'main_image_id', 'main_image_id') }}</th>
                         <th><?= sortable_anchor('is_active', 'Activate / De-Active') ?></th>
                         <th style="width:6%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
                         <th style="width:6%"><?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?></th>
@@ -35,6 +36,14 @@
                                     data-title="Enter Display Order">
                                     {{ $record->list_display_order }}
                                 </a>
+                            </td>
+                            <td>
+                                @if ($record->mainImage?->file_url)
+                                <a class="fancybox" href="{{ $record->mainImage->file_url }}">
+                                    <img class="img-thumbnail small-img" src="{{ $record->mainImage->file_url }}" />
+                                </a>
+                                @endif
+                            </td>
                             </td>
                             <td>
                                 <x-Backend.active_deactive :isActive="$record->is_active" :id="$record->id" :routePrefix="$routePrefix" />
@@ -59,15 +68,15 @@
                         </tr>
                         <tr id="record-{{ $record->id }}" class="hidden">
                             <td style="background-color: var(--body--bs-body-bg)"></td>                            
-                            <td colspan="7">
+                            <td colspan="9">
                                 <div class="row">
-                                    <div class="col-md-12 col-xl-6">
+                                    <div class="col-md-12 col-xl-5">
                                         <table class="table table-sm summary-table table-bordered i-data-table">
                                             <thead>
                                                 <tr>
                                                     <th style="width:5%">Sr.No.</th>
-                                                    <th style="width:60%" data-search="like" data-sort="text">Custom Attrbute</th>
-                                                    <th style="width:30%" data-search="like" data-sort="text">Value</th>
+                                                    <th style="width:50%" data-search="like" data-sort="text">Custom Attrbute</th>
+                                                    <th style="width:40%" data-search="like" data-sort="text">Value</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -82,6 +91,10 @@
                                                 @endforeach
                                             </tbody>
                                         </table>
+                                    </div>
+
+                                    <div class="col-md-12 col-xl-7">
+                                        <x-Backend.document-files :records="$record->documentFile" />
                                     </div>
                                 </div>
                             </td>

@@ -70,15 +70,7 @@
     <script src="{{ get_asset_url('js/common_funtions.js') }}"></script>
     <script src="{{ get_asset_url('js/common_script_for_all_non_ajax_layout.js') }}"></script>
     <script src="{{ get_asset_url('js/backend/backend_non_ajax.js') }}"></script>
-    <script>
-        $(function() {
-            $.loader.init();
-            $.events.lastCallbacks.map(function(cb) {
-                cb();
-            });
-        });
-    </script>
-
+    <script src="{{ get_asset_url('js/backend/common.js') }}"></script>    
 </body>
 
 </html>

@@ -59,6 +59,23 @@
                                 <x-Inputs.text-area :name="$field" :label="$label" value="{{ $model->{$field} }}"
                                     placeholder="Enter {{ $label }}" />
                             </div>
+                            <div class="form-group mb-3">
+                                <?php
+                                $field = "main_image_id";
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <x-Inputs.text-field :id="$field" :name="$field" :label="$label" :value="$model->{$field}" />                        
+                                <span id="choose-main-image" class="btn btn-secondary">Choose Main Image</span>
+                            </div>
+                            <div class="form-group mb-3">
+                                <?php
+                                $field = "productFile";
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                $value = implode(',', $model->productFile?->pluck('document_file_id')->toArray());
+                                ?>
+                                <x-Inputs.text-field :id="$field" :name="$field" :label="$label" :value="$value" multiple="multiple"  />                        
+                                <span id="files-choose" class="btn btn-secondary">Choose Files</span>
+                            </div>
                             <div id="load_field_block">
                             </div>
                             <div class="row">
@@ -108,6 +125,20 @@
                     })
                 }
             }).trigger("change", {pageLoad : true});
+
+            $("#main_image_id").browseGallery({
+                opener : "#choose-main-image",
+                postfix : "choose-main-image",
+                type : "image"
+            });
+
+            $("#productFile").browseGallery({
+                opener : "#files-choose"
+            });
+
+            $.events.execAtLast(function(){
+                
+            })
         });
     </script>
 @endsection

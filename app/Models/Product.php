@@ -31,6 +31,21 @@ class Product extends BaseModel
         return $this->hasMany(ProductAttribute::class);
     }
 
+    public function documentFile()
+    {
+        return $this->belongsToMany(DocumentFile::class, ProductFile::class);
+    }
+
+    public function productFile()
+    {
+        return $this->hasMany(ProductFile::class, 'product_id');
+    }
+
+    public function mainImage()
+    {
+        return $this->belongsTo(DocumentFile::class);
+    }
+
     protected function getDisplayNameAttribute()
     {
         return $this->getDisplayName();
@@ -75,5 +90,14 @@ class Product extends BaseModel
         }
 
         return $ret_array;
+    }
+
+    public function getFieldLabels()
+    {
+        $labels = parent::getFieldLabels();
+
+        $labels['productFile'] = "Files";
+
+        return $labels;
     }
 }
