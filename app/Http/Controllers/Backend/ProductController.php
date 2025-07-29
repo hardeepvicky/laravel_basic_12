@@ -88,6 +88,9 @@ class ProductController extends BackendController
         $builder = $builder->where($conditions);
 
         $builder->with([            
+            "productAttributes" => function($q){
+                $q->orderBy("display_order", "ASC");
+            },
             "productAttributes.categoryAttribute"
         ]);
 
@@ -115,11 +118,9 @@ class ProductController extends BackendController
             $this->model = new $this->modelClass();
         }
 
-        $uom_list = Uom::getListCache();
-
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
-        $this->setForView(compact("field_labels", "uom_list"));
+        $this->setForView(compact("field_labels"));
 
         return parent::beforeViewRender();
     }

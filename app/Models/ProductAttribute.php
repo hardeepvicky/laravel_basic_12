@@ -41,6 +41,7 @@ class ProductAttribute extends BaseModel
 
     public function getDisplayValue()
     {
+        $value = $this->value;
         if ($this->categoryAttribute?->input_type == ProductCategoryAttribute::INPUT_TYPE_DROPDOWN)
         {
             $drop_down_value_list = DropDownValue::getListCache();
@@ -59,7 +60,18 @@ class ProductAttribute extends BaseModel
         {
             return if_date_time($this->value);
         }
+        else
+        {
+            if($this->categoryAttribute?->uom_id)
+            {
+                $uom_list = Uom::getListCache();
 
-        return $this->value;
+                $sub_value = get_value_from_list($uom_list, $this->categoryAttribute?->uom_id);
+
+                $value .= " (" . $sub_value . ")";
+            }
+        }
+
+        return $value;
     }
 }

@@ -68,7 +68,6 @@
                                                     <th style="width:5%">Sr.No.</th>
                                                     <th style="width:60%" data-search="like" data-sort="text">Custom Attrbute</th>
                                                     <th style="width:30%" data-search="like" data-sort="text">Value</th>
-                                                    <th style="width:30%" data-search="like" data-sort="text">UOM</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -79,7 +78,6 @@
                                                     <td>{{ $a }}</td>
                                                     <td>{{ $productAttribute->categoryAttribute?->getDisplayName() }}</td>
                                                     <td>{{ $productAttribute->getDisplayValue() }}</td>
-                                                    <td>{{ get_value_from_list($uom_list, $productAttribute->categoryAttribute?->uom_id) }}
                                                 </tr>
                                                 @endforeach
                                             </tbody>
