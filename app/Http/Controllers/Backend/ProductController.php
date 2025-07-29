@@ -274,7 +274,10 @@ class ProductController extends BackendController
 
     public function edit($id)
     {
-        $model = $this->model = $this->modelClass::findOrFail($id);
+        $model = $this->model = $this->modelClass::with([
+            "productFile"
+        ])
+        ->findOrFail($id);
 
         $this->beforeEdit($model);
 
@@ -338,7 +341,9 @@ class ProductController extends BackendController
 
     public function copy($id)
     {
-        $model = $this->model = $this->modelClass::findOrFail($id);
+        $model = $this->model = $this->modelClass::with([
+            "productFile"
+        ])->findOrFail($id);
 
         $this->beforeEdit($model);
 

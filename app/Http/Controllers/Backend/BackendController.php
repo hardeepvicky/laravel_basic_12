@@ -89,9 +89,11 @@ class BackendController extends WebController
             "show_as" => "celec_datetime"
         ];
 
+        $false = false;
+
         $this->setForView(compact(
             "current_route_name", "current_url", "menus", "header_menu_list", "partial_path", "breadcums", "userListCache", "auth_user", "screen_name", 
-            "index_table_info_options", "unread_notifications", "unread_notification_count"
+            "index_table_info_options", "unread_notifications", "unread_notification_count", "false"
         ));
 
         return true;
