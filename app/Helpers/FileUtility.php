@@ -338,7 +338,7 @@ class FileUtility
 
         if ($this->disk->fileExists($file)) {
 
-            if (strpos($root_path, "/hdd") !== false && file_exists($root_path . "storage/app/public/erp_test"))
+            if (strpos($root_path, "/hdd/erp_test") !== false)
             {
                 //external
                 return "/storage/erp_test/" . $file;
