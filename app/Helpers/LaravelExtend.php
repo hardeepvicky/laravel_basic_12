@@ -69,9 +69,14 @@ class LaravelExtend
             throw_exception("User Save Failed");
         }
 
-        $link =  config("url") . "/otp_verify/" . $user->uid;
+        if ($user->dont_send_email)
+        {
+            return;
+        }
 
-        $job = new JobSendEmailUserOtp($user->full_name, $user->email, $user->otp, $link);
+        $link = url()->query(config("url") . "/otp_verify/" . $user->uid, ["otp_sent" => true]);
+
+        $job = new JobSendEmailUserOtp($user, $link);
 
         dispatch($job);
     }
@@ -99,7 +104,7 @@ class LaravelExtend
 
     public static function send_email_on_registeration(User $user)
     {
-        $job = new JobSendEmailOnRegisration($user->full_name, $user->email);
+        $job = new JobSendEmailOnRegisration($user);
 
         dispatch($job);
     }
@@ -112,7 +117,7 @@ class LaravelExtend
 
         $link =  config("url") . "/create_password/" . $user->uid;
 
-        $job = new JobForgotPassword($user->full_name, $user->email, $link);
+        $job = new JobForgotPassword($user, $link);
 
         dispatch($job);
     }

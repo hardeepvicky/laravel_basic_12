@@ -20,7 +20,7 @@ class WhatsappHelper
 
     private array $header_values = [], $body_values = [], $button_values = [], $mobile_list = [];
 
-    private bool $is_sandbox = true;
+    private bool $is_sandbox = false;
 
     private $api_key, $api_secret;
 
@@ -50,7 +50,7 @@ class WhatsappHelper
             $this->api_secret = $api_secret;
         }
 
-        $this->is_sandbox = !App::isProduction();
+        $this->is_sandbox = App::isLocal();
     }
 
     public function setTemplate(String $template_name, String $template_lanugage)

@@ -416,7 +416,8 @@ class User extends Authenticatable implements BaseModelInterface
 
         $field_rules['mobile'] = [$rule];
 
-        if ($request->get("type") == self::TYPE_INTERNAL) {
+        if ($request->has("name") && $request->get("type") == self::TYPE_INTERNAL)
+        {
             $rule = Rule::unique($this->connection . "." . $this->getTable(), "name")->where("type", self::TYPE_INTERNAL);
             $field_rules["name"] = [$rule];
         }

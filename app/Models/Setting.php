@@ -6,6 +6,7 @@ class Setting extends BaseMongoModel
 {
     public const LABELS = [
         "company_name" => "Company Name",
+        "company_tag_line" => "Company Tag Line",
         "company_email" => "Company Email",
         "company_address" => "Company Address",
         "company_gst_no" => "Company GST No.",
@@ -44,7 +45,7 @@ class Setting extends BaseMongoModel
         return $value;
     }
 
-    public function getValueOfList(array $names)
+    public static function getValueOfList(array $names)
     {
         $list = self::whereIn("name", $names)->pluck("value", "name")->toArray();
 

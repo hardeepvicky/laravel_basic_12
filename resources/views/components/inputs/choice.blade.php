@@ -11,7 +11,13 @@ if (!isset($mandatory)) {
     $mandatory = $attributes->get('required', false);
 }
 
-if (!isset($is_disabled)) {
+
+if (isset($isDisabled) && $isDisabled) {
+    $is_disabled = true;
+}
+
+if (!isset($is_disabled))
+{
     $is_disabled = $attributes->get('disabled', false);
 }
 
@@ -26,7 +32,7 @@ if ($mandatory) {
     $my_attributes['required'] = 'true';
 }
 
-if (!$mandatory && $is_disabled) {
+if ($is_disabled) {
     $my_attributes['disabled'] = 'true';
 }
 

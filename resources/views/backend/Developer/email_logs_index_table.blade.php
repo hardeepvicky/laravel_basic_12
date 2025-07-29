@@ -7,12 +7,18 @@
         <table class="table table-striped table-bordered table-hover mb-0">
             <thead>
                 <tr>
-                    <th>From Name</th>
-                    <th>From Email</th>
-                    <th>To Name</th>
-                    <th>To Email</th>
-                    <th>Subject</th>
-                    <th>
+                    <th style="width:10%">From Name</th>
+                    <th style="width:10%">From Email</th>
+                    <th style="width:10%">To Name</th>
+                    <th style="width:10%">To Email</th>
+                    <th style="width:10%">Subject</th>
+                    <th style="width:6%">
+                        <?= sortable_anchor('is_sandbox', 'Sandbox') ?>
+                    </th>
+                    <th style="width:6%">
+                        <?= sortable_anchor('is_sent', 'Status') ?>
+                    </th>                    
+                    <th style="width:12%">
                         <?= sortable_anchor('created_at', 'Created') ?>
                         | <?= sortable_anchor('updated_at', 'Updated') ?>
                     </th>
@@ -27,6 +33,11 @@
                         <td>{{ $record->to_name }}</td>
                         <td>{{ $record->to_email }}</td>
                         <td>{{ $record->subject }}</td>
+                        <td>{{ $record->is_sandbox ? "Yes" : "No" }}</td>
+                        <td>{{ $record->is_sent == 1 ? "Sent" : ($record->is_sent == 0 ? "Fail" : "-") }}</td>
+                        <td>
+                            
+                        </td>
                         <td>
                             <x-Backend.index-table-info :record="$record" :userList="$userListCache" />
                         </td>
@@ -41,11 +52,40 @@
                         </td>
                     </tr>
                     <tr id="record-{{ $record->id }}" class="hidden">
-                        <td></td>
-                        <td class="details" style="background-color:#EEE" colspan="5">
+                        <td style="background-color: var(--body--bs-body-bg)"></td>
+                        <td class="details" colspan="5">
 
                         </td>
-                        <td></td>
+                        <td colspan="3">
+                            @if(isset($record->error_code))
+                                <h4 class="mb-2 b-b-danger">
+                                    Error Code : {{ $record->error_code }}
+                                </h4>
+
+                                <div class="mb-3">
+                                    {{ $record->error_msg }}
+                                </div>
+                            @endif
+
+                            @if(isset($record->api_response_code))
+                                <h4 class="mb-2 b-b-danger">
+                                    API Error Code : {{ $record->api_response_code }}
+                                </h4>
+                            @endif
+                            
+                            @if(isset($record->api_response) && is_array($record->api_response))
+                            <div id="api_response-{{ $record->id }}" class="mx-h-200 mb-3">
+                                {!! array_print($record->api_response) !!}
+                            </div>
+
+                            <span class="btn btn-info btn-sm css-toggler mt-1 mb-1"
+                                data-sr-css-class-toggle-target="#api_response-{{ $record->id }}"
+                                data-sr-css-class-toggle-class="mx-h-200" data-sr-css-class-toggle-applied-text="More"
+                                data-sr-css-class-toggle-not-applied-text="Less">
+                                More
+                            </span>
+                            @endif
+                        </td>
                     </tr>
                 @endforeach
             </tbody>

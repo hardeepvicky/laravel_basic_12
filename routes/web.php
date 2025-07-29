@@ -38,6 +38,7 @@ use App\Http\Controllers\Backend\UserCategoryController;
 use App\Http\Controllers\Backend\UserController;
 use App\Http\Controllers\Backend\WhatsappTemplateController;
 use App\Http\Controllers\Frontend\EnquiryController;
+use App\Http\Controllers\Frontend\PublicController as FrontendPublicController;
 use App\Http\Controllers\HomeController;
 use App\Models\EmailLog;
 use Illuminate\Http\Request;
@@ -80,6 +81,8 @@ Route::post('ajax_otp_verify', [$controllerClass, 'ajax_otp_verify']);
 
 Route::any('/create_password/{uid}', [RegisterController::class, 'create_password'])->name("create_password");
 Route::any('/forgot_password', [RegisterController::class, 'forgot_password'])->name("forgot_password");
+
+Route::any('unsubscribe_email/{uid}', [FrontendPublicController::class, 'unsubscribe_user_email'])->name("unsubscribe_email");
 
 // Route to redirect to Google's OAuth page
 Route::get('/auth/google/redirect', [GoogleAuthController::class, 'redirect'])->name('auth.google.redirect');

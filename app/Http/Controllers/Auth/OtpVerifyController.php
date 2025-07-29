@@ -32,13 +32,13 @@ class OtpVerifyController extends WebController
 
         if (!$uid)
         {
-            throw new UserException("Empty uid");
+            throw new UserException("Empty uid", UserException::ERROR_USER_DATA_WRONG);
         }
         
         $user = User::where("uid", $uid)->first();
 
         if (!$user) {
-            throw new UserException("User UID is wrong : " . $uid);
+            throw new UserException("User UID is wrong : " . $uid, UserException::ERROR_USER_DATA_WRONG);
         }
 
         $this->setForView(compact("user"));
@@ -56,13 +56,13 @@ class OtpVerifyController extends WebController
 
             if (!$uid)
             {
-                throw new UserException("Empty uid");
+                throw new UserException("Empty uid", UserException::ERROR_USER_DATA_WRONG);
             }
 
             $user = User::where("uid", $uid)->first();
 
             if (!$user) {
-                throw new Exception("Wrong uid : " . $uid);
+                throw new Exception("Wrong uid : " . $uid, UserException::ERROR_USER_DATA_WRONG);
             }
 
             LaravelExtend::send_email_user_otp($user);
@@ -86,13 +86,13 @@ class OtpVerifyController extends WebController
 
             if (!$uid)
             {
-                throw new UserException("Empty uid");
+                throw new UserException("Empty uid", UserException::ERROR_USER_DATA_WRONG);
             }
 
             $user = User::where("uid", $uid)->first();
 
             if (!$user) {
-                throw new UserException("Wrong uid : " . $uid);
+                throw new UserException("Wrong uid : " . $uid, UserException::ERROR_USER_DATA_WRONG);
             }
 
             LaravelExtend::send_whatsapp_user_otp($user);

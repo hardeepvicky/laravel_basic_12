@@ -17,7 +17,7 @@ class EmailHelper
 
     private String $email_via, $from_email, $from_name, $subject, $html, $type;
     private array $cc_list = [], $to_list = [], $attachments = [];
-    private bool $is_sandbox = true;
+    private bool $is_sandbox = false;
 
     private $api_key, $api_secret;
 
@@ -64,7 +64,7 @@ class EmailHelper
         $this->from_email = env("EMAIL_FROM");
         $this->from_name = env("EMAIL_NAME");
 
-        $this->is_sandbox = !App::isProduction();
+        $this->is_sandbox = App::isLocal();
     }
 
     public function setSubject(String $subject)
@@ -293,6 +293,7 @@ class EmailHelper
             $this->updateLog([
                 "is_sent" => 0,
                 "error_msg" => $ex->api_error_msg,
+                "error_code" => $ex->getCode(),
                 "api_response_code" => $ex->api_error_code
             ]);
 
@@ -300,7 +301,8 @@ class EmailHelper
         } catch (Exception $ex) {
             $this->updateLog([
                 "is_sent" => 0,
-                "error_msg" => $ex->getMessage()
+                "error_msg" => $ex->getMessage(),
+                "error_code" => $ex->getCode(),
             ]);
 
             throw $ex;
@@ -429,20 +431,13 @@ class EmailHelper
                 throw new ApiException('API : Response->Messages on success', $response->getStatus());
             } else {
                 foreach ($api_response['Messages'] as $message) {
-                    $log = [
-                        "api_response" => $message,
-                    ];
-
                     if ($message['Status'] == "success") {
 
                         foreach ($message['To'] as $to) {
-
-                            $result['success']++;
-
                             if ($to['MessageID']) {
-                                $log['is_sent'] = true;
+                                $result['success']++;
                             } else {
-                                $log['is_sent'] = false;
+                                $result['fail']++;
                             }
                         }
                     } else if ($message['Status'] == "error") {

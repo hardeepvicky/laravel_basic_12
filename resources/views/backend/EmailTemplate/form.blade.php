@@ -12,6 +12,7 @@ $false = false;
     <?php
     $page_header_links = [['title' => 'List', 'url' => route($routePrefix . '.index')]];
     $empty_list = [];
+    $is_disabled = $model->name && !is_developer_role_login();
     ?>
 
     @include($partial_path . '.page_header')
@@ -30,7 +31,7 @@ $false = false;
                         $field = 'name';
                         $label = get_value_from_list($field_labels, $field, $field);
                         ?>
-                        <x-Inputs.text-field :name="$field" :label="$label" value="{{ $model->{$field} }}"
+                        <x-Inputs.text-field :name="$field" :label="$label" value="{{ $model->{$field} }}" :isDisabled="$is_disabled"
                             placeholder="Enter {{ $label }}" mandatory="true" autocomplete="off" />
                     </div>
                     <div class="form-group mb-3">
@@ -51,7 +52,7 @@ $false = false;
                         $label = get_value_from_list($field_labels, $field);
                         $value = is_array($model->placeholders) ? implode(',', $model->placeholders) : "";
                         ?>
-                        <x-Inputs.choice :id="$field" :name="$field" :label="$label" :value="$value"
+                        <x-Inputs.choice :id="$field" :name="$field" :label="$label" :value="$value" :isDisabled="$is_disabled"
                             class="choice" placeholder="Enter {{ $label }}" />
                     </div>
                     <div class="form-group mb-3">

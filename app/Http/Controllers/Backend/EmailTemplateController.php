@@ -30,6 +30,9 @@ class EmailTemplateController extends BackendController
 
         $this->setForView(compact("records"));
 
+        $emailTemplate = new EmailTemplate();
+        $emailTemplate->getPlaceholderCommonData();
+
         return $this->viewIndex(__FUNCTION__);
     }
 
@@ -92,10 +95,8 @@ class EmailTemplateController extends BackendController
     private function _common_validation_rules()
     {
         return [
-            "name" => ["required"],
             "subject" => ["required"],
             "body" => ["required"],
-            "placeholders" => ["required"],
             "emailTemplateFile" => [],
             "is_active" => ""
         ];
@@ -111,6 +112,8 @@ class EmailTemplateController extends BackendController
         $this->beforeCreate();
 
         $rules = $this->_common_validation_rules();
+        $rules['name'] = ['required'];
+        $rules['placeholders'] = ['required'];
 
         $this->model = new $this->modelClass();
 

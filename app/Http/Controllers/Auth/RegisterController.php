@@ -52,7 +52,7 @@ class RegisterController extends WebController
      */
     protected function validator(array $data)
     {
-        return Validator::make($data, [
+        $rules = [
             'type' => ['required', 'string', 'max:255'],
             'sub_type' => ['required', 'string', 'max:255'],
             'country_id' => ['required'],
@@ -63,7 +63,13 @@ class RegisterController extends WebController
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:6', 'confirmed'],
             "g-recaptcha-response" => ['required', new ReCaptcha]
-        ],
+        ];
+
+        $user = new User();
+        $rules = LaravelExtend::merge_validation_rules($rules, $user->getRequiredIfRules(request()));
+        $rules = LaravelExtend::merge_validation_rules($rules, $user->getUniqueValidationRules(request()));
+
+        return Validator::make($data, $rules,
         [
             "g-recaptcha-response.required" => "Google Capcha verification required"
         ]

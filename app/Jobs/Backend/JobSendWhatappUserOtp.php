@@ -34,10 +34,15 @@ class JobSendWhatappUserOtp implements ShouldQueue
      */
     public function handle()
     {
-        $template = WhatsappTemplate::where("name", "OTP")->where("is_active", 1)->first();
+        $template = WhatsappTemplate::where("name", "OTP")->first();
         if (!$template)
         {
             throw new UserException("Template not found : OTP", UserException::ERROR_USER_DATA_WRONG);
+        }
+
+        if (!$template->is_active)
+        {
+            return;
         }
 
         $whatsappHelper = new WhatsappHelper();

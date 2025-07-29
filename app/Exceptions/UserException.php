@@ -49,7 +49,7 @@ class UserException extends Exception
                 break;
 
             case self::ERROR_USER_DATA_WRONG:
-                $data['error_title'] = "Error due to wrong or missing data in database";
+                $data['error_title'] = "Error due to wrong or missing data";
                 break;
         }
 

@@ -36,6 +36,13 @@
                                 :value="$value" />
                         </div>
                         <div class="form-group mb-3">
+                            <?php $field = 'company_tag_line';
+                            $value = get_value($record_list, $field);
+                            $label = Setting::LABELS[$field]; ?>
+                            <x-inputs.text-field name="data[text][{{ $field }}]" :label="$label"
+                                :value="$value" />
+                        </div>
+                        <div class="form-group mb-3">
                             <?php $field = 'company_email';
                             $value = get_value($record_list, $field);
                             $label = Setting::LABELS[$field]; ?>

@@ -18,6 +18,7 @@ class Choice extends Component
         public array $list = [],
         public $mandatory = false,
         public $preventCssClassAddToInput = false,
+        public $isDisabled = false,
         public $errorName = ""
     )
     {
