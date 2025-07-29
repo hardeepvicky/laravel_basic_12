@@ -283,7 +283,11 @@ class ProductCategoryController extends BackendController
 
     public function edit($id)
     {
-        $model = $this->model = $this->modelClass::with(["categoryAttribute"])->findOrFail($id);
+        $model = $this->model = $this->modelClass::with([
+            "categoryAttribute" => function($q){
+                $q->orderBy("list_display_order");
+            }
+        ])->findOrFail($id);
 
         $this->beforeEdit($model);
 
