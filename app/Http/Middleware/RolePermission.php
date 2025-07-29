@@ -36,10 +36,9 @@ class RolePermission
         $accessControl = AccessControl::init();
 
         if (!$accessControl->isAllow($route_name, $role_id_list)) {
-            d($route_name);
-            d($role_id_list);
-            d(LaravelExtend::getQueryLog("", -3));
-            exit;
+            // d($route_name);
+            // d($role_id_list);
+            // d(LaravelExtend::getQueryLog("", -3));
             abort(401);
         }
 
