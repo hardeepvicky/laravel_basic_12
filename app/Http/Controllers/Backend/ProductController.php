@@ -378,6 +378,7 @@ class ProductController extends BackendController
     {
         $category = ProductCategory::with([
             "categoryAttribute" => function($q){
+                $q->where("is_active", 1);
                 $q->orderBy("list_display_order", "ASC");
             },
             ])->findOrFail($category_id);
