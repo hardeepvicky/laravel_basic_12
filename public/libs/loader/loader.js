@@ -143,12 +143,14 @@ $.loader = {
             }
         }
 
-        jqueryObj = $("#loadingIndicator");
+        var parent = target ? $(target) : $("body");
+
+        jqueryObj = parent.find(".loadingIndicator");
 
         if (jqueryObj.length == 0)
         {
             var html = `
-                <div id="loadingIndicator" class="indicator-loading-overlay">
+                <div class="loadingIndicator indicator-loading-overlay">
                      <div class="indicator-loader-content">
                         <i class="fas fa-spinner fa-spin"></i>
                         <span class="message">${text}</span>
@@ -156,9 +158,9 @@ $.loader = {
                 </div>
             `;
 
-            $("body").append(html).addClass("indicator-applied");
+            parent.append(html).addClass("indicator-applied");
 
-            jqueryObj = $("#loadingIndicator");
+            jqueryObj = parent.find(".loadingIndicator");
         }
         else
         {
@@ -185,42 +187,22 @@ $.loader = {
                 }
                 else
                 {
-                    const offset = $(target).offset();
-                    
+                    var newPopperTop = 0; // Top of target + its height
+                    var newPopperLeft = 0; // Same left as target
 
-                    var targetTop = offset.top;
-                    var targetLeft = offset.left;
+                    var position = options.target.position.toLowerCase();
 
-                    var newPopperTop = targetTop; // Top of target + its height
-                    var newPopperLeft = targetLeft; // Same left as target
-
-                    if (options.target.position == "top")
+                    if (position.includes("right"))
                     {
-                        newPopperTop -= 20;
-                    }
-                    else if (options.target.position == "top right")
-                    {
-                        newPopperTop -= 20;
                         newPopperLeft += $(target).outerWidth() - jqueryObj.outerWidth();
                     }
-                    else if (options.target.position == "bottom")
+
+                    if (position.includes("bottom"))
                     {
-                        newPopperTop += $(target).outerHeight();
+                        newPopperTop += $(target).outerHeight() - 20;
                     }
-                    else if (options.target.position == "bottom right")
-                    {
-                        newPopperTop += $(target).outerHeight();
-                        newPopperLeft += $(target).outerWidth() - jqueryObj.outerWidth();
-                    }
-                    else if (options.target.position == "right")
-                    {
-                        newPopperLeft += $(target).outerWidth();
-                    }
-                    else if (options.target.position == "left")
-                    {
-                        newPopperLeft -= 160;
-                    }
-                    else if (options.target.position == "center")
+
+                    if (position == "center")
                     {
                         newPopperTop = ($(target).outerHeight() / 2) - 20;
                         newPopperLeft = ($(target).outerWidth() / 2) - 160;

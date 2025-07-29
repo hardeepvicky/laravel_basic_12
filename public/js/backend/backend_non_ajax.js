@@ -401,7 +401,7 @@ function suggestion_list(textarea, suggestionBox, suggestion_data, url) {
     const fetchSuggestions = function (term) {
         if (url) {
 
-            $.loader.indicator("Fetching Data...", textarea, {
+            $.loader.indicator("Fetching Data...", textarea.parent(), {
                 target : {
                     position : "top right",
                 }
@@ -413,7 +413,7 @@ function suggestion_list(textarea, suggestionBox, suggestion_data, url) {
             });
         }
 
-        $.loader.indicator("Filtering Data...", textarea, {
+        $.loader.indicator("Filtering Data...", textarea.parent(), {
             target : {
                 position : "top right",
             }
@@ -528,7 +528,7 @@ function suggestion_list(textarea, suggestionBox, suggestion_data, url) {
                                 suggestions = data['data'];
                             }
 
-                            $.loader.indicator(false);
+                            $.loader.indicator(false, textarea.parent());
 
                             displaySuggestions(suggestions);
                         });

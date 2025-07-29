@@ -62,7 +62,7 @@ body > .loader-container
 
 /*** ------------------------------------------------------------------------------ **/
 .indicator-loading-overlay {
-    position: fixed;
+    position: absolute;
     top: 0;
     left: 50%;
     height: 20px;
