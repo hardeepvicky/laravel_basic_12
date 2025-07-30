@@ -744,9 +744,9 @@ class TaskController extends BackendController
 
         $task_taken_actions_fields = FieldSetting::getDynamicFields($model);
 
-        $action_list = DropDownValue::getList("id", "display_name", ["type" => DropDownValue::TASK_ACTION_TAKEN]);
+        $action_list = DropDownValue::getList("id", "display_name", ["type" => DropDownValue::TASK_ACTION_TAKEN], "list_display_order");
 
-        $response_list = DropDownValue::getList("id", "display_name", ["type" => DropDownValue::TASK_RESPONSE]);
+        $response_list = DropDownValue::getList("id", "display_name", ["type" => DropDownValue::TASK_RESPONSE], "list_display_order");
 
         $id_list = $record->taskFile->pluck("document_file_id")->toArray();
 
