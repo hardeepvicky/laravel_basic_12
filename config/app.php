@@ -123,4 +123,5 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    'ACL_IS_SYSTEM_ADMIN_ALLOW_ALL_ROUTES' => env("ACL_IS_SYSTEM_ADMIN_ALLOW_ALL_ROUTES", false)
 ];

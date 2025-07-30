@@ -1,9 +1,8 @@
 <?php
 use App\Helpers\LaravelExtend;
 
-if (!isset($partial_path))
-{
-    $partial_path = "backend.partials";
+if (!isset($partial_path)) {
+    $partial_path = 'backend.partials';
 }
 
 ?>
@@ -40,18 +39,23 @@ if (!isset($partial_path))
     <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/css/vendors/slick-theme.css') }}" />
 
     <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/libs/select2/select2.min.css') }}" />
-    <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/libs/select2/select2-bootstrap-5-theme.min.css') }}" />
+    <link rel="stylesheet" type="text/css"
+        href="{{ get_asset_url('assets/libs/select2/select2-bootstrap-5-theme.min.css') }}" />
     <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/libs/select2/select2-dark.css') }}" />
     <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/libs/Croppie-2.6.4/croppie.css') }}" />
-    <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/libs/fancybox/dist/jquery.fancybox.min.css') }}" />
-    <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/libs/jquery-file-validator/css/file-validator.css') }}" />
-    <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/css/vendors/flatpickr/flatpickr.min.css') }}">
+    <link rel="stylesheet" type="text/css"
+        href="{{ get_asset_url('assets/libs/fancybox/dist/jquery.fancybox.min.css') }}" />
+    <link rel="stylesheet" type="text/css"
+        href="{{ get_asset_url('assets/libs/jquery-file-validator/css/file-validator.css') }}" />
+    <link rel="stylesheet" type="text/css"
+        href="{{ get_asset_url('assets/css/vendors/flatpickr/flatpickr.min.css') }}">
 
     <!-- Theme Specfic -->
     <link id="color" rel="stylesheet" href="{{ get_asset_url('assets/css/color-1.css') }}" media="screen" />
     <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/css/style.css') }}" />
 
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/css/bootstrap-editable.css" />
+    <link rel="stylesheet"
+        href="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/css/bootstrap-editable.css" />
 
     <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/libs/summernote/summernote.min.css') }}">
 
@@ -91,7 +95,7 @@ if (!isset($partial_path))
 
                 <?php $primary_info = LaravelExtend::$info['primary'] ?? []; ?>
 
-                <x-Backend.information :info="$primary_info"/>
+                <x-Backend.information :info="$primary_info" />
 
                 @yield('content')
             </div>
@@ -156,7 +160,7 @@ if (!isset($partial_path))
     <script src="{{ get_asset_url('js/backend/backend_non_ajax.js') }}"></script>
     <script src="{{ get_asset_url('js/common.js') }}"></script>
 
-    <div class="modal fade" id="modal-add-via-upload" tabindex="-1" style="display: none;" aria-hidden="true">
+    <div class="modal fade" id="modal-add-via-upload" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-xl" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -174,7 +178,7 @@ if (!isset($partial_path))
         </div>
     </div>
 
-    <div class="modal fade" id="modal-add-via-url" tabindex="-1" style="display: none;" aria-hidden="true">
+    <div class="modal fade" id="modal-add-via-url" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-xl" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -195,8 +199,7 @@ if (!isset($partial_path))
     <script>
         $(function() {
 
-            function after_modal_load(form_url, modal)
-            {
+            function after_modal_load(form_url, modal) {
                 setTimeout(() => {
                     $('.modal-select2').select2({
                         placeHolder: "Please Select",
@@ -218,7 +221,7 @@ if (!isset($partial_path))
                             percentComplete + "%");
                     },
                     error: function(xhr, status, errorString) {
-                        $.loader.hide();
+                        $.loader.init().hide();
 
                         response = xhr.responseText.trim();
 
@@ -227,56 +230,49 @@ if (!isset($partial_path))
                             return false;
                         }
 
-                        try
-                        {
+                        try {
                             var responseJson = JSON.parse(response);
-                        }
-                        catch(e)
-                        {
+                        } catch (e) {
                             $.events.onAjaxError("JSON Parse Error", response);
                             return false;
                         }
 
                         modal.find("form").find(".error-message").remove();
 
-                        if (typeof responseJson['errors'] == "object")
-                        {
-                            for (var field_name in responseJson['errors'])
-                            {
+                        if (typeof responseJson['errors'] == "object") {
+                            for (var field_name in responseJson['errors']) {
                                 var errors = responseJson['errors'][field_name];
 
-                                var field = modal.find("form").find("[name='"+ field_name +"']");
-                                if (field.length > 0)
-                                {
+                                var field = modal.find("form").find("[name='" + field_name + "']");
+                                if (field.length > 0) {
                                     var html = "";
 
-                                    for (var a in errors)
-                                    {
+                                    for (var a in errors) {
                                         html += '<span class="error-message">' + errors[a] + '</span>';
                                     }
 
                                     field.parent().append(html);
                                 }
                             }
-                        }
-                        else if (typeof responseJson['message'] == "string")
-                        {
+                        } else if (typeof responseJson['message'] == "string") {
                             $.events.onUserError(responseJson['message']);
                         }
                     },
                     success: function(responseText, statusText, xhr) {
+                        $.loader.init().hide();
+
                         ajaxHandleResponse(form_url, responseText,
                             function(response) {
+                                console.log(modal);
                                 modal.modal("hide");
-                                
+
                                 $("form.summary_search").find(".clear_form_search_conditions").trigger("click");
 
-                                if ($("#gallery-modal-main").length > 0)
-                                {
+                                if ($("#gallery-modal-main").length > 0) {
                                     $("#gallery-modal-main").refresh();
                                     $("#gallery-modal-main").modal('show');
                                 }
-                            })
+                            });
                     }
                 });
             }
@@ -287,8 +283,7 @@ if (!isset($partial_path))
 
                 $('#modal-add-via-upload').find(".modal-body").html("Loading....");
 
-                $('#modal-add-via-upload').find(".modal-body").load(form_url, function()
-                {
+                $('#modal-add-via-upload').find(".modal-body").load(form_url, function() {
                     after_modal_load(form_url, $('#modal-add-via-upload'));
                 });
             });
@@ -303,8 +298,7 @@ if (!isset($partial_path))
 
                 $('#modal-add-via-url').find(".modal-body").html("Loading....");
 
-                $('#modal-add-via-url').find(".modal-body").load(form_url, function()
-                {
+                $('#modal-add-via-url').find(".modal-body").load(form_url, function() {
                     after_modal_load(form_url, $('#modal-add-via-url'));
                 });
             });
@@ -313,31 +307,31 @@ if (!isset($partial_path))
                 $('#modal-add-via-url form').trigger("submit");
             });
 
-            $(document).on("click", "a.document-file-archive", function(){
+            $(document).on("click", "a.document-file-archive", function() {
                 var _li = $(this).closest("li.folder-box");
 
                 var url = $(this).attr("href");
 
-                ajaxGetJson(url, function(response){
+                ajaxGetJson(url, function(response) {
                     _li.remove();
                 });
 
                 return false;
             });
 
-            $(document).on("click", "a.document-file-unarchive", function(){
+            $(document).on("click", "a.document-file-unarchive", function() {
                 var _li = $(this).closest("li.folder-box");
 
                 var url = $(this).attr("href");
 
-                ajaxGetJson(url, function(response){
+                ajaxGetJson(url, function(response) {
                     _li.remove();
                 });
 
                 return false;
             });
 
-            $(document).on("click", ".file-block", function(){
+            $(document).on("click", ".file-block", function() {
                 $(this).toggleClass("active");
             });
 

@@ -62,7 +62,7 @@ class AccessControl
             $system_role_count = Role::where("id", $role_id_list)->where('code', Role::TYPE_SYSTEM_ADMIN)->count();
 
             if ($system_role_count > 0) {
-                $is_allow_all_routes = env("ACL_IS_SYSTEM_ADMIN_ALLOW_ALL_ROUTES", false);
+                $is_allow_all_routes = config("app.ACL_IS_SYSTEM_ADMIN_ALLOW_ALL_ROUTES");
 
                 if ($is_allow_all_routes) {
                     return true;
@@ -86,7 +86,7 @@ class AccessControl
         // by default allow 
         $allow_route_list = SectionRoutes::ALLOW_ROUTES_FOR_ANY_LOGIN_USER;
 
-        $is_allow_all_routes = env("ACL_IS_SYSTEM_ADMIN_ALLOW_ALL_ROUTES", false);
+        $is_allow_all_routes = config("app.ACL_IS_SYSTEM_ADMIN_ALLOW_ALL_ROUTES");
 
         $all_routes = LaravelExtend::getRoutes();
 
@@ -145,7 +145,7 @@ class AccessControl
             $admin_role = Role::where('code', Role::TYPE_SYSTEM_ADMIN)->whereIn("id", $role_id_list)->first();
         }
 
-        $is_allow_all_routes_to_admin = env("ACL_IS_SYSTEM_ADMIN_ALLOW_ALL_ROUTES", false);
+        $is_allow_all_routes_to_admin = config("app.ACL_IS_SYSTEM_ADMIN_ALLOW_ALL_ROUTES");
 
         $arrayHelper = new ArrayHelper($section_list);
 

@@ -13,6 +13,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 
 class JobSendEmailOnRegisration
 {
@@ -61,11 +62,10 @@ class JobSendEmailOnRegisration
 
         if ($result['fail'] > 0 || !empty($result['errors']))
         {
-            $msg = "Success : " . $result['success'];
+            $msg = "Total : " . $result['total'];
+            $msg = ", Success : " . $result['success'];
             $msg .= ", Fail : " . $result['fail'];
-            $msg .= ", Errors : " . implode(",", array_get_only_scaler_values($result['errors']));
-
-            throw new UserException($msg, UserException::ERROR_API_FAIL);
+            Log::error($msg, $result['errors']);
         }
     }
 }
