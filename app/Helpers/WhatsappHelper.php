@@ -259,7 +259,7 @@ class WhatsappHelper
             $request_params['template']['headerValues'] = $this->header_values;
         }
 
-        d($request_params, true);
+        // d($request_params, true);
 
         $request_params = json_encode($request_params);
 
