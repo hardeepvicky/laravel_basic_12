@@ -55,7 +55,7 @@ class JobSendWhatappUserOtp implements ShouldQueue
 
         $result = $whatsappHelper->send();
 
-        if ($result['fail'] > 0)
+        if ($result['fail'] > 0 || !empty($result['errors']))
         {
             $msg = "Success : " . $result['success'];
             $msg .= ", Fail : " . $result['fail'];

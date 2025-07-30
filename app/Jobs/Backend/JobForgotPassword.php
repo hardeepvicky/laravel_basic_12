@@ -60,7 +60,7 @@ class JobForgotPassword implements ShouldQueue
 
         $result = $emaiHelper->setSandbox(false)->send();
 
-        if ($result['fail'] > 0)
+        if ($result['fail'] > 0 || !empty($result['errors']))
         {
             $msg = "Success : " . $result['success'];
             $msg .= ", Fail : " . $result['fail'];
