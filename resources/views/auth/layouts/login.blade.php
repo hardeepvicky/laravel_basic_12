@@ -49,6 +49,7 @@
 
         @include("partials.common_script_links");
 
+        <script src="{{ get_asset_url('assets/js/password.js') }}"></script>
         <script src="{{ get_asset_url('js/backend/login_non_ajax.js') }}"></script>
     </div>
 </body>

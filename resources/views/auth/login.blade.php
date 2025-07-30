@@ -22,7 +22,9 @@ use App\Models\User;
                 <div class="form-input position-relative">
                     <x-Inputs.text-field type="password" name="password" label="" placeholder="*********"
                         mandatory="true" />
-                    <div class="show-hide"><span class="show"></span></div>
+                    <div class="show-hide">
+                        <span class="show"></span>
+                    </div>
                 </div>
             </div>
             <div class="form-group mb-0 checkbox-checked">
