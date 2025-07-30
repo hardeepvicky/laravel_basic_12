@@ -50,7 +50,7 @@ class JobSendWhatappUserOtp
             ->setBodyValues([$this->otp])
             ->setButtonValues(["1" => [$this->otp]])
             ->setCountryCode("+" . $this->country_code)
-            ->addTo($this->mobile, $this->name, $this->user_id)
+            ->setTo($this->mobile, $this->name, $this->user_id)
         ;
 
         $result = $whatsappHelper->setSandbox(false)->send();

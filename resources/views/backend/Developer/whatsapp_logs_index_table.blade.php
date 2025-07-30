@@ -19,6 +19,12 @@
                     <th style="width:6%">
                         <?= sortable_anchor('country_code', 'Country Code') ?>
                     </th>
+                    <th style="width:7%">
+                        <?= sortable_anchor('to_name', 'To') ?>
+                    </th>
+                    <th style="width:7%">
+                        <?= sortable_anchor('to_mobile', 'To Mobile') ?>
+                    </th>
                     <th style="width:6%">
                         <?= sortable_anchor('is_sandbox', 'Sandbox') ?>
                     </th>
@@ -38,41 +44,10 @@
                         <td>{{ $record->template_name }}</td>
                         <td>{{ $record->template_lanugage }}</td>
                         <td>{{ $record->country_code }}</td>
+                        <td>{{ $record->to_name }}</td>
+                        <td>{{ $record->to_mobile }}</td>
                         <td>{{ get_value_from_list($yes_no_list, $record->is_sandbox) }}</td>
-                        <td>{{ $record->is_sent == 1 ? "Sent" : ($record->is_sent == 0 ? "Fail" : "-") }}</td>
-                        <td>
-                            @if (isset($record->to) && is_array($record->to))
-                            <div id="to-{{ $record->id }}" class="mx-h-200">
-                                <table class="table table-sm summary-table table-bordered i-data-table">
-                                    <thead>
-                                        <tr>
-                                            <th style="width:5%">Sr.No.</th>
-                                            <th style="width:60%" data-search="like" data-sort="text">Name</th>
-                                            <th style="width:30%" data-search="like" data-sort="text">Mobile</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php $a = 0; ?>
-                                        @foreach($record->to as $arr)
-                                        <?php $a++; ?>
-                                        <tr>
-                                            <td>{{ $a }}</td>
-                                            <td>{{ $arr['name'] ?? "" }}</td>
-                                            <td>{{ $arr['mobile_no'] ?? "" }}</td>
-                                        </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            <span class="btn btn-info btn-sm css-toggler mt-1 mb-1"
-                                data-sr-css-class-toggle-target="#change-{{ $record->id }}"
-                                data-sr-css-class-toggle-class="mx-h-200" data-sr-css-class-toggle-applied-text="More"
-                                data-sr-css-class-toggle-not-applied-text="Less">
-                                More
-                            </span>
-                            @endif
-                        </td>
+                        <td>{{ $record->is_sent == 1 ? "Sent" : ($record->is_sent == 0 ? "Fail" : "-") }}</td>                        
                         <td>
                             <x-Backend.created-and-by :datetime="$record->created_at_user_tz" :userId="$record->created_by" />
 

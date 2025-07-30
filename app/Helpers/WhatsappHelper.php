@@ -16,9 +16,9 @@ class WhatsappHelper
 
     private static $enabled_api_platforms = [self::EMAIL_VIA_INTERAKT];
 
-    private String $via, $country_code, $template_name, $template_lanugage;
+    private String $via, $country_code, $template_name, $template_lanugage, $mobile_no, $name, $user_id;
 
-    private array $header_values = [], $body_values = [], $button_values = [], $mobile_list = [];
+    private array $header_values = [], $body_values = [], $button_values = [];
 
     private bool $is_sandbox = false;
 
@@ -89,19 +89,11 @@ class WhatsappHelper
         return $this;
     }
 
-    public function addTo(String $mobile_no, String $name, $user_id)
+    public function setTo(String $mobile_no, String $name, $user_id = null)
     {
-        foreach ($this->mobile_list as $to) {
-            if (isset($to['mobile_no']) && $to['mobile_no'] == $mobile_no) {
-                return $this;
-            }
-        }
-
-        $this->mobile_list[] = [
-            "mobile_no" => $mobile_no,
-            "name" => $name,
-            "user_id" => $user_id
-        ];
+        $this->mobile_no = $mobile_no;
+        $this->name = $this->name;
+        $this->user_id = $user_id;
 
         return $this;
     }
@@ -125,7 +117,9 @@ class WhatsappHelper
             "header_values" => $this->header_values,
             "body_values" => $this->body_values,
             "button_values" => $this->button_values,
-            "to" => $this->mobile_list,
+            "to_mobile" => $this->mobile_no,
+            "to_name" => $this->name,
+            "to_user_id" => $this->user_id,
             "is_sandbox" => (int) $this->is_sandbox,
             "is_sent" => null
         ]);
