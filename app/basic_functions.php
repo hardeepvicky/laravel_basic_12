@@ -1213,3 +1213,17 @@ function get_exception_display_message(Exception $ex)
 
     return $msg;
 }
+
+function check_internet_connection($host = 'www.google.com', $port = 80, $timeout = 5) {
+    // The @ suppresses warnings that fsockopen() might throw if it can't connect
+    $connected = @fsockopen($host, $port, $errno, $errstr, $timeout);
+    
+    if ($connected) {
+        // A connection was successfully opened, so we have internet
+        fclose($connected); // Close the connection
+        return true;
+    } else {
+        // The connection failed, so we are likely offline
+        return false;
+    }
+}

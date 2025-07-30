@@ -18,6 +18,9 @@ $.ajaxSetup({
 });
 
 $(document).ajaxError(function (event, xhr, settings, errorString) {
+    
+    $.loader.init().hide();
+
     if (xhr.status == 403) {
         $.events.onAjaxError(errorString, "Session is expired. Please Login");
     } 

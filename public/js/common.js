@@ -27,8 +27,4 @@ $(function()
             }
         });
     });
-
-    $.events.lastCallbacks.map(function(cb) {
-        cb();
-    });
 });

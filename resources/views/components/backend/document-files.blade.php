@@ -7,7 +7,7 @@ use App\Helpers\LaravelExtend;
     @foreach($records as $record)
     <?php
         $mime_type = get_mime_type_from_extension($record->file_ext);
-    ?>    
+    ?>
     <li class="folder-box d-flex align-items-center">
         @if($record->file_url && in_array($record->type, ["image", "video", "audio"]))
             <div class="file-block card " data-id="{{ $record->id }}">
@@ -34,13 +34,13 @@ use App\Helpers\LaravelExtend;
                             <h5 class="f-w-600">{{ str_short_with_dot($record->name) }}</h5>
                             <span>By : {{ LaravelExtend::getCreatedByOrUpdatedBy($record->created_by) }}</span>
                             <p>
-                                {{ $record->created_at->diffForHumans() }} ,
+                                {{ $record->created_at_user_tz->diffForHumans() }} ,
 
                                 {{ round($record->file_size_in_mb, 2) }} MB
                             </p>
                         </div>
                         <div class="flex-shrink-0 text-end">
-                            
+
                         </div>
                     </div>
                 </div>
@@ -57,7 +57,7 @@ use App\Helpers\LaravelExtend;
                         <h5 class="f-w-600">{{ str_short_with_dot($record->name) }}</h5>
                         <span>By : {{ LaravelExtend::getCreatedByOrUpdatedBy($record->created_by) }}</span>
                         <p>
-                            {{ $record->created_at->diffForHumans() }}
+                            {{ $record->created_at_user_tz->diffForHumans() }}
                             @if ($record->file)
                                 , {{ round($record->file_size_in_mb, 2) }} MB
                             @endif

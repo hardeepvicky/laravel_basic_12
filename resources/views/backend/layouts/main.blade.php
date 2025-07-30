@@ -156,8 +156,7 @@ if (!isset($partial_path))
     <script src="{{ get_asset_url('js/backend/backend_non_ajax.js') }}"></script>
     <script src="{{ get_asset_url('js/common.js') }}"></script>
 
-    <div class="modal fade" id="modal-add-via-upload" tabindex="-1" aria-labelledby="modal-add-via-upload"
-        style="display: none;" aria-hidden="true">
+    <div class="modal fade" id="modal-add-via-upload" tabindex="-1" style="display: none;" aria-hidden="true">
         <div class="modal-dialog modal-xl" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -175,8 +174,7 @@ if (!isset($partial_path))
         </div>
     </div>
 
-    <div class="modal fade" id="modal-add-via-url" tabindex="-1" aria-labelledby="modal-add-via-upload"
-        style="display: none;" aria-hidden="true">
+    <div class="modal fade" id="modal-add-via-url" tabindex="-1" style="display: none;" aria-hidden="true">
         <div class="modal-dialog modal-xl" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -273,10 +271,10 @@ if (!isset($partial_path))
                                 
                                 $("form.summary_search").find(".clear_form_search_conditions").trigger("click");
 
-                                if ($("#gallery-modal--main").length > 0)
+                                if ($("#gallery-modal-main").length > 0)
                                 {
-                                    $("#gallery-modal--main").refresh();
-                                    $("#gallery-modal--main").modal('show');
+                                    $("#gallery-modal-main").refresh();
+                                    $("#gallery-modal-main").modal('show');
                                 }
                             })
                     }
@@ -341,6 +339,10 @@ if (!isset($partial_path))
 
             $(document).on("click", ".file-block", function(){
                 $(this).toggleClass("active");
+            });
+
+            $.events.lastCallbacks.map(function(cb) {
+                cb();
             });
         });
     </script>
