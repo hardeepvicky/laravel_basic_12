@@ -205,7 +205,7 @@
                         otp: list.join("")
                     };
 
-                    ajaxPostJson("/ajax_user_otp_verify", request, function(response) {
+                    ajaxPostJson("/ajax_otp_verify", request, function(response) {
 
                         Swal.fire({
                             icon: "success",
