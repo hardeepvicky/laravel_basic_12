@@ -202,6 +202,7 @@ class UserController extends BackendController
             'whatsapp_mobile' => ['required', new MobileNumber],
             'roles' => ["required"],
             'allow_ip' => [],
+            'office_landline_no' => "",
             "dont_send_email" => "",
             "profile_image" => "",
             "is_active" => "",

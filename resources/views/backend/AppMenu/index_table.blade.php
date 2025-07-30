@@ -31,6 +31,7 @@
                         <td>
                             <a class="x-editable" href="#" id="menu_display_order" 
                                 data-type="number" 
+                                data-name="menu_display_order"
                                 data-pk="{{ $record->id }}" 
                                 data-url="{{ route($routePrefix . ".ajax_update_field") }}" 
                                 data-title="Enter Display Order"

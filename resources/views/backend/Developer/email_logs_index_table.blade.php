@@ -11,6 +11,8 @@
                     <th style="width:10%">From Email</th>
                     <th style="width:10%">To Name</th>
                     <th style="width:10%">To Email</th>
+                    <th style="width:10%">To CC</th>
+                    <th style="width:10%">To CC Email</th>
                     <th style="width:10%">Subject</th>
                     <th style="width:6%">
                         <?= sortable_anchor('is_sandbox', 'Sandbox') ?>

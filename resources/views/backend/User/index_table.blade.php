@@ -93,6 +93,12 @@ use App\Models\User;
                                                 </span>
                                             </label>
                                             <label class="info">
+                                                {{ get_value_from_list($field_labels, 'office_landline_no') }} :
+                                                <span>
+                                                    {{ $record->office_landline_no }}
+                                                </span>
+                                            </label>
+                                            <label class="info">
                                                 {{ get_value_from_list($field_labels, 'dont_send_email') }} :
                                                 <x-Backend.yes-no-label :value="$record->dont_send_email" />
                                             </label>

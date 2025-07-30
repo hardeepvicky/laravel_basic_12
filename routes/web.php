@@ -523,6 +523,9 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
 
         $name = "unarchive";
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "ajax_update_field";
+        Route::post($name, [$controllerClass, $name])->name($name);
     });
 
     $route_prefix = "uom";
