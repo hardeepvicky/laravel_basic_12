@@ -3,6 +3,7 @@
 namespace App\Helpers;
 
 use App\Exceptions\ApiException;
+use App\Exceptions\UserException;
 use App\Models\EmailLog;
 use Exception;
 use Illuminate\Support\Facades\App;
@@ -276,6 +277,11 @@ class EmailHelper
 
         try {
             $this->saveToLog($log_extras);
+
+            if (!check_internet_connection())
+            {
+                throw new UserException("Internet not working", UserException::ERROR_NETWORK_FAIL);
+            }
 
             switch ($this->email_via) {
                 case self::EMAIL_VIA_BREVO:

@@ -176,6 +176,11 @@ class WhatsappHelper
 
             if (!$this->is_sandbox)
             {
+                if (!check_internet_connection())
+                {
+                    throw new UserException("Internet not working", UserException::ERROR_NETWORK_FAIL);
+                }
+
                 switch ($this->via) {
                     case self::EMAIL_VIA_INTERAKT:
                         $api_result = $this->_sendViaInterAkt();
