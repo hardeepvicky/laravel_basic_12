@@ -46,7 +46,7 @@ class JobSendWhatappUserOtp
         }
 
         $whatsappHelper = new WhatsappHelper();
-        $whatsappHelper->setTemplate($template->name, $template->language)
+        $whatsappHelper->setTemplate($template->template_name, $template->language)
             ->setBodyValues([$this->otp])
             ->setButtonValues(["1" => [$this->otp]])
             ->setCountryCode("+" . $this->country_code)
