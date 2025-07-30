@@ -222,15 +222,7 @@ class WhatsappHelper
             "errors" => []
         ];
 
-        $to_list = [];
-
-        foreach ($this->mobile_list as $to) {
-            array_check_key_and_throw_error($to, ["mobile_no"]);
-
-            $to_list[] = $to['mobile_no'];
-        }
-
-        $result['total'] = count($to_list);
+        $result['total'] = 1;
 
         if (!$result['total']) {
             return $result;
@@ -238,7 +230,7 @@ class WhatsappHelper
 
         $request_params = [
             "countryCode" => $this->country_code,
-            "phoneNumber" => $to_list,
+            "phoneNumber" => $this->mobile_no,
             "type" => "Template",
             "template" => [
                 "name" => $this->template_name,
