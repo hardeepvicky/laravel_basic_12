@@ -259,7 +259,7 @@ class WhatsappHelper
             $request_params['template']['headerValues'] = $this->header_values;
         }
 
-        // d($request_params, true);
+        d($request_params, true);
 
         $request_params = json_encode($request_params);
 
@@ -299,6 +299,15 @@ class WhatsappHelper
         else
         {
             $result['fail'] = count($to_list);
+			
+			if (isset($api_response['message']))
+			{
+				throw new UserException($api_response['message'], UserException::ERROR_API_FAIL);
+			}
+			else
+			{
+				throw new UserException("Unknown Error", UserException::ERROR_API_FAIL);
+			}
         }
 
         return $result;
