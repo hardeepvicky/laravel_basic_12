@@ -6,12 +6,7 @@ use App\Exceptions\UserException;
 use App\Helpers\FileUtility;
 use App\Helpers\LaravelExtend;
 use App\Helpers\MyCommand;
-use App\Models\AppMenu;
 use App\Models\BaseModelInterface;
-use App\Models\FieldSetting;
-use App\Models\Task;
-use App\Models\Type;
-use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
 
 class ModelToJsonCommand extends MyCommand

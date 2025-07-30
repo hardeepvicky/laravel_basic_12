@@ -4,22 +4,15 @@ namespace App\Console\Commands;
 
 use App\Helpers\ConsoleOutput;
 use App\Helpers\DateUtility;
-use App\Helpers\LaravelExtend;
 use App\Helpers\MyCommand;
 use App\Models\AjaxLog;
-use App\Models\AutomateTask;
 use App\Models\CommandLog;
-use App\Models\DocumentFile;
 use App\Models\EmailLog;
 use App\Models\RecordHistory;
-use App\Models\RecurringTask;
 use App\Models\SqlLog;
-use App\Models\Task;
-use Carbon\Carbon;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
-use Twilio\TwiML\Voice\Record;
 
 class LogsOldCommand extends MyCommand
 {
