@@ -108,7 +108,7 @@ class OtpVerifyController extends WebController
 
     public function ajax_otp_verify(Request $request)
     {
-        $response = ["status" => 0, "msg" => "unknown"];
+        $response = ["status" => 0, "msg" => "unknown", "redirect_to" => "/home"];
 
         try {
             $data = $request->validate([
