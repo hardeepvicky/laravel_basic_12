@@ -16,13 +16,13 @@
                     <th style="width:8%">
                         <?= sortable_anchor('template_lanugage', 'Template Lanugage') ?>
                     </th>
+                    <th style="width:10%">
+                        <?= sortable_anchor('to_name', 'To') ?>
+                    </th>
                     <th style="width:6%">
                         <?= sortable_anchor('country_code', 'Country Code') ?>
                     </th>
-                    <th style="width:7%">
-                        <?= sortable_anchor('to_name', 'To') ?>
-                    </th>
-                    <th style="width:7%">
+                    <th style="width:8%">
                         <?= sortable_anchor('to_mobile', 'To Mobile') ?>
                     </th>
                     <th style="width:6%">
@@ -31,7 +31,6 @@
                     <th style="width:6%">
                         <?= sortable_anchor('is_sent', 'Status') ?>
                     </th>
-                    <th style="width:35%">To</th>
                     <th style="width:12%">
                         <?= sortable_anchor('created_at', 'Created') ?>
                     </th>

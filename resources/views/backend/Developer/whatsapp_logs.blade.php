@@ -27,6 +27,9 @@
                             class="select2" />
                     </div>
                     <div class="col-md-4 col-lg-3 col-xxxl-2 mb-2">
+                        <x-inputs.text-field name="country_code" label="Country Code" :value="$search['country_code']" />
+                    </div>
+                    <div class="col-md-4 col-lg-3 col-xxxl-2 mb-2">
                         <?php
                         $field = 'is_sandbox';
                         ?>

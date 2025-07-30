@@ -211,6 +211,7 @@ class DeveloperController extends BackendController
             ["field" => "api_platform", "type" => "string"],
             ["field" => "template_name", "type" => "string"],
             ["field" => "template_lanugage", "type" => "string"],
+            ["field" => "country_code", "type" => "string"],
             ["field" => "to_name", "type" => "string"],
             ["field" => "to_mobile", "type" => "string"],
             ["field" => "to_user_id", "type" => "int"],
