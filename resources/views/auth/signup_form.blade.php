@@ -16,13 +16,13 @@ use App\Models\User;
                 Signup with Google
             </a>
         </div>
-        
+
         <div class="d-flex align-items-center my-4">
             <hr class="flex-grow-1">
             <span class="px-3 text-muted text-sm">or</span>
             <hr class="flex-grow-1">
         </div>
-        
+
         <form class="theme-form" method="POST" action="{{ route('register') }}">
             @csrf
             <x-Inputs.text-field type="hidden" name="type" value="{{ User::TYPE_EXTERNAL }}" />
@@ -159,68 +159,64 @@ use App\Models\User;
     <script>
         $(function() {
 
-            $.events.execAtLast(function() {
-                $("#country_id").change(function() {
-                    var v = $(this).val();
+            $("#country_id").change(function() {
+                var v = $(this).val();
 
-                    var data_value = $(this).attr("data-value");
+                var data_value = $(this).attr("data-value");
 
-                    if (data_value && !v) {
-                        v = data_value;
-                    }
+                if (data_value && !v) {
+                    v = data_value;
+                }
 
-                    if (v) {
-                        $("#mobile_country_code").html("");
-                        ajaxGetJson("/country/ajax_get/" + v, function(response) {
-                            var data = response['data'];
+                if (v) {
+                    $("#mobile_country_code").html("");
+                    ajaxGetJson("/country/ajax_get/" + v, function(response) {
+                        var data = response['data'];
 
-                            $("#mobile_country_code").html("+" + data['phonecode']);
-                        });
-                    }
-                });
-
-                $("#same_as_mobile").click(function() {
-                    $("#whatsapp_mobile").val($("#mobile").val());
-                });
-
-                $("a.signup-with-third-party").click(function(e) {
-                    e.preventDefault();
-
-                    var url = $(this).attr("href");
-
-                    $("#modal-signup-with-third-party").modal("show");
-
-
-                    $("#modal-signup-with-third-party .submit").unbind("click").bind("click",
-                        function() {
-
-                            $("#signup-with-third-party-before-signup").ajaxSubmit({
-                                beforeSubmit: function(formData, jqForm, options) {
-                                    $.loader.setInfo("Please Wait...").show();
-                                },
-                                success: function(responseText, statusText, xhr,
-                                $form) {
-
-                                    ajaxHandleResponse(url, responseText, function(
-                                        response) {
-                                        $.loader.setInfo(
-                                            "Redirecting to external URL..."
-                                            ).show();
-
-                                        location.href = url;
-                                    });
-                                },
-                                error: function() {
-                                    $.loader.hide();
-                                },
-                            });
-                        });
-
-                    return false;
-                });
+                        $("#mobile_country_code").html("+" + data['phonecode']);
+                    });
+                }
             });
 
+            $("#same_as_mobile").click(function() {
+                $("#whatsapp_mobile").val($("#mobile").val());
+            });
 
+            $("a.signup-with-third-party").click(function(e) {
+                e.preventDefault();
+
+                var url = $(this).attr("href");
+
+                $("#modal-signup-with-third-party").modal("show");
+
+
+                $("#modal-signup-with-third-party .submit").unbind("click").bind("click",
+                    function() {
+
+                        $("#signup-with-third-party-before-signup").ajaxSubmit({
+                            beforeSubmit: function(formData, jqForm, options) {
+                                $.loader.setInfo("Please Wait...").show();
+                            },
+                            success: function(responseText, statusText, xhr,
+                                $form) {
+
+                                ajaxHandleResponse(url, responseText, function(
+                                    response) {
+                                    $.loader.setInfo(
+                                        "Redirecting to external URL..."
+                                    ).show();
+
+                                    location.href = url;
+                                });
+                            },
+                            error: function() {
+                                $.loader.hide();
+                            },
+                        });
+                    });
+
+                return false;
+            });
         });
     </script>
 @endsection

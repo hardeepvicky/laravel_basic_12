@@ -171,7 +171,7 @@ if (!isset($partial_path)) {
                     Loading...
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Close</button>
+                    <button class="btn btn-secondary close" type="button" data-bs-dismiss="modal">Close</button>
                     <button class="btn btn-primary submit" type="button">Submit</button>
                 </div>
             </div>
@@ -189,7 +189,7 @@ if (!isset($partial_path)) {
                     Loading...
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Close</button>
+                    <button class="btn btn-secondary close" type="button" data-bs-dismiss="modal">Close</button>
                     <button class="btn btn-primary submit" type="button">Submit</button>
                 </div>
             </div>
@@ -263,8 +263,8 @@ if (!isset($partial_path)) {
 
                         ajaxHandleResponse(form_url, responseText,
                             function(response) {
-                                console.log(modal);
-                                modal.modal("hide");
+
+                                modal.find("button.close").trigger("click");
 
                                 $("form.summary_search").find(".clear_form_search_conditions").trigger("click");
 

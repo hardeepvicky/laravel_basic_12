@@ -51,6 +51,12 @@ use App\Helpers\LaravelExtend;
                             </p>
                         </div>
                         <div class="flex-shrink-0 text-end">
+                            <?php
+                                $url = $record->file_url ?? $record->url;
+                            ?>
+                            <a download="{{ $record->name }}" href="{{ $url }}" class="btn btn-outline-secondary summary-action-button">
+                                <i class="fa-solid fa-download label-icon"></i>
+                            </a>
                             @if($record->is_archive)
                                 <a href="{{ route($routePrefix .'.unarchive', ['id' => $record->id]) }}"
                                     class="btn btn-outline-success summary-action-button document-file-unarchive"
@@ -92,8 +98,11 @@ use App\Helpers\LaravelExtend;
                 <?php
                     $url = $record->file_url ?? $record->url;
                 ?>
-                <a target="_blank" href="{{ $url }}" class="btn btn-secondary btn-sm btn-round">
-                    Open
+                <a target="_blank" href="{{ $url }}" class="btn btn-outline-info summary-action-button">
+                    <i class="fa-solid fa-eye label-icon"></i>
+                </a>
+                <a download="{{ $record->name }}" href="{{ $url }}" class="btn btn-outline-secondary summary-action-button">
+                    <i class="fa-solid fa-download label-icon"></i>
                 </a>
 
                 @if($record->is_archive)
