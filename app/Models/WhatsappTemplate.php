@@ -2,8 +2,6 @@
 
 namespace App\Models;
 
-use App\Exceptions\UserException;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Unique;
@@ -26,7 +24,7 @@ class WhatsappTemplate extends BaseModel
 
     protected static array $unique_fields = ["name"];
 
-    const TEMPLATE_OTP = "otp-en";
+    public const TEMPLATE_OTP = "otp-en";
 
     protected function getDisplayNameAttribute()
     {
