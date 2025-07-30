@@ -200,6 +200,7 @@ class WhatsappHelper
                 "error_data" => $ex->data
             ]);
 
+            $result['fail'] = $result['total'];
             $result['errors'][] = $ex->getMessage();
         }
         catch (Exception $ex) {
@@ -209,6 +210,7 @@ class WhatsappHelper
                 "error_code" => $ex->getCode()
             ]);
 
+            $result['fail'] = $result['total'];
             $result['errors'][] = $ex->getMessage();
 
             throw $ex;

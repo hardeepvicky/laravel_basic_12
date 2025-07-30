@@ -297,7 +297,8 @@ class EmailHelper
                 default:
                     throw new Exception("No Email Via found");
             }
-        } catch (ApiException $ex) {
+        } 
+        catch (ApiException $ex) {
             $this->updateLog([
                 "is_sent" => 0,
                 "error_msg" => $ex->api_error_msg,
@@ -306,12 +307,27 @@ class EmailHelper
             ]);
 
             $result['errors'][] = $ex->getMessage();
-        } catch (Exception $ex) {
+        } 
+        catch (UserException $ex) {
+            $this->updateLog([
+                "is_sent" => 0,
+                "error_msg" => $ex->getMessage(),
+                "error_code" => $ex->getCode(),
+                "error_data" => $ex->data
+            ]);
+
+            $result['fail'] = $result['total'];
+            $result['errors'][] = $ex->getMessage();
+        }
+        catch (Exception $ex) {
             $this->updateLog([
                 "is_sent" => 0,
                 "error_msg" => $ex->getMessage(),
                 "error_code" => $ex->getCode(),
             ]);
+
+            $result['fail'] = $result['total'];
+            $result['errors'][] = $ex->getMessage();
 
             throw $ex;
         }
@@ -321,34 +337,41 @@ class EmailHelper
 
     private function _sendViaBrevo()
     {
-        $data = array(
-            'sender' => [
-                'email' => $this->from_email,
-                'name' => $this->from_name
-            ],
-            'to' => $this->to_list,
-            'subject' => $this->subject,
-            'htmlContent' => $this->html
-        );
+        // $result = [
+        //     "total" => 0,
+        //     "success" => 0,
+        //     "fail" => 0,
+        //     "errors" => []
+        // ];
 
-        $config = \Brevo\Client\Configuration::getDefaultConfiguration()->setApiKey('api-key', $this->api_key);
+        // $data = array(
+        //     'sender' => [
+        //         'email' => $this->from_email,
+        //         'name' => $this->from_name
+        //     ],
+        //     'to' => $this->to_list,
+        //     'subject' => $this->subject,
+        //     'htmlContent' => $this->html
+        // );
 
-        $apiInstance = new \Brevo\Client\Api\TransactionalEmailsApi(new \GuzzleHttp\Client(), $config);
+        // $config = \Brevo\Client\Configuration::getDefaultConfiguration()->setApiKey('api-key', $this->api_key);
 
-        $sendSmtpEmail = new \Brevo\Client\Model\SendSmtpEmail($data);
+        // $apiInstance = new \Brevo\Client\Api\TransactionalEmailsApi(new \GuzzleHttp\Client(), $config);
 
-        try {
-            $result = $apiInstance->sendTransacEmail($sendSmtpEmail);
+        // $sendSmtpEmail = new \Brevo\Client\Model\SendSmtpEmail($data);
 
-            $msg_id = $result->getMessageId();
-            if ($msg_id) {
-                return $msg_id;
-            }
-        } catch (Exception $ex) {
-            throw $ex;
-        }
+        // try {
+        //     $result = $apiInstance->sendTransacEmail($sendSmtpEmail);
 
-        return false;
+        //     $msg_id = $result->getMessageId();
+        //     if ($msg_id) {
+        //         return $msg_id;
+        //     }
+        // } catch (Exception $ex) {
+        //     throw $ex;
+        // }
+
+        // return false;
     }
 
     private function _sendViaMailjet()
@@ -456,6 +479,7 @@ class EmailHelper
                 }
             }
         } else {
+            $result['fail'] = $result['total'];
             $data = $response->getData();
             throw new ApiException($data['ErrorMessage'], $data['StatusCode'], $data);
         }
