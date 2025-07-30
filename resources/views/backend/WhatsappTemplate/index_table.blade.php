@@ -22,10 +22,9 @@
                         </th>
                         <th><?= sortable_anchor('language', get_value_from_list($field_labels, 'language', 'language')) ?></th>
                         <th><?= sortable_anchor('name', get_value_from_list($field_labels, 'name', 'name')) ?></th>
-                        <th><?= sortable_anchor('is_active', get_value_from_list($field_labels, 'is_active', 'is_active')) ?></th>
-                        <th style="width:6%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
-                        <th style="width:6%"><?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?></th>
-                        <th>Actions</th>
+                        <th style="width:8%"><?= sortable_anchor('is_active', get_value_from_list($field_labels, 'is_active', 'is_active')) ?></th>
+                        <th style="width:8%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
+                        <th style="width:8%"><?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -39,7 +38,6 @@
                             <th scope="row">
                                 <x-Backend.celec-summary-table-first-column :record="$record" :routePrefix="$routePrefix" buttons="edit,delete,tr_details" :labelInfo="$first_col_info"/>
                             </th>
-                            <td>{{ $record->template_name }}</td>
                             <td>{{ $record->language }}</td>
                             <td>{{ $record->name }}</td>
                             <td>
