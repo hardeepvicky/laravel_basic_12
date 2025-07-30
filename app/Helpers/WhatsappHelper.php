@@ -280,11 +280,11 @@ class WhatsappHelper
 
         if ($api_response['result'])
         {
-            $result['success'] = count($to_list);
+            $result['success'] = 1;
         }
         else
         {
-            $result['fail'] = count($to_list);
+            $result['fail'] = 1;
 			
 			if (isset($api_response['message']))
 			{
