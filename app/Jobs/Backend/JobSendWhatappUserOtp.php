@@ -15,10 +15,9 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class JobSendWhatappUserOtp implements ShouldQueue
+class JobSendWhatappUserOtp
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-
+    use Dispatchable, InteractsWithQueue, SerializesModels;
 
     /**
      * Create a new job instance.
