@@ -114,6 +114,7 @@ class OtpVerifyController extends WebController
             $data = $request->validate([
                 'user_id' => ['required'],
                 'otp' => ['required'],
+                'timezone' => ['required'],
             ]);
 
             $user = User::findOrFail($data['user_id']);
@@ -134,6 +135,7 @@ class OtpVerifyController extends WebController
 
             $user->email_verified_at = date("Y-m-d H:i:s");
             $user->is_active = 1;
+            $user->login_timezone = $data['timezone'];
 
             if (!$user->save()) {
                 throw new UserException("Fail To Save User");

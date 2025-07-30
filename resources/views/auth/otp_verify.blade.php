@@ -202,7 +202,8 @@
 
                     var request = {
                         user_id: user.id,
-                        otp: list.join("")
+                        otp: list.join(""),
+                        timezone: getTimeZone()
                     };
 
                     ajaxPostJson("/ajax_otp_verify", request, function(response) {
