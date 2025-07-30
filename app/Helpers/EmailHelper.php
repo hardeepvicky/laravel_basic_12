@@ -168,6 +168,8 @@ class EmailHelper
     public function setSandbox(bool $value)
     {
         $this->is_sandbox = $value;
+
+        return $this;
     }
 
     public function saveToLog($log_extras = [])

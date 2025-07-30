@@ -59,6 +59,6 @@ class JobSendEmailUserOtp implements ShouldQueue
 
         $emaiHelper->setBody($ret['body']);
 
-        $emaiHelper->send();
+        $emaiHelper->setSandbox(false)->send();
     }
 }
