@@ -53,7 +53,7 @@ class JobSendWhatappUserOtp
             ->addTo($this->mobile, $this->name, $this->user_id)
         ;
 
-        $result = $whatsappHelper->send();
+        $result = $whatsappHelper->setSandbox(false)->send();
 
         if ($result['fail'] > 0 || !empty($result['errors']))
         {
