@@ -16,9 +16,9 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
-class JobSendWhatappUserOtp
+class JobSendWhatappUserOtp implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, SerializesModels;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
      * Create a new job instance.
@@ -62,5 +62,7 @@ class JobSendWhatappUserOtp
             $msg .= ", Fail : " . $result['fail'];
             Log::error($msg, $result['errors']);
         }
+
+        return $result;
     }
 }

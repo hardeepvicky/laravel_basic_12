@@ -77,7 +77,7 @@ class PermissionController extends BackendController
             $choosen_route_list = [];
 
             $counters = [
-                "saved"  => 0,
+                "new"  => 0,
                 "deleted"  => 0,
             ];
 
@@ -118,18 +118,18 @@ class PermissionController extends BackendController
 
                     if ($is_insert)
                     {
-                        $counters['saved']++;
+                        $counters['new']++;
                     }
 
                     unset($old_save_id_list[$roleRouteName->id]);
                 }
             }
 
-            $counters['deleted'] = count($old_save_id_list);
-
             RoleRouteName::withoutEvents(function() use ($old_save_id_list){
                 RoleRouteName::destroy($old_save_id_list);            
             });
+
+            $counters['deleted'] = count($old_save_id_list);
 
             $user_id_list = User::whereHas("roles", function ($q) use ($data) {
                 $q->whereIn("role_id", $data['role_id']);
