@@ -4,6 +4,7 @@ namespace App\Jobs\Backend;
 
 use App\Exceptions\UserException;
 use App\Helpers\EmailHelper;
+use App\Helpers\LaravelExtend;
 use App\Models\EmailTemplate;
 use App\Models\Setting;
 use App\Models\User;
@@ -59,6 +60,15 @@ class JobSendEmailUserOtp implements ShouldQueue
 
         $emaiHelper->setBody($ret['body']);
 
-        $emaiHelper->setSandbox(false)->send();
+        $result = $emaiHelper->setSandbox(false)->send();
+
+        if ($result['fail'] > 0)
+        {
+            $msg = "Success : " . $result['success'];
+            $msg .= ", Fail : " . $result['fail'];
+            $msg .= ", Errors : " . implode(",", array_get_only_scaler_values($result['errors']));
+
+            throw new UserException($msg, UserException::ERROR_API_FAIL);
+        }
     }
 }
