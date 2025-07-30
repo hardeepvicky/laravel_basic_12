@@ -92,7 +92,7 @@ class WhatsappHelper
     public function setTo(String $mobile_no, String $name, $user_id = null)
     {
         $this->mobile_no = $mobile_no;
-        $this->name = $this->name;
+        $this->name = $name;
         $this->user_id = $user_id;
 
         return $this;
