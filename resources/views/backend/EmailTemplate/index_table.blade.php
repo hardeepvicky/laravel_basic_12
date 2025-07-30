@@ -12,24 +12,37 @@ $false = false;
         <div class="table-responsive">
             <table class="table table-bordered summary-table summary_table_with_search">
                 <thead>
+                    <tr>
+                        <th>
+                            <?php
+                            $field = "name";
+                            ?>
+                            <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]"/>
+                        </th>                        
+                    </tr>
                     <tr class="border-bottom-primary">
-                        <th style="width:6%">
+                        <th style="width:15%">
                             <?= sortable_anchor('id', get_value_from_list($field_labels, 'id', 'id')) ?>
+                            | <?= sortable_anchor('name', get_value_from_list($field_labels, 'name', 'name')) ?>
                         </th>
-                        <th style="width:10%"><?= sortable_anchor('name', get_value_from_list($field_labels, 'name', 'name')) ?></th>
-                        <th style="width:10%"><?= sortable_anchor('subject', get_value_from_list($field_labels, 'subject', 'subject')) ?></th>
+                        <th style="width:15%"><?= sortable_anchor('subject', get_value_from_list($field_labels, 'subject', 'subject')) ?></th>
                         <th>Placeholders</th>
                         <th style="width:6%"><?= sortable_anchor('is_active', get_value_from_list($field_labels, 'is_active', 'is_active')) ?></th>
-                        <th style="width:6%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
-                        <th style="width:6%"><?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?></th>
-                        <th style="width:10%">Actions</th>
+                        <th style="width:8%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
+                        <th style="width:8%"><?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?></th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach ($records as $record)
+                    <?php
+                        $first_col_info = [
+                            $record->id . " | " . $record->name
+                        ];
+                    ?>
                     <tr>
-                        <td>{{ $record->id }}</td>
-                        <td>{{ $record->name }}</td>
+                        <th scope="row">
+                            <x-Backend.celec-summary-table-first-column :record="$record" :routePrefix="$routePrefix" buttons="edit,copy,delete,tr_details" :labelInfo="$first_col_info"/>
+                        </th>
                         <td>{{ $record->subject }}</td>
                         <td>
                             {!! array_print($record->placeholders) !!}
@@ -42,16 +55,6 @@ $false = false;
                         </td>
                         <td>
                             <x-Backend.created-and-by :datetime="$record->updated_at" :userId="$record->updated_by" />
-                        </td>
-                        <td>
-                            <x-Backend.summary-comman-actions :id="$record->id" :routePrefix="$routePrefix" buttons="edit,copy,delete" />
-
-                            <span class="btn btn-info btn-sm css-toggler mt-1 mb-1"
-                                data-sr-css-class-toggle-target="#record-{{ $record->id }}"
-                                data-sr-css-class-toggle-class="hidden" data-sr-css-class-toggle-applied-text="Show"
-                                data-sr-css-class-toggle-not-applied-text="Hide">
-                                Show
-                            </span>
                         </td>
                     </tr>
                     <tr id="record-{{ $record->id }}" class="hidden">

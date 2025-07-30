@@ -5,7 +5,7 @@
 
     <div class="card-body p-1">
         <div class="table-responsive">
-            <table class="table table-striped table-bordered table-hover summary_table_with_search">
+            <table class="table table-bordered summary-table summary_table_with_search">
                 <thead>
                     <tr>
                         <th style="width:10%">

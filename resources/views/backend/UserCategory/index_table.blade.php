@@ -3,9 +3,9 @@
         <x-Backend.pagination-links :records="$records" />
     </div>
 
-    <div class="card-body p-1 summary_table_with_search" data-base_url="{{ route($routePrefix . '.index') }}">
+    <div class="card-body p-1">
         <div class="table-responsive">
-            <table class="table table-bordered summary-table">
+            <table class="table table-bordered summary-table summary_table_with_search">
                 <thead>
                     <tr class="border-bottom-primary">
                         <th><?= sortable_anchor('id', get_value_from_list($field_labels, 'id')) ?></th>

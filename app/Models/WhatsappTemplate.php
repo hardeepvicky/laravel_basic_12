@@ -24,9 +24,9 @@ class WhatsappTemplate extends BaseModel
        
     ];
 
-    protected static array $unique_fields = ["name", "language"];
+    protected static array $unique_fields = ["name"];
 
-    
+    const TEMPLATE_OTP = "otp-en";
 
     protected function getDisplayNameAttribute()
     {
@@ -40,9 +40,12 @@ class WhatsappTemplate extends BaseModel
 
     public function getUniqueValidationRules(Request $request)
     {
-        $field_rules = [
-            "name" => [Rule::unique($this->connection . "." . $this->getTable(), "name")->where("language", $request->input("language"))],
-        ];
+        $field_rules = [];
+
+        if ($request->has("name"))
+        {
+            $field_rules['name'] = [Rule::unique($this->connection . "." . $this->getTable(), "name")];
+        }
 
         if ($this->id) {
             foreach ($field_rules as $field => $rules) {
@@ -53,6 +56,18 @@ class WhatsappTemplate extends BaseModel
                     }
                 }
             }
+        }
+
+        return $field_rules;
+    }
+
+    public function getRequiredValidationRules(Request $request)
+    {
+        $field_rules = [];
+
+        if (!$this->name)
+        {
+            $field_rules['name'] = ["required"];
         }
 
         return $field_rules;

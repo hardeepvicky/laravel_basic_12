@@ -7,23 +7,38 @@
         <div class="table-responsive">
             <table class="table table-striped table-bordered table-hover">
                 <thead>
+                    <tr>
+                        <th>
+                            <?php
+                            $field = "name";
+                            ?>
+                            <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]"/>
+                        </th>                        
+                    </tr>
                     <tr class="border-bottom-primary">
-                        <th><?= sortable_anchor('id', get_value_from_list($field_labels, 'id', 'id')) ?></th>
-                        <th><?= sortable_anchor('name', get_value_from_list($field_labels, 'name', 'name')) ?></th>
+                        <th style="width:15%">
+                            <?= sortable_anchor('id', get_value_from_list($field_labels, 'id', 'id')) ?>
+                            | <?= sortable_anchor('name', get_value_from_list($field_labels, 'name', 'name')) ?>
+                        </th>
                         <th><?= sortable_anchor('short_name', get_value_from_list($field_labels, 'short_name', 'short_name')) ?></th>
                         <th><?= sortable_anchor('level', get_value_from_list($field_labels, 'level', 'level')) ?></th>
-                        <th><?= sortable_anchor('list_display_order', get_value_from_list($field_labels, 'list_display_order', 'list_display_order')) ?></th>
-                        <th><?= sortable_anchor('is_active', 'Activate / De-Active') ?></th>
-                        <th style="width:6%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
-                        <th style="width:6%"><?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?></th>
-                        <th>Actions</th>
+                        <th style="width:8%"><?= sortable_anchor('list_display_order', get_value_from_list($field_labels, 'list_display_order', 'list_display_order')) ?></th>
+                        <th style="width:8%"><?= sortable_anchor('is_active', 'Activate / De-Active') ?></th>
+                        <th style="width:8%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
+                        <th style="width:8%"><?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?></th>                        
                     </tr>
                 </thead>
                 <tbody>
                     @foreach ($records as $record)
+                    <?php
+                        $first_col_info = [
+                            $record->id . " | " . $record->name
+                        ];
+                    ?>
                         <tr>
-                            <th scope="row">{{ $record->id }}</th>
-                            <td>{{ $record->name }}</td>
+                            <th scope="row">
+                                <x-Backend.celec-summary-table-first-column :record="$record" :routePrefix="$routePrefix" buttons="edit,delete" :labelInfo="$first_col_info"/>
+                            </th>
                             <td>{{ $record->short_name }}</td>
                             <td>{{ $record->level }}</td>
                             <td>
@@ -45,9 +60,6 @@
                             </td>
                             <td>
                                 <x-Backend.created-and-by :datetime="$record->updated_at" :userId="$record->updated_by" />
-                            </td>
-                            <td>
-                                <x-Backend.summary-comman-actions :id="$record->id" :routePrefix="$routePrefix"/>
                             </td>
                         </tr>
                     @endforeach

@@ -112,11 +112,10 @@ class EmailTemplateController extends BackendController
         $this->beforeCreate();
 
         $rules = $this->_common_validation_rules();
-        $rules['name'] = ['required'];
-        $rules['placeholders'] = ['required'];
 
         $this->model = new $this->modelClass();
 
+        $rules = LaravelExtend::merge_validation_rules($rules, $this->model->getRequiredValidationRules($request));
         $rules = LaravelExtend::merge_validation_rules($rules, $this->model->getUniqueValidationRules($request));
 
         $messages = $this->_common_validation_messages();
@@ -203,6 +202,7 @@ class EmailTemplateController extends BackendController
 
         $rules = $this->_common_validation_rules();
 
+        $rules = LaravelExtend::merge_validation_rules($rules, $this->model->getRequiredValidationRules($request));
         $rules = LaravelExtend::merge_validation_rules($rules, $this->model->getUniqueValidationRules($request));
 
         // dd($rules);

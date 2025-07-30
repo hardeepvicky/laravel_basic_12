@@ -240,22 +240,30 @@ class WhatsappHelper
             "template" => [
                 "name" => $this->template_name,
                 "languageCode" => $this->template_lanugage,
-                "headerValues" => $this->header_values,
                 "bodyValues" => $this->body_values,
                 "buttonValues" => $this->button_values
             ]
         ];
+
+        if ($this->header_values)
+        {
+            $request_params['template']['headerValues'] = $this->header_values;
+        }
 
         // d($request_params, true);
 
         $request_params = json_encode($request_params);
 
         $headers = [
-            'Authorization : Basic ' . $this->api_secret,
-            'Content-Type : application/json'
+            'Authorization: Basic ' . $this->api_secret,
+            'Content-Type: application/json'
         ];
 
         $url = "https://api.interakt.ai/v1/public/message/";
+
+        // d($request_params, true);
+
+        // d($headers, true);
 
         $raw_response = curl_post_request($url, $request_params, $headers);
 

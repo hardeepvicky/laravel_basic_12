@@ -3,6 +3,7 @@
 @section('content')
     <?php
     $page_header_links = [['title' => 'List', 'url' => route($routePrefix . '.index')]];
+    $is_disabled = $model->name && !is_developer_role_login();
     ?>
 
     @include($partial_path . '.page_header')
@@ -18,10 +19,10 @@
             <div class="row">
                 <div class="col-md-12 col-xxl-6">
                     <div class="form-group mb-3">
-                        <div class="row">
+                        <div class="row">                            
                             <div class="col-md-12 col-xxl-6">
                                 <?php
-                                $field = 'name';
+                                $field = 'template_name';
                                 $label = get_value_from_list($field_labels, $field, $field);
                                 ?>
                                 <x-Inputs.text-field :id="$field" :name="$field" :label="$label" :value="$model->{$field}"
@@ -33,6 +34,14 @@
                                 $label = get_value_from_list($field_labels, $field, $field);
                                 ?>
                                 <x-Inputs.text-field :id="$field" :name="$field" :label="$label" :value="$model->{$field}"
+                                    placeholder="Enter {{ $label }}" mandatory="true" />
+                            </div>
+                            <div class="col-md-12 col-xxl-6">
+                                <?php
+                                $field = 'name';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <x-Inputs.text-field :id="$field" :name="$field" :label="$label" :value="$model->{$field}" :isDisabled="$is_disabled"
                                     placeholder="Enter {{ $label }}" mandatory="true" />
                             </div>
                         </div>
@@ -66,15 +75,14 @@
                                     </td>
                                     <td>
                                         <x-inputs.text-field name="defaultHeaderValues[(sr-id)]" label=""/>
-                                    </td>                                    
+                                    </td>
                                 @php
                                     $defaultHeaderValues = old('defaultHeaderValues', $model->default_header_values ?? []);
                                     unset($defaultHeaderValues['(sr-id)']);
                                 @endphp
                                 @if (isset($defaultHeaderValues))
                                     @foreach ($defaultHeaderValues as $k => $arr)
-                                        <tr class="" sr-id="{{ $arr['id'] }}"
-                                            sr-counter="{{ $k }}">
+                                        <tr class="" sr-id="{{ $k }}" sr-counter="{{ $k }}">
                                             <td>
                                                 <div class="block">
                                                     <div class="left-block">
@@ -90,7 +98,7 @@
                                                 <?php $value = $arr['default_header_values']; ?>
                                                 <x-inputs.text-field name="defaultHeaderValues[{{ $k }}]"
                                                     label="" :value="$value"/>
-                                            </td>                                            
+                                            </td>
                                         </tr>
                                     @endforeach
                                 @endif
@@ -135,15 +143,14 @@
                                     </td>
                                     <td>
                                         <x-inputs.text-field name="defaultBodyValues[(sr-id)]" label=""/>
-                                    </td>                                    
+                                    </td>
                                 @php
                                     $defaultBodyValues = old('defaultBodyValues', $model->default_body_values ?? []);
                                     unset($defaultBodyValues['(sr-id)']);
                                 @endphp
                                 @if (isset($defaultBodyValues))
-                                    @foreach ($defaultBodyValues as $k => $arr)
-                                        <tr class="" sr-id="{{ $arr['id'] }}"
-                                            sr-counter="{{ $k }}">
+                                    @foreach ($defaultBodyValues as $k => $value)
+                                        <tr class="" sr-id="{{ $k }}" sr-counter="{{ $k }}">
                                             <td>
                                                 <div class="block">
                                                     <div class="left-block">
@@ -156,10 +163,9 @@
                                                 </div>
                                             </td>
                                             <td>
-                                                <?php $value = $arr['default_body_values']; ?>
                                                 <x-inputs.text-field name="defaultBodyValues[{{ $k }}]"
                                                     label="" :value="$value"/>
-                                            </td>                                            
+                                            </td>
                                         </tr>
                                     @endforeach
                                 @endif
@@ -204,15 +210,14 @@
                                     </td>
                                     <td>
                                         <x-inputs.text-field name="defaultButtonValues[(sr-id)]" label=""/>
-                                    </td>                                    
+                                    </td>
                                 @php
                                     $defaultButtonValues = old('defaultButtonValues', $model->default_button_values ?? []);
                                     unset($defaultButtonValues['(sr-id)']);
                                 @endphp
                                 @if (isset($defaultButtonValues))
                                     @foreach ($defaultButtonValues as $k => $arr)
-                                        <tr class="" sr-id="{{ $arr['id'] }}"
-                                            sr-counter="{{ $k }}">
+                                        <tr class="" sr-id="{{ $k }}" sr-counter="{{ $k }}">
                                             <td>
                                                 <div class="block">
                                                     <div class="left-block">
@@ -225,10 +230,12 @@
                                                 </div>
                                             </td>
                                             <td>
-                                                <?php $value = $arr['default_button_values']; ?>
+                                                <?php
+                                                $value = reset($arr);
+                                                ?>
                                                 <x-inputs.text-field name="defaultButtonValues[{{ $k }}]"
                                                     label="" :value="$value"/>
-                                            </td>                                            
+                                            </td>
                                         </tr>
                                     @endforeach
                                 @endif
@@ -244,7 +251,7 @@
                             </tfoot>
                         </table>
                     </div>
-                    
+
                     <div class="form-group mb-3">
                         <x-Inputs.checkbox name="is_active" label="Active" :value="$model->is_active" />
                     </div>
@@ -264,10 +271,26 @@
 
     <script>
         $(function() {
+            $(".template-table").srTableTemplate({
+                brace_type: "(",
+            });
+
+            $("#template_name, #language").keyup(function(){
+
+                if (!$("#name").is(':disabled'))
+                {
+                    var t = $("#template_name").val();
+                    t = t ? t.trim().toLowerCase() : "";
+
+                    var l = $("#language").val();
+                    l = l ? l.trim().toLowerCase() : "";
+
+                    $("#name").val(t + "-" + l);
+                }
+            });
+
             $.events.execAtLast(function() {
-                $(".template-table").srTableTemplate({
-                    brace_type: "(",
-                });
+                
             });
         })
     </script>

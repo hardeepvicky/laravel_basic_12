@@ -67,6 +67,23 @@ class EmailTemplate extends BaseModel
         return $field_rules;
     }
 
+    public function getRequiredValidationRules(Request $request)
+    {
+        $field_rules = [];
+
+        if (!$this->name)
+        {
+            $field_rules['name'] = ["required"];
+        }
+
+        if (!$this->placeholders)
+        {
+            $field_rules['placeholders'] = ["required"];
+        }
+
+        return $field_rules;
+    }
+
     public function getFieldLabels()
     {
         $labels = parent::getFieldLabels();

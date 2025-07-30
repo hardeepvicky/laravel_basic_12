@@ -14,32 +14,47 @@ use App\Models\User;
         </div>
 
         <div class="table-responsive">
-            <table class="table table-bordered summary-table">
+            <table class="table table-bordered summary-table summary_table_with_search">
                 <thead>
+                    <tr>
+                        <th>
+                            <?php
+                            $field = "name";
+                            ?>
+                            <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]"/>
+                        </th>                        
+                    </tr>
                     <tr class="border-bottom-primary">
-                        <th><?= sortable_anchor('id', get_value_from_list($field_labels, 'id')) ?></th>
+                        <th style="width:10%">
+                            <?= sortable_anchor('id', get_value_from_list($field_labels, 'id', 'id')) ?>
+                            | <?= sortable_anchor('name', get_value_from_list($field_labels, 'full_name', 'full_name')) ?>
+                        </th>
                         <th><?= sortable_anchor('type', get_value_from_list($field_labels, 'type')) ?></th>
                         <th><?= sortable_anchor('sub_type', get_value_from_list($field_labels, 'sub_type')) ?></th>
                         <th><?= get_value_from_list($field_labels, 'user_category_id') ?></th>
-                        <th><?= sortable_anchor('name', get_value_from_list($field_labels, 'full_name')) ?></th>
-                        <th><?= sortable_anchor('name', get_value_from_list($field_labels, 'name')) ?></th>
+                        <th><?= sortable_anchor('name', get_value_from_list($field_labels, 'name', 'Username')) ?></th>
                         <th><?= sortable_anchor('email', get_value_from_list($field_labels, 'email')) ?></th>
                         <th><?= sortable_anchor('mobile', get_value_from_list($field_labels, 'mobile')) ?></th>
-                        <th><?= get_value_from_list($field_labels, 'profile_image') ?></th>
-                        <th><?= sortable_anchor('is_active', get_value_from_list($field_labels, 'is_active')) ?></th>
-                        <th style="width:6%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
-                        <th style="width:6%"><?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?></th>
-                        <th>Actions</th>
+                        <th style="width:10%"><?= get_value_from_list($field_labels, 'profile_image') ?></th>
+                        <th style="width:8%"><?= sortable_anchor('is_active', get_value_from_list($field_labels, 'is_active')) ?></th>
+                        <th style="width:8%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
+                        <th style="width:8%"><?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?></th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach ($records as $record)
+                    <?php
+                        $first_col_info = [
+                            $record->id . " | " . $record->full_name
+                        ];
+                    ?>
                     <tr>
-                        <td>{{ $record->id }}</td>
+                        <th scope="row">
+                            <x-Backend.celec-summary-table-first-column :record="$record" :routePrefix="$routePrefix" buttons="edit,delete,tr_details" :labelInfo="$first_col_info"/>
+                        </th>
                         <td>{{ get_value_from_list($type_list, $record->type) }}</td>
                         <td>{{ get_value_from_list($sub_type_list, $record->sub_type) }}</td>
                         <td>{{ $record->userCategory?->getDisplayName() }}</td>
-                        <td>{{ $record->full_name }}</td>
                         <td>{{ $record->name }}</td>
                         <td>{{ $record->email }}</td>
                         <td>{{ $record->mobile }}</td>
@@ -59,15 +74,6 @@ use App\Models\User;
                         </td>
                         <td>
                             <x-Backend.created-and-by :datetime="$record->updated_at" :userId="$record->updated_by" />
-                        </td>
-                        <td>
-                            <x-Backend.summary-comman-actions :id="$record->id" :routePrefix="$routePrefix" />
-
-                            <span class="btn btn-info btn-sm css-toggler mt-1 mb-1"
-                                data-sr-css-class-toggle-target="#record-{{ $record->id }}"
-                                data-sr-css-class-toggle-class="hidden">
-                                Details
-                            </span>
                         </td>
                     </tr>
                     <tr id="record-{{ $record->id }}" class="hidden">

@@ -90,8 +90,8 @@ class WhatsappTemplateController extends BackendController
 
     private function _common_validation_rules()
     {
-        return [
-            "name" => ["required"],
+        return [           
+            "template_name" => ["required"],
             "language" => ["required"],
             "defaultHeaderValues" => "",
             "defaultBodyValues" => "",
@@ -109,10 +109,11 @@ class WhatsappTemplateController extends BackendController
     {
         $this->beforeCreate();
 
-        $rules = $this->_common_validation_rules();
+        $rules = $this->_common_validation_rules();        
 
         $model = new $this->modelClass();
 
+        $rules = LaravelExtend::merge_validation_rules($rules, $model->getRequiredValidationRules($request));
         $rules = LaravelExtend::merge_validation_rules($rules, $model->getUniqueValidationRules($request));
 
         $messages = $this->_common_validation_messages();
@@ -161,13 +162,14 @@ class WhatsappTemplateController extends BackendController
 
         if (isset($validatedData['defaultButtonValues']) && is_array($validatedData['defaultButtonValues']))
         {
-            unset($validatedData['defaultButtonValues']['(sr-id)']);
+            $validatedData['default_button_values'] = [];
 
-            $validatedData['default_button_values'] = array_values($validatedData['defaultButtonValues']);
-
-            foreach($validatedData['default_button_values'] as $k => $v)
+            foreach($validatedData['defaultButtonValues'] as $k => $v)
             {
-                $validatedData['default_button_values'][$k] = [$v];
+                if (is_int($k))
+                {
+                    $validatedData['default_button_values'][$k] = [$v];
+                }
             }
 
             unset($validatedData['defaultButtonValues']);
@@ -200,6 +202,7 @@ class WhatsappTemplateController extends BackendController
 
         $rules = $this->_common_validation_rules();
 
+        $rules = LaravelExtend::merge_validation_rules($rules, $model->getRequiredValidationRules($request));
         $rules = LaravelExtend::merge_validation_rules($rules, $model->getUniqueValidationRules($request));
 
         // dd($rules);
