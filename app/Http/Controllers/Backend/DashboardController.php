@@ -6,6 +6,7 @@ use App\Helpers\DateUtility;
 use App\Helpers\LaravelExtend;
 use App\Models\Tag;
 use App\Models\Task;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 
@@ -15,13 +16,19 @@ class DashboardController extends BackendController
 
     public function index()
     {
+        $auth_user = Auth::user();
+
         if (is_admin_role_login())
         {
             return $this->_admin();
         }
+        else if ($auth_user->type == User::TYPE_INTERNAL)
+        {
+            return $this->_team_member();
+        }
         else
         {
-            return $this->_other();
+            return $this->view("default");
         }
     }
 
@@ -69,9 +76,9 @@ class DashboardController extends BackendController
         return $this->view($view_name);
     }
 
-    private function _other()
+    private function _team_member()
     {
-        $view_name = "default";
+        $view_name = "team_member";
 
         $task_figures = [
             'rating' => [
