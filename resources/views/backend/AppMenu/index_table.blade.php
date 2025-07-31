@@ -29,7 +29,7 @@
                         <td>{{ get_value_from_list($tree_list, $record->parent_id) }}</td>
                         <td>{{ $record->name }}</td>
                         <td>
-                            <a class="x-editable" href="#" id="menu_display_order" 
+                            <a class="x-editable" href="javascript:void();"id="menu_display_order" 
                                 data-type="number" 
                                 data-name="menu_display_order"
                                 data-pk="{{ $record->id }}" 

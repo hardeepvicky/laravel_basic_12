@@ -51,7 +51,7 @@
                                 @endif
                             </td>
                             <td class="text-center">
-                                <a class="x-editable" href="#" id="list_display_order" data-type="number"
+                                <a class="x-editable" href="javascript:void();"id="list_display_order" data-type="number"
                                     data-name="list_display_order"
                                     data-pk="{{ $record->id }}"
                                     data-url="{{ route($routePrefix . '.ajax_update_field') }}"

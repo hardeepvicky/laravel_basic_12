@@ -45,7 +45,7 @@
                             <td>{{ $record->conversion_factor }}</td>
                             <td>{{ $record->is_last_node ? "Last Node" : "" }}</td>
                             <td class="text-center">
-                                <a class="x-editable" href="#" id="list_display_order" data-type="number"
+                                <a class="x-editable" href="javascript:void();"id="list_display_order" data-type="number"
                                     data-name="list_display_order"
                                     data-pk="{{ $record->id }}"
                                     data-url="{{ route($routePrefix . '.ajax_update_field') }}"

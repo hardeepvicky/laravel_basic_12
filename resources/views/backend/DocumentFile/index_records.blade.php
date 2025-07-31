@@ -43,7 +43,7 @@ use App\Helpers\LaravelExtend;
                     <div class="d-flex align-items-center">
                         <div class="flex-grow-1">
                             <h5 class="f-w-600">
-                                <a class="x-editable" href="#" data-type="text"
+                                <a class="x-editable" href="javascript:void();"data-type="text"
                                     data-name="name"
                                     data-pk="{{ $record->id }}"
                                     data-url="{{ route($routePrefix . '.ajax_update_field') }}"
@@ -88,7 +88,7 @@ use App\Helpers\LaravelExtend;
                 </div>
                 <div class="flex-grow-1 d-flex align-items-center ml-1">
                     <div class="flex-grow-1">
-                        <a class="x-editable" href="#" data-type="text"
+                        <a class="x-editable" href="javascript:void();"data-type="text"
                             data-name="name"
                             data-pk="{{ $record->id }}"
                             data-url="{{ route($routePrefix . '.ajax_update_field') }}"

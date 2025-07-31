@@ -41,7 +41,7 @@
                             <td>{{ $record->short_name }}</td>
                             <td>{{ $record->level }}</td>
                             <td>
-                                <a class="x-editable" href="#" id="list_display_order" 
+                                <a class="x-editable" href="javascript:void();"id="list_display_order" 
                                     data-name="list_display_order"
                                     data-type="number" 
                                     data-pk="{{ $record->id }}" 
