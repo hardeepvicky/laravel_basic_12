@@ -93,7 +93,6 @@ class RecordHistory extends BaseMongoModel
             Tag::class,
             ModuleLink::class,
             RouteName::class,
-            RoleRouteName::class,
         ];
 
         $model_class = get_class($model);
