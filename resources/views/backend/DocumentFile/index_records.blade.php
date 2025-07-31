@@ -88,11 +88,13 @@ use App\Helpers\LaravelExtend;
                 </div>
                 <div class="flex-grow-1 d-flex align-items-center ml-1">
                     <div class="flex-grow-1">
-                        <a class="x-editable" href="javascript:void();"data-type="text"
-                            data-name="name"
-                            data-pk="{{ $record->id }}"
-                            data-url="{{ route($routePrefix . '.ajax_update_field') }}"
-                            data-title="Enter Name">{{ str_short_with_dot($record->name) }}</a>
+                        <h5 class="f-w-600">
+                            <a class="x-editable" href="javascript:void();"data-type="text"
+                                data-name="name"
+                                data-pk="{{ $record->id }}"
+                                data-url="{{ route($routePrefix . '.ajax_update_field') }}"
+                                data-title="Enter Name">{{ str_short_with_dot($record->name) }}</a>
+                        </h5>
                         <span>By : {{ LaravelExtend::getCreatedByOrUpdatedBy($record->created_by) }}</span>
                         <p style="font-size: 12px">
                             {{ $record->created_at_user_tz->diffForHumans() }}
