@@ -78,10 +78,6 @@ class DepartmentController extends BackendController
             "type" => User::TYPE_INTERNAL,
         ];
 
-        if ($this->model->dept_head_user_id) {
-            $user_conditions['or_id'] = $this->model->dept_head_user_id;
-        }
-
         $user_list = User::getList("id", "display_name", $user_conditions);
 
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);

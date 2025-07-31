@@ -1004,6 +1004,7 @@ jQuery.fn.extend({
                 placeholder: "{v}",
                 key: "id",
                 text: "name",
+                default_data : [],
                 onError: function (title, msg) {
                     $.events.onError(title, msg);
                 },
@@ -1064,88 +1065,154 @@ jQuery.fn.extend({
                 });
 
                 _this.on(events.change, function (e, event_opt) {
-                    var v = $(this).val();
 
-                    if (v) {
-                        var new_url = settings.beforeGet(_this, url);
+                    if ((typeof event_opt != "undefined" && typeof event_opt.eventBubble == "boolean" && event_opt.eventBubble))
+                    {
 
-                        if (new_url === false) {
-                            return false;
-                        }
+                    }
+                    else
+                    {
+                        var v = $(this).val();
 
-                        new_url = new_url.replaceAll(settings.placeholder, v);
+                        if (v) 
+                        {
+                            var new_url = settings.beforeGet(_this, url);
 
-                        console.log(feature + " : get : " + new_url);
-                        $.get(new_url, function (response) {
-                            try {
-                                if (typeof response == "string") {
-                                    response = JSON.parse(response);
+                            if (new_url === false) {
+                                return false;
+                            }
+
+                            new_url = new_url.replaceAll(settings.placeholder, v);
+
+                            console.log(feature + " : get : " + new_url);
+                            $.get(new_url, function (response) {
+                                try {
+                                    if (typeof response == "string") {
+                                        response = JSON.parse(response);
+                                    }
+                                } catch (e) {
+                                    settings.onError(
+                                        feature + " Error on get " + new_url,
+                                        response
+                                    );
+                                    return;
                                 }
-                            } catch (e) {
-                                settings.onError(
-                                    feature + " Error on get " + new_url,
+
+                                var new_response = settings.afterGet(
+                                    _this,
+                                    $(target),
                                     response
                                 );
-                                return;
-                            }
 
-                            var new_response = settings.afterGet(
-                                _this,
-                                $(target),
-                                response
-                            );
+                                if (typeof new_response != "object")
+                                {
+                                    settings.onError(
+                                        feature + " Error on get " + new_url,
+                                        "new_response should be object"
+                                    );
 
-                            if (typeof new_response != "object")
-                            {
+                                    return;
+                                }
+
+                                if (typeof new_response['status'] == "undefined")
+                                {
+                                    settings.onError(
+                                        feature + " Error on get " + new_url,
+                                        "status is not found in new_response"
+                                    );
+
+                                    return;
+                                }
+
+                                if (typeof new_response['data'] != "object")
+                                {
+                                    settings.onError(
+                                        feature + " Error on get " + new_url,
+                                        "data is not onject in new_response"
+                                    );
+
+                                    return;
+                                }
+
+                                if (new_response["status"] != "1") {
+                                    settings.onError(
+                                        feature + " Error on get " + new_url,
+                                        new_response["msg"]
+                                    );
+                                    return;
+                                }
+
+                                var html = "";
+                                var multiple = $(target).attr("multiple");
+                                if (!multiple) {
+                                    var html = "<option value=''>Please Select</option>";
+                                }
+
+                                for (var i in new_response["data"]) {
+                                    var k = new_response["data"][i][settings.key];
+                                    var v = new_response["data"][i][settings.text];
+
+                                    var attr = 'value="' + k +'"';
+
+                                    if (typeof new_response["data"][i]["auto_select"] != "undefined")
+                                    {
+                                        if (new_response["data"][i]["auto_select"])
+                                        {
+                                            attr += ' selected="selected"';
+                                        }
+                                    }
+
+                                    html += '<option ' + attr +'>' + v +"</option>";
+                                }
+
+                                $(target).html(html);
+
+                                $(target).each(function () {
+                                    if (
+                                        typeof event_opt != "undefined" &&
+                                        typeof event_opt.pageLoad != "undefined" &&
+                                        event_opt.pageLoad
+                                    ) {
+                                        var value = $(this).data("value");
+
+                                        if (value) {
+                                            $(this).trigger(events.setValue, [
+                                                { value: value },
+                                            ]);
+                                        }
+                                    }
+
+                                    if (
+                                        typeof event_opt != "undefined" &&
+                                        typeof event_opt.onListFill == "function"
+                                    ) {
+                                        event_opt.onListFill();
+                                    }
+
+                                    $(this).trigger(events.change, event_opt);
+                                });
+                            }).fail(function (jqXHR, status, msg) {
                                 settings.onError(
                                     feature + " Error on get " + new_url,
-                                    "new_response should be object"
+                                    msg
                                 );
-
-                                return;
-                            }
-
-                            if (typeof new_response['status'] == "undefined")
-                            {
-                                settings.onError(
-                                    feature + " Error on get " + new_url,
-                                    "status is not found in new_response"
-                                );
-
-                                return;
-                            }
-
-                            if (typeof new_response['data'] != "object")
-                            {
-                                settings.onError(
-                                    feature + " Error on get " + new_url,
-                                    "data is not onject in new_response"
-                                );
-
-                                return;
-                            }
-
-                            if (new_response["status"] != "1") {
-                                settings.onError(
-                                    feature + " Error on get " + new_url,
-                                    new_response["msg"]
-                                );
-                                return;
-                            }
-
+                            });
+                        } 
+                        else if (settings.default_data)
+                        {
                             var html = "";
                             var multiple = $(target).attr("multiple");
                             if (!multiple) {
                                 var html = "<option value=''>Please Select</option>";
                             }
 
-                            for (var i in new_response["data"]) {
-                                var k = new_response["data"][i][settings.key];
-                                var v = new_response["data"][i][settings.text];
+                            for (var i in settings.default_data) {
+                                var k = settings.default_data[i][settings.key];
+                                var v = settings.default_data[i][settings.text];
 
                                 var attr = 'value="' + k +'"';
 
-                                if (typeof new_response["data"][i]["auto_select"] != "undefined")
+                                if (typeof settings.default_data[i]["auto_select"] != "undefined")
                                 {
                                     if (new_response["data"][i]["auto_select"])
                                     {
@@ -1157,8 +1224,6 @@ jQuery.fn.extend({
                             }
 
                             $(target).html(html);
-
-                            console.log(event_opt);
 
                             $(target).each(function () {
                                 if (
@@ -1184,20 +1249,16 @@ jQuery.fn.extend({
 
                                 $(this).trigger(events.change, event_opt);
                             });
-                        }).fail(function (jqXHR, status, msg) {
-                            settings.onError(
-                                feature + " Error on get " + new_url,
-                                msg
-                            );
-                        });
-                    } else {
-                        $(target).html("");
+                        }
+                        else {
+                            $(target).html("");
 
-                        $(target).each(function () {
-                            if ($(this).hasEvent(events.change)) {
-                                $(this).trigger(events.change, event_opt);
-                            }
-                        });
+                            $(target).each(function () {
+                                if ($(this).hasEvent(events.change)) {
+                                    $(this).trigger(events.change, event_opt);
+                                }
+                            });
+                        }
                     }
                 });
 

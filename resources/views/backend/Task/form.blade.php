@@ -47,7 +47,7 @@ $false = false;
                         $label = get_value_from_list($field_labels, $field, $field);
                         ?>
                         <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$department_list"
-                            :value="$model->{$field}" class="select2 cascade-drop-down" data-sr-cascade-target="#assign_to_user_id"
+                            :value="$model->{$field}" class="select2" data-sr-cascade-target="#assign_to_user_id"
                             data-sr-cascade-url="/user/ajax_get_list?dept_id={v}" mandatory="true" />
                     </div>
                     <div class="form-group mb-3 is_draft-block is_draft-block-0">
@@ -187,9 +187,10 @@ $false = false;
     </div>
     </form>
 
-    <script>
+    <script>        
         $(function() {
             var screen_name = '<?= $screen_name ?>';
+            var users = JSON.parse('<?= json_encode($users) ?>');
             $.events.execAtLast(function() {
 
                 var start_date_picker;
@@ -242,8 +243,34 @@ $false = false;
 
                 suggestion_list($("#description"), $("#description-suggestion-box"), [], "/tags/ajax_get_list");
 
-                $(".cascade-drop-down").trigger("change", {
+                $("#dept_id").cascade({
+                    beforeGet: function (src, url) {
+                        $.loader.init().setInfo("Fetching Users ...").show();
+                        return url;
+                    },
+                    afterGet: function (src, dest, response) {
+                        $.loader.init().hide();
+                        return response;
+                    },
+                    default_data : users
+                }).trigger("change", {
                     pageLoad: true
+                });
+
+                $("#assign_to_user_id").change(function(){
+                    var v = $(this).val();
+
+                    if (v)
+                    {
+                        for(var i in users)
+                        {
+                            if (users[i]['id'] == v)
+                            {
+                                $("#dept_id").val(users[i]['dept_id']).trigger('change', {eventBubble : true});
+                                return;
+                            }
+                        }
+                    }
                 });
 
                 $("#taskFile").browseGallery({

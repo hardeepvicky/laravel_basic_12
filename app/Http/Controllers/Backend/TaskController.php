@@ -274,6 +274,21 @@ class TaskController extends BackendController
 
         $user_list = User::getList("id", "display_name", $user_conditions);
 
+        $cache_time = 60 * 60 * 24;
+
+        $users = User::getCache("users_type_internal", $cache_time);
+
+        if (!$users)
+        {
+            $users = User::where("type", User::TYPE_INTERNAL)->get()->toArray();
+            User::addCache("users_type_internal", $users);
+        }
+
+        foreach($users as $k => $user)
+        {
+            $users[$k]['name'] = $user['display_name'];
+        }
+
         $type_conditions = [
             'type' => Type::getType($this->model, "task_type")
         ];
@@ -295,7 +310,7 @@ class TaskController extends BackendController
 
         $default_start_date_time = DateUtility::change(date('d-M-Y 10:00'), 1, DateUtility::DAYS, DateUtility::DATETIME_OUT_FORMAT);
 
-        $this->setForView(compact("user_list", "task_type_list", "status_list",  "department_list", "duration_type_list", "field_labels", "default_start_date_time"));
+        $this->setForView(compact("user_list", "users", "task_type_list", "status_list",  "department_list", "duration_type_list", "field_labels", "default_start_date_time"));
 
         return parent::beforeViewRender();
     }
