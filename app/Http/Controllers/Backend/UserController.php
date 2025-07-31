@@ -541,7 +541,7 @@ class UserController extends BackendController
         {
             $main_model = new $model_class();
 
-            if ($main_model instanceof BaseModel || $model_name == "User")
+            if ($main_model instanceof BaseModel)
             {
                 $ref_model = new $model_class();
 
