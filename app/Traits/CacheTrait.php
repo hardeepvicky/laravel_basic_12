@@ -6,6 +6,7 @@ use App\Exceptions\UserException;
 use App\Helpers\ArrayHelper;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 trait CacheTrait
 {
@@ -46,6 +47,13 @@ trait CacheTrait
         if (!$instance->put($cache_key, $data, $cache_time_in_seconds)) {
             throw new UserException("Fail To Put Cache", UserException::ERROR_LARAVEL_FAIL);
         }
+
+        Log::info("Cache-put", [
+            "tags" => [$base_cache_key],
+            "key" => $cache_key,
+            "time" => $cache_time_in_seconds,
+            "data" => $data
+        ]);
     }
 
     public static function forgotCache($key = null)
@@ -58,10 +66,18 @@ trait CacheTrait
         {
             $cache_key = static::optimizeCacheKey($key);
             $instance->forget($cache_key);
+
+            Log::info("Cache-forget", [
+                "tags" => [$base_cache_key],
+                "key" => $cache_key,
+            ]);
         }
         else
         {
             $instance->flush();
+            Log::info("Cache-flush", [
+                "tags" => [$base_cache_key],
+            ]);
         }
     }
 }
