@@ -32,9 +32,9 @@
                             <th scope="row">
                                 <x-Backend.celec-summary-table-first-column :record="$record" :routePrefix="$routePrefix" buttons="edit,delete">
                                     <div class="label">
-                                    {{ $record->id . " | " . $record->name }}
-                                </div>
-                            </x-Backend.celec-summary-table-first-column>
+                                        {{ $record->id . " | " . $record->name }}
+                                    </div>
+                                </x-Backend.celec-summary-table-first-column>
                             </th>
                             <td>
                                 <x-Backend.active_deactive :isActive="$record->is_active" :id="$record->id" :routePrefix="$routePrefix" />

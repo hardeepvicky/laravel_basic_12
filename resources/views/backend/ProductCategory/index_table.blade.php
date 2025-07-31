@@ -31,11 +31,6 @@
                 </thead>
                 <tbody>
                     @foreach ($records as $record)
-                    <?php
-                        $first_col_info = [
-                            $record->id . " | " . $record->name
-                        ];
-                    ?>
                         <tr>
                             <th scope="row">
                                 <x-Backend.celec-summary-table-first-column :record="$record" :routePrefix="$routePrefix" buttons="edit,delete">
