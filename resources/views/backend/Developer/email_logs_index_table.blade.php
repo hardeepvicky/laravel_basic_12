@@ -18,13 +18,14 @@
                         <?= sortable_anchor('is_sandbox', 'Sandbox') ?>
                     </th>
                     <th style="width:6%">
-                        <?= sortable_anchor('is_sent', 'Status') ?>
-                    </th>                    
-                    <th style="width:12%">
-                        <?= sortable_anchor('created_at', 'Created') ?>
-                        | <?= sortable_anchor('updated_at', 'Updated') ?>
+                        <?= sortable_anchor('is_sent', 'Sent Status') ?>
+                    </th>                
+                    <th style="width:8%">    
+                        Email Status
                     </th>
-                    <th style="width:12%">Actions</th>
+                    <th style="width:10%">
+                        <?= sortable_anchor('created_at', 'Created') ?>
+                    </th>
                 </tr>
             </thead>
             <tbody>
@@ -34,14 +35,16 @@
                         <td>{{ $record->from_email }}</td>
                         <td>{{ $record->to_name }}</td>
                         <td>{{ $record->to_email }}</td>
+                        <td>{{ $record->cc_name }}</td>
+                        <td>{{ $record->cc_email }}</td>
                         <td>{{ $record->subject }}</td>
                         <td>{{ get_value_from_list($yes_no_list, $record->is_sandbox) }}</td>
                         <td>{{ $record->is_sent == 1 ? "Sent" : ($record->is_sent == 0 ? "Fail" : "-") }}</td>
+                        <td></td>
                         <td>
-                            <x-Backend.index-table-info :record="$record" :userList="$userListCache" />
-                        </td>
-                        <td>
-                            <span class="btn btn-info btn-sm css-toggler ajax-load"
+                            <x-Backend.created-and-by :datetime="$record->created_at_user_tz" :userId="$record->created_by" />
+
+                            <span class="btn btn-info btn-sm css-toggler d-block m-1 ajax-load"
                                 data-sr-css-class-toggle-target="#record-{{ $record->id }}"
                                 data-sr-css-class-toggle-class="hidden"
                                 data-sr-ajax-load-url="{{ $record->content_file_url }}"
@@ -55,7 +58,7 @@
                         <td class="details" colspan="4">
 
                         </td>
-                        <td colspan="4">
+                        <td colspan="5">
                             @if(isset($record->error_code))
                                 <h4 class="mb-2 b-b-danger">
                                     Error Code : {{ $record->error_code }}
