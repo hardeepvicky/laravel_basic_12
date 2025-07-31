@@ -552,16 +552,16 @@ class WebController extends Controller
 
     protected function beforeEdit($model)
     {
-        if (BaseModel::tableHaveField($model->getTable(), "is_pre_defined")) {
+        if ($model->tableHaveField($model->getTable(), "is_pre_defined")) {
             if ($model->is_pre_defined) {
                 abort(ACTION_NOT_PROCEED, "Pre-Defined Record can not be edit");
             }
         }
 
-        if (BaseModel::tableHaveField($model->getTable(), "can_edit")) {
+        if ($model->tableHaveField($model->getTable(), "can_edit")) {
             if (!$model->can_edit) {
                 $msg = "Record can not be edit";
-                if (BaseModel::tableHaveField($model->getTable(), "cannot_edit_reason_array") || array_key_exists("cannot_edit_reason_array", $model->attributes)) {
+                if ($model->tableHaveField($model->getTable(), "cannot_edit_reason_array") || array_key_exists("cannot_edit_reason_array", $model->attributes)) {
 
                     if ($model->cannot_edit_reason_array) {
                         $arr = $model->cannot_edit_reason_array;
@@ -686,16 +686,16 @@ class WebController extends Controller
 
     protected function beforeDelete($model)
     {
-        if (BaseModel::tableHaveField($model->getTable(), "is_pre_defined")) {
+        if ($model->tableHaveField($model->getTable(), "is_pre_defined")) {
             if ($model->is_pre_defined) {
                 abort(ACTION_NOT_PROCEED, "Pre-Defined Record can not be delete");
             }
         }
 
-        if (BaseModel::tableHaveField($model->getTable(), "can_delete")) {
+        if ($model->tableHaveField($model->getTable(), "can_delete")) {
             if (!$model->can_delete) {
                 $msg = "Record can not be delete";
-                if (BaseModel::tableHaveField($model->getTable(), "cannot_delete_reason_array") || array_key_exists("cannot_delete_reason_array", $model->attributes)) {
+                if ($model->tableHaveField($model->getTable(), "cannot_delete_reason_array") || array_key_exists("cannot_delete_reason_array", $model->attributes)) {
                     if ($model->cannot_delete_reason_array) {
                         $msg .= ", Reason : " . implode(", ", $model->cannot_delete_reason_array);
                     }
