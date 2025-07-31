@@ -44,9 +44,8 @@ class PermissionController extends BackendController
 
         // d($section_list);
 
-        if ($conditions || $section_conditions) {
-
-            $role_id_list = isset($conditions['role_id']) && $conditions['role_id'] ? [$conditions['role_id']] : [];
+        if ($conditions || $section_conditions) {            
+            $role_id_list = isset($conditions['role_id']) && $conditions['role_id'] ? [$conditions['role_id']['value']] : [];
 
             $choosen_route_list = isset($section_conditions['section_list_key']) && $section_conditions['section_list_key'] ? get_value_from_list($section_list, $section_conditions['section_list_key']) : [];
 
