@@ -276,7 +276,7 @@ class User extends Authenticatable implements BaseModelInterface
 
     public function getDisplayName()
     {
-        $sub_type_list = self::getCache("sub_type_list");
+        $sub_type_list = Type::getCache("sub_type_list");
 
         if (!$sub_type_list) {
             $type_conditions = [
@@ -285,7 +285,9 @@ class User extends Authenticatable implements BaseModelInterface
 
             $sub_type_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
 
-            self::addCache("sub_type_list", $sub_type_list);
+            $cache_time = 60 * 60 * 24;
+
+            Type::addCache("sub_type_list", $sub_type_list, $cache_time);
         }
 
         if ($this->type == self::TYPE_EXTERNAL) {

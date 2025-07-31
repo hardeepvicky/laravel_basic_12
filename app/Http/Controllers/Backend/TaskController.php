@@ -272,14 +272,17 @@ class TaskController extends BackendController
             "type" => User::TYPE_INTERNAL,
         ];
 
-        $cache_time = 60 * 60 * 24;
+        
 
-        $users = User::getCache("users_type_internal", $cache_time);
+        $users = User::getCache("users_type_internal");
 
         if (!$users)
         {
             $users = User::where("type", User::TYPE_INTERNAL)->get()->toArray();
-            User::addCache("users_type_internal", $users);
+
+            $cache_time = 60 * 60 * 24;
+            
+            User::addCache("users_type_internal", $users, $cache_time);
         }
 
         $user_list = [];
