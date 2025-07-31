@@ -32,7 +32,7 @@ class RoleRouteName extends BaseModel
                 break;
             case "route_name_id":
                 $ret_array = [
-                    $field => $this->routeName?->name;
+                    $field => $this->routeName?->name
                 ];
                 break;
         }
