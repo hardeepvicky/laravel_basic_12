@@ -9,6 +9,7 @@ use App\Helpers\FileUtility;
 use App\Helpers\LaravelExtend;
 use App\Models\AjaxLog;
 use App\Models\BaseModel;
+use App\Models\BaseModelInterface;
 use App\Models\BaseMongoModel;
 use App\Models\CacheLog;
 use App\Models\SqlLog;
@@ -25,7 +26,7 @@ abstract class Controller
 {
     public array $custom_errors = [];
 
-    protected function deleteCascade(Model $model)
+    protected function deleteCascade(BaseModelInterface $model)
     {
         $class_name = get_class($model);
 

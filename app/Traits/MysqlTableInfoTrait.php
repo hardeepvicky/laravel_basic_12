@@ -3,6 +3,7 @@ namespace App\Traits;
 
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 trait MysqlTableInfoTrait
 {
@@ -29,11 +30,13 @@ trait MysqlTableInfoTrait
             $table_info['columns'][$column->Field] = (array) $column;
         }
 
-        $cache_time = 300;
-
-        if (App::isProduction())
+        if (App::isLocal())
         {
-            $cache_time = 60 * 60 * 24;
+            $cache_time = 300;
+        }
+        else
+        {
+            $cache_time = 60 * 60 * 24 * 30;
         }
 
         self::addCache($cache_key, $table_info, $cache_time);

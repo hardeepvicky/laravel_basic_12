@@ -6,6 +6,8 @@ use App\Exceptions\UserException;
 use App\Helpers\ArrayHelper;
 use App\Helpers\FileUtility;
 use App\Helpers\LaravelExtend;
+use App\Models\BaseModel;
+use App\Models\BaseModelInterface;
 use App\Models\Country;
 use App\Models\Department;
 use App\Models\Designation;
@@ -441,12 +443,6 @@ class UserController extends BackendController
         }
     }
 
-
-    public function destroy($id)
-    {
-        abort(ACTION_NOT_PROCEED, "Because many tables contain created_by and updated_by field, which refer to user, can not delete");
-    }
-
     public function change_password(Request $request)
     {
         if ($request->isMethod("post")) {
@@ -533,5 +529,46 @@ class UserController extends BackendController
         }
 
         return $this->responseJson($response);
+    }
+
+    protected function beforeDelete($user)
+    {
+        parent::beforeDelete($user);
+
+        $model_list = LaravelExtend::getListOfModels();
+
+        foreach($model_list as $model_name => $model_class)
+        {
+            $main_model = new $model_class();
+
+            if ($main_model instanceof BaseModel || $model_name == "User")
+            {
+                $ref_model = new $model_class();
+
+                if ($model_class::tableHaveField($ref_model->getTable(), "created_by")) 
+                {
+                    $count = $model_class::where("created_by", $user->id)->count();
+
+                    $ref_class_display_name = $model_class::classDisplayName();
+
+                    if ($count > 0)
+                    {
+                        throw new \Exception("Record has associated data in $ref_class_display_name in created_by field. can't delete");
+                    }
+                }
+
+                if ($model_class::tableHaveField($ref_model->getTable(), "updated_by")) 
+                {
+                    $count = $model_class::where("updated_by", $user->id)->count();
+
+                    $ref_class_display_name = $model_class::classDisplayName();
+
+                    if ($count > 0)
+                    {
+                        throw new \Exception("Record has associated data in $ref_class_display_name in updated_by field. can't delete");
+                    }
+                }
+            }
+        }
     }
 }

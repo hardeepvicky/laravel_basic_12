@@ -308,7 +308,9 @@ class AccessControl
 
     public static function addMenuToCache($user_id, $data)
     {
-        return self::addCache(self::getMenuCacheKey($user_id), $data, 60 * 60 * 24 * 365);
+        $cache_time = 60 * 60 * 24 * 30;
+
+        return self::addCache(self::getMenuCacheKey($user_id), $data, $cache_time);
     }
 
     public function syncRouteNamesToDatabase()

@@ -81,6 +81,7 @@ class User extends Authenticatable implements BaseModelInterface
         'full_name'
     ];
 
+
     public string $field_for_create_tag = "display_name";
 
     /**
@@ -94,7 +95,7 @@ class User extends Authenticatable implements BaseModelInterface
         'used_in_other_table_updated_by' => 'array',
     ];
 
-    public array $child_model_class = [
+    public static array $child_model_class = [
         UserRole::class => [
             "foreignKey" => "user_id",
             "preventDelete" => false,

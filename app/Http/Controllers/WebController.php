@@ -7,6 +7,7 @@ use App\Helpers\ArrayHelper;
 use App\Helpers\DateUtility;
 use App\Helpers\LaravelExtend;
 use App\Models\BaseModel;
+use App\Models\BaseModelInterface;
 use App\Models\Setting;
 use App\Traits\CacheTrait;
 use Exception;
@@ -705,7 +706,7 @@ class WebController extends Controller
         }
     }
 
-    protected function delete(BaseModel $model)
+    protected function delete(BaseModelInterface $model)
     {
         try {
             DB::beginTransaction();

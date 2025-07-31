@@ -214,7 +214,9 @@ class BaseMongoModel extends Model implements BaseModelInterface
 
         $list = static::fetchList($builder, $id, $value, $table_name);
 
-        self::addCache($key, $list);
+        $cache_time = 60 * 60 * 24 * 30;
+
+        self::addCache($key, $list, $cache_time);
 
         return $list;
     }

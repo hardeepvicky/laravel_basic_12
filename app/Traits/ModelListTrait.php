@@ -71,7 +71,9 @@ trait ModelListTrait
 
         $list = static::fetchList($builder, $key_field, $value_field);
 
-        self::addCache($key, $list);
+        $cache_time = 60 * 60 * 24 * 30;
+
+        self::addCache($key, $list, $cache_time);
 
         return $list;
     }

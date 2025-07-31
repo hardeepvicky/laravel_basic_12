@@ -47,7 +47,7 @@ use App\Models\User;
                         <th scope="row">
                             <x-Backend.celec-summary-table-first-column :record="$record" :routePrefix="$routePrefix" buttons="edit,delete,tr_details">
                                 <div class="label">
-                                    {{ $record->id . " | " . $record->name }}
+                                    {{ $record->id . " | " . $record->full_name }}
                                 </div>
                             </x-Backend.celec-summary-table-first-column>
                         </th>
