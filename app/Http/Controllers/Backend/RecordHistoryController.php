@@ -50,13 +50,9 @@ class RecordHistoryController extends BackendController
         return $this->viewIndex(__FUNCTION__);
     }
 
-    public function change_history_of_field(Request $request)
+    public function change_history_of_record($model, $model_id, $model_field)
     {
-        if ($request->isMethod("post"))
-        {
-            $data = $request->all();
-            dd($data);
-        }
+        
     }
 
     protected function beforeViewRender()
