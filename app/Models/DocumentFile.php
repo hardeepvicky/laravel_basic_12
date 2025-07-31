@@ -29,14 +29,9 @@ class DocumentFile extends BaseModel
         ],
     ];
 
-    public function product()
+    public function documentCategory()
     {
-        return $this->hasMany(Product::class);
-    }
-
-    public function categoryAttribute()
-    {
-        return $this->hasMany(ProductCategoryAttribute::class);
+        return $this->belongsTo(DocumentCategory::class);
     }
 
     protected function getDisplayNameAttribute()
@@ -90,5 +85,22 @@ class DocumentFile extends BaseModel
         }
 
         return $list;
+    }
+
+    public function getRefDisplayName($field, $value)
+    {
+        $ret_array = [];
+
+        switch ($field) {
+            case "document_category_id":
+                $ret_array = [
+                    $field => $this->documentCategory?->getDisplayName()
+                ];
+                break;
+        }
+
+        // dd($ret_array);
+
+        return $ret_array;
     }
 }

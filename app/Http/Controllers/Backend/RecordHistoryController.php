@@ -6,6 +6,7 @@ use App\Helpers\LaravelExtend;
 use App\Models\BaseModelInterface;
 use App\Models\FieldSetting;
 use App\Models\RecordHistory;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 class RecordHistoryController extends BackendController
@@ -47,6 +48,15 @@ class RecordHistoryController extends BackendController
         $this->setForView(compact("records"));
 
         return $this->viewIndex(__FUNCTION__);
+    }
+
+    public function change_history_of_field(Request $request)
+    {
+        if ($request->isMethod("post"))
+        {
+            $data = $request->all();
+            dd($data);
+        }
     }
 
     protected function beforeViewRender()

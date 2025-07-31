@@ -113,7 +113,7 @@ class PermissionController extends BackendController
                     $roleRouteName = RoleRouteName::insertIgnoreIfExist([
                         "role_id" => $role_id,
                         "route_name_id" => $synced_route_name_list[$route_name],
-                    ], $is_insert, true);
+                    ], $is_insert);
 
                     if ($is_insert)
                     {
@@ -124,10 +124,8 @@ class PermissionController extends BackendController
                 }
             }
 
-            RoleRouteName::withoutEvents(function() use ($old_save_id_list){
-                RoleRouteName::destroy($old_save_id_list);            
-            });
-
+            RoleRouteName::destroy($old_save_id_list);
+            
             $counters['deleted'] = count($old_save_id_list);
 
             $user_id_list = User::whereHas("roles", function ($q) use ($data) {

@@ -87,7 +87,6 @@ class RecordHistory extends BaseMongoModel
     {
         $ignore_models = [
             AppMenu::class,
-            DocumentFile::class,
             Notification::class,
             RecordHistory::class,
             Tag::class,
@@ -303,7 +302,7 @@ class RecordHistory extends BaseMongoModel
         {
             $parse_value = (array) $value;
         }
-        
+
         if (is_array($value))
         {
             $parse_value = implode(",", array_get_only_scaler_values($value));
