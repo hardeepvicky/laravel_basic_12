@@ -72,6 +72,7 @@ class User extends Authenticatable implements BaseModelInterface
      * @var array<int, string>
      */
     protected $hidden = [
+        'plain_password',
         'password',
         'remember_token',
     ];
