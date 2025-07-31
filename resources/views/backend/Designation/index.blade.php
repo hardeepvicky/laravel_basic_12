@@ -7,7 +7,7 @@
     ?>
 
     <div class="row">
-        <div class="col-xxxl-10">
+        <div class="col-xxxl-8">
 
             @include($partial_path . '.page_header')
 
@@ -25,7 +25,7 @@
                                     class="pagination_limit" />
                             </div>
 
-                            <div class="col-md-4 col-lg-3 col-xxxl-2 mb-2">
+                            <div class="col-md-4 col-lg-3 mb-2">
                                 <?php
                                 $field = 'name';
                                 $label = get_value_from_list($field_labels, $field, $field);

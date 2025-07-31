@@ -7,7 +7,7 @@
     ?>
 
     <div class="row">
-        <div class="col-xxxl-10">
+        <div class="col-xxxl-8">
 
             @include($partial_path . '.page_header')
 
@@ -23,6 +23,13 @@
                                 <x-Inputs.drop-down :name="$field" label="Limit" :list="$paginationList" :value="$pagination_limit"
                                     :pleaseSelect="$false" class="pagination_limit" />
                             </div>
+                            <div class="col-md-3 mb-2">
+                                <?php
+                                $field = 'name';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <x-Inputs.text-field :name="$field" :label="$label" :value="$search[$field]" />
+                            </div>
                             <div class="col-md-3 col-xxl-2 mb-2">
                                 <?php
                                 $field = 'department_id';
@@ -30,13 +37,6 @@
                                 ?>
                                 <x-Inputs.drop-down :name="$field" :label="$label" :value="$search[$field]" :list="$dept_list"
                                     class="select2" />
-                            </div>
-                            <div class="col-md-3 col-xxl-2 mb-2">
-                                <?php
-                                $field = 'name';
-                                $label = get_value_from_list($field_labels, $field, $field);
-                                ?>
-                                <x-Inputs.text-field :name="$field" :label="$label" :value="$search[$field]" />
                             </div>
                             <div class="col-md-3 col-xxl-2 mb-2">
                                 <?php
