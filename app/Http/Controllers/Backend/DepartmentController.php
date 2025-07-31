@@ -58,8 +58,8 @@ class DepartmentController extends BackendController
             $this->model = new $this->modelClass;
 
             $sort = $this->getSortBy($this->model, $cache_key_for_sort, [
-                ["key" => "sort_by", "default" => "id"],
-                ["key" => "sort_dir", "default" => "DESC"],
+                ["key" => "sort_by", "default" => "list_display_order"],
+                ["key" => "sort_dir", "default" => "ASC"],
             ], $clear_cache);
 
             $builder->orderBy($sort['sort_by'], $sort['sort_dir']);

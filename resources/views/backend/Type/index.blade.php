@@ -39,4 +39,5 @@
     <div id="index_table">
         @include($viewPrefix . '.index_table')
     </div>
+
 @endsection

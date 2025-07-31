@@ -43,14 +43,13 @@ use App\Models\User;
                 </thead>
                 <tbody>
                     @foreach ($records as $record)
-                    <?php
-                        $first_col_info = [
-                            $record->id . " | " . $record->full_name
-                        ];
-                    ?>
                     <tr>
                         <th scope="row">
-                            <x-Backend.celec-summary-table-first-column :record="$record" :routePrefix="$routePrefix" buttons="edit,delete,tr_details" :labelInfo="$first_col_info"/>
+                            <x-Backend.celec-summary-table-first-column :record="$record" :routePrefix="$routePrefix" buttons="edit,delete,tr_details">
+                                <div class="label">
+                                    {{ $record->id . " | " . $record->name }}
+                                </div>
+                            </x-Backend.celec-summary-table-first-column>
                         </th>
                         <td>{{ get_value_from_list($type_list, $record->type) }}</td>
                         <td>{{ get_value_from_list($sub_type_list, $record->sub_type) }}</td>

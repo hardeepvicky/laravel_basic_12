@@ -9,6 +9,10 @@ use App\Helpers\LaravelExtend;
         @endforeach
     @endif
 
+    {!! $slot !!}
+
+    <div class="divider"></div>
+
     <div class="p-1">
         <x-Backend.summary-comman-actions :id="$record->id" :routePrefix="$routePrefix" :buttons="$buttons"/>        
     </div>

@@ -16,27 +16,26 @@
                         </th>                        
                     </tr>
                     <tr class="border-bottom-primary">
-                        <th style="width:10%">
+                        <th style="width:15%">
                             <?= sortable_anchor('id', get_value_from_list($field_labels, 'id', 'id')) ?>
                             | <?= sortable_anchor('template_name', get_value_from_list($field_labels, 'template_name', 'template_name')) ?>
                         </th>
                         <th><?= sortable_anchor('language', get_value_from_list($field_labels, 'language', 'language')) ?></th>
                         <th><?= sortable_anchor('name', get_value_from_list($field_labels, 'name', 'name')) ?></th>
-                        <th style="width:8%"><?= sortable_anchor('is_active', get_value_from_list($field_labels, 'is_active', 'is_active')) ?></th>
-                        <th style="width:8%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
-                        <th style="width:8%"><?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?></th>
+                        <th style="width:12%"><?= sortable_anchor('is_active', get_value_from_list($field_labels, 'is_active', 'is_active')) ?></th>
+                        <th style="width:12%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
+                        <th style="width:12%"><?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?></th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($records as $record)
-                    <?php
-                        $first_col_info = [
-                            $record->id . " | " . $record->template_name
-                        ];
-                    ?>
+                    @foreach ($records as $record)                    
                         <tr>
                             <th scope="row">
-                                <x-Backend.celec-summary-table-first-column :record="$record" :routePrefix="$routePrefix" buttons="edit,delete,tr_details" :labelInfo="$first_col_info"/>
+                                <x-Backend.celec-summary-table-first-column :record="$record" :routePrefix="$routePrefix" buttons="edit,delete,tr_details">
+                                    <div class="label">
+                                        {{ $record->id . " | " . $record->template_name }}
+                                    </div>
+                                </x-Backend.celec-summary-table-first-column>
                             </th>
                             <td>{{ $record->language }}</td>
                             <td>{{ $record->name }}</td>

@@ -27,21 +27,20 @@ $false = false;
                         </th>
                         <th style="width:15%"><?= sortable_anchor('subject', get_value_from_list($field_labels, 'subject', 'subject')) ?></th>
                         <th>Placeholders</th>
-                        <th style="width:6%"><?= sortable_anchor('is_active', get_value_from_list($field_labels, 'is_active', 'is_active')) ?></th>
-                        <th style="width:8%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
-                        <th style="width:8%"><?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?></th>
+                        <th style="width:12%"><?= sortable_anchor('is_active', get_value_from_list($field_labels, 'is_active', 'is_active')) ?></th>
+                        <th style="width:12%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
+                        <th style="width:12%"><?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?></th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach ($records as $record)
-                    <?php
-                        $first_col_info = [
-                            $record->id . " | " . $record->name
-                        ];
-                    ?>
                     <tr>
                         <th scope="row">
-                            <x-Backend.celec-summary-table-first-column :record="$record" :routePrefix="$routePrefix" buttons="edit,copy,delete,tr_details" :labelInfo="$first_col_info"/>
+                            <x-Backend.celec-summary-table-first-column :record="$record" :routePrefix="$routePrefix" buttons="edit,copy,delete,tr_details" >
+                                <div class="label">
+                                    {{ $record->id . " | " . $record->name }}
+                                </div>
+                            </x-Backend.celec-summary-table-first-column>
                         </th>
                         <td>{{ $record->subject }}</td>
                         <td>

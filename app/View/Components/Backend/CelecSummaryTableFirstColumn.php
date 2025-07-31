@@ -14,7 +14,7 @@ class CelecSummaryTableFirstColumn extends BackendComponent
     public function __construct(
         public $record,
         public $routePrefix,
-        public array $labelInfo,
+        public array $labelInfo = [],
         public $buttons = ""
     )
     {

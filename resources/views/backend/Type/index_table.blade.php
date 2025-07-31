@@ -16,34 +16,33 @@
                         </th>                        
                     </tr>
                     <tr class="border-bottom-primary">
-                        <th style="width:10%">
+                        <th style="width:15%">
                             <?= sortable_anchor('id', get_value_from_list($field_labels, 'id', 'id')) ?>
                             | <?= sortable_anchor('name', get_value_from_list($field_labels, 'name', 'name')) ?>
                         </th>
                         <th><?= sortable_anchor('type', get_value_from_list($field_labels, 'type', 'type')) ?></th>
                         <th><?= sortable_anchor('short_name', get_value_from_list($field_labels, 'short_name', 'short_name')) ?></th>
                         <th><?= sortable_anchor('code', get_value_from_list($field_labels, 'code', 'code')) ?></th>
-                        <th style="width:10%"><?= sortable_anchor('list_display_order', get_value_from_list($field_labels, 'list_display_order', 'list_display_order')) ?></th>
-                        <th style="width:8%"><?= sortable_anchor('is_active', get_value_from_list($field_labels, 'is_active', 'is_active')) ?></th>
-                        <th style="width:8%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
-                        <th style="width:8%"><?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?></th>
+                        <th style="width:12%"><?= sortable_anchor('list_display_order', get_value_from_list($field_labels, 'list_display_order', 'list_display_order')) ?></th>
+                        <th style="width:12%"><?= sortable_anchor('is_active', get_value_from_list($field_labels, 'is_active', 'is_active')) ?></th>
+                        <th style="width:12%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
+                        <th style="width:12%"><?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?></th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach ($records as $record)
-                    <?php
-                        $first_col_info = [
-                            $record->id . " | " . $record->name
-                        ];
-                    ?>
                         <tr>
                             <th scope="row">
-                                <x-Backend.celec-summary-table-first-column :record="$record" :routePrefix="$routePrefix" buttons="edit,copy,delete" :labelInfo="$first_col_info"/>
+                                <x-Backend.celec-summary-table-first-column :record="$record" :routePrefix="$routePrefix" buttons="edit,copy,delete">
+                                    <div class="label">
+                                        {{ $record->id . " | " . $record->name }}
+                                    </div>
+                                </x-Backend.celec-summary-table-first-column>
                             </th>
                             <td>{{ get_value_from_list($type_list, $record->type) }}</td>
                             <td>{{ $record->short_name }}</td>
                             <td>{{ $record->code }}</td>
-                            <td>
+                            <td class="text-center">
                                 <a class="x-editable" href="#" id="list_display_order" data-type="number"
                                     data-name="list_display_order"
                                     data-pk="{{ $record->id }}"

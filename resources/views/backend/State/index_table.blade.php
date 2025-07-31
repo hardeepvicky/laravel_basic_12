@@ -16,27 +16,26 @@
                         </th>                        
                     </tr>
                     <tr class="border-bottom-primary">
-                        <th style="width:15%">
+                        <th style="width:20%">
                             <?= sortable_anchor('id', get_value_from_list($field_labels, 'id', 'id')) ?>
                             | <?= sortable_anchor('name', get_value_from_list($field_labels, 'name', 'name')) ?>
                         </th>
                         <th>Country</th>
                         <th><?= sortable_anchor('short_name', 'Short Name') ?></th>
-                        <th style="width:8%"><?= sortable_anchor('is_active', 'Active / De-Active') ?></th>
-                        <th style="width:8%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
-                        <th style="width:8%"><?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?></th>
+                        <th style="width:12%"><?= sortable_anchor('is_active', 'Active / De-Active') ?></th>
+                        <th style="width:12%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
+                        <th style="width:12%"><?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?></th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach ($records as $record)
-                    <?php
-                        $first_col_info = [
-                            $record->id . " | " . $record->name
-                        ];
-                    ?>
                         <tr>
                             <th scope="row">
-                                <x-Backend.celec-summary-table-first-column :record="$record" :routePrefix="$routePrefix" buttons="edit,delete" :labelInfo="$first_col_info"/>
+                                <x-Backend.celec-summary-table-first-column :record="$record" :routePrefix="$routePrefix" buttons="edit,delete">
+                                    <div class="label">
+                                        {{ $record->id . " | " . $record->name }}
+                                    </div>
+                                </x-Backend.celec-summary-table-first-column>
                             </th>
                             <td>{{ $record->country?->getDisplayName() }}</td>
                             <td>{{ $record->short_name }}</td>

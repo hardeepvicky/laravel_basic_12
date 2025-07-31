@@ -52,8 +52,8 @@ class DesignationController extends BackendController
             $clear_cache = request('is_sort_clear', false);
 
             $sort_params = $this->getRequestData($cache_key_for_sort, [
-                ["key" => "sort_by", "default" => "id"],
-                ["key" => "sort_dir", "default" => "DESC"],
+                ["key" => "sort_by", "default" => "list_display_order"],
+                ["key" => "sort_dir", "default" => "ASC"],
             ], $clear_cache);
 
             $builder->orderBy($sort_params['sort_by'], $sort_params['sort_dir']);
