@@ -571,6 +571,8 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
     $controllerClass = RecordHistoryController::class;
     Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
         Route::get("/", [$controllerClass, "index"])->name("index");
+        Route::any("change_history_of_record", [$controllerClass, "change_history_of_record"])->name("change_history_of_record");
+        Route::get("ajax_get_model_fields/{model_name}", [$controllerClass, "ajax_get_model_fields"])->name("ajax_get_model_fields");
     });
 
     $route_prefix = "whatsapp-template";
@@ -639,6 +641,9 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
         Route::get($name, [DeveloperController::class, $name])->name($name);
 
         $name = "whatsapp_logs";
+        Route::get($name, [DeveloperController::class, $name])->name($name);
+
+        $name = "permission_change_logs";
         Route::get($name, [DeveloperController::class, $name])->name($name);
 
         $name = "sql_logs";

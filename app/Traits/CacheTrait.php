@@ -48,7 +48,7 @@ trait CacheTrait
             throw new UserException("Fail To Put Cache", UserException::ERROR_LARAVEL_FAIL);
         }
 
-        Log::info("Cache-put", [
+        Log::debug("Cache-put", [
             "tags" => [$base_cache_key],
             "key" => $cache_key,
             "time" => $cache_time_in_seconds,
@@ -67,7 +67,7 @@ trait CacheTrait
             $cache_key = static::optimizeCacheKey($key);
             $instance->forget($cache_key);
 
-            Log::info("Cache-forget", [
+            Log::debug("Cache-forget", [
                 "tags" => [$base_cache_key],
                 "key" => $cache_key,
             ]);
@@ -75,7 +75,7 @@ trait CacheTrait
         else
         {
             $instance->flush();
-            Log::info("Cache-flush", [
+            Log::debug("Cache-flush", [
                 "tags" => [$base_cache_key],
             ]);
         }

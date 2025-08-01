@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers\Backend;
 
+use App\Acl\SectionRoutes;
 use App\Helpers\ArrayHelper;
 use App\Helpers\LaravelExtend;
 use App\Models\AjaxLog;
 use App\Models\CommandLog;
 use App\Models\EmailLog;
+use App\Models\PermissionChangeLog;
+use App\Models\Role;
 use App\Models\SqlLog;
 use App\Models\WhatsappLog;
 use Illuminate\Support\Facades\DB;
@@ -244,6 +247,47 @@ class DeveloperController extends BackendController
         //dd($records);
 
         $this->setForView(compact("records"));
+
+        return $this->viewIndex(__FUNCTION__);
+    }
+
+    public function permission_change_logs()
+    {
+        $cache_key_prefix = Route::currentRouteName();
+
+        $conditions = $this->getConditions(Route::currentRouteName(), [
+            ["field" => "type", "type" => "string_equal"],
+            ["field" => "section_list_key", "type" => "string_equal"],
+            ["field" => "role_id", "type" => "int"],
+            ["field" => "created", "type" => "from_date", "view_field" => "from_date"],
+            ["field" => "created", "type" => "to_date", "view_field" => "to_date"],
+        ]);
+
+        $builder = PermissionChangeLog::where($conditions);
+
+        $cache_key_for_sort = $cache_key_prefix . "-extra-params";
+
+        $clear_cache = request('is_sort_clear', false);
+
+        $sort_params = $this->getRequestData($cache_key_for_sort, [
+            ["key" => "sort_by", "default" => "created_at"],
+            ["key" => "sort_dir", "default" => "DESC"],
+        ], $clear_cache);
+
+        $builder->orderBy($sort_params['sort_by'], $sort_params['sort_dir']);
+
+        $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
+
+        $section_list = SectionRoutes::getList();
+
+        $role_list = Role::getList();
+
+        $type_list = [
+            "NEW" => "New",
+            "DELETE" => "Deleted",
+        ];
+
+        $this->setForView(compact("role_list", "section_list", "type_list", "records"));
 
         return $this->viewIndex(__FUNCTION__);
     }

@@ -7,6 +7,7 @@ use App\Acl\SectionRoutes;
 use App\Exceptions\UserException;
 use App\Helpers\LaravelExtend;
 use App\Models\Notification;
+use App\Models\PermissionChangeLog;
 use App\Models\Role;
 use App\Models\RoleRouteName;
 use App\Models\User;
@@ -44,7 +45,7 @@ class PermissionController extends BackendController
 
         // d($section_list);
 
-        if ($conditions || $section_conditions) {            
+        if ($conditions || $section_conditions) {
             $role_id_list = isset($conditions['role_id']) && $conditions['role_id'] ? [$conditions['role_id']['value']] : [];
 
             $choosen_route_list = isset($section_conditions['section_list_key']) && $section_conditions['section_list_key'] ? get_value_from_list($section_list, $section_conditions['section_list_key']) : [];
@@ -52,7 +53,7 @@ class PermissionController extends BackendController
             $records = AccessControl::getAllowedRoutes($role_id_list, $choosen_route_list);
 
             // d($records, true);
-            
+
             $this->setForView(compact("records"));
         }
 
@@ -85,7 +86,7 @@ class PermissionController extends BackendController
                 {
                     $route_names = explode(",", $route_name);
 
-                    $choosen_route_list = array_merge($choosen_route_list, $route_names);                    
+                    $choosen_route_list = array_merge($choosen_route_list, $route_names);
                 }
                 else
                 {
@@ -101,7 +102,26 @@ class PermissionController extends BackendController
 
             $new_permission_count = 0;
 
-            $old_save_id_list = RoleRouteName::whereIn("role_id", $data['role_id'])->pluck("id", "id")->toArray();
+            $old_role_route_names = RoleRouteName::with(["routeName"])->whereIn("role_id", $data['role_id'])->get();
+
+            $old_save_routes = [];
+
+            foreach($old_role_route_names as $role_route_name)
+            {
+                $old_save_routes[$role_route_name->id] = $role_route_name;
+            }
+
+            $sections = SectionRoutes::getList();
+
+            $route_section_list = [];
+
+            foreach($sections as $label => $route_names)
+            {
+                foreach($route_names as $route_name)
+                {
+                    $route_section_list[$route_name] = $label;
+                }
+            }
 
             foreach ($choosen_route_list as $route_name) {
                 if (!isset($synced_route_name_list[$route_name])) {
@@ -117,18 +137,39 @@ class PermissionController extends BackendController
 
                     if ($is_insert)
                     {
+                        $save_data = [
+                            "type" => "NEW",
+                            "role_id" => $role_id,
+                            "route_name" => $route_name,
+                            "section_name" => get_value_from_list($route_section_list, $route_name),
+                        ];
+
+                        PermissionChangeLog::create($save_data);
+
                         $counters['new']++;
                     }
 
-                    unset($old_save_id_list[$roleRouteName->id]);
+                    unset($old_save_routes[$roleRouteName->id]);
                 }
             }
 
-            RoleRouteName::withoutEvents(function() use ($old_save_id_list){
-                RoleRouteName::destroy($old_save_id_list);            
+            RoleRouteName::withoutEvents(function() use ($old_save_routes){
+                RoleRouteName::destroy(array_keys($old_save_routes));
             });
 
-            $counters['deleted'] = count($old_save_id_list);
+            foreach($old_save_routes as $old_save_route)
+            {
+                $save_data = [
+                    "type" => "DELETE",
+                    "role_id" => $old_save_route->role_id,
+                    "route_name" => $old_save_route->routeName->name,
+                    "section_name" => get_value_from_list($route_section_list, $old_save_route->routeName->name),
+                ];
+
+                PermissionChangeLog::create($save_data);
+
+                $counters['deleted']++;
+            }
 
             $user_id_list = User::whereHas("roles", function ($q) use ($data) {
                 $q->whereIn("role_id", $data['role_id']);
@@ -184,20 +225,39 @@ class PermissionController extends BackendController
             $id = $request->get("id");
 
             $id_list = explode(",", $id);
-            
+
             DB::beginTransaction();
 
             $records = RoleRouteName::whereIn("id", $id_list)->get();
 
             $role_list = [];
 
+            $sections = SectionRoutes::getList();
+
+            $route_section_list = [];
+
+            foreach($sections as $label => $route_names)
+            {
+                foreach($route_names as $route_name)
+                {
+                    $route_section_list[$route_name] = $label;
+                }
+            }
+
             foreach($records as $record)
             {
                 $role_list[] = $record->role_id;
 
-                RoleRouteName::withoutEvents(function() use($record){
-                    $record->delete();
-                });
+                $record->delete();
+
+                $save_data = [
+                    "type" => "DELETE",
+                    "role_id" => $record->role_id,
+                    "route_name" => $record->routeName->name,
+                    "section_name" => get_value_from_list($route_section_list, $record->routeName->name),
+                ];
+
+                PermissionChangeLog::create($save_data);
             }
 
             $user_id_list = User::whereHas("roles", function ($q) use ($role_list) {

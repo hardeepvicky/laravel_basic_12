@@ -266,7 +266,7 @@ $false = false;
                         {
                             if (users[i]['id'] == v)
                             {
-                                $("#dept_id").val(users[i]['dept_id']).trigger('change', {eventBubble : true});
+                                $("#dept_id").val(users[i]['dept_id']).trigger('change', {eventBubble : false});
                                 return;
                             }
                         }

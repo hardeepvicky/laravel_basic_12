@@ -2,7 +2,7 @@
 
 @section('content')
     <?php
-    $page_header_links = [];
+    $page_header_links = [['title' => 'Change History Of Record', 'url' => route($routePrefix . '.change_history_of_record')]];
     $false = false;
     ?>
 

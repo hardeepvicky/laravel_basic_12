@@ -11,7 +11,7 @@
         <div class="card-body new-btn-showcase">
             <x-Form.start action="{{ route($routePrefix . '.index') }}" class="form-get-encode-before-submit" />
             <div class="row mb-4">
-                <div class="col-md-6">
+                <div class="col-md-6 col-lg-4 col-xxxl-3 mb-2">
                     <label class="form-label">
                         Sections
                     </label>
@@ -25,7 +25,7 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-4 col-lg-3 col-xxxl-2 mb-2">
                     <x-Inputs.drop-down name="role_id" label="Roles" :list="$role_list" :value="$search['role_id']" class="select2" />
                 </div>
             </div>

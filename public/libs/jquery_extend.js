@@ -1066,7 +1066,7 @@ jQuery.fn.extend({
 
                 _this.on(events.change, function (e, event_opt) {
 
-                    if ((typeof event_opt != "undefined" && typeof event_opt.eventBubble == "boolean" && event_opt.eventBubble))
+                    if ((typeof event_opt != "undefined" && typeof event_opt.eventBubble == "boolean" && !event_opt.eventBubble))
                     {
 
                     }

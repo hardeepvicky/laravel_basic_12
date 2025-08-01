@@ -2,12 +2,19 @@
 
 namespace App\Http\Controllers\Backend;
 
+use App\Exceptions\UserException;
+use App\Helpers\DateUtility;
 use App\Helpers\LaravelExtend;
+use App\Models\BaseModel;
 use App\Models\BaseModelInterface;
 use App\Models\FieldSetting;
 use App\Models\RecordHistory;
+use Exception;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Session;
+use MongoDB\Laravel\Eloquent\Model as EloquentModel;
 
 class RecordHistoryController extends BackendController
 {
@@ -50,9 +57,50 @@ class RecordHistoryController extends BackendController
         return $this->viewIndex(__FUNCTION__);
     }
 
-    public function change_history_of_record($model, $model_id, $model_field)
+    public function change_history_of_record(Request $request)
     {
-        
+        if ($request->isMethod("post"))
+        {
+            $data = $request->validate([
+                "model_class" => "required",
+                "model_field" => "required",
+                "model_id" => "required",
+            ]);
+
+            $this->setForView($data);
+
+            // dd($data);
+
+            $data['model_id'] = (int) $data['model_id'];
+
+            $records = $this->modelClass::where("model_class", $data['model_class'])->where("model_id", $data['model_id'])->get();
+
+            $change_history = [];
+
+            if ($records->count() > 0)
+            {
+                foreach($records as $record)
+                {
+                    $record->afterFind();
+
+                    if (isset($record->changes[$data['model_field']]))
+                    {
+                        $arr = $record->changes[$data['model_field']];
+                        $arr['created_by'] = $record->created_by;
+                        $arr['created_at_user_tz'] = $record->created_at_user_tz->format(DateUtility::DATETIME_OUT_FORMAT);
+                        $change_history[] = $arr;
+                    }
+                }
+
+                $this->setForView(compact("change_history"));
+            }
+            else
+            {
+                Session::flash("fail", "No any record found");
+            }
+        }
+
+        return $this->view(__FUNCTION__);
     }
 
     protected function beforeViewRender()
@@ -97,5 +145,54 @@ class RecordHistoryController extends BackendController
     protected function parseConditionValue($value, String $type, array $extra = [])
     {
         return LaravelExtend::getMongodbParseCondition($value, $type, $extra);
+    }
+
+    public function ajax_get_model_fields($model_name)
+    {
+        $response = ["status" => 1, "data" => []];
+
+        $model_class = "App\\Models\\$model_name";
+
+        try
+        {
+            if (!class_exists($model_class))
+            {
+                throw new UserException("$model_name is not exist", UserException::ERROR_USER_DATA_WRONG);
+            }
+
+            $model = new $model_class;
+
+            if ($model instanceof Model)
+            {
+                $table_info = $model->getTableInfo($model->getTable());
+
+                foreach($table_info['columns'] as $field => $arr)
+                {
+                    $response['data'][] = [
+                        "id" => $field,
+                        "name" => $field
+                    ];
+                }
+            }
+            else if ($model instanceof EloquentModel)
+            {
+                $record = $model->first();
+
+                foreach($record as $field => $value)
+                {
+                    $response['data'][] = [
+                        "id" => $field,
+                        "name" => $field
+                    ];
+                }
+            }
+        }
+        catch(Exception $ex)
+        {
+            $response['status'] = 0;
+            $response['msg'] = $ex->getMessage();
+        }
+
+        return $this->responseJson($response);
     }
 }

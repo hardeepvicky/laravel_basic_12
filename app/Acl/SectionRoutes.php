@@ -19,6 +19,7 @@ class SectionRoutes
         "user.change.password",
 
         "tags.ajax_get_list_for_header",
+        "change-history.ajax_get_model_fields",
 
         "*.ajax_get_list",
         "*.ajax_get_code_list",
@@ -318,7 +319,7 @@ class SectionRoutes
 
         $section['children'][] = self::setting();
         $section['children'][] = self::app_menu();
-        $section['children'][] = self::developer_logs();
+        $section['children'][] = self::logs();
         $section['children'][] = self::developer_other();
 
         return $section;
@@ -383,7 +384,7 @@ class SectionRoutes
         return $section;
     }
 
-    private static function developer_logs()
+    private static function logs()
     {
         $routePrefix = "developer";
 
@@ -396,6 +397,15 @@ class SectionRoutes
             "text" => "Email",
             "route_list" => [$routePrefix . ".email_logs"]
         ];
+        $section['children'][] = [
+            "text" => "Whatsapp",
+            "route_list" => [$routePrefix . ".whatsapp_logs"]
+        ];
+        $section['children'][] = [
+            "text" => "Permission Change",
+            "route_list" => [$routePrefix . ".permission_change_logs"]
+        ];
+
         $section['children'][] = [
             "text" => "SQL",
             "route_list" => [$routePrefix . ".sql_logs"]
