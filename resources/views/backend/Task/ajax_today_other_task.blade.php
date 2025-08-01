@@ -1,5 +1,7 @@
 <?php
 use App\Models\Task;
+$page = (int) request("page", 1);
+$start = ($page * 10) - 10;
 ?>
 <div class="card">
     <div class="card-header">
@@ -23,9 +25,15 @@ use App\Models\Task;
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($other_tasks as $i => $record)
+                    @php
+                        $i = $start;
+                    @endphp
+                    @foreach ($other_tasks as $record)
+                    @php
+                        $i++;
+                    @endphp
                         <tr>
-                            <th scope="row">{{ $i + 1 }}</th>
+                            <th scope="row">{{ $i }}</th>
                             <td class="name">{{ $record->name }}</td>
                             <td class="assignToUser">{{ $record->assignToUser?->getDisplayName() }}</td>
                             <td>{{ $record->priority }}</td>
