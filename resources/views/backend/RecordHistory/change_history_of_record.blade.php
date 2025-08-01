@@ -44,6 +44,7 @@
         </div>
     </div>
 
+    @if(isset($change_history) && $change_history)
     <div class="m-1">
         <table class="table table-striped table-bordered table-hover">
             <thead>
@@ -68,6 +69,7 @@
             </tbody>
         </table>
     </div>
+    @endif
 
     <script>
         $(function(){
