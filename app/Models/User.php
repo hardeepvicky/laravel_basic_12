@@ -165,9 +165,9 @@ class User extends Authenticatable implements BaseModelInterface
                 if ($auth_user) {
                     $model->created_by = $auth_user->id;
                 }
-
-                $model->uid = self::generateUID();
             }
+            
+            $model->uid = self::generateUID();
         });
 
         self::created(function ($model) {
