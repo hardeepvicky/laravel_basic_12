@@ -57,10 +57,10 @@
                                             <?php $a++; ?>
                                             <tr>
                                                 <td>{{ $a }}</td>
-                                                <td class="force-break-text w-100">{{ $arr['type'] ?? "" }}</td>
-                                                <td class="force-break-text w-100">{{ $arr['label'] ?? "" }}</td>
-                                                <td class="force-break-text w-200">{{ $arr['previous'] ?? "" }}</td>
-                                                <td class="force-break-text w-200">{{ $arr['current'] ?? "" }}</td>
+                                                <td>{{ $arr['type'] ?? "" }}</td>
+                                                <td>{{ $arr['label'] ?? "" }}</td>
+                                                <td>{{ $arr['previous'] ?? "" }}</td>
+                                                <td>{{ $arr['current'] ?? "" }}</td>
                                             </tr>
                                             @endforeach
                                         </tbody>
