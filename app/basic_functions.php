@@ -425,7 +425,7 @@ function array_check_value_and_throw_error($arr, $keys, $msg = "")
     }
 
     foreach ($keys as $key) {
-        if (!isset($arr[$key]) || strlen($arr[$key]) == 0 || is_null($arr[$key])) {
+        if (!isset($arr[$key]) || is_null($arr[$key]) || empty($arr[$key])) {
             $msg = str_replace("{key}", $key, $msg);
             throw new Exception($msg);
         }

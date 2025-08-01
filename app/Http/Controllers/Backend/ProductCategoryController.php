@@ -276,7 +276,15 @@ class ProductCategoryController extends BackendController
 
             if ($existing_id_list)
             {
-                $this->model->categoryAttribute()->where("id", $existing_id_list)->delete();
+                $existing_records = $this->model->categoryAttribute()->where("id", $existing_id_list)->get();
+
+                foreach($existing_records as $existing_record)
+                {
+                    if (!$existing_record->safeDelete($existing_record))
+                    {
+                        LaravelExtend::addError($existing_record->name, "Can not delete, bcoz it is asscoicated with other modules.", "Attribute");
+                    }
+                }
             }
         }
     }
