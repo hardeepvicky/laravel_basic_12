@@ -26,44 +26,46 @@ class EmailHelper
 
     public function __construct()
     {
-        $this->email_via = env("EMAIL_API_PLATFORM");
+        $via = config("app.EMAIL_API_PLATFORM");
 
-        if (!$this->email_via) {
-            throw_exception("env : EMAIL_API_PLATFORM not set");
+        if (!$via) {
+            throw_exception("app.EMAIL_API_PLATFORM not set");
         }
+
+        $this->email_via = $via;
 
         if (!in_array($this->email_via, self::$enabled_api_platforms)) {
             throw_exception("email_via : $this->email_via is not enabled");
         }
 
         if ($this->email_via == self::EMAIL_VIA_MAILJET) {
-            $api_key = env('MAILJET_API_KEY');
+            $api_key = config('services.mailjet.api_key');
 
             if (!$api_key) {
-                throw_exception("env : MAILJET_API_KEY is not set");
+                throw_exception("services.mailjet.api_key is not set");
             }
 
             $this->api_key = $api_key;
 
-            $api_secret = env('MAILJET_API_SECRET');
+            $api_secret = config('services.mailjet.api_secret');
 
             if (!$api_secret) {
-                throw_exception("env : MAILJET_API_SECRET is not set");
+                throw_exception("services.mailjet.api_secret is not set");
             }
 
             $this->api_secret = $api_secret;
         } else if ($this->email_via == self::EMAIL_VIA_BREVO) {
-            $api_key = env('BREVO_API_KEY');
+            $api_key = config('services.brevo.api_key');
 
             if (!$api_key) {
-                throw_exception("env : BREVO_API_KEY is not set");
+                throw_exception("services.brevo.api_key");
             }
 
             $this->api_key = $api_key;
         }
 
-        $this->from_email = env("EMAIL_FROM");
-        $this->from_name = env("EMAIL_NAME");
+        $this->from_email = config('app.EMAIL_FROM');
+        $this->from_name = config('app.EMAIL_NAME');
 
         $this->is_sandbox = App::isLocal();
     }

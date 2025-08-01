@@ -576,71 +576,27 @@ class WebController extends Controller
 
     protected function updateUserInfoAfterSave(Model $model)
     {
-        if (!env("APP_DEBUG")) {
-            return false;
-        }
-
-        $auth_user = Auth::user();
-
-        if ($auth_user) {
-            // dd($model->wasRecentlyCreated);
-            if ($model->wasRecentlyCreated) {
-                $auth_user->changeCreatedByUsage($model, 1);
-            } else {
-                $auth_user->changeUpdatedByUsage($model, 1);
-            }
-
-            // d($this->getQueryLog());
-            // exit;
-        }
+       
     }
 
     protected function updateUserInfoAfterDelete(Model $model)
     {
-        $auth_user = Auth::user();
-        if ($auth_user) {
-            die("Under Development");
-        }
+        
     }
 
     protected function updateUserInfoForCreateBulk(array $models)
     {
-        if (!env("APP_DEBUG")) {
-            return false;
-        }
-
-        $auth_user = Auth::user();
-
-        if ($auth_user) {
-            $auth_user->changeCreatedByUsageBulk($models);
-        }
+        
     }
 
     protected function updateUserInfoForUpdateBulk(array $models)
     {
-        if (!env("APP_DEBUG")) {
-            return false;
-        }
-
-        $auth_user = Auth::user();
-
-        if ($auth_user) {
-            $auth_user->changeUpdatedByUsageBulk($models);
-        }
+        
     }
 
     protected function updateUserInfoForDeleteBulk(array $models)
     {
-        if (!env("APP_DEBUG")) {
-            return false;
-        }
-
-        $auth_user = Auth::user();
-        // $auth_user = (User) $auth_user;
-
-        if ($auth_user) {
-            die("Under Development");
-        }
+        
     }
 
     protected function afterSave($model, $prefix = null, $msg = null)

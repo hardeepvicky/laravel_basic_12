@@ -22,11 +22,11 @@ class GoogleCapacha extends Component
      */
     public function render(): View|Closure|string
     {
-        $google_cacha_key = env("GOOGLE_RECAPTCHA_SITE_KEY");
+        $google_cacha_key = config('services.google.RECAPTCHA_SITE_KEY');
 
         if(!$google_cacha_key)
         {
-            throw new UserException("env : GOOGLE_RECAPTCHA_SITE_KEY : not set");
+            throw new UserException("services.google.RECAPTCHA_SITE_KEY : not set");
         }
 
         return view('components.google-capacha', compact("google_cacha_key"));

@@ -28,10 +28,10 @@ class WhatsappHelper
 
     public function __construct()
     {
-        $via = env("WHATSAPP_API_PLATFORM");
+        $via = config("app.WHATSAPP_API_PLATFORM");
 
         if (!$via) {
-            throw new UserException("env : EMAIL_API_PLATFORM not set");
+            throw new UserException("app.WHATSAPP_API_PLATFORM not set");
         }
 
         $this->via = $via;
@@ -41,10 +41,10 @@ class WhatsappHelper
         }
 
         if ($this->via == self::EMAIL_VIA_INTERAKT) {
-            $api_secret = env('INTERAKT_API_TOKEN');
+            $api_secret = config('services.interakt.api_token');
 
             if (!$api_secret) {
-                throw new UserException("env : INTERAKT_API_TOKEN is not set");
+                throw new UserException("services.interakt.api_token is not set");
             }
 
             $this->api_secret = $api_secret;

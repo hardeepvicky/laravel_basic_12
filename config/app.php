@@ -123,5 +123,9 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
-    'ACL_IS_SYSTEM_ADMIN_ALLOW_ALL_ROUTES' => env("ACL_IS_SYSTEM_ADMIN_ALLOW_ALL_ROUTES", false)
+    'ACL_IS_SYSTEM_ADMIN_ALLOW_ALL_ROUTES' => env("ACL_IS_SYSTEM_ADMIN_ALLOW_ALL_ROUTES", false),
+    'EMAIL_API_PLATFORM' => env("EMAIL_API_PLATFORM", false),
+    'EMAIL_FROM' => env("EMAIL_FROM", false),
+    'EMAIL_NAME' => env("EMAIL_NAME", false),
+    'DEVELOPER_TEAM_EMAIL' => env("DEVELOPER_TEAM_EMAIL", false),
 ];

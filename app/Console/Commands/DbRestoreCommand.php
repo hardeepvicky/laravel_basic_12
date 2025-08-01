@@ -8,6 +8,7 @@ use App\Helpers\LaravelExtend;
 use App\Helpers\MyCommand;
 use App\Models\BaseMongoModel;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use ZipArchive;
@@ -37,9 +38,9 @@ class DbRestoreCommand extends MyCommand
      */
     public function handle()
     {
-        if (!env("APP_DEBUG")) 
+        if (!App::isProduction()) 
         {
-            $this->info("Debug Mode is off, restore can be run in debug off mode");
+            $this->info("App is in production, restore can be run in debug off mode");
             return;
         }
 

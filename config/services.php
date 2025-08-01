@@ -39,5 +39,20 @@ return [
         'client_id' => env('GOOGLE_CLIENT_ID'),
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
         'redirect' => env('GOOGLE_REDIRECT_URL'),
+        'RECAPTCHA_SITE_KEY' => env('GOOGLE_RECAPTCHA_SITE_KEY'),
+        'RECAPTCHA_SECRET_KEY' => env('GOOGLE_RECAPTCHA_SECRET_KEY'),
+    ],
+
+    'mailjet' => [
+        'api_key' => env('MAILJET_API_KEY'),
+        'api_secret' => env('MAILJET_API_SECRET'),
+    ],
+
+    'brevo' => [
+        'api_key' => env('BREVO_API_KEY'),
+    ],
+
+    'interakt' => [
+        'api_token' => env('INTERAKT_API_TOKEN'),
     ],
 ];

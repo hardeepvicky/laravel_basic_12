@@ -34,7 +34,7 @@ function d($arg, $will_exit = false)
 {
     $callBy = debug_backtrace()[0];
 
-    if (!env("APP_DEBUG")) {
+    if (!config('app.debug')) {
         return;
     }
 
@@ -1206,7 +1206,7 @@ function get_exception_display_message(Exception $ex)
 {
     $msg = $ex->getMessage();
 
-    if (env("APP_DEBUG"))
+    if (config('app.debug'))
     {
         $msg .= ", File : " . $ex->getFile() . ":" . $ex->getLine();
     }

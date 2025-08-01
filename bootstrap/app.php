@@ -41,7 +41,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
             $current_route_name = Route::currentRouteName();
 
-            $contact_support_email = env("DEVELOPER_TEAM_EMAIL");
+            $contact_support_email = config("app.DEVELOPER_TEAM_EMAIL");
 
             $data = compact("error_code", "error_msg", "current_url", "current_route_name", "contact_support_email");
 
