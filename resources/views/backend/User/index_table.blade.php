@@ -9,10 +9,6 @@ use App\Models\User;
     </div>
 
     <div class="card-body p-1">
-        <div class="m-2">
-            <span class="btn btn-secondary">Export CSV</span>
-        </div>
-
         <div class="table-responsive">
             <table class="table table-bordered summary-table summary_table_with_search">
                 <thead>
