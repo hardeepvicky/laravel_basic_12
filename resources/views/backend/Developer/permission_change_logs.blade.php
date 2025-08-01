@@ -17,11 +17,11 @@
                         <label class="form-label">
                             Sections
                         </label>
-                        <select name="section_list_key" class="form-select select2">
+                        <select name="section_name" class="form-select select2">
                             <option value="">Please Select</option>
                             @foreach ($section_list as $t => $k)
                                 @php
-                                    $attr = $t == $search['section_list_key'] ? 'selected="selected"' : '';
+                                    $attr = $t == $search['section_name'] ? 'selected="selected"' : '';
                                 @endphp
                                 <option value="{{ $t }}" {!! $attr !!}>{{ $t }}</option>
                             @endforeach

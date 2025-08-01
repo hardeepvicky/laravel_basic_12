@@ -8,7 +8,7 @@
             <table class="table table-striped table-bordered table-hover">
                 <thead>
                     <tr class="border-bottom-primary">
-                        <th style="width:10%">
+                        <th style="width:15%">
                             <?= sortable_anchor('model_class', get_value_from_list($field_labels, 'model_class', 'model_class')) ?>
                             | 
                             <?= sortable_anchor('model_id', get_value_from_list($field_labels, 'model_id', 'model_id')) ?>
@@ -57,10 +57,10 @@
                                             <?php $a++; ?>
                                             <tr>
                                                 <td>{{ $a }}</td>
-                                                <td>{{ $arr['type'] ?? "" }}</td>
-                                                <td>{{ $arr['label'] ?? "" }}</td>
-                                                <td>{{ $arr['previous'] ?? "" }}</td>
-                                                <td>{{ $arr['current'] ?? "" }}</td>
+                                                <td class="force-break-text w-100">{{ $arr['type'] ?? "" }}</td>
+                                                <td class="force-break-text w-100">{{ $arr['label'] ?? "" }}</td>
+                                                <td class="force-break-text w-200">{{ $arr['previous'] ?? "" }}</td>
+                                                <td class="force-break-text w-200">{{ $arr['current'] ?? "" }}</td>
                                             </tr>
                                             @endforeach
                                         </tbody>

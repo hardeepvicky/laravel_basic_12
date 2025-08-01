@@ -12,7 +12,6 @@ use App\Models\PermissionChangeLog;
 use App\Models\Role;
 use App\Models\SqlLog;
 use App\Models\WhatsappLog;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
 class DeveloperController extends BackendController
@@ -180,8 +179,8 @@ class DeveloperController extends BackendController
             ["field" => "to_email", "type" => "string"],
             ["field" => "is_sent", "type" => "int"],
             ["field" => "is_sandbox", "type" => "int"],
-            ["field" => "created", "type" => "from_date", "view_field" => "from_date"],
-            ["field" => "created", "type" => "to_date", "view_field" => "to_date"],
+            ["field" => "created_at", "type" => "from_date", "view_field" => "from_date"],
+            ["field" => "created_at", "type" => "to_date", "view_field" => "to_date"],
         ]);
 
         $builder = EmailLog::where($conditions);
@@ -220,8 +219,8 @@ class DeveloperController extends BackendController
             ["field" => "to_user_id", "type" => "int"],
             ["field" => "is_sent", "type" => "int"],
             ["field" => "is_sandbox", "type" => "int"],            
-            ["field" => "created", "type" => "from_date", "view_field" => "from_date"],
-            ["field" => "created", "type" => "to_date", "view_field" => "to_date"],
+            ["field" => "created_at", "type" => "from_date", "view_field" => "from_date"],
+            ["field" => "created_at", "type" => "to_date", "view_field" => "to_date"],
         ]);
 
         // if ($conditions)
@@ -257,10 +256,10 @@ class DeveloperController extends BackendController
 
         $conditions = $this->getConditions(Route::currentRouteName(), [
             ["field" => "type", "type" => "string_equal"],
-            ["field" => "section_list_key", "type" => "string_equal"],
+            ["field" => "section_name", "type" => "string_equal"],
             ["field" => "role_id", "type" => "string_equal"],
-            ["field" => "created", "type" => "from_date", "view_field" => "from_date"],
-            ["field" => "created", "type" => "to_date", "view_field" => "to_date"],
+            ["field" => "created_at", "type" => "from_date", "view_field" => "from_date"],
+            ["field" => "created_at", "type" => "to_date", "view_field" => "to_date"],
         ]);
 
         $builder = PermissionChangeLog::where($conditions);
