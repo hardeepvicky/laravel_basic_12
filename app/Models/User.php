@@ -262,6 +262,8 @@ class User extends Authenticatable implements BaseModelInterface
                 $this->{$field_url_field} = $fileUtility->getUrl($this->{$field});
             }
         }
+
+        $this->convertTimeZoneForDisplay();
     }
 
     protected function getFullNameAttribute()
