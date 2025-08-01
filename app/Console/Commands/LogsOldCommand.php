@@ -9,6 +9,7 @@ use App\Models\AjaxLog;
 use App\Models\BaseMongoModel;
 use App\Models\CommandLog;
 use App\Models\EmailLog;
+use App\Models\PermissionChangeLog;
 use App\Models\RecordHistory;
 use App\Models\SqlLog;
 use Carbon\Carbon;
@@ -58,7 +59,8 @@ class LogsOldCommand extends MyCommand
                 CommandLog::class => $_7_days_before,
                 EmailLog::class => $_7_days_before,
                 SqlLog::class => $_7_days_before,
-                RecordHistory::class => $_90_days_before
+                RecordHistory::class => $_90_days_before,
+                PermissionChangeLog::class => $_90_days_before,
             ];
 
             $log_info = [];
