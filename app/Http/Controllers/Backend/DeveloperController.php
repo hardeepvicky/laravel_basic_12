@@ -258,7 +258,7 @@ class DeveloperController extends BackendController
         $conditions = $this->getConditions(Route::currentRouteName(), [
             ["field" => "type", "type" => "string_equal"],
             ["field" => "section_list_key", "type" => "string_equal"],
-            ["field" => "role_id", "type" => "string"],
+            ["field" => "role_id", "type" => "string_equal"],
             ["field" => "created", "type" => "from_date", "view_field" => "from_date"],
             ["field" => "created", "type" => "to_date", "view_field" => "to_date"],
         ]);
