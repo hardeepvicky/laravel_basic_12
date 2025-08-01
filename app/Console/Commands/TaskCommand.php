@@ -57,8 +57,10 @@ class TaskCommand extends MyCommand
 
             $main_counts['task']['status_change'] = 0;
 
+            $now = DateUtility::getDate(null, DateUtility::DATETIME_FORMAT);
+            $last_one_hour = DateUtility::change($now, -1, DateUtility::HOURS, DateUtility::DATETIME_FORMAT);
             
-            $qb = RecurringTask::where("is_draft", 0)->where("is_active", 1)
+            $qb = RecurringTask::where("is_draft", 0)->where("is_active", 1)->where("start_date_time", ">=", $last_one_hour)
             ->with([
                 "recurringTaskDate", "tags", "recurringTaskUser", "recurringTaskFile"
             ]);
@@ -77,8 +79,6 @@ class TaskCommand extends MyCommand
                     $main_counts['task']['insert'] += RecurringTask::createTask($record);
                 }
             }
-
-            $now = DateUtility::getDate(null, DateUtility::DATETIME_FORMAT);
 
             $qb = Task::where("status", Task::STATUS_CREATED)
                 ->where("start_date_time", "<=", $now);
