@@ -3,11 +3,9 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Exceptions\UserException;
-use App\Helpers\ArrayHelper;
 use App\Helpers\FileUtility;
 use App\Helpers\LaravelExtend;
 use App\Models\BaseModel;
-use App\Models\BaseModelInterface;
 use App\Models\Country;
 use App\Models\Department;
 use App\Models\Designation;
@@ -18,9 +16,7 @@ use App\Models\User;
 use App\Models\Role;
 use App\Models\Type;
 use App\Models\UserAllowIp;
-use App\Models\UserCategory;
 use App\Rules\MobileNumber;
-use App\View\Components\Inputs\DropDown;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
@@ -65,6 +61,8 @@ class UserController extends BackendController
         $conditions = $this->getConditions($cache_key_prefix, [
             ["field" => "id", "type" => "int", "cache" => false],
             ["field" => "name", "type" => "string"],
+            ["field" => "person_name", "type" => "string"],
+            ["field" => "person_last_name", "type" => "string"],
             ["field" => "email", "type" => "string"],
             ["field" => "mobile", "type" => "string"],
             ["field" => "is_active", "type" => "int"],

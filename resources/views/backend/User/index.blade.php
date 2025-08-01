@@ -20,6 +20,20 @@ $page_header_links = [['title' => 'Create', 'url' => route($routePrefix . '.crea
             <div class="row mb-4">
                 <div class="col-md-4 col-lg-3 col-xxxl-2 mb-2">
                     <?php
+                    $field = "person_name";
+                    $label = get_value_from_list($field_labels, $field, $field);
+                    ?>
+                    <x-Inputs.text-field :name="$field" :label="$label" :value="$search[$field]" />
+                </div>
+                <div class="col-md-4 col-lg-3 col-xxxl-2 mb-2">
+                    <?php
+                    $field = "person_last_name";
+                    $label = get_value_from_list($field_labels, $field, $field);
+                    ?>
+                    <x-Inputs.text-field :name="$field" :label="$label" :value="$search[$field]" />
+                </div>
+                <div class="col-md-4 col-lg-3 col-xxxl-2 mb-2">
+                    <?php
                     $field = "name";
                     $label = get_value_from_list($field_labels, $field, $field);
                     ?>

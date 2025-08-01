@@ -28,7 +28,7 @@
                         </select>
                     </div>                    
                     <div class="col-md-4 col-lg-3 col-xxxl-2 mb-2">
-                        <x-Inputs.drop-down name="role_id" label="Roles" :list="$role_list" :value="$search['role_id']" class="select2" />
+                        <x-Inputs.drop-down name="role_id" label="Role" :list="$role_list" :value="$search['role_id']" class="select2" />
                     </div>
                     <div class="col-md-4 col-lg-3 col-xxxl-2 mb-2">
                         <x-Inputs.drop-down name="type" label="Action Type" :list="$type_list" :value="$search['type']" class="select2" />
