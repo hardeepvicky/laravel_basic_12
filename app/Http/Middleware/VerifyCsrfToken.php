@@ -12,8 +12,8 @@ class VerifyCsrfToken extends Middleware
      * @var array<int, string>
      */
     protected $except = [
-        "mailjet-webhook",
-        "whatsapp-hook",
+        "mailjet-webhook/*",
+        "whatsapp-hook/*",
         "auth/google/*",
     ];
 }
