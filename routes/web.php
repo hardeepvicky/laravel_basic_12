@@ -52,10 +52,10 @@ Route::get("/", function () {
     return redirect("/home");
 });
 
-Route::any("whatsapp-hook", function(Request $request){
+Route::any("interakt-hook", function(Request $request){
 
     $data = $request->all();
-    Log::channel("hooks")->debug("Whatsapp Hook", $data);
+    Log::channel("hooks")->debug("interakt Hook", $data);
 
     header('HTTP/1.1 200 OK');
 });
@@ -64,7 +64,7 @@ Route::any("mailjet-webhook", function(Request $request){
 
     $data = $request->all();
 
-    Log::channel("hooks")->debug("Mailjet Hook", $data);
+    Log::channel("hooks")->debug("mailjet Hook", $data);
 
     //MailjetWebhook::create($data);
 

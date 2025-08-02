@@ -27,6 +27,11 @@ return Application::configure(basePath: dirname(__DIR__))
             'role_permission' => RolePermission::class,
             'backend_view_render' => BackendViewRender::class
         ]);
+
+        $middleware->validateCsrfTokens(except: [
+            'interakt-hook',
+            'mailjet-webhook',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
 
