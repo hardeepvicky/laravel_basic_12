@@ -38,6 +38,7 @@
                                     <th>{!! sortable_anchor('priority', get_value_from_list($field_labels, 'priority', 'priority')) !!}</th>
                                     <th>{!! sortable_anchor('start_date_time', get_value_from_list($field_labels, 'start_date_time', 'start_date_time')) !!} </th>
                                     <th>Duration</th>
+                                    <th>{!! sortable_anchor('end_date_time', get_value_from_list($field_labels, 'end_date_time', 'end_date_time')) !!} </th>
                                     <th>Time Left</th>
                                     <th>Status</th>
                                     <th>Actions</th>
@@ -50,11 +51,14 @@
                                         <td class="name">{{ $record->name }}</td>
                                         <td>{{ $record->priority }}</td>
                                         <td>
-                                            {{ if_date_time($record->start_date_time) }}
+                                            <x-Backend.celec-date-time :value="$record->start_date_time"/>
                                         </td>
                                         <td>
                                             {{ $record->duration }}
                                             {{ get_value_from_list($duration_type_list, $record->duration_type) }}
+                                        </td>
+                                        <td>
+                                            <x-Backend.celec-date-time :value="$record->end_date_time"/>
                                         </td>
                                         <td>{{ $record->time_left }}</td>
                                         <td>
