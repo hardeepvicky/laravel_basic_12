@@ -13,6 +13,7 @@ use App\Models\Product;
 use App\Models\ProductAttribute;
 use App\Models\ProductCategory;
 use App\Models\ProductCategoryAttribute;
+use App\Models\ProductFile;
 use App\Models\Uom;
 use Illuminate\Http\Request;
 use Exception;
@@ -63,8 +64,8 @@ class ProductController extends BackendController
             ["field" => "product_category_id", "type" => "int"],
             ["field" => "is_find_nested_child", "type" => "bool", "view_field" => "is_find_nested_child"],
             ["field" => "name", "type" => "string"],
-            ["field" => "short_name", "type" => "string"],
             ["field" => "model_name", "type" => "string"],
+            ["field" => "sku", "type" => "string"],
             ["field" => "is_active", "type" => "int"],
         ]);
 
@@ -86,20 +87,22 @@ class ProductController extends BackendController
                 $conditions = $array_helper->unsetValues($conditions, ["product_category_id"], true, [ArrayHelper::UNSET_VALUE_REMOVE_PARENT_IF_FOUND_CHILD]);
             }
         }
-        
+
         $conditions = $array_helper->unsetValues($conditions, ["is_find_nested_child"], true, [ArrayHelper::UNSET_VALUE_REMOVE_PARENT_IF_FOUND_CHILD]);
 
         // d($conditions, true);
 
         $builder = $builder->where($conditions);
 
-        $builder->with([            
+        $builder->with([
             "productAttributes" => function($q){
                 $q->orderBy("display_order", "ASC");
             },
             "productAttributes.categoryAttribute",
             "mainImage",
-            "documentFile"
+            "images",
+            "videos",
+            "otherFiles",
         ]);
 
         if ($apply_sort) {
@@ -175,13 +178,23 @@ class ProductController extends BackendController
     {
         return [
             "product_category_id" => ["required"],
-            "name" => ["required"],
-            "model_name" => ["required"],
+            "name" => ["required", "min:3", "max:80"],
+            "model_name" => ["required", "max:80"],
+            "length" => ["required"],
+            "width" => ["required"],
+            "height" => ["required"],
+            "net_weight" => ["required"],
+            "gross_weight" => ["required"],
+            "sku" => ["required", "max:255"],
             "description" => ["nullable"],
-            "short_name" => ["nullable"],
+            "description_html" => ["nullable"],
+            "seo_title" => ["nullable", "max:80"],
+            "meta_main_keyword" => ["nullable", "max:45"],
+            "meta_description" => ["nullable", "max:255"],
             "product_attributes" => [],
-            "productFile" => [],
-            "main_image_id" => "",
+            "images" => [],
+            "videos" => [],
+            "other_files" => [],
             "list_display_order" => "",
             "is_active" => "",
         ];
@@ -214,7 +227,9 @@ class ProductController extends BackendController
 
             $save_data = $validatedData;
             unset($save_data['product_attributes']);
-            unset($save_data['productFile']);
+            unset($save_data['images']);
+            unset($save_data['videos']);
+            unset($save_data['other_files']);
 
             $this->model->fill($save_data);
 
@@ -224,6 +239,15 @@ class ProductController extends BackendController
             }
 
             $this->_saveOthers($validatedData);
+
+            $document_file = $this->model->images()->first();
+            
+            if ($document_file)
+            {
+                $this->model->main_image_id = $document_file->id;
+
+                $this->model->save();
+            }
 
             if (LaravelExtend::$errors) {
                 throw new Exception("Fail to Save");
@@ -262,20 +286,64 @@ class ProductController extends BackendController
             }
         }
 
-        if (isset($validatedData['productFile'])) {
+        $this->model->productFile()->delete();
 
-            $ids = explode(",", $validatedData['productFile']);
+        if (isset($validatedData['images'])) {
+
+            $ids = explode(",", $validatedData['images']);
 
             $document_files = DocumentFile::find($ids);
 
-            $this->model->documentFile()->sync($document_files);
+            foreach($document_files as $document_file)
+            {
+                $productFile = new ProductFile([
+                    "file_type" => "image",
+                    "document_file_id" => $document_file->id
+                ]);
+
+                $this->model->productFile()->save($productFile);
+            }
+        }
+
+        if (isset($validatedData['videos'])) {
+
+            $ids = explode(",", $validatedData['videos']);
+
+            $document_files = DocumentFile::find($ids);
+
+            foreach($document_files as $document_file)
+            {
+                $productFile = new ProductFile([
+                    "file_type" => "video",
+                    "document_file_id" => $document_file->id
+                ]);
+
+                $this->model->productFile()->save($productFile);
+            }
+        }
+
+        if (isset($validatedData['other_files'])) {
+
+            $ids = explode(",", $validatedData['other_files']);
+
+            $document_files = DocumentFile::find($ids);
+
+            foreach($document_files as $document_file)
+            {
+                $productFile = new ProductFile([
+                    "file_type" => "",
+                    "document_file_id" => $document_file->id
+                ]);
+
+                $this->model->productFile()->save($productFile);
+            }
         }
     }
 
     public function edit($id)
     {
         $model = $this->model = $this->modelClass::with([
-            "productFile"
+            "images", "videos", "otherFiles"
         ])
         ->findOrFail($id);
 
@@ -312,7 +380,9 @@ class ProductController extends BackendController
         try {
             $save_data = $validatedData;
             unset($save_data['product_attributes']);
-            unset($save_data['productFile']);
+            unset($save_data['images']);
+            unset($save_data['videos']);
+            unset($save_data['otherFiles']);
 
             $this->model->fill($save_data);
 
@@ -411,7 +481,7 @@ class ProductController extends BackendController
 
         if ($id)
         {
-            $model = $this->modelClass::with(["productAttributes"])->find($id);  
+            $model = $this->modelClass::with(["productAttributes"])->find($id);
         }
         else
         {
@@ -441,5 +511,32 @@ class ProductController extends BackendController
         $this->setForView(compact("category", "model", "drop_down_lists"));
 
         return $this->view(__FUNCTION__);
+    }
+
+    public function mark_as_main_image($id, $document_file_id)
+    {
+        $response = ["status" => 0, "msg" => ""];
+
+        try
+        {
+            $product = $this->modelClass::findorFail($id);
+
+            $document_file = DocumentFile::findorFail($document_file_id);
+            $document_file->afterFind();
+
+            $product->main_image_id = $document_file->id;
+            $product->save();
+
+            $response['status'] = 1;
+
+            $response['url'] = $document_file->file_url;
+        }
+        catch(Exception $ex)
+        {
+            $response['status'] = 0;
+            $response['msg'] = get_exception_display_message($ex);
+        }
+
+        return $this->responseJson($response);
     }
 }

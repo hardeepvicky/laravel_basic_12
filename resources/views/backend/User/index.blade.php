@@ -117,6 +117,7 @@ $page_header_links = [['title' => 'Create', 'url' => route($routePrefix . '.crea
 
 <script>
     var my_country = JSON.parse('{!! json_encode($my_country) !!}');
+    
     $.events.execAtLast(function() {
         $("#type").change(function() {
             var v = $(this).val();
@@ -137,7 +138,7 @@ $page_header_links = [['title' => 'Create', 'url' => route($routePrefix . '.crea
 
         $(".cascade-drop-down").trigger("change", {
             pageLoad: true
-        });
+        });        
     });
 </script>
 @endsection

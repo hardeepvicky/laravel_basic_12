@@ -45,7 +45,7 @@
                             <td>{{ $record->short_name }}</td>
                             <td>
                                 @if ($record->mainImage?->file_url)
-                                <a class="fancybox" href="{{ $record->mainImage->file_url }}">
+                                <a id="main_image-{{ $record->id }}" class="fancybox" href="{{ $record->mainImage->file_url }}">
                                     <img class="img-thumbnail small-img" src="{{ $record->mainImage->file_url }}" />
                                 </a>
                                 @endif
@@ -94,10 +94,60 @@
                                                 @endforeach
                                             </tbody>
                                         </table>
+
+                                        <h4 class="mt-2 mb-2 b-b-info">
+                                            Description
+                                        </h4>
+
+                                        <p class="mb-2 b-b-info">
+                                            {!! $record->description !!}
+                                        </p>
+
+                                        {!! $record->description_html !!}
                                     </div>
 
                                     <div class="col-md-12 col-xl-7">
-                                        <x-Backend.document-files :records="$record->documentFile" />
+                                            <div class="card">
+                                                <div class="card-header border-l-secondary card-no-border">
+                                                    <h3>Images</h3>
+                                                </div>
+                                                <div class="card-body">
+
+                                                    <div class="file-content mt-2">
+                                                        <ul class="d-flex flex-row files-content">
+                                                            @foreach($record->images as $image)
+                                                            <?php
+                                                                $image->afterFind();
+                                                            ?>
+                                                            <li class="folder-box d-flex align-items-center">
+                                                                <div class="file-block card " data-id="{{ $image->id }}">
+                                                                    <i class="fas fa-check check-icon"></i>
+                                                                    <div class="card-header">
+                                                                        <a href="{{ $image->file_url }}" class="fancybox image-container" data-fancybox="image">
+                                                                            <img class="full-img lazy-load-image" src="{{ $image->file_url }}" alt="{{ $image->file_name }}"/>
+                                                                            <div class="image-loader"></div>
+                                                                            <div class="error-icon" aria-hidden="true">&#x26A0;</div>
+                                                                        </a>
+                                                                    </div>
+                                                                    <div class="card-body">
+                                                                        <div class="d-flex justify-content-center align-items-center">
+                                                                            <a href="{{ route('product.mark_as_main_image', ['id' => $record->id, 'document_file_id' => $image->id]) }}" 
+                                                                                data-main_image_id="main_image-{{ $record->id }}"
+                                                                                class="btn btn-secondary btn-sm mark_as_main_image">
+                                                                                Mark As Main Image
+                                                                            </a>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </li>
+                                                            @endforeach
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        <x-Backend.document-files :records="$record->videos" />
+                                        <x-Backend.document-files :records="$record->otherFiles" />
                                     </div>
                                 </div>
                             </td>

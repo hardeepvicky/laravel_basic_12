@@ -32,10 +32,7 @@ use App\Helpers\LaravelExtend;
                     <div class="d-flex align-items-center">
                         <div class="flex-grow-1">
                             <h5 class="f-w-600">{{ str_short_with_dot($record->name) }}</h5>
-                            <span>By : {{ LaravelExtend::getCreatedByOrUpdatedBy($record->created_by) }}</span>
                             <p>
-                                {{ $record->created_at_user_tz->diffForHumans() }} ,
-
                                 {{ round($record->file_size_in_mb, 2) }} MB
                             </p>
                         </div>
@@ -46,7 +43,7 @@ use App\Helpers\LaravelExtend;
                 </div>
             </div>
         @else
-        <div class="file-block   p-2" data-id="{{ $record->id }}">
+        <div class="file-block p-2" data-id="{{ $record->id }}">
             <i class="fas fa-check check-icon"></i>
             <div class="d-flex align-items-center files-list">
                 <div class="flex-shrink-0 file-left">
@@ -55,12 +52,8 @@ use App\Helpers\LaravelExtend;
                 <div class="flex-grow-1 d-flex align-items-center ml-1">
                     <div class="flex-grow-1">
                         <h5 class="f-w-600">{{ str_short_with_dot($record->name) }}</h5>
-                        <span>By : {{ LaravelExtend::getCreatedByOrUpdatedBy($record->created_by) }}</span>
                         <p>
-                            {{ $record->created_at_user_tz->diffForHumans() }}
-                            @if ($record->file)
-                                , {{ round($record->file_size_in_mb, 2) }} MB
-                            @endif
+                            {{ round($record->file_size_in_mb, 2) }} MB                            
                         </p>
                     </div>
                 </div>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Backend;
 
 use App\Acl\SectionRoutes;
 use App\Helpers\ArrayHelper;
+use App\Helpers\EmailHelper;
 use App\Helpers\LaravelExtend;
 use App\Models\AjaxLog;
 use App\Models\CommandLog;

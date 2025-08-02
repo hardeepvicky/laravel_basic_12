@@ -31,14 +31,24 @@ class Product extends BaseModel
         return $this->hasMany(ProductAttribute::class);
     }
 
-    public function documentFile()
-    {
-        return $this->belongsToMany(DocumentFile::class, ProductFile::class);
-    }
-
     public function productFile()
     {
         return $this->hasMany(ProductFile::class, 'product_id');
+    }
+
+    public function images()
+    {
+        return $this->belongsToMany(DocumentFile::class, ProductFile::class)->where("file_type", "image");
+    }
+
+    public function videos()
+    {
+        return $this->belongsToMany(DocumentFile::class, ProductFile::class)->where("file_type", "video");
+    }
+
+    public function otherFiles()
+    {
+        return $this->belongsToMany(DocumentFile::class, ProductFile::class)->where("file_type", "");
     }
 
     public function mainImage()
@@ -59,7 +69,8 @@ class Product extends BaseModel
     public function getUniqueValidationRules(Request $request)
     {
         $field_rules = [
-            "name" => [Rule::unique($this->connection . "." . $this->getTable(), "name")->where("product_category_id", $request->input("product_category_id"))],
+            "model_name" => [Rule::unique($this->connection . "." . $this->getTable(), "name")],
+            "sku" => [Rule::unique($this->connection . "." . $this->getTable(), "name")],
         ];
 
         if ($this->id) {

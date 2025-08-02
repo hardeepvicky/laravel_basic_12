@@ -495,6 +495,9 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
 
         $name = "ajax_load_attribute_fields";
         Route::get($name . "/{category_id}/{id?}", [$controllerClass, $name])->name($name);
+
+        $name = "mark_as_main_image";
+        Route::get($name . "/{id}/{document_file_id}", [$controllerClass, $name])->name($name);
     });
 
     $route_prefix = "document-category";

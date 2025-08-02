@@ -495,4 +495,21 @@ class EmailHelper
 
         return $result;
     }
+
+    public function getMailjetMessageStatus($msg_id)
+    {
+        $mj = new \Mailjet\Client($this->api_key, $this->api_secret, true, ['version' => 'v3.1']);        
+        $response = $mj->get(Resources::$Messagehistory, ['id' => $msg_id]);
+        
+        if ($response->success())
+        {
+            return $response->getData();
+        }
+        else
+        {
+            return $response->getData();
+        }
+
+        return [];
+    }
 }

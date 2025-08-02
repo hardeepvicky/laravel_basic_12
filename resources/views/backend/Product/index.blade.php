@@ -64,4 +64,20 @@
     <div id="index_table">
         @include($viewPrefix . '.index_table')
     </div>
+
+    <script>
+        $(document).on("click", "a.mark_as_main_image", function(e){
+            var url = $(this).attr("href");
+
+            var main_image_id = $(this).data("main_image_id");
+
+            ajaxGetJson(url, function(response)
+            {
+                $("#" + main_image_id).attr("href", response['url']);
+                $("#" + main_image_id).find("img").attr("src", response['url']);
+            });
+
+            return false;
+        });
+    </script>
 @endsection

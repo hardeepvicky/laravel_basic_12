@@ -45,38 +45,120 @@
                             </div>
                             <div class="form-group mb-3">
                                 <?php
-                                $field = 'short_name';
+                                $field = 'sku';
                                 $label = get_value_from_list($field_labels, $field, $field);
                                 ?>
                                 <x-Inputs.text-field :name="$field" :label="$label" value="{{ $model->{$field} }}"
-                                    placeholder="Enter {{ $label }}" />
+                                    placeholder="Enter {{ $label }}" mandatory="true" />
                             </div>
-                            <div class="form-group mb-3">
-                                <?php
-                                $field = 'description';
-                                $label = get_value_from_list($field_labels, $field, $field);
-                                ?>
-                                <x-Inputs.text-area :name="$field" :label="$label" value="{{ $model->{$field} }}"
-                                    placeholder="Enter {{ $label }}" />
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group mb-3">
+                                        <?php
+                                        $field = 'length';
+                                        $label = get_value_from_list($field_labels, $field, $field);
+                                        ?>
+                                        <x-Inputs.group-text-field :name="$field" :label="$label"
+                                            value="{{ $model->{$field} }}" class="validate-float"
+                                            placeholder="Enter {{ $label }}"
+                                            secondaryText='<span class="input-group-text">in.</span>'
+                                            secondaryTextPosition="last" mandatory="true" />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group mb-3">
+                                        <?php
+                                        $field = 'width';
+                                        $label = get_value_from_list($field_labels, $field, $field);
+                                        ?>
+                                        <x-Inputs.group-text-field :name="$field" :label="$label"
+                                            value="{{ $model->{$field} }}" class="validate-float"
+                                            placeholder="Enter {{ $label }}"
+                                            secondaryText='<span class="input-group-text">in.</span>'
+                                            secondaryTextPosition="last" mandatory="true" />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group mb-3">
+                                        <?php
+                                        $field = 'height';
+                                        $label = get_value_from_list($field_labels, $field, $field);
+                                        ?>
+                                        <x-Inputs.group-text-field :name="$field" :label="$label"
+                                            value="{{ $model->{$field} }}" class="validate-float"
+                                            placeholder="Enter {{ $label }}"
+                                            secondaryText='<span class="input-group-text">in.</span>'
+                                            secondaryTextPosition="last" mandatory="true" />
+                                    </div>
+                                </div>
                             </div>
-                            <div class="form-group mb-3">
-                                <?php
-                                $field = "main_image_id";
-                                $label = get_value_from_list($field_labels, $field, $field);
-                                ?>
-                                <x-Inputs.text-field :id="$field" :name="$field" :label="$label" :value="$model->{$field}" />                        
-                                <span id="choose-main-image" class="btn btn-secondary">Choose Main Image</span>
-                            </div>
-                            <div class="form-group mb-3">
-                                <?php
-                                $field = "productFile";
-                                $label = get_value_from_list($field_labels, $field, $field);
-                                $value = implode(',', $model->productFile?->pluck('document_file_id')->toArray());
-                                ?>
-                                <x-Inputs.text-field :id="$field" :name="$field" :label="$label" :value="$value" multiple="multiple"  />                        
-                                <span id="files-choose" class="btn btn-secondary">Choose Files</span>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <?php
+                                        $field = 'net_weight';
+                                        $label = get_value_from_list($field_labels, $field, $field);
+                                        ?>
+                                        <x-Inputs.group-text-field :name="$field" :label="$label"
+                                            value="{{ $model->{$field} }}" class="validate-float"
+                                            placeholder="Enter {{ $label }}"
+                                            secondaryText='<span class="input-group-text">kg.</span>'
+                                            secondaryTextPosition="last" mandatory="true" />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <?php
+                                        $field = 'gross_weight';
+                                        $label = get_value_from_list($field_labels, $field, $field);
+                                        ?>
+                                        <x-Inputs.group-text-field :name="$field" :label="$label"
+                                            value="{{ $model->{$field} }}" class="validate-float"
+                                            placeholder="Enter {{ $label }}"
+                                            secondaryText='<span class="input-group-text">kg.</span>'
+                                            secondaryTextPosition="last" mandatory="true" />
+                                    </div>
+                                </div>
                             </div>
                             <div id="load_field_block">
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group mb-3">
+                                        <?php
+                                        $field = 'images';
+                                        $label = get_value_from_list($field_labels, $field, $field);
+                                        $value = implode(',', $model->images?->pluck('id')->toArray());
+                                        ?>
+                                        <span id="choose-images" class="btn btn-secondary">Choose Images</span>
+                                        <x-Inputs.text-field :id="$field" :name="$field" :label="$false"
+                                            :value="$value" multiple="multiple" />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group mb-3">
+                                        <?php
+                                        $field = 'videos';
+                                        $label = get_value_from_list($field_labels, $field, $field);
+                                        $value = implode(',', $model->videos?->pluck('id')->toArray());
+                                        ?>
+                                        <span id="choose-videos" class="btn btn-secondary">Choose Videos</span>
+                                        <x-Inputs.text-field :id="$field" :name="$field" :label="$false"
+                                            :value="$value" multiple="multiple" />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group mb-3">
+                                        <?php
+                                        $field = 'other_files';
+                                        $label = get_value_from_list($field_labels, $field, $field);
+                                        $value = implode(',', $model->otherFiles?->pluck('id')->toArray());
+                                        ?>
+                                        <span id="choose-other_files" class="btn btn-secondary">Choose Files</span>
+                                        <x-Inputs.text-field :id="$field" :name="$field" :label="$false"
+                                            :value="$value" multiple="multiple" />
+                                    </div>
+                                </div>
                             </div>
                             <div class="row">
                                 <div class="col-xl-6">
@@ -85,8 +167,9 @@
                                         $field = 'list_display_order';
                                         $label = get_value_from_list($field_labels, $field, $field);
                                         ?>
-                                        <x-Inputs.text-field type="number" :name="$field" :label="$label" value="{{ $model->{$field} }}"
-                                            placeholder="Enter {{ $label }}" mandatory="true" autocomplete="off" />
+                                        <x-Inputs.text-field type="number" :name="$field" :label="$label"
+                                            value="{{ $model->{$field} }}" placeholder="Enter {{ $label }}"
+                                            mandatory="true" autocomplete="off" />
                                     </div>
                                 </div>
                                 <div class="col-xl-6" style="padding-top: 30px">
@@ -95,9 +178,56 @@
                                         $field = 'is_active';
                                         $label = get_value_from_list($field_labels, $field, $field);
                                         ?>
-                                        <x-Inputs.checkbox :name="$field" :label="$label" value="{{ $model->{$field} }}" />
+                                        <x-Inputs.checkbox :name="$field" :label="$label"
+                                            value="{{ $model->{$field} }}" />
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12 col-xxl-6">
+                            <div class="form-group mb-3">
+                                <?php
+                                $field = 'description';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <x-Inputs.text-area :name="$field" :label="$label" value="{{ $model->{$field} }}"
+                                    placeholder="Enter {{ $label }}" rows="5"/>
+                            </div>
+                            <div class="form-group mb-3">
+                                <?php
+                                $field = 'description_html';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <x-Inputs.text-area :id="$field" :name="$field" :label="$label"
+                                    :value="$model->{$field}" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-12 col-xxl-6">
+                            <div class="form-group mb-3">
+                                <?php
+                                $field = 'seo_title';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <x-Inputs.text-field :name="$field" :label="$label" value="{{ $model->{$field} }}"
+                                    placeholder="Enter {{ $label }}" />
+                            </div>
+                            <div class="form-group mb-3">
+                                <?php
+                                $field = 'meta_main_keyword';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <x-Inputs.text-field :name="$field" :label="$label" value="{{ $model->{$field} }}"
+                                    placeholder="Enter {{ $label }}" />
+                            </div>
+                            <div class="form-group mb-3">
+                                <?php
+                                $field = 'meta_description';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <x-Inputs.text-field :name="$field" :label="$label" value="{{ $model->{$field} }}"
+                                    placeholder="Enter {{ $label }}" />
                             </div>
                         </div>
                     </div>
@@ -111,34 +241,46 @@
 
     <script>
         var id = '<?= $model->id ?? 0 ?>';
-        $(function(){
-            $("#product_category_id").change(function(){
+        $(function() {
+            $("#product_category_id").change(function() {
                 var v = $(this).val();
 
                 $("#load_field_block").html("");
 
-                if (v)
-                {
+                if (v) {
                     $.loader.init().show();
-                    $("#load_field_block").load("/product/ajax_load_attribute_fields/" + v + "/" + id, function(){
-                        $.loader.hide();
-                    })
+                    $("#load_field_block").load("/product/ajax_load_attribute_fields/" + v + "/" + id,
+                        function() {
+                            $.loader.hide();
+                        })
                 }
-            }).trigger("change", {pageLoad : true});
-
-            $("#main_image_id").browseGallery({
-                opener : "#choose-main-image",
-                postfix : "choose-main-image",
-                type : "image"
+            }).trigger("change", {
+                pageLoad: true
             });
 
-            $("#productFile").browseGallery({
-                opener : "#files-choose"
+            $("#images").browseGallery({
+                opener: "#choose-images",
+                postfix: "choose-images",
+                type: "image"
             });
 
-            $.events.execAtLast(function(){
-                
-            })
+            $("#videos").browseGallery({
+                opener: "#choose-videos",
+                postfix: "choose-videos",
+                type: "video"
+            });
+            $("#other_files").browseGallery({
+                opener: "#choose-other_files",
+                postfix: "choose-other_files",
+            });
+
+            $("#description_html").summernote({
+                height: 400,
+            });
+
+            $.events.execAtLast(function() {
+
+            });
         });
     </script>
 @endsection
