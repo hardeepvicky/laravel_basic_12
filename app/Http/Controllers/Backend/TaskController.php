@@ -268,12 +268,6 @@ class TaskController extends BackendController
             $this->model = new Task();
         }
 
-        $user_conditions = [
-            "type" => User::TYPE_INTERNAL,
-        ];
-
-        
-
         $users = User::getCache("users_type_internal");
 
         if (!$users)
