@@ -457,6 +457,8 @@ class EmailHelper
             "api_response" => $api_response
         ]);
 
+        $message_id_arr = [];
+
         if ($response->success()) {
             if (!$api_response) {
                 throw new ApiException('API : No Response on success', $response->getStatus());
@@ -468,6 +470,7 @@ class EmailHelper
 
                         foreach ($message['To'] as $to) {
                             if ($to['MessageID']) {
+                                $message_id_arr[] = $to;
                                 $result['success']++;
                             } else {
                                 $result['fail']++;
@@ -485,6 +488,10 @@ class EmailHelper
             $data = $response->getData();
             throw new ApiException($data['ErrorMessage'], $data['StatusCode'], $data);
         }
+
+        $this->updateLog([
+            "message_id_array" => $message_id_arr
+        ]);
 
         return $result;
     }

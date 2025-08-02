@@ -41,6 +41,7 @@ use App\Http\Controllers\Frontend\EnquiryController;
 use App\Http\Controllers\Frontend\PublicController as FrontendPublicController;
 use App\Http\Controllers\HomeController;
 use App\Models\EmailLog;
+use App\Models\MailjetWebhook;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -55,6 +56,17 @@ Route::any("whatsapp-hook", function(Request $request){
 
     $data = $request->all();
     Log::channel("hooks")->debug("Whatsapp Hook", $data);
+
+    header('HTTP/1.1 200 OK');
+});
+
+Route::any("mailjet-webhook", function(Request $request){
+
+    $data = $request->all();
+
+    Log::channel("hooks")->debug("Mailjet Hook", $data);
+
+    //MailjetWebhook::create($data);
 
     header('HTTP/1.1 200 OK');
 });
