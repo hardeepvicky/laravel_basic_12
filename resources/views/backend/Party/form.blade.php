@@ -75,7 +75,7 @@
                                 $field = 'address';
                                 $label = get_value_from_list($field_labels, $field, $field);
                                 ?>
-                                <x-Inputs.text-area :name="$field" :label="$label" value="{{ $model->{$field} }}"
+                                <x-Inputs.text-area :name="$field" :label="$label" value="{{ $model->{$field} }}"  rows="3"
                                     placeholder="Enter {{ $label }}" />
                             </div>
                             <div class="form-group mb-3">
@@ -83,7 +83,7 @@
                                 $field = 'description';
                                 $label = get_value_from_list($field_labels, $field, $field);
                                 ?>
-                                <x-Inputs.text-area :name="$field" :label="$label" value="{{ $model->{$field} }}"
+                                <x-Inputs.text-area :name="$field" :label="$label" value="{{ $model->{$field} }}" rows="3"
                                     placeholder="Enter {{ $label }}" />
                             </div>
                             <div class="row">
