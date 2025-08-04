@@ -74,6 +74,26 @@
                             <td colspan="9">
                                 <div class="row">
                                     <div class="col-md-12 col-xl-5">
+                                        <label class="info">
+                                            Size :
+                                            <span>
+                                                {{ $record->length }} x {{ $record->width }} x {{ $record->height }} {{ $record->size_uom_name }}
+                                            </span>
+                                        </label>
+
+                                        <label class="info">
+                                            {{ get_value_from_list($field_labels, 'net_weight') }} :
+                                            <span>
+                                                {{ $record->net_weight }} kg.
+                                            </span>
+                                        </label>
+                                        <label class="info">
+                                            {{ get_value_from_list($field_labels, 'gross_weight') }} :
+                                            <span>
+                                                {{ $record->gross_weight }} kg.
+                                            </span>
+                                        </label>
+                                        
                                         <table class="table table-sm summary-table table-bordered i-data-table">
                                             <thead>
                                                 <tr>
@@ -95,6 +115,34 @@
                                             </tbody>
                                         </table>
 
+                                        <label class="info">
+                                            {{ get_value_from_list($field_labels, 'seo_title') }} :
+                                            <span>
+                                                {{ $record->seo_title }}
+                                            </span>
+                                        </label>
+
+                                        <label class="info">
+                                            {{ get_value_from_list($field_labels, 'meta_main_keyword') }} :
+                                            <span>
+                                                {{ $record->meta_main_keyword }}
+                                            </span>
+                                        </label>
+
+                                        <label class="info">
+                                            {{ get_value_from_list($field_labels, 'meta_description') }} :
+                                            <span>
+                                                {{ $record->meta_description }}
+                                            </span>
+                                        </label>
+
+                                         <label class="info">
+                                            Keywords :
+                                            <span>
+                                                {{ implode(',', $record->keywords?->pluck('name')->toArray())  }}
+                                            </span>
+                                        </label>
+
                                         <h4 class="mt-2 mb-2 b-b-info">
                                             Description
                                         </h4>
@@ -104,6 +152,7 @@
                                         </p>
 
                                         {!! $record->description_html !!}
+                                        
                                     </div>
 
                                     <div class="col-md-12 col-xl-7">

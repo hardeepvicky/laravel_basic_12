@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Exceptions\UserException;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Unique;
@@ -21,6 +22,27 @@ class Product extends BaseModel
         ]
     ];
 
+    public function beforeSave()
+    {
+        parent::beforeSave();
+
+        if ($this->size_uom_id)
+        {
+            if ($this->length)
+            {
+                $this->length = Uom::convertToParentUomValue($this->size_uom_id, $this->length);
+            }
+            if ($this->width)
+            {
+                $this->width = Uom::convertToParentUomValue($this->size_uom_id, $this->width);
+            }
+            if ($this->height)
+            {
+                $this->height = Uom::convertToParentUomValue($this->size_uom_id, $this->height);
+            }
+        }
+    }
+
     public function category()
     {
         return $this->belongsTo(ProductCategory::class);
@@ -34,6 +56,11 @@ class Product extends BaseModel
     public function productFile()
     {
         return $this->hasMany(ProductFile::class, 'product_id');
+    }
+
+    public function keywords()
+    {
+        return $this->hasMany(ProductKeyword::class, 'product_id');
     }
 
     public function images()
@@ -110,5 +137,73 @@ class Product extends BaseModel
         $labels['productFile'] = "Files";
 
         return $labels;
+    }
+
+    public function convertToChildUom()
+    {
+        if ($this->size_uom_id)
+        {
+            if ($this->length)
+            {
+                $this->length = Uom::convertToChildUomValue($this->size_uom_id, $this->length);
+            }
+            if ($this->width)
+            {
+                $this->width = Uom::convertToChildUomValue($this->size_uom_id, $this->width);
+            }
+            if ($this->height)
+            {
+                $this->height = Uom::convertToChildUomValue($this->size_uom_id, $this->height);
+            }
+        }
+    }
+
+    public static function convertRecordsForChildUom($records)
+    {
+        $cache_key = "all_uoms";
+
+        $uoms = static::getCache($cache_key);
+
+        if (!$uoms)
+        {
+            $temp = Uom::get()->toArray();
+
+            foreach($temp as $arr)
+            {
+                $uoms[$arr['id']] = $arr;
+            }
+
+            if ($uoms)
+            {                
+                Uom::addCache($cache_key, $uoms, 60 * 60 * 24);
+            }
+        }
+
+        foreach($records as $record)
+        {
+            if ($record->size_uom_id && isset($uoms[$record->size_uom_id]))
+            {
+                $record->size_uom_name = $uoms[$record->size_uom_id]['short_name'];
+
+                if ($record->length)
+                {
+                    $record->length *= $uoms[$record->size_uom_id]['conversion_factor'];
+                    $record->length = round($record->length, 3);
+                }
+
+                if ($record->width)
+                {
+                    $record->width *= $uoms[$record->size_uom_id]['conversion_factor'];
+
+                    $record->width = round($record->width, 3);
+                }
+
+                if ($record->height)
+                {
+                    $record->height *= $uoms[$record->size_uom_id]['conversion_factor'];
+                    $record->height = round($record->height, 3);
+                }
+            }
+        }
     }
 }

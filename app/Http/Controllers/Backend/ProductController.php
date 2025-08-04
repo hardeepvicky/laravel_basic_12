@@ -14,6 +14,7 @@ use App\Models\ProductAttribute;
 use App\Models\ProductCategory;
 use App\Models\ProductCategoryAttribute;
 use App\Models\ProductFile;
+use App\Models\ProductKeyword;
 use App\Models\Uom;
 use Illuminate\Http\Request;
 use Exception;
@@ -36,7 +37,9 @@ class ProductController extends BackendController
 
         $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
 
-        // dd($records->toArray(), true);
+        Product::convertRecordsForChildUom($records);
+
+        // d($records->toArray(), true);
 
         foreach($records as $record)
         {
@@ -103,6 +106,7 @@ class ProductController extends BackendController
             "images",
             "videos",
             "otherFiles",
+            "keywords"
         ]);
 
         if ($apply_sort) {
@@ -129,11 +133,9 @@ class ProductController extends BackendController
             $this->model = new $this->modelClass();
         }
 
-        $uom_list = Uom::getListCache();
-
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
-        $this->setForView(compact("field_labels", "uom_list"));
+        $this->setForView(compact("field_labels"));
 
         return parent::beforeViewRender();
     }
@@ -171,7 +173,9 @@ class ProductController extends BackendController
 
         $product_category_list = Util::getTreeListArray($product_category_records, "id", "name");
 
-        $this->setForView(compact("product_category_list"));
+        $uom_list = Uom::getUomListForCode("size");
+
+        $this->setForView(compact("product_category_list", "uom_list"));
     }
 
     private function _common_validation_rules()
@@ -183,6 +187,7 @@ class ProductController extends BackendController
             "length" => ["required"],
             "width" => ["required"],
             "height" => ["required"],
+            "size_uom_id" => ["required"],
             "net_weight" => ["required"],
             "gross_weight" => ["required"],
             "sku" => ["required", "max:255"],
@@ -195,6 +200,7 @@ class ProductController extends BackendController
             "images" => [],
             "videos" => [],
             "other_files" => [],
+            "keywords" => [],
             "list_display_order" => "",
             "is_active" => "",
         ];
@@ -338,16 +344,34 @@ class ProductController extends BackendController
                 $this->model->productFile()->save($productFile);
             }
         }
+
+        if (isset($validatedData['keywords'])) {
+
+            $this->model->keywords()->delete();
+
+            $keywords = explode(",", $validatedData['keywords']);
+
+            foreach($keywords as $keyword)
+            {
+                $child = new ProductKeyword([
+                    "name" => $keyword,
+                ]);
+
+                $this->model->keywords()->save($child);
+            }
+        }
     }
 
     public function edit($id)
     {
         $model = $this->model = $this->modelClass::with([
-            "images", "videos", "otherFiles"
+            "images", "videos", "otherFiles", "keywords"
         ])
         ->findOrFail($id);
 
         $this->beforeEdit($model);
+
+        $model->convertToChildUom();
 
         $form = [
             'url' => route($this->routePrefix . '.update', $id),
@@ -508,7 +532,9 @@ class ProductController extends BackendController
             }
         }
 
-        $this->setForView(compact("category", "model", "drop_down_lists"));
+        $uom_list = Uom::getListCache();
+
+        $this->setForView(compact("category", "model", "drop_down_lists", "uom_list"));
 
         return $this->view(__FUNCTION__);
     }

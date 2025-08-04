@@ -23,7 +23,7 @@
             </div>
         </div>
         <div class="card-body file-manager">            
-            <div id="index_table">
+            <div id="{{ $index_table_id }}" class="index_table">
                 @include($viewPrefix . '.index_records')
             </div>
         </div>

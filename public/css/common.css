@@ -507,6 +507,11 @@ label.info {
     overflow-y: auto;
 }
 
+.w-50 {
+    width: 100px;
+    overflow-x: auto;
+}
+
 .w-100 {
     width: 100px;
     overflow-x: auto;

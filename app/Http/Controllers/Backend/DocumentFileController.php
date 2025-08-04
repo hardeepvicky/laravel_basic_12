@@ -42,7 +42,9 @@ class DocumentFileController extends BackendController
 
         $category_list = Util::getTreeListArray($category_records, "id", "name", false, false);
 
-        $this->setForView(compact("records", "category_list"));
+        $index_table_id = request("index_table_id", "index_table");
+
+        $this->setForView(compact("records", "category_list", "index_table_id"));
 
         return $this->viewIndex(__FUNCTION__);
     }

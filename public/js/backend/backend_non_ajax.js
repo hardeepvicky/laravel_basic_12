@@ -150,11 +150,12 @@ $(document).ready(function () {
         }
 
         $(this).ajaxSubmit({
-            target: load_html_at,
             beforeSubmit: function (formData, jqForm, options) {
                 $.loader.show();
             },
             success: function (responseText, statusText, xhr, $form) {
+                console.log(target);
+                target.html(responseText);
                 $.loader.hide();
             },
             error: function () {

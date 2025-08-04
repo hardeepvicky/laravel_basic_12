@@ -13,7 +13,7 @@ $paginationList = [
 ];
 ?>
 
-<form method="GET" class="summary_search" action="{{ route($current_route_name) }}">
+<form method="GET" class="summary_search" action="{{ route($current_route_name) }}" data-load_html_at="#{{ $index_table_id }}">
     <input type="hidden" name="is_sort_clear" value="1" />
     <input type="hidden" name="value" value="{{ $selected_value ?? '' }}" />
     <div class="row m-1">

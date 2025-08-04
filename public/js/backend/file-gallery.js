@@ -116,6 +116,10 @@ jQuery.fn.extend({
                     request_data.type = obj.type;
                 }
 
+                if (typeof obj.index_table_id != "undefined" && obj.index_table_id) {
+                    request_data.index_table_id = obj.index_table_id;
+                }
+
                 var query_params = get_array_to_url(request_data);
 
                 var url = "/document-file?" + query_params;

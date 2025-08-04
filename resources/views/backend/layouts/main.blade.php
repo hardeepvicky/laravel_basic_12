@@ -57,7 +57,7 @@ if (!isset($partial_path)) {
     <link rel="stylesheet"
         href="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/css/bootstrap-editable.css" />
 
-    <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/libs/summernote/summernote.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/libs/summernote/summernote-lite.min.css') }}">
 
     <!-- Project related CSS -->
     <link rel="stylesheet" type="text/css" href="{{ get_asset_url('libs/loader/loader.css') }}" />
@@ -138,7 +138,7 @@ if (!isset($partial_path)) {
     <script src="{{ get_asset_url('assets/libs/jquery.form.min.js') }}"></script>
     <script src="{{ get_asset_url('assets/libs/typeahead.js-0.11.1/dist/typeahead.bundle.min.js') }}"></script>
     <script src="{{ get_asset_url('assets/libs/jquery-file-validator/js/file-validator.js') }}"></script>
-    <script src="{{ get_asset_url('assets/libs/summernote/summernote.min.js') }}"></script>
+    <script src="{{ get_asset_url('assets/libs/summernote/summernote-lite.min.js') }}"></script>
 
     <script src="https://cdn.amcharts.com/lib/5/index.js"></script>
     <script src="https://cdn.amcharts.com/lib/5/percent.js"></script>

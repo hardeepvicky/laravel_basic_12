@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Exceptions\UserException;
 use App\Helpers\Util;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -24,6 +25,11 @@ class Uom extends BaseModel
             "preventDelete" => true
         ],
     ];
+
+    public function parent()
+    {
+        return $this->belongsTo(Uom::class, "parent_id");
+    }
 
     public function beforeSave()
     {
@@ -116,6 +122,98 @@ class Uom extends BaseModel
 
     public static function getTreeList(Builder $qb) : array
     {
-        return Util::getTreeListArray(self::getTreeRecords($qb, 2), "id", "name", false, false);
+        return Util::getTreeListArray(self::getTreeRecords($qb, 1), "id", "name", false, false);
+    }
+
+    public static function getUomsForCode($code)
+    {
+        $parent = static::where("code", $code)->first();
+
+        $children = [];
+
+        if ($parent)
+        {
+            $children = static::where("parent_id", $parent->id)->orderBy("list_display_order", "ASC")->get();
+        }
+
+        return compact("parent", "children");
+    }
+
+    public static function getUomListForCode($code)
+    {
+        $data = static::getUomsForCode($code);
+
+        $list = [];
+
+        if (isset($data['parent']) && $data['parent'])
+        {
+            $list[$data['parent']->id] = $data['parent']->getDisplayName();
+        }
+
+        if (isset($data['children']) && $data['children'])
+        {
+            foreach($data['children'] as $child)
+            {
+                $list[$child->id] = $child->getDisplayName();
+            }
+        }
+
+        return $list;
+    }
+
+    public static function convertToParentUomValue($uom_id, $value)
+    {
+        $cache_key = "uom_" . $uom_id;
+
+        $uom = static::getCache($cache_key);
+
+        if (!$uom)
+        {
+            $uom = static::find($uom_id);
+
+            if (!$uom)
+            {
+                throw new UserException("Wrong uom_id : " . $uom_id);
+            }
+
+            static::addCache($cache_key, $uom, 60 * 60 * 24);
+        }
+
+        if ($uom->conversion_factor && $uom->conversion_factor != 0 && is_numeric($value))
+        {
+            $value /= $uom->conversion_factor;
+
+            $value = round($value, 3);
+        }
+
+        return $value;
+    }
+
+    public static function convertToChildUomValue($uom_id, $value)
+    {
+        $cache_key = "uom_" . $uom_id;
+
+        $uom = static::getCache($cache_key);
+
+        if (!$uom)
+        {
+            $uom = static::find($uom_id);
+
+            if (!$uom)
+            {
+                throw new UserException("Wrong uom_id : " . $uom_id);
+            }
+
+            static::addCache($cache_key, $uom, 60 * 60 * 24);
+        }
+
+        if ($uom->conversion_factor && $uom->conversion_factor != 0 && is_numeric($value))
+        {
+            $value *= $uom->conversion_factor;
+
+            $value = round($value, 3);
+        }
+
+        return $value;
     }
 }

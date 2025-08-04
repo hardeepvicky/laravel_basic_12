@@ -21,6 +21,6 @@ return new class extends MyMigration
      */
     public function down(): void
     {
-        $this->dropColumnsWithIndex("product_files", ["type"]);
+        $this->dropColumnsWithIndex("product_files", ["file_type"]);
     }
 };
