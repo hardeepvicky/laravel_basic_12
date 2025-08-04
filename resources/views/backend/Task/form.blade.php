@@ -47,7 +47,7 @@ $false = false;
                             $field = 'description';
                             $label = get_value_from_list($field_labels, $field, $field);
                             ?>
-                            <x-Inputs.text-area :id="$field" :name="$field" :label="$label" rows="8"
+                            <x-Inputs.text-area :id="$field" :name="$field" :label="$label" rows="3"
                                 value="{{ $model->{$field} }}" placeholder="Enter {{ $label }}"
                                 class="auto-suggesstion-list" />
                             <div id="{{ $field . '-suggestion-box' }}" class="suggestion-box hidden"></div>
