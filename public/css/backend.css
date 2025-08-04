@@ -277,13 +277,8 @@ label.form-label {
 
 .textarea-wrapper {
     position: relative;
-    /* Crucial for positioning the suggestion box */
     width: 100%;
-    /* Or fixed width if preferred */
-    max-width: 600px;
-    /* Example max width */
     margin: 0 auto;
-    /* Center it */
 }
 
 .suggestion-box {

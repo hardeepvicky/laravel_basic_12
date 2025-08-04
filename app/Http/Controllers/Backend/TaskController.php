@@ -12,6 +12,7 @@ use App\Models\Department;
 use App\Models\DocumentFile;
 use App\Models\DropDownValue;
 use App\Models\FieldSetting;
+use App\Models\Party;
 use App\Models\Role;
 use App\Models\SqlLog;
 use App\Models\Tag;
@@ -304,11 +305,13 @@ class TaskController extends BackendController
 
         $department_list = Department::getList("id", "display_name", [], "list_display_order");
 
+        $party_list = Party::getList("id", "display_name", [], "list_display_order");
+
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
         $default_start_date_time = DateUtility::change(date('d-M-Y 10:00'), 1, DateUtility::DAYS, DateUtility::DATETIME_OUT_FORMAT);
 
-        $this->setForView(compact("user_list", "users", "task_type_list", "status_list",  "department_list", "duration_type_list", "field_labels", "default_start_date_time"));
+        $this->setForView(compact("user_list", "users", "task_type_list", "status_list",  "department_list", "duration_type_list", "party_list", "field_labels", "default_start_date_time"));
 
         return parent::beforeViewRender();
     }
@@ -347,6 +350,7 @@ class TaskController extends BackendController
             "tag_name" => [],
             "taskUser" => [],
             "taskFile" => [],
+            "taskParty" => [],
         ];
     }
 
@@ -382,6 +386,7 @@ class TaskController extends BackendController
             unset($save_data['tag_name']);
             unset($save_data['taskUser']);
             unset($save_data['taskFile']);
+            unset($save_data['taskParty']);
 
             $save_data = $this->model->convertTimeZoneBeforeQueryToDatabase($save_data);
 
@@ -431,6 +436,11 @@ class TaskController extends BackendController
         if (isset($validatedData['taskUser']) && is_array($validatedData['taskUser'])) {
             $users = User::find($validatedData['taskUser']);
             $this->model->user()->sync($users);
+        }
+
+        if (isset($validatedData['taskParty']) && is_array($validatedData['taskParty'])) {
+            $parties = Party::find($validatedData['taskParty']);
+            $this->model->party()->sync($parties);
         }
 
         if (isset($validatedData['taskFile'])) {

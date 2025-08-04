@@ -114,7 +114,7 @@ trait CommonModelTrait
         $conditions = [];
         foreach ($unique_fields as $unique_field) {
             if (!isset($data[$unique_field])) {
-                throw new UserException("field $unique_field missing in argument data");
+                throw new UserException("field : $unique_field missing in argument data");
             }
 
             $conditions[] = [$unique_field, '=', $data[$unique_field]];
@@ -452,8 +452,17 @@ trait CommonModelTrait
 
         $save_data = [
             "main_table_field" => $this->field_for_create_tag,
-            "name" => $this->{$this->field_for_create_tag},
+            "main_id" => $this->id,
         ];
+
+        if ($this->field_for_create_tag == "display_name")
+        {
+            $save_data['name'] = $this->getDisplayName();
+        }
+        else
+        {
+            $save_data['name'] = $this->{$this->field_for_create_tag};
+        }
 
         Tag::createTag($save_data, $this);
     }

@@ -218,6 +218,8 @@ class User extends Authenticatable implements BaseModelInterface
     {
         $this->forgotCache();
 
+        $this->saveAutoTags();
+
         foreach (Department::$child_model_class as $child_model_class => $arr) {
             if (isset($arr['foreignKey'])) {
                 if (!is_array($arr['foreignKey'])) {

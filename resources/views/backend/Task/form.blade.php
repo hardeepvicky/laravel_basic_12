@@ -41,6 +41,18 @@ $false = false;
                         <x-Inputs.text-field :name="$field" :label="$label" value="{{ $model->{$field} }}"
                             placeholder="Enter {{ $label }}" mandatory="true" autocomplete="off" />
                     </div>
+                    <div class="form-group mb-3">
+                        <div class="textarea-wrapper">
+                            <?php
+                            $field = 'description';
+                            $label = get_value_from_list($field_labels, $field, $field);
+                            ?>
+                            <x-Inputs.text-area :id="$field" :name="$field" :label="$label" rows="8"
+                                value="{{ $model->{$field} }}" placeholder="Enter {{ $label }}"
+                                class="auto-suggesstion-list" />
+                            <div id="{{ $field . '-suggestion-box' }}" class="suggestion-box hidden"></div>
+                        </div>
+                    </div>
                     <div class="form-group mb-3 is_draft-block is_draft-block-0">
                         <?php
                         $field = 'dept_id';
@@ -155,6 +167,15 @@ $false = false;
                     </div>
                     <div class="form-group mb-3 is_draft-block is_draft-block-0">
                         <?php
+                        $field = "taskParty";
+                        $label = get_value_from_list($field_labels, $field, $field);
+                        $value = implode(',', $model->taskParty?->pluck('party_id')->toArray());
+                        ?>
+                        <x-Inputs.drop-down name="taskParty[]" :label="$label" :list="$party_list" :value="$value"
+                            class="select2" multiple="multiple"  />
+                    </div>
+                    <div class="form-group mb-3 is_draft-block is_draft-block-0">
+                        <?php
                         $field = "taskFile";
                         $label = get_value_from_list($field_labels, $field, $field);
                         $value = implode(',', $model->taskFile?->pluck('document_file_id')->toArray());
@@ -164,18 +185,7 @@ $false = false;
                     </div>
                 </div>
                 <div class="col-md-12 col-xxl-6">
-                    <div class="form-group mb-3">
-                        <div class="textarea-wrapper">
-                            <?php
-                            $field = 'description';
-                            $label = get_value_from_list($field_labels, $field, $field);
-                            ?>
-                            <x-Inputs.text-area :id="$field" :name="$field" :label="$label" rows="8"
-                                value="{{ $model->{$field} }}" placeholder="Enter {{ $label }}"
-                                class="auto-suggesstion-list" />
-                            <div id="{{ $field . '-suggestion-box' }}" class="suggestion-box hidden"></div>
-                        </div>
-                    </div>                    
+                                      
                 </div>
             </div>
             <div class="row">

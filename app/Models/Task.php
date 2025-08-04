@@ -133,6 +133,11 @@ class Task extends BaseModel
         return $this->belongsToMany(User::class, TaskUser::class);
     }
 
+    public function party()
+    {
+        return $this->belongsToMany(Party::class, TaskParty::class);
+    }
+
     public function taskUser()
     {
         return $this->hasMany(TaskUser::class, 'task_id');
@@ -146,6 +151,11 @@ class Task extends BaseModel
     public function taskFile()
     {
         return $this->hasMany(TaskFile::class, 'task_id');
+    }
+
+    public function taskParty()
+    {
+        return $this->hasMany(TaskParty::class, 'task_id');
     }
     
     public function taskTakenAction()
@@ -172,6 +182,7 @@ class Task extends BaseModel
         $labels['to_start_date'] = "To Start Date";
         $labels['taskUser'] = "Link Users";
         $labels['taskFile'] = "Files";
+        $labels['taskParty'] = "Link External";
 
         return $labels;
     }

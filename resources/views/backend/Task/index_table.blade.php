@@ -98,22 +98,37 @@ $false = false;
                                         </span>
                                     </label>
 
-                                    <h5>
-                                        Link Users
-                                    </h5>
-                                    <ol>
-                                        @foreach ($record->user as $user)
-                                        <li>{{ $user->getDisplayName() }}</li>
-                                        @endforeach
-                                    </ol>
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <h5>
+                                                {{ get_value_from_list($field_labels, 'taskUser', 'Link Users') }}
+                                            </h5>
+                                            <ol>
+                                                @foreach ($record->user as $user)
+                                                <li>{{ $user->getDisplayName() }}</li>
+                                                @endforeach
+                                            </ol>
 
-                                    <label class="info">
-                                        {{ get_value_from_list($field_labels, 'is_send_notification', 'is_send_notification') }}
-                                        :
-                                        <span>
-                                            {{ get_value_from_list($yes_no_list, $record->is_send_notification) }}
-                                        </span>
-                                    </label>
+                                            <label class="info">
+                                                {{ get_value_from_list($field_labels, 'is_send_notification', 'is_send_notification') }}
+                                                :
+                                                <span>
+                                                    {{ get_value_from_list($yes_no_list, $record->is_send_notification) }}
+                                                </span>
+                                            </label>
+
+                                        </div>
+                                        <div class="col-md-3">
+                                            <h5>
+                                                {{ get_value_from_list($field_labels, 'taskParty', 'Link External') }}
+                                            </h5>
+                                            <ol>
+                                                @foreach ($record->party as $party)
+                                                <li>{{ $party->getDisplayName() }}</li>
+                                                @endforeach
+                                            </ol>
+                                        </div>
+                                    </div>
 
                                     @if($record->is_completed)
                                         <x-Backend.celec-date-time :value="$record->complete_date_time"

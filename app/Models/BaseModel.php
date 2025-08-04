@@ -108,7 +108,7 @@ class BaseModel extends Model implements BaseModelInterface
 
         $this->saveAutoTags();
 
-        $this->saveModuleLinksFromString();        
+        $this->saveModuleLinksFromString();
     }
 
     public function saveModuleLinksFromString()
@@ -261,7 +261,7 @@ class BaseModel extends Model implements BaseModelInterface
             throw new UserException("child_model_class Array is not set in $class_name");
         }
 
-        foreach (static::$child_model_class as $childClass => $arr) 
+        foreach (static::$child_model_class as $childClass => $arr)
         {
             $child_class_display_name = $childClass::classDisplayName();
 
