@@ -43,7 +43,7 @@ if (!$mandatory && $is_disabled) {
     @endif
 </label>
 
-<textarea name="{{ $name }}" {{ $attributes->merge($my_attributes) }}>{{ old($name, $value) }}</textarea>
+<textarea name="{{ $name }}" {{ $attributes->merge($my_attributes) }}>{!! old($name, $value) !!}</textarea>
 
 @error($errorName)
     <div class="input-error">{{ $message }}</div>

@@ -53,7 +53,7 @@ if ($autocomplete) {
     </label>
 @endif
 
-<input name="{{ $name }}" value="{{ old($name, $value) }}" {{ $attributes->merge($my_attributes) }} />
+<input name="{{ $name }}" value="{!! old($name, $value) !!}" {{ $attributes->merge($my_attributes) }} />
 
 @error($errorName)
     <div class="input-error">{{ $message }}</div>
