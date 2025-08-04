@@ -2,10 +2,13 @@
 
 namespace App\Console\Commands;
 
+use App\Exceptions\UserException;
 use App\Helpers\ConsoleOutput;
 use App\Helpers\FileUtility;
 use App\Helpers\MyCommand;
 use App\Helpers\Util;
+use Exception;
+use Illuminate\Support\Facades\DB;
 
 class JsonToModelCommand extends MyCommand
 {
@@ -190,21 +193,49 @@ class JsonToModelCommand extends MyCommand
             {
                 $counters['total']++;
 
-                $model_class::insertOrUpdate($record, $is_insert, $is_update);
-
-                if ($is_insert)
+                try
                 {
-                    $counters['insert']++;
+                    DB::beginTransaction();
+
+                    $model_class::insertOrUpdate($record, $is_insert, $is_update);
+
+                    if ($is_insert)
+                    {
+                        $counters['insert']++;
+                    }
+
+                    if ($is_update)
+                    {
+                        $counters['update']++;
+                    }
+
+                    if (isset($tree_record["children"]) && $tree_record["children"])
+                    {
+                        $this->save($filename, $tree_record["children"], false, $info_prefix . $tree_record['id'] . "->" );
+                    }
+
+                    DB::commit();
                 }
-
-                if ($is_update)
+                catch(UserException $ex)
                 {
-                    $counters['update']++;
+                    DB::rollBack();
+
+                    $this->info("DB Rollback");
+
+                    $this->error(get_exception_display_message($ex));
+
+                    if (isset($ex->data['custom_errors']))
+                    {
+                        dd($ex->data['custom_errors']);
+                    }                    
                 }
-
-                if (isset($tree_record["children"]) && $tree_record["children"])
+                catch(Exception $ex)
                 {
-                    $this->save($filename, $tree_record["children"], false, $info_prefix . $tree_record['id'] . "->" );
+                    DB::rollBack();
+
+                    $this->info("DB Rollback");
+
+                    $this->error(get_exception_display_message($ex));
                 }
             }
         }
