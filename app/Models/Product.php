@@ -184,24 +184,26 @@ class Product extends BaseModel
             if ($record->size_uom_id && isset($uoms[$record->size_uom_id]))
             {
                 $record->size_uom_name = $uoms[$record->size_uom_id]['short_name'];
-
-                if ($record->length)
+                if ($uoms[$record->size_uom_id]['conversion_factor'])
                 {
-                    $record->length *= $uoms[$record->size_uom_id]['conversion_factor'];
-                    $record->length = round($record->length, 3);
-                }
+                    if ($record->length)
+                    {
+                        $record->length *= $uoms[$record->size_uom_id]['conversion_factor'];
+                        $record->length = round($record->length, 3);
+                    }
 
-                if ($record->width)
-                {
-                    $record->width *= $uoms[$record->size_uom_id]['conversion_factor'];
+                    if ($record->width)
+                    {
+                        $record->width *= $uoms[$record->size_uom_id]['conversion_factor'];
 
-                    $record->width = round($record->width, 3);
-                }
+                        $record->width = round($record->width, 3);
+                    }
 
-                if ($record->height)
-                {
-                    $record->height *= $uoms[$record->size_uom_id]['conversion_factor'];
-                    $record->height = round($record->height, 3);
+                    if ($record->height)
+                    {
+                        $record->height *= $uoms[$record->size_uom_id]['conversion_factor'];
+                        $record->height = round($record->height, 3);
+                    }
                 }
             }
         }
