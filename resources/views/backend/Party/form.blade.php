@@ -70,7 +70,14 @@
                                     </div>
                                 </div>
                             </div>
-                                    
+                            <div class="form-group mb-3">
+                                <?php
+                                $field = 'address';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <x-Inputs.text-area :name="$field" :label="$label" value="{{ $model->{$field} }}"
+                                    placeholder="Enter {{ $label }}" />
+                            </div>
                             <div class="form-group mb-3">
                                 <?php
                                 $field = 'description';
