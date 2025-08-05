@@ -500,6 +500,15 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
 
         $name = "mark_as_main_image";
         Route::get($name . "/{id}/{document_file_id}", [$controllerClass, $name])->name($name);
+
+        $route_prefix = "export";
+        Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+            $name = "csv";
+            Route::get($name, [$controllerClass, $name])->name($name);
+
+            $name = "csv_attribute";
+            Route::get($name, [$controllerClass, $name])->name($name);
+        });
     });
 
     $route_prefix = "document-category";

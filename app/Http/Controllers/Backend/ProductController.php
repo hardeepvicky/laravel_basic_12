@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Backend;
 
 use App\Exceptions\UserException;
 use App\Helpers\ArrayHelper;
+use App\Helpers\CsvUtility;
+use App\Helpers\DateUtility;
+use App\Helpers\FileUtility;
 use App\Helpers\LaravelExtend;
 use App\Helpers\Util;
 use App\Models\DocumentFile;
@@ -16,6 +19,7 @@ use App\Models\ProductCategoryAttribute;
 use App\Models\ProductFile;
 use App\Models\ProductKeyword;
 use App\Models\Uom;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Support\Facades\DB;
@@ -249,7 +253,7 @@ class ProductController extends BackendController
             $this->_saveOthers($validatedData);
 
             $document_file = $this->model->images()->first();
-            
+
             if ($document_file)
             {
                 $this->model->main_image_id = $document_file->id;
@@ -566,5 +570,157 @@ class ProductController extends BackendController
         }
 
         return $this->responseJson($response);
+    }
+
+    public function csv()
+    {
+        $cache_key_prefix = Route::currentRouteName();
+
+        $builder = $this->_getBuildeForIndex($cache_key_prefix);
+
+        $this->beforeCsvExport($builder);
+
+        $records = $builder->get();
+
+        Product::convertRecordsForChildUom($records);
+
+        foreach($records as $k => $record)
+        {
+            $record->afterFindForCsv();
+        }
+
+        $records = $records->toArray();
+
+        // d($records, true);
+
+        $csv_records = [];
+        $user_cache_list = User::getListCache();
+
+        $yes_no_list = laravel_constant('yes_no_list');
+
+        $product_category_records = ProductCategory::getTreeRecords(ProductCategory::query());
+
+        $product_category_list = Util::getTreeListArray($product_category_records, "id", "name", false, false);
+
+        $field_labels = FieldSetting::getDynamicFields($this->modelClass);
+
+        foreach($records as $record)
+        {
+            $csv_records[] = [
+                'ID' => $record['id'],
+
+                $field_labels['product_category_id'] => get_value_from_list($product_category_list, $record['product_category_id']),
+                $field_labels['name'] => $record['name'],
+                $field_labels['model_name'] => $record['model_name'],
+                $field_labels['sku'] => $record['sku'],
+                $field_labels['length'] => $record['length'],
+                $field_labels['width'] => $record['width'],
+                $field_labels['height'] => $record['height'],
+                $field_labels['size_uom_id'] => $record['size_uom_name'],
+                $field_labels['net_weight'] => $record['net_weight'],
+                $field_labels['gross_weight'] => $record['gross_weight'],
+                'Weight UOM' => 'kg.',
+                $field_labels['height'] => $record['height'],
+                $field_labels['description'] => $record['description'] ?? "",
+                $field_labels['seo_title'] => $record['seo_title'] ?? "",
+                $field_labels['meta_main_keyword'] => $record['meta_main_keyword'] ?? "",
+                $field_labels['product_catalog_id'] => $record['catalog']['document']['url'] ?? "",
+
+                'Active' => get_value_from_list($yes_no_list, $record['is_active']),
+                $field_labels['list_display_order'] => $record['list_display_order'] ?? "",
+                'Created' => if_date_time($record['created_at']),
+                'Created By' => $user_cache_list[$record['created_by']] ?? "",
+                'Updated' => if_date_time($record['updated_at']),
+                'Updated By' => $user_cache_list[$record['updated_by']] ?? "",
+            ];
+        }
+
+        // d($csv_records, true);
+
+        $this->saveSqlLog();
+
+        $path = laravel_constant('path.temp');
+        FileUtility::createFolder($path);
+
+        $current_dt = DateUtility::getDateObj(null);
+        $current_dt->setTimezone(DateUtility::$login_user_time_zone);
+        $datetime = DateUtility::getDate($current_dt, DateUtility::DATETIME_OUT_FORMAT_FILE);
+        $file = $path . $this->tableName . "_$datetime.csv";
+
+        $csvUtility = new CsvUtility($file);
+        $csvUtility->write($csv_records);
+
+        download_start($file, "application/octet-stream");
+    }
+
+    public function csv_attribute()
+    {
+        $cache_key_prefix = Route::currentRouteName();
+
+        $builder = $this->_getBuildeForIndex($cache_key_prefix);
+
+        $this->beforeCsvExport($builder);
+
+        $records = $builder->get();
+
+        foreach($records as $k => $record)
+        {
+            $record->afterFindForCsv();
+        }
+
+        $records = $records->toArray();
+
+        // d($records, true);
+
+        $csv_records = [];
+        $user_cache_list = User::getListCache();
+
+        $yes_no_list = laravel_constant('yes_no_list');
+
+        $product_category_records = ProductCategory::getTreeRecords(ProductCategory::query());
+
+        $product_category_list = Util::getTreeListArray($product_category_records, "id", "name", false, false);
+
+        $field_labels = FieldSetting::getDynamicFields($this->modelClass);
+
+        foreach($records as $record)
+        {
+            foreach($record['product_attributes'] as $attribute)
+            {
+                $csv_records[] = [
+                    'Product ID' => $record['id'],
+
+                    $field_labels['product_category_id'] => get_value_from_list($product_category_list, $record['product_category_id']),
+                    $field_labels['name'] => $record['name'],
+                    $field_labels['model_name'] => $record['model_name'],
+                    $field_labels['sku'] => $record['sku'],
+
+                    'Attribute' => $attribute['category_attribute']['name'] ?? "",
+                    'value' => $attribute['value'] ?? "",
+                    
+                    'Created' => if_date_time($attribute['created_at']),
+                    'Created By' => $user_cache_list[$attribute['created_by']] ?? "",
+                    'Updated' => if_date_time($attribute['updated_at']),
+                    'Updated By' => $user_cache_list[$attribute['updated_by']] ?? "",
+                ];
+            }
+        }
+
+        // d($csv_records, true);
+
+        $this->saveSqlLog();
+
+        $path = laravel_constant('path.temp');
+        FileUtility::createFolder($path);
+
+        $current_dt = DateUtility::getDateObj(null);
+        $current_dt->setTimezone(DateUtility::$login_user_time_zone);
+        $datetime = DateUtility::getDate($current_dt, DateUtility::DATETIME_OUT_FORMAT_FILE);
+        $file = $path . $this->tableName . "_$datetime.csv";
+
+        $csvUtility = new CsvUtility($file);
+        $csvUtility->write($csv_records);
+
+        download_start($file, "application/octet-stream");
     }
 }

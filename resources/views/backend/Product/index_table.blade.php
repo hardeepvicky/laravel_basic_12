@@ -4,6 +4,11 @@
     </div>
 
     <div class="card-body p-1">
+        <div class="m-2">
+            <a href="{{ route($routePrefix . ".export.csv") }}" class="btn btn-secondary">Export CSV</a>
+            <a href="{{ route($routePrefix . ".export.csv_attribute") }}" class="btn btn-secondary">Export Attribute CSV</a>
+        </div>
+
         <div class="table-responsive">
             <table class="table table-striped table-bordered table-hover">
                 <thead>

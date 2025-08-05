@@ -884,9 +884,9 @@ class TaskController extends BackendController
                 $field_labels['tag_name'] => implode(", ", $tag_list),
 
                 'Created' => if_date_time($record['created_at']),
-                'Created By' => $user_list[$record['created_by']] ?? "",
+                'Created By' => $user_cache_list[$record['created_by']] ?? "",
                 'Updated' => if_date_time($record['updated_at']),
-                'Updated By' => $user_list[$record['updated_by']] ?? "",
+                'Updated By' => $user_cache_list[$record['updated_by']] ?? "",
             ];
         }
 

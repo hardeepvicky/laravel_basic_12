@@ -54,6 +54,11 @@ class Product extends BaseModel
         $this->parseTagsForModuleLinking();
     }
 
+    public function afterFindForCsv()
+    {
+        parent::afterFind();
+    }
+
     public function category()
     {
         return $this->belongsTo(ProductCategory::class);
