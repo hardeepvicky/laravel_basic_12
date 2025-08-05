@@ -55,6 +55,9 @@ class FieldSettingSeeder extends Seeder
 
                 try {
                     $record = Util::objToArray($record);
+                    unset($record['id']);
+                    unset($record['_id']);
+                    
                     $model = FieldSetting::insertOrUpdate($record, $is_insert, $is_update);
 
                     if ($is_insert) {
