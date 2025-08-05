@@ -15,11 +15,11 @@
                         </th>
                         <th><?= sortable_anchor('is_link', get_value_from_list($field_labels, 'is_link', 'is_link')) ?>
                         </th>
-                        <th><?= sortable_anchor('is_active', 'Activate / De-Active') ?></th>
+                        <th style="width:12%"><?= sortable_anchor('is_active', 'Activate / De-Active') ?></th>
                         <th>Menu Info</th>
-                        <th style="width:6%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
-                        <th style="width:6%"><?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?></th>
-                        <th>Actions</th>
+                        <th style="width:10%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
+                        <th style="width:10%"><?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?></th>
+                        <th style="width:8%">Actions</th>
                     </tr>
                 </thead>
                 <tbody>

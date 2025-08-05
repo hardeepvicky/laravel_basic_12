@@ -54,7 +54,9 @@ class PartyController extends BackendController
 
             $clear_cache = request('is_sort_clear', false);
 
-            $sort_params = $this->getRequestData($cache_key_for_sort, [
+            $this->model = new $this->modelClass;
+
+            $sort_params = $this->getSortBy($this->model, $cache_key_for_sort, [
                 ["key" => "sort_by", "default" => "id"],
                 ["key" => "sort_dir", "default" => "DESC"],
             ], $clear_cache);

@@ -106,7 +106,8 @@ class ProductController extends BackendController
             "images",
             "videos",
             "otherFiles",
-            "keywords"
+            "keywords",
+            "catalog.document"
         ]);
 
         if ($apply_sort) {
@@ -182,6 +183,7 @@ class ProductController extends BackendController
     {
         return [
             "product_category_id" => ["required"],
+            "product_catalog_id" => ["required"],
             "name" => ["required", "min:3", "max:80"],
             "model_name" => ["required", "max:80"],
             "length" => ["required"],

@@ -42,9 +42,7 @@ class DocumentFileController extends BackendController
 
         $category_list = Util::getTreeListArray($category_records, "id", "name", false, false);
 
-        $index_table_id = request("index_table_id", "index_table");
-
-        $this->setForView(compact("records", "category_list", "index_table_id"));
+        $this->setForView(compact("records", "category_list"));
 
         return $this->viewIndex(__FUNCTION__);
     }
@@ -176,7 +174,9 @@ class DocumentFileController extends BackendController
 
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
-        $this->setForView(compact("field_labels", "type_list"));
+        $index_table_id = request("index_table_id", "index_table");
+
+        $this->setForView(compact("field_labels", "type_list", "index_table_id"));
 
         return parent::beforeViewRender();
     }

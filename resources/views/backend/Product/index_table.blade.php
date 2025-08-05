@@ -22,7 +22,7 @@
                         </th>
                         <th><?= sortable_anchor('category.name', get_value_from_list($field_labels, 'product_category_id', 'product_category_id')) ?></th>
                         <th><?= sortable_anchor('model_name', get_value_from_list($field_labels, 'model_name', 'model_name')) ?></th>
-                        <th><?= sortable_anchor('short_name', get_value_from_list($field_labels, 'short_name', 'short_name')) ?></th>
+                        <th>Catalog</th>
                         <th>{{ get_value_from_list($field_labels, 'main_image_id', 'main_image_id') }}</th>
                         <th style="width:10%"><?= sortable_anchor('list_display_order', get_value_from_list($field_labels, 'list_display_order', 'list_display_order')) ?></th>
                         <th style="width:10%"><?= sortable_anchor('is_active', 'Activate / De-Active') ?></th>
@@ -42,7 +42,14 @@
                             </th>
                             <td>{{ get_value_from_list($product_category_list, $record->product_category_id) }}</td>
                             <td>{{ $record->model_name }}</td>
-                            <td>{{ $record->short_name }}</td>
+                            <td>                                
+                                <?php
+                                if ($record->catalog):
+                                    $documents = [$record->catalog->document]; 
+                                ?>
+                                    <x-backend.document-files :records="$documents" />
+                                <?php endif; ?>
+                            </td>
                             <td>
                                 @if ($record->mainImage?->file_url)
                                 <a id="main_image-{{ $record->id }}" class="fancybox" href="{{ $record->mainImage->file_url }}">

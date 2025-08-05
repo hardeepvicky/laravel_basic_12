@@ -59,6 +59,11 @@ class Product extends BaseModel
         return $this->belongsTo(ProductCategory::class);
     }
 
+    public function catalog()
+    {
+        return $this->belongsTo(ProductCatalog::class, "product_catalog_id");
+    }
+
     public function productAttributes()
     {
         return $this->hasMany(ProductAttribute::class);
