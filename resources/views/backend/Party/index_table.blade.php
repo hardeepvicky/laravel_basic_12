@@ -34,7 +34,7 @@
                     @foreach ($records as $record)
                         <tr>
                             <th scope="row">
-                                <x-Backend.celec-summary-table-first-column :record="$record" :routePrefix="$routePrefix" buttons="edit,copy,delete">
+                                <x-Backend.celec-summary-table-first-column :record="$record" :routePrefix="$routePrefix" buttons="edit,copy,delete,tr_details">
                                     <div class="label">
                                         {{ $record->id . " | " . $record->name }}
                                     </div>
@@ -61,6 +61,26 @@
                             </td>
                             <td>
                                 <x-Backend.created-and-by :datetime="$record->updated_at" :userId="$record->updated_by" />
+                            </td>
+                        </tr>
+                        <tr id="record-{{ $record->id }}" class="hidden">
+                            <td style="background-color: var(--body--bs-body-bg)"></td>                            
+                            <td colspan="6">
+
+                                <label class="info">
+                                    {{ get_value_from_list($field_labels, 'address') }} :
+                                    <span>
+                                        {{ $record->address }}
+                                    </span>
+                                </label>
+
+                                <h4 class="mt-2 mb-2 b-b-info">
+                                    Description
+                                </h4>
+
+                                <p class="mb-2">
+                                    {!! $record->description !!}
+                                </p>
                             </td>
                         </tr>
                     @endforeach

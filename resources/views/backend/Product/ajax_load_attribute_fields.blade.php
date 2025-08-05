@@ -7,7 +7,7 @@ use App\Models\ProductCategoryAttribute;
 
 <div class="b-info p-1 mb-2">
     <h3 class="b-b-info">
-        Custom Attributes
+        Attributes
     </h3>
     @foreach($category->categoryAttribute as $categoryAttribute)
     <?php

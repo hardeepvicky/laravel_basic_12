@@ -15,6 +15,10 @@ class Product extends BaseModel
 
     protected static array $unique_fields = ["product_category_id", "name"];
 
+    protected static array $fields_containg_tags = ["description"];
+
+    public string $field_for_create_tag = "model_name";
+
     public static array $child_model_class = [
         ProductAttribute::class => [
             "foreignKey" => ["product_id"],
@@ -41,6 +45,13 @@ class Product extends BaseModel
                 $this->height = Uom::convertToParentUomValue($this->size_uom_id, $this->height);
             }
         }
+    }
+    
+    public function afterFind()
+    {
+        parent::afterFind();
+
+        $this->parseTagsForModuleLinking();
     }
 
     public function category()

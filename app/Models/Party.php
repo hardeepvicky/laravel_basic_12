@@ -21,11 +21,13 @@ class Party extends BaseModel
     const TYPE_CONTRACTOR = "CONTRACTOR";
 
     public static array $child_model_class = [
-        // User::class => [
-        //     "foreignKey" => ["sub_department_id"],
-        //     "preventDelete" => true
-        // ]
+        TaskParty::class => [
+            "foreignKey" => ["party_id"],
+            "preventDelete" => true
+        ]
     ];
+
+    protected static array $fields_containg_tags = ["description"];
 
     public string $field_for_create_tag = "display_name";
 
@@ -43,6 +45,13 @@ class Party extends BaseModel
         $name .= " (" . get_value_from_list($type_list, $this->type) . ")";
 
         return $name;
+    }
+
+    public function afterFind()
+    {
+        parent::afterFind();
+
+        $this->parseTagsForModuleLinking();
     }
 
     public function getUniqueValidationRules(Request $request)

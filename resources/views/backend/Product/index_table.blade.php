@@ -98,7 +98,7 @@
                                             <thead>
                                                 <tr>
                                                     <th style="width:5%">Sr.No.</th>
-                                                    <th style="width:50%" data-search="like" data-sort="text">Custom Attrbute</th>
+                                                    <th style="width:50%" data-search="like" data-sort="text">Attrbute</th>
                                                     <th style="width:40%" data-search="like" data-sort="text">Value</th>
                                                 </tr>
                                             </thead>

@@ -161,40 +161,24 @@
                                             :value="$value" multiple="multiple" />
                                     </div>
                                 </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-xl-6">
-                                    <div class="form-group mb-3">
-                                        <?php
-                                        $field = 'list_display_order';
-                                        $label = get_value_from_list($field_labels, $field, $field);
-                                        ?>
-                                        <x-Inputs.text-field type="number" :name="$field" :label="$label"
-                                            value="{{ $model->{$field} }}" placeholder="Enter {{ $label }}"
-                                            mandatory="true" autocomplete="off" />
-                                    </div>
-                                </div>
-                                <div class="col-xl-6" style="padding-top: 30px">
-                                    <div class="form-group mb-3">
-                                        <?php
-                                        $field = 'is_active';
-                                        $label = get_value_from_list($field_labels, $field, $field);
-                                        ?>
-                                        <x-Inputs.checkbox :name="$field" :label="$label"
-                                            value="{{ $model->{$field} }}" />
-                                    </div>
-                                </div>
-                            </div>
+                            </div>                            
                         </div>
 
                         <div class="col-md-12 col-xxl-6">
                             <div class="form-group mb-3">
-                                <?php
-                                $field = 'description';
-                                $label = get_value_from_list($field_labels, $field, $field);
-                                ?>
-                                <x-Inputs.text-area :name="$field" :label="$label" value="{{ $model->{$field} }}"
-                                    placeholder="Enter {{ $label }}" rows="5"/>
+                                <div class="textarea-wrapper">
+                                    <?php
+                                    $field = 'description';
+                                    $label = get_value_from_list($field_labels, $field, $field);
+                                    ?>
+                                    <x-Inputs.text-area :id="$field" :name="$field" :label="$label" value="{{ $model->{$field} }}"
+                                        class="auto-suggesstion-list"
+                                        rows="4"
+                                        placeholder="Enter {{ $label }}"
+                                        />
+                                    <div id="{{ $field . '-suggestion-box' }}" class="suggestion-box hidden"></div>
+                                </div>
+
                             </div>
                             <div class="form-group mb-3">
                                 <?php
@@ -239,6 +223,29 @@
                                 ?>
                                 <x-Inputs.choice :id="$field" :name="$field" :label="$label" :value="$value"
                                     class="choice " placeholder="Enter {{ $label }}" />
+                            </div>
+                            <div class="row">
+                                <div class="col-xl-6">
+                                    <div class="form-group mb-3">
+                                        <?php
+                                        $field = 'list_display_order';
+                                        $label = get_value_from_list($field_labels, $field, $field);
+                                        ?>
+                                        <x-Inputs.text-field type="number" :name="$field" :label="$label"
+                                            value="{{ $model->{$field} }}" placeholder="Enter {{ $label }}"
+                                            mandatory="true" autocomplete="off" />
+                                    </div>
+                                </div>
+                                <div class="col-xl-6" style="padding-top: 30px">
+                                    <div class="form-group mb-3">
+                                        <?php
+                                        $field = 'is_active';
+                                        $label = get_value_from_list($field_labels, $field, $field);
+                                        ?>
+                                        <x-Inputs.checkbox :name="$field" :label="$label"
+                                            value="{{ $model->{$field} }}" />
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -287,6 +294,8 @@
                 postfix: "choose-other_files",
                 index_table_id : "document_file_others"
             });
+
+            suggestion_list($("#description"), $("#description-suggestion-box"), [], "/tags/ajax_get_list");
 
             $("#description_html").summernote({
                 height: 400,

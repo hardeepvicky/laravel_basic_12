@@ -79,12 +79,16 @@
                                     placeholder="Enter {{ $label }}" />
                             </div>
                             <div class="form-group mb-3">
-                                <?php
-                                $field = 'description';
-                                $label = get_value_from_list($field_labels, $field, $field);
-                                ?>
-                                <x-Inputs.text-area :name="$field" :label="$label" value="{{ $model->{$field} }}" rows="3"
-                                    placeholder="Enter {{ $label }}" />
+                                <div class="textarea-wrapper">
+                                    <?php
+                                    $field = 'description';
+                                    $label = get_value_from_list($field_labels, $field, $field);
+                                    ?>
+                                    <x-Inputs.text-area :id="$field" :name="$field" :label="$label" rows="3"
+                                        value="{{ $model->{$field} }}" placeholder="Enter {{ $label }}"
+                                        class="auto-suggesstion-list" />
+                                    <div id="{{ $field . '-suggestion-box' }}" class="suggestion-box hidden"></div>
+                                </div>
                             </div>
                             <div class="row">
                                 <div class="col-xl-6">
@@ -116,4 +120,10 @@
         </div>
     </div>
     </form>
+
+    <script>
+        $(function(){
+            suggestion_list($("#description"), $("#description-suggestion-box"), [], "/tags/ajax_get_list");;
+        })
+    </script>
 @endsection
