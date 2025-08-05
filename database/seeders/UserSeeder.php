@@ -57,6 +57,12 @@ class UserSeeder extends Seeder
         $model = new User();
 
         foreach ($records as $record) {
+
+            if (User::where("email", $record['email'])->count())
+            {
+                unset($record['password']);
+            }
+
             $model = User::insertOrUpdate($record, $is_insert, $is_update);
 
             if  (!$model)
