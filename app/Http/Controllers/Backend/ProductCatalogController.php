@@ -219,7 +219,7 @@ class ProductCatalogController extends BackendController
 
         try {
 
-            $records = $this->modelClass::where("product_category_id", $product_category_id)->get();
+            $records = $this->modelClass::where("product_category_id", $product_category_id)->orderBy("list_display_order")->get();
 
             $response['data'] = [];
 

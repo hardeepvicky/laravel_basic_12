@@ -219,7 +219,7 @@ class PartyController extends BackendController
 
         try {
 
-            $records = $this->modelClass::where("type", $type)->get();
+            $records = $this->modelClass::where("type", $type)->orderBy("list_display_order")->get();
 
             $response['data'] = [];
 
