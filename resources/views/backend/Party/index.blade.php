@@ -7,7 +7,7 @@
     ?>
 
     <div class="row">
-        <div class="col-xxxl-10">
+        <div class="col-xxxl-12">
             @include($partial_path . '.page_header')
 
             <div class="card">

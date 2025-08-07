@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Backend;
 
 use App\Exceptions\UserException;
 use App\Helpers\LaravelExtend;
+use App\Models\DocumentFile;
 use App\Models\DropDownValue;
 use App\Models\FieldSetting;
 use App\Models\Party;
+use App\Models\PartyTerm;
 use App\Models\Tag;
 use App\Rules\MobileNumber;
 use Illuminate\Http\Request;
@@ -49,6 +51,13 @@ class PartyController extends BackendController
 
         $builder = $this->modelClass::where($conditions);
 
+        $builder->with([
+            "terms" => function($q){
+                $q->orderBy("list_display_order");
+            },
+            "documentFile"
+        ]);
+
         if ($apply_sort) {
             $cache_key_for_sort = $cache_key_prefix . "-index-extra-params";
 
@@ -72,8 +81,10 @@ class PartyController extends BackendController
         $type_list = Party::getTypeList();
 
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
+
+        $term_field_labels = FieldSetting::getDynamicFields(PartyTerm::class);
         
-        $this->setForView(compact("type_list", "field_labels"));
+        $this->setForView(compact("type_list", "field_labels", "term_field_labels"));
 
         return parent::beforeViewRender();
     }
@@ -104,6 +115,8 @@ class PartyController extends BackendController
             "phone_no" => ["nullable"],
             "description" => ["nullable"],
             "list_display_order" => ["nullable"],
+            "terms" => [],
+            "partyFile" => [],
             "is_active" => ""
         ];
     }
@@ -132,6 +145,12 @@ class PartyController extends BackendController
         try {
             $this->model = $this->modelClass::create($validatedData);
 
+            $this->_saveOthers($validatedData);
+
+            if (LaravelExtend::$errors) {
+                throw new Exception("There are some errors");
+            }
+
             DB::commit();
 
             return $this->afterSave($model);
@@ -140,13 +159,92 @@ class PartyController extends BackendController
 
             $this->saveSqlLog();
 
-            return back()->withInput()->with('fail', $ex->getMessage());
+            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", LaravelExtend::$errors);
+        }
+    }
+
+    private function _saveOthers($validatedData)
+    {
+        if (isset($validatedData['partyFile'])) {
+
+            $ids = explode(",", $validatedData['partyFile']);
+
+            $document_files = DocumentFile::find($ids);
+
+            $this->model->documentFile()->sync($document_files);
+        }
+
+        unset($validatedData['terms']['(sr-id)']);
+
+        // d($validatedData, true);
+
+        if (isset($validatedData['terms']))
+        {
+            $rules = [
+                "name" => ["required"],
+                "is_active" => ""
+            ];
+
+            $child_model = new PartyTerm();
+
+            $existing_id_list = $this->model->terms()->pluck("id", "id")->toArray();
+
+            $validatedData['party_id'] = $this->model->id;
+
+            $rules = LaravelExtend::merge_validation_rules($rules, $child_model->getUniqueValidationRules($validatedData));
+
+            $display_order = 0;
+
+            foreach($validatedData['terms'] as $term)
+            {
+                $display_order++;
+                if ($term['id'])
+                {
+                    $child_model = PartyTerm::find($term['id']);
+
+                    if (!$child_model)
+                    {
+                        $child_model = new PartyTerm();
+                    }
+                    else
+                    {
+                        unset($existing_id_list[$term['id']]);
+                    }
+                }
+                else
+                {
+                    $child_model = new PartyTerm();
+                }
+
+                $term['list_display_order'] = $display_order;
+
+                $child_model->fill($term);
+
+                $this->model->terms()->save($child_model);
+            }
+
+            if ($existing_id_list)
+            {
+                $existing_records = $this->model->terms()->where("id", $existing_id_list)->get();
+
+                foreach($existing_records as $existing_record)
+                {
+                    if (!$existing_record->safeDelete($existing_record))
+                    {
+                        LaravelExtend::addError($existing_record->name, "Can not delete, bcoz it is asscoicated with other modules.", "Term");
+                    }
+                }
+            }
         }
     }
 
     public function edit($id)
     {
-        $model = $this->modelClass::findOrFail($id);
+        $this->model = $model = $this->modelClass::with([
+            "terms" => function($q){
+                $q->orderBy("list_display_order");
+            }
+        ])->findOrFail($id);
 
         $this->beforeEdit($model);
 
@@ -155,7 +253,9 @@ class PartyController extends BackendController
             'method' => 'PUT',
         ];
 
-        $this->setForView(compact("model", "form"));
+        $terms = $this->model->terms?->toArray() ?? [];
+
+        $this->setForView(compact("model", "form", "terms"));
 
         return $this->view("form");
     }
@@ -185,6 +285,12 @@ class PartyController extends BackendController
 
             $this->model->save();
 
+            $this->_saveOthers($validatedData);
+
+            if (LaravelExtend::$errors) {
+                throw new Exception("There are some errors");
+            }
+
             DB::commit();
 
             return $this->afterSave($this->model);
@@ -193,7 +299,7 @@ class PartyController extends BackendController
 
             $this->saveSqlLog();
 
-            return back()->withInput()->with('fail', $ex->getMessage());
+            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", LaravelExtend::$errors);
         }
     }
 

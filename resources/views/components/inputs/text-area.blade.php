@@ -35,6 +35,7 @@ if (!$mandatory && $is_disabled) {
 }
 ?>
 
+@if(isset($label) && $label)
 <label class="form-label">
     {{ $label }}
 
@@ -42,6 +43,7 @@ if (!$mandatory && $is_disabled) {
         <span class="mandatory">*</span>
     @endif
 </label>
+@endif
 
 <textarea name="{{ $name }}" {{ $attributes->merge($my_attributes) }}>{!! old($name, $value) !!}</textarea>
 

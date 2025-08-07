@@ -16,6 +16,7 @@ class Party extends BaseModel
 
     protected static array $list_fields = ["id", "name", "type"];
 
+    const TYPE_OEM = "OEM";
     const TYPE_VENDOR = "VENDOR";
     const TYPE_SUPPLIER = "SUPPLIER";
     const TYPE_CONTRACTOR = "CONTRACTOR";
@@ -54,6 +55,21 @@ class Party extends BaseModel
         $this->parseTagsForModuleLinking();
     }
 
+    public function documentFile()
+    {
+        return $this->belongsToMany(DocumentFile::class, PartyFile::class);
+    }
+
+    public function partyFile()
+    {
+        return $this->hasMany(PartyFile::class, 'party_id');
+    }
+
+    public function terms()
+    {
+        return $this->hasMany(PartyTerm::class, 'party_id');
+    }
+
     public function getUniqueValidationRules(Request $request)
     {
         $field_rules = [
@@ -77,11 +93,21 @@ class Party extends BaseModel
     public static function getTypeList()
     {
         $list = [
+            self::TYPE_OEM => "OEM",
             self::TYPE_VENDOR => "Vendor",
             self::TYPE_SUPPLIER => "Supplier",
             self::TYPE_CONTRACTOR => "Contractor",
         ];
 
         return $list;
+    }
+
+    public function getFieldLabels()
+    {
+        $labels = parent::getFieldLabels();
+        $labels['terms'] = "Terms and Conditions";
+        $labels['partyFile'] = "Files";
+
+        return $labels;
     }
 }
