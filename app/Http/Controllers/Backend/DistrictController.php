@@ -46,8 +46,9 @@ class DistrictController extends BackendController
 
         $conditions = $this->getConditions($cache_key, [
             ["field" => "id", "type" => "int", "cache" => false],
-            ["field" => "name", "type" => "string", "view_field" => "name"],
-            ["field" => "state_id", "type" => "", "view_field" => "state_id"],
+            ["field" => "name", "type" => "string"],
+            ["field" => "state_id", "type" => "int"],
+            ["field" => "is_active", "type" => "int"],
         ]);
 
         $builder = $this->modelClass::where($conditions);
@@ -204,6 +205,22 @@ class DistrictController extends BackendController
         }
     }
 
+    public function copy($id)
+    {
+        $model = $this->modelClass::findOrFail($id);
+
+        $this->beforeEdit($model);
+
+        $form = [
+            'url' => route($this->routePrefix . '.store', $id),
+            'method' => 'POST',
+        ];
+
+        $this->setForView(compact("model", "form"));
+
+        return $this->view("form");
+    }
+
     public function import_csv(Request $request)
     {
         $sample = "samples/districts.csv";
@@ -324,7 +341,7 @@ class DistrictController extends BackendController
                         }
                         else
                         {
-                            LaravelExtend::addError("", "Fail To Save" . " is not found in State", "Row #" . ($i + 2));
+                            LaravelExtend::addError("", "Fail To Save", "Row #" . ($i + 2));
                         }
                     }
                 }
@@ -375,7 +392,7 @@ class DistrictController extends BackendController
             
             catch(\Exception $ex)
             {
-                $msg = $ex->getMessage();
+                $msg = get_exception_display_message($ex);
 
                 if (isset($importLogModel))
                 {
@@ -384,7 +401,7 @@ class DistrictController extends BackendController
                     $importLogModel->save();
                 }
                 
-                return back()->with("fail", $msg)->with("custom_errors", LaravelExtend::$errors);
+                return back()->with("fail", $msg);
             }
         }
 

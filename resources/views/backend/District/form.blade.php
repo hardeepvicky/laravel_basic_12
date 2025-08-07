@@ -51,7 +51,7 @@
                                     <div class="col-md-12 col-xxl-6" style="padding-top: 30px;">
                                         <div class="form-group mb-3">
                                             <?php
-                                            $field = 'is_last_node';
+                                            $field = 'is_active';
                                             $label = get_value_from_list($field_labels, $field, $field);
                                             ?>
                                             <x-Inputs.checkbox :id="$field" :name="$field" :label="$label" value="{{ $model->{$field} }}" />

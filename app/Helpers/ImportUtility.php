@@ -18,7 +18,7 @@ class ImportUtility
         $post_csv_utility = new CsvUtility($this->post_csv_file);
 
         $this->post_data = $post_csv_utility->find(); 
-        
+
         if (count($this->post_data) > $max_count)
         {
             throw new \Exception("CSV Data excced the limit of $max_count records in single file");

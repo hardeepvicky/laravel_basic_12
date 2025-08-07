@@ -5,31 +5,54 @@
 
     <div class="card-body p-1">
         <div class="table-responsive">
-            <table class="table table-striped table-bordered table-hover">
+            <table class="table table-bordered summary_table_with_search">
                 <thead>
+                    <tr>
+                        <th>
+                            <?php
+                            $field = "name";
+                            ?>
+                            <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]"/>
+                        </th>                        
+                    </tr>
                     <tr class="border-bottom-primary">
-                        <th><?= sortable_anchor('id', 'ID') ?></th>
-                        <th><?= sortable_anchor('name', 'Name') ?></th>
-                        <th>State</th>
-                        <th style="width:6%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
-                        <th style="width:6%"><?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?></th>
-                        <th>Actions</th>
+                        <th style="width:15%">
+                            <?= sortable_anchor('id', get_value_from_list($field_labels, 'id', 'id')) ?>
+                            | <?= sortable_anchor('name', get_value_from_list($field_labels, 'name', 'name')) ?>
+                        </th>
+                        <th><?= sortable_anchor('state.name', get_value_from_list($field_labels, 'state_id', 'state_id')) ?></th>
+                        <th><?= sortable_anchor('district.name', get_value_from_list($field_labels, 'district_id', 'district_id')) ?></th>
+                        <th style="width:12%"><?= sortable_anchor('list_display_order', get_value_from_list($field_labels, 'list_display_order', 'list_display_order')) ?></th>
+                        <th style="width:12%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
+                        <th style="width:12%"><?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?></th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach ($records as $record)
                         <tr>
-                            <th scope="row">{{ $record->id }}</th>
-                            <td>{{ $record->name }}</td>
-                            <td>{{ $record->state->name }}</td>
+                            <th scope="row">
+                                <x-Backend.celec-summary-table-first-column :record="$record" :routePrefix="$routePrefix" buttons="edit,copy,delete">
+                                    <div class="label">
+                                        {{ $record->id . " | " . $record->name }}
+                                    </div>
+                                </x-Backend.celec-summary-table-first-column>
+                            </th>
+                            <td>{{ $record->state?->getDisplayName() }}</td>
+                            <td>{{ $record->district?->getDisplayName() }}</td>
+                            <td class="text-center">
+                                <a class="x-editable" href="javascript:void();"id="list_display_order" data-type="number"
+                                    data-name="list_display_order"
+                                    data-pk="{{ $record->id }}"
+                                    data-url="{{ route($routePrefix . '.ajax_update_field') }}"
+                                    data-title="Enter Display Order">
+                                    {{ $record->list_display_order }}
+                                </a>
+                            </td>
                             <td>
                                 <x-Backend.created-and-by :datetime="$record->created_at" :userId="$record->created_by" />
                             </td>
                             <td>
                                 <x-Backend.created-and-by :datetime="$record->updated_at" :userId="$record->updated_by" />
-                            </td>
-                            <td>
-                                <x-Backend.summary-comman-actions :id="$record->id" :routePrefix="$routePrefix" />
                             </td>
                         </tr>
                     @endforeach

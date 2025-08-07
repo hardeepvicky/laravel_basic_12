@@ -8,6 +8,8 @@ use App\Helpers\ImportUtility;
 use App\Helpers\LaravelExtend;
 use App\Helpers\Util;
 use App\Models\City;
+use App\Models\District;
+use App\Models\FieldSetting;
 use App\Models\ImportLog;
 use App\Models\State;
 use Illuminate\Http\Request;
@@ -35,8 +37,6 @@ class CityController extends BackendController
         $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
         // dd($records->toArray());
 
-        $this->_set_data_for_add_and_edit(null);
-
         $this->setForView(compact("records"));
 
         return $this->viewIndex(__FUNCTION__);
@@ -48,8 +48,10 @@ class CityController extends BackendController
 
         $conditions = $this->getConditions($cache_key, [
             ["field" => "id", "type" => "int", "cache" => false],
-            ["field" => "name", "type" => "string", "view_field" => "name"],
-            ["field" => "state_id", "type" => "", "view_field" => "state_id"],
+            ["field" => "name", "type" => "string"],
+            ["field" => "state_id", "type" => "int"],
+            ["field" => "district_id", "type" => "int"],
+            ["field" => "is_active", "type" => "int"],
         ]);
 
         $builder = $this->modelClass::where($conditions);
@@ -80,9 +82,11 @@ class CityController extends BackendController
             return false;
         }
 
-        $state_list = State::getList('id','name');
+        $state_list = State::getIndianList();
 
-        $this->setForView(compact('state_list'));
+        $field_labels = FieldSetting::getDynamicFields($this->modelClass);
+        
+        $this->setForView(compact("state_list", "field_labels"));
     }
 
 
@@ -205,16 +209,41 @@ class CityController extends BackendController
         }
     }
 
-    public function import(Request $request)
+    public function copy($id)
     {
-        $sample = "samples/districts.csv";
+        $model = $this->modelClass::findOrFail($id);
 
-        $this->setForView(compact('sample'));
+        $this->beforeEdit($model);
+
+        $form = [
+            'url' => route($this->routePrefix . '.store', $id),
+            'method' => 'POST',
+        ];
+
+        $this->setForView(compact("model", "form"));
+
+        return $this->view("form");
+    }
+
+    public function import_csv(Request $request)
+    {
+        $sample = "samples/city.csv";
+
+        $this->setForView([
+            "sample" => "/" . $sample
+        ]);
+
+        $form = [
+            'url' => route($this->routePrefix . '.import.csv'),
+            'method' => 'POST',
+        ];
+
+        $this->setForView(compact("form"));
 
         if ($request->isMethod('POST'))
         {
             $rules = [
-                "file" => [
+                "file_csv" => [
                     "required", 
                     "file",
                     "max:5200",
@@ -226,11 +255,15 @@ class CityController extends BackendController
 
             try
             {
+                $this->beforeCsvImport();
+
                 $path = ImportLog::getStoragePath();
 
-                $filepath = $request->file('file')->store($path, DEFAULT_DISK);
+                $filepath = $request->file('file_csv')->store($path, DEFAULT_DISK);
 
-                $importUtility = new ImportUtility($sample, $filepath);
+                $full_file_path = ImportLog::getStorageDisk()->path($filepath);
+
+                $importUtility = new ImportUtility($sample, $full_file_path);
 
                 if (!$importUtility->checkHeaders())
                 {
@@ -246,7 +279,8 @@ class CityController extends BackendController
 
                 $headers = array(
                     "State" => "state_id",
-                    "District" => "name",
+                    "District" => "district_id",
+                    "City" => "name",
                     "Active" => "is_active",
                     "List Display Order" => "list_display_order"
                 );
@@ -269,11 +303,10 @@ class CityController extends BackendController
                 $accept_count = 0;
                 $msg_list = [
                     "State Found" => 0,
-                    "District Insert" => 0,
-                    "District Update" => 0,
+                    "District Found" => 0,
+                    "City Insert" => 0,
+                    "City Update" => 0,
                 ];
-
-                $auth_user = Auth::user();
 
                 $state_list = array_flip(Util::applyAll(State::getListCache("id", "name"), ["strtolower"]));
                 
@@ -287,6 +320,21 @@ class CityController extends BackendController
                     {
                         $record['state_id'] = $state_list[$state_name];
                         $msg_list['State Found']++;
+
+                        $district_name = strtolower($record["district_id"]);
+
+                        $district = District::where("state_id", $record['state_id'])->where("name", $district_name)->select(["id", "state_id"])->first();
+
+                        if ($district)
+                        {
+                            $record['district_id'] = $district->id;
+                            $msg_list['District Found']++;
+                        }
+                        else
+                        {
+                            LaravelExtend::addError($header_flip['district_id'], $record['district_id'] . " is not found in District", "Row #" . ($i + 2));
+                            $validate = false;
+                        }
                     }
                     else
                     {
@@ -305,16 +353,16 @@ class CityController extends BackendController
 
                             if ($is_insert)
                             {
-                                $msg_list['District Insert']++;
+                                $msg_list['City Insert']++;
                             }
                             else
                             {
-                                $msg_list['District Update']++;
+                                $msg_list['City Update']++;
                             }
                         }
                         else
                         {
-                            LaravelExtend::addError("", "Fail To Save" . " is not found in State", "Row #" . ($i + 2));
+                            LaravelExtend::addError("", "Fail To Save", "Row #" . ($i + 2));
                         }
                     }
                 }
@@ -347,32 +395,36 @@ class CityController extends BackendController
             {
                 $msg = $ex->getMessage();
 
-                $importLogModel->flash_msg = $msg;
-                $importLogModel->have_error = 1;
-
-                if (isset($importLogModel) && LaravelExtend::$errors)
+                if (isset($importLogModel))
                 {
-                    $importLogModel->errors = LaravelExtend::$errors;                    
-                }
+                    $importLogModel->flash_msg = $msg;
+                    $importLogModel->have_error = 1;
 
-                $importLogModel->save();
+                    if (LaravelExtend::$errors)
+                    {
+                        $importLogModel->errors = LaravelExtend::$errors;                    
+                    }
+
+                    $importLogModel->save();
+                }
                 
-                Session::flash('fail', $msg);  
-                
-                return $this->view(__FUNCTION__, "")->with("custom_errors", LaravelExtend::$errors);
+                return back()->With("fail", $msg)->with("custom_errors", LaravelExtend::$errors);
             }
             
             catch(\Exception $ex)
             {
-                $msg = $ex->getMessage();
+                $msg = get_exception_display_message($ex);
 
-                $importLogModel->flash_msg = $msg;
-                $importLogModel->have_error = 1;
-                $importLogModel->save();
+                if (isset($importLogModel))
+                {
+                    $importLogModel->flash_msg = $msg;
+                    $importLogModel->have_error = 1;
+                    $importLogModel->save();
+                }
                 
                 Session::flash('fail', $msg);  
                 
-                return $this->view(__FUNCTION__, "");
+                return back()->With("fail", $msg);
             }
         }
 

@@ -218,6 +218,9 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
     Route::resource($route_prefix, $controllerClass);
     Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
 
+        $name = "copy";
+        Route::get("{id}/" . $name, [$controllerClass, $name])->name($name);
+
         $name = "activate";
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
 
@@ -229,6 +232,21 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
 
         $name = "ajax_get";
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "ajax_update_field";
+        Route::post($name, [$controllerClass, $name])->name($name);
+
+        $route_prefix = "export";
+        Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+            $name = "csv";
+            Route::get($name, [$controllerClass, "export_" . $name])->name($name);
+        });
+
+        $route_prefix = "import";
+        Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+            $name = "csv";
+            Route::any($name, [$controllerClass, "import_". $name])->name($name);
+        });
     });
 
     $route_prefix = "district";
@@ -236,6 +254,9 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
     Route::resource($route_prefix, $controllerClass);
     Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
 
+        $name = "copy";
+        Route::get("{id}/" . $name, [$controllerClass, $name])->name($name);
+
         $name = "activate";
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
 
@@ -247,6 +268,9 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
 
         $name = "ajax_get";
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "ajax_update_field";
+        Route::post($name, [$controllerClass, $name])->name($name);
 
         $route_prefix = "export";
         Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {

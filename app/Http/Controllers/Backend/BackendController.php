@@ -90,10 +90,11 @@ class BackendController extends WebController
         ];
 
         $false = false;
+        $empty_list = [];
 
         $this->setForView(compact(
             "current_route_name", "current_url", "menus", "header_menu_list", "partial_path", "breadcums", "userListCache", "auth_user", "screen_name", 
-            "index_table_info_options", "unread_notifications", "unread_notification_count", "false"
+            "index_table_info_options", "unread_notifications", "unread_notification_count", "false", "empty_list"
         ));
 
         return true;
