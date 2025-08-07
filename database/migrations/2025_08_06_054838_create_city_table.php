@@ -15,10 +15,11 @@ class CreateCityTable extends Migration
     {
         Schema::create('cities', function (Blueprint $table) {
             $table->id();
-            $table->string("name", 255);
-            $table->string("short_name", 10)->nullable();
-            $table->unsignedBigInteger("state_id");
+            $table->string("name");
+            $table->foreignId("district_id")->constrained("districts")->onDelete("restrict");
+            $table->foreignId("state_id")->constrained("states")->onDelete("restrict");
             $table->boolean("is_active")->default(1);
+            $table->integer("list_display_order")->default(0);
             $table->timestamps();
             $table->bigInteger("created_by")->nullable();
             $table->bigInteger("updated_by")->nullable();

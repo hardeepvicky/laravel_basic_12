@@ -12,6 +12,7 @@ use App\Http\Controllers\Backend\DashboardController;
 use App\Http\Controllers\Backend\DepartmentController;
 use App\Http\Controllers\Backend\DesignationController;
 use App\Http\Controllers\Backend\DeveloperController;
+use App\Http\Controllers\Backend\DistrictController;
 use App\Http\Controllers\Backend\DocumentCategoryController;
 use App\Http\Controllers\Backend\DocumentFileController;
 use App\Http\Controllers\Backend\DropDownValueController;
@@ -207,6 +208,9 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
 
         $name = "de_activate";
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "ajax_get_list";
+        Route::get($name . "/{state_id?}/{district_id?}", [$controllerClass, $name])->name($name);
     });
 
     $route_prefix = "city";
@@ -214,11 +218,47 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
     Route::resource($route_prefix, $controllerClass);
     Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
 
+        $name = "activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "de_activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
         $name = "ajax_get_list";
-        Route::get($name . "/{state_id}", [$controllerClass, $name])->name($name);
+        Route::get($name . "/{state_id?}/{district_id?}", [$controllerClass, $name])->name($name);
 
         $name = "ajax_get";
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+    });
+
+    $route_prefix = "district";
+    $controllerClass = DistrictController::class;
+    Route::resource($route_prefix, $controllerClass);
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
+        $name = "activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "de_activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "ajax_get_list";
+        Route::get($name . "/{state_id?}/{district_id?}", [$controllerClass, $name])->name($name);
+
+        $name = "ajax_get";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $route_prefix = "export";
+        Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+            $name = "csv";
+            Route::get($name, [$controllerClass, "export_" . $name])->name($name);
+        });
+
+        $route_prefix = "import";
+        Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+            $name = "csv";
+            Route::any($name, [$controllerClass, "import_". $name])->name($name);
+        });
     });
 
 

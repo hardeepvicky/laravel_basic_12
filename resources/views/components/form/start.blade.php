@@ -7,6 +7,6 @@ if ($form_method == 'GET') {
     }
 }
 ?>
-<form action="{{ $action }}" method="{{ $form_method }}" {{ $attributes->merge($my_attributes) }}>
+<form action="{{ $action }}" method="{{ $form_method }}" enctype="multipart/form-data" {{ $attributes->merge($my_attributes) }}>
      @csrf
     {{ method_field($method) }}

@@ -2,12 +2,21 @@
 
 namespace App\Models;
 
+use App\Exceptions\UserException;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Unique;
 
 class State extends BaseModel
 {
+    protected static array $unique_fields = ["country_id", "name"];
+
+    protected static array $list_fields = ["id", "name", "short_name"];
+
+    protected $appends = [
+        'display_name',
+    ];
+
     public static array $child_model_class = [
         // Employee::class => [
         //     "foreignKey" => ["current_state_id", "permanent_state_id"],
@@ -41,6 +50,23 @@ class State extends BaseModel
     public function user()
     {
         return $this->hasMany(User::class);
+    }
+
+    protected function getDisplayNameAttribute()
+    {
+        return $this->getDisplayName();
+    }
+
+    public function getDisplayName()
+    {
+        $name = $this->name;
+
+        if ($this->short_name)
+        {
+            $name .= " (" . $this->short_name . ")";
+        }
+
+        return $name;
     }
 
     public function getUniqueValidationRules(Request $request)
@@ -128,5 +154,19 @@ class State extends BaseModel
         $ret_str = trim($ret_str);
 
         return $ret_str;
+    }
+
+    public static function getIndianList(String $key_field = "id", String $value_field = "display_name", $conditions = [], $order_by = "name", $order_dir = "asc")
+    {
+        $my_country = Country::getMyCountry();
+
+        if (!$my_country)
+        {
+            throw new UserException("My Country : India not found");
+        }
+
+        $conditions['country_id'] = $my_country->id;
+
+        return self::getList($key_field, $value_field, $conditions, $order_by, $order_dir);
     }
 }
