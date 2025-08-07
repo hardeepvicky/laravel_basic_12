@@ -2,14 +2,11 @@
 
 namespace App\Http\Controllers\Backend;
 
-use App\Exceptions\UserException;
 use App\Helpers\LaravelExtend;
 use App\Models\DocumentFile;
-use App\Models\DropDownValue;
 use App\Models\FieldSetting;
 use App\Models\Party;
 use App\Models\PartyTerm;
-use App\Models\Tag;
 use App\Rules\MobileNumber;
 use Illuminate\Http\Request;
 use Exception;
@@ -305,7 +302,11 @@ class PartyController extends BackendController
 
     public function copy($id)
     {
-        $model = $this->modelClass::findOrFail($id);
+        $model = $this->modelClass::with([
+            "terms" => function($q){
+                $q->orderBy("list_display_order");
+            }
+        ])->indOrFail($id);
 
         $this->beforeEdit($model);
 

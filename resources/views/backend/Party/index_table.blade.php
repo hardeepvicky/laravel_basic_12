@@ -21,12 +21,12 @@
                             | <?= sortable_anchor('name', get_value_from_list($field_labels, 'name', 'name')) ?>
                         </th>
                         <th><?= sortable_anchor('type', get_value_from_list($field_labels, 'type', 'type')) ?></th>
-                        <th style="width:12%"><?= sortable_anchor('mobile', get_value_from_list($field_labels, 'mobile', 'mobile')) ?></th>
-                        <th style="width:12%"><?= sortable_anchor('mobile2', get_value_from_list($field_labels, 'mobile2', 'mobile2')) ?></th>
-                        <th style="width:12%"><?= sortable_anchor('phone_no', get_value_from_list($field_labels, 'phone_no', 'phone_no')) ?></th>
+                        <th><?= sortable_anchor('mobile', get_value_from_list($field_labels, 'mobile', 'mobile')) ?></th>
+                        <th><?= sortable_anchor('mobile2', get_value_from_list($field_labels, 'mobile2', 'mobile2')) ?></th>
+                        <th><?= sortable_anchor('phone_no', get_value_from_list($field_labels, 'phone_no', 'phone_no')) ?></th>
                         <th>Address</th>
-                        <th style="width:12%"><?= sortable_anchor('list_display_order', get_value_from_list($field_labels, 'list_display_order', 'list_display_order')) ?></th>
-                        <th style="width:12%"><?= sortable_anchor('is_active', 'Activate / De-Active') ?></th>
+                        <th style="width:10%"><?= sortable_anchor('list_display_order', get_value_from_list($field_labels, 'list_display_order', 'list_display_order')) ?></th>
+                        <th style="width:10%"><?= sortable_anchor('is_active', 'Activate / De-Active') ?></th>
                         <th style="width:12%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
                         <th style="width:12%"><?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?></th>
                     </tr>
@@ -70,13 +70,6 @@
                             <td colspan="8">
                                 <div class="row">
                                     <div class="col-md-6 col-xl-3">
-                                        <label class="info">
-                                            {{ get_value_from_list($field_labels, 'address') }} :
-                                            <span>
-                                                {{ $record->address }}
-                                            </span>
-                                        </label>
-
                                         <h4 class="mt-2 mb-2 b-b-info">
                                             Description
                                         </h4>

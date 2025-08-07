@@ -29,6 +29,7 @@
                                         :list="$state_list" value="{{ $model->{$field} }}" class="select2 cascade-drop-down" 
                                         data-sr-cascade-target="#district_id"
                                         data-sr-cascade-url="/district/ajax_get_list/{v}" 
+                                        mandatory="true"
                                         />
                                 </div>
                                 <div class="form-group mb-3">
@@ -37,7 +38,7 @@
                                     $label = get_value_from_list($field_labels, $field, $field);
                                     ?>
                                     <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
-                                        :list="$empty_list" value="{{ $model->{$field} }}" class="select2" 
+                                        :list="$empty_list" value="{{ $model->{$field} }}" class="select2" mandatory="true"
                                     />
                                 </div>
                                 <div class="form-group mb-3">
