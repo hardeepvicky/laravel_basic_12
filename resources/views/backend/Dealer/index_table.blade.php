@@ -110,9 +110,41 @@
                                         </div>     
                                     </div>
                                     <div class="col-md-6 col-xl-5">
-                                        <x-Backend.document-files :records="$record->documentFile" />
+                                        <div class="card">
+                                            <div class="card-header border-l-secondary card-no-border">
+                                                <h3>Address</h3>
+                                            </div>
+                                            <div class="card-body">
+                                                <table class="table table-sm summary-table table-bordered">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Sr. No.</th>
+                                                            <th>{{ get_value_from_list($address_field_labels, 'type') }}</th>
+                                                            <th>{{ get_value_from_list($address_field_labels, 'addr1') }}</th>
+                                                            <th>{{ get_value_from_list($address_field_labels, 'addr2') }}</th>
+                                                            <th>{{ get_value_from_list($address_field_labels, 'pincode') }}</th>
+                                                            <th>{{ get_value_from_list($address_field_labels, 'is_primary') }}</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach ($record->address as $i => $address)
+                                                        <tr>
+                                                            <td>{{ $i + 1 }}</td>
+                                                            <td>{{ get_value_from_list($address_type_list, $address->type, $address->type) }}</td>
+                                                            <td>{{ $address->addr1 }}</td>
+                                                            <td>{{ $address->addr2 }}</td>
+                                                            <td>{{ $address->pincode }}</td>
+                                                            <td>{{ $address->is_primary ? "Primary" : "No" }}</td>
+                                                        </tr>
+                                                        @endforeach
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>                                          
                                     </div>
                                 </div>
+
+                                <x-Backend.document-files :records="$record->documentFile" />
                             </td>
                         </tr>
                     @endforeach

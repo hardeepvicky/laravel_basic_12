@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Backend;
 
 use App\Helpers\LaravelExtend;
 use App\Models\Dealer;
+use App\Models\DealerAddress;
 use App\Models\DealerTerm;
 use App\Models\DocumentFile;
 use App\Models\FieldSetting;
@@ -58,6 +59,9 @@ class DealerController extends BackendController
             "terms" => function($q){
                 $q->orderBy("list_display_order");
             },
+            "address" => function($q){
+                $q->orderBy("list_display_order");
+            },
             "documentFile"
         ]);
 
@@ -83,13 +87,17 @@ class DealerController extends BackendController
     {
         $type_list = Dealer::getTypeList();
 
+        $address_type_list = DealerAddress::getTypeList();
+
         $state_list = State::getIndianList();
 
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
-        $term_field_labels = FieldSetting::getDynamicFields(PartyTerm::class);
+        $term_field_labels = FieldSetting::getDynamicFields(DealerTerm::class);
+
+        $address_field_labels = FieldSetting::getDynamicFields(DealerAddress::class);
         
-        $this->setForView(compact("type_list", "state_list", "field_labels", "term_field_labels"));
+        $this->setForView(compact("type_list", "address_type_list", "state_list", "field_labels", "term_field_labels", "address_field_labels"));
 
         return parent::beforeViewRender();
     }
@@ -125,6 +133,7 @@ class DealerController extends BackendController
             "list_display_order" => ["nullable"],
             "terms" => [],
             "dealerFile" => [],
+            "addresses" => [],
             "is_active" => ""
         ];
     }
@@ -184,8 +193,6 @@ class DealerController extends BackendController
 
         unset($validatedData['terms']['(sr-id)']);
 
-        // d($validatedData, true);
-
         if (isset($validatedData['terms']))
         {
             $rules = [
@@ -244,6 +251,70 @@ class DealerController extends BackendController
                 }
             }
         }
+
+        unset($validatedData['addresses']['(sr-id)']);
+
+        if (isset($validatedData['addresses']))
+        {
+            $rules = [
+                "type" => ["required"],
+                "addr1" => ["required"],
+                "addr2" => ["nullable"],
+                "pincode" => ["required"],
+                "is_primary" => ""
+            ];
+
+            $child_model = new DealerAddress();
+
+            $existing_id_list = $this->model->address()->pluck("id", "id")->toArray();
+
+            $validatedData['dealer_id'] = $this->model->id;
+
+            $rules = LaravelExtend::merge_validation_rules($rules, $child_model->getUniqueValidationRules($validatedData));
+
+            $display_order = 0;
+
+            foreach($validatedData['addresses'] as $address)
+            {
+                $display_order++;
+                if ($address['id'])
+                {
+                    $child_model = DealerAddress::find($address['id']);
+
+                    if (!$child_model)
+                    {
+                        $child_model = new DealerAddress();
+                    }
+                    else
+                    {
+                        unset($existing_id_list[$address['id']]);
+                    }
+                }
+                else
+                {
+                    $child_model = new DealerAddress();
+                }
+
+                $term['list_display_order'] = $display_order;
+
+                $child_model->fill($address);
+
+                $this->model->address()->save($child_model);
+            }
+
+            if ($existing_id_list)
+            {
+                $existing_records = $this->model->address()->where("id", $existing_id_list)->get();
+
+                foreach($existing_records as $existing_record)
+                {
+                    if (!$existing_record->safeDelete($existing_record))
+                    {
+                        LaravelExtend::addError($existing_record->name, "Can not delete, bcoz it is asscoicated with other modules.", "Term");
+                    }
+                }
+            }
+        }
     }
 
     public function edit($id)
@@ -251,7 +322,10 @@ class DealerController extends BackendController
         $this->model = $model = $this->modelClass::with([
             "terms" => function($q){
                 $q->orderBy("list_display_order");
-            }
+            },
+            "address" => function($q){
+                $q->orderBy("list_display_order");
+            },
         ])->findOrFail($id);
 
         $this->beforeEdit($model);
@@ -262,8 +336,9 @@ class DealerController extends BackendController
         ];
 
         $terms = $this->model->terms?->toArray() ?? [];
+        $addresses = $this->model->address?->toArray() ?? [];
 
-        $this->setForView(compact("model", "form", "terms"));
+        $this->setForView(compact("model", "form", "terms", "addresses"));
 
         return $this->view("form");
     }
@@ -313,10 +388,13 @@ class DealerController extends BackendController
 
     public function copy($id)
     {
-        $model = $this->modelClass::with([
+        $this->model = $model = $this->modelClass::with([
             "terms" => function($q){
                 $q->orderBy("list_display_order");
-            }
+            },
+            "address" => function($q){
+                $q->orderBy("list_display_order");
+            },
         ])->findOrFail($id);
 
         $this->beforeEdit($model);
@@ -326,7 +404,10 @@ class DealerController extends BackendController
             'method' => 'POST',
         ];
 
-        $this->setForView(compact("model", "form"));
+        $terms = $this->model->terms?->toArray() ?? [];
+        $addresses = $this->model->address?->toArray() ?? [];
+
+        $this->setForView(compact("model", "form", "terms", "addresses"));
 
         return $this->view("form");
     }

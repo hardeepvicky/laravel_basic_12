@@ -68,6 +68,11 @@ class Dealer extends BaseModel
         return $this->hasMany(DealerTerm::class, 'dealer_id');
     }
 
+    public function address()
+    {
+        return $this->hasMany(DealerAddress::class, 'dealer_id');
+    }
+
     public function state()
     {
         return $this->belongsTo(State::class);
