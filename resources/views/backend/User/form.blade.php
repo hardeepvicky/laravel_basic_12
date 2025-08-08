@@ -183,6 +183,19 @@ use App\Models\User;
                         <div class="col-md-6">
                             <div class="form-group mb-3">
                                 <?php
+                                $field = 'voip_mobile';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <x-Inputs.group-text-field :id="$field" :name="$field" :label="$label"
+                                    :value="$model->{$field}" 
+                                    class="validate-mobile" 
+                                    placeholder="Enter {{ $label }}"
+                                    secondaryText='<span id="mobile_country_code" class="input-group-text">+91</span>' />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <?php
                                 $field = 'office_landline_no';
                                 $label = get_value_from_list($field_labels, $field, $field);
                                 ?>

@@ -88,6 +88,12 @@ use App\Models\User;
                                                 </span>
                                             </label>
                                             <label class="info">
+                                                {{ get_value_from_list($field_labels, 'voip_mobile') }} :
+                                                <span>
+                                                    {{ $record->voip_mobile }}
+                                                </span>
+                                            </label>
+                                            <label class="info">
                                                 {{ get_value_from_list($field_labels, 'office_landline_no') }} :
                                                 <span>
                                                     {{ $record->office_landline_no }}
