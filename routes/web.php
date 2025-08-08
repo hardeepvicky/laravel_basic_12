@@ -792,6 +792,12 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
         $name = "ajax_update_field";
         Route::post($name, [$controllerClass, $name])->name($name);
 
+        $name = "history";
+        Route::any($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "history_destroy";
+        Route::delete($name . "/{id}", [$controllerClass, $name])->name($name);
+
         $route_prefix = "export";
         Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
             $name = "csv";

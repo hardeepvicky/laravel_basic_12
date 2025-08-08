@@ -567,16 +567,11 @@ jQuery.fn.extend({
     srParagraph: function () {
         var feature = "sr-paragraph";
 
-        var events = {
-            moreText: feature + ".moreText",
-            lessText: feature + ".lessText",
-        };
-
         return this.each(function () {
             var _this = $(this);
 
             if ($(this).applyOnce(feature)) {
-                max = parseInt(max);
+                max = parseInt(_this.data("max"));
 
                 var content = _this.html();
 
@@ -584,55 +579,25 @@ jQuery.fn.extend({
                     var less_content = content.substr(0, max);
 
                     var html =
-                        '<span class="' +
-                        feature +
-                        '-less-text-block">' +
+                        '<span class="' + feature + '-less-text-block">' +
                         less_content +
-                        '<br/><a class="' +
-                        feature +
-                        '-more-text-opener">...More</a></span>';
+                        '<br/><a class="' + feature +'-more-text-opener">...More</a></span>';
                     html +=
-                        '<span class="' +
-                        feature +
-                        '-more-text-block hidden">' +
+                        '<span class="' + feature + '-more-text-block hidden">' +
                         content +
-                        '<br/><a class="' +
-                        feature +
-                        '-less-text-opener">...Less</a></span>';
+                        '<br/><a class="' + feature +'-less-text-opener">...Less</a></span>';
 
-                    $(this).html(html);
+                    _this.html(html);
 
-                    var _this = $(this);
-
-                    _this.on(events.lessText, function () {
-                        _this
-                            .find("." + feature + "-more-text-block")
-                            .addClass("hidden");
-                        _this
-                            .find("." + feature + "-less-text-block")
-                            .removeClass("hidden");
+                    _this.find("." + feature + "-more-text-opener").click(function () {
+                        _this.find("." + feature + "-less-text-block").addClass("hidden");
+                        _this.find("." + feature + "-more-text-block").removeClass("hidden");
                     });
 
-                    _this.on(events.moreText, function () {
-                        _this
-                            .find("." + feature + "-less-text-block")
-                            .addClass("hidden");
-                        _this
-                            .find("." + feature + "-more-text-block")
-                            .removeClass("hidden");
+                    _this.find("." + feature + "-less-text-opener").click(function () {
+                        _this.find("." + feature + "-more-text-block").addClass("hidden");
+                        _this.find("." + feature + "-less-text-block").removeClass("hidden");
                     });
-
-                    _this
-                        .find("." + feature + "-more-text-opener")
-                        .click(function () {
-                            $(this).trigger(events.toggle);
-                        });
-
-                    _this
-                        .find("." + feature + "-less-text-opener")
-                        .click(function () {
-                            $(this).trigger(events.lessText);
-                        });
                 }
             }
         });

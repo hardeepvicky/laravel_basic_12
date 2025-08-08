@@ -47,6 +47,13 @@ class Lead extends BaseModel
     public const DEAL_TYPE_DIRECT = "DIRECT";
     public const DEAL_TYPE_THROGH_DEALER = "THROGH_DEALER";
 
+    public const PAYMENT_METHOD_CASH = "CASH";
+    public const PAYMENT_METHOD_BANK_TRANSFER = "BANK_TRANSFER";
+    public const PAYMENT_METHOD_UPI = "UPI";
+    public const PAYMENT_METHOD_CREDIT_CARD = "CREDIT_CARD";
+    public const PAYMENT_METHOD_DEBIT_CARD = "DEBIT_CARD";
+    
+
     protected function getDisplayNameAttribute()
     {
         return $this->getDisplayName();
@@ -86,6 +93,11 @@ class Lead extends BaseModel
         return $this->hasMany(LeadProduct::class, 'lead_id');
     }
 
+    public function history()
+    {
+        return $this->hasMany(LeadHistory::class, 'lead_id');
+    }
+
     public function state()
     {
         return $this->belongsTo(State::class);
@@ -99,6 +111,11 @@ class Lead extends BaseModel
     public function city()
     {
         return $this->belongsTo(City::class);
+    }
+
+    public function assignTo()
+    {
+        return $this->belongsTo(User::class, "assign_to_user_id");
     }
 
     public function getUniqueValidationRules(Request $request)
@@ -169,6 +186,18 @@ class Lead extends BaseModel
 
                 foreach ($class_info['constants'] as $constant => $label) {
                     if (strpos($constant, "DEAL_TYPE_") !== false) {
+                        $list[] = $label;
+                    }
+                }
+
+                return $list;
+                break;
+
+            case "payment_method_type":
+                $list = [];
+
+                foreach ($class_info['constants'] as $constant => $label) {
+                    if (strpos($constant, "PAYMENT_METHOD_") !== false) {
                         $list[] = $label;
                     }
                 }
