@@ -20,10 +20,18 @@ class Dealer extends BaseModel
     const TYPE_TRADER = "TRADER";
 
     public static array $child_model_class = [
-        // TaskParty::class => [
-        //     "foreignKey" => ["party_id"],
-        //     "preventDelete" => true
-        // ]
+        DealerAddress::class => [
+            "foreignKey" => ["dealer_id"],
+            "preventDelete" => false
+        ],
+        DealerFile::class => [
+            "foreignKey" => ["dealer_id"],
+            "preventDelete" => false
+        ],
+        DealerTerm::class => [
+            "foreignKey" => ["dealer_id"],
+            "preventDelete" => false
+        ],
     ];
 
     protected static array $fields_containg_tags = ["description"];

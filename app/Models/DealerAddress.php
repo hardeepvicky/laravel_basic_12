@@ -39,12 +39,12 @@ class DealerAddress extends BaseModel
             "addr1" => [Rule::unique($this->connection . "." . $this->getTable(), "addr1")->where("dealer_id", $validateData["dealer_id"])],
         ];
 
-        if ($this->id) {
+        if (isset($validateData['id']) && $validateData['id']) {
             foreach ($field_rules as $field => $rules) {
                 foreach ($rules as $rule) {
                     if ($rule instanceof Unique) {
                         // d([$field => $this->id]);
-                        $rule->ignore($this->id, $this->primaryKey);
+                        $rule->ignore($validateData['id'], $this->primaryKey);
                     }
                 }
             }

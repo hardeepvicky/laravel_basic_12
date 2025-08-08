@@ -77,7 +77,14 @@ class Type extends BaseModel
                     "sub_type" => "Sub Type",
                     "sub_type_for_signup_form" => "Sub Type For Signup Form"
                 ]
-            ]
+            ],
+            Lead::class => [
+                "fields" => [
+                    "source_type" => "Source Type",
+                    "deal_type" => "Deal Type",
+                    "status_type" => "Status",
+                ]
+            ],
         ];
 
         return $types;

@@ -8,14 +8,13 @@ use App\Models\DealerAddress;
 use App\Models\DealerTerm;
 use App\Models\DocumentFile;
 use App\Models\FieldSetting;
-use App\Models\Party;
-use App\Models\PartyTerm;
 use App\Models\State;
 use App\Rules\MobileNumber;
 use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Validator;
 
 class DealerController extends BackendController
 {
@@ -212,6 +211,17 @@ class DealerController extends BackendController
 
             foreach($validatedData['terms'] as $term)
             {
+                $validator = Validator::make($term, $rules);
+
+                if ($validator->fails())
+                {
+                    foreach($validator->errors()->all() as $error_msg)
+                    {               
+                        LaravelExtend::addError("", $error_msg, "Terms");
+                    }
+                    continue;
+                }
+
                 $display_order++;
                 if ($term['id'])
                 {
@@ -256,7 +266,7 @@ class DealerController extends BackendController
 
         if (isset($validatedData['addresses']))
         {
-            $rules = [
+            $base_rules = [
                 "type" => ["required"],
                 "addr1" => ["required"],
                 "addr2" => ["nullable"],
@@ -268,14 +278,24 @@ class DealerController extends BackendController
 
             $existing_id_list = $this->model->address()->pluck("id", "id")->toArray();
 
-            $validatedData['dealer_id'] = $this->model->id;
-
-            $rules = LaravelExtend::merge_validation_rules($rules, $child_model->getUniqueValidationRules($validatedData));
-
             $display_order = 0;
 
             foreach($validatedData['addresses'] as $address)
             {
+                $address['dealer_id'] = $this->model->id;
+                $rules = LaravelExtend::merge_validation_rules($base_rules, $child_model->getUniqueValidationRules($address));
+
+                $validator = Validator::make($address, $rules);
+
+                if ($validator->fails())
+                {
+                    foreach($validator->errors()->all() as $error_msg)
+                    {               
+                        LaravelExtend::addError("", $error_msg, "Addresses");
+                    }
+                    continue;
+                }
+
                 $display_order++;
                 if ($address['id'])
                 {
@@ -295,7 +315,7 @@ class DealerController extends BackendController
                     $child_model = new DealerAddress();
                 }
 
-                $term['list_display_order'] = $display_order;
+                $address['list_display_order'] = $display_order;
 
                 $child_model->fill($address);
 
