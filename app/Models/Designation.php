@@ -70,4 +70,18 @@ class Designation extends BaseModel
 
         return $user_id_list;
     }
+
+    public function getParentUserIdListBasedOnDesignationLevel()
+    {
+        $desg_id_list = self::where("level", ">", $this->level)->pluck("id")->toArray();
+
+        $user_id_list = [];
+
+        if ($desg_id_list)
+        {
+            $user_id_list = User::whereIn("desg_id", $desg_id_list)->pluck("id")->toArray();
+        }
+
+        return $user_id_list;
+    }
 }

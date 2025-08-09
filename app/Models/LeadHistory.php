@@ -4,7 +4,13 @@ namespace App\Models;
 
 class LeadHistory extends BaseModel
 {
+    protected $casts = [
+        'next_meeting_date_time' => 'datetime',
+    ];
+
     protected static Array $unique_fields = [];
+
+    protected static array $file_fields = ["recording_file"];
 
     const ACTION_TYPE_CALL = "CALL";
     const ACTION_TYPE_SEND_SMS = "SEND_SMS";
@@ -12,11 +18,18 @@ class LeadHistory extends BaseModel
     const ACTION_TYPE_SEND_EMAIL = "SEND_EMAIL";
     const ACTION_TYPE_LEAD_TRANSFER = "LEAD_TRANSFER";
     const ACTION_TYPE_DISPATCH = "DISPATCH";
+    const ACTION_TYPE_CHANGE_STATUS = "CHANGE_STATUS";
 
     public function lead()
     {
         return $this->belongsTo(Lead::class);
     }
+
+    public function assignTo()
+    {
+        return $this->belongsTo(User::class, "assign_to_user_id");
+    }
+
     public function getRefDisplayName($field, $value)
     {
         $ret_array = [];

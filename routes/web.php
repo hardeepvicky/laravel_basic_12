@@ -45,6 +45,7 @@ use App\Http\Controllers\Backend\WhatsappTemplateController;
 use App\Http\Controllers\Frontend\EnquiryController;
 use App\Http\Controllers\Frontend\PublicController as FrontendPublicController;
 use App\Http\Controllers\HomeController;
+use App\Livewire\Widget\LeadCounter;
 use App\Models\EmailLog;
 use App\Models\MailjetWebhook;
 use Illuminate\Http\Request;
@@ -793,7 +794,13 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
         Route::post($name, [$controllerClass, $name])->name($name);
 
         $name = "history";
-        Route::any($name . "/{id}", [$controllerClass, $name])->name($name);
+        Route::get($name . "/{lead_id}", [$controllerClass, $name])->name($name);
+
+        $name = "history_store";
+        Route::post($name . "/{lead_id}", [$controllerClass, $name])->name($name);
+
+        $name = "transfer_lead";
+        Route::post($name . "/{lead_id}", [$controllerClass, $name])->name($name);
 
         $name = "history_destroy";
         Route::delete($name . "/{id}", [$controllerClass, $name])->name($name);

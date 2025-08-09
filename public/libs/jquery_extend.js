@@ -573,6 +573,11 @@ jQuery.fn.extend({
             if ($(this).applyOnce(feature)) {
                 max = parseInt(_this.data("max"));
 
+                if (!max)
+                {
+                    max = 45;
+                }
+
                 var content = _this.html();
 
                 if (content.length > max) {

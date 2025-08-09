@@ -6,6 +6,9 @@
 
         <div class="row general-widget">
             <div class="col-xxl-12">
+
+                <livewire:widget.lead-counter />
+
                 <div class="card">
                     <div class="card-header card-no-border pb-0">
                         <h3>Tasks</h3>

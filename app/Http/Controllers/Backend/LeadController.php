@@ -151,6 +151,14 @@ class LeadController extends BackendController
 
         $user_list = User::getList("id", "display_name", ["type" => User::TYPE_INTERNAL], "person_name");
 
+        $type_conditions = [
+            'type' => Type::getType(new LeadHistory(), "action_type")
+        ];
+
+        $action_type_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
+
+        $lead_history_response_list = DropDownValue::getList("id", "display_name", ["type" =>  DropDownValue::LEAD_HISTORY_RESPONSE], "list_display_order");
+
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
         $address_field_labels = FieldSetting::getDynamicFields(LeadAddress::class);
@@ -158,10 +166,11 @@ class LeadController extends BackendController
         $product_field_labels = FieldSetting::getDynamicFields(LeadProduct::class);
 
         $history_field_labels = FieldSetting::getDynamicFields(LeadHistory::class);
-        
+
         $this->setForView(compact(
-            "address_type_list", "state_list", 
-            "source_type_list", "deal_type_list", "status_type_list", "source_list", "payment_method_type_list", "dealer_list", "product_list", "user_list",
+            "address_type_list", "state_list",
+            "source_type_list", "deal_type_list", "status_type_list", "source_list", "payment_method_type_list", "dealer_list", "product_list", 
+            "user_list", "action_type_list", "lead_history_response_list",
             "field_labels", "address_field_labels", "product_field_labels", "history_field_labels"
         ));
 
@@ -293,7 +302,7 @@ class LeadController extends BackendController
                 if ($validator->fails())
                 {
                     foreach($validator->errors()->all() as $error_msg)
-                    {               
+                    {
                         LaravelExtend::addError("", $error_msg, "Addresses");
                     }
                     continue;
@@ -364,7 +373,7 @@ class LeadController extends BackendController
                 if ($validator->fails())
                 {
                     foreach($validator->errors()->all() as $error_msg)
-                    {               
+                    {
                         LaravelExtend::addError("", $error_msg, "Products");
                     }
                     continue;
@@ -527,73 +536,246 @@ class LeadController extends BackendController
         return $this->responseJson($response);
     }
 
-    public function history($id, Request $request)
+    public function history($lead_id, Request $request)
     {
         $record = $this->modelClass::with([
             "address" => function($q){
                 $q->orderBy("list_display_order");
             },
-            "products", 
-            "history",
+            "products",
+            "history" => function($q){
+                $q->orderBy("id", "DESC");
+            },
             "documentFile"
-        ])->findOrFail($id);
-
-        $model = new LeadHistory();
-
-        if ($request->isMethod('post')) {
-            $rules = [
-                "action_taken_id" => ["required"],
-                "response_taken_id" => ["required"],
-                "remarks" => "",
-            ];
-
-            $validatedData = $request->validate($rules);
-
-            DB::beginTransaction();
-
-            try {
-
-                $save_data = $validatedData;
-
-                $save_data = $model->convertTimeZoneBeforeQueryToDatabase($save_data);
-
-                // dd($save_data);
-
-                $save_data['task_id'] = $id;
-
-                $model->fill($save_data);
-
-                if (!$model->save()) {
-                    throw new UserException("Fail To save", UserException::ERROR_LARAVEL_FAIL);
-                }
-
-                if (LaravelExtend::$errors) {
-                    throw new Exception("There are some errors");
-                }
-
-                DB::commit();
-
-                return back()->with('success', "History has saved");
-
-            } catch (Exception $ex) {
-                DB::rollBack();
-
-                $this->saveSqlLog();
-
-                return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", LaravelExtend::$errors);
-            }
-        }
+        ])->findOrFail($lead_id);
 
         $record->convertTimeZoneForDisplay();
 
+        // d($record->toArray(), true);
+
         $form = [
-            'url' => route($this->routePrefix . '.history', $id),
+            'url' => route($this->routePrefix . '.history_store', $lead_id),
             'method' => 'POST',
         ];
+
+        $model = new LeadHistory();
 
         $this->setForView(compact("record", "form", "model"));
 
         return $this->view(__FUNCTION__);
+    }
+
+    public function history_store($lead_id, Request $request)
+    {
+        $lead = $this->modelClass::findOrFail($lead_id);
+
+        $rules = [
+            "entry_by" => ["required"],
+            "action_type" => ["required"],
+            "status_type" => ["required"],
+            "action" => "",
+            "response_type_id" => "",
+            "response" => "",
+            "remarks" => "",
+            "next_meeting_date_time" => "",
+        ];
+
+        switch($request->input("action_type"))
+        {
+            case LeadHistory::ACTION_TYPE_CALL:
+                $rules['action'] = ["required"];
+                $rules['response_type_id'] = ["required"];                                
+                break;
+            case LeadHistory::ACTION_TYPE_SEND_SMS:
+            case LeadHistory::ACTION_TYPE_SEND_EMAIL:
+            case LeadHistory::ACTION_TYPE_SEND_WHATSAPP:
+                $rules['action'] = ["required"];
+                break;
+            case LeadHistory::ACTION_TYPE_CHANGE_STATUS:
+                $rules['status_type'] = ["required"];
+                break;
+            case LeadHistory::ACTION_TYPE_LEAD_TRANSFER:
+                $rules['assing_to_user_id'] = ["required"];
+                break;
+            case LeadHistory::ACTION_TYPE_DISPATCH:
+                $rules['remarks'] = ["required"];
+                break;
+        }
+
+        switch($request->input("status_type"))
+        {
+            case Lead::STATUS_COLD:
+            case Lead::STATUS_HOT:
+            case Lead::STATUS_WARM:    
+                $rules['next_meeting_date_time'] = ["required"];
+                break;        
+        }
+
+        $validatedData = $request->validate($rules);
+
+        DB::beginTransaction();
+
+        try {
+            // d($validatedData, true);
+
+            $lead->canChangeHistory();
+
+            $validatedData['lead_id'] = $lead_id;
+
+            $model = new LeadHistory();
+
+            $validatedData = $model->convertTimeZoneBeforeQueryToDatabase($validatedData);
+
+            $model = LeadHistory::create($validatedData);
+
+            if ($validatedData['status_type'] != $lead->status_type)
+            {
+                $lead->changeStatus($validatedData['status_type']);
+            }
+
+            if ($validatedData['next_meeting_date_time'])
+            {
+                $lead->changeNextFollowupDateTime($validatedData['next_meeting_date_time']);
+            }
+
+            if (LaravelExtend::$errors) {
+                throw new Exception("There are some errors");
+            }
+
+            DB::commit();
+
+            $request = request();
+
+            if ($request->ajax()) {
+                return $this->responseJson([
+                    'status' => 1,
+                ]);
+            }
+
+            return back()->with('success', "History Saved successfully");
+        } 
+        catch (UserException $ex) {
+            DB::rollBack();
+
+            $this->saveSqlLog();
+
+            $request = request();
+
+            if ($request->ajax()) {
+                return $this->responseJson([
+                    'status' => 0,
+                    'msg' => $ex->getMessage(),
+                    "custom_errors" => LaravelExtend::$errors
+                ]);
+            }
+
+            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", LaravelExtend::$errors);
+        }
+        catch (Exception $ex) {
+            DB::rollBack();
+
+            $this->saveSqlLog();
+
+            $request = request();
+
+            if ($request->ajax()) {
+                return $this->responseJson([
+                    'status' => 0,
+                    'msg' => get_exception_display_message($ex),
+                    "custom_errors" => LaravelExtend::$errors
+                ]);
+            }
+
+            return back()->withInput()->with('fail', get_exception_display_message($ex))->with("custom_errors", LaravelExtend::$errors);
+        }
+    }
+
+    public function transfer_lead($lead_id, Request $request)
+    {
+        $lead = $this->modelClass::findOrFail($lead_id);
+
+        $rules = [
+            "entry_by" => ["required"],
+            "action_type" => ["required"],
+            "assign_to_user_id" => ["required"],
+        ];
+
+        $validatedData = $request->validate($rules);
+
+        DB::beginTransaction();
+
+        try {
+            // d($validatedData, true);
+
+            if ($lead->status_type == Lead::STATUS_DEAD)
+            {
+                throw new UserException("Lead is dead", UserException::ERROR_USER_ACTION_RESTRICT);
+            }
+
+            if ($lead->status_type == Lead::STATUS_FAKE)
+            {
+                throw new UserException("Lead is Fake", UserException::ERROR_USER_ACTION_RESTRICT);
+            }
+
+            if ($validatedData['assign_to_user_id'] == $lead->assign_to_user_id)
+            {
+                throw new UserException("Lead is already assigned to this user", UserException::ERROR_USER_ACTION_RESTRICT);
+            }
+            else
+            {
+                $lead->changeAssignTo($validatedData);
+            }
+
+            if (LaravelExtend::$errors) {
+                throw new Exception("There are some errors");
+            }
+
+            DB::commit();
+
+            $request = request();
+
+            if ($request->ajax()) {
+                return $this->responseJson([
+                    'status' => 1,
+                ]);
+            }
+
+            return back()->with('success', "History Saved successfully");
+        } 
+        catch (UserException $ex) {
+            DB::rollBack();
+
+            $this->saveSqlLog();
+
+            $request = request();
+
+            if ($request->ajax()) {
+                return $this->responseJson([
+                    'status' => 0,
+                    'msg' => $ex->getMessage(),
+                    "custom_errors" => LaravelExtend::$errors
+                ]);
+            }
+
+            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", LaravelExtend::$errors);
+        }
+        catch (Exception $ex) {
+            DB::rollBack();
+
+            $this->saveSqlLog();
+
+            $request = request();
+
+            if ($request->ajax()) {
+                return $this->responseJson([
+                    'status' => 0,
+                    'msg' => get_exception_display_message($ex),
+                    "custom_errors" => LaravelExtend::$errors
+                ]);
+            }
+
+            return back()->withInput()->with('fail', get_exception_display_message($ex))->with("custom_errors", LaravelExtend::$errors);
+        }
     }
 
     public function history_destroy($id)

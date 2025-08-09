@@ -1,9 +1,8 @@
 <?php
 
-use App\Models\Task;
+use App\Models\LeadHistory;
 use App\Helpers\DateUtility;
 
-$false = false;
 ?>
 
 @extends($layout)
@@ -23,10 +22,12 @@ $false = false;
         <div class="card-header card-no-border pb-0">
             History
 
-            <div class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modal-call-form">Call</div>
-            <div class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modal-sms-form">SMS</div>
-            <div class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modal-whatsapp-form">Whatsapp</div>
-            <div class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modal-email-form">Email</div>
+            <div class="btn btn-secondary call_link" data-bs-toggle="modal" data-bs-target="#modal-call-form">Call</div>
+            <div class="btn btn-secondary sms_link">SMS</div>
+            <a class="btn btn-secondary whatsapp_link" href="https://web.whatsapp.com/" target="_blank" rel="noopener noreferrer">
+                Whatsapp
+            </a>
+            <div class="btn btn-secondary email_link">Email</div>
             <div class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modal-snooze-form">Snooze</div>
             <div class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modal-dispatch-form">Dispatch</div>
             <div class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modal-transfer-form">Transfer Lead</div>
@@ -49,26 +50,276 @@ $false = false;
                             <th><?= get_value_from_list($history_field_labels, 'id', 'id') ?></th>
                             <th><?= get_value_from_list($history_field_labels, 'entry_by', 'entry_by') ?></th>
                             <th><?= get_value_from_list($history_field_labels, 'action_type', 'action_type') ?></th>
+                            <th><?= get_value_from_list($history_field_labels, 'action', 'action') ?></th>
                             <th><?= get_value_from_list($history_field_labels, 'response_type_id', 'response_type_id') ?></th>
-                            <th><?= get_value_from_list($history_field_labels, 'status_type', 'status_type') ?></th>
-                            <th><?= get_value_from_list($history_field_labels, 'assing_to_user_id', 'assing_to_user_id') ?></th>
+                            <th><?= get_value_from_list($history_field_labels, 'response', 'response') ?></th>
                             <th><?= get_value_from_list($history_field_labels, 'recording_file', 'recording_file') ?></th>
+                            <th><?= get_value_from_list($history_field_labels, 'assign_to_user_id', 'assign_to_user_id') ?></th>
                             <th><?= get_value_from_list($history_field_labels, 'remarks', 'remarks') ?></th>
-                            <th><?= get_value_from_list($history_field_labels, 'next_meeting_date_time', 'next_meeting_date_time') ?></th>
-                            <th>{{ get_value_from_list($history_field_labels, 'created_at', 'created_at') }}</th>
-                            <th>{{ get_value_from_list($history_field_labels, 'updated_at', 'updated_at') }}</th>
+                            <th><?= get_value_from_list($history_field_labels, 'status_type', 'status_type') ?></th>
+                            <th style="width:10%"><?= get_value_from_list($history_field_labels, 'next_meeting_date_time', 'next_meeting_date_time') ?></th>
+                            <th style="width:10%">{{ get_value_from_list($history_field_labels, 'created_at', 'created_at') }}</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($record->history as $record)
+                        @foreach ($record->history as $history)
                         <?php
-                            $record->convertTimeZoneForDisplay();
+                            $history->convertTimeZoneForDisplay();                            
                         ?>
-                            
+                        <tr>
+                            <td>{{ $history->id }}</td>
+                            <td>{{ $history->entry_by }}</td>
+                            <td>{{ get_value_from_list($action_type_list, $history->action_type) }}</td>
+                            <td>
+                                <div class="more-less-text">{{ $history->action }}</div>
+                            </td>
+                            <td>
+                                {{ get_value_from_list($lead_history_response_list, $history->response_type_id) }}
+                            </td>
+                            <td>
+                                <div class="more-less-text">{{ $history->response }}</div>
+                            </td>
+                            <td>
+                                @if($record->recording_file_url)
+                                <?php 
+                                    $mime_type = get_mime_type_from_extension($record->recording_file);
+                                ?>
+                                <audio controls class="full-audio">
+                                    <source src="{{ $record->recording_file_url }}" type="{{ $mime_type }}">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                @endif
+                            </td>
+                            <td>
+                                {{ get_value_from_list($userListCache, $history->assign_to_user_id) }}
+                            </td>
+                            <td>
+                                <div class="more-less-text">{{ $history->remarks }}</div>
+                            </td>
+                            <td>
+                                {{ get_value_from_list($status_type_list, $history->status_type) }}
+                            </td>
+                            <td>
+                                <x-Backend.created-and-by :datetime="$history->next_meeting_date_time" userId="0" />
+                            </td>
+                            <td>
+                                <x-Backend.created-and-by :datetime="$history->created_at" :userId="$history->created_by" />
+                            </td>
+                        </tr>
+
                         @endforeach
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="modal-sms-whatsapp-email-form" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title fs-5"></h3>
+                    <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <x-form.start action="{{ route('lead.history_store', ['lead_id' => $record->id]) }}" method="POST" />
+                        <x-Inputs.text-field type="hidden" name="entry_by" :label="$false" value="MANUAL" />
+                        <x-Inputs.text-field type="hidden" name="action_type" :label="$false" value="" class="action_type" />
+                        <div class="form-group mb-3">
+                            <?php
+                            $field = 'action';
+                            $label = get_value_from_list($history_field_labels, $field, $field);
+                            ?>
+                            <x-Inputs.text-area :id="$field" :name="$field" :label="$label" rows="3" mandatory="true" />
+                        </div>
+                        <div class="form-group mb-3">
+                            <?php
+                            $field = 'response_type_id';
+                            $label = get_value_from_list($history_field_labels, $field, $field);
+                            ?>
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
+                                :list="$lead_history_response_list" class="modal-select2"
+                                />
+                        </div>
+                        <div class="form-group mb-3">
+                            <?php
+                            $field = 'response';
+                            $label = get_value_from_list($history_field_labels, $field, $field);
+                            ?>
+                            <x-Inputs.text-area :id="$field" :name="$field" :label="$label" rows="3"/>
+                        </div>                        
+                        <div class="form-group mb-3">
+                            <?php
+                            $field = 'status_type';
+                            $label = get_value_from_list($history_field_labels, $field, $field);
+                            ?>
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
+                                :list="$status_type_list" :value="$record->{$field}" class="modal-select2" mandatory="true"
+                                />
+                        </div>
+                        <div class="form-group mb-3">
+                            <?php
+                            $field = 'remarks';
+                            $label = get_value_from_list($history_field_labels, $field, $field);
+                            ?>
+                            <x-Inputs.text-area :id="$field" :name="$field" :label="$label" rows="3"/>
+                        </div>
+                        <div class="form-group mb-3">
+                            <?php
+                            $field = 'next_meeting_date_time';
+                            $label = get_value_from_list($history_field_labels, $field, $field);
+                            ?>
+                            <x-Inputs.text-field :id="$field" :name="$field" :label="$label" class="next-date-time-picker"/>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary closed" type="button" data-bs-dismiss="modal">Close</button>
+                    <button class="btn btn-primary submit" type="button">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal-transfer-form" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title fs-5">Tranfer Lead To Another User</h3>
+                    <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <x-form.start action="{{ route('lead.transfer_lead', ['lead_id' => $record->id]) }}" method="POST" />
+                        <x-Inputs.text-field type="hidden" name="entry_by" :label="$false" value="MANUAL" />
+                        <x-Inputs.text-field type="hidden" name="action_type" :label="$false" value="{{ LeadHistory::ACTION_TYPE_LEAD_TRANSFER }}" />
+                        <div class="form-group mb-3">
+                            <?php
+                            $field = 'assign_to_user_id';
+                            $label = get_value_from_list($history_field_labels, $field, $field);
+                            ?>
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
+                                :list="$user_list" class="modal-select2"
+                                mandatory="true" />
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary closed" type="button" data-bs-dismiss="modal">Close</button>
+                    <button class="btn btn-primary submit" type="button">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(function(){
+
+            function modal_form_init(modal) {
+                setTimeout(() => {
+                    $('.modal-select2').select2({
+                        placeHolder: "Please Select",
+                        theme: "bootstrap-5",
+                        dropdownParent: modal
+                    });
+                }, 500);
+
+                modal.find(".next-date-time-picker").flatpickr({
+                    enableTime: true,        
+                    minDate: "today",
+                    minTime: new Date().getHours() + ":" + new Date().getMinutes(),
+                    dateFormat: constants.dateTimeFormat
+                });
+
+                modal.find(".modal-body form").ajaxForm({
+                    beforeSubmit: function(arr, $form, options) {
+
+                        $.loader.init().setInfo("Uploading....").show();
+
+                        return true;
+                    },
+                    uploadProgress: function(event, position, total, percentComplete) {
+                        $.loader.setInfo("Uploading " + percentComplete + "%");
+                    },
+                    error: function(xhr, status, errorString) {
+                        $.loader.init().hide();
+
+                        response = xhr.responseText.trim();
+
+                        if (response.length == 0) {
+                            $.events.onAjaxError("JSON Parse Error", "Empty Response");
+                            return false;
+                        }
+
+                        try {
+                            var responseJson = JSON.parse(response);
+                        } catch (e) {
+                            $.events.onAjaxError("JSON Parse Error", response);
+                            return false;
+                        }
+
+                        form_errors(modal.find("form"), responseJson);
+                    },
+                    success: function(responseText, statusText, xhr) {
+
+                        var form_url = modal.find("form").attr("action");
+
+                        ajaxHandleResponse(form_url, responseText, function(response) {
+                            modal.find("button.closed").trigger("click");
+
+                            $.loader.init().setInfo("Reloading....");
+                            window.location.reload();
+                        });
+                    }
+                });
+            }
+
+            modal_form_init($("#modal-transfer-form"));
+
+            $('#modal-transfer-form .submit').click(function() {
+                $('#modal-transfer-form form').trigger("submit");
+            });
+
+            
+            modal_form_init($("#modal-sms-whatsapp-email-form"));
+
+            $('#modal-sms-whatsapp-email-form .submit').click(function() {
+                $('#modal-sms-whatsapp-email-form form').trigger("submit");
+            });
+
+            $(".sms_link").click(function(){
+                var modal = $("#modal-sms-whatsapp-email-form");
+
+                modal.find("form").find('input:text, textarea').val('');
+
+                modal.find(".modal-title").text("SMS");
+                modal.find(".action_type").val('{{ LeadHistory::ACTION_TYPE_SEND_SMS }}');
+
+                modal.modal("show");
+            });
+
+            $(".whatsapp_link").click(function(){
+                var modal = $("#modal-sms-whatsapp-email-form");
+
+                modal.find("form").find('input:text, textarea').val('');
+
+                modal.find(".modal-title").text("Whatsapp");
+                modal.find(".action_type").val('{{ LeadHistory::ACTION_TYPE_SEND_WHATSAPP }}');
+
+                modal.modal("show");
+            });
+
+            $(".email_link").click(function(){
+                var modal = $("#modal-sms-whatsapp-email-form");
+
+                modal.find("form").find('input:text, textarea, select').val('').find('input:checkbox, input:radio').prop('checked', false);
+
+                modal.find(".modal-title").text("Email");
+                modal.find(".action_type").val('{{ LeadHistory::ACTION_TYPE_SEND_EMAIL }}');
+
+                modal.modal("show");
+            });
+
+            $(".more-less-text").srParagraph();
+        });
+    </script>
 @endsection

@@ -20,11 +20,11 @@ return new class extends Migration
             $table->foreignId("response_type_id")->nullable()->constrained("drop_down_values")->onDelete("restrict");
             $table->text("response")->nullable();
             $table->string("recording_file")->nullable();
-            $table->string("status_type", 45);
+            $table->string("status_type", 45)->nullable();
             $table->text("remarks")->nullable();
             $table->dateTime("next_meeting_date_time")->nullable();
             $table->boolean("is_lead_transfered")->default(0);
-            $table->foreignId("assing_to_user_id")->nullable()->constrained("users")->onDelete("restrict");
+            $table->foreignId("assign_to_user_id")->nullable()->constrained("users")->onDelete("restrict");
             $table->timestamps();
             $table->bigInteger("created_by")->nullable();
             $table->bigInteger("updated_by")->nullable();

@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Exceptions\UserException;
+use App\Helpers\LaravelExtend;
+use App\Notifications\GeneralNotification;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Unique;
@@ -10,6 +13,10 @@ class Lead extends BaseModel
 {
     protected $appends = [
         'display_name',
+    ];
+
+    protected $casts = [
+        'next_meeting_date_time' => 'datetime',
     ];
 
     protected static array $unique_fields = [];
@@ -204,6 +211,83 @@ class Lead extends BaseModel
 
                 return $list;
                 break;
+        }
+    }
+
+    public function changeAssignTo(array $data)
+    {
+        if ($data['assign_to_user_id'])
+        {
+            $this->assign_to_user_id = $data['assign_to_user_id'];
+            $this->save();
+
+            LeadHistory::create($data);
+
+            $notification_data = [
+                'from_user_id' => LaravelExtend::getAuthUserId(),
+                "sub_type" => Notification::SUB_TYPE_INFO,
+                "msg" => "Lead $this->name is assigned to you"
+            ];
+
+            $notifyObj = new GeneralNotification($notification_data);
+
+            $this->assignTo->notify($notifyObj);
+        }
+    }
+
+    public function changeStatus($status)
+    {
+        $cache_key = "status_type_active_list";
+
+        $status_type_list = Type::getCache($cache_key);
+
+        if (!$status_type_list)
+        {
+            $type_conditions = [
+                'type' => Type::getType($this, "status_type")
+            ];
+
+            $status_type_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
+
+            Type::addCache($cache_key, $status_type_list, 60 * 60 * 24);
+        }
+
+        $label = get_value_from_list($status_type_list, $this->status_type, $this->status_type);
+        $label .= " To ";
+        $label .= get_value_from_list($status_type_list, $status, $status);
+
+        DashboardCounter::createOrUpdateCounter($this, "status_change", "", $label, 1, "", 10);
+
+        $this->status_type = $status;
+        $this->save();
+    }
+
+    public function changeNextFollowupDateTime($datetime)
+    {
+        $this->next_meeting_date_time = $datetime;
+        $this->save();
+    }
+
+    public function canChangeHistory()
+    {
+        if ($this->assign_to_user_id)
+        {
+            $user_id_list = $this->assignTo->designation->getParentUserIdListBasedOnDesignationLevel();
+
+            $auth_user_id = LaravelExtend::getAuthUserId();
+
+            if ($auth_user_id == $this->assign_to_user_id || in_array($auth_user_id, $user_id_list))
+            {
+
+            }
+            else
+            {
+                throw new UserException("You are not allowed to change lead history, only assignee or its parent designation user can change it.", UserException::ERROR_USER_ACTION_RESTRICT);
+            }
+        }
+        else if (!is_admin_role_login())
+        {
+            throw new UserException("Lead is not assigned, so only Admin can change it.", UserException::ERROR_USER_ACTION_RESTRICT);
         }
     }
 }

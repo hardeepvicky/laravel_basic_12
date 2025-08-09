@@ -103,62 +103,64 @@ if (!isset($partial_path)) {
         </div>
     </div>
 
-    <script src="{{ get_asset_url('assets/js/vendors/bootstrap/dist/js/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ get_asset_url('assets/js/vendors/bootstrap/dist/js/popper.min.js') }}"></script>
-    <script src="{{ get_asset_url('assets/js/vendors/font-awesome/fontawesome-min.js') }}"></script>
-    <script src="{{ get_asset_url('assets/js/vendors/feather-icon/feather.min.js') }}"></script>
-    <script src="{{ get_asset_url('assets/js/vendors/feather-icon/custom-script.js') }}"></script>
-    <script src="{{ get_asset_url('assets/js/chart/apex-chart/apex-chart.js') }}"></script>
-    <script src="{{ get_asset_url('assets/js/chart/apex-chart/stock-prices.js') }}"></script>
-    <script src="{{ get_asset_url('assets/js/slick/slick.min.js') }}"></script>
-    <script src="{{ get_asset_url('assets/js/slick/slick.js') }}"></script>
-    <script src="{{ get_asset_url('assets/js/js-datatables/datatables/jquery.dataTables.min.js') }}"></script>
-    <script src="{{ get_asset_url('assets/js/js-datatables/datatables/datatable.custom.js') }}"></script>
-    <script src="{{ get_asset_url('assets/js/js-datatables/datatables/datatable.custom1.js') }}"></script>
-    <script src="{{ get_asset_url('assets/js/datatable/datatables/datatable.custom.js') }}"></script>
-    <script src="{{ get_asset_url('assets/js/sweetalert/sweetalert2.min.js') }}"></script>
-    <script src="{{ get_asset_url('assets/libs/bootbox/5.5.3/bootbox.min.js') }}"></script>
-    <script src="{{ get_asset_url('assets/libs/select2/select2.min.js') }}"></script>
-    <script src="{{ get_asset_url('assets/js/flat-pickr/flatpickr.js') }}"></script>
-    <script src="{{ get_asset_url('assets/js/custom-card/custom-card.js') }}"></script>
-    <script src="{{ get_asset_url('assets/js/config.js') }}"></script>
-    <script src="{{ get_asset_url('assets/js/script.js') }}"></script>
-    <script src="{{ get_asset_url('assets/js/height-equal.js') }}"></script>
-    <script src="{{ get_asset_url('assets/js/sidebar.js') }}"></script>
-    <script src="{{ get_asset_url('assets/js/scrollbar/simplebar.js') }}"></script>
-    <script src="{{ get_asset_url('assets/js/scrollbar/custom.js') }}"></script>
-    <script src="{{ get_asset_url('assets/js/range/rangeslider.nostyle.umd.min.js') }}"></script>
-    <script src="{{ get_asset_url('assets/js/range/rangeslider.umd.min.js') }}"></script>
-    <script src="{{ get_asset_url('assets/js/clipboard/clipboard.min.js') }}"></script>
-    <script src="{{ get_asset_url('assets/js/theme-customizer/customizer.js') }}"></script>
+    <div class="script-block">
+        <script src="{{ get_asset_url('assets/js/vendors/bootstrap/dist/js/bootstrap.bundle.min.js') }}"></script>
+        <script src="{{ get_asset_url('assets/js/vendors/bootstrap/dist/js/popper.min.js') }}"></script>
+        <script src="{{ get_asset_url('assets/js/vendors/font-awesome/fontawesome-min.js') }}"></script>
+        <script src="{{ get_asset_url('assets/js/vendors/feather-icon/feather.min.js') }}"></script>
+        <script src="{{ get_asset_url('assets/js/vendors/feather-icon/custom-script.js') }}"></script>
+        <script src="{{ get_asset_url('assets/js/chart/apex-chart/apex-chart.js') }}"></script>
+        <script src="{{ get_asset_url('assets/js/chart/apex-chart/stock-prices.js') }}"></script>
+        <script src="{{ get_asset_url('assets/js/slick/slick.min.js') }}"></script>
+        <script src="{{ get_asset_url('assets/js/slick/slick.js') }}"></script>
+        <script src="{{ get_asset_url('assets/js/js-datatables/datatables/jquery.dataTables.min.js') }}"></script>
+        <script src="{{ get_asset_url('assets/js/js-datatables/datatables/datatable.custom.js') }}"></script>
+        <script src="{{ get_asset_url('assets/js/js-datatables/datatables/datatable.custom1.js') }}"></script>
+        <script src="{{ get_asset_url('assets/js/datatable/datatables/datatable.custom.js') }}"></script>
+        <script src="{{ get_asset_url('assets/js/sweetalert/sweetalert2.min.js') }}"></script>
+        <script src="{{ get_asset_url('assets/libs/bootbox/5.5.3/bootbox.min.js') }}"></script>
+        <script src="{{ get_asset_url('assets/libs/select2/select2.min.js') }}"></script>
+        <script src="{{ get_asset_url('assets/js/flat-pickr/flatpickr.js') }}"></script>
+        <script src="{{ get_asset_url('assets/js/custom-card/custom-card.js') }}"></script>
+        <script src="{{ get_asset_url('assets/js/config.js') }}"></script>
+        <script src="{{ get_asset_url('assets/js/script.js') }}"></script>
+        <script src="{{ get_asset_url('assets/js/height-equal.js') }}"></script>
+        <script src="{{ get_asset_url('assets/js/sidebar.js') }}"></script>
+        <script src="{{ get_asset_url('assets/js/scrollbar/simplebar.js') }}"></script>
+        <script src="{{ get_asset_url('assets/js/scrollbar/custom.js') }}"></script>
+        <script src="{{ get_asset_url('assets/js/range/rangeslider.nostyle.umd.min.js') }}"></script>
+        <script src="{{ get_asset_url('assets/js/range/rangeslider.umd.min.js') }}"></script>
+        <script src="{{ get_asset_url('assets/js/clipboard/clipboard.min.js') }}"></script>
+        <script src="{{ get_asset_url('assets/js/theme-customizer/customizer.js') }}"></script>
 
-    <script src="{{ get_asset_url('assets/libs/Croppie-2.6.4/croppie.min.js') }}"></script>
-    <script src="{{ get_asset_url('assets/libs/fancybox/dist/jquery.fancybox.min.js') }}"></script>
-    <script src="{{ get_asset_url('assets/libs/ejs.min.js') }}"></script>
-    <script src="{{ get_asset_url('assets/libs/jquery.form.min.js') }}"></script>
-    <script src="{{ get_asset_url('assets/libs/typeahead.js-0.11.1/dist/typeahead.bundle.min.js') }}"></script>
-    <script src="{{ get_asset_url('assets/libs/jquery-file-validator/js/file-validator.js') }}"></script>
-    <script src="{{ get_asset_url('assets/libs/summernote/summernote-lite.min.js') }}"></script>
+        <script src="{{ get_asset_url('assets/libs/Croppie-2.6.4/croppie.min.js') }}"></script>
+        <script src="{{ get_asset_url('assets/libs/fancybox/dist/jquery.fancybox.min.js') }}"></script>
+        <script src="{{ get_asset_url('assets/libs/ejs.min.js') }}"></script>
+        <script src="{{ get_asset_url('assets/libs/jquery.form.min.js') }}"></script>
+        <script src="{{ get_asset_url('assets/libs/typeahead.js-0.11.1/dist/typeahead.bundle.min.js') }}"></script>
+        <script src="{{ get_asset_url('assets/libs/jquery-file-validator/js/file-validator.js') }}"></script>
+        <script src="{{ get_asset_url('assets/libs/summernote/summernote-lite.min.js') }}"></script>
 
-    <script src="https://cdn.amcharts.com/lib/5/index.js"></script>
-    <script src="https://cdn.amcharts.com/lib/5/percent.js"></script>
-    <script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
+        <script src="https://cdn.amcharts.com/lib/5/index.js"></script>
+        <script src="https://cdn.amcharts.com/lib/5/percent.js"></script>
+        <script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
 
-    <!-- Project Lib -->
-    <script src="{{ get_asset_url('libs/constants.js') }}"></script>
+        <!-- Project Lib -->
+        <script src="{{ get_asset_url('libs/constants.js') }}"></script>
 
-    <script src="{{ get_asset_url('libs/loader/loader.js') }}"></script>
-    <script src="{{ get_asset_url('libs/date-util.js') }}"></script>
-    <script src="{{ get_asset_url('libs/jquery-input-validate.js') }}"></script>
-    <script src="{{ get_asset_url('libs/jquery_extend.js') }}"></script>
-    <script src="{{ get_asset_url('libs/i-data-table/script.js') }}"></script>
+        <script src="{{ get_asset_url('libs/loader/loader.js') }}"></script>
+        <script src="{{ get_asset_url('libs/date-util.js') }}"></script>
+        <script src="{{ get_asset_url('libs/jquery-input-validate.js') }}"></script>
+        <script src="{{ get_asset_url('libs/jquery_extend.js') }}"></script>
+        <script src="{{ get_asset_url('libs/i-data-table/script.js') }}"></script>
 
-    <!-- Project JS -->
-    <script src="{{ get_asset_url('js/common_funtions.js') }}"></script>
-    <script src="{{ get_asset_url('js/common_script_for_all_non_ajax_layout.js') }}"></script>
-    <script src="{{ get_asset_url('js/backend/file-gallery.js') }}"></script>
-    <script src="{{ get_asset_url('js/backend/backend_non_ajax.js') }}"></script>
-    <script src="{{ get_asset_url('js/common.js') }}"></script>
+        <!-- Project JS -->
+        <script src="{{ get_asset_url('js/common_funtions.js') }}"></script>
+        <script src="{{ get_asset_url('js/common_script_for_all_non_ajax_layout.js') }}"></script>
+        <script src="{{ get_asset_url('js/backend/file-gallery.js') }}"></script>
+        <script src="{{ get_asset_url('js/backend/backend_non_ajax.js') }}"></script>
+        <script src="{{ get_asset_url('js/common.js') }}"></script>
+    </div>
 
     <div class="modal fade" id="modal-add-via-upload" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-xl" role="document">
@@ -237,29 +239,9 @@ if (!isset($partial_path)) {
                             return false;
                         }
 
-                        modal.find("form").find(".error-message").remove();
-
-                        if (typeof responseJson['errors'] == "object") {
-                            for (var field_name in responseJson['errors']) {
-                                var errors = responseJson['errors'][field_name];
-
-                                var field = modal.find("form").find("[name='" + field_name + "']");
-                                if (field.length > 0) {
-                                    var html = "";
-
-                                    for (var a in errors) {
-                                        html += '<span class="error-message">' + errors[a] + '</span>';
-                                    }
-
-                                    field.parent().append(html);
-                                }
-                            }
-                        } else if (typeof responseJson['message'] == "string") {
-                            $.events.onUserError(responseJson['message']);
-                        }
+                        form_errors(modal.find("form"), responseJson);
                     },
                     success: function(responseText, statusText, xhr) {
-                        $.loader.init().hide();
 
                         ajaxHandleResponse(form_url, responseText,
                             function(response) {
