@@ -21,6 +21,8 @@ class SectionRoutes
         "tags.ajax_get_list_for_header",
         "change-history.ajax_get_model_fields",
 
+        "product.ajax_load_attribute_fields",
+
         "*.ajax_get_list",
         "*.ajax_get_code_list",
         "*.ajax_get_count",

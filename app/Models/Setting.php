@@ -11,6 +11,7 @@ class Setting extends BaseMongoModel
         "company_address" => "Company Address",
         "company_gst_no" => "Company GST No.",
         "export_csv_max_record_count" => "Export CSV Max Record Count",
+        "item_sku_pattern" => "Item SKU Pattern",
     ];
 
     /**

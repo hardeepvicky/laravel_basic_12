@@ -20,6 +20,7 @@ class DropDownValue extends BaseModel
     const TASK_RESPONSE = "TASK_RESPONSE";
     const FILE_EXTENSION = "FILE_EXTENSION";
     const COLOR = "COLOR";
+    const BRAND = "BRAND";
     const USER_CATEGORY = "USER_CATEGORY";
     const LEAD_SOURCE = "LEAD_SOURCE";
     const LEAD_HISTORY_RESPONSE = "LEAD_HISTORY_RESPONSE";
@@ -75,6 +76,7 @@ class DropDownValue extends BaseModel
             self::TASK_RESPONSE => "Task Response",
             self::FILE_EXTENSION => "File Extension",
             self::COLOR => "Colour",
+            self::BRAND => "Brand",
             self::USER_CATEGORY => "User Category",
             self::LEAD_SOURCE => "Lead Source",
             self::LEAD_HISTORY_RESPONSE => "Lead History Response",

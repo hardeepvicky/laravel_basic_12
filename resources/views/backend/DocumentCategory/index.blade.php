@@ -56,7 +56,7 @@
                         $field = 'is_active';
                         $label = get_value_from_list($field_labels, $field, $field);
                         ?>
-                        <x-Inputs.drop-down :name="$field" :label="$label" :value="$search[$field]" :list="$success_fail_list"
+                        <x-Inputs.drop-down :name="$field" :label="$label" :value="$search[$field]" :list="$yes_no_list"
                             class="select2" />
                     </div>
                 </div>

@@ -161,7 +161,7 @@ use App\Models\ProductCategoryAttribute;
                                     @endphp
                                     @if (isset($productCategoryAttribute))
                                         @foreach ($productCategoryAttribute as $k => $child_arr)
-                                            <tr class="" sr-id="{{ $child_arr['id'] }}"
+                                            <tr class="" sr-id="{{ $child_arr['id'] ?? $k }}"
                                                 sr-counter="{{ $k }}">
                                                 <td>
                                                     <div class="block">

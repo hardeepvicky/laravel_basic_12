@@ -15,6 +15,8 @@ class Product extends BaseModel
 
     protected static array $unique_fields = ["product_category_id", "name"];
 
+    protected static array $list_fields = ["id", "name", "sku"];
+
     protected static array $fields_containg_tags = ["description"];
 
     public string $field_for_create_tag = "model_name";
@@ -23,7 +25,11 @@ class Product extends BaseModel
         ProductAttribute::class => [
             "foreignKey" => ["product_id"],
             "preventDelete" => true
-        ]
+        ],
+        ProductFile::class => [
+            "foreignKey" => ["product_id"],
+            "preventDelete" => false
+        ],
     ];
 
     public function beforeSave()
@@ -111,7 +117,14 @@ class Product extends BaseModel
 
     public function getDisplayName()
     {
-        return $this->name;
+        $name = $this->name;
+
+        if ($this->sku)
+        {
+            $name .= " (" . $this->sku . ")";
+        }
+
+        return $name;
     }
 
     public function getUniqueValidationRules(Request $request)
@@ -156,6 +169,9 @@ class Product extends BaseModel
         $labels = parent::getFieldLabels();
 
         $labels['productFile'] = "Files";
+        $labels['images'] = "Images";
+        $labels['videos'] = "Videos";
+        $labels['other_files'] = "Other Files";
 
         return $labels;
     }

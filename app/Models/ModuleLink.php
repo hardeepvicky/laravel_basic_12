@@ -92,7 +92,7 @@ class ModuleLink extends BaseModel
         preg_match_all($pattern, $content, $main_matches);
 
         if (empty($main_matches) || !isset($main_matches[0]) || empty($main_matches[0])) {
-            return;
+            return $content;
         }
 
         foreach ($main_matches[0] as $main_match) {

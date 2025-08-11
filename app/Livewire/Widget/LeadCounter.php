@@ -77,7 +77,7 @@ class LeadCounter extends Component
         if (!$status_type_list)
         {
             $type_conditions = [
-                'type' => Type::getType($this, "status_type")
+                'type' => Type::getType(new Lead(), "status_type")
             ];
 
             $status_type_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");

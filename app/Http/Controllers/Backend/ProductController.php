@@ -39,6 +39,19 @@ class ProductController extends BackendController
 
         $builder = $this->_getBuildeForIndex($cache_key_prefix);
 
+        $builder->with([
+            "productAttributes" => function($q){
+                $q->orderBy("display_order", "ASC");
+            },
+            "productAttributes.categoryAttribute",
+            "mainImage",
+            "images",
+            "videos",
+            "otherFiles",
+            "keywords",
+            "catalog.document"
+        ]);
+
         $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
 
         Product::convertRecordsForChildUom($records);
@@ -100,19 +113,6 @@ class ProductController extends BackendController
         // d($conditions, true);
 
         $builder = $builder->where($conditions);
-
-        $builder->with([
-            "productAttributes" => function($q){
-                $q->orderBy("display_order", "ASC");
-            },
-            "productAttributes.categoryAttribute",
-            "mainImage",
-            "images",
-            "videos",
-            "otherFiles",
-            "keywords",
-            "catalog.document"
-        ]);
 
         if ($apply_sort) {
             $cache_key_for_sort = $cache_key_prefix . "-index-extra-params";
@@ -442,7 +442,7 @@ class ProductController extends BackendController
     public function copy($id)
     {
         $model = $this->model = $this->modelClass::with([
-            "productFile"
+            "images", "videos", "otherFiles", "keywords"
         ])->findOrFail($id);
 
         $this->beforeEdit($model);
@@ -580,6 +580,11 @@ class ProductController extends BackendController
 
         $this->beforeCsvExport($builder);
 
+        $builder->with([
+            "mainImage",
+            "catalog.document"
+        ]);
+
         $records = $builder->get();
 
         Product::convertRecordsForChildUom($records);
@@ -660,6 +665,13 @@ class ProductController extends BackendController
         $builder = $this->_getBuildeForIndex($cache_key_prefix);
 
         $this->beforeCsvExport($builder);
+
+        $builder->with([
+            "productAttributes" => function($q){
+                $q->orderBy("display_order", "ASC");
+            },
+            "productAttributes.categoryAttribute",
+        ]);
 
         $records = $builder->get();
 

@@ -101,7 +101,6 @@ class SettingsController extends BackendController
             UserRole::class,
             Type::class,
             FieldSetting::class,
-            Employee::class,
             City::class,
             Enquiry::class,
         ];
