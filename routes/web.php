@@ -583,6 +583,28 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
         });
     });
 
+    $route_prefix = "product-catalog";
+    $controllerClass = ProductCatalogController::class;
+    Route::resource($route_prefix, $controllerClass);
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
+        $name = "copy";
+        Route::get("{id}/" . $name, [$controllerClass, $name])->name($name);
+
+        $name = "activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "de_activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "ajax_get_list";
+        Route::get($name . "/{product_category_id}", [$controllerClass, $name])->name($name);
+
+        $name = "ajax_update_field";
+        Route::post($name, [$controllerClass, $name])->name($name);
+    });
+
+
     $route_prefix = "document-category";
     $controllerClass = DocumentCategoryController::class;
     Route::resource($route_prefix, $controllerClass);
@@ -757,27 +779,7 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
         });
     });
 
-    $route_prefix = "product-catalog";
-    $controllerClass = ProductCatalogController::class;
-    Route::resource($route_prefix, $controllerClass);
-    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
-
-        $name = "copy";
-        Route::get("{id}/" . $name, [$controllerClass, $name])->name($name);
-
-        $name = "activate";
-        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
-
-        $name = "de_activate";
-        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
-
-        $name = "ajax_get_list";
-        Route::get($name . "/{product_category_id}", [$controllerClass, $name])->name($name);
-
-        $name = "ajax_update_field";
-        Route::post($name, [$controllerClass, $name])->name($name);
-    });
-
+    
     $route_prefix = "lead";
     $controllerClass = LeadController::class;
     Route::resource($route_prefix, $controllerClass);
