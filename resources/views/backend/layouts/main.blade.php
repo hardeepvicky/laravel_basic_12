@@ -201,7 +201,7 @@ if (!isset($partial_path)) {
     <script>
         $(function() {
 
-            function after_modal_load(form_url, modal) {
+            function after_modal_load(form_url, modal, prev_model_id) {
                 setTimeout(() => {
                     $('.modal-select2').select2({
                         placeHolder: "Please Select",
@@ -248,25 +248,27 @@ if (!isset($partial_path)) {
 
                                 modal.find("button.closed").trigger("click");
 
-                                $("form.summary_search").find(".clear_form_search_conditions").trigger("click");
-
-                                if ($("#gallery-modal-main").length > 0) {
-                                    $("#gallery-modal-main").refresh();
-                                    $("#gallery-modal-main").modal('show');
+                                if (prev_model_id && $("#" + prev_model_id).length > 0) {
+                                    $("#" + prev_model_id).find("form.summary_search").find(".clear_form_search_conditions").trigger("click");                                    
+                                    $("#" + prev_model_id).modal('show');
                                 }
                             });
                     }
                 });
             }
 
-            $('#modal-add-via-upload').on('show.bs.modal', function() {
+            $('#modal-add-via-upload').on('show.bs.modal', function(event) {
 
                 var form_url = "/document-file/create?add_via=upload";
 
                 $('#modal-add-via-upload').find(".modal-body").html("Loading....");
 
+                let triggerElement = $(event.relatedTarget);
+
+                let prev_model_id = triggerElement.data("prev_modal_id");
+
                 $('#modal-add-via-upload').find(".modal-body").load(form_url, function() {
-                    after_modal_load(form_url, $('#modal-add-via-upload'));
+                    after_modal_load(form_url, $('#modal-add-via-upload'), prev_model_id);
                 });
             });
 
@@ -274,14 +276,18 @@ if (!isset($partial_path)) {
                 $('#modal-add-via-upload form').trigger("submit");
             });
 
-            $('#modal-add-via-url').on('show.bs.modal', function() {
+            $('#modal-add-via-url').on('show.bs.modal', function(event) {
 
                 var form_url = "/document-file/create?add_via=url";
 
                 $('#modal-add-via-url').find(".modal-body").html("Loading....");
 
+                let triggerElement = $(event.relatedTarget);
+
+                let prev_model_id = triggerElement.data("prev_modal_id");
+
                 $('#modal-add-via-url').find(".modal-body").load(form_url, function() {
-                    after_modal_load(form_url, $('#modal-add-via-url'));
+                    after_modal_load(form_url, $('#modal-add-via-url'), prev_model_id);
                 });
             });
 

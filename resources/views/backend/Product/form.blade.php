@@ -12,13 +12,13 @@
     <x-Form.start action="{{ $form['url'] }}" method="{{ $form['method'] }}" />
 
     <div class="row">
-        <div class="col-xxl-10">
+        <div class="col-xxxl-12">
             <div class="card">
                 <div class="card-header card-no-border pb-0">
                 </div>
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-md-12 col-xxl-6">
+                        <div class="col-md-12 col-xxl-5">
                             <div class="form-group mb-3">
                                 <?php
                                 $field = 'product_category_id';
@@ -185,36 +185,7 @@
                                             :value="$value" multiple="multiple" />
                                     </div>
                                 </div>
-                            </div>                            
-                        </div>
-
-                        <div class="col-md-12 col-xxl-6">
-                            <div class="form-group mb-3">
-                                <div class="textarea-wrapper">
-                                    <?php
-                                    $field = 'description';
-                                    $label = get_value_from_list($field_labels, $field, $field);
-                                    ?>
-                                    <x-Inputs.text-area :id="$field" :name="$field" :label="$label" value="{{ $model->{$field} }}"
-                                        class="auto-suggesstion-list"
-                                        rows="4"
-                                        placeholder="Enter {{ $label }}"
-                                        />
-                                    <div id="{{ $field . '-suggestion-box' }}" class="suggestion-box hidden"></div>
-                                </div>
-
-                            </div>
-                            <div class="form-group mb-3">
-                                <?php
-                                $field = 'description_html';
-                                $label = get_value_from_list($field_labels, $field, $field);
-                                ?>
-                                <x-Inputs.text-area :id="$field" :name="$field" :label="$label"
-                                    :value="$model->{$field}" />
-                            </div>
-                        </div>
-
-                        <div class="col-md-12 col-xxl-6">
+                            </div>     
                             <div class="form-group mb-3">
                                 <?php
                                 $field = 'seo_title';
@@ -270,6 +241,32 @@
                                             value="{{ $model->{$field} }}" />
                                     </div>
                                 </div>
+                            </div>                       
+                        </div>
+
+                        <div class="col-md-12 col-xxl-7">
+                            <div class="form-group mb-3">
+                                <div class="textarea-wrapper">
+                                    <?php
+                                    $field = 'description';
+                                    $label = get_value_from_list($field_labels, $field, $field);
+                                    ?>
+                                    <x-Inputs.text-area :id="$field" :name="$field" :label="$label" value="{{ $model->{$field} }}"
+                                        class="auto-suggesstion-list"
+                                        rows="4"
+                                        placeholder="Enter {{ $label }}"
+                                        />
+                                    <div id="{{ $field . '-suggestion-box' }}" class="suggestion-box hidden"></div>
+                                </div>
+
+                            </div>
+                            <div class="form-group mb-3">
+                                <?php
+                                $field = 'description_html';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <x-Inputs.text-area :id="$field" :name="$field" :label="$label"
+                                    :value="$model->{$field}" />
                             </div>
                         </div>
                     </div>
@@ -322,7 +319,7 @@
             suggestion_list($("#description"), $("#description-suggestion-box"), [], "/tags/ajax_get_list");
 
             $("#description_html").summernote({
-                height: 400,
+                height: 600,
             });
 
             $.events.execAtLast(function() {

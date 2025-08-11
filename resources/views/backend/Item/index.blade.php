@@ -68,6 +68,13 @@ $false = false;
                 </div>
                 <div class="col-md-4 col-lg-3 col-xxxl-2 mb-2">
                     <?php
+                    $field = "tag_name";
+                    $label = get_value_from_list($field_labels, $field, $field);
+                    ?>
+                    <x-Inputs.text-field :name="$field" :label="$label" :value="$search[$field]" />
+                </div>
+                <div class="col-md-4 col-lg-3 col-xxxl-2 mb-2">
+                    <?php
                     $field = 'is_active';
                     $label = get_value_from_list($field_labels, $field, $field);
                     ?>
@@ -92,7 +99,7 @@ $false = false;
 
             ajaxGetJson(url, function(response)
             {
-                $("#" + main_image_id).attr("href", response['url']);
+                $("#" + main_image_id).find("a").attr("href", response['url']);
                 $("#" + main_image_id).find("img").attr("src", response['url']);
             });
 

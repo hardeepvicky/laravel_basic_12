@@ -59,9 +59,9 @@
                             <td>{{ $record->brand?->getDisplayName() }}</td>
                             <td>{{ $record->size }}</td>
                             <td>{{ $record->specification }}</td>
-                            <td>
+                            <td id="main_image-{{ $record->id }}">
                                 @if ($record->mainImage?->file_url)
-                                    <a id="main_image-{{ $record->id }}" class="fancybox"
+                                    <a class="fancybox"
                                         href="{{ $record->mainImage->file_url }}">
                                         <img class="img-thumbnail small-img"
                                             src="{{ $record->mainImage->file_url }}" />
@@ -105,6 +105,14 @@
                                         <p class="mb-2 b-b-info">
                                             {!! $record->description !!}
                                         </p>
+
+                                        <label class="info">
+                                            {{ get_value_from_list($field_labels, 'tag_name', 'tag_name') }}
+                                            :
+                                            <span>
+                                                {{ implode(", ", $record->tags->pluck("name")->toArray()) }}
+                                            </span>
+                                        </label>
                                     </div>
 
                                     <div class="col-md-12 col-xl-7">

@@ -175,8 +175,9 @@ class DocumentFileController extends BackendController
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
         $index_table_id = request("index_table_id", "index_table");
+        $modal_id = request("modal_id", "");
 
-        $this->setForView(compact("field_labels", "type_list", "index_table_id"));
+        $this->setForView(compact("field_labels", "type_list", "index_table_id", "modal_id"));
 
         return parent::beforeViewRender();
     }

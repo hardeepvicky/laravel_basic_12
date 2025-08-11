@@ -7,11 +7,13 @@ use App\Helpers\ArrayHelper;
 use App\Helpers\CsvUtility;
 use App\Helpers\DateUtility;
 use App\Helpers\FileUtility;
+use App\Helpers\ImportUtility;
 use App\Helpers\LaravelExtend;
 use App\Helpers\Util;
 use App\Models\DocumentFile;
 use App\Models\DropDownValue;
 use App\Models\FieldSetting;
+use App\Models\ImportLog;
 use App\Models\Item;
 use App\Models\ItemCategory;
 use App\Models\ItemFile;
@@ -23,6 +25,7 @@ use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Session;
 
 class ItemController extends BackendController
 {
@@ -499,7 +502,240 @@ class ItemController extends BackendController
         return $this->responseJson($response);
     }
 
-    public function csv()
+    public function import_excel(Request $request)
+    {
+        $sample = "samples/item.csv";
+
+        $this->setForView([
+            "sample" => route("sample.item")
+        ]);
+
+        if ($request->isMethod('POST'))
+        {
+            $rules = [
+                "file" => [
+                    "required", 
+                    "file",
+                    "max:5200",
+                    "mimes:xlsx"
+                ],
+            ];
+
+            $request->validate($rules);
+
+            try
+            {
+                $this->beforeCsvImport();
+
+                $path = ImportLog::getStoragePath();
+
+                $filepath = $request->file('file')->store($path, DEFAULT_DISK);
+
+                $full_file_path = ImportLog::getStorageDisk()->path($filepath);
+
+                $importUtility = new ImportUtility($sample, $full_file_path);
+
+                if (!$importUtility->checkHeaders())
+                {
+                    $this->setForView(array('errors' => $importUtility->errors));
+                    
+                    foreach($importUtility->errors as $error_msg)
+                    {
+                        LaravelExtend::addError("", $error_msg);
+                    }
+
+                    throw new UserException("CSV Column headers are mismatched", UserException::ERROR_USER_DATA_WRONG);
+                }
+
+                $headers = array(
+                    "Category" => "item_category_id",
+                    "Name" => "name",
+                    "Description" => "description",
+                    "Color" => "color_id",
+                    "Size" => "size",
+                    "Brand" => "brand_id",
+                    "Specification" => "specification",
+                    "Active" => "is_active",
+                    "List Display Order" => "list_display_order"
+                );
+
+                $header_flip = array_flip($headers);
+
+                $csv_records = $importUtility->replaceHeaders($headers);
+                // d($csv_records, true);
+
+                $total_count = count($csv_records);
+
+                $save = [
+                    'type' => str_class_name_without_namespace($this->modelClass),
+                    'file' => $filepath,
+                    'total_count' => $total_count
+                ];
+
+                $importLogModel = ImportLog::create($save);
+
+                $accept_count = 0;
+                $msg_list = [
+                    "Category Found" => 0,
+                    "Color Found" => 0,
+                    "Brand Found" => 0,
+                    "Item Insert" => 0,
+                    "Item Update" => 0,
+                ];
+
+                $qb = ItemCategory::where("is_active", 1);
+
+                $item_category_records = ItemCategory::getTreeRecords($qb);
+
+                $item_category_list = Util::getTreeListArray($item_category_records, "id", "name");
+                $item_category_list = array_flip(Util::applyAll($item_category_list, ["strtolower"]));
+
+                $brand_list = array_flip(Util::applyAll(DropDownValue::getList("id", "name", ["type" => DropDownValue::BRAND]), ["strtolower"]));
+                
+                $color_list = array_flip(Util::applyAll(DropDownValue::getList("id", "name", ["type" => DropDownValue::COLOR]), ["strtolower"]));
+
+                $sku_pattern = Setting::getValue("item_sku_pattern");
+
+                if (!$sku_pattern)
+                {
+                    $label = Setting::LABELS['item_sku_pattern'];
+                    throw new UserException("Setting : $label is not set yet", UserException::ERROR_USER_DATA_WRONG);
+                }
+                
+                foreach($csv_records as $i => $record)
+                {
+                    $record = Util::applyAll($record, array("trim"));
+                    $validate = true;
+
+                    $category_name = strtolower($record["item_category_id"]);
+                    if (isset($item_category_list[$category_name]))
+                    {
+                        $record['item_category_id'] = $item_category_list[$category_name];
+                        $msg_list['Category Found']++;
+                    }
+                    else
+                    {
+                        LaravelExtend::addError($header_flip['item_category_id'], $record['item_category_id'] . " is not found", "Row #" . ($i + 2));
+                        $validate = false;
+                    }
+
+                    $color_name = strtolower($record["color_id"]);
+                    if (isset($color_list[$color_name]))
+                    {
+                        $record['color_id'] = $color_list[$color_name];
+                        $msg_list['Color Found']++;
+                    }
+                    else
+                    {
+                        LaravelExtend::addError($header_flip['color_id'], $record['color_id'] . " is not found", "Row #" . ($i + 2));
+                        $validate = false;
+                    }
+
+                    $brand_name = strtolower($record["brand_id"]);
+                    if (isset($brand_list[$brand_name]))
+                    {
+                        $record['brand_id'] = $brand_list[$brand_name];
+                        $msg_list['Brand Found']++;
+                    }
+                    else
+                    {
+                        LaravelExtend::addError($header_flip['brand_id'], $record['brand_id'] . " is not found", "Row #" . ($i + 2));
+                        $validate = false;
+                    }
+                    
+                    if ($validate)
+                    {   
+                        $model = new $this->modelClass();
+                        $record['sku'] = Item::getSkuFromPattern($sku_pattern, $record);
+
+                        // d($record, true);
+                        
+                        $is_insert = null;
+                        if ($model->insertOrUpdate($record, $is_insert))
+                        {
+                            $accept_count++;
+
+                            if ($is_insert)
+                            {
+                                $msg_list['Item Insert']++;
+                            }
+                            else
+                            {
+                                $msg_list['Item Update']++;
+                            }
+                        }
+                        else
+                        {
+                            LaravelExtend::addError("", "Fail To Save", "Row #" . ($i + 2));
+                        }
+                    }
+                }
+
+                $importLogModel->accept_count = $accept_count;
+
+                $text_list = [];
+                foreach($msg_list as $text => $count)
+                {
+                    $text_list[] = $text . " : " . $count;
+                }
+
+                $importLogModel->is_fully_run = true;
+
+                $msg = "Total Count = $total_count, Accept Count $accept_count";
+                $msg .= ", " . implode(", ", $text_list);
+
+                if (LaravelExtend::$errors)
+                {
+                    throw new UserException("Unable to Save all records. " . $msg, UserException::ERROR_USER_DATA_WRONG);
+                }
+
+                $msg = "All File rows updated successfully. " . $msg;
+                $importLogModel->flash_msg = $msg;
+                $importLogModel->save();
+
+                Session::flash('success', $msg);
+            }
+            catch(UserException $ex)
+            {
+                $msg = $ex->getMessage();
+
+                if (isset($importLogModel))
+                {
+                    $importLogModel->flash_msg = $msg;
+                    $importLogModel->have_error = 1;
+
+                    if (LaravelExtend::$errors)
+                    {
+                        $importLogModel->errors = LaravelExtend::$errors;                    
+                    }
+
+                    $importLogModel->save();
+                }
+                
+                return back()->With("fail", $msg)->with("custom_errors", LaravelExtend::$errors);
+            }
+            
+            catch(\Exception $ex)
+            {
+                $msg = get_exception_display_message($ex);
+
+                if (isset($importLogModel))
+                {
+                    $importLogModel->flash_msg = $msg;
+                    $importLogModel->have_error = 1;
+                    $importLogModel->save();
+                }
+                
+                Session::flash('fail', $msg);  
+                
+                return back()->With("fail", $msg);
+            }
+        }
+
+        return $this->view("import");
+    }
+
+    public function export_csv()
     {
         $cache_key_prefix = Route::currentRouteName();
 

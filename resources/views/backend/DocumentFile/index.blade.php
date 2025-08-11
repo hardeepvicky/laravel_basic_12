@@ -10,11 +10,11 @@
                     </div>
                     <div class="flex-shrink-0 text-end">
                         <form class="d-inline-flex m-1">
-                            <span class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modal-add-via-url">
+                            <span class="btn btn-outline-primary" data-prev_modal_id="{{ $modal_id }}" data-bs-toggle="modal" data-bs-target="#modal-add-via-url">
                                 Add Via URL
                             </span>
 
-                            <span class="btn btn-outline-primary ms-2" data-bs-toggle="modal" data-bs-target="#modal-add-via-upload">
+                            <span class="btn btn-outline-primary ms-2" data-prev_modal_id="{{ $modal_id }}" data-bs-toggle="modal" data-bs-target="#modal-add-via-upload">
                                 Add Via Upload
                             </span>
                         </form>

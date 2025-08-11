@@ -101,6 +101,7 @@ jQuery.fn.extend({
                     value: value,
                     multiple: multiple,
                     pagination_limit: 10,
+                    modal_id : modal_id,
                     full_view: true,
                 };
 

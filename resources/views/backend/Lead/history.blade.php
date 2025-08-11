@@ -211,6 +211,244 @@ use App\Helpers\DateUtility;
         </div>
     </div>
 
+    <div class="modal fade" id="modal-dispatch-form" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content model-xl">
+                <div class="modal-header">
+                    <h3 class="modal-title fs-5">Dispatch</h3>
+                    <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <x-form.start action="{{ route('lead.dispatch', ['lead_id' => $record->id]) }}" method="POST" />
+                        <x-Inputs.text-field type="hidden" name="entry_by" :label="$false" value="MANUAL" />
+                        <x-Inputs.text-field type="hidden" name="action_type" :label="$false" value="{{ LeadHistory::ACTION_TYPE_DISPATCH }}" />                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <?php
+                                    $field = 'status_type';
+                                    $label = get_value_from_list($history_field_labels, $field, $field);
+                                    ?>
+                                    <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
+                                        :list="$status_type_list" :value="$record->{$field}" class="modal-select2" mandatory="true"
+                                        />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <?php
+                                    $field = 'next_meeting_date_time';
+                                    $label = get_value_from_list($history_field_labels, $field, $field);
+                                    ?>
+                                    <x-Inputs.text-field :id="$field" :name="$field" :label="$label" class="next-date-time-picker"/>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                 <div class="form-group mb-3">
+                                    <?php
+                                    $field = 'remarks';
+                                    $label = get_value_from_list($history_field_labels, $field, $field);
+                                    ?>
+                                    <x-Inputs.text-area :id="$field" :name="$field" :label="$label" rows="3"/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mb-4">
+                                <div class="col-md-12">
+                                    <h4 class="b-b-info">
+                                        Items
+                                    </h4>
+                                    <table class="table table-bordered order-column template-table"
+                                        data-sr-table-template-min-row="1">
+                                        <thead>
+                                            <tr>
+                                                <th class="text-center" style="width : 50px;">
+                                                    <span class="sr-table-template-add">
+                                                        <i class="fas fa-plus-circle text-success icon"></i>
+                                                    </span>
+                                                </th>
+                                                <th style="width:80%">
+                                                    Address
+                                                </th>
+                                                <th style="width:10%">
+                                                    {{ get_value_from_list($address_field_labels, 'is_primary') }}
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="sr-table-template-row hidden">
+                                                <td>
+                                                    <div class="block">
+                                                        <div class="left-block">
+                                                            <div class="sr-table-template-move-up">
+                                                                <i class="fas fa-arrow-circle-up icon"></i>
+                                                            </div>
+                                                            <div class="sr-table-template-move-down">
+                                                                <i class="fas fa-arrow-circle-down icon"></i>
+                                                            </div>
+                                                        </div>
+                                                        <div class="right-block">
+                                                            <span class="sr-table-template-delete">
+                                                                <i class=" fas fa-times-circle text-danger icon"></i>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <x-inputs.text-field type="hidden" name="addresses[(sr-id)][id]"
+                                                        label="" />
+                                                </td>
+                                                <td>
+                                                    <div class="form-group mb-2">
+                                                        <?php
+                                                        $field = 'type';
+                                                        $label = get_value_from_list($address_field_labels, $field, $field);
+                                                        ?>
+                                                        <x-inputs.drop-down name="addresses[(sr-id)][{{ $field }}]"
+                                                            :label="$label" 
+                                                            :list="$address_type_list"
+                                                            class="will-required will-select2" />
+                                                    </div>
+
+                                                    <div class="form-group mb-2">
+                                                        <?php
+                                                        $field = 'addr1';
+                                                        $label = get_value_from_list($address_field_labels, $field, $field);
+                                                        ?>
+                                                        <x-inputs.text-field name="addresses[(sr-id)][{{ $field }}]"
+                                                            :label="$label" class="will-required" />
+                                                    </div>
+                                                    <div class="form-group mb-2">
+                                                        <?php
+                                                        $field = 'addr2';
+                                                        $label = get_value_from_list($address_field_labels, $field, $field);
+                                                        ?>
+                                                        <x-inputs.text-field name="addresses[(sr-id)][{{ $field }}]"
+                                                            :label="$label" />
+                                                    </div>
+
+                                                    <div class="form-group mb-2">
+                                                        <?php
+                                                        $field = 'pincode';
+                                                        $label = get_value_from_list($address_field_labels, $field, $field);
+                                                        ?>
+                                                        <x-inputs.text-field name="addresses[(sr-id)][{{ $field }}]"
+                                                            :label="$label" class="will-required validate-int" />
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <?php
+                                                    $field = 'is_primary';
+                                                    ?>
+                                                    <x-inputs.checkbox name="addresses[(sr-id)][{{ $field }}]"
+                                                        label="" class="is_primary" />
+                                                </td>
+                                            </tr>
+                                            @php
+                                                $addresses = old('addresses', $addresses ?? []);
+                                                unset($addresses['(sr-id)']);
+                                                // d($addresses, true);
+                                            @endphp
+                                            @if (isset($addresses))
+                                                @foreach ($addresses as $k => $child_arr)
+                                                    <tr class="" sr-id="{{ $child_arr['id'] }}" sr-counter="{{ $k }}">
+                                                        <td>
+                                                            <div class="block">
+                                                                <div class="left-block">
+                                                                    <div class="sr-table-template-move-up">
+                                                                        <i class="fas fa-arrow-circle-up icon"></i>
+                                                                    </div>
+                                                                    <div class="sr-table-template-move-down">
+                                                                        <i class="fas fa-arrow-circle-down icon"></i>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="right-block">
+                                                                    <span class="sr-table-template-delete">
+                                                                        <i
+                                                                            class=" fas fa-times-circle text-danger icon"></i>
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                            <input type="hidden" name="addresses[{{ $k }}][id]"
+                                                                value="{{ $child_arr['id'] ?? '' }}" />
+                                                        </td>                                                        
+                                                        <td>
+                                                            <div class="form-group mb-2">
+                                                                <?php
+                                                                $field = 'type';
+                                                                $value = $child_arr[$field] ?? '';
+                                                                $label = get_value_from_list($address_field_labels, $field, $field);
+                                                                ?>
+                                                                <x-inputs.drop-down name="addresses[{{ $k }}][{{ $field }}]"
+                                                                    :label="$label" 
+                                                                    :value="$value"
+                                                                    :list="$address_type_list"
+                                                                    class="will-required will-select2" />
+                                                            </div>
+
+                                                            <div class="form-group mb-2">
+                                                                <?php
+                                                                $field = 'addr1';
+                                                                $value = $child_arr[$field] ?? '';
+                                                                $label = get_value_from_list($address_field_labels, $field, $field);
+                                                                ?>
+                                                                <x-inputs.text-field name="addresses[{{ $k }}][{{ $field }}]"
+                                                                    :label="$label" :value="$value" class="will-required" />
+                                                            </div>
+                                                            <div class="form-group mb-2">
+                                                                <?php
+                                                                $field = 'addr2';
+                                                                $value = $child_arr[$field] ?? '';
+                                                                $label = get_value_from_list($address_field_labels, $field, $field);
+                                                                ?>
+                                                                <x-inputs.text-field name="addresses[{{ $k }}][{{ $field }}]"
+                                                                    :label="$label" :value="$value" />
+                                                            </div>
+
+                                                            <div class="form-group mb-2">
+                                                                <?php
+                                                                $field = 'pincode';
+                                                                $value = $child_arr[$field] ?? '';
+                                                                $label = get_value_from_list($address_field_labels, $field, $field);
+                                                                ?>
+                                                                <x-inputs.text-field name="addresses[{{ $k }}][{{ $field }}]"
+                                                                    :label="$label" :value="$value" class="will-required validate-int" />
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <?php
+                                                            $field = 'is_primary';
+                                                            $value = $child_arr[$field] ?? '';
+                                                            ?>
+                                                            <x-inputs.checkbox
+                                                                name="addresses[{{ $k }}][{{ $field }}]"
+                                                                label="" :value="$value" class="is_primary" />
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+                                            @endif
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <th class="text-center" style="width : 80px;">
+                                                    <span class="sr-table-template-add">
+                                                        <i class="fas fa-plus-circle text-success icon"></i>
+                                                    </span>
+                                                </th>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                        
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary closed" type="button" data-bs-dismiss="modal">Close</button>
+                    <button class="btn btn-primary submit" type="button">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         $(function(){
 

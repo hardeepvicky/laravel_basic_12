@@ -34,6 +34,7 @@ use App\Http\Controllers\Backend\PublicController;
 use App\Http\Controllers\Backend\RecordHistoryController;
 use App\Http\Controllers\Backend\RecurringTaskController;
 use App\Http\Controllers\Backend\RoleController;
+use App\Http\Controllers\Backend\SampleController;
 use App\Http\Controllers\Backend\SettingsController;
 use App\Http\Controllers\Backend\StateController;
 use App\Http\Controllers\Backend\SubDepartmentController;
@@ -155,6 +156,14 @@ Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function 
 
     $name = "ajax_get_list";
     Route::get($name . "/{country_id}", [$controllerClass, $name])->name($name);
+});
+
+$route_prefix = "sample";
+$controllerClass = SampleController::class;
+Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
+    $name = "item";
+    Route::get($name, [$controllerClass, $name])->name($name);
 });
 
 Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend_view_render']], function () {
@@ -863,7 +872,13 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
         $route_prefix = "export";
         Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
             $name = "csv";
-            Route::get($name, [$controllerClass, $name])->name($name);
+            Route::get($name, [$controllerClass, "export_" . $name])->name($name);
+        });
+
+        $route_prefix = "import";
+        Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+            $name = "excel";
+            Route::any($name, [$controllerClass, "import_". $name])->name($name);
         });
     });
 
@@ -906,6 +921,9 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
         Route::get($name, [DeveloperController::class, $name])->name($name);
 
         $name = "permission_change_logs";
+        Route::get($name, [DeveloperController::class, $name])->name($name);
+
+        $name = "import_logs";
         Route::get($name, [DeveloperController::class, $name])->name($name);
 
         $name = "sql_logs";

@@ -147,6 +147,7 @@ $(document).ready(function () {
         {
             load_html_at = "#index_table";
             var target = $(load_html_at);
+            $.loader.init();
         }
 
         $(this).ajaxSubmit({
@@ -157,9 +158,11 @@ $(document).ready(function () {
                 console.log(target);
                 target.html(responseText);
                 $.loader.hide();
+                $.loader.init().hide();
             },
             error: function () {
                 $.loader.hide();
+                $.loader.init().hide();
             },
         });
 

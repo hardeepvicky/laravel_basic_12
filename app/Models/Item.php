@@ -146,4 +146,64 @@ class Item extends BaseModel
 
         return $labels;
     }
+
+    public static function getSkuFromPattern(string $sku_pattern, array $record) : string
+    {
+        $item_category_short_list = ItemCategory::getListCache("id", "short_name");
+        $brand_short_name_list = DropDownValue::getList("id", "short_name", ["type" => DropDownValue::BRAND]);
+        $color_short_name_list = DropDownValue::getList("id", "short_name", ["type" => DropDownValue::COLOR]);
+
+        $sku = $sku_pattern;
+
+        if (isset($record['item_category_id']) && $record['item_category_id'] && isset($item_category_short_list[$record['item_category_id']]))
+        {
+            $sku = str_replace("{category}", $item_category_short_list[$record['item_category_id']], $sku);
+        }
+        else
+        {
+            $sku = str_replace("{category}", "", $sku);
+        }
+
+        if (isset($record['brand_id']) && $record['brand_id'] && isset($brand_short_name_list[$record['brand_id']]))
+        {
+            $sku = str_replace("{brand}", $brand_short_name_list[$record['brand_id']], $sku);
+        }
+        else
+        {
+            $sku = str_replace("{brand}", "", $sku);
+        }
+
+        if (isset($record['color_id']) && $record['color_id'] && isset($color_short_name_list[$record['color_id']]))
+        {
+            $sku = str_replace("{color}", $color_short_name_list[$record['color_id']], $sku);
+        }
+        else
+        {
+            $sku = str_replace("{color}", "", $sku);
+        }
+
+        if (isset($record['size']) && $record['size'])
+        {
+            $sku = str_replace("{size}", $record['size'], $sku);
+        }
+        else
+        {
+            $sku = str_replace("{size}", "", $sku);
+        }
+
+        if (isset($record['specification']) && $record['specification'])
+        {
+            $sku = str_replace("{specification}", $record['specification'], $sku);
+        }
+        else
+        {
+            $sku = str_replace("{specification}", "", $sku);
+        }
+
+        $sku = preg_replace('/[^a-zA-Z0-9-_.]/', '-', $sku);
+        $sku = preg_replace('/-+/', '-', $sku);
+        $sku = trim($sku, '-');
+
+        return $sku;
+    }
 }
