@@ -41,6 +41,12 @@ class LeadHistory extends BaseModel
                     $field => $this->lead?->getDisplayName()
                 ];
                 break;
+
+            case "assign_to_user_id":
+                $ret_array = [
+                    $field => $this->assignTo?->getDisplayName()
+                ];
+                break;
         }
 
         return $ret_array;

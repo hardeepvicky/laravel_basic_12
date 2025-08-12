@@ -334,7 +334,9 @@ class DeveloperController extends BackendController
             $file = $path . "/" . $file_name . ".log";
             $log_content = file_get_contents($file);
 
-            $log_content = str_replace("local.ERROR", '<span class="error-message">local.ERROR</span>', $log_content);
+            $log_content = preg_replace('/\b[\w-]+\.ERROR\b/', '<span class="error-message">ERROR</span>', $log_content);
+            $log_content = preg_replace('/\b[\w-]+\.INFO\b/', '<span class="warning-message">INFO</span>', $log_content);
+            $log_content = preg_replace('/\b[\w-]+\.DEBUG\b/', '<span class="info-message">DEBUG</span>', $log_content);
             // d($log_content, true);
 
             $this->setForView(compact("log_content"));

@@ -210,8 +210,18 @@ label.info {
 }
 
 .error-message {
-    color: red;
+    color: #e74b2b;
     display: block;
+}
+
+.warning-message{
+    color: #ea9200;
+    display: block;
+}
+
+.info-message{
+    color: #02a2b9;
+    display: block;;
 }
 
 .mandatory {
