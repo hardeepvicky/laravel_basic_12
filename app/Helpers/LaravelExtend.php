@@ -807,4 +807,46 @@ class LaravelExtend
 
         Log::info("-------------------------------END QUERY LOG-------------------------------");
     }
+
+    public static function getCacheKeyFromConditions(array $conditions = [], string $prefix = "") : string
+    {
+        $list = [];
+
+        foreach($conditions as $k => $condition)
+        {
+            if (is_numeric($k))
+            {
+                $list[] = Str::snake(implode("_", $condition));
+            }
+            else
+            {
+                if (is_array($condition))
+                {
+                    $condition = implode(",", array_get_scaler_value_only($condition));
+
+                    if (strlen($condition) > 50)
+                    {
+                        $condition = substr($condition, 0, 50);
+                    }
+                }
+
+                $list[] = Str::snake($k) . "_" . Str::snake($condition);
+            }
+        }
+
+        if (empty($list))
+        {
+            return "";
+        }
+        
+        $cache_key = $prefix . "-" . implode("-", $list);
+        $cache_key = trim(trim($cache_key, "-"));
+
+        if (strlen($cache_key) > 255)
+        {
+            $cache_key = substr($cache_key, 0, 255);
+        }
+
+        return $cache_key;
+    }
 }

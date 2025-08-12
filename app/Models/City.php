@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Helpers\LaravelExtend;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Unique;
@@ -82,5 +83,50 @@ class City extends BaseModel
         }
 
         return $ret_array;
+    }
+
+    public static function getWithDistrict(array $state_conditions = [], array $district_conditions = [], array $city_conditions = [])
+    {
+        $records = District::where($district_conditions)
+        ->whereHas("state", function ($q) use($state_conditions) {
+            $q->where($state_conditions);
+        })
+        ->with([
+            "city" => function($q) use($city_conditions){
+                $q->where($city_conditions);
+                $q->orderBy("name", "ASC");
+            }
+        ])->orderBy("name", "ASC")->get();
+
+        $data = [];
+
+        $cache_key = "getWithDistrict";
+        $cache_key .= "|" . LaravelExtend::getCacheKeyFromConditions($state_conditions, "state");
+        $cache_key .= "|" . LaravelExtend::getCacheKeyFromConditions($district_conditions, "district");
+        $cache_key .= "|" . LaravelExtend::getCacheKeyFromConditions($city_conditions, "city");
+
+        $data = static::getCache($cache_key);
+
+        if (!$data)
+        {
+            foreach($records as $record)
+            {
+                $prefix = $record->getDisplayName();
+
+                foreach($record->city as $city)
+                {
+                    $data[$city->id] = [];
+                    $data[$city->id]['id'] = $city->id;
+                    $data[$city->id]['name'] = $prefix . " > " . $city->getDisplayName();
+                    $data[$city->id]['state_id'] = $city->state_id;
+                    $data[$city->id]['district_id'] = $city->district_id;
+                }
+            }
+
+            $cache_time = 60 * 60;
+            static::addCache($cache_key, $data, $cache_time);
+        }
+
+        return $data;
     }
 }

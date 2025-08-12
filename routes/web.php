@@ -244,6 +244,9 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
         $name = "ajax_get_list";
         Route::get($name . "/{state_id?}/{district_id?}", [$controllerClass, $name])->name($name);
 
+        $name = "ajax_get_list_with_district";
+        Route::get($name . "/{state_id}", [$controllerClass, $name])->name($name);
+
         $name = "ajax_get";
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
 
@@ -816,6 +819,15 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
         Route::post($name . "/{lead_id}", [$controllerClass, $name])->name($name);
 
         $name = "transfer_lead";
+        Route::post($name . "/{lead_id}", [$controllerClass, $name])->name($name);
+
+        $name = "address";
+        Route::post($name . "/{lead_id}", [$controllerClass, $name])->name($name);
+
+        $name = "lead_files";
+        Route::post($name . "/{lead_id}", [$controllerClass, $name])->name($name);
+
+        $name = "dispatch";
         Route::post($name . "/{lead_id}", [$controllerClass, $name])->name($name);
 
         $name = "history_destroy";

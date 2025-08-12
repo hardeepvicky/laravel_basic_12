@@ -23,6 +23,8 @@ class SectionRoutes
 
         "product.ajax_load_attribute_fields",
 
+        "city.ajax_get_list_with_district",
+
         "*.ajax_get_list",
         "*.ajax_get_code_list",
         "*.ajax_get_count",

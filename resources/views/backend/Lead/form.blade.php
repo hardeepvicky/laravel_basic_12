@@ -67,36 +67,24 @@
                             <div class="row">
                                 <div class="col-lg-6">
                                     <div class="form-group mb-3">
-                                        <?php
+                                        <?php   
                                         $field = 'state_id';
                                         $label = get_value_from_list($field_labels, $field, $field);
                                         ?>
                                         <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
                                             :list="$state_list" value="{{ $model->{$field} }}"
-                                            class="select2 cascade-drop-down" data-sr-cascade-target="#district_id"
-                                            data-sr-cascade-url="/district/ajax_get_list/{v}" mandatory="true" />
+                                            class="select2" data-sr-cascade-target="#city_id"
+                                            data-sr-cascade-url="/city/ajax_get_list_with_district/{v}" mandatory="true" />
                                     </div>
                                 </div>
-                                <div class="col-lg-6">
-                                    <div class="form-group mb-3">
-                                        <?php
-                                        $field = 'district_id';
-                                        $label = get_value_from_list($field_labels, $field, $field);
-                                        ?>
-                                        <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
-                                            :list="$empty_list" value="{{ $model->{$field} }}"
-                                            class="select2 cascade-drop-down" data-sr-cascade-target="#city_id"
-                                            data-sr-cascade-url="/city/ajax_get_list/0/{v}" mandatory="true" />
-                                    </div>
-                                </div>
-                                <div class="col-lg-6">
+                                <div class="col-lg-12">
                                     <div class="form-group mb-3">
                                         <?php
                                         $field = 'city_id';
                                         $label = get_value_from_list($field_labels, $field, $field);
                                         ?>
                                         <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
-                                            :list="$empty_list" value="{{ $model->{$field} }}" class="select2"
+                                            :list="$district_city_list" value="{{ $model->{$field} }}" class="select2"
                                             mandatory="true" />
                                     </div>
                                 </div>
@@ -566,6 +554,7 @@
     </form>
 
     <script>
+        var district_cities = JSON.parse('<?= json_encode($district_cities) ?>');
         $(function() {
             suggestion_list($("#remarks"), $("#remarks-suggestion-box"), [], "/tags/ajax_get_list");
 
@@ -599,9 +588,39 @@
                 }
             });
 
+            $("#state_id").cascade({
+                beforeGet: function (src, url) {
+                    $.loader.init().setInfo("Fetching City ...").show();
+                    return url;
+                },
+                afterGet: function (src, dest, response) {
+                    $.loader.init().hide();
+                    return response;
+                },
+                default_data : district_cities
+            }).trigger("change", {
+                pageLoad: true
+            });
+
             $.events.execAtLast(function() {
                 $("#state_id").trigger("change", {
                     pageLoad: true
+                });
+
+                $("#city_id").change(function(){
+                    var v = $(this).val();
+
+                    if (v)
+                    {
+                        for(var i in district_cities)
+                        {
+                            if (district_cities[i]['id'] == v)
+                            {
+                                $("#state_id").val(district_cities[i]['state_id']).trigger('change', {eventBubble : false});
+                                return;
+                            }
+                        }
+                    }
                 });
 
                 $("#deal_type").trigger("change");

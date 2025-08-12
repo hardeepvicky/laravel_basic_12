@@ -451,4 +451,22 @@ class CityController extends BackendController
 
         return $this->responseJson($response);
     }
+
+    public function ajax_get_list_with_district($state_id)
+    {
+        $response = ["status" => 1, "data" => []];
+
+        $conditions = [
+            ["is_active", "=", 1]
+        ];
+
+        if ($state_id)
+        {
+            $conditions[] = ["state_id", "=", $state_id];
+        }
+
+        $response['data'] = City::getWithDistrict([], $conditions, [["is_active", "=", 1]]);
+
+        return $this->responseJson($response);
+    }
 }

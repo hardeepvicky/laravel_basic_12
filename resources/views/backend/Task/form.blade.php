@@ -55,30 +55,28 @@ $false = false;
                                     <div id="{{ $field . '-suggestion-box' }}" class="suggestion-box hidden"></div>
                                 </div>
                             </div>
-                            <div class="form-group mb-3 is_draft-block is_draft-block-0">
-                                <?php
-                                $field = 'dept_id';
-                                $label = get_value_from_list($field_labels, $field, $field);
-                                ?>
-                                <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$department_list"
-                                    :value="$model->{$field}" class="select2" data-sr-cascade-target="#assign_to_user_id"
-                                    data-sr-cascade-url="/user/ajax_get_list?dept_id={v}" mandatory="true" />
-                            </div>
-                            <div class="form-group mb-3 is_draft-block is_draft-block-0">
-                                <?php
-                                $field = 'assign_to_user_id';
-                                $label = get_value_from_list($field_labels, $field, $field);
-                                ?>
-                                <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
-                                    data-value="{{ $model->{$field} }}" mandatory="true" class="select2" mandatory="true" />
-                            </div>
-                            <div class="form-group mb-3 is_draft-block is_draft-block-0">
-                                <?php
-                                $field = 'task_type';
-                                $label = get_value_from_list($field_labels, $field, $field);
-                                ?>
-                                <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$task_type_list"
-                                    value="{{ $model->{$field} }}" mandatory="true" class="select2" :pleaseSelect="$false" />
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3 is_draft-block is_draft-block-0">
+                                        <?php
+                                        $field = 'dept_id';
+                                        $label = get_value_from_list($field_labels, $field, $field);
+                                        ?>
+                                        <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$department_list"
+                                            :value="$model->{$field}" class="select2" data-sr-cascade-target="#assign_to_user_id"
+                                            data-sr-cascade-url="/user/ajax_get_list?dept_id={v}" mandatory="true" />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3 is_draft-block is_draft-block-0">
+                                        <?php
+                                        $field = 'assign_to_user_id';
+                                        $label = get_value_from_list($field_labels, $field, $field);
+                                        ?>
+                                        <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
+                                            data-value="{{ $model->{$field} }}" mandatory="true" class="select2" mandatory="true" />
+                                    </div>
+                                </div>
                             </div>
                             <div class="form-group mb-3 is_draft-block is_draft-block-0">
                                 <?php

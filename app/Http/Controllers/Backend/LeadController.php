@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Backend;
 
 use App\Exceptions\UserException;
 use App\Helpers\LaravelExtend;
+use App\Models\City;
+use App\Models\Country;
 use App\Models\Dealer;
 use App\Models\DocumentFile;
 use App\Models\DropDownValue;
@@ -99,6 +101,14 @@ class LeadController extends BackendController
 
         $state_list = State::getIndianList();
 
+        $my_country = Country::getMyCountry();
+
+        $district_cities = City::getWithDistrict([["country_id", $my_country->id]], [["is_active", 1]], [["is_active", 1]]);
+        
+        $district_city_collection = collect($district_cities);
+
+        $district_city_list = $district_city_collection->pluck('name', 'id')->toArray();
+
         $type_conditions = [
             'type' => Type::getType($this->model, "source_type")
         ];
@@ -168,7 +178,7 @@ class LeadController extends BackendController
         $history_field_labels = FieldSetting::getDynamicFields(LeadHistory::class);
 
         $this->setForView(compact(
-            "address_type_list", "state_list",
+            "address_type_list", "state_list", "district_cities", "district_city_list",
             "source_type_list", "deal_type_list", "status_type_list", "source_list", "payment_method_type_list", "dealer_list", "product_list", 
             "user_list", "action_type_list", "lead_history_response_list",
             "field_labels", "address_field_labels", "product_field_labels", "history_field_labels"
@@ -202,7 +212,6 @@ class LeadController extends BackendController
             "mobile" => ["required", new MobileNumber],
             "mobile2" => ["nullable", new MobileNumber],
             "state_id" => ["required"],
-            "district_id" => ["required"],
             "city_id" => ["required"],
             "assign_to_user_id" => ["required"],
             "status_type" => ["required"],
@@ -243,7 +252,13 @@ class LeadController extends BackendController
         DB::beginTransaction();
 
         try {
-            $this->model = $this->modelClass::create($validatedData);
+
+            $save_data = $this->_beforeSave($validatedData);
+            unset($save_data['leadFile']);
+            unset($save_data['addresses']);
+            unset($save_data['products']);
+
+            $this->model = $this->modelClass::create($save_data);
 
             $this->_saveOthers($validatedData);
 
@@ -261,6 +276,32 @@ class LeadController extends BackendController
 
             return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", LaravelExtend::$errors);
         }
+    }
+
+    private function _beforeSave($validatedData)
+    {
+        if (isset($validatedData['city_id']) && $validatedData['city_id'])
+        {
+            $my_country = Country::getMyCountry();
+
+            $district_cities = City::getWithDistrict([["country_id", $my_country->id]], [["is_active", 1]], [["is_active", 1]]);
+
+            foreach($district_cities as $city)
+            {
+                if ($city['id'] == $validatedData['city_id'])
+                {
+                    $validatedData['district_id'] = $city['district_id'];
+                    break;
+                }
+            }
+
+            if (!isset($validatedData['district_id']))
+            {
+                LaravelExtend::addError("City", "District ID not found");
+            }
+        }
+
+        return $validatedData;
     }
 
     private function _saveOthers($validatedData)
@@ -463,9 +504,12 @@ class LeadController extends BackendController
         DB::beginTransaction();
 
         try {
-            // d($validatedData, true);
+            $save_data = $this->_beforeSave($validatedData);
+            unset($save_data['leadFile']);
+            unset($save_data['addresses']);
+            unset($save_data['products']);
 
-            $this->model->fill($validatedData);
+            $this->model->fill($save_data);
 
             $this->model->save();
 

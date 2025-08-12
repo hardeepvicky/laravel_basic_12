@@ -15,23 +15,25 @@ trait CacheTrait
 
     public static function optimizeCacheKey($key): string
     {
-        $str = preg_replace('/[^a-zA-Z0-9]+/', '-', $key);
+        $str = preg_replace('/[^a-zA-Z0-9_|-]+/', '-', $key);
 
         return $str;
     }
 
-    public static function getCache($key)
+    public static function getCache($key, array $tags = [])
     {
         $base_cache_key = static::getCacheKey();
 
         $cache_key = static::optimizeCacheKey($key);
 
-        $instance = Cache::tags([$base_cache_key]);
+        $tags[] = $base_cache_key;
+
+        $instance = Cache::tags($tags);
 
         return $instance->get($cache_key);
     }
 
-    public static function addCache($key, $data, $cache_time_in_seconds = null)
+    public static function addCache($key, $data, $cache_time_in_seconds = null, array $tags = [])
     {
         if (!$cache_time_in_seconds) {
             $cache_time_in_seconds = static::$cache_time_in_seconds;
@@ -39,7 +41,9 @@ trait CacheTrait
 
         $base_cache_key = static::getCacheKey();
 
-        $instance = Cache::tags([$base_cache_key]);
+        $tags[] = $base_cache_key;
+
+        $instance = Cache::tags($tags);
 
         $cache_key = static::optimizeCacheKey($key);
 
@@ -49,18 +53,23 @@ trait CacheTrait
         }
 
         Log::debug("Cache-put", [
-            "tags" => [$base_cache_key],
+            "tags" => $tags,
             "key" => $cache_key,
             "time" => $cache_time_in_seconds,
             "data" => $data
         ]);
     }
 
-    public static function forgotCache($key = null)
+    public static function forgotCache($key = null, array $tags = [])
     {
         $base_cache_key = static::getCacheKey();
 
-        $instance = Cache::tags([$base_cache_key]);
+        if (empty($tags))
+        {
+            $tags = [$base_cache_key];
+        }
+
+        $instance = Cache::tags($tags);
 
         if ($key)
         {
@@ -68,7 +77,7 @@ trait CacheTrait
             $instance->forget($cache_key);
 
             Log::debug("Cache-forget", [
-                "tags" => [$base_cache_key],
+                "tags" => $tags,
                 "key" => $cache_key,
             ]);
         }
@@ -76,7 +85,7 @@ trait CacheTrait
         {
             $instance->flush();
             Log::debug("Cache-flush", [
-                "tags" => [$base_cache_key],
+                "tags" => $tags,
             ]);
         }
     }
