@@ -24,8 +24,7 @@ if (!isset($partial_path)) {
     <!-- Google font-->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
-    <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,200;6..12,300;6..12,400;6..12,500;6..12,600;6..12,700;6..12,800;6..12,900;6..12,1000&amp;display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,200;6..12,300;6..12,400;6..12,500;6..12,600;6..12,700;6..12,800;6..12,900;6..12,1000&amp;display=swap" />
     <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/css/fontawesome-min.css') }}" />
     <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/css/vendors/flag-icon.css') }}" />
     <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/css/iconly-icon.css') }}" />
@@ -39,23 +38,18 @@ if (!isset($partial_path)) {
     <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/css/vendors/slick-theme.css') }}" />
 
     <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/libs/select2/select2.min.css') }}" />
-    <link rel="stylesheet" type="text/css"
-        href="{{ get_asset_url('assets/libs/select2/select2-bootstrap-5-theme.min.css') }}" />
+    <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/libs/select2/select2-bootstrap-5-theme.min.css') }}" />
     <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/libs/select2/select2-dark.css') }}" />
     <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/libs/Croppie-2.6.4/croppie.css') }}" />
-    <link rel="stylesheet" type="text/css"
-        href="{{ get_asset_url('assets/libs/fancybox/dist/jquery.fancybox.min.css') }}" />
-    <link rel="stylesheet" type="text/css"
-        href="{{ get_asset_url('assets/libs/jquery-file-validator/css/file-validator.css') }}" />
-    <link rel="stylesheet" type="text/css"
-        href="{{ get_asset_url('assets/css/vendors/flatpickr/flatpickr.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/libs/fancybox/dist/jquery.fancybox.min.css') }}" />
+    <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/libs/jquery-file-validator/css/file-validator.css') }}" />
+    <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/css/vendors/flatpickr/flatpickr.min.css') }}">
 
     <!-- Theme Specfic -->
     <link id="color" rel="stylesheet" href="{{ get_asset_url('assets/css/color-1.css') }}" media="screen" />
     <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/css/style.css') }}" />
 
-    <link rel="stylesheet"
-        href="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/css/bootstrap-editable.css" />
+    <link rel="stylesheet" href="href="{{ get_asset_url('assets/libs/x-editable/bootstrap-editable.css') }} />
 
     <link rel="stylesheet" type="text/css" href="{{ get_asset_url('assets/libs/summernote/summernote-lite.min.css') }}">
 
