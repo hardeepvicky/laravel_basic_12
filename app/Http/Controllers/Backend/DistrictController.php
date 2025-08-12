@@ -229,16 +229,36 @@ class DistrictController extends BackendController
             "sample" => "/" . $sample
         ]);
 
+        $import_log_id = $request->get("import_log_id", false);
+        if ($import_log_id)
+        {
+            $importLogModel = ImportLog::find($import_log_id);
+        }
+
+        if (!isset($importLogModel))
+        {
+            $save = [
+                'type' => str_class_name_without_namespace($this->modelClass),
+                "status_info" => "Processing...."
+            ];
+
+            $importLogModel = ImportLog::create($save);
+            $import_log_id = $importLogModel->id;
+        }
+
         $form = [
             'url' => route($this->routePrefix . '.import.csv'),
             'method' => 'POST',
         ];
 
-        $this->setForView(compact("form"));
-
+        $this->setForView(compact("form", "import_log_id"));
 
         if ($request->isMethod('POST'))
         {
+            $import_log_id = "";
+
+            $this->setForView(compact("import_log_id"));
+
             $rules = [
                 "file_csv" => [
                     "required", 
@@ -252,6 +272,8 @@ class DistrictController extends BackendController
 
             try
             {
+                $start_seconds = microtime(true);
+                
                 $this->beforeCsvImport();
 
                 $path = ImportLog::getStoragePath();
@@ -288,12 +310,11 @@ class DistrictController extends BackendController
                 $total_count = count($csv_records);
 
                 $save = [
-                    'type' => str_class_name_without_namespace($this->modelClass),
                     'file' => $filepath,
                     'total_count' => $total_count
                 ];
 
-                $importLogModel = ImportLog::create($save);
+                $importLogModel->fill($save);
 
                 $accept_count = 0;
                 $msg_list = [
@@ -325,8 +346,8 @@ class DistrictController extends BackendController
                     {   
                         $model = new $this->modelClass();
 
-                        $is_insert = null;
-                        if ($model->insertOrUpdate($record, $is_insert))
+                        $is_insert = $is_update = null;
+                        if ($model->insertOrUpdate($record, $is_insert, $is_update, true))
                         {
                             $accept_count++;
 
@@ -334,10 +355,15 @@ class DistrictController extends BackendController
                             {
                                 $msg_list['District Insert']++;
                             }
-                            else
+                            else if ($is_update)
                             {
                                 $msg_list['District Update']++;
                             }
+
+                            $percent = round(($i + 1) * 100 / $total_count, 1);
+
+                            $importLogModel->status_info = "Processing... $percent % " . ", Time Taken : " . Util::niceTime(microtime(true) - $start_seconds);
+                            $importLogModel->saveQuietly();
                         }
                         else
                         {
@@ -347,6 +373,7 @@ class DistrictController extends BackendController
                 }
 
                 $importLogModel->accept_count = $accept_count;
+                $importLogModel->exec_time = microtime(true) - $start_seconds;
 
                 $text_list = [];
                 foreach($msg_list as $text => $count)

@@ -167,6 +167,8 @@ Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function 
     Route::get($name, [$controllerClass, $name])->name($name);
 });
 
+Route::get("import_log_status/{import_log_id}", [HomeController::class, "import_log_status"])->name("import_log_status");
+
 Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend_view_render']], function () {
 
     $route_prefix = "dashboard";

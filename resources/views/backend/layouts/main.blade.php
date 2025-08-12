@@ -135,9 +135,11 @@ if (!isset($partial_path)) {
         <script src="{{ get_asset_url('assets/libs/jquery-file-validator/js/file-validator.js') }}"></script>
         <script src="{{ get_asset_url('assets/libs/summernote/summernote-lite.min.js') }}"></script>
 
-        <script src="https://cdn.amcharts.com/lib/5/index.js"></script>
-        <script src="https://cdn.amcharts.com/lib/5/percent.js"></script>
-        <script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
+        <script src="{{ get_asset_url('assets/libs/amcharts5/index.js') }}"></script>
+        <script src="{{ get_asset_url('assets/libs/amcharts5/percent.js') }}"></script>
+        <script src="{{ get_asset_url('assets/libs/amcharts5/xy.js') }}"></script>
+        <script src="{{ get_asset_url('assets/libs/amcharts5/themes/Animated.js') }}"></script>
+        <script src="{{ get_asset_url('assets/libs/amcharts5/themes/Animated.js') }}"></script>
 
         <!-- Project Lib -->
         <script src="{{ get_asset_url('libs/constants.js') }}"></script>
@@ -219,10 +221,18 @@ if (!isset($partial_path)) {
                     error: function(xhr, status, errorString) {
                         $.loader.init().hide();
 
-                        response = xhr.responseText.trim();
+                        if (typeof xhr.responseText == "string")
+                        {
+                            response = xhr.responseText.trim();
 
-                        if (response.length == 0) {
-                            $.events.onAjaxError("JSON Parse Error", "Empty Response");
+                            if (response.length == 0) {
+                                $.events.onAjaxError("JSON Parse Error", "Empty Response");
+                                return false;
+                            }
+                        }
+                        else
+                        {
+                            console.log(xhr.responseText);
                             return false;
                         }
 
