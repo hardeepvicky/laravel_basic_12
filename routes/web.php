@@ -978,6 +978,9 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
         $name = "command_logs";
         Route::get($name, [DeveloperController::class, $name])->name($name);
 
+        $route_prefix = "laravel_logs";
+        Route::get($route_prefix . "/{file_name?}", [DeveloperController::class, "laravel_logs"])->name($route_prefix);
+
         $name = "laravel_routes_index";
         Route::get($name, [DeveloperController::class, $name])->name($name);
     });

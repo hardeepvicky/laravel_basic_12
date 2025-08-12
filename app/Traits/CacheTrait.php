@@ -28,6 +28,11 @@ trait CacheTrait
 
         $tags[] = $base_cache_key;
 
+        foreach($tags as $k => $tag)
+        {
+            $tags[$k] = static::optimizeCacheKey($tag);
+        }
+
         $instance = Cache::tags($tags);
 
         return $instance->get($cache_key);
@@ -42,6 +47,11 @@ trait CacheTrait
         $base_cache_key = static::getCacheKey();
 
         $tags[] = $base_cache_key;
+
+        foreach($tags as $k => $tag)
+        {
+            $tags[$k] = static::optimizeCacheKey($tag);
+        }
 
         $instance = Cache::tags($tags);
 
@@ -67,6 +77,11 @@ trait CacheTrait
         if (empty($tags))
         {
             $tags = [$base_cache_key];
+        }
+
+        foreach($tags as $k => $tag)
+        {
+            $tags[$k] = static::optimizeCacheKey($tag);
         }
 
         $instance = Cache::tags($tags);

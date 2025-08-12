@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Backend;
 use App\Acl\SectionRoutes;
 use App\Helpers\ArrayHelper;
 use App\Helpers\EmailHelper;
+use App\Helpers\FileUtility;
 use App\Helpers\LaravelExtend;
 use App\Models\AjaxLog;
 use App\Models\CommandLog;
@@ -322,5 +323,41 @@ class DeveloperController extends BackendController
         $this->setForView(compact("records"));
 
         return $this->viewIndex(__FUNCTION__);
+    }
+
+    public function laravel_logs($file_name = "")
+    {
+        $path = storage_path("logs");
+
+        if (isset($file_name) && $file_name)
+        {
+            $file = $path . "/" . $file_name . ".log";
+            $log_content = file_get_contents($file);
+
+            $log_content = str_replace("local.ERROR", '<span class="error-message">local.ERROR</span>', $log_content);
+            // d($log_content, true);
+
+            $this->setForView(compact("log_content"));
+        }
+
+        $list = FileUtility::getFileList($path);
+
+        $file_list = [];
+
+        foreach($list as $k => $file)
+        {
+            $v = pathinfo($file, PATHINFO_FILENAME);
+            $file_list[$v] = $v;
+        }
+
+        $search['file_name'] = $file_name;
+
+        $current_route_name = Route::currentRouteName();
+
+        $this->setForView(compact("file_list", "search", "current_route_name"));
+
+        $this->layout = "frontend.layouts.main";
+
+        return $this->view(__FUNCTION__);
     }
 }

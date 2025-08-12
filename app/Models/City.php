@@ -123,8 +123,8 @@ class City extends BaseModel
                 }
             }
 
-            $cache_time = 60 * 60;
-            static::addCache($cache_key, $data, $cache_time);
+            $cache_time = 60 * 60 * 24;
+            static::addCache($cache_key, $data, $cache_time, [District::class]);
         }
 
         return $data;

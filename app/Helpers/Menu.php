@@ -544,6 +544,7 @@ class DeveloperMenu extends BaseMenu
         $links[] = self::getLink($routePrefix . ".sql_logs", null, self::ICON_MENU_LIST, [], self::LINK_TYPE_SUMMARY);
         $links[] = self::getLink($routePrefix . ".ajax_logs", null, self::ICON_MENU_LIST, [], self::LINK_TYPE_SUMMARY);
         $links[] = self::getLink($routePrefix . ".command_logs", null, self::ICON_MENU_LIST, [], self::LINK_TYPE_SUMMARY);
+        $links[] = self::getLink($routePrefix . ".laravel_logs", null, self::ICON_MENU_LIST, [], self::LINK_TYPE_SUMMARY);
 
         return self::getModule("Logs", null, $links);
     }
