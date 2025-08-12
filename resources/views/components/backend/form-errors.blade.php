@@ -2,15 +2,14 @@
 
 use Illuminate\Support\Facades\Session;
 
-$custom_errors = [];
 if (Session::has("custom_errors"))
 {
-    $custom_errors = Session::get("custom_errors");
+    $customErrors = Session::get("custom_errors");
     Session::forget('custom_errors');
 }
 ?>
 
-@if ($errors->any() || $custom_errors)
+@if ($errors->any() || isset($customErrors))
     <div class="card-wrapper rounded-3 h-100 bg-light-secondary mb-2">
         <h6 class="sub-title f-w-600">Errors</h6>
         <ol class="mb-0">
@@ -18,7 +17,7 @@ if (Session::has("custom_errors"))
                 <li>{{ $error }}</li>
             @endforeach
 
-            @foreach ($custom_errors as $group => $errors)
+            @foreach ($customErrors as $group => $errors)
                 @if (is_array($errors))
                     @if(is_string($group))
                     <li>
