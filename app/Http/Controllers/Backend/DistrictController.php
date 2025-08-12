@@ -372,6 +372,12 @@ class DistrictController extends BackendController
                     }
                 }
 
+                
+                $sqlLogModel = LaravelExtend::saveSqlLog([
+                    "import_log_id" => $importLogModel->id
+                ]);
+
+                $importLogModel->sql_log_id = $sqlLogModel->id;
                 $importLogModel->accept_count = $accept_count;
                 $importLogModel->exec_time = microtime(true) - $start_seconds;
 

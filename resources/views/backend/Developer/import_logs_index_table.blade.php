@@ -39,7 +39,13 @@ use App\Helpers\Util;
                         <td>
                             <x-Backend.created-and-by :datetime="$record->created_at_user_tz" :userId="$record->created_by" />
 
-                            <span class="btn btn-outline-light text-dark summary-action-button mb-2 css-toggler"
+                            @if($record->sql_log_id)
+                                <a class="btn btn-outline-secondary mt-2 mb-2" href="{{ route('developer.sql_logs', ['id' => $record->sql_log_id ])  }}">
+                                    Open SQL Log Link
+                                </a>
+                            @endif
+
+                            <span class="btn btn-outline-light text-dark summary-action-button mt-2 mb-2 css-toggler"
                                 data-sr-css-class-toggle-target="#record-{{ $record->id }}"
                                 data-sr-css-class-toggle-class="hidden">
                                 Details

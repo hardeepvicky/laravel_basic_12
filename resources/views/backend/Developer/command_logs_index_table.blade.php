@@ -64,11 +64,9 @@ use App\Helpers\Util;
                         </td>
                         <td>
                             @if($record->sql_log_id)
-                            <div class="mt-2 mb-2">
-                                <a href="{{ route('developer.sql_logs', ['id' => $record->sql_log_id ])  }}">
-                                    Open SQL Log Link
-                                </a>
-                            </div>
+                            <a class="btn btn-outline-secondary mt-2 mb-2"  href="{{ route('developer.sql_logs', ['id' => $record->sql_log_id ])  }}">
+                                Open SQL Log Link
+                            </a>
                             @endif
                         </td>
                     </tr>
