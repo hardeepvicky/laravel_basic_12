@@ -2,11 +2,18 @@
 
 @section('content')
     <?php
-    $page_header_links = [
-        ['title' => 'History', 'url' => route($routePrefix . '.history', ["lead_id" => $model->id])],
-        ['title' => 'List', 'url' => route($routePrefix . '.index')]
-    ];
     use App\Models\Lead;
+    
+    $page_header_links = [];
+
+    if ($model->id)
+    {
+        $page_header_links[] = ['title' => 'History', 'url' => route($routePrefix . '.history', ["lead_id" => $model->id])];
+    }
+
+    $page_header_links[] = ['title' => 'List', 'url' => route($routePrefix . '.index')];
+
+    
     ?>
 
     @include($partial_path . '.page_header')
