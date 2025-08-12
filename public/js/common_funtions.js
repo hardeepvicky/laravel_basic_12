@@ -70,7 +70,15 @@ function ajaxHandleResponse(url, response, callback) {
         }
     } else if (typeof responseJson["msg"] != "undefined") {
         $.loader.hide();
-        $.events.onUserError(responseJson["msg"]);
+        
+        if (typeof responseJson['custom_errors'] == "object")
+        {
+            $.events.customErrors(responseJson["msg"], responseJson['custom_errors']);
+        }
+        else
+        {
+            $.events.onUserError(responseJson["msg"]);
+        }
     } else {
         $.loader.hide();
         $.events.onAjaxError("Missing", "Response JSON Should have msg", {

@@ -128,12 +128,11 @@ abstract class Controller
                 {
 
                 }
-                else
+                else if (is_string($v))
                 {
                     $request_params[$k] = urldecode($v);
                 }
             }
-
 
             $method = Request::method();
 

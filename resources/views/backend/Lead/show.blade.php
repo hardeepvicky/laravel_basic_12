@@ -131,6 +131,20 @@
             <div class="tab-pane" id="tab_file_block" role="tabpanel"
                 aria-labelledby="tab_file">
 
+                <x-Form.start action="{{ route('lead.change_files', ['lead_id' => $record->id]) }}" method="POST" />
+                    <div class="form-group mt-2 mb-3">
+                        <?php
+                        $field = 'leadFile';
+                        $label = get_value_from_list($field_labels, $field, $field);
+                        $value = implode(',', $record->leadFile?->pluck('document_file_id')->toArray());
+                        ?>
+                        <x-Inputs.text-field :id="$field" :name="$field" :label="$label"
+                            :value="$value" multiple="multiple" />
+                        <span id="files-choose" class="btn btn-secondary">Choose Files</span>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
+
                 <x-Backend.document-files :records="$record->documentFile" />
             </div>
         </div>
@@ -140,5 +154,9 @@
 <script>
     $(function(){
         $('.more-less').srParagraph();
+
+        $("#leadFile").browseGallery({
+            opener: "#files-choose"
+        });
     });
 </script>

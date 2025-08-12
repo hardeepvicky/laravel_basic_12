@@ -25,6 +25,8 @@ class SectionRoutes
 
         "city.ajax_get_list_with_district",
 
+        "item.ajax_get_child_uom_list",
+
         "*.ajax_get_list",
         "*.ajax_get_code_list",
         "*.ajax_get_count",

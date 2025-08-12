@@ -100,6 +100,11 @@ class Lead extends BaseModel
         return $this->hasMany(LeadProduct::class, 'lead_id');
     }
 
+    public function items()
+    {
+        return $this->hasMany(LeadItem::class, 'lead_id');
+    }
+
     public function history()
     {
         return $this->hasMany(LeadHistory::class, 'lead_id');

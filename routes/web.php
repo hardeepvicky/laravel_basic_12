@@ -473,6 +473,9 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
         $name = "history_destroy";
         Route::delete($name . "/{id}", [$controllerClass, $name])->name($name);
 
+        $name = "change_files";
+        Route::post($name . "/{task_id}", [$controllerClass, $name])->name($name);
+
         $name = "ajax_get";
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
 
@@ -824,7 +827,7 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
         $name = "address";
         Route::post($name . "/{lead_id}", [$controllerClass, $name])->name($name);
 
-        $name = "lead_files";
+        $name = "change_files";
         Route::post($name . "/{lead_id}", [$controllerClass, $name])->name($name);
 
         $name = "dispatch";
@@ -873,6 +876,9 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
 
         $name = "ajax_get";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "ajax_get_child_uom_list";
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
 
         $name = "ajax_update_field";

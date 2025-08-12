@@ -812,6 +812,83 @@ class TaskController extends BackendController
         }
     }
 
+    public function change_files($task_id, Request $request)
+    {
+        $model = $this->modelClass::findOrFail($task_id);
+
+        $rules = [
+            "taskFile" => ["required"],
+        ];
+
+        $validatedData = $request->validate($rules);
+
+        DB::beginTransaction();
+
+        try {
+
+            if (isset($validatedData['taskFile'])) {
+
+                $ids = explode(",", $validatedData['taskFile']);
+
+                $document_files = DocumentFile::find($ids);
+
+                $model->documentFile()->sync($document_files);
+            }
+
+            if (LaravelExtend::$errors) {
+                throw new Exception("There are some errors");
+            }
+
+            DB::commit();
+
+            $request = request();
+
+            if ($request->ajax()) {
+                return $this->responseJson([
+                    'status' => 1,
+                ]);
+            }
+
+            $this->saveSqlLog();
+
+            return back()->with('success', "Files Saved successfully");
+        } 
+        catch (UserException $ex) {
+            DB::rollBack();
+
+            $request = request();
+
+            if ($request->ajax()) {
+                return $this->responseJson([
+                    'status' => 0,
+                    'msg' => $ex->getMessage(),
+                    "custom_errors" => LaravelExtend::$errors
+                ]);
+            }
+
+            $this->saveSqlLog();
+
+            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", LaravelExtend::$errors);
+        }
+        catch (Exception $ex) {
+            DB::rollBack();
+
+            $request = request();
+
+            if ($request->ajax()) {
+                return $this->responseJson([
+                    'status' => 0,
+                    'msg' => get_exception_display_message($ex),
+                    "custom_errors" => LaravelExtend::$errors
+                ]);
+            }
+
+            $this->saveSqlLog();
+
+            return back()->withInput()->with('fail', get_exception_display_message($ex))->with("custom_errors", LaravelExtend::$errors);
+        }
+    }
+
     public function csv()
     {
         $cache_key_prefix = Route::currentRouteName();

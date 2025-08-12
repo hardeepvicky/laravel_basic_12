@@ -20,6 +20,7 @@ use App\Models\ItemFile;
 use App\Models\Setting;
 use App\Models\Tag;
 use App\Models\Type;
+use App\Models\Uom;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Exception;
@@ -463,6 +464,46 @@ class ItemController extends BackendController
                 $row = [
                     "id" => $record->id,
                     "name" => $record->getDisplayName(),
+                ];
+
+                $response['data'][] = $row;
+            }
+        } catch (Exception $ex) {
+            $response['status'] = 0;
+            $response['msg'] = $ex->getMessage();
+        }
+
+        return $this->responseJson($response);
+    }
+
+    public function ajax_get_child_uom_list($item_id)
+    {
+        $response = ["status" => 1];
+
+        try {
+
+            $model = $this->modelClass::where("id", $item_id)->with(["category"])->first();
+            
+            if (!$model)
+            {
+                throw new UserException("Invalid Item ID : $item_id");
+            }
+
+            $records = Uom::where("is_active", 1)
+                        ->where(function($q) use($model) {
+                            $q->where("id", $model->category->base_uom_id)
+                            ->orWhere("parent_id", $model->category->base_uom_id);
+                        })
+                        ->orderBy("list_display_order", "ASC")
+                        ->get();
+
+            $response['data'] = [];
+
+            foreach ($records as $record) {
+                $row = [
+                    "id" => $record->id,
+                    "name" => $record->short_name,
+                    "conversion_factor" => $record->conversion_factor,
                 ];
 
                 $response['data'][] = $row;

@@ -9,7 +9,10 @@ use App\Helpers\DateUtility;
 
 @section('content')
     <?php
-    $page_header_links = [['title' => 'List', 'url' => route($routePrefix . '.index')]];
+    $page_header_links = [
+        ['title' => 'Edit', 'url' => route($routePrefix . '.edit', ["lead" => $record])],
+        ['title' => 'List', 'url' => route($routePrefix . '.index')],
+    ];
     ?>
 
     @include($partial_path . '.page_header')
@@ -29,7 +32,7 @@ use App\Helpers\DateUtility;
             </a>
             <div class="btn btn-secondary email_link">Email</div>
             <div class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modal-snooze-form">Snooze</div>
-            <div class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modal-dispatch-form">Dispatch</div>
+            <div class="btn btn-secondary dispatch_link" data-bs-toggle="modal" data-bs-target="#modal-dispatch-form">Dispatch</div>
             <div class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modal-transfer-form">Transfer Lead</div>
             <div class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modal-convert-form">Convert To Customer</div>
             <div class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modal-label-download">Label</div>
@@ -212,8 +215,8 @@ use App\Helpers\DateUtility;
     </div>
 
     <div class="modal fade" id="modal-dispatch-form" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content model-xl">
+        <div class="modal-dialog  modal-xl" role="document">
+            <div class="modal-content">
                 <div class="modal-header">
                     <h3 class="modal-title fs-5">Dispatch</h3>
                     <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -252,193 +255,459 @@ use App\Helpers\DateUtility;
                                     <x-Inputs.text-area :id="$field" :name="$field" :label="$label" rows="3"/>
                                 </div>
                             </div>
-                        </div>
+                        </div>                        
+
                         <div class="row mb-4">
-                                <div class="col-md-12">
-                                    <h4 class="b-b-info">
-                                        Items
-                                    </h4>
-                                    <table class="table table-bordered order-column template-table"
-                                        data-sr-table-template-min-row="1">
-                                        <thead>
-                                            <tr>
-                                                <th class="text-center" style="width : 50px;">
-                                                    <span class="sr-table-template-add">
-                                                        <i class="fas fa-plus-circle text-success icon"></i>
-                                                    </span>
-                                                </th>
-                                                <th style="width:80%">
-                                                    Address
-                                                </th>
-                                                <th style="width:10%">
-                                                    {{ get_value_from_list($address_field_labels, 'is_primary') }}
-                                                </th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr class="sr-table-template-row hidden">
-                                                <td>
-                                                    <div class="block">
-                                                        <div class="left-block">
-                                                            <div class="sr-table-template-move-up">
-                                                                <i class="fas fa-arrow-circle-up icon"></i>
-                                                            </div>
-                                                            <div class="sr-table-template-move-down">
-                                                                <i class="fas fa-arrow-circle-down icon"></i>
-                                                            </div>
+                            <div class="col-md-12">
+                                <h4 class="b-b-info">
+                                    Send Products
+                                </h4>
+                                <table class="table table-bordered order-column template-table"
+                                    data-sr-table-template-min-row="0">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-center" style="width : 50px;">
+                                                <span class="sr-table-template-add">
+                                                    <i class="fas fa-plus-circle text-success icon"></i>
+                                                </span>
+                                            </th>
+                                            <th style="width:70%">
+                                                {{ get_value_from_list($product_field_labels, 'product_id') }}
+                                            </th>
+                                            <th style="width:20%">
+                                                {{ get_value_from_list($product_field_labels, 'qty') }}
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="sr-table-template-row hidden">
+                                            <td>
+                                                <div class="block">
+                                                    <div class="left-block">
+                                                        <div class="sr-table-template-move-up">
+                                                            <i class="fas fa-arrow-circle-up icon"></i>
                                                         </div>
-                                                        <div class="right-block">
-                                                            <span class="sr-table-template-delete">
-                                                                <i class=" fas fa-times-circle text-danger icon"></i>
-                                                            </span>
+                                                        <div class="sr-table-template-move-down">
+                                                            <i class="fas fa-arrow-circle-down icon"></i>
                                                         </div>
                                                     </div>
-                                                    <x-inputs.text-field type="hidden" name="addresses[(sr-id)][id]"
-                                                        label="" />
-                                                </td>
-                                                <td>
-                                                    <div class="form-group mb-2">
-                                                        <?php
-                                                        $field = 'type';
-                                                        $label = get_value_from_list($address_field_labels, $field, $field);
-                                                        ?>
-                                                        <x-inputs.drop-down name="addresses[(sr-id)][{{ $field }}]"
-                                                            :label="$label" 
-                                                            :list="$address_type_list"
-                                                            class="will-required will-select2" />
+                                                    <div class="right-block">
+                                                        <span class="sr-table-template-delete">
+                                                            <i class=" fas fa-times-circle text-danger icon"></i>
+                                                        </span>
                                                     </div>
-
-                                                    <div class="form-group mb-2">
-                                                        <?php
-                                                        $field = 'addr1';
-                                                        $label = get_value_from_list($address_field_labels, $field, $field);
-                                                        ?>
-                                                        <x-inputs.text-field name="addresses[(sr-id)][{{ $field }}]"
-                                                            :label="$label" class="will-required" />
-                                                    </div>
-                                                    <div class="form-group mb-2">
-                                                        <?php
-                                                        $field = 'addr2';
-                                                        $label = get_value_from_list($address_field_labels, $field, $field);
-                                                        ?>
-                                                        <x-inputs.text-field name="addresses[(sr-id)][{{ $field }}]"
-                                                            :label="$label" />
-                                                    </div>
-
-                                                    <div class="form-group mb-2">
-                                                        <?php
-                                                        $field = 'pincode';
-                                                        $label = get_value_from_list($address_field_labels, $field, $field);
-                                                        ?>
-                                                        <x-inputs.text-field name="addresses[(sr-id)][{{ $field }}]"
-                                                            :label="$label" class="will-required validate-int" />
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <?php
-                                                    $field = 'is_primary';
-                                                    ?>
-                                                    <x-inputs.checkbox name="addresses[(sr-id)][{{ $field }}]"
-                                                        label="" class="is_primary" />
-                                                </td>
-                                            </tr>
-                                            @php
-                                                $addresses = old('addresses', $addresses ?? []);
-                                                unset($addresses['(sr-id)']);
-                                                // d($addresses, true);
-                                            @endphp
-                                            @if (isset($addresses))
-                                                @foreach ($addresses as $k => $child_arr)
-                                                    <tr class="" sr-id="{{ $child_arr['id'] }}" sr-counter="{{ $k }}">
-                                                        <td>
-                                                            <div class="block">
-                                                                <div class="left-block">
-                                                                    <div class="sr-table-template-move-up">
-                                                                        <i class="fas fa-arrow-circle-up icon"></i>
-                                                                    </div>
-                                                                    <div class="sr-table-template-move-down">
-                                                                        <i class="fas fa-arrow-circle-down icon"></i>
-                                                                    </div>
+                                                </div>
+                                                <x-inputs.text-field type="hidden" name="products[(sr-id)][id]"
+                                                    label="" />
+                                            </td>
+                                            <td>
+                                                <?php
+                                                $field = 'product_id';
+                                                ?>
+                                                <x-inputs.drop-down name="products[(sr-id)][{{ $field }}]"
+                                                    label="" :list="$product_list" class="will-required will-select2"
+                                                    />
+                                            </td>
+                                            <td>
+                                                <?php
+                                                $field = 'qty';
+                                                ?>
+                                                <x-inputs.text-field name="products[(sr-id)][{{ $field }}]"
+                                                    label="" class="will-required validate-float"/>
+                                            </td>
+                                        </tr>
+                                        @php
+                                            $products = old('products', $products ?? []);
+                                            unset($products['(sr-id)']);
+                                        @endphp
+                                        @if (isset($products))
+                                            @foreach ($products as $k => $child_arr)
+                                                <tr class="" sr-id="{{ $child_arr['id'] ?? $k }}"
+                                                    sr-counter="{{ $k }}">
+                                                    <td>
+                                                        <div class="block">
+                                                            <div class="left-block">
+                                                                <div class="sr-table-template-move-up">
+                                                                    <i class="fas fa-arrow-circle-up icon"></i>
                                                                 </div>
-                                                                <div class="right-block">
-                                                                    <span class="sr-table-template-delete">
-                                                                        <i
-                                                                            class=" fas fa-times-circle text-danger icon"></i>
-                                                                    </span>
+                                                                <div class="sr-table-template-move-down">
+                                                                    <i class="fas fa-arrow-circle-down icon"></i>
                                                                 </div>
                                                             </div>
-                                                            <input type="hidden" name="addresses[{{ $k }}][id]"
-                                                                value="{{ $child_arr['id'] ?? '' }}" />
-                                                        </td>                                                        
-                                                        <td>
-                                                            <div class="form-group mb-2">
-                                                                <?php
-                                                                $field = 'type';
-                                                                $value = $child_arr[$field] ?? '';
-                                                                $label = get_value_from_list($address_field_labels, $field, $field);
-                                                                ?>
-                                                                <x-inputs.drop-down name="addresses[{{ $k }}][{{ $field }}]"
-                                                                    :label="$label" 
-                                                                    :value="$value"
-                                                                    :list="$address_type_list"
-                                                                    class="will-required will-select2" />
+                                                            <div class="right-block">
+                                                                <span class="sr-table-template-delete">
+                                                                    <i
+                                                                        class=" fas fa-times-circle text-danger icon"></i>
+                                                                </span>
                                                             </div>
-
-                                                            <div class="form-group mb-2">
-                                                                <?php
-                                                                $field = 'addr1';
-                                                                $value = $child_arr[$field] ?? '';
-                                                                $label = get_value_from_list($address_field_labels, $field, $field);
-                                                                ?>
-                                                                <x-inputs.text-field name="addresses[{{ $k }}][{{ $field }}]"
-                                                                    :label="$label" :value="$value" class="will-required" />
-                                                            </div>
-                                                            <div class="form-group mb-2">
-                                                                <?php
-                                                                $field = 'addr2';
-                                                                $value = $child_arr[$field] ?? '';
-                                                                $label = get_value_from_list($address_field_labels, $field, $field);
-                                                                ?>
-                                                                <x-inputs.text-field name="addresses[{{ $k }}][{{ $field }}]"
-                                                                    :label="$label" :value="$value" />
-                                                            </div>
-
-                                                            <div class="form-group mb-2">
-                                                                <?php
-                                                                $field = 'pincode';
-                                                                $value = $child_arr[$field] ?? '';
-                                                                $label = get_value_from_list($address_field_labels, $field, $field);
-                                                                ?>
-                                                                <x-inputs.text-field name="addresses[{{ $k }}][{{ $field }}]"
-                                                                    :label="$label" :value="$value" class="will-required validate-int" />
-                                                            </div>
-                                                        </td>
-                                                        <td>
-                                                            <?php
-                                                            $field = 'is_primary';
-                                                            $value = $child_arr[$field] ?? '';
-                                                            ?>
-                                                            <x-inputs.checkbox
-                                                                name="addresses[{{ $k }}][{{ $field }}]"
-                                                                label="" :value="$value" class="is_primary" />
-                                                        </td>
-                                                    </tr>
-                                                @endforeach
-                                            @endif
-                                        </tbody>
-                                        <tfoot>
-                                            <tr>
-                                                <th class="text-center" style="width : 80px;">
-                                                    <span class="sr-table-template-add">
-                                                        <i class="fas fa-plus-circle text-success icon"></i>
-                                                    </span>
-                                                </th>
-                                            </tr>
-                                        </tfoot>
-                                    </table>
-                                </div>
+                                                        </div>
+                                                        <input type="hidden" name="products[{{ $k }}][id]"
+                                                            value="{{ $child_arr['id'] ?? '' }}" />
+                                                    </td>
+                                                    <td>
+                                                        <?php
+                                                        $field = 'product_id';
+                                                        $value = $child_arr[$field] ?? '';
+                                                        ?>
+                                                        <x-inputs.drop-down name="products[{{ $k }}][{{ $field }}]"
+                                                            label="" :list="$product_list" :value="$value" class="will-required will-select2"
+                                                            />
+                                                    </td>
+                                                    <td>
+                                                        <?php
+                                                        $field = 'qty';
+                                                        $value = $child_arr[$field] ?? '';
+                                                        ?>
+                                                        <x-inputs.text-field name="products[{{ $k }}][{{ $field }}]"
+                                                            label="" :value="$value" class="will-required validate-float"/>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        @endif
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <th class="text-center" style="width : 80px;">
+                                                <span class="sr-table-template-add">
+                                                    <i class="fas fa-plus-circle text-success icon"></i>
+                                                </span>
+                                            </th>
+                                        </tr>
+                                    </tfoot>
+                                </table>
                             </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <h4 class="b-b-info">
+                                    Send Items
+                                </h4>
+                                <table class="table table-bordered order-column template-table"
+                                    data-sr-table-template-min-row="0">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-center" style="width : 50px;">
+                                                <span class="sr-table-template-add">
+                                                    <i class="fas fa-plus-circle text-success icon"></i>
+                                                </span>
+                                            </th>
+                                            <th style="width:50%">
+                                                {{ get_value_from_list($item_field_labels, 'item_id') }}
+                                            </th>
+                                            <th style="width:20%">
+                                                {{ get_value_from_list($item_field_labels, 'qty') }}
+                                            </th>
+                                            <th style="width:30%">
+                                                {{ get_value_from_list($item_field_labels, 'uom_id') }}
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="sr-table-template-row hidden">
+                                            <td>
+                                                <div class="block">
+                                                    <div class="left-block">
+                                                        <div class="sr-table-template-move-up">
+                                                            <i class="fas fa-arrow-circle-up icon"></i>
+                                                        </div>
+                                                        <div class="sr-table-template-move-down">
+                                                            <i class="fas fa-arrow-circle-down icon"></i>
+                                                        </div>
+                                                    </div>
+                                                    <div class="right-block">
+                                                        <span class="sr-table-template-delete">
+                                                            <i class=" fas fa-times-circle text-danger icon"></i>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <x-inputs.text-field type="hidden" name="items[(sr-id)][id]"
+                                                    label="" />
+                                            </td>
+                                            <td>
+                                                <?php
+                                                $field = 'item_id';
+                                                ?>
+                                                <x-inputs.drop-down name="items[(sr-id)][{{ $field }}]"
+                                                    label="" :list="$item_list" class="will-required item_id will-select2"
+                                                    data-sr-cascade-target="#lead-uom_id-(sr-id)"
+                                                    data-sr-cascade-url="/item/ajax_get_child_uom_list/{v}"
+                                                    />
+                                            </td>
+                                            <td>
+                                                <?php
+                                                $field = 'qty';
+                                                ?>
+                                                <x-inputs.text-field name="items[(sr-id)][{{ $field }}]"
+                                                    label="" class="will-required validate-float"/>
+                                            </td>
+                                            <td>
+                                                <?php
+                                                $field = 'uom_id';
+                                                ?>
+                                                <x-inputs.drop-down id="lead-uom_id-(sr-id)" name="items[(sr-id)][{{ $field }}]"
+                                                    label="" :list="$empty_list" class="will-required will-select2"
+                                                    />
+                                            </td>
+                                        </tr>
+                                        @php
+                                            $items = old('items', $items ?? []);
+                                            unset($items['(sr-id)']);
+                                        @endphp
+                                        @if (isset($items))
+                                            @foreach ($items as $k => $child_arr)
+                                                <tr class="" sr-id="{{ $child_arr['id'] ?? $k }}"
+                                                    sr-counter="{{ $k }}">
+                                                    <td>
+                                                        <div class="block">
+                                                            <div class="left-block">
+                                                                <div class="sr-table-template-move-up">
+                                                                    <i class="fas fa-arrow-circle-up icon"></i>
+                                                                </div>
+                                                                <div class="sr-table-template-move-down">
+                                                                    <i class="fas fa-arrow-circle-down icon"></i>
+                                                                </div>
+                                                            </div>
+                                                            <div class="right-block">
+                                                                <span class="sr-table-template-delete">
+                                                                    <i
+                                                                        class=" fas fa-times-circle text-danger icon"></i>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        <input type="hidden" name="items[{{ $k }}][id]"
+                                                            value="{{ $child_arr['id'] ?? '' }}" />
+                                                    </td>
+                                                    <td>
+                                                        <?php
+                                                        $field = 'item_id';
+                                                        $value = $child_arr[$field] ?? '';
+                                                        ?>
+                                                        <x-inputs.drop-down name="items[{{ $k }}][{{ $field }}]"
+                                                            label="" :list="$item_list" :value="$value" class="will-required item_id will-select2"
+                                                            data-sr-cascade-target="#lead-uom_id-{{ $k }}"
+                                                            data-sr-cascade-url="/item/ajax_get_child_uom_list/{v}"
+                                                            />
+                                                    </td>
+                                                    <td>
+                                                        <?php
+                                                        $field = 'qty';
+                                                        $value = $child_arr[$field] ?? '';
+                                                        ?>
+                                                        <x-inputs.text-field name="items[{{ $k }}][{{ $field }}]"
+                                                            label="" :value="$value" class="will-required validate-float"/>
+                                                    </td>
+                                                    <td>
+                                                        <?php
+                                                        $field = 'uom_id';
+                                                        $value = $child_arr[$field] ?? '';
+                                                        ?>
+                                                        <x-inputs.drop-down id="lead-uom_id-{{ $k }}" name="items[{{ $k }}][{{ $field }}]"
+                                                            label="" :list="$empty_list" :value="$value" class="will-required will-select2"
+                                                            />
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        @endif
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <th class="text-center" style="width : 80px;">
+                                                <span class="sr-table-template-add">
+                                                    <i class="fas fa-plus-circle text-success icon"></i>
+                                                </span>
+                                            </th>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
                         
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <h4 class="b-b-info">
+                                    Address
+                                </h4>
+                                <table class="table table-bordered order-column template-table"
+                                    data-sr-table-template-min-row="1">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-center" style="width : 50px;">
+                                                <span class="sr-table-template-add">
+                                                    <i class="fas fa-plus-circle text-success icon"></i>
+                                                </span>
+                                            </th>
+                                            <th style="width:80%">
+                                                Address
+                                            </th>
+                                            <th style="width:10%">
+                                                {{ get_value_from_list($address_field_labels, 'is_primary') }}
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="sr-table-template-row hidden">
+                                            <td>
+                                                <div class="block">
+                                                    <div class="left-block">
+                                                        <div class="sr-table-template-move-up">
+                                                            <i class="fas fa-arrow-circle-up icon"></i>
+                                                        </div>
+                                                        <div class="sr-table-template-move-down">
+                                                            <i class="fas fa-arrow-circle-down icon"></i>
+                                                        </div>
+                                                    </div>
+                                                    <div class="right-block">
+                                                        <span class="sr-table-template-delete">
+                                                            <i class=" fas fa-times-circle text-danger icon"></i>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <x-inputs.text-field type="hidden" name="addresses[(sr-id)][id]"
+                                                    label="" />
+                                            </td>
+                                            <td>
+                                                <div class="form-group mb-2">
+                                                    <?php
+                                                    $field = 'type';
+                                                    $label = get_value_from_list($address_field_labels, $field, $field);
+                                                    ?>
+                                                    <x-inputs.drop-down name="addresses[(sr-id)][{{ $field }}]"
+                                                        :label="$label" 
+                                                        :list="$address_type_list"
+                                                        class="will-required will-select2" />
+                                                </div>
+
+                                                <div class="form-group mb-2">
+                                                    <?php
+                                                    $field = 'addr1';
+                                                    $label = get_value_from_list($address_field_labels, $field, $field);
+                                                    ?>
+                                                    <x-inputs.text-field name="addresses[(sr-id)][{{ $field }}]"
+                                                        :label="$label" class="will-required" />
+                                                </div>
+                                                <div class="form-group mb-2">
+                                                    <?php
+                                                    $field = 'addr2';
+                                                    $label = get_value_from_list($address_field_labels, $field, $field);
+                                                    ?>
+                                                    <x-inputs.text-field name="addresses[(sr-id)][{{ $field }}]"
+                                                        :label="$label" />
+                                                </div>
+
+                                                <div class="form-group mb-2">
+                                                    <?php
+                                                    $field = 'pincode';
+                                                    $label = get_value_from_list($address_field_labels, $field, $field);
+                                                    ?>
+                                                    <x-inputs.text-field name="addresses[(sr-id)][{{ $field }}]"
+                                                        :label="$label" class="will-required validate-int" />
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <?php
+                                                $field = 'is_primary';
+                                                ?>
+                                                <x-inputs.checkbox name="addresses[(sr-id)][{{ $field }}]"
+                                                    label="" class="is_primary" />
+                                            </td>
+                                        </tr>
+                                        @php
+                                            $addresses = old('addresses', $addresses ?? []);
+                                            unset($addresses['(sr-id)']);
+                                            // d($addresses, true);
+                                        @endphp
+                                        @if (isset($addresses))
+                                            @foreach ($addresses as $k => $child_arr)
+                                                <tr class="" sr-id="{{ $child_arr['id'] }}" sr-counter="{{ $k }}">
+                                                    <td>
+                                                        <div class="block">
+                                                            <div class="left-block">
+                                                                <div class="sr-table-template-move-up">
+                                                                    <i class="fas fa-arrow-circle-up icon"></i>
+                                                                </div>
+                                                                <div class="sr-table-template-move-down">
+                                                                    <i class="fas fa-arrow-circle-down icon"></i>
+                                                                </div>
+                                                            </div>
+                                                            <div class="right-block">
+                                                                <span class="sr-table-template-delete">
+                                                                    <i
+                                                                        class=" fas fa-times-circle text-danger icon"></i>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        <input type="hidden" name="addresses[{{ $k }}][id]"
+                                                            value="{{ $child_arr['id'] ?? '' }}" />
+                                                    </td>                                                        
+                                                    <td>
+                                                        <div class="form-group mb-2">
+                                                            <?php
+                                                            $field = 'type';
+                                                            $value = $child_arr[$field] ?? '';
+                                                            $label = get_value_from_list($address_field_labels, $field, $field);
+                                                            ?>
+                                                            <x-inputs.drop-down name="addresses[{{ $k }}][{{ $field }}]"
+                                                                :label="$label" 
+                                                                :value="$value"
+                                                                :list="$address_type_list"
+                                                                class="will-required will-select2" />
+                                                        </div>
+
+                                                        <div class="form-group mb-2">
+                                                            <?php
+                                                            $field = 'addr1';
+                                                            $value = $child_arr[$field] ?? '';
+                                                            $label = get_value_from_list($address_field_labels, $field, $field);
+                                                            ?>
+                                                            <x-inputs.text-field name="addresses[{{ $k }}][{{ $field }}]"
+                                                                :label="$label" :value="$value" class="will-required" />
+                                                        </div>
+                                                        <div class="form-group mb-2">
+                                                            <?php
+                                                            $field = 'addr2';
+                                                            $value = $child_arr[$field] ?? '';
+                                                            $label = get_value_from_list($address_field_labels, $field, $field);
+                                                            ?>
+                                                            <x-inputs.text-field name="addresses[{{ $k }}][{{ $field }}]"
+                                                                :label="$label" :value="$value" />
+                                                        </div>
+
+                                                        <div class="form-group mb-2">
+                                                            <?php
+                                                            $field = 'pincode';
+                                                            $value = $child_arr[$field] ?? '';
+                                                            $label = get_value_from_list($address_field_labels, $field, $field);
+                                                            ?>
+                                                            <x-inputs.text-field name="addresses[{{ $k }}][{{ $field }}]"
+                                                                :label="$label" :value="$value" class="will-required validate-int" />
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <?php
+                                                        $field = 'is_primary';
+                                                        $value = $child_arr[$field] ?? '';
+                                                        ?>
+                                                        <x-inputs.checkbox
+                                                            name="addresses[{{ $k }}][{{ $field }}]"
+                                                            label="" :value="$value" class="is_primary" />
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        @endif
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <th class="text-center" style="width : 80px;">
+                                                <span class="sr-table-template-add">
+                                                    <i class="fas fa-plus-circle text-success icon"></i>
+                                                </span>
+                                            </th>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -454,7 +723,7 @@ use App\Helpers\DateUtility;
 
             function modal_form_init(modal) {
                 setTimeout(() => {
-                    $('.modal-select2').select2({
+                    modal.find('.modal-select2').select2({
                         placeHolder: "Please Select",
                         theme: "bootstrap-5",
                         dropdownParent: modal
@@ -467,6 +736,43 @@ use App\Helpers\DateUtility;
                     minTime: new Date().getHours() + ":" + new Date().getMinutes(),
                     dateFormat: constants.dateTimeFormat
                 });
+
+                modal.find(".template-table").srTableTemplate({
+                    brace_type: "(",
+                    afterRowAdd(_table, last_id, _tr) {
+                        // _tr.find(".will-select2").select2({
+                        //     placeHolder: "Please Select",
+                        //     theme: "bootstrap-5",
+                        //     dropdownParent: modal
+                        // });
+
+                        _tr.find(".item_id").cascade({
+                            beforeGet: function (src, url) {
+                                $.loader.init().setInfo("Fetching Uom ...").show();
+                                return url;
+                            },
+                            afterGet: function (src, dest, response) {
+                                $.loader.init().hide();
+                                return response;
+                            },
+                        });
+
+                        _tr.find(".will-required").attr("required", true);
+                    }
+                });
+
+                var _trs = modal.find(".template-table").find("> tbody > tr").not(".sr-table-template-row");
+
+                _trs.find(".item_id").cascade({
+                    beforeGet: function (src, url) {
+                        $.loader.init().setInfo("Fetching Uom ...").show();
+                        return url;
+                    },
+                    afterGet: function (src, dest, response) {
+                        $.loader.init().hide();
+                        return response;
+                    },
+                }).trigger("change", { pageLoad : true });
 
                 modal.find(".modal-body form").ajaxForm({
                     beforeSubmit: function(arr, $form, options) {
@@ -481,13 +787,21 @@ use App\Helpers\DateUtility;
                     error: function(xhr, status, errorString) {
                         $.loader.init().hide();
 
-                        response = xhr.responseText.trim();
+                        if (typeof xhr.responseText == "string")
+                        {
+                            response = xhr.responseText.trim();
 
-                        if (response.length == 0) {
-                            $.events.onAjaxError("JSON Parse Error", "Empty Response");
+                            if (response.length == 0) {
+                                $.events.onAjaxError("JSON Parse Error", "Empty Response");
+                                return false;
+                            }
+                        }
+                        else
+                        {
+                            console.log(xhr.responseText);
                             return false;
                         }
-
+                        
                         try {
                             var responseJson = JSON.parse(response);
                         } catch (e) {
@@ -505,7 +819,7 @@ use App\Helpers\DateUtility;
                             modal.find("button.closed").trigger("click");
 
                             $.loader.init().setInfo("Reloading....");
-                            window.location.reload();
+                            window.location.reload(true);
                         });
                     }
                 });
@@ -522,6 +836,13 @@ use App\Helpers\DateUtility;
 
             $('#modal-sms-whatsapp-email-form .submit').click(function() {
                 $('#modal-sms-whatsapp-email-form form').trigger("submit");
+            });
+
+            
+            modal_form_init($("#modal-dispatch-form"));
+
+            $('#modal-dispatch-form .submit').click(function() {
+                $('#modal-dispatch-form form').trigger("submit");
             });
 
             $(".sms_link").click(function(){

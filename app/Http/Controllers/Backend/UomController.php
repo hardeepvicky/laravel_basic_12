@@ -250,4 +250,27 @@ class UomController extends BackendController
             return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", LaravelExtend::$errors);
         }
     }
+
+    public function ajax_get_list($parent_id)
+    {
+        $response = ["status" => 1, "data" => []];
+
+        $conditions = [];
+
+        if ($parent_id)
+        {
+            $conditions[] = ["parent_id", "=", $parent_id];
+        }
+
+        $data = $this->modelClass::where($conditions)->select("id", "short_name")->get()->toArray();
+
+        foreach($data as $k => $arr)
+        {
+            $data['name'] = $arr['short_name'];
+        }
+
+        $response['data'] = $data;
+
+        return $this->responseJson($response);
+    }
 }

@@ -433,7 +433,7 @@ class CityController extends BackendController
 
     public function ajax_get_list($state_id = 0, $district_id = 0)
     {
-        $response = ["status" => 1];
+        $response = ["status" => 1, "data" => []];
 
         $conditions = [];
 

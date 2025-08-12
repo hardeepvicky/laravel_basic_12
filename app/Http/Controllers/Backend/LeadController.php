@@ -10,9 +10,11 @@ use App\Models\Dealer;
 use App\Models\DocumentFile;
 use App\Models\DropDownValue;
 use App\Models\FieldSetting;
+use App\Models\Item;
 use App\Models\Lead;
 use App\Models\LeadAddress;
 use App\Models\LeadHistory;
+use App\Models\LeadItem;
 use App\Models\LeadProduct;
 use App\Models\Product;
 use App\Models\State;
@@ -159,6 +161,8 @@ class LeadController extends BackendController
 
         $product_list = Product::getList();
 
+        $item_list = Item::getList();
+
         $user_list = User::getList("id", "display_name", ["type" => User::TYPE_INTERNAL], "person_name");
 
         $type_conditions = [
@@ -175,13 +179,15 @@ class LeadController extends BackendController
 
         $product_field_labels = FieldSetting::getDynamicFields(LeadProduct::class);
 
+        $item_field_labels = FieldSetting::getDynamicFields(LeadItem::class);
+
         $history_field_labels = FieldSetting::getDynamicFields(LeadHistory::class);
 
         $this->setForView(compact(
             "address_type_list", "state_list", "district_cities", "district_city_list",
-            "source_type_list", "deal_type_list", "status_type_list", "source_list", "payment_method_type_list", "dealer_list", "product_list", 
+            "source_type_list", "deal_type_list", "status_type_list", "source_list", "payment_method_type_list", "dealer_list", "product_list", "item_list",
             "user_list", "action_type_list", "lead_history_response_list",
-            "field_labels", "address_field_labels", "product_field_labels", "history_field_labels"
+            "field_labels", "address_field_labels", "product_field_labels", "item_field_labels", "history_field_labels"
         ));
 
         return parent::beforeViewRender();
@@ -263,7 +269,7 @@ class LeadController extends BackendController
             $this->_saveOthers($validatedData);
 
             if (LaravelExtend::$errors) {
-                throw new Exception("There are some errors");
+                throw new UserException("There are some errors", UserException::ERROR_USER_DATA_WRONG);
             }
 
             DB::commit();
@@ -389,6 +395,7 @@ class LeadController extends BackendController
             }
         }
 
+
         unset($validatedData['products']['(sr-id)']);
 
         if (isset($validatedData['products']))
@@ -459,6 +466,78 @@ class LeadController extends BackendController
                 }
             }
         }
+
+        unset($validatedData['items']['(sr-id)']);
+
+        if (isset($validatedData['items']))
+        {
+            $base_rules = [
+                "lead_id" => ["required"],
+                "uom_id" => ["required"],
+                "qty" => ["required"],
+            ];
+
+            $child_model = new LeadItem();
+
+            $existing_id_list = $this->model->items()->pluck("id", "id")->toArray();
+
+            $display_order = 0;
+
+            foreach($validatedData['items'] as $item)
+            {
+                $item['lead_id'] = $this->model->id;
+                $rules = LaravelExtend::merge_validation_rules($base_rules, $child_model->getUniqueValidationRules($item));
+
+                $validator = Validator::make($item, $rules);
+
+                if ($validator->fails())
+                {
+                    foreach($validator->errors()->all() as $error_msg)
+                    {
+                        LaravelExtend::addError("", $error_msg, "Items");
+                    }
+                    continue;
+                }
+
+                $display_order++;
+                if ($item['id'])
+                {
+                    $child_model = LeadItem::find($item['id']);
+
+                    if (!$child_model)
+                    {
+                        $child_model = new LeadItem();
+                    }
+                    else
+                    {
+                        unset($existing_id_list[$item['id']]);
+                    }
+                }
+                else
+                {
+                    $child_model = new LeadItem();
+                }
+
+                $item['list_display_order'] = $display_order;
+
+                $child_model->fill($item);
+
+                $this->model->items()->save($child_model);
+            }
+
+            if ($existing_id_list)
+            {
+                $existing_records = $this->model->items()->where("id", $existing_id_list)->get();
+
+                foreach($existing_records as $existing_record)
+                {
+                    if (!$existing_record->safeDelete($existing_record))
+                    {
+                        LaravelExtend::addError($existing_record->name, "Can not delete, bcoz it is asscoicated with other modules.", "Term");
+                    }
+                }
+            }
+        }
     }
 
     public function edit($id)
@@ -516,7 +595,7 @@ class LeadController extends BackendController
             $this->_saveOthers($validatedData);
 
             if (LaravelExtend::$errors) {
-                throw new Exception("There are some errors");
+                throw new UserException("There are some errors", UserException::ERROR_USER_DATA_WRONG);
             }
 
             DB::commit();
@@ -587,9 +666,11 @@ class LeadController extends BackendController
                 $q->orderBy("list_display_order");
             },
             "products",
+            "items",
             "history" => function($q){
                 $q->orderBy("id", "DESC");
             },
+            "leadFile",
             "documentFile"
         ])->findOrFail($lead_id);
 
@@ -602,9 +683,13 @@ class LeadController extends BackendController
             'method' => 'POST',
         ];
 
+        $products = $record->products?->toArray() ?? [];
+        $items = $record->items?->toArray() ?? [];
+        $addresses = $record->address?->toArray() ?? [];
+
         $model = new LeadHistory();
 
-        $this->setForView(compact("record", "form", "model"));
+        $this->setForView(compact("record", "form", "model", "products", "items", "addresses"));
 
         return $this->view(__FUNCTION__);
     }
@@ -683,7 +768,7 @@ class LeadController extends BackendController
             }
 
             if (LaravelExtend::$errors) {
-                throw new Exception("There are some errors");
+                throw new UserException("There are some errors", UserException::ERROR_USER_DATA_WRONG);
             }
 
             DB::commit();
@@ -696,12 +781,12 @@ class LeadController extends BackendController
                 ]);
             }
 
+            $this->saveSqlLog();
+
             return back()->with('success', "History Saved successfully");
         } 
         catch (UserException $ex) {
             DB::rollBack();
-
-            $this->saveSqlLog();
 
             $request = request();
 
@@ -713,12 +798,12 @@ class LeadController extends BackendController
                 ]);
             }
 
+            $this->saveSqlLog();
+
             return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", LaravelExtend::$errors);
         }
         catch (Exception $ex) {
             DB::rollBack();
-
-            $this->saveSqlLog();
 
             $request = request();
 
@@ -729,6 +814,8 @@ class LeadController extends BackendController
                     "custom_errors" => LaravelExtend::$errors
                 ]);
             }
+
+            $this->saveSqlLog();
 
             return back()->withInput()->with('fail', get_exception_display_message($ex))->with("custom_errors", LaravelExtend::$errors);
         }
@@ -771,7 +858,7 @@ class LeadController extends BackendController
             }
 
             if (LaravelExtend::$errors) {
-                throw new Exception("There are some errors");
+                throw new UserException("There are some errors", UserException::ERROR_USER_DATA_WRONG);
             }
 
             DB::commit();
@@ -784,12 +871,13 @@ class LeadController extends BackendController
                 ]);
             }
 
+
+            $this->saveSqlLog();
+
             return back()->with('success', "History Saved successfully");
         } 
         catch (UserException $ex) {
             DB::rollBack();
-
-            $this->saveSqlLog();
 
             $request = request();
 
@@ -800,6 +888,8 @@ class LeadController extends BackendController
                     "custom_errors" => LaravelExtend::$errors
                 ]);
             }
+
+            $this->saveSqlLog();
 
             return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", LaravelExtend::$errors);
         }
@@ -817,6 +907,113 @@ class LeadController extends BackendController
                     "custom_errors" => LaravelExtend::$errors
                 ]);
             }
+
+            return back()->withInput()->with('fail', get_exception_display_message($ex))->with("custom_errors", LaravelExtend::$errors);
+        }
+    }
+
+    public function dispatch($lead_id, Request $request)
+    {
+        $this->model = $lead = $this->modelClass::findOrFail($lead_id);
+
+        $rules = [
+            "entry_by" => ["required"],
+            "action_type" => ["required"],
+            "status_type" => ["required"],
+            "remarks" => "",
+            "next_meeting_date_time" => "",
+            "products" => [],
+            "items" => [],
+            "addresses" => [],
+        ];
+
+        $validatedData = $request->validate($rules);
+
+        DB::beginTransaction();
+
+        try {
+            // d($validatedData, true);
+
+            if ($lead->status_type == Lead::STATUS_DEAD)
+            {
+                throw new UserException("Lead is dead", UserException::ERROR_USER_ACTION_RESTRICT);
+            }
+
+            if ($lead->status_type == Lead::STATUS_FAKE)
+            {
+                throw new UserException("Lead is Fake", UserException::ERROR_USER_ACTION_RESTRICT);
+            }
+
+            $lead->canChangeHistory();
+
+            $model = new LeadHistory();
+
+            $validatedData['lead_id'] = $lead_id;
+            $validatedData = $model->convertTimeZoneBeforeQueryToDatabase($validatedData);
+
+            $model = LeadHistory::create($validatedData);
+
+            if ($validatedData['status_type'] != $lead->status_type)
+            {
+                $lead->changeStatus($validatedData['status_type']);
+            }
+
+            if ($validatedData['next_meeting_date_time'])
+            {
+                $lead->changeNextFollowupDateTime($validatedData['next_meeting_date_time']);
+            }
+
+            $this->_saveOthers($validatedData);
+
+            if (LaravelExtend::$errors) {
+                throw new UserException("There are some errors", UserException::ERROR_USER_DATA_WRONG);
+            }
+
+            DB::commit();
+
+            $request = request();
+
+            if ($request->ajax()) {
+                return $this->responseJson([
+                    'status' => 1,
+                ]);
+            }
+
+
+            $this->saveSqlLog();
+
+            return back()->with('success', "History Saved successfully");
+        } 
+        catch (UserException $ex) {
+            DB::rollBack();
+
+            $request = request();
+
+            if ($request->ajax()) {
+                return $this->responseJson([
+                    'status' => 0,
+                    'msg' => $ex->getMessage(),
+                    "custom_errors" => LaravelExtend::$errors
+                ]);
+            }
+
+            $this->saveSqlLog();
+
+            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", LaravelExtend::$errors);
+        }
+        catch (Exception $ex) {
+            DB::rollBack();
+
+            $request = request();
+
+            if ($request->ajax()) {
+                return $this->responseJson([
+                    'status' => 0,
+                    'msg' => get_exception_display_message($ex),
+                ]);
+            }
+
+            $this->saveSqlLog();
 
             return back()->withInput()->with('fail', get_exception_display_message($ex))->with("custom_errors", LaravelExtend::$errors);
         }
@@ -851,6 +1048,83 @@ class LeadController extends BackendController
             $this->saveSqlLog();
 
             return back()->with('fail', $ex->getMessage());
+        }
+    }
+
+    public function change_files($lead_id, Request $request)
+    {
+        $lead = $this->modelClass::findOrFail($lead_id);
+
+        $rules = [
+            "leadFile" => ["required"],
+        ];
+
+        $validatedData = $request->validate($rules);
+
+        DB::beginTransaction();
+
+        try {
+
+            if (isset($validatedData['leadFile'])) {
+
+                $ids = explode(",", $validatedData['leadFile']);
+
+                $document_files = DocumentFile::find($ids);
+
+                $lead->documentFile()->sync($document_files);
+            }
+
+            if (LaravelExtend::$errors) {
+                throw new Exception("There are some errors");
+            }
+
+            DB::commit();
+
+            $request = request();
+
+            if ($request->ajax()) {
+                return $this->responseJson([
+                    'status' => 1,
+                ]);
+            }
+
+            $this->saveSqlLog();
+
+            return back()->with('success', "Files Saved successfully");
+        } 
+        catch (UserException $ex) {
+            DB::rollBack();
+
+            $request = request();
+
+            if ($request->ajax()) {
+                return $this->responseJson([
+                    'status' => 0,
+                    'msg' => $ex->getMessage(),
+                    "custom_errors" => LaravelExtend::$errors
+                ]);
+            }
+
+            $this->saveSqlLog();
+
+            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", LaravelExtend::$errors);
+        }
+        catch (Exception $ex) {
+            DB::rollBack();
+
+            $request = request();
+
+            if ($request->ajax()) {
+                return $this->responseJson([
+                    'status' => 0,
+                    'msg' => get_exception_display_message($ex),
+                    "custom_errors" => LaravelExtend::$errors
+                ]);
+            }
+
+            $this->saveSqlLog();
+
+            return back()->withInput()->with('fail', get_exception_display_message($ex))->with("custom_errors", LaravelExtend::$errors);
         }
     }
 
@@ -949,5 +1223,4 @@ class LeadController extends BackendController
 
         download_start($file, "application/octet-stream");
     }
-
 }

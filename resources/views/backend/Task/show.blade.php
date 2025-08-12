@@ -85,8 +85,31 @@
             <div class="tab-pane" id="tab_file_block" role="tabpanel"
                 aria-labelledby="tab_file">
 
+                <x-Form.start action="{{ route('task.change_files', ['task_id' => $record->id]) }}" method="POST" />
+                    <div class="form-group mt-2 mb-3">
+                        <?php
+                        $field = 'taskFile';
+                        $label = get_value_from_list($field_labels, $field, $field);
+                        $value = implode(',', $record->taskFile?->pluck('document_file_id')->toArray());
+                        ?>
+                        <x-Inputs.text-field :id="$field" :name="$field" :label="$label"
+                            :value="$value" multiple="multiple" />
+                        <span id="files-choose" class="btn btn-secondary">Choose Files</span>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
+
                 <x-Backend.document-files :records="$document_files" />
             </div>
         </div>
     </div>
 </div>
+<script>
+    $(function(){
+        $('.more-less').srParagraph();
+
+        $("#taskFile").browseGallery({
+            opener: "#files-choose"
+        });
+    });
+</script>

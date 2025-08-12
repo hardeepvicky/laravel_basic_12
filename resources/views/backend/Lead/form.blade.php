@@ -2,7 +2,10 @@
 
 @section('content')
     <?php
-    $page_header_links = [['title' => 'List', 'url' => route($routePrefix . '.index')]];
+    $page_header_links = [
+        ['title' => 'History', 'url' => route($routePrefix . '.history', ["lead_id" => $model->id])],
+        ['title' => 'List', 'url' => route($routePrefix . '.index')]
+    ];
     use App\Models\Lead;
     ?>
 
@@ -189,6 +192,151 @@
                                     </div>
                                 </div>                                
                             </div>
+
+                            <div class="form-group mb-3">
+                                <div class="textarea-wrapper">
+                                    <?php
+                                    $field = 'remarks';
+                                    $label = get_value_from_list($field_labels, $field, $field);
+                                    ?>
+                                    <x-Inputs.text-area :id="$field" :name="$field" :label="$label"
+                                        rows="3" value="{{ $model->{$field} }}"
+                                        placeholder="Enter {{ $label }}" class="auto-suggesstion-list" />
+                                    <div id="{{ $field . '-suggestion-box' }}" class="suggestion-box hidden"></div>
+                                </div>
+                            </div>
+                            <div class="form-group mb-3">
+                                <?php
+                                $field = 'leadFile';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                $value = implode(',', $model->leadFile?->pluck('document_file_id')->toArray());
+                                ?>
+                                <x-Inputs.text-field :id="$field" :name="$field" :label="$label"
+                                    :value="$value" multiple="multiple" />
+                                <span id="files-choose" class="btn btn-secondary">Choose Files</span>
+                            </div>
+
+                            <div class="row mb-4">
+                                <div class="col-md-12">
+                                    <h4 class="b-b-info">
+                                        Interested Products
+                                    </h4>
+                                    <table class="table table-bordered order-column template-table"
+                                        data-sr-table-template-min-row="0">
+                                        <thead>
+                                            <tr>
+                                                <th class="text-center" style="width : 50px;">
+                                                    <span class="sr-table-template-add">
+                                                        <i class="fas fa-plus-circle text-success icon"></i>
+                                                    </span>
+                                                </th>
+                                                <th style="width:70%">
+                                                    {{ get_value_from_list($product_field_labels, 'product_id') }}
+                                                </th>
+                                                <th style="width:20%">
+                                                    {{ get_value_from_list($product_field_labels, 'qty') }}
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="sr-table-template-row hidden">
+                                                <td>
+                                                    <div class="block">
+                                                        <div class="left-block">
+                                                            <div class="sr-table-template-move-up">
+                                                                <i class="fas fa-arrow-circle-up icon"></i>
+                                                            </div>
+                                                            <div class="sr-table-template-move-down">
+                                                                <i class="fas fa-arrow-circle-down icon"></i>
+                                                            </div>
+                                                        </div>
+                                                        <div class="right-block">
+                                                            <span class="sr-table-template-delete">
+                                                                <i class=" fas fa-times-circle text-danger icon"></i>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <x-inputs.text-field type="hidden" name="products[(sr-id)][id]"
+                                                        label="" />
+                                                </td>
+                                                <td>
+                                                    <?php
+                                                    $field = 'product_id';
+                                                    ?>
+                                                    <x-inputs.drop-down name="products[(sr-id)][{{ $field }}]"
+                                                        label="" :list="$product_list" class="will-required will-select2"
+                                                        />
+                                                </td>
+                                                <td>
+                                                    <?php
+                                                    $field = 'qty';
+                                                    ?>
+                                                    <x-inputs.text-field name="products[(sr-id)][{{ $field }}]"
+                                                        label="" class="will-required validate-float"/>
+                                                </td>
+                                            </tr>
+                                            @php
+                                                $products = old('products', $products ?? []);
+                                                unset($products['(sr-id)']);
+                                            @endphp
+                                            @if (isset($products))
+                                                @foreach ($products as $k => $child_arr)
+                                                    <tr class="" sr-id="{{ $child_arr['id'] ?? $k }}"
+                                                        sr-counter="{{ $k }}">
+                                                        <td>
+                                                            <div class="block">
+                                                                <div class="left-block">
+                                                                    <div class="sr-table-template-move-up">
+                                                                        <i class="fas fa-arrow-circle-up icon"></i>
+                                                                    </div>
+                                                                    <div class="sr-table-template-move-down">
+                                                                        <i class="fas fa-arrow-circle-down icon"></i>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="right-block">
+                                                                    <span class="sr-table-template-delete">
+                                                                        <i
+                                                                            class=" fas fa-times-circle text-danger icon"></i>
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                            <input type="hidden" name="products[{{ $k }}][id]"
+                                                                value="{{ $child_arr['id'] ?? '' }}" />
+                                                        </td>
+                                                        <td>
+                                                            <?php
+                                                            $field = 'product_id';
+                                                            $value = $child_arr[$field] ?? '';
+                                                            ?>
+                                                            <x-inputs.drop-down name="products[{{ $k }}][{{ $field }}]"
+                                                                label="" :list="$product_list" :value="$value" class="will-required will-select2"
+                                                                />
+                                                        </td>
+                                                        <td>
+                                                            <?php
+                                                            $field = 'qty';
+                                                            $value = $child_arr[$field] ?? '';
+                                                            ?>
+                                                            <x-inputs.text-field name="products[{{ $k }}][{{ $field }}]"
+                                                                label="" :value="$value" class="will-required validate-float"/>
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+                                            @endif
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <th class="text-center" style="width : 80px;">
+                                                    <span class="sr-table-template-add">
+                                                        <i class="fas fa-plus-circle text-success icon"></i>
+                                                    </span>
+                                                </th>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                            
                             <div class="row mb-4">
                                 <div class="col-md-12">
                                     <h4 class="b-b-info">
@@ -357,150 +505,6 @@
                                                             <x-inputs.checkbox
                                                                 name="addresses[{{ $k }}][{{ $field }}]"
                                                                 label="" :value="$value" class="is_primary" />
-                                                        </td>
-                                                    </tr>
-                                                @endforeach
-                                            @endif
-                                        </tbody>
-                                        <tfoot>
-                                            <tr>
-                                                <th class="text-center" style="width : 80px;">
-                                                    <span class="sr-table-template-add">
-                                                        <i class="fas fa-plus-circle text-success icon"></i>
-                                                    </span>
-                                                </th>
-                                            </tr>
-                                        </tfoot>
-                                    </table>
-                                </div>
-                            </div>
-
-                            <div class="form-group mb-3">
-                                <div class="textarea-wrapper">
-                                    <?php
-                                    $field = 'remarks';
-                                    $label = get_value_from_list($field_labels, $field, $field);
-                                    ?>
-                                    <x-Inputs.text-area :id="$field" :name="$field" :label="$label"
-                                        rows="3" value="{{ $model->{$field} }}"
-                                        placeholder="Enter {{ $label }}" class="auto-suggesstion-list" />
-                                    <div id="{{ $field . '-suggestion-box' }}" class="suggestion-box hidden"></div>
-                                </div>
-                            </div>
-                            <div class="form-group mb-3">
-                                <?php
-                                $field = 'leadFile';
-                                $label = get_value_from_list($field_labels, $field, $field);
-                                $value = implode(',', $model->leadFile?->pluck('document_file_id')->toArray());
-                                ?>
-                                <x-Inputs.text-field :id="$field" :name="$field" :label="$label"
-                                    :value="$value" multiple="multiple" />
-                                <span id="files-choose" class="btn btn-secondary">Choose Files</span>
-                            </div>
-
-                            <div class="row mb-4">
-                                <div class="col-md-12">
-                                    <h4 class="b-b-info">
-                                        Interested Products
-                                    </h4>
-                                    <table class="table table-bordered order-column template-table"
-                                        data-sr-table-template-min-row="0">
-                                        <thead>
-                                            <tr>
-                                                <th class="text-center" style="width : 50px;">
-                                                    <span class="sr-table-template-add">
-                                                        <i class="fas fa-plus-circle text-success icon"></i>
-                                                    </span>
-                                                </th>
-                                                <th style="width:70%">
-                                                    {{ get_value_from_list($product_field_labels, 'product_id') }}
-                                                </th>
-                                                <th style="width:20%">
-                                                    {{ get_value_from_list($product_field_labels, 'qty') }}
-                                                </th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr class="sr-table-template-row hidden">
-                                                <td>
-                                                    <div class="block">
-                                                        <div class="left-block">
-                                                            <div class="sr-table-template-move-up">
-                                                                <i class="fas fa-arrow-circle-up icon"></i>
-                                                            </div>
-                                                            <div class="sr-table-template-move-down">
-                                                                <i class="fas fa-arrow-circle-down icon"></i>
-                                                            </div>
-                                                        </div>
-                                                        <div class="right-block">
-                                                            <span class="sr-table-template-delete">
-                                                                <i class=" fas fa-times-circle text-danger icon"></i>
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                    <x-inputs.text-field type="hidden" name="products[(sr-id)][id]"
-                                                        label="" />
-                                                </td>
-                                                <td>
-                                                    <?php
-                                                    $field = 'product_id';
-                                                    ?>
-                                                    <x-inputs.drop-down name="products[(sr-id)][{{ $field }}]"
-                                                        label="" :list="$product_list" class="will-required will-select2"
-                                                        />
-                                                </td>
-                                                <td>
-                                                    <?php
-                                                    $field = 'qty';
-                                                    ?>
-                                                    <x-inputs.text-field name="products[(sr-id)][{{ $field }}]"
-                                                        label="" class="will-required validate-float"/>
-                                                </td>
-                                            </tr>
-                                            @php
-                                                $products = old('products', $products ?? []);
-                                                unset($products['(sr-id)']);
-                                            @endphp
-                                            @if (isset($products))
-                                                @foreach ($products as $k => $child_arr)
-                                                    <tr class="" sr-id="{{ $child_arr['id'] }}"
-                                                        sr-counter="{{ $k }}">
-                                                        <td>
-                                                            <div class="block">
-                                                                <div class="left-block">
-                                                                    <div class="sr-table-template-move-up">
-                                                                        <i class="fas fa-arrow-circle-up icon"></i>
-                                                                    </div>
-                                                                    <div class="sr-table-template-move-down">
-                                                                        <i class="fas fa-arrow-circle-down icon"></i>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="right-block">
-                                                                    <span class="sr-table-template-delete">
-                                                                        <i
-                                                                            class=" fas fa-times-circle text-danger icon"></i>
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                            <input type="hidden" name="products[{{ $k }}][id]"
-                                                                value="{{ $child_arr['id'] ?? '' }}" />
-                                                        </td>
-                                                        <td>
-                                                            <?php
-                                                            $field = 'product_id';
-                                                            $value = $child_arr[$field] ?? '';
-                                                            ?>
-                                                            <x-inputs.drop-down name="products[{{ $k }}][{{ $field }}]"
-                                                                label="" :list="$product_list" :value="$value" class="will-required will-select2"
-                                                                />
-                                                        </td>
-                                                        <td>
-                                                            <?php
-                                                            $field = 'qty';
-                                                            $value = $child_arr[$field] ?? '';
-                                                            ?>
-                                                            <x-inputs.text-field name="products[{{ $k }}][{{ $field }}]"
-                                                                label="" :value="$value" class="will-required validate-float"/>
                                                         </td>
                                                     </tr>
                                                 @endforeach
