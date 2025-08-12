@@ -25,12 +25,6 @@ use App\Helpers\Util;
                     <tr>
                         <td>{{ $record->type }}</td>
                         <td>
-                            <span class="btn btn-outline-light text-dark summary-action-button mb-2 css-toggler"
-                                data-sr-css-class-toggle-target="#record-{{ $record->id }}"
-                                data-sr-css-class-toggle-class="hidden">
-                                Details
-                            </span>
-
                             @if($record->file_url)
                                 <a href="{{ $record->file_url }}" class="btn btn-outline-secondary mb-2">
                                     <i class="fas fa-download"></i> Download File
@@ -44,6 +38,12 @@ use App\Helpers\Util;
                         <td>{!! $record->have_error ? '<span class="bg-light-danger p-1">' . $record->flash_msg . '</span>' : '<span class="bg-light-success p-1">' . $record->flash_msg . '</span>' !!}</td>
                         <td>
                             <x-Backend.created-and-by :datetime="$record->created_at_user_tz" :userId="$record->created_by" />
+
+                            <span class="btn btn-outline-light text-dark summary-action-button mb-2 css-toggler"
+                                data-sr-css-class-toggle-target="#record-{{ $record->id }}"
+                                data-sr-css-class-toggle-class="hidden">
+                                Details
+                            </span>
                         </td>
                     </tr>
                     <tr id="record-{{ $record->id }}" class="hidden">
