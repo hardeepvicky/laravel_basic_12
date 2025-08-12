@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\OtpVerifyController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Backend\AppMenuController;
+use App\Http\Controllers\Backend\CarrierController;
 use App\Http\Controllers\Backend\CityController;
 use App\Http\Controllers\Backend\CountryController;
 use App\Http\Controllers\Backend\DashboardController;
@@ -897,6 +898,30 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
         Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
             $name = "excel";
             Route::any($name, [$controllerClass, "import_". $name])->name($name);
+        });
+    });
+
+    $route_prefix = "carrier";
+    $controllerClass = CarrierController::class;
+    Route::resource($route_prefix, $controllerClass);
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
+        $name = "copy";
+        Route::get("{id}/" . $name, [$controllerClass, $name])->name($name);
+
+        $name = "activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "de_activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "ajax_update_field";
+        Route::post($name, [$controllerClass, $name])->name($name);
+
+        $route_prefix = "export";
+        Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+            $name = "csv";
+            Route::get($name, [$controllerClass, $name])->name($name);
         });
     });
 
