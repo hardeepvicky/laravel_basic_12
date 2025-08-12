@@ -417,7 +417,7 @@ class CityController extends BackendController
 
                 $importLogModel->is_fully_run = true;
 
-                $msg = "Total Count = $total_count, Accept Count $accept_count";
+                $msg = "Total Count : $total_count, Accept Count : $accept_count";
                 $msg .= ", " . implode(", ", $text_list);
 
                 if (LaravelExtend::$errors)
