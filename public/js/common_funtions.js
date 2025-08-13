@@ -153,7 +153,11 @@ function form_errors(form, responseJson) {
         $.events.onUserError(responseJson['message']);
     }
 
-    if (!any_field_found)
+    if (any_field_found)
+    {
+        return form.find(".error-message").first();
+    }
+    else
     {
         $.events.onUserError(first_error_msg);
     }

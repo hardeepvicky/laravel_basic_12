@@ -131,7 +131,7 @@ use App\Helpers\DateUtility;
                     <h3 class="modal-title fs-5"></h3>
                     <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body" style="height: 80vh; overflow-y:scroll">
                     <x-form.start action="{{ route('lead.history_store', ['lead_id' => $record->id]) }}" method="POST" />
                         <x-Inputs.text-field type="hidden" name="entry_by" :label="$false" value="MANUAL" />
                         <x-Inputs.text-field type="hidden" name="action_type" :label="$false" value="" class="action_type" />
@@ -198,7 +198,7 @@ use App\Helpers\DateUtility;
                     <h3 class="modal-title fs-5">Tranfer To Another User</h3>
                     <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body" style="height: 80vh; overflow-y:scroll">
                     <x-form.start action="{{ route('lead.transfer_lead', ['lead_id' => $record->id]) }}" method="POST" />
                         <x-Inputs.text-field type="hidden" name="entry_by" :label="$false" value="MANUAL" />
                         <x-Inputs.text-field type="hidden" name="action_type" :label="$false" value="{{ LeadHistory::ACTION_TYPE_LEAD_TRANSFER }}" />
@@ -228,7 +228,7 @@ use App\Helpers\DateUtility;
                     <h3 class="modal-title fs-5">Dispatch</h3>
                     <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body" style="height: 80vh; overflow-y:scroll">
                     <x-form.start action="{{ route('lead.dispatch', ['lead_id' => $record->id]) }}" method="POST" />
                         <x-Inputs.text-field type="hidden" name="entry_by" :label="$false" value="MANUAL" />
                         <x-Inputs.text-field type="hidden" name="action_type" :label="$false" value="{{ LeadHistory::ACTION_TYPE_DISPATCH }}" />                        
@@ -870,6 +870,20 @@ use App\Helpers\DateUtility;
                     },
                 }).trigger("change", { pageLoad : true });
 
+                modal.find(".modal-body form").submit(function(){
+                    var _this = $(this);
+                    var confirm = _this.attr("data-confirm");
+
+                    if (!confirm)
+                    {
+                        confirmDialog("", function(){
+                            _this.attr("data-confirm", 1);
+                            _this.trigger("submit");
+                        })
+                        return false;
+                    }
+                });
+
                 modal.find(".modal-body form").ajaxForm({
                     beforeSubmit: function(arr, $form, options) {
 
@@ -905,7 +919,14 @@ use App\Helpers\DateUtility;
                             return false;
                         }
 
-                        form_errors(modal.find("form"), responseJson);
+                        var first_error_ele = form_errors(modal.find("form"), responseJson);
+                        var modalBody = modal.find('.modal-body');                                
+                        if (modalBody.length > 0 && first_error_ele)
+                        {
+                            modalBody.animate({
+                                scrollTop: first_error_ele.offset().top - modalBody.offset().top + modalBody.scrollTop() - 200
+                            }, 800);
+                        }
                     },
                     success: function(responseText, statusText, xhr) {
 

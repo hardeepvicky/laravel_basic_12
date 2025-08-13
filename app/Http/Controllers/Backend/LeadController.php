@@ -936,6 +936,7 @@ class LeadController extends BackendController
             "action_type" => ["required"],
             "status_type" => ["required"],
             "payable_amount" => ["required"],
+            "payable_amount" => ["required"],
             "next_meeting_date_time" => "",
             "remarks" => "",
             "products" => [],
@@ -1172,38 +1173,6 @@ class LeadController extends BackendController
             $this->saveSqlLog();
 
             return back()->withInput()->with('fail', get_exception_display_message($ex))->with("custom_errors", LaravelExtend::$errors);
-        }
-    }
-
-    public function history_destroy($id)
-    {
-        $request = request();
-
-        try {
-            $model = TaskTakenAction::findOrFail($id);
-
-            if (!$this->delete($model)) {
-                throw new Exception("Fail to Delete");
-            }
-
-            $msg = "Task History deleted successfully";
-
-            $this->saveSqlLog();
-
-            if ($request->ajax()) {
-                return response()->json(['status' => 1, 'msg' => $msg]);
-            }
-
-            return back()->with('success', $msg);
-
-        } catch (\Exception $ex) {
-            if ($request->ajax()) {
-                return $this->responseJson(['status' => 0, 'msg' => $ex->getMessage()]);
-            }
-
-            $this->saveSqlLog();
-
-            return back()->with('fail', $ex->getMessage());
         }
     }
 

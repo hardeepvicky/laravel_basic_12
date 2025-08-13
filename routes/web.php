@@ -840,9 +840,6 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
         $name = "convert_to_customer";
         Route::get($name . "/{lead_id}", [$controllerClass, $name])->name($name);
 
-        $name = "history_destroy";
-        Route::delete($name . "/{id}", [$controllerClass, $name])->name($name);
-
         $route_prefix = "export";
         Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
             $name = "csv";
@@ -884,9 +881,6 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
 
         $name = "dispatch";
         Route::post($name . "/{lead_id}", [$controllerClass, $name])->name($name);
-
-        $name = "history_destroy";
-        Route::delete($name . "/{id}", [$controllerClass, $name])->name($name);
 
         $name = "convert_to_lead";
         Route::get($name . "/{lead_id}", [$controllerClass, $name])->name($name);
