@@ -44,6 +44,20 @@
                                 ?>
                                 <x-Inputs.text-field :name="$field" :label="$label" :value="$search[$field]" />
                             </div>
+                            <div class="col-md-6 col-xxl-2 mb-2">
+                                <?php
+                                $field = 'mobile2';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <x-Inputs.text-field :name="$field" :label="$label" :value="$search[$field]" />
+                            </div>
+                            <div class="col-md-6 col-xxl-2 mb-2">
+                                <?php
+                                $field = 'email';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <x-Inputs.text-field :name="$field" :label="$label" :value="$search[$field]" />
+                            </div>
                             <div class="col-md-4 col-lg-3 col-xxxl-2 mb-2">
                                 <?php
                                 $field = 'state_id';
@@ -62,8 +76,28 @@
                                 ?>
                                 <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
                                     :list="$empty_list" :value="$search[$field]"
+                                    class="select2 cascade-drop-down" 
+                                    data-sr-cascade-target="#city_id"
+                                    data-sr-cascade-url="/city/ajax_get_list/{v}" 
+                                />
+                            </div>
+                            <div class="col-md-4 col-lg-3 col-xxxl-2 mb-2">
+                                <?php
+                                $field = 'city_id';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
+                                    :list="$empty_list" :value="$search[$field]"
                                     class="select2" 
                                 />
+                            </div>                            
+                            <div class="col-md-4 col-lg-3 col-xxxl-2 mb-2">
+                                <?php
+                                $field = 'source_id';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <x-Inputs.drop-down :name="$field" :label="$label" :value="$search[$field]" :list="$source_list"
+                                    class="select2" />
                             </div>
                             <div class="col-md-4 col-lg-3 col-xxxl-2 mb-2">
                                 <?php
@@ -71,14 +105,6 @@
                                 $label = get_value_from_list($field_labels, $field, $field);
                                 ?>
                                 <x-Inputs.drop-down :name="$field" :label="$label" :value="$search[$field]" :list="$source_type_list"
-                                    class="select2" />
-                            </div>
-                            <div class="col-md-4 col-lg-3 col-xxxl-2 mb-2">
-                                <?php
-                                $field = 'source_id';
-                                $label = get_value_from_list($field_labels, $field, $field);
-                                ?>
-                                <x-Inputs.drop-down :name="$field" :label="$label" :value="$search[$field]" :list="$source_list"
                                     class="select2" />
                             </div>
                             <div class="col-md-4 col-lg-3 col-xxxl-2 mb-2">
@@ -95,6 +121,14 @@
                                 $label = get_value_from_list($field_labels, $field, $field);
                                 ?>
                                 <x-Inputs.drop-down :name="$field" :label="$label" :value="$search[$field]" :list="$dealer_list"
+                                    class="select2" />
+                            </div>
+                            <div class="col-md-4 col-lg-3 col-xxxl-2 mb-2">
+                                <?php
+                                $field = 'campaign_id';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <x-Inputs.drop-down :name="$field" :label="$label" :value="$search[$field]" :list="$campaign_list"
                                     class="select2" />
                             </div>
                         </div>
