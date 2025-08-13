@@ -38,12 +38,16 @@ class CustomerController extends LeadController
             ["field" => "status_type", "type" => "string"],
             ["field" => "name", "type" => "string"],
             ["field" => "mobile", "type" => "string"],
+            ["field" => "mobile2", "type" => "string"],
+            ["field" => "email", "type" => "string"],
             ["field" => "source_type", "type" => "string"],
             ["field" => "source_id", "type" => "int"],
             ["field" => "deal_type", "type" => "string"],
             ["field" => "dealer_id", "type" => "int"],
             ["field" => "state_id", "type" => "int"],
             ["field" => "district_id", "type" => "int"],
+            ["field" => "city_id", "type" => "int"],
+            ["field" => "campaign_id", "type" => "int"],
         ]);
 
         $builder = $this->modelClass::where($conditions);
