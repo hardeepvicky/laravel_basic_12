@@ -181,7 +181,10 @@ class BaseModel extends Model implements BaseModelInterface
 
         foreach ($records as $record) {
             $arr = $record->toArray();
-            $list[$arr[$key_field]] = $arr[$value_field];
+            if (isset($arr[$key_field]) && is_scalar($arr[$key_field]))
+            {
+                $list[$arr[$key_field]] = $arr[$value_field] ?? null;
+            }
         }
 
         return $list;
