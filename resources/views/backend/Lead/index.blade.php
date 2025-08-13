@@ -78,7 +78,7 @@
                                     :list="$empty_list" :value="$search[$field]"
                                     class="select2 cascade-drop-down" 
                                     data-sr-cascade-target="#city_id"
-                                    data-sr-cascade-url="/city/ajax_get_list/{v}" 
+                                    data-sr-cascade-url="/city/ajax_get_list/0/{v}" 
                                 />
                             </div>
                             <div class="col-md-4 col-lg-3 col-xxxl-2 mb-2">
