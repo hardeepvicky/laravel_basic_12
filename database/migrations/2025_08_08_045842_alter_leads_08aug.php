@@ -30,6 +30,6 @@ return new class extends MyMigration
      */
     public function down(): void
     {
-        //
+        $this->dropColumnsWithIndex("leads", ["source_id", "dealer_id", "source_type", "deal_type", "status_type", "payment_method_type"]);
     }
 };

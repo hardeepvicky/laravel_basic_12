@@ -32,6 +32,18 @@ class Lead extends BaseModel
             "foreignKey" => ["lead_id"],
             "preventDelete" => false
         ],
+        LeadProduct::class => [
+            "foreignKey" => ["lead_id"],
+            "preventDelete" => false
+        ],
+        LeadItem::class => [
+            "foreignKey" => ["lead_id"],
+            "preventDelete" => false
+        ],
+        LeadHistory::class => [
+            "foreignKey" => ["lead_id"],
+            "preventDelete" => true
+        ],
     ];
 
     protected static array $fields_containg_tags = ["description"];
@@ -130,6 +142,22 @@ class Lead extends BaseModel
         return $this->belongsTo(User::class, "assign_to_user_id");
     }
 
+    public function dealer()
+    {
+        return $this->belongsTo(Dealer::class, "dealer_id");
+    }
+
+    public function getRequiedIfRules(Request $request)
+    {
+        $rules = [];
+
+        if ($request->input("deal_type", false) == self::DEAL_TYPE_THROGH_DEALER) {
+            $rules["dealer_id"] = ["required"];
+        }
+
+        return $rules;
+    }
+
     public function getUniqueValidationRules(Request $request)
     {
         $field_rules = [
@@ -160,7 +188,6 @@ class Lead extends BaseModel
         return $labels;
     }
 
-    
     public static function getCodeList(String $field)
     {
         $class_info = get_class_info(static::class);
@@ -226,6 +253,7 @@ class Lead extends BaseModel
             $this->assign_to_user_id = $data['assign_to_user_id'];
             $this->save();
 
+            $data['lead_id'] = $this->id;
             LeadHistory::create($data);
 
             $notification_data = [
@@ -236,7 +264,7 @@ class Lead extends BaseModel
 
             $notifyObj = new GeneralNotification($notification_data);
 
-            $this->assignTo->notify($notifyObj);
+            $this->assignTo?->notify($notifyObj);
         }
     }
 
@@ -294,5 +322,41 @@ class Lead extends BaseModel
         {
             throw new UserException("Lead is not assigned, so only Admin can change it.", UserException::ERROR_USER_ACTION_RESTRICT);
         }
+    }
+
+    public function getRefDisplayName($field, $value)
+    {
+        $ret_array = [];
+
+        switch($field)
+        {
+            case "state_id":
+                $ret_array = [
+                    $field => $this->state?->getDisplayName()
+                ];
+                break;
+            case "district_id":
+                $ret_array = [
+                    $field => $this->district?->getDisplayName()
+                ];
+                break;
+            case "city_id":
+                $ret_array = [
+                    $field => $this->city?->getDisplayName()
+                ];
+                break;
+            case "assign_to_user_id":
+                $ret_array = [
+                    $field => $this->assignTo?->getDisplayName()
+                ];
+                break;
+            case "dealer_id":
+                $ret_array = [
+                    $field => $this->dealer?->getDisplayName()
+                ];
+                break;
+        }
+
+        return $ret_array;
     }
 }

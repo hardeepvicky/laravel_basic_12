@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Lead;
 use App\Models\LeadHistory;
 use App\Helpers\DateUtility;
 
@@ -10,7 +11,7 @@ use App\Helpers\DateUtility;
 @section('content')
     <?php
     $page_header_links = [
-        ['title' => 'Edit', 'url' => route($routePrefix . '.edit', ["lead" => $record])],
+        ['title' => 'Edit', 'url' => route($routePrefix . '.edit', [$record])],
         ['title' => 'List', 'url' => route($routePrefix . '.index')],
     ];
     ?>
@@ -33,11 +34,17 @@ use App\Helpers\DateUtility;
             <div class="btn btn-secondary email_link">Email</div>
             <div class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modal-snooze-form">Snooze</div>
             <div class="btn btn-secondary dispatch_link" data-bs-toggle="modal" data-bs-target="#modal-dispatch-form">Dispatch</div>
-            <div class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modal-transfer-form">Transfer Lead</div>
-            <div class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modal-convert-form">Convert To Customer</div>
-            <div class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modal-label-download">Label</div>
-            <div class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modal-label-a4-download">Label A4</div>
-
+            <div class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modal-transfer-form">Transfer</div>
+            @if($record->is_customer)
+                <a class="btn btn-secondary confirm" href="{{ route($routePrefix . ".convert_to_lead", ["lead_id" => $record->id])  }}">
+                    Convert To Lead
+                </a>
+            @else
+                <a class="btn btn-secondary confirm" href="{{ route($routePrefix . ".convert_to_customer", ["lead_id" => $record->id])  }}">
+                    Convert To Customer
+                </a>
+            @endif
+            
             <div class="card-header-right">
                 <ul class="list-unstyled card-option" style="width: 230px;">
                     <li><i class="fa-solid fa-maximize full-card"></i></li>
@@ -188,7 +195,7 @@ use App\Helpers\DateUtility;
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h3 class="modal-title fs-5">Tranfer Lead To Another User</h3>
+                    <h3 class="modal-title fs-5">Tranfer To Another User</h3>
                     <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -244,6 +251,75 @@ use App\Helpers\DateUtility;
                                     $label = get_value_from_list($history_field_labels, $field, $field);
                                     ?>
                                     <x-Inputs.text-field :id="$field" :name="$field" :label="$label" class="next-date-time-picker"/>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <?php
+                                    $field = 'carrier_id';
+                                    $label = "Carrier";
+                                    ?>
+                                    <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
+                                        :list="$carrier_list" class="modal-select2" mandatory="true"
+                                        />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <?php
+                                    $field = 'docket_no';
+                                    $label = "Docket Number";
+                                    ?>
+                                    <x-Inputs.text-field :id="$field" :name="$field" :label="$label"
+                                        mandatory="true"
+                                        />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <?php
+                                    $field = 'purpose_price';
+                                    $label = get_value_from_list($field_labels, $field, $field);
+                                    ?>
+                                    <x-Inputs.text-field :id="$field" :name="$field" :label="$label" :value="$record->{$field}"  mandatory="true"/>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <?php
+                                    $field = 'shipping_fee';
+                                    $label = "Shipping Fee";
+                                    ?>
+                                    <x-Inputs.text-field :id="$field" :name="$field" :label="$label" class="validate-float"  mandatory="true"/>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <?php
+                                    $field = 'shipping_fee_gst_per';
+                                    $label = "Shipping Fee GST (%)";
+                                    ?>
+                                    <x-Inputs.text-field :id="$field" :name="$field" :label="$label" class="validate-float"  mandatory="true"/>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <?php
+                                    $field = 'payable_amount';
+                                    $label = get_value_from_list($field_labels, $field, $field);
+                                    ?>
+                                    <x-Inputs.text-field :id="$field" :name="$field" :label="$label" :value="$record->{$field}" class="validate-float"  mandatory="true" readonly="readonly"/>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <?php
+                                    $field = 'payment_method_type';
+                                    $label = get_value_from_list($field_labels, $field, $field);
+                                    ?>
+                                    <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
+                                        :list="$payment_method_type_list" :value="$record->{$field}" class="modal-select2" mandatory="true"
+                                        />
                                 </div>
                             </div>
                             <div class="col-md-12">
@@ -523,6 +599,7 @@ use App\Helpers\DateUtility;
                             </div>
                         </div>
                         
+                        @if ($record->deal_type == Lead::DEAL_TYPE_DIRECT)
                         <div class="row mb-4">
                             <div class="col-md-12">
                                 <h4 class="b-b-info">
@@ -708,6 +785,7 @@ use App\Helpers\DateUtility;
                                 </table>
                             </div>
                         </div>
+                        @endif
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -720,6 +798,24 @@ use App\Helpers\DateUtility;
 
     <script>
         $(function(){
+
+            function cal_price()
+            {
+                var purpose_price = $("#purpose_price").val();
+                purpose_price = purpose_price ? parseFloat(purpose_price): 0;
+
+                var shipping_fee = $("#shipping_fee").val();
+                shipping_fee = shipping_fee ? parseFloat(shipping_fee): 0;
+
+                var shipping_fee_gst_per = $("#shipping_fee_gst_per").val();
+                shipping_fee_gst_per = shipping_fee_gst_per ? parseFloat(shipping_fee_gst_per): 0;
+
+                var shipping_fee_gst = shipping_fee * shipping_fee_gst_per  / 100;
+
+                var payable_amount = purpose_price + shipping_fee + shipping_fee_gst;
+
+                $("#payable_amount").val(payable_amount.toFixed(2));
+            }
 
             function modal_form_init(modal) {
                 setTimeout(() => {
@@ -879,6 +975,9 @@ use App\Helpers\DateUtility;
             });
 
             $(".more-less-text").srParagraph();
+
+            $("#purpose_price, #shipping_fee, #shipping_fee_gst_per").keyup(cal_price);
+            $("#purpose_price, #shipping_fee, #shipping_fee_gst_per").on("paste", cal_price);
         });
     </script>
 @endsection

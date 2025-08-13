@@ -22,7 +22,7 @@
                                 <x-Inputs.drop-down :name="$field" label="Limit" :list="$paginationList" :value="$pagination_limit" :pleaseSelect="$false"
                                     class="pagination_limit" />
                             </div>
-                            <div class="col-md-4 col-lg-3 col-xxxl-2 mb-2">
+                            <div class="col-md-6 col-lg-4 col-xxxl-3 mb-2">
                                 <?php
                                 $field = 'type';
                                 $label = get_value_from_list($field_labels, $field, $field);

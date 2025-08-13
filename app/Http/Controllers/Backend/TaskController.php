@@ -273,7 +273,7 @@ class TaskController extends BackendController
 
         if (!$users)
         {
-            $users = User::where("type", User::TYPE_INTERNAL)->get()->toArray();
+            $users = User::where("type", User::TYPE_INTERNAL)->where("is_active", 1)->get()->toArray();
 
             $cache_time = 60 * 60 * 24;
             

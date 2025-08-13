@@ -101,6 +101,10 @@
                             <span>{{ $record->assignTo?->getDisplayName() }}</span>
                         </label>
                         <label class="info">
+                            {{ get_value_from_list($field_labels, 'next_meeting_date_time', 'next_meeting_date_time') }} :
+                            <x-Backend.celec-date-time :value="$record->next_meeting_date_time"/>
+                        </label>
+                        <label class="info">
                             {{ get_value_from_list($field_labels, 'status_type', 'status_type') }} :
                             <span>{{ get_value_from_list($status_type_list, $record->status_type) }}</span>
                         </label>
@@ -118,7 +122,7 @@
                         </label>
                         <label class="info">
                             {{ get_value_from_list($field_labels, 'dealer_id', 'dealer_id') }} :
-                            <span>{{ get_value_from_list($dealer_list, $record->dealer_id) }}</span>
+                            <span>{{ $record->dealer?->getDisplayName() }}</span>
                         </label>
                         
                     </div>

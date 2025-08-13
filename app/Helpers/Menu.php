@@ -516,6 +516,7 @@ class DeveloperMenu extends BaseMenu
 
         $links = [
             self::getLink($routePrefix . ".general", "General", 'fa-solid fa-gear'),
+            self::getLink($routePrefix . ".notification_setting", "Notification Setting", 'fa-solid fa-gear'),
             self::getLink($routePrefix . ".field_setting", "Field Setting", 'fa-solid fa-gear'),
         ];
 

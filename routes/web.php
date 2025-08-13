@@ -9,6 +9,7 @@ use App\Http\Controllers\Backend\AppMenuController;
 use App\Http\Controllers\Backend\CarrierController;
 use App\Http\Controllers\Backend\CityController;
 use App\Http\Controllers\Backend\CountryController;
+use App\Http\Controllers\Backend\CustomerController;
 use App\Http\Controllers\Backend\DashboardController;
 use App\Http\Controllers\Backend\DealerController;
 use App\Http\Controllers\Backend\DepartmentController;
@@ -836,8 +837,59 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
         $name = "dispatch";
         Route::post($name . "/{lead_id}", [$controllerClass, $name])->name($name);
 
+        $name = "convert_to_customer";
+        Route::get($name . "/{lead_id}", [$controllerClass, $name])->name($name);
+
         $name = "history_destroy";
         Route::delete($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $route_prefix = "export";
+        Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+            $name = "csv";
+            Route::get($name, [$controllerClass, $name])->name($name);
+        });
+    });
+
+    $route_prefix = "customer";
+    $controllerClass = CustomerController::class;
+    Route::resource($route_prefix, $controllerClass);
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
+        $name = "copy";
+        Route::get("{id}/" . $name, [$controllerClass, $name])->name($name);
+
+        $name = "activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "de_activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "ajax_get_list";
+        Route::get($name . "/{type}", [$controllerClass, $name])->name($name);
+
+        $name = "ajax_update_field";
+        Route::post($name, [$controllerClass, $name])->name($name);
+
+        $name = "history";
+        Route::get($name . "/{lead_id}", [$controllerClass, $name])->name($name);
+
+        $name = "history_store";
+        Route::post($name . "/{lead_id}", [$controllerClass, $name])->name($name);
+
+        $name = "address";
+        Route::post($name . "/{lead_id}", [$controllerClass, $name])->name($name);
+
+        $name = "change_files";
+        Route::post($name . "/{lead_id}", [$controllerClass, $name])->name($name);
+
+        $name = "dispatch";
+        Route::post($name . "/{lead_id}", [$controllerClass, $name])->name($name);
+
+        $name = "history_destroy";
+        Route::delete($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "convert_to_lead";
+        Route::get($name . "/{lead_id}", [$controllerClass, $name])->name($name);
 
         $route_prefix = "export";
         Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
@@ -951,6 +1003,8 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
     $controller_prefix = "setting";
     $controllerClass = SettingsController::class;
     $name = "general";
+    Route::any($controller_prefix . "/" . $name, [$controllerClass, $name])->name($controller_prefix . "." . $name);
+    $name = "notification_setting";
     Route::any($controller_prefix . "/" . $name, [$controllerClass, $name])->name($controller_prefix . "." . $name);
     $name = "field_setting";
     Route::any($controller_prefix . "/" . $name . "/{type?}", [$controllerClass, $name])->name($controller_prefix . "." . $name);

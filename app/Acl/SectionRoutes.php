@@ -346,6 +346,11 @@ class SectionRoutes
         ];
 
         $section['children'][] = [
+            "text" => "Notification Setting",
+            "route_list" => [$routePrefix . ".notification_setting"]
+        ];
+
+        $section['children'][] = [
             "text" => "Field Setting",
             "route_list" => [$routePrefix . ".field_setting"]
         ];
@@ -403,13 +408,20 @@ class SectionRoutes
             "text" => "Email",
             "route_list" => [$routePrefix . ".email_logs"]
         ];
+
         $section['children'][] = [
             "text" => "Whatsapp",
             "route_list" => [$routePrefix . ".whatsapp_logs"]
         ];
+
         $section['children'][] = [
             "text" => "Permission Change",
             "route_list" => [$routePrefix . ".permission_change_logs"]
+        ];
+
+        $section['children'][] = [
+            "text" => "Import",
+            "route_list" => [$routePrefix . ".import_logs"]
         ];
 
         $section['children'][] = [
@@ -425,6 +437,11 @@ class SectionRoutes
         $section['children'][] = [
             "text" => "Command",
             "route_list" => [$routePrefix . ".command_logs"]
+        ];
+
+        $section['children'][] = [
+            "text" => "Laravel Logs",
+            "route_list" => [$routePrefix . ".laravel_logs"]
         ];
 
         return $section;

@@ -4,9 +4,13 @@ namespace App\Http\Controllers\Backend;
 
 use App\Exceptions\UserException;
 use App\Helpers\LaravelExtend;
+use App\Models\Carrier;
 use App\Models\City;
 use App\Models\Country;
 use App\Models\Dealer;
+use App\Models\DispatchOrder;
+use App\Models\DispatchOrderItem;
+use App\Models\DispatchOrderProduct;
 use App\Models\DocumentFile;
 use App\Models\DropDownValue;
 use App\Models\FieldSetting;
@@ -16,13 +20,17 @@ use App\Models\LeadAddress;
 use App\Models\LeadHistory;
 use App\Models\LeadItem;
 use App\Models\LeadProduct;
+use App\Models\Notification;
+use App\Models\NotificationSetting;
 use App\Models\Product;
 use App\Models\State;
 use App\Models\Type;
 use App\Models\User;
+use App\Notifications\GeneralNotification;
 use App\Rules\MobileNumber;
 use Illuminate\Http\Request;
 use Exception;
+use Illuminate\Notifications\Events\NotificationSent;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Validator;
@@ -33,7 +41,7 @@ class LeadController extends BackendController
 
     protected $modelClass = Lead::class;
 
-    protected $model = null;
+    protected Lead | null $model = null;
 
     public function index()
     {
@@ -66,6 +74,7 @@ class LeadController extends BackendController
         ]);
 
         $builder = $this->modelClass::where($conditions);
+        $builder->where("is_customer", 0);
 
         $builder->with([
             "state", "district", "city",
@@ -226,6 +235,8 @@ class LeadController extends BackendController
             "company_gst_no" => ["nullable"],
             "source_type" => ["nullable"],
             "source_id" => ["nullable"],
+            "deal_type" => ["required"],
+            "dealer_id" => [],
             "purpose_price" => ["nullable"],
             "payment_method_type" => ["nullable"],
             "profile_img" => ["nullable"],
@@ -249,6 +260,7 @@ class LeadController extends BackendController
 
         $model = new $this->modelClass();
 
+        $rules = LaravelExtend::merge_validation_rules($rules, $model->getRequiedIfRules($request));
         $rules = LaravelExtend::merge_validation_rules($rules, $model->getUniqueValidationRules($request));
 
         $messages = $this->_common_validation_messages();
@@ -572,6 +584,7 @@ class LeadController extends BackendController
 
         $rules = $this->_common_validation_rules();
 
+        $rules = LaravelExtend::merge_validation_rules($rules, $model->getRequiedIfRules($request));
         $rules = LaravelExtend::merge_validation_rules($rules, $model->getUniqueValidationRules($request));
 
         // dd($rules);
@@ -687,9 +700,11 @@ class LeadController extends BackendController
         $items = $record->items?->toArray() ?? [];
         $addresses = $record->address?->toArray() ?? [];
 
+        $carrier_list = Carrier::getList();
+
         $model = new LeadHistory();
 
-        $this->setForView(compact("record", "form", "model", "products", "items", "addresses"));
+        $this->setForView(compact("record", "form", "model", "products", "items", "addresses", "carrier_list"));
 
         return $this->view(__FUNCTION__);
     }
@@ -920,14 +935,28 @@ class LeadController extends BackendController
             "entry_by" => ["required"],
             "action_type" => ["required"],
             "status_type" => ["required"],
-            "remarks" => "",
+            "payable_amount" => ["required"],
             "next_meeting_date_time" => "",
+            "remarks" => "",
             "products" => [],
             "items" => [],
             "addresses" => [],
         ];
 
         $validatedData = $request->validate($rules);
+
+        $rules = [
+            "carrier_id" => ["required"],
+            "docket_no" => ["required"],
+            "builty_no" => "",
+            "tracking_no" => "",
+            "tracking_phone_no" => "",
+            "shipping_fee" => ["required"],
+            "shipping_fee_gst_per" => ["required"],
+            "remarks" => "",
+        ];
+
+        $dispatchData = $request->validate($rules);
 
         DB::beginTransaction();
 
@@ -964,6 +993,133 @@ class LeadController extends BackendController
             }
 
             $this->_saveOthers($validatedData);
+
+            $dispatch = new DispatchOrder();
+            $dispatch->type = str_class_name_to_human_text($this->modelClass);
+            $dispatch->status_type = DispatchOrder::STATUS_PENDING;
+            $dispatch->lead_id = $lead_id;
+
+            $dispatch->fill($dispatchData);
+
+            $my_country = Country::getMyCountry();
+
+            if ($lead->deal_type == Lead::DEAL_TYPE_THROGH_DEALER)
+            {
+                $primary_address = $lead->dealer->address()->where("is_primary", 1)->first();
+
+                if (!$primary_address)
+                {
+                    throw new UserException("Dealer have no Primary Address", UserException::ERROR_USER_DATA_WRONG);
+                }
+
+                $dispatch->addr1 = $primary_address->addr1;
+                $dispatch->addr2 = $primary_address->addr2;
+                $dispatch->pincode = $primary_address->pincode;
+                $dispatch->country_id = $my_country->id;
+                $dispatch->state_id = $lead->dealer->state_id;
+                $dispatch->district_id = $lead->dealer->district_id;
+                $dispatch->city_id = $lead->dealer->city_id;
+            }
+            else
+            {
+                $primary_address = $lead->address()->where("is_primary", 1)->first();
+
+                if (!$primary_address)
+                {
+                    throw new UserException("No Primary Address Found", UserException::ERROR_USER_DATA_WRONG);
+                }
+                
+                $dispatch->addr1 = $primary_address->addr1;
+                $dispatch->addr2 = $primary_address->addr2;
+                $dispatch->pincode = $primary_address->pincode;
+                $dispatch->country_id = $my_country->id;
+                $dispatch->state_id = $lead->state_id;
+                $dispatch->district_id = $lead->district_id;
+                $dispatch->city_id = $lead->city_id;
+            }
+
+            if (!$dispatch->save())
+            {
+                throw new UserException("Fail To Save Dispatch", UserException::ERROR_LARAVEL_FAIL);
+            }
+
+            $existing_id_list = $this->model->products()->pluck("id", "id")->toArray();
+
+            foreach($lead->products as $product)
+            {
+                $save = $product->toArray();
+                unset($save['id']);
+                unset($save['lead_id']);
+                $save['dispatch_order_id'] = $dispatch->id;
+
+                $child_model = new DispatchOrderProduct($save);
+
+                $child_model = DispatchOrderProduct::insertOrUpdate($save, $is_insert, $is_update);
+
+                unset($existing_id_list[$child_model->id]);
+            }
+
+            if ($existing_id_list)
+            {
+                $existing_records = $dispatch->products()->where("id", $existing_id_list)->get();
+
+                foreach($existing_records as $existing_record)
+                {
+                    if (!$existing_record->safeDelete($existing_record))
+                    {
+                        LaravelExtend::addError($existing_record->name, "Can not delete, bcoz it is asscoicated with other modules.", "Term");
+                    }
+                }
+            }
+
+            $existing_id_list = $this->model->items()->pluck("id", "id")->toArray();
+
+            foreach($lead->items as $item)
+            {
+                $save = $item->toArray();
+                unset($save['id']);
+                unset($save['lead_id']);
+                $save['dispatch_order_id'] = $dispatch->id;
+
+                $child_model = new DispatchOrderItem($save);
+
+                $child_model = DispatchOrderItem::insertOrUpdate($save, $is_insert, $is_update);
+
+                unset($existing_id_list[$child_model->id]);
+            }
+
+            if ($existing_id_list)
+            {
+                $existing_records = $dispatch->items()->where("id", $existing_id_list)->get();
+
+                foreach($existing_records as $existing_record)
+                {
+                    if (!$existing_record->safeDelete($existing_record))
+                    {
+                        LaravelExtend::addError($existing_record->name, "Can not delete, bcoz it is asscoicated with other modules.", "Term");
+                    }
+                }
+            }
+
+            $notification_data = [
+                'from_user_id' => LaravelExtend::getAuthUserId(),
+                "sub_type" => Notification::SUB_TYPE_INFO,
+                "msg" => "New Dispatch Order of Lead from Sales"
+            ];
+
+            $notifyObj = new GeneralNotification($notification_data);
+
+            $user_id_list = NotificationSetting::getUserIdList("on_dispatch_order_from_sales_lead");
+
+            if ($user_id_list)
+            {
+                $users = User::find($user_id_list);
+
+                foreach($users as $user)
+                {
+                    $user->notify($notifyObj);
+                }
+            }
 
             if (LaravelExtend::$errors) {
                 throw new UserException("There are some errors", UserException::ERROR_USER_DATA_WRONG);
@@ -1126,6 +1282,18 @@ class LeadController extends BackendController
 
             return back()->withInput()->with('fail', get_exception_display_message($ex))->with("custom_errors", LaravelExtend::$errors);
         }
+    }
+
+    public function convert_to_customer($lead_id)
+    {
+        $lead = $this->modelClass::findOrFail($lead_id);
+
+        $lead->is_customer = 1;
+        $lead->status_type = Lead::STATUS_CONVERTED;
+
+        $lead->save();
+
+        return redirect()->route("customer.index")->with('success', "Convert to Customer Successfully");
     }
 
     public function export_csv()

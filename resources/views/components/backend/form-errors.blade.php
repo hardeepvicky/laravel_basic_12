@@ -9,7 +9,7 @@ if (Session::has("custom_errors"))
 }
 ?>
 
-@if ($errors->any() || isset($customErrors))
+@if ($errors->any() || (isset($customErrors) && $customErrors))
     <div class="card-wrapper rounded-3 h-100 bg-light-secondary mb-2">
         <h6 class="sub-title f-w-600">Errors</h6>
         <ol class="mb-0">

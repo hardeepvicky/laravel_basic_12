@@ -149,7 +149,7 @@
                                         $label = get_value_from_list($field_labels, $field, $field);
                                         ?>
                                         <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
-                                            :list="$deal_type_list" value="{{ $model->{$field} }}" class="select2"/>
+                                            :list="$deal_type_list" value="{{ $model->{$field} }}" class="select2" mandatory="true"/>
                                     </div>
                                 </div>
                                 <div class="col-lg-6 deal_type-block deal_type-block-THROGH_DEALER">

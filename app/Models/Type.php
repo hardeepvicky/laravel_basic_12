@@ -91,6 +91,11 @@ class Type extends BaseModel
                     "action_type" => "Action Type",
                 ]
             ],
+            DispatchOrder::class => [
+                "fields" => [
+                    "status_type" => "Status",
+                ]
+            ],
         ];
 
         return $types;

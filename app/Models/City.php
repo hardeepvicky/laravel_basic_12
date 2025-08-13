@@ -87,17 +87,6 @@ class City extends BaseModel
 
     public static function getWithDistrict(array $state_conditions = [], array $district_conditions = [], array $city_conditions = [])
     {
-        $records = District::where($district_conditions)
-        ->whereHas("state", function ($q) use($state_conditions) {
-            $q->where($state_conditions);
-        })
-        ->with([
-            "city" => function($q) use($city_conditions){
-                $q->where($city_conditions);
-                $q->orderBy("name", "ASC");
-            }
-        ])->orderBy("name", "ASC")->get();
-
         $data = [];
 
         $cache_key = "getWithDistrict";
@@ -107,8 +96,23 @@ class City extends BaseModel
 
         $data = static::getCache($cache_key);
 
+        // dd($data);
+
         if (!$data)
         {
+            $data = [];
+
+            $records = District::where($district_conditions)
+                ->whereHas("state", function ($q) use($state_conditions) {
+                    $q->where($state_conditions);
+                })
+                ->with([
+                    "city" => function($q) use($city_conditions){
+                        $q->where($city_conditions);
+                        $q->orderBy("name", "ASC");
+                    }
+                ])->orderBy("name", "ASC")->get();
+            
             foreach($records as $record)
             {
                 $prefix = $record->getDisplayName();
@@ -123,8 +127,8 @@ class City extends BaseModel
                 }
             }
 
-            $cache_time = 60 * 60 * 24;
-            static::addCache($cache_key, $data, $cache_time, [District::class]);
+            $cache_time = 120;
+            static::addCache($cache_key, $data, $cache_time);
         }
 
         return $data;

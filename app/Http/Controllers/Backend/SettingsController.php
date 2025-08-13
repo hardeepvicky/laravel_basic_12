@@ -13,10 +13,13 @@ use App\Models\BaseMongoModel;
 use App\Models\CacheLog;
 use App\Models\City;
 use App\Models\CommandLog;
+use App\Models\Department;
+use App\Models\Designation;
 use App\Models\EmailLog;
 use App\Models\Employee;
 use App\Models\Enquiry;
 use App\Models\FieldSetting;
+use App\Models\NotificationSetting;
 use App\Models\PageSetting;
 use App\Models\Role;
 use App\Models\RoleRouteName;
@@ -24,6 +27,7 @@ use App\Models\RouteName;
 use App\Models\Setting;
 use App\Models\SqlLog;
 use App\Models\Type;
+use App\Models\User;
 use App\Models\UserRole;
 use Exception;
 use Illuminate\Http\Request;
@@ -182,61 +186,65 @@ class SettingsController extends BackendController
         return $this->view(__FUNCTION__);
     }
 
-    public function page_setting($type = "")
+    public function notification_setting(Request $request)
     {
-        $exception_list = [];
+        if ($request->isMethod('post')) {
+            $data = $request->all();
 
-        $search['type'] = $type;
-
-        $request = request();
-
-        if ($type) {
-
-            if (is_string($type)) {
-                $type = ucwords($type);
-            }
-
-            dd($type);
-
-            // d($fields, true);
-
-            $model = FieldSetting::where("type", $type)->first();
-            if (!$model) {
-                $model = new FieldSetting();
-            }
-
-            if ($request->isMethod("post")) {
-
-                $data = $request->all();
-
-                try {
-
-                    $save_data = [
-                        "type" => $type,
-                        "field_labels" => $data['field_labels'],
-                    ];
-
-                    $model = FieldSetting::insertOrUpdate($save_data);
-
-                    return back()->with("success", "Record save successfully");
-                } catch (Exception $ex) {
-
-                    $this->custom_errors = array_merge_recursive($this->custom_errors, $model->custom_errors);
-
-                    return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", $this->custom_errors);
+            //d($data["data"]['text']); exit;
+            foreach ($data["data"] as $key => $arr) 
+            {
+                if ($arr) {
+                    $arr['name'] = $key;
+                    $notificationSettingModel = NotificationSetting::insertOrUpdate($arr);
                 }
-            } else {
             }
 
-            $form = [
-                'url' => route($this->routePrefix . '.' . __FUNCTION__),
-                'method' => 'POST',
-            ];
-
-            $this->setForView(compact("form", "model", "fields"));
+            Session::flash('success', 'Notification Settings has been saved');
         }
 
-        $this->setForView(compact("search"));
+        $form = [
+            'url' => route($this->routePrefix . '.notification_setting'),
+            'method' => 'POST',
+        ];
+
+        $temp = NotificationSetting::get()->toArray();
+
+        $records = [];
+
+        foreach($temp as $arr)
+        {
+            $records[$arr['name']] = $arr;
+        }
+
+        $type_list = NotificationSetting::getTypeList();
+        $sub_type_list = NotificationSetting::getSubTypeList();
+
+        $role_list = Role::getList();
+        $dept_list = Department::getList("id", "display_name", [], "list_display_order");
+        $desg_list = Designation::getList("id", "display_name", [], "list_display_order");
+
+        $users = User::getCache("users_type_internal");
+
+        if (!$users)
+        {
+            $users = User::where("type", User::TYPE_INTERNAL)->where("is_active", 1)->get()->toArray();
+
+            $cache_time = 60 * 60 * 24;
+            
+            User::addCache("users_type_internal", $users, $cache_time);
+        }
+
+        $user_list = [];
+
+        foreach($users as $k => $user)
+        {
+            $user_list[$user['id']] = $user['display_name'];
+        }
+
+        //d($record_list); exit;
+
+        $this->setForView(compact('form', 'records', "type_list", "sub_type_list", "role_list", "dept_list", "desg_list", "user_list"));
 
         return $this->view(__FUNCTION__);
     }
