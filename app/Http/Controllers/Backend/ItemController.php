@@ -551,8 +551,35 @@ class ItemController extends BackendController
             "sample" => route("sample.item")
         ]);
 
+        $import_log_id = $request->get("import_log_id", false);
+        if ($import_log_id)
+        {
+            $importLogModel = ImportLog::find($import_log_id);
+        }
+
+        if (!isset($importLogModel))
+        {
+            $save = [
+                'type' => str_class_name_without_namespace($this->modelClass),
+                "status_info" => "Processing...."
+            ];
+
+            $importLogModel = ImportLog::create($save);
+            $import_log_id = $importLogModel->id;
+        }
+
+        $form = [
+            'url' => route($this->routePrefix . '.import.csv'),
+            'method' => 'POST',
+        ];
+
+        $this->setForView(compact("form", "import_log_id"));
+
         if ($request->isMethod('POST'))
         {
+            $import_log_id = "";
+
+            $this->setForView(compact("import_log_id"));
             $rules = [
                 "file" => [
                     "required", 
@@ -566,6 +593,8 @@ class ItemController extends BackendController
 
             try
             {
+                $start_seconds = microtime(true);
+
                 $this->beforeCsvImport();
 
                 $path = ImportLog::getStoragePath();
@@ -608,12 +637,11 @@ class ItemController extends BackendController
                 $total_count = count($csv_records);
 
                 $save = [
-                    'type' => str_class_name_without_namespace($this->modelClass),
                     'file' => $filepath,
                     'total_count' => $total_count
                 ];
 
-                $importLogModel = ImportLog::create($save);
+                $importLogModel->fill($save);
 
                 $accept_count = 0;
                 $msg_list = [
@@ -691,8 +719,8 @@ class ItemController extends BackendController
 
                         // d($record, true);
                         
-                        $is_insert = null;
-                        if ($model->insertOrUpdate($record, $is_insert))
+                        $is_insert = $is_update = null;
+                        if ($model->insertOrUpdate($record, $is_insert, $is_update))
                         {
                             $accept_count++;
 
@@ -700,10 +728,15 @@ class ItemController extends BackendController
                             {
                                 $msg_list['Item Insert']++;
                             }
-                            else
+                            else if ($is_update)
                             {
                                 $msg_list['Item Update']++;
                             }
+
+                            $percent = round(($i + 1) * 100 / $total_count, 1);
+
+                            $importLogModel->status_info = "Processing... $percent % " . ", Time Taken : " . Util::niceTime(microtime(true) - $start_seconds);
+                            $importLogModel->saveQuietly();
                         }
                         else
                         {
@@ -712,7 +745,13 @@ class ItemController extends BackendController
                     }
                 }
 
+                $sqlLogModel = LaravelExtend::saveSqlLog([
+                    "import_log_id" => $importLogModel->id
+                ]);
+
+                $importLogModel->sql_log_id = $sqlLogModel->id;
                 $importLogModel->accept_count = $accept_count;
+                $importLogModel->exec_time = microtime(true) - $start_seconds;
 
                 $text_list = [];
                 foreach($msg_list as $text => $count)
@@ -722,7 +761,7 @@ class ItemController extends BackendController
 
                 $importLogModel->is_fully_run = true;
 
-                $msg = "Total Count = $total_count, Accept Count $accept_count";
+                $msg = "Total Count : $total_count, Accept Count : $accept_count";
                 $msg .= ", " . implode(", ", $text_list);
 
                 if (LaravelExtend::$errors)
