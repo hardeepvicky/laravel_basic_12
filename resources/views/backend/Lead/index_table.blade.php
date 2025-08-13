@@ -41,7 +41,7 @@
                             <th scope="row">
                                 <x-Backend.celec-summary-table-first-column :record="$record" :routePrefix="$routePrefix" buttons="history,edit,copy,delete,tr_details">
                                     <div class="label">
-                                        {{ $record->id . " | " . $record->name . " | " . $record->mobile }}
+                                        {{ $record->id . " | " . $record->name }}
                                     </div>
                                 </x-Backend.celec-summary-table-first-column>
                             </th>
