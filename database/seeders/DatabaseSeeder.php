@@ -19,7 +19,10 @@ class DatabaseSeeder extends Seeder
 
         $this->call(StateSeeder::class);
         $this->call(TypeSeeder::class);
+        $this->call(DropDownValueSeeder::class);
         $this->call(AppMenuSeeder::class);
+        $this->call(SettingSeeder::class);
         $this->call(FieldSettingSeeder::class);
+        $this->call(NotificationSettingSeeder::class);
     }
 }

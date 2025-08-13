@@ -69,6 +69,11 @@ class DispatchOrder extends BaseModel
         return $this->hasMany(DispatchOrderItem::class, 'dispatch_order_id');
     }
 
+    public function country()
+    {
+        return $this->belongsTo(Country::class);
+    }
+
     public function state()
     {
         return $this->belongsTo(State::class);
@@ -82,6 +87,16 @@ class DispatchOrder extends BaseModel
     public function city()
     {
         return $this->belongsTo(City::class);
+    }
+
+    public function carrier()
+    {
+        return $this->belongsTo(Carrier::class);
+    }
+
+    public function lead()
+    {
+        return $this->belongsTo(Lead::class);
     }
 
     public function getUniqueValidationRules(Request $request)

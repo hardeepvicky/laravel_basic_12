@@ -490,7 +490,17 @@ class CityController extends BackendController
             $conditions[] = ["district_id", "=", $district_id];
         }
 
-        $response['data'] = $this->modelClass::where($conditions)->select("id", "name")->get()->toArray();
+        $list = $this->modelClass::getList("id", "display_name", $conditions, "list_display_order");
+
+        $response['data'] = [];
+
+        foreach($list as $k => $v)
+        {
+            $response['data'][] = [
+                'id' => $k,
+                'name' => $v,
+            ];
+        }
 
         return $this->responseJson($response);
     }

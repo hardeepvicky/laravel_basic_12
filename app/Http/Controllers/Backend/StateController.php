@@ -195,4 +195,28 @@ class StateController extends BackendController
             return back()->withInput()->with('fail', $ex->getMessage());
         }
     }
+
+    
+    public function ajax_get_list($country_id)
+    {
+        $response = ["status" => 1];
+
+        $conditions = [];
+
+        $conditions[] = ["country_id", "=", $country_id];
+
+        $list = $this->modelClass::getList("id", "display_name", $conditions, "name");
+
+        $response['data'] = [];
+
+        foreach($list as $k => $v)
+        {
+            $response['data'][] = [
+                'id' => $k,
+                'name' => $v,
+            ];
+        }
+
+        return $this->responseJson($response);
+    }
 }

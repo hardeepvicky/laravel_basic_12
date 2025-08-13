@@ -16,6 +16,7 @@ use App\Http\Controllers\Backend\DealerController;
 use App\Http\Controllers\Backend\DepartmentController;
 use App\Http\Controllers\Backend\DesignationController;
 use App\Http\Controllers\Backend\DeveloperController;
+use App\Http\Controllers\Backend\DispatchOrderController;
 use App\Http\Controllers\Backend\DistrictController;
 use App\Http\Controllers\Backend\DocumentCategoryController;
 use App\Http\Controllers\Backend\DocumentFileController;
@@ -987,6 +988,21 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
 
         $name = "de_activate";
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "ajax_update_field";
+        Route::post($name, [$controllerClass, $name])->name($name);
+
+        $route_prefix = "export";
+        Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+            $name = "csv";
+            Route::get($name, [$controllerClass, $name])->name($name);
+        });
+    });
+
+    $route_prefix = "dispatch-order";
+    $controllerClass = DispatchOrderController::class;
+    Route::resource($route_prefix, $controllerClass);
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
 
         $name = "ajax_update_field";
         Route::post($name, [$controllerClass, $name])->name($name);
