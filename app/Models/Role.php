@@ -18,6 +18,8 @@ class Role extends BaseModel
      */
     protected static array $unique_fields = ["name"];
 
+    protected static array $list_fields = ["id", "name", "code"];
+
     protected $appends = [
         'display_name',
     ];
