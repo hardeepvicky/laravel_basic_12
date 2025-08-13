@@ -36,14 +36,16 @@ class DispatchOrder extends BaseModel
 
     public function beforeSave()
     {
-        if ($this->fee && $this->fee_gst_per)
+        if ($this->shipping_fee && $this->shipping_fee_gst_per)
         {
-            $this->fee_gst = round($this->fee * $this->fee_gst_per / 100, 2);
+            $this->shipping_fee_gst = round($this->shipping_fee * $this->shipping_fee_gst_per / 100, 2);
         }
 
-        if ($this->fee && $this->fee_gst) {
-            $this->total_fee = $this->fee + $this->fee_gst;
+        if ($this->shipping_fee && $this->shipping_fee_gst) {
+            $this->total_fee = $this->shipping_fee + $this->shipping_fee_gst;
         }
+
+        parent::beforeSave();
     }
 
     
