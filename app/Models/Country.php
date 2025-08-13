@@ -13,6 +13,17 @@ class Country extends BaseModel
 
     protected static array $list_fields = ["id", "name", "short_name"];
 
+    public static array $child_model_class = [
+        State::class => [
+            "foreignKey" => ["country_id"],
+            "preventDelete" => true
+        ], 
+        DispatchOrder::class => [
+            "foreignKey" => ["country_id"],
+            "preventDelete" => true
+        ],        
+    ];
+
     public function getUniqueValidationRules()
     {
         $field_rules = [

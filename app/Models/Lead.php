@@ -44,6 +44,14 @@ class Lead extends BaseModel
             "foreignKey" => ["lead_id"],
             "preventDelete" => true
         ],
+        TaskLead::class => [
+            "foreignKey" => ["lead_id"],
+            "preventDelete" => true
+        ], 
+        TaskCustomer::class => [
+            "foreignKey" => ["lead_id"],
+            "preventDelete" => true
+        ], 
     ];
 
     protected static array $fields_containg_tags = ["description"];
@@ -150,6 +158,11 @@ class Lead extends BaseModel
     public function dealer()
     {
         return $this->belongsTo(Dealer::class, "dealer_id");
+    }
+
+    public function campaign()
+    {
+        return $this->belongsTo(Campaign::class, "campaign_id");
     }
 
     public function getRequiedIfRules(Request $request)
@@ -358,6 +371,11 @@ class Lead extends BaseModel
             case "dealer_id":
                 $ret_array = [
                     $field => $this->dealer?->getDisplayName()
+                ];
+                break;
+            case "campaign_id":
+                $ret_array = [
+                    $field => $this->campaign?->getDisplayName()
                 ];
                 break;
         }

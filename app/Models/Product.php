@@ -30,6 +30,14 @@ class Product extends BaseModel
             "foreignKey" => ["product_id"],
             "preventDelete" => false
         ],
+        LeadProduct::class => [
+            "foreignKey" => ["product_id"],
+            "preventDelete" => true
+        ],
+        DispatchOrderProduct::class => [
+            "foreignKey" => ["product_id"],
+            "preventDelete" => true
+        ], 
     ];
 
     public function beforeSave()

@@ -18,10 +18,26 @@ class State extends BaseModel
     ];
 
     public static array $child_model_class = [
-        // Employee::class => [
-        //     "foreignKey" => ["current_state_id", "permanent_state_id"],
-        //     "preventDelete" => true
-        // ]
+        District::class => [
+            "foreignKey" => ["state_id"],
+            "preventDelete" => true
+        ], 
+        City::class => [
+            "foreignKey" => ["state_id"],
+            "preventDelete" => true
+        ], 
+        Lead::class => [
+            "foreignKey" => ["state_id"],
+            "preventDelete" => true
+        ], 
+        Dealer::class => [
+            "foreignKey" => ["state_id"],
+            "preventDelete" => true
+        ], 
+        DispatchOrder::class => [
+            "foreignKey" => ["state_id"],
+            "preventDelete" => true
+        ], 
     ];
 
     public function beforeSave()

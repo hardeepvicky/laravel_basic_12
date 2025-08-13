@@ -27,6 +27,26 @@ class DocumentFile extends BaseModel
             "foreignKey" => "document_file_id",
             "preventDelete" => true
         ],
+        CarrierFile::class => [
+            "foreignKey" => "document_file_id",
+            "preventDelete" => true
+        ],
+        CampaignFile::class => [
+            "foreignKey" => "document_file_id",
+            "preventDelete" => true
+        ],
+        DealerFile::class => [
+            "foreignKey" => "document_file_id",
+            "preventDelete" => true
+        ],
+        PartyFile::class => [
+            "foreignKey" => "document_file_id",
+            "preventDelete" => true
+        ],
+        ProductFile::class => [
+            "foreignKey" => "document_file_id",
+            "preventDelete" => true
+        ],
     ];
 
     public function documentCategory()

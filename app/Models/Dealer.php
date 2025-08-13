@@ -32,6 +32,10 @@ class Dealer extends BaseModel
             "foreignKey" => ["dealer_id"],
             "preventDelete" => false
         ],
+        TaskDealer::class => [
+            "foreignKey" => ["dealer_id"],
+            "preventDelete" => true
+        ], 
     ];
 
     protected static array $fields_containg_tags = ["description"];

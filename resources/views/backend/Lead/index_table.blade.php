@@ -25,6 +25,7 @@
                         <th><?= sortable_anchor('state.name', get_value_from_list($field_labels, 'state_id', 'state_id')) ?></th>
                         <th><?= sortable_anchor('distirct.name', get_value_from_list($field_labels, 'district_id', 'district_id')) ?></th>
                         <th><?= sortable_anchor('city.name', get_value_from_list($field_labels, 'city_id', 'city_id')) ?></th>
+                        <th><?= sortable_anchor('mobile', get_value_from_list($field_labels, 'mobile', 'mobile')) ?></th>
                         <th><?= sortable_anchor('mobile2', get_value_from_list($field_labels, 'mobile2', 'mobile2')) ?></th>
                         <th><?= sortable_anchor('source_type', get_value_from_list($field_labels, 'source_type', 'source_type')) ?></th>
                         <th><?= sortable_anchor('source_id', get_value_from_list($field_labels, 'source_id', 'source_id')) ?></th>
@@ -49,6 +50,7 @@
                             <td>{{ $record->state?->getDisplayName() }}</td>
                             <td>{{ $record->district?->getDisplayName() }}</td>
                             <td>{{ $record->city?->getDisplayName() }}</td>
+                            <td>{{ $record->mobile }}</td>
                             <td>{{ $record->mobile2 }}</td>
                             <td>{{ get_value_from_list($source_type_list, $record->source_type) }}</td>
                             <td>{{ get_value_from_list($source_list, $record->source_id) }}</td>
@@ -63,7 +65,7 @@
                         </tr>
                         <tr id="record-{{ $record->id }}" class="hidden">
                             <td style="background-color: var(--body--bs-body-bg)"></td>                            
-                            <td colspan="10">
+                            <td colspan="12">
                                 <div class="row">
                                     <div class="col-md-6 col-xl-3">
                                         <label class="info">
@@ -91,6 +93,13 @@
                                             {{ get_value_from_list($field_labels, 'company_gst_no') }} :
                                             <span>
                                                 {{ $record->company_gst_no }}
+                                            </span>
+                                        </label>
+
+                                        <label class="info">
+                                            {{ get_value_from_list($field_labels, 'campaign_id') }} :
+                                            <span>
+                                                {{ $record->campaign?->getDisplayName() }}
                                             </span>
                                         </label>
 

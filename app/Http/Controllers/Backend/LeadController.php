@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Backend;
 
 use App\Exceptions\UserException;
 use App\Helpers\LaravelExtend;
+use App\Models\Campaign;
 use App\Models\Carrier;
 use App\Models\City;
 use App\Models\Country;
@@ -172,6 +173,8 @@ class LeadController extends BackendController
 
         $item_list = Item::getList();
 
+        $campaign_list = Campaign::getList();
+
         $user_list = User::getList("id", "display_name", ["type" => User::TYPE_INTERNAL], "person_name");
 
         $type_conditions = [
@@ -194,7 +197,7 @@ class LeadController extends BackendController
 
         $this->setForView(compact(
             "address_type_list", "state_list", "district_cities", "district_city_list",
-            "source_type_list", "deal_type_list", "status_type_list", "source_list", "payment_method_type_list", "dealer_list", "product_list", "item_list",
+            "source_type_list", "deal_type_list", "status_type_list", "source_list", "payment_method_type_list", "dealer_list", "product_list", "item_list", "campaign_list",
             "user_list", "action_type_list", "lead_history_response_list",
             "field_labels", "address_field_labels", "product_field_labels", "item_field_labels", "history_field_labels"
         ));
@@ -237,6 +240,7 @@ class LeadController extends BackendController
             "source_id" => ["nullable"],
             "deal_type" => ["required"],
             "dealer_id" => [],
+            "campaign_id" => ["nullable"],
             "purpose_price" => ["nullable"],
             "payment_method_type" => ["nullable"],
             "profile_img" => ["nullable"],

@@ -99,7 +99,7 @@ $false = false;
                                     </label>
 
                                     <div class="row">
-                                        <div class="col-md-2">
+                                        <div class="col-md-3">
                                             <h5>
                                                 {{ get_value_from_list($field_labels, 'taskUser', 'Link Users') }}
                                             </h5>

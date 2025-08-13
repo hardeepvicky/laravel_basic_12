@@ -25,7 +25,7 @@ class Party extends BaseModel
         TaskParty::class => [
             "foreignKey" => ["party_id"],
             "preventDelete" => true
-        ]
+        ],        
     ];
 
     protected static array $fields_containg_tags = ["description"];

@@ -125,16 +125,6 @@
                                 <div class="col-lg-6">
                                     <div class="form-group mb-3">
                                         <?php
-                                        $field = 'source_type';
-                                        $label = get_value_from_list($field_labels, $field, $field);
-                                        ?>
-                                        <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
-                                            :list="$source_type_list" value="{{ $model->{$field} }}" class="select2"/>
-                                    </div>
-                                </div>
-                                <div class="col-lg-6">
-                                    <div class="form-group mb-3">
-                                        <?php
                                         $field = 'source_id';
                                         $label = get_value_from_list($field_labels, $field, $field);
                                         ?>
@@ -142,6 +132,17 @@
                                             :list="$source_list" value="{{ $model->{$field} }}" class="select2"/>
                                     </div>
                                 </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group mb-3">
+                                        <?php
+                                        $field = 'source_type';
+                                        $label = get_value_from_list($field_labels, $field, $field);
+                                        ?>
+                                        <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
+                                            :list="$source_type_list" value="{{ $model->{$field} }}" class="select2"/>
+                                    </div>
+                                </div>
+
                                 <div class="col-lg-6">
                                     <div class="form-group mb-3">
                                         <?php
@@ -160,6 +161,16 @@
                                         ?>
                                         <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
                                             :list="$dealer_list" value="{{ $model->{$field} }}" class="select2"/>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group mb-3">
+                                        <?php
+                                        $field = 'campaign_id';
+                                        $label = get_value_from_list($field_labels, $field, $field);
+                                        ?>
+                                        <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
+                                            :list="$campaign_list" value="{{ $model->{$field} }}" class="select2"/>
                                     </div>
                                 </div>
                             </div>

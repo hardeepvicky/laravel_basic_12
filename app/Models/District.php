@@ -15,10 +15,22 @@ class District extends BaseModel
     ];
 
     public static array $child_model_class = [
-        // Employee::class => [
-        //     "foreignKey" => ["current_state_id", "permanent_state_id"],
-        //     "preventDelete" => true
-        // ]
+        City::class => [
+            "foreignKey" => ["district_id"],
+            "preventDelete" => true
+        ], 
+        Lead::class => [
+            "foreignKey" => ["district_id"],
+            "preventDelete" => true
+        ], 
+        Dealer::class => [
+            "foreignKey" => ["district_id"],
+            "preventDelete" => true
+        ], 
+        DispatchOrder::class => [
+            "foreignKey" => ["district_id"],
+            "preventDelete" => true
+        ], 
     ];
 
     public function state()

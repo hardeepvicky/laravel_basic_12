@@ -55,11 +55,47 @@
                             <span>{!! $record->description !!}</span>
                         </label>
                         <h5>
-                            Link Users
+                            {{ get_value_from_list($field_labels, 'taskUser', 'Link Users') }}
                         </h5>
                         <ol>
                             @foreach ($record->user as $user)
                                 <li>{{ $user->getDisplayName() }}</li>
+                            @endforeach
+                        </ol>
+
+                        <h5>
+                            {{ get_value_from_list($field_labels, 'taskLead') }}
+                        </h5>
+                        <ol>
+                            @foreach ($record->lead as $lead)
+                                <li>{{ $lead->getDisplayName() }}</li>
+                            @endforeach
+                        </ol>
+
+                        <h5>
+                            {{ get_value_from_list($field_labels, 'taskCustomer') }}
+                        </h5>
+                        <ol>
+                            @foreach ($record->customer as $customer)
+                                <li>{{ $customer->getDisplayName() }}</li>
+                            @endforeach
+                        </ol>
+
+                        <h5>
+                            {{ get_value_from_list($field_labels, 'taskDealer') }}
+                        </h5>
+                        <ol>
+                            @foreach ($record->dealer as $dealer)
+                                <li>{{ $dealer->getDisplayName() }}</li>
+                            @endforeach
+                        </ol>
+
+                        <h5>
+                            {{ get_value_from_list($field_labels, 'taskParty') }}
+                        </h5>
+                        <ol>
+                            @foreach ($record->party as $party)
+                                <li>{{ $party->getDisplayName() }}</li>
                             @endforeach
                         </ol>
                     </div>
