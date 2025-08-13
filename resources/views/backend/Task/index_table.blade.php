@@ -99,7 +99,7 @@ $false = false;
                                     </label>
 
                                     <div class="row">
-                                        <div class="col-md-3">
+                                        <div class="col-md-2">
                                             <h5>
                                                 {{ get_value_from_list($field_labels, 'taskUser', 'Link Users') }}
                                             </h5>
@@ -118,9 +118,39 @@ $false = false;
                                             </label>
 
                                         </div>
-                                        <div class="col-md-3">
+                                        <div class="col-md-2">
                                             <h5>
-                                                {{ get_value_from_list($field_labels, 'taskParty', 'Link External') }}
+                                                {{ get_value_from_list($field_labels, 'taskLead') }}
+                                            </h5>
+                                            <ol>
+                                                @foreach ($record->lead as $lead)
+                                                <li>{{ $lead->getDisplayName() }}</li>
+                                                @endforeach
+                                            </ol>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <h5>
+                                                {{ get_value_from_list($field_labels, 'taskCustomer') }}
+                                            </h5>
+                                            <ol>
+                                                @foreach ($record->customer as $customer)
+                                                <li>{{ $customer->getDisplayName() }}</li>
+                                                @endforeach
+                                            </ol>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <h5>
+                                                {{ get_value_from_list($field_labels, 'taskDealer') }}
+                                            </h5>
+                                            <ol>
+                                                @foreach ($record->dealer as $dealer)
+                                                <li>{{ $dealer->getDisplayName() }}</li>
+                                                @endforeach
+                                            </ol>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <h5>
+                                                {{ get_value_from_list($field_labels, 'taskParty') }}
                                             </h5>
                                             <ol>
                                                 @foreach ($record->party as $party)

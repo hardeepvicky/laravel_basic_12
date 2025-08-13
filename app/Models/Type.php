@@ -55,6 +55,7 @@ class Type extends BaseModel
                     "task_type" => "Task Type",
                     "status" => "Status",
                     "duration_type" => "Duration Type",
+                    "contact_type" => "Contact Type",
                 ]
             ],
             RecurringTask::class => [

@@ -10,7 +10,10 @@ $false = false;
 
 @section('content')
     <?php
-    $page_header_links = [['title' => 'List', 'url' => route($routePrefix . '.index')]];
+    $page_header_links = [
+        ['title' => 'Edit', 'url' => route($routePrefix . '.edit', [$record])],
+        ['title' => 'List', 'url' => route($routePrefix . '.index')]
+    ];
     ?>
 
     @include($partial_path . '.page_header')

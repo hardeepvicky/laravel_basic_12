@@ -64,6 +64,11 @@ class Task extends BaseModel
     public const DURATION_TYPE_MONTH = "MONTH";
     public const DURATION_TYPE_YEAR = "YEAR";
 
+    public const CONTACT_TYPE_LEAD = "LEAD";
+    public const CONTACT_TYPE_CUSTOMER = "CUSTOMER";
+    public const CONTACT_TYPE_DEALER = "DEALER";
+    public const CONTACT_TYPE_PARTY = "PARTY";
+
     public function beforeSave()
     {
         if ($this->is_draft) {
@@ -87,29 +92,6 @@ class Task extends BaseModel
         parent::afterFind();
     }
 
-    public function setDefaultAttributes() {}
-
-    public function getUniqueValidationRules(Request $request)
-    {
-        return [];
-    }
-
-    public function getRequiedIfRules(Request $request)
-    {
-        $rules = [];
-
-        if (!$request->input("is_draft", false)) {
-            $rules["task_type"] = ["required"];
-            $rules["dept_id"] = ["required"];
-            $rules["assign_to_user_id"] = ["required"];
-            $rules["priority"] = ["required"];
-            $rules["start_date_time"] = ["required"];
-            $rules["duration_type"] = ["required"];
-            $rules["duration"] = ["required"];
-        }
-
-        return $rules;
-    }
 
     public function department()
     {
@@ -133,11 +115,6 @@ class Task extends BaseModel
         return $this->belongsToMany(User::class, TaskUser::class);
     }
 
-    public function party()
-    {
-        return $this->belongsToMany(Party::class, TaskParty::class);
-    }
-
     public function taskUser()
     {
         return $this->hasMany(TaskUser::class, 'task_id');
@@ -157,6 +134,41 @@ class Task extends BaseModel
     {
         return $this->hasMany(TaskParty::class, 'task_id');
     }
+
+    public function party()
+    {
+        return $this->belongsToMany(Party::class, TaskParty::class);
+    }
+
+    public function taskLead()
+    {
+        return $this->hasMany(TaskLead::class, 'task_id');
+    }
+
+    public function lead()
+    {
+        return $this->belongsToMany(Lead::class, TaskLead::class);
+    }
+
+    public function taskCustomer()
+    {
+        return $this->hasMany(TaskCustomer::class, 'task_id');
+    }
+
+    public function customer()
+    {
+        return $this->belongsToMany(Lead::class, TaskCustomer::class);
+    }
+
+    public function taskDealer()
+    {
+        return $this->hasMany(TaskDealer::class, 'task_id');
+    }
+
+    public function dealer()
+    {
+        return $this->belongsToMany(Dealer::class, TaskDealer::class);
+    }
     
     public function taskTakenAction()
     {
@@ -173,6 +185,30 @@ class Task extends BaseModel
         return $this->name;
     }
 
+    
+    public function setDefaultAttributes() {}
+
+    public function getUniqueValidationRules(Request $request)
+    {
+        return [];
+    }
+
+    public function getRequiedIfRules(Request $request)
+    {
+        $rules = [];
+
+        if (!$request->input("is_draft", false)) {
+            $rules["dept_id"] = ["required"];
+            $rules["assign_to_user_id"] = ["required"];
+            $rules["priority"] = ["required"];
+            $rules["start_date_time"] = ["required"];
+            $rules["duration_type"] = ["required"];
+            $rules["duration"] = ["required"];
+        }
+
+        return $rules;
+    }
+
     public function getFieldLabels()
     {
         $labels = parent::getFieldLabels();
@@ -182,7 +218,10 @@ class Task extends BaseModel
         $labels['to_start_date'] = "To Start Date";
         $labels['taskUser'] = "Link Users";
         $labels['taskFile'] = "Files";
-        $labels['taskParty'] = "Link External";
+        $labels['taskParty'] = "Link Party";
+        $labels['taskLead'] = "Link Lead";
+        $labels['taskCustomer'] = "Link Customer";
+        $labels['taskDealer'] = "Link Dealer";
 
         return $labels;
     }
@@ -485,6 +524,18 @@ class Task extends BaseModel
 
                 foreach ($class_info['constants'] as $constant => $label) {
                     if (strpos($constant, "DURATION_TYPE_") !== false) {
+                        $list[] = $label;
+                    }
+                }
+
+                return $list;
+                break;
+
+            case "contact_type":
+                $list = [];
+
+                foreach ($class_info['constants'] as $constant => $label) {
+                    if (strpos($constant, "CONTACT_TYPE_") !== false) {
                         $list[] = $label;
                     }
                 }

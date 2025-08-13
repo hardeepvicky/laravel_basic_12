@@ -8,10 +8,12 @@ use App\Helpers\DateUtility;
 use App\Helpers\FileUtility;
 use App\Helpers\LaravelExtend;
 use App\Helpers\Util;
+use App\Models\Dealer;
 use App\Models\Department;
 use App\Models\DocumentFile;
 use App\Models\DropDownValue;
 use App\Models\FieldSetting;
+use App\Models\Lead;
 use App\Models\Party;
 use App\Models\Role;
 use App\Models\SqlLog;
@@ -291,27 +293,80 @@ class TaskController extends BackendController
         $type_conditions = [
             'type' => Type::getType($this->model, "task_type")
         ];
+
+        if ($this->model->task_type)
+        {
+            $type_id_list = Type::getIdFromCode($this->model, $this->model->task_type);
+
+            if ($type_id_list)
+            {
+                $type_conditions['or_id'] = $type_id_list;
+            }
+        }
+
         $task_type_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
 
         $type_conditions = [
             'type' => Type::getType($this->model, "status")
         ];
+        if ($this->model->status)
+        {
+            $type_id_list = Type::getIdFromCode($this->model, $this->model->status);
+
+            if ($type_id_list)
+            {
+                $type_conditions['or_id'] = $type_id_list;
+            }
+        }
         $status_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
 
         $type_conditions = [
             'type' => Type::getType($this->model, "duration_type")
         ];
+        if ($this->model->duration_type)
+        {
+            $type_id_list = Type::getIdFromCode($this->model, $this->model->duration_type);
+
+            if ($type_id_list)
+            {
+                $type_conditions['or_id'] = $type_id_list;
+            }
+        }
         $duration_type_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
+
+        $type_conditions = [
+            'type' => Type::getType($this->model, "contact_type")
+        ];
+        if ($this->model->contact_type)
+        {
+            $type_id_list = Type::getIdFromCode($this->model, $this->model->contact_type);
+
+            if ($type_id_list)
+            {
+                $type_conditions['or_id'] = $type_id_list;
+            }
+        }
+        $contact_type_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
 
         $department_list = Department::getList("id", "display_name", [], "list_display_order");
 
         $party_list = Party::getList("id", "display_name", [], "list_display_order");
 
+        $lead_list = Lead::getList("id", "display_name", ["is_customer" => 0]);
+
+        $customer_list = Lead::getList("id", "display_name", ["is_customer" => 1]);
+
+        $dealer_list = Dealer::getList("id", "display_name", [], "list_display_order");
+
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
         $default_start_date_time = DateUtility::change(date('d-M-Y 10:00'), 1, DateUtility::DAYS, DateUtility::DATETIME_OUT_FORMAT);
 
-        $this->setForView(compact("user_list", "users", "task_type_list", "status_list",  "department_list", "duration_type_list", "party_list", "field_labels", "default_start_date_time"));
+        $this->setForView(compact(
+            "user_list", "users", "task_type_list", 
+            "status_list", "department_list", "duration_type_list", "party_list", "contact_type_list", "lead_list", "customer_list", "dealer_list",
+            "field_labels", "default_start_date_time"
+        ));
 
         return parent::beforeViewRender();
     }
@@ -346,11 +401,15 @@ class TaskController extends BackendController
             "start_date_time" => [],
             "end_date_time" => [],
             "priority" => [],
+            "contact_type" => "",
             "is_send_notification" => "",
             "tag_name" => [],
             "taskUser" => [],
             "taskFile" => [],
-            "taskParty" => [],
+            'taskParty' => [],
+            'taskLead' => [],
+            'taskCustomer' => [],
+            'taskDealer' => [],
         ];
     }
 
@@ -433,6 +492,7 @@ class TaskController extends BackendController
 
     private function _saveOthers($validatedData)
     {
+        // d($validatedData, true);
         if (isset($validatedData['taskUser']) && is_array($validatedData['taskUser'])) {
             $users = User::find($validatedData['taskUser']);
             $this->model->user()->sync($users);
@@ -441,6 +501,37 @@ class TaskController extends BackendController
         if (isset($validatedData['taskParty']) && is_array($validatedData['taskParty'])) {
             $parties = Party::find($validatedData['taskParty']);
             $this->model->party()->sync($parties);
+        }
+        else
+        {
+            $this->model->taskParty()->delete();
+        }
+
+        if (isset($validatedData['taskLead']) && is_array($validatedData['taskLead'])) {
+            $leads = Lead::find($validatedData['taskLead']);
+            $this->model->lead()->sync($leads);
+        }
+        else
+        {
+            $this->model->taskLead()->delete();
+        }
+
+        if (isset($validatedData['taskCustomer']) && is_array($validatedData['taskCustomer'])) {
+            $leads = Lead::find($validatedData['taskCustomer']);
+            $this->model->customer()->sync($leads);
+        }
+        else
+        {
+            $this->model->taskCustomer()->delete();
+        }
+
+        if (isset($validatedData['taskDealer']) && is_array($validatedData['taskDealer'])) {
+            $dealers = Lead::find($validatedData['taskDealer']);
+            $this->model->dealer()->sync($dealers);
+        }
+        else
+        {
+            $this->model->taskDealer()->delete();
         }
 
         if (isset($validatedData['taskFile'])) {

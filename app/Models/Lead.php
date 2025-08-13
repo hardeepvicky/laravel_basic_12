@@ -21,7 +21,7 @@ class Lead extends BaseModel
 
     protected static array $unique_fields = [];
 
-    protected static array $list_fields = ["id", "name"];
+    protected static array $list_fields = ["id", "name", "mobile"];
 
     public static array $child_model_class = [
         LeadAddress::class => [
@@ -81,6 +81,11 @@ class Lead extends BaseModel
     public function getDisplayName()
     {
         $name = $this->name;
+
+        if ($this->mobile)
+        {
+            $name .= " (M:" . $this->mobile . ")";
+        }
         
         return $name;
     }

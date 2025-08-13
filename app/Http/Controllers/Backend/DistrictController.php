@@ -6,6 +6,7 @@ use App\Exceptions\UserException;
 use App\Helpers\ImportUtility;
 use App\Helpers\LaravelExtend;
 use App\Helpers\Util;
+use App\Models\Country;
 use App\Models\District;
 use App\Models\FieldSetting;
 use App\Models\ImportLog;
@@ -323,7 +324,9 @@ class DistrictController extends BackendController
                     "District Update" => 0,
                 ];
 
-                $state_list = array_flip(Util::applyAll(State::getListCache("id", "name"), ["strtolower"]));
+                $my_country = Country::getMyCountry();
+
+                $state_list = array_flip(Util::applyAll(State::getList("id", "name", ["country_id" => $my_country->id]), ["strtolower"]));
                 
                 foreach($csv_records as $i => $record)
                 {

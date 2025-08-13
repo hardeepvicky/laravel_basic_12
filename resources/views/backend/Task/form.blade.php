@@ -148,6 +148,66 @@ $false = false;
                                 ?>
                                 <x-Inputs.choice :id="$field" :name="$field" :label="$label" :value="$value"
                                     class="choice " placeholder="Enter {{ $label }}" />
+                            </div>                            
+                            <div class="row is_draft-block is_draft-block-0">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <?php
+                                        $field = "contact_type";
+                                        $label = get_value_from_list($field_labels, $field, $field);
+                                        ?>
+                                        <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
+                                            :list="$contact_type_list" :value="$model->{$field}" class="select2"/>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3 contact_type-block contact_type-block_{{ Task::CONTACT_TYPE_PARTY }}">
+                                        <?php
+                                        $field = "taskParty";
+                                        $label = get_value_from_list($field_labels, $field, $field);
+                                        $value = implode(',', $model->taskParty?->pluck('party_id')->toArray());
+                                        ?>
+                                        <x-Inputs.drop-down name="taskParty[]" :label="$label" :list="$party_list" :value="$value"
+                                            class="select2" multiple="multiple"  />
+                                    </div>
+                                    <div class="form-group mb-3 contact_type-block contact_type-block_{{ Task::CONTACT_TYPE_LEAD }}">
+                                        <?php
+                                        $field = "taskLead";
+                                        $label = get_value_from_list($field_labels, $field, $field);
+                                        $value = implode(',', $model->taskLead?->pluck('lead_id')->toArray());
+                                        ?>
+                                        <x-Inputs.drop-down name="taskLead[]" :label="$label" :list="$lead_list" :value="$value"
+                                            class="select2" multiple="multiple"  />
+                                    </div>
+                                    <div class="form-group mb-3 contact_type-block contact_type-block_{{ Task::CONTACT_TYPE_CUSTOMER }}">
+                                        <?php
+                                        $field = "taskCustomer";
+                                        $label = get_value_from_list($field_labels, $field, $field);
+                                        $value = implode(',', $model->taskCustomer?->pluck('lead_id')->toArray());
+                                        ?>
+                                        <x-Inputs.drop-down name="taskCustomer[]" :label="$label" :list="$customer_list" :value="$value"
+                                            class="select2" multiple="multiple"  />
+                                    </div>
+                                    <div class="form-group mb-3 contact_type-block contact_type-block_{{ Task::CONTACT_TYPE_DEALER }}">
+                                        <?php
+                                        $field = "taskDealer";
+                                        $label = get_value_from_list($field_labels, $field, $field);
+                                        $value = implode(',', $model->taskDealer?->pluck('dealer_id')->toArray());
+                                        ?>
+                                        <x-Inputs.drop-down name="taskDealer[]" :label="$label" :list="$dealer_list" :value="$value"
+                                            class="select2" multiple="multiple"  />
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group mb-3 is_draft-block is_draft-block-0">
+                                <?php
+                                $field = "taskFile";
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                $value = implode(',', $model->taskFile?->pluck('document_file_id')->toArray());
+                                ?>
+                                <x-Inputs.text-field :id="$field" :name="$field" :label="$label" :value="$value" multiple="multiple"  />                        
+                                <span id="files-choose" class="btn btn-secondary">Choose Files</span>
                             </div>
                             <div class="form-group mb-3 is_draft-block is_draft-block-0">
                                 <?php
@@ -164,24 +224,6 @@ $false = false;
                                 ?>
                                 <x-Inputs.checkbox :id="$field" :name="$field" :label="$label"
                                     value="{{ $model->{$field} }}" />
-                            </div>
-                            <div class="form-group mb-3 is_draft-block is_draft-block-0">
-                                <?php
-                                $field = "taskParty";
-                                $label = get_value_from_list($field_labels, $field, $field);
-                                $value = implode(',', $model->taskParty?->pluck('party_id')->toArray());
-                                ?>
-                                <x-Inputs.drop-down name="taskParty[]" :label="$label" :list="$party_list" :value="$value"
-                                    class="select2" multiple="multiple"  />
-                            </div>
-                            <div class="form-group mb-3 is_draft-block is_draft-block-0">
-                                <?php
-                                $field = "taskFile";
-                                $label = get_value_from_list($field_labels, $field, $field);
-                                $value = implode(',', $model->taskFile?->pluck('document_file_id')->toArray());
-                                ?>
-                                <x-Inputs.text-field :id="$field" :name="$field" :label="$label" :value="$value" multiple="multiple"  />                        
-                                <span id="files-choose" class="btn btn-secondary">Choose Files</span>
                             </div>
                         </div>
                         <div class="col-md-12 col-xxl-6">
@@ -225,9 +267,37 @@ $false = false;
                         $(selector).show();
                         $(selector).find("input,select").removeAttr("disabled");
                     }
+
+                    var contact_type = $("#contact_type").val();
+
+                    var selector = ".contact_type-block";
+                    $(selector).hide();
+                    $(selector).find("input,select").attr("disabled", true);
+
+                    console.log("hide", selector);
+
+                    var selector = ".contact_type-block_any";
+
+                    if ($(selector).length > 0) {
+                        console.log("show", selector);
+                        $(selector).show();
+                        $(selector).find("input,select").removeAttr("disabled");
+                    }
+
+                    if (contact_type)
+                    {
+                        var selector = ".contact_type-block_" + contact_type;
+
+                        if ($(selector).length > 0) {
+                            console.log("show", selector);
+                            $(selector).show();
+                            $(selector).find("input,select").removeAttr("disabled");
+                        }
+                    }
                 }
 
                 $("#is_draft").change(show_hide_field);
+                $("#contact_type").change(show_hide_field);
 
                 start_date_picker = flatpickr("#start_date_time", {
                     enableTime: true,
