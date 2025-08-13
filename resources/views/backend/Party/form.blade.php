@@ -102,6 +102,9 @@
                             </div>
                             <div class="row">
                                 <div class="col-md-12">
+                                    <h4 class="b-b-info">
+                                        {{ get_value_from_list($field_labels, 'terms') }}
+                                    </h4>
                                     <table class="table table-bordered order-column template-table"
                                         data-sr-table-template-min-row="0">
                                         <thead>
@@ -112,7 +115,7 @@
                                                     </span>
                                                 </th>
                                                 <th style="width:80%">
-                                                    {{ get_value_from_list($term_field_labels, 'name') }}
+                                                    {{ get_value_from_list($field_labels, 'terms') }}
                                                 </th>
                                                 <th style="width:10%">
                                                     {{ get_value_from_list($term_field_labels, 'is_active') }}
