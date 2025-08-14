@@ -85,6 +85,14 @@
                                                 {{ $record->email }}
                                             </span>
                                         </label>
+
+                                        <label class="info">
+                                            {{ get_value_from_list($field_labels, 'gst_no') }} :
+                                            <span>
+                                                {{ $record->gst_no }}
+                                            </span>
+                                        </label>
+                                        
                                         <h4 class="mt-2 mb-2 b-b-info">
                                             Description
                                         </h4>
