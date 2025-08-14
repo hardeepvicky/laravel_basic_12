@@ -20,10 +20,13 @@
                             <?= sortable_anchor('id', get_value_from_list($field_labels, 'id', 'id')) ?>
                             | <?= sortable_anchor('name', get_value_from_list($field_labels, 'name', 'name')) ?>
                         </th>
+                        <th><?= sortable_anchor('state.name', get_value_from_list($field_labels, 'state_id', 'state_id')) ?></th>
+                        <th><?= sortable_anchor('distirct.name', get_value_from_list($field_labels, 'district_id', 'district_id')) ?></th>
+                        <th><?= sortable_anchor('city.name', get_value_from_list($field_labels, 'city_id', 'city_id')) ?></th>
+                        <th><?= sortable_anchor('company_name', get_value_from_list($field_labels, 'company_name', 'company_name')) ?></th>
                         <th><?= sortable_anchor('mobile', get_value_from_list($field_labels, 'mobile', 'mobile')) ?></th>
                         <th><?= sortable_anchor('mobile2', get_value_from_list($field_labels, 'mobile2', 'mobile2')) ?></th>
                         <th><?= sortable_anchor('phone_no', get_value_from_list($field_labels, 'phone_no', 'phone_no')) ?></th>
-                        <th><?= sortable_anchor('email', get_value_from_list($field_labels, 'email', 'email')) ?></th>
                         <th style="width:8%"><?= sortable_anchor('list_display_order', get_value_from_list($field_labels, 'list_display_order', 'list_display_order')) ?></th>
                         <th style="width:8%"><?= sortable_anchor('is_active', 'Activate / De-Active') ?></th>
                         <th style="width:8%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
@@ -40,10 +43,13 @@
                                     </div>
                                 </x-Backend.celec-summary-table-first-column>
                             </th>
+                            <td>{{ $record->state?->getDisplayName() }}</td>
+                            <td>{{ $record->district?->getDisplayName() }}</td>
+                            <td>{{ $record->city?->getDisplayName() }}</td>
+                            <td>{{ $record->company_name }}</td>
                             <td>{{ $record->mobile }}</td>
                             <td>{{ $record->mobile2 }}</td>
                             <td>{{ $record->phone_no }}</td>
-                            <td>{{ $record->email }}</td>
                             <td class="text-center">
                                 <a class="x-editable" href="javascript:void();"id="list_display_order" data-type="number"
                                     data-name="list_display_order"
@@ -68,6 +74,13 @@
                             <td colspan="10">
                                 <div class="row">
                                     <div class="col-md-6 col-xl-4">
+                                        <label class="info">
+                                            {{ get_value_from_list($field_labels, 'email') }} :
+                                            <span>
+                                                {{ $record->email }}
+                                            </span>
+                                        </label>
+
                                         <h4 class="mt-2 mb-2 b-b-info">
                                             Description
                                         </h4>
@@ -76,7 +89,7 @@
                                             {!! $record->description !!}
                                         </p>
                                     </div>
-                                    <div class="col-md-6 col-xl-4">
+                                    <div class="col-md-6 col-xl-8">
                                         <div class="card">
                                             <div class="card-header border-l-secondary card-no-border">
                                                 <h3>Terms</h3>

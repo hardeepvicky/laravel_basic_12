@@ -27,6 +27,7 @@
                         <th><?= sortable_anchor('state.name', get_value_from_list($field_labels, 'state_id', 'state_id')) ?></th>
                         <th><?= sortable_anchor('distirct.name', get_value_from_list($field_labels, 'district_id', 'district_id')) ?></th>
                         <th><?= sortable_anchor('city.name', get_value_from_list($field_labels, 'city_id', 'city_id')) ?></th>
+                        <th><?= sortable_anchor('company_name', get_value_from_list($field_labels, 'company_name', 'company_name')) ?></th>
                         <th><?= sortable_anchor('mobile', get_value_from_list($field_labels, 'mobile', 'mobile')) ?></th>
                         <th><?= sortable_anchor('mobile2', get_value_from_list($field_labels, 'mobile2', 'mobile2')) ?></th>
                         <th><?= sortable_anchor('phone_no', get_value_from_list($field_labels, 'phone_no', 'phone_no')) ?></th>
@@ -50,6 +51,7 @@
                             <td>{{ $record->state?->getDisplayName() }}</td>
                             <td>{{ $record->district?->getDisplayName() }}</td>
                             <td>{{ $record->city?->getDisplayName() }}</td>
+                            <td>{{ $record->company_name }}</td>
                             <td>{{ $record->mobile }}</td>
                             <td>{{ $record->mobile2 }}</td>
                             <td>{{ $record->phone_no }}</td>
@@ -74,9 +76,15 @@
                         </tr>
                         <tr id="record-{{ $record->id }}" class="hidden">
                             <td style="background-color: var(--body--bs-body-bg)"></td>                            
-                            <td colspan="10">
+                            <td colspan="11">
                                 <div class="row">
                                     <div class="col-md-6 col-xl-3">
+                                        <label class="info">
+                                            {{ get_value_from_list($field_labels, 'email') }} :
+                                            <span>
+                                                {{ $record->email }}
+                                            </span>
+                                        </label>
                                         <h4 class="mt-2 mb-2 b-b-info">
                                             Description
                                         </h4>

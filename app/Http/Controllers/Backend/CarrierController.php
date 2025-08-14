@@ -8,6 +8,7 @@ use App\Models\Carrier;
 use App\Models\CarrierTerm;
 use App\Models\DocumentFile;
 use App\Models\FieldSetting;
+use App\Models\State;
 use App\Rules\MobileNumber;
 use Illuminate\Http\Request;
 use Exception;
@@ -76,11 +77,13 @@ class CarrierController extends BackendController
 
     protected function beforeViewRender()
     {
+        $state_list = State::getIndianList();
+
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
         $term_field_labels = FieldSetting::getDynamicFields(CarrierTerm::class);
 
-        $this->setForView(compact("field_labels", "term_field_labels"));
+        $this->setForView(compact("state_list", "field_labels", "term_field_labels"));
 
         return parent::beforeViewRender();
     }
@@ -109,6 +112,11 @@ class CarrierController extends BackendController
             "mobile" => ["required", new MobileNumber],
             "mobile2" => ["nullable", new MobileNumber],
             "phone_no" => ["nullable"],
+            "company_name" => ["nullable"],
+            "state_id" => ["required"],
+            "district_id" => ["required"],
+            "city_id" => ["required"],
+            "address" => ["nullable"],
             "description" => ["nullable"],
             "terms" => [],
             "carrierFile" => [],
@@ -185,13 +193,15 @@ class CarrierController extends BackendController
 
             $validatedData['carrier_id'] = $this->model->id;
 
-            $rules = LaravelExtend::merge_validation_rules($rules, $child_model->getUniqueValidationRules($validatedData));
+            // $rules = LaravelExtend::merge_validation_rules($rules, $child_model->getUniqueValidationRules($validatedData));
 
             $display_order = 0;
 
             foreach($validatedData['terms'] as $term)
             {
-                $validator = Validator::make($term, $rules);
+                $validator = Validator::make($term, $rules, [
+                    "name.required" => "Term is required"
+                ]);
 
                 if ($validator->fails())
                 {

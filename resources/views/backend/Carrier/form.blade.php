@@ -49,6 +49,17 @@
                                             value="{{ $model->{$field} }}" class="validate-mobile"
                                             placeholder="Enter {{ $label }}" />
                                     </div>
+                                </div>                                
+                                <div class="col-lg-6">
+                                    <div class="form-group mb-3">
+                                        <?php
+                                        $field = 'email';
+                                        $label = get_value_from_list($field_labels, $field, $field);
+                                        ?>
+                                        <x-Inputs.text-field :name="$field" :label="$label"
+                                            value="{{ $model->{$field} }}" class="validate-email"
+                                            placeholder="Enter {{ $label }}" mandatory="true" />
+                                    </div>
                                 </div>
                                 <div class="col-lg-6">
                                     <div class="form-group mb-3">
@@ -64,37 +75,62 @@
                                 <div class="col-lg-6">
                                     <div class="form-group mb-3">
                                         <?php
-                                        $field = 'email';
+                                        $field = 'company_name';
                                         $label = get_value_from_list($field_labels, $field, $field);
                                         ?>
                                         <x-Inputs.text-field :name="$field" :label="$label"
-                                            value="{{ $model->{$field} }}" class="validate-email"
-                                            placeholder="Enter {{ $label }}" mandatory="true" />
+                                            value="{{ $model->{$field} }}" class="validate-phone"
+                                            placeholder="Enter {{ $label }}"  />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <div class="form-group mb-3">
+                                        <?php
+                                        $field = 'state_id';
+                                        $label = get_value_from_list($field_labels, $field, $field);
+                                        ?>
+                                        <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
+                                            :list="$state_list" value="{{ $model->{$field} }}"
+                                            class="select2 cascade-drop-down" data-sr-cascade-target="#district_id"
+                                            data-sr-cascade-url="/district/ajax_get_list/{v}" mandatory="true" />
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group mb-3">
+                                        <?php
+                                        $field = 'district_id';
+                                        $label = get_value_from_list($field_labels, $field, $field);
+                                        ?>
+                                        <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
+                                            :list="$empty_list" value="{{ $model->{$field} }}"
+                                            class="select2 cascade-drop-down" data-sr-cascade-target="#city_id"
+                                            data-sr-cascade-url="/city/ajax_get_list/0/{v}" mandatory="true" />
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group mb-3">
+                                        <?php
+                                        $field = 'city_id';
+                                        $label = get_value_from_list($field_labels, $field, $field);
+                                        ?>
+                                        <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
+                                            :list="$empty_list" value="{{ $model->{$field} }}" class="select2"
+                                            mandatory="true" />
                                     </div>
                                 </div>
                             </div>
 
                             <div class="form-group mb-3">
-                                <div class="textarea-wrapper">
-                                    <?php
-                                    $field = 'description';
-                                    $label = get_value_from_list($field_labels, $field, $field);
-                                    ?>
-                                    <x-Inputs.text-area :id="$field" :name="$field" :label="$label"
-                                        rows="3" value="{{ $model->{$field} }}"
-                                        placeholder="Enter {{ $label }}" class="auto-suggesstion-list" />
-                                    <div id="{{ $field . '-suggestion-box' }}" class="suggestion-box hidden"></div>
-                                </div>
-                            </div>
-                            <div class="form-group mb-3">
                                 <?php
-                                $field = 'carrierFile';
+                                $field = 'address';
                                 $label = get_value_from_list($field_labels, $field, $field);
-                                $value = implode(',', $model->carrierFile?->pluck('document_file_id')->toArray());
                                 ?>
-                                <x-Inputs.text-field :id="$field" :name="$field" :label="$label"
-                                    :value="$value" multiple="multiple" />
-                                <span id="files-choose" class="btn btn-secondary">Choose Files</span>
+                                <x-Inputs.text-field :name="$field" :label="$label"
+                                    value="{{ $model->{$field} }}"
+                                    placeholder="Enter {{ $label }}"  mandatory="true"/>
                             </div>
 
                             <div class="row">
@@ -218,6 +254,30 @@
                                     </table>
                                 </div>
                             </div>
+
+                            <div class="form-group mb-3">
+                                <div class="textarea-wrapper">
+                                    <?php
+                                    $field = 'description';
+                                    $label = get_value_from_list($field_labels, $field, $field);
+                                    ?>
+                                    <x-Inputs.text-area :id="$field" :name="$field" :label="$label"
+                                        rows="3" value="{{ $model->{$field} }}"
+                                        placeholder="Enter {{ $label }}" class="auto-suggesstion-list" />
+                                    <div id="{{ $field . '-suggestion-box' }}" class="suggestion-box hidden"></div>
+                                </div>
+                            </div>
+                            <div class="form-group mb-3">
+                                <?php
+                                $field = 'carrierFile';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                $value = implode(',', $model->carrierFile?->pluck('document_file_id')->toArray());
+                                ?>
+                                <x-Inputs.text-field :id="$field" :name="$field" :label="$label"
+                                    :value="$value" multiple="multiple" />
+                                <span id="files-choose" class="btn btn-secondary">Choose Files</span>
+                            </div>
+
                             <div class="row">
                                 <div class="col-xl-6">
                                     <div class="form-group mb-3">
@@ -272,6 +332,11 @@
             });
 
             $.events.execAtLast(function() {
+
+                $("#state_id").trigger("change", {
+                    pageLoad: true
+                });
+
                 var template_trs = $(".template-table").find("> tbody > tr").not(".sr-table-template-row");
                 template_trs.find(".will-required").attr("required", true);
 

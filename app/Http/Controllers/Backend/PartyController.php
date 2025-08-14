@@ -214,12 +214,16 @@ class PartyController extends BackendController
 
             $validatedData['party_id'] = $this->model->id;
 
-            $rules = LaravelExtend::merge_validation_rules($rules, $child_model->getUniqueValidationRules($validatedData));
+            // $rules = LaravelExtend::merge_validation_rules($rules, $child_model->getUniqueValidationRules($validatedData));
 
             $display_order = 0;
 
             foreach($validatedData['terms'] as $term)
             {
+                $validator = Validator::make($term, $rules, [
+                    "name.required" => "Term is required"
+                ]);
+
                 $display_order++;
                 if ($term['id'])
                 {

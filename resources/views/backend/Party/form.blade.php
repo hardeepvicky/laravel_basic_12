@@ -502,6 +502,12 @@
             $("#partyFile").browseGallery({
                 opener: "#files-choose"
             });
+
+            $.events.execAtLast(function() {
+                $("#state_id").trigger("change", {
+                    pageLoad: true
+                });
+            });
         })
     </script>
 @endsection

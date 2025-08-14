@@ -214,13 +214,15 @@ class DealerController extends BackendController
 
             $validatedData['dealer_id'] = $this->model->id;
 
-            $rules = LaravelExtend::merge_validation_rules($rules, $child_model->getUniqueValidationRules($validatedData));
+            // $rules = LaravelExtend::merge_validation_rules($rules, $child_model->getUniqueValidationRules($validatedData));
 
             $display_order = 0;
 
             foreach($validatedData['terms'] as $term)
             {
-                $validator = Validator::make($term, $rules);
+                $validator = Validator::make($term, $rules, [
+                    "name.required" => "Term is required"
+                ]);
 
                 if ($validator->fails())
                 {
