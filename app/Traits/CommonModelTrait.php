@@ -114,7 +114,7 @@ trait CommonModelTrait
         $conditions = [];
         foreach ($unique_fields as $unique_field) {
             if (!isset($data[$unique_field])) {
-                throw new UserException("field : $unique_field missing in argument data");
+                throw new UserException("getUniqueRecord() : field : $unique_field missing in argument data");
             }
 
             $conditions[] = [$unique_field, '=', $data[$unique_field]];
@@ -127,7 +127,7 @@ trait CommonModelTrait
         }
 
         if ($count > 1) {
-            throw new UserException("more than 1 records found");
+            throw new UserException("getUniqueRecord() : more than 1 records found");
         }
 
         $record = static::where($conditions)->first(["id"]);
@@ -171,7 +171,7 @@ trait CommonModelTrait
         }
 
         if (!is_scalar($group)) {
-            throw new UserException("group should be scaler value");
+            throw new UserException("addError() : group should be scaler value");
         }
 
         foreach ($messages as $msg) {
@@ -446,6 +446,11 @@ trait CommonModelTrait
     public function saveAutoTags()
     {
         if (!isset($this->field_for_create_tag) || empty($this->field_for_create_tag))
+        {
+            return;
+        }
+
+        if (!$this->id)
         {
             return;
         }

@@ -771,6 +771,12 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
             $name = "csv";
             Route::get($name, [$controllerClass, "export_" . $name])->name($name);
         });
+
+        $route_prefix = "import";
+        Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+            $name = "csv";
+            Route::any($name, [$controllerClass, "import_". $name])->name($name);
+        });
     });
 
     $route_prefix = "dealer";
@@ -797,6 +803,12 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
         Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
             $name = "csv";
             Route::get($name, [$controllerClass, "export_" . $name])->name($name);
+        });
+
+        $route_prefix = "import";
+        Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+            $name = "csv";
+            Route::any($name, [$controllerClass, "import_". $name])->name($name);
         });
     });
 

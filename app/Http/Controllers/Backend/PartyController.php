@@ -2,12 +2,19 @@
 
 namespace App\Http\Controllers\Backend;
 
+use App\Exceptions\UserException;
 use App\Helpers\CsvUtility;
 use App\Helpers\DateUtility;
 use App\Helpers\FileUtility;
+use App\Helpers\ImportUtility;
 use App\Helpers\LaravelExtend;
+use App\Helpers\Util;
+use App\Models\City;
+use App\Models\Country;
+use App\Models\District;
 use App\Models\DocumentFile;
 use App\Models\FieldSetting;
+use App\Models\ImportLog;
 use App\Models\Party;
 use App\Models\PartyAddress;
 use App\Models\PartyTerm;
@@ -19,6 +26,7 @@ use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
 
 class PartyController extends BackendController
@@ -453,6 +461,309 @@ class PartyController extends BackendController
 
         return $this->responseJson($response);
     }
+
+    public function import_csv(Request $request)
+    {
+        $sample = "samples/party.csv";
+
+        $this->setForView([
+            "sample" => "/" . $sample
+        ]);
+
+        $import_log_id = $request->get("import_log_id", false);
+        if ($import_log_id)
+        {
+            $importLogModel = ImportLog::find($import_log_id);
+        }
+
+        if (!isset($importLogModel))
+        {
+            $save = [
+                'type' => str_class_name_without_namespace($this->modelClass),
+                "status_info" => "Processing...."
+            ];
+
+            $importLogModel = ImportLog::create($save);
+            $import_log_id = $importLogModel->id;
+        }
+
+        $form = [
+            'url' => route($this->routePrefix . '.import.csv'),
+            'method' => 'POST',
+        ];
+
+        $this->setForView(compact("form", "import_log_id"));
+
+        if ($request->isMethod('POST'))
+        {
+            $import_log_id = "";
+
+            $this->setForView(compact("import_log_id"));
+
+            $rules = [
+                "file_csv" => [
+                    "required", 
+                    "file",
+                    "max:5200",
+                    "mimes:csv"
+                ],
+            ];
+
+            $request->validate($rules);
+
+            try
+            {
+                $start_seconds = microtime(true);
+
+                $this->beforeCsvImport();
+
+                $path = ImportLog::getStoragePath();
+
+                $filepath = $request->file('file_csv')->store($path, DEFAULT_DISK);
+
+                $full_file_path = ImportLog::getStorageDisk()->path($filepath);
+
+                $importUtility = new ImportUtility($sample, $full_file_path);
+
+                if (!$importUtility->checkHeaders())
+                {
+                    $this->setForView(array('errors' => $importUtility->errors));
+                    
+                    foreach($importUtility->errors as $error_msg)
+                    {
+                        LaravelExtend::addError("", $error_msg);
+                    }
+
+                    throw new UserException("CSV Column headers are mismatched", UserException::ERROR_USER_DATA_WRONG);
+                }
+
+                $headers = array(
+                    "Type" => "type",
+                    "Name" => "name",
+                    "Mobile" => "mobile",
+                    "Mobile2" => "mobile2",
+                    "Phone No" => "phone_no",
+                    "Email" => "email",
+                    "Company Name" => "company_name",
+                    "State" => "state_id",
+                    "District" => "district_id",
+                    "City" => "city_id",
+                    "Description" => "description",
+                    "Active" => "is_active",
+                    "List Display Order" => "list_display_order"
+                );
+
+                $header_flip = array_flip($headers);
+
+                $csv_records = $importUtility->replaceHeaders($headers);
+                //dd($csv_records); exit;
+
+                $total_count = count($csv_records);
+
+                $save = [
+                    'file' => $filepath,
+                    'total_count' => $total_count
+                ];
+
+                $importLogModel->fill($save);
+
+                $accept_count = 0;
+                $msg_list = [
+                    "Type Found" => 0,
+                    "State Found" => 0,
+                    "District Found" => 0,
+                    "City Found" => 0,
+                    "Dealer Insert" => 0,
+                    "Dealer Update" => 0,
+                ];
+
+                $my_country = Country::getMyCountry();
+
+                $state_list = array_flip(Util::applyAll(State::getList("id", "name", ["country_id" => $my_country->id]), ["strtolower"]));
+
+                $type_list = array_flip(Util::applyAll(Party::getTypeList(), ["strtolower"]));
+
+                foreach($csv_records as $i => $record)
+                {
+                    $record = Util::applyAll($record, array("trim"));
+                    $validate = true;
+
+                    $required_fields = ["type", "name", "mobile", "email", "state_id", "district_id", "city_id", "is_active", "list_display_order"];
+
+                    foreach($required_fields as $field)
+                    {
+                        if (!isset($record[$field]) || strlen($record[$field]) == 0)
+                        {
+                            LaravelExtend::addError($header_flip[$field], "Required", "Row #" . ($i + 2));
+                            $validate = false;
+                        }
+                    }
+
+                    $type_name = strtolower($record["type"]);
+                    if (isset($type_list[$type_name]))
+                    {
+                        $record['type'] = $type_list[$type_name];
+                        $msg_list['Type Found']++;
+                    }
+                    else
+                    {
+                        LaravelExtend::addError($header_flip['city_id'], $record['city_id'] . " is not found", "Row #" . ($i + 2));
+                        $validate = false;
+                    }
+
+                    $state_name = strtolower($record["state_id"]);
+                    if (isset($state_list[$state_name]))
+                    {
+                        $record['state_id'] = $state_list[$state_name];
+                        $msg_list['State Found']++;
+
+                        $district_name = strtolower($record["district_id"]);
+
+                        $district = District::where("state_id", $record['state_id'])->where("name", $district_name)->select(["id", "state_id"])->first();
+
+                        if ($district)
+                        {
+                            $record['district_id'] = $district->id;
+                            $msg_list['District Found']++;
+
+                            $city_name = strtolower($record["city_id"]);
+
+                            $city = City::where("state_id", $record['state_id'])
+                                            ->where("district_id", $record['district_id'])
+                                            ->where("name", $city_name)->select(["id", "district_id"])->first();
+
+                            if ($city)
+                            {
+                                $record['city_id'] = $district->id;
+                                $msg_list['City Found']++;
+                            }
+                            else
+                            {
+                                LaravelExtend::addError($header_flip['city_id'], $record['city_id'] . " is not found", "Row #" . ($i + 2));
+                                $validate = false;
+                            }
+                        }
+                        else
+                        {
+                            LaravelExtend::addError($header_flip['district_id'], $record['district_id'] . " is not found", "Row #" . ($i + 2));
+                            $validate = false;
+                        }
+                    }
+                    else
+                    {
+                        LaravelExtend::addError($header_flip['state_id'], $record['state_id'] . " is not found", "Row #" . ($i + 2));
+                        $validate = false;
+                    }
+                    
+                    if ($validate)
+                    {   
+                        $model = new $this->modelClass();
+
+                        $record['created_by'] = $record['updated_by'] = LaravelExtend::getAuthUserId();
+
+                        // d($record, true);
+
+                        $is_insert = $is_update = null;
+                        if ($model->insertOrUpdate($record, $is_insert, $is_update, true))
+                        {
+                            $accept_count++;
+
+                            if ($is_insert)
+                            {
+                                $msg_list['Dealer Insert']++;
+                            }
+                            else if ($is_update)
+                            {
+                                $msg_list['Dealer Update']++;
+                            }
+
+                            $percent = round(($i + 1) * 100 / $total_count, 1);
+
+                            $importLogModel->status_info = "Processing... $percent % " . ", Time Taken : " . Util::niceTime(microtime(true) - $start_seconds);
+                            $importLogModel->saveQuietly();
+                        }
+                        else
+                        {
+                            LaravelExtend::addError("", "Fail To Save", "Row #" . ($i + 2));
+                        }
+                    }
+                }
+
+                if (isset($model))
+                {
+                    $model->afterSave();
+                }
+
+                $sqlLogModel = LaravelExtend::saveSqlLog([
+                    "import_log_id" => $importLogModel->id
+                ]);
+
+                $importLogModel->sql_log_id = $sqlLogModel->id;
+                $importLogModel->accept_count = $accept_count;
+                $importLogModel->exec_time = microtime(true) - $start_seconds;
+
+                $text_list = [];
+                foreach($msg_list as $text => $count)
+                {
+                    $text_list[] = $text . " : " . $count;
+                }
+
+                $importLogModel->is_fully_run = true;
+
+                $msg = "Total Count : $total_count, Accept Count : $accept_count";
+                $msg .= ", " . implode(", ", $text_list);
+
+                if (LaravelExtend::$errors)
+                {
+                    throw new UserException("Unable to Save all records. " . $msg, UserException::ERROR_USER_DATA_WRONG);
+                }
+
+                $msg = "All File rows updated successfully. " . $msg;
+                $importLogModel->flash_msg = $msg;
+                $importLogModel->save();
+
+                Session::flash('success', $msg);
+            }
+            catch(UserException $ex)
+            {
+                $msg = $ex->getMessage();
+
+                if (isset($importLogModel))
+                {
+                    $importLogModel->flash_msg = $msg;
+                    $importLogModel->have_error = 1;
+
+                    if (LaravelExtend::$errors)
+                    {
+                        $importLogModel->errors = LaravelExtend::$errors;                    
+                    }
+
+                    $importLogModel->save();
+                }
+                
+                return back()->With("fail", $msg)->with("custom_errors", LaravelExtend::$errors);
+            }
+            
+            catch(\Exception $ex)
+            {
+                $msg = get_exception_display_message($ex);
+
+                if (isset($importLogModel))
+                {
+                    $importLogModel->flash_msg = $msg;
+                    $importLogModel->have_error = 1;
+                    $importLogModel->save();
+                }
+                
+                Session::flash('fail', $msg);  
+                
+                return back()->With("fail", $msg);
+            }
+        }
+
+        return $this->view(__FUNCTION__);
+    }
+
 
     public function export_csv()
     {
