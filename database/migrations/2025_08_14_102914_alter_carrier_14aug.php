@@ -13,11 +13,26 @@ return new class extends MyMigration
     public function up(): void
     {
         Schema::table('carriers', function (Blueprint $table) {
-            $table->foreignId("state_id")->after("name")->nullable()->constrained("states")->onDelete("restrict");
-            $table->foreignId("district_id")->after("state_id")->nullable()->constrained("districts")->onDelete("restrict");
-            $table->foreignId("city_id")->after("district_id")->nullable()->constrained("cities")->onDelete("restrict");
-            $table->string("company_name")->after("city_id")->nullable();
-            // $table->string("email")->after("phone_no")->nullable();
+            if (!Schema::hasColumn('carriers', 'state_id'))
+            {
+                $table->foreignId("state_id")->after("name")->nullable()->constrained("states")->onDelete("restrict");
+            }
+            if (!Schema::hasColumn('carriers', 'district_id'))
+            {
+                $table->foreignId("district_id")->after("state_id")->nullable()->constrained("districts")->onDelete("restrict");
+            }
+            if (!Schema::hasColumn('carriers', 'city_id'))
+            {
+                $table->foreignId("city_id")->after("district_id")->nullable()->constrained("cities")->onDelete("restrict");
+            }
+            if (!Schema::hasColumn('carriers', 'company_name'))
+            {
+                $table->string("company_name")->after("city_id")->nullable();
+            }
+            if (!Schema::hasColumn('carriers', 'email'))
+            {
+                $table->string("email")->after("phone_no")->nullable();
+            }
         });
     }
 
