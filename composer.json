@@ -21,6 +21,7 @@
         "mailjet/mailjet-apiv3-php": "^1.6",
         "mongodb/laravel-mongodb": "^5.4",
         "predis/predis": "^3.0",
+        "pusher/pusher-php-server": "^7.2",
         "twilio/sdk": "^8.6"
     },
     "require-dev": {

@@ -18,6 +18,7 @@ if (!isset($partial_path)) {
     <meta name="description" content="{{ $page_description ?? config('app.description') }}" />
     <meta name="description" content="{{ $page_author ?? config('app.author') }}" />
     <meta name="csrf-token" content="{{ csrf_token() }}" />
+    <meta name="user-id" content="{{ auth()->id() }}">
     <!-- App favicon -->
     <link rel="icon" href="{{ get_asset_url('assets/images/favicon.png') }}" type="image/x-icon" />
     <link rel="shortcut icon" href="{{ get_asset_url('assets/images/favicon.png') }}" type="image/x-icon" />
@@ -145,6 +146,7 @@ if (!isset($partial_path)) {
         <script src="{{ get_asset_url('libs/constants.js') }}"></script>
 
         <script src="{{ get_asset_url('libs/loader/loader.js') }}"></script>
+        <script src="{{ get_asset_url('libs/toast.js') }}"></script>
         <script src="{{ get_asset_url('libs/date-util.js') }}"></script>
         <script src="{{ get_asset_url('libs/jquery-input-validate.js') }}"></script>
         <script src="{{ get_asset_url('libs/jquery_extend.js') }}"></script>
@@ -195,6 +197,7 @@ if (!isset($partial_path)) {
     </div>
 
     <script>
+        var auth_user_id = '<?= LaravelExtend::getAuthUserId() ?>';
         $(function() {
 
             function after_modal_load(form_url, modal, prev_model_id) {

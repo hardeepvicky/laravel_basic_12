@@ -8,3 +8,5 @@ window.DarkEditable = DarkEditable;
 
 import Choices from 'choices.js';
 window.Choices = Choices;
+
+

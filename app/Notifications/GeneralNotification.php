@@ -2,8 +2,10 @@
 
 namespace App\Notifications;
 
+use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -28,7 +30,7 @@ class GeneralNotification extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return ['broadcast', 'database'];
     }
 
     /**
@@ -50,5 +52,10 @@ class GeneralNotification extends Notification implements ShouldQueue
     public function toArray(object $notifiable): array
     {
         return $this->notification_data;
+    }
+
+    public function toBroadcast($notifiable)
+    {
+        return new BroadcastMessage($this->notification_data);
     }
 }

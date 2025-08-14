@@ -1254,3 +1254,8 @@ Route::get("/test/external_drive/get", function () {
 Route::get('/phpinfo', function () {
     phpinfo();
 });
+
+Route::get('/test-broadcast', function () {
+    broadcast(new \App\Events\TestEvent("Hello from Laravel!"));
+    return "Event sent";
+});

@@ -8,6 +8,7 @@
     <meta content="Test Laravel" name="description" />
     <meta content="Hardeep" name="author" />
     <meta name="csrf-token" content="{{ csrf_token() }}" />
+    <meta name="user-id" content="{{ auth()->id() }}">
     <!-- App favicon -->
     <link rel="shortcut icon" href="/favicon.ico">
 
@@ -29,6 +30,8 @@
 
     <script src="{{ get_asset_url('assets/js/vendors/jquery/jquery.min.js') }}"></script>
     <script src="{{ get_asset_url('libs/events.js') }}"></script>
+
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
 <body>
