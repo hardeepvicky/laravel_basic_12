@@ -10,7 +10,6 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
-        "getbrevo/brevo-php": "1.x.x",
         "laravel/framework": "^12.0",
         "laravel/sanctum": "^4.0",
         "laravel/socialite": "^5.21",
@@ -21,8 +20,7 @@
         "mailjet/mailjet-apiv3-php": "^1.6",
         "mongodb/laravel-mongodb": "^5.4",
         "predis/predis": "^3.0",
-        "pusher/pusher-php-server": "^7.2",
-        "twilio/sdk": "^8.6"
+        "pusher/pusher-php-server": "^7.2"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.15",
