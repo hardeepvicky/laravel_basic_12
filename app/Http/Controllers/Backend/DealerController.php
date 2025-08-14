@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers\Backend;
 
+use App\Helpers\CsvUtility;
+use App\Helpers\DateUtility;
+use App\Helpers\FileUtility;
 use App\Helpers\LaravelExtend;
 use App\Models\Dealer;
 use App\Models\DealerAddress;
@@ -9,6 +12,8 @@ use App\Models\DealerTerm;
 use App\Models\DocumentFile;
 use App\Models\FieldSetting;
 use App\Models\State;
+use App\Models\Type;
+use App\Models\User;
 use App\Rules\MobileNumber;
 use Illuminate\Http\Request;
 use Exception;
@@ -29,6 +34,16 @@ class DealerController extends BackendController
         $cache_key_prefix = Route::currentRouteName();
 
         $builder = $this->_getBuildeForIndex($cache_key_prefix);
+
+        $builder->with([
+            "terms" => function($q){
+                $q->orderBy("list_display_order");
+            },
+            "address" => function($q){
+                $q->orderBy("list_display_order");
+            },
+            "documentFile"
+        ]);
 
         $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
 
@@ -55,13 +70,6 @@ class DealerController extends BackendController
 
         $builder->with([
             "state", "district", "city",
-            "terms" => function($q){
-                $q->orderBy("list_display_order");
-            },
-            "address" => function($q){
-                $q->orderBy("list_display_order");
-            },
-            "documentFile"
         ]);
 
         if ($apply_sort) {
@@ -125,15 +133,16 @@ class DealerController extends BackendController
             "mobile" => ["required", new MobileNumber],
             "mobile2" => ["nullable", new MobileNumber],
             "phone_no" => ["nullable"],
+            "company_name" => ["nullable"],
             "state_id" => ["required"],
             "district_id" => ["required"],
             "city_id" => ["required"],
             "description" => ["nullable"],
-            "list_display_order" => ["nullable"],
             "terms" => [],
             "dealerFile" => [],
             "addresses" => [],
-            "is_active" => ""
+            "is_active" => "",
+            "list_display_order" => ["nullable"],
         ];
     }
 
@@ -456,5 +465,80 @@ class DealerController extends BackendController
         }
 
         return $this->responseJson($response);
+    }
+
+    public function export_csv()
+    {
+        $cache_key_prefix = Route::currentRouteName();
+
+        $builder = $this->_getBuildeForIndex($cache_key_prefix);
+
+        $this->beforeCsvExport($builder);
+
+        $records = $builder->get();
+
+        foreach($records as $k => $record)
+        {
+            $record->afterFindForCsv();
+        }
+
+        $records = $records->toArray();
+
+        // d($records, true);
+
+        $csv_records = [];
+        $user_cache_list = User::getListCache();
+
+        $type_group_list = Type::getListOfModel($this->modelClass);
+
+        $type_list = Dealer::getTypeList();
+
+        $yes_no_list = laravel_constant('yes_no_list');
+
+        $field_labels = FieldSetting::getDynamicFields($this->modelClass);
+
+        foreach($records as $record)
+        {
+            $csv_records[] = [
+                'ID' => $record['id'],
+                $field_labels['name'] => $record['name'],
+                $field_labels['type'] => get_value_from_list($type_list, $record['type']),
+                $field_labels['mobile'] => $record['mobile'] ?? "",
+                $field_labels['mobile2'] => $record['mobile2'] ?? "",
+                $field_labels['phone_no'] => $record['phone_no'] ?? "",
+                $field_labels['email'] => $record['email'] ?? "",
+                $field_labels['company_name'] => $record['company_name'] ?? "",
+                $field_labels['state_id'] => $record['state']['name'] ?? "",
+                $field_labels['district_id'] => $record['district']['name'] ?? "",
+                $field_labels['city_id'] => $record['city']['name'] ?? "",
+                $field_labels['description'] => $record['description'] ?? "",
+
+                $field_labels['is_active'] => get_value_from_list($yes_no_list, $record['is_active']),
+                $field_labels['list_display_order'] => $record['list_display_order'] ?? "",
+
+                'Created' => if_date_time($record['created_at']),
+                'Created By' => $user_cache_list[$record['created_by']] ?? "",
+                'Updated' => if_date_time($record['updated_at']),
+                'Updated By' => $user_cache_list[$record['updated_by']] ?? "",
+            ];
+        }
+
+        // d($csv_records, true);
+
+        $this->saveSqlLog();
+
+        $path = laravel_constant('path.temp');
+        FileUtility::createFolder($path);
+
+        $current_dt = DateUtility::getDateObj(null);
+        $current_dt->setTimezone(DateUtility::$login_user_time_zone);
+        $datetime = DateUtility::getDate($current_dt, DateUtility::DATETIME_OUT_FORMAT_FILE);
+        $file_prefix = str_class_name_to_human_text($this->modelClass);
+        $file = $path . $file_prefix . "-$datetime.csv";
+
+        $csvUtility = new CsvUtility($file);
+        $csvUtility->write($csv_records);
+
+        download_start($file, "application/octet-stream");
     }
 }

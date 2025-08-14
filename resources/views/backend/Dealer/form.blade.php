@@ -69,6 +69,17 @@
                                             placeholder="Enter {{ $label }}" />
                                     </div>
                                 </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group mb-3">
+                                        <?php
+                                        $field = 'company_name';
+                                        $label = get_value_from_list($field_labels, $field, $field);
+                                        ?>
+                                        <x-Inputs.text-field :name="$field" :label="$label"
+                                            value="{{ $model->{$field} }}" class="validate-phone"
+                                            placeholder="Enter {{ $label }}" />
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="row">
@@ -294,29 +305,6 @@
                                 </div>
                             </div>
 
-                            <div class="form-group mb-3">
-                                <div class="textarea-wrapper">
-                                    <?php
-                                    $field = 'description';
-                                    $label = get_value_from_list($field_labels, $field, $field);
-                                    ?>
-                                    <x-Inputs.text-area :id="$field" :name="$field" :label="$label"
-                                        rows="3" value="{{ $model->{$field} }}"
-                                        placeholder="Enter {{ $label }}" class="auto-suggesstion-list" />
-                                    <div id="{{ $field . '-suggestion-box' }}" class="suggestion-box hidden"></div>
-                                </div>
-                            </div>
-                            <div class="form-group mb-3">
-                                <?php
-                                $field = 'dealerFile';
-                                $label = get_value_from_list($field_labels, $field, $field);
-                                $value = implode(',', $model->dealerFile?->pluck('document_file_id')->toArray());
-                                ?>
-                                <x-Inputs.text-field :id="$field" :name="$field" :label="$label"
-                                    :value="$value" multiple="multiple" />
-                                <span id="files-choose" class="btn btn-secondary">Choose Files</span>
-                            </div>
-
                             <div class="row">
                                 <div class="col-md-12">
                                     <h4 class="b-b-info">
@@ -437,6 +425,29 @@
                                         </tfoot>
                                     </table>
                                 </div>
+                            </div>
+                            
+                            <div class="form-group mb-3">
+                                <div class="textarea-wrapper">
+                                    <?php
+                                    $field = 'description';
+                                    $label = get_value_from_list($field_labels, $field, $field);
+                                    ?>
+                                    <x-Inputs.text-area :id="$field" :name="$field" :label="$label"
+                                        rows="3" value="{{ $model->{$field} }}"
+                                        placeholder="Enter {{ $label }}" class="auto-suggesstion-list" />
+                                    <div id="{{ $field . '-suggestion-box' }}" class="suggestion-box hidden"></div>
+                                </div>
+                            </div>
+                            <div class="form-group mb-3">
+                                <?php
+                                $field = 'dealerFile';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                $value = implode(',', $model->dealerFile?->pluck('document_file_id')->toArray());
+                                ?>
+                                <x-Inputs.text-field :id="$field" :name="$field" :label="$label"
+                                    :value="$value" multiple="multiple" />
+                                <span id="files-choose" class="btn btn-secondary">Choose Files</span>
                             </div>
                             <div class="row">
                                 <div class="col-xl-6">

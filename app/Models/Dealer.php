@@ -65,6 +65,11 @@ class Dealer extends BaseModel
         $this->parseTagsForModuleLinking();
     }
 
+    public function afterFindForCsv()
+    {
+        parent::afterFind();
+    }
+
     public function documentFile()
     {
         return $this->belongsToMany(DocumentFile::class, DealerFile::class);

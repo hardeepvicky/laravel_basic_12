@@ -2,16 +2,24 @@
 
 namespace App\Http\Controllers\Backend;
 
+use App\Helpers\CsvUtility;
+use App\Helpers\DateUtility;
+use App\Helpers\FileUtility;
 use App\Helpers\LaravelExtend;
 use App\Models\DocumentFile;
 use App\Models\FieldSetting;
 use App\Models\Party;
+use App\Models\PartyAddress;
 use App\Models\PartyTerm;
+use App\Models\State;
+use App\Models\Type;
+use App\Models\User;
 use App\Rules\MobileNumber;
 use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Validator;
 
 class PartyController extends BackendController
 {
@@ -27,7 +35,19 @@ class PartyController extends BackendController
 
         $builder = $this->_getBuildeForIndex($cache_key_prefix);
 
+        $builder->with([
+            "terms" => function($q){
+                $q->orderBy("list_display_order");
+            },
+            "address" => function($q){
+                $q->orderBy("list_display_order");
+            },
+            "documentFile"
+        ]);
+
         $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
+
+        // d($records->toArray(), true);
 
         $this->setForView(compact("records"));
 
@@ -43,17 +63,12 @@ class PartyController extends BackendController
             ["field" => "type", "type" => "string_equal"],
             ["field" => "name", "type" => "string"],
             ["field" => "mobile", "type" => "string"],
+            ["field" => "state_id", "type" => "int"],
+            ["field" => "district_id", "type" => "int"],
             ["field" => "is_active", "type" => "int"],
         ]);
 
         $builder = $this->modelClass::where($conditions);
-
-        $builder->with([
-            "terms" => function($q){
-                $q->orderBy("list_display_order");
-            },
-            "documentFile"
-        ]);
 
         if ($apply_sort) {
             $cache_key_for_sort = $cache_key_prefix . "-index-extra-params";
@@ -77,11 +92,17 @@ class PartyController extends BackendController
     {
         $type_list = Party::getTypeList();
 
+        $address_type_list = PartyAddress::getTypeList();
+
+        $state_list = State::getIndianList();
+
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
         $term_field_labels = FieldSetting::getDynamicFields(PartyTerm::class);
+
+        $address_field_labels = FieldSetting::getDynamicFields(PartyAddress::class);
         
-        $this->setForView(compact("type_list", "field_labels", "term_field_labels"));
+        $this->setForView(compact("type_list", "address_type_list", "state_list", "field_labels", "term_field_labels", "address_field_labels"));
 
         return parent::beforeViewRender();
     }
@@ -110,11 +131,16 @@ class PartyController extends BackendController
             "mobile" => ["required", new MobileNumber],
             "mobile2" => ["nullable", new MobileNumber],
             "phone_no" => ["nullable"],
+            "company_name" => ["nullable"],
+            "state_id" => ["required"],
+            "district_id" => ["required"],
+            "city_id" => ["required"],
             "description" => ["nullable"],
-            "list_display_order" => ["nullable"],
             "terms" => [],
             "partyFile" => [],
-            "is_active" => ""
+            "addresses" => [],
+            "is_active" => "",
+            "list_display_order" => "",
         ];
     }
 
@@ -233,6 +259,80 @@ class PartyController extends BackendController
                 }
             }
         }
+
+        unset($validatedData['addresses']['(sr-id)']);
+
+        if (isset($validatedData['addresses']))
+        {
+            $base_rules = [
+                "type" => ["required"],
+                "addr1" => ["required"],
+                "addr2" => ["nullable"],
+                "pincode" => ["required"],
+                "is_primary" => ""
+            ];
+
+            $child_model = new PartyAddress();
+
+            $existing_id_list = $this->model->address()->pluck("id", "id")->toArray();
+
+            $display_order = 0;
+
+            foreach($validatedData['addresses'] as $address)
+            {
+                $address['party_id'] = $this->model->id;
+                $rules = LaravelExtend::merge_validation_rules($base_rules, $child_model->getUniqueValidationRules($address));
+
+                $validator = Validator::make($address, $rules);
+
+                if ($validator->fails())
+                {
+                    foreach($validator->errors()->all() as $error_msg)
+                    {               
+                        LaravelExtend::addError("", $error_msg, "Addresses");
+                    }
+                    continue;
+                }
+
+                $display_order++;
+                if ($address['id'])
+                {
+                    $child_model = PartyAddress::find($address['id']);
+
+                    if (!$child_model)
+                    {
+                        $child_model = new PartyAddress();
+                    }
+                    else
+                    {
+                        unset($existing_id_list[$address['id']]);
+                    }
+                }
+                else
+                {
+                    $child_model = new PartyAddress();
+                }
+
+                $address['list_display_order'] = $display_order;
+
+                $child_model->fill($address);
+
+                $this->model->address()->save($child_model);
+            }
+
+            if ($existing_id_list)
+            {
+                $existing_records = $this->model->address()->where("id", $existing_id_list)->get();
+
+                foreach($existing_records as $existing_record)
+                {
+                    if (!$existing_record->safeDelete($existing_record))
+                    {
+                        LaravelExtend::addError($existing_record->name, "Can not delete, bcoz it is asscoicated with other modules.", "Term");
+                    }
+                }
+            }
+        }
     }
 
     public function edit($id)
@@ -240,7 +340,10 @@ class PartyController extends BackendController
         $this->model = $model = $this->modelClass::with([
             "terms" => function($q){
                 $q->orderBy("list_display_order");
-            }
+            },
+            "address" => function($q){
+                $q->orderBy("list_display_order");
+            },
         ])->findOrFail($id);
 
         $this->beforeEdit($model);
@@ -250,9 +353,7 @@ class PartyController extends BackendController
             'method' => 'PUT',
         ];
 
-        $terms = $this->model->terms?->toArray() ?? [];
-
-        $this->setForView(compact("model", "form", "terms"));
+        $this->setForView(compact("model", "form"));
 
         return $this->view("form");
     }
@@ -305,7 +406,10 @@ class PartyController extends BackendController
         $model = $this->modelClass::with([
             "terms" => function($q){
                 $q->orderBy("list_display_order");
-            }
+            },
+            "address" => function($q){
+                $q->orderBy("list_display_order");
+            },
         ])->indOrFail($id);
 
         $this->beforeEdit($model);
@@ -344,5 +448,80 @@ class PartyController extends BackendController
         }
 
         return $this->responseJson($response);
+    }
+
+    public function export_csv()
+    {
+        $cache_key_prefix = Route::currentRouteName();
+
+        $builder = $this->_getBuildeForIndex($cache_key_prefix);
+
+        $this->beforeCsvExport($builder);
+
+        $records = $builder->get();
+
+        foreach($records as $k => $record)
+        {
+            $record->afterFindForCsv();
+        }
+
+        $records = $records->toArray();
+
+        // d($records, true);
+
+        $csv_records = [];
+        $user_cache_list = User::getListCache();
+
+        $type_group_list = Type::getListOfModel($this->modelClass);
+
+        $type_list = Party::getTypeList();
+
+        $yes_no_list = laravel_constant('yes_no_list');
+
+        $field_labels = FieldSetting::getDynamicFields($this->modelClass);
+
+        foreach($records as $record)
+        {
+            $csv_records[] = [
+                'ID' => $record['id'],
+                $field_labels['name'] => $record['name'],
+                $field_labels['type'] => get_value_from_list($type_list, $record['type']),
+                $field_labels['mobile'] => $record['mobile'] ?? "",
+                $field_labels['mobile2'] => $record['mobile2'] ?? "",
+                $field_labels['phone_no'] => $record['phone_no'] ?? "",
+                $field_labels['email'] => $record['email'] ?? "",
+                $field_labels['company_name'] => $record['company_name'] ?? "",
+                $field_labels['state_id'] => $record['state']['name'] ?? "",
+                $field_labels['district_id'] => $record['district']['name'] ?? "",
+                $field_labels['city_id'] => $record['city']['name'] ?? "",
+                $field_labels['description'] => $record['description'] ?? "",
+
+                $field_labels['is_active'] => get_value_from_list($yes_no_list, $record['is_active']),
+                $field_labels['list_display_order'] => $record['list_display_order'] ?? "",
+
+                'Created' => if_date_time($record['created_at']),
+                'Created By' => $user_cache_list[$record['created_by']] ?? "",
+                'Updated' => if_date_time($record['updated_at']),
+                'Updated By' => $user_cache_list[$record['updated_by']] ?? "",
+            ];
+        }
+
+        // d($csv_records, true);
+
+        $this->saveSqlLog();
+
+        $path = laravel_constant('path.temp');
+        FileUtility::createFolder($path);
+
+        $current_dt = DateUtility::getDateObj(null);
+        $current_dt->setTimezone(DateUtility::$login_user_time_zone);
+        $datetime = DateUtility::getDate($current_dt, DateUtility::DATETIME_OUT_FORMAT_FILE);
+        $file_prefix = str_class_name_to_human_text($this->modelClass);
+        $file = $path . $file_prefix . "-$datetime.csv";
+
+        $csvUtility = new CsvUtility($file);
+        $csvUtility->write($csv_records);
+
+        download_start($file, "application/octet-stream");
     }
 }

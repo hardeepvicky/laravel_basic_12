@@ -4,6 +4,9 @@
     </div>
 
     <div class="card-body p-1">
+        <div class="m-2">
+            <a href="{{ route($routePrefix . '.export.csv') }}" class="btn btn-secondary">Export CSV</a>
+        </div>
         <div class="table-responsive">
             <table class="table table-bordered summary-table summary_table_with_search">
                 <thead>
@@ -22,7 +25,7 @@
                         </th>
                         <th><?= sortable_anchor('type', get_value_from_list($field_labels, 'type', 'type')) ?></th>
                         <th><?= sortable_anchor('state.name', get_value_from_list($field_labels, 'state_id', 'state_id')) ?></th>
-                        <th><?= sortable_anchor('distirct.name', get_value_from_list($field_labels, 'distirct_id', 'distirct_id')) ?></th>
+                        <th><?= sortable_anchor('distirct.name', get_value_from_list($field_labels, 'district_id', 'district_id')) ?></th>
                         <th><?= sortable_anchor('city.name', get_value_from_list($field_labels, 'city_id', 'city_id')) ?></th>
                         <th><?= sortable_anchor('mobile', get_value_from_list($field_labels, 'mobile', 'mobile')) ?></th>
                         <th><?= sortable_anchor('mobile2', get_value_from_list($field_labels, 'mobile2', 'mobile2')) ?></th>

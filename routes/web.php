@@ -769,7 +769,7 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
         $route_prefix = "export";
         Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
             $name = "csv";
-            Route::get($name, [$controllerClass, $name])->name($name);
+            Route::get($name, [$controllerClass, "export_" . $name])->name($name);
         });
     });
 
@@ -796,7 +796,7 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
         $route_prefix = "export";
         Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
             $name = "csv";
-            Route::get($name, [$controllerClass, $name])->name($name);
+            Route::get($name, [$controllerClass, "export_" . $name])->name($name);
         });
     });
 
@@ -1253,9 +1253,4 @@ Route::get("/test/external_drive/get", function () {
 
 Route::get('/phpinfo', function () {
     phpinfo();
-});
-
-Route::get('/test-broadcast', function () {
-    broadcast(new \App\Events\TestEvent("Hello from Laravel!"));
-    return "Event sent";
 });

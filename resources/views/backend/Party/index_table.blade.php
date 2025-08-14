@@ -21,10 +21,12 @@
                             | <?= sortable_anchor('name', get_value_from_list($field_labels, 'name', 'name')) ?>
                         </th>
                         <th><?= sortable_anchor('type', get_value_from_list($field_labels, 'type', 'type')) ?></th>
+                        <th><?= sortable_anchor('state.name', get_value_from_list($field_labels, 'state_id', 'state_id')) ?></th>
+                        <th><?= sortable_anchor('distirct.name', get_value_from_list($field_labels, 'district_id', 'district_id')) ?></th>
+                        <th><?= sortable_anchor('city.name', get_value_from_list($field_labels, 'city_id', 'city_id')) ?></th>
                         <th><?= sortable_anchor('mobile', get_value_from_list($field_labels, 'mobile', 'mobile')) ?></th>
                         <th><?= sortable_anchor('mobile2', get_value_from_list($field_labels, 'mobile2', 'mobile2')) ?></th>
                         <th><?= sortable_anchor('phone_no', get_value_from_list($field_labels, 'phone_no', 'phone_no')) ?></th>
-                        <th>Address</th>
                         <th style="width:10%"><?= sortable_anchor('list_display_order', get_value_from_list($field_labels, 'list_display_order', 'list_display_order')) ?></th>
                         <th style="width:10%"><?= sortable_anchor('is_active', 'Activate / De-Active') ?></th>
                         <th style="width:12%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
@@ -42,10 +44,12 @@
                                 </x-Backend.celec-summary-table-first-column>
                             </th>
                             <td>{{ get_value_from_list($type_list, $record->type) }}</td>
+                            <td>{{ $record->state?->getDisplayName() }}</td>
+                            <td>{{ $record->district?->getDisplayName() }}</td>
+                            <td>{{ $record->city?->getDisplayName() }}</td>
                             <td>{{ $record->mobile }}</td>
                             <td>{{ $record->mobile2 }}</td>
                             <td>{{ $record->phone_no }}</td>
-                            <td>{{ $record->address }}</td>
                             <td class="text-center">
                                 <a class="x-editable" href="javascript:void();"id="list_display_order" data-type="number"
                                     data-name="list_display_order"
@@ -67,7 +71,7 @@
                         </tr>
                         <tr id="record-{{ $record->id }}" class="hidden">
                             <td style="background-color: var(--body--bs-body-bg)"></td>                            
-                            <td colspan="8">
+                            <td colspan="10">
                                 <div class="row">
                                     <div class="col-md-6 col-xl-3">
                                         <h4 class="mt-2 mb-2 b-b-info">
@@ -106,6 +110,39 @@
                                         </div>     
                                     </div>
                                     <div class="col-md-6 col-xl-5">
+                                        <div class="card">
+                                            <div class="card-header border-l-secondary card-no-border">
+                                                <h3>Address</h3>
+                                            </div>
+                                            <div class="card-body">
+                                                <table class="table table-sm summary-table table-bordered">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Sr. No.</th>
+                                                            <th>{{ get_value_from_list($address_field_labels, 'type') }}</th>
+                                                            <th>{{ get_value_from_list($address_field_labels, 'addr1') }}</th>
+                                                            <th>{{ get_value_from_list($address_field_labels, 'addr2') }}</th>
+                                                            <th>{{ get_value_from_list($address_field_labels, 'pincode') }}</th>
+                                                            <th>{{ get_value_from_list($address_field_labels, 'is_primary') }}</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach ($record->address as $i => $address)
+                                                        <tr>
+                                                            <td>{{ $i + 1 }}</td>
+                                                            <td>{{ get_value_from_list($address_type_list, $address->type, $address->type) }}</td>
+                                                            <td>{{ $address->addr1 }}</td>
+                                                            <td>{{ $address->addr2 }}</td>
+                                                            <td>{{ $address->pincode }}</td>
+                                                            <td>{{ $address->is_primary ? "Primary" : "No" }}</td>
+                                                        </tr>
+                                                        @endforeach
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>                                          
+                                    </div>
+                                    <div class="col-md-12">
                                         <x-Backend.document-files :records="$record->documentFile" />
                                     </div>
                                 </div>

@@ -822,11 +822,7 @@ class ItemController extends BackendController
         $builder = $this->_getBuildeForIndex($cache_key_prefix);
 
         $this->beforeCsvExport($builder);
-
-        $builder->with([
-            "tags", "mainImage"
-        ]);
-
+        
         $builder->with([
             "tags",
             "color",

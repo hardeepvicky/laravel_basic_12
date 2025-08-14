@@ -44,6 +44,27 @@
                                 ?>
                                 <x-Inputs.text-field :name="$field" :label="$label" :value="$search[$field]" />
                             </div>
+                            <div class="col-md-4 col-lg-3 col-xxxl-2 mb-2">
+                                <?php
+                                $field = 'state_id';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$state_list"
+                                        :value="$search[$field]" class="select2 cascade-drop-down" 
+                                        data-sr-cascade-target="#district_id"
+                                        data-sr-cascade-url="/district/ajax_get_list/{v}" 
+                                        />
+                            </div>
+                            <div class="col-md-4 col-lg-3 col-xxxl-2 mb-2">
+                                <?php
+                                $field = 'district_id';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
+                                    :list="$empty_list" :value="$search[$field]"
+                                    class="select2" 
+                                />
+                            </div>
                             <div class="col-md-6 col-xxl-2 mb-2">
                                 <?php
                                 $field = 'is_active';
@@ -63,4 +84,13 @@
             </div>
         </div>
     </div>
+    <script>
+        $(function(){
+            $.events.execAtLast(function(){
+                $("#state_id").trigger("change", {
+                    pageLoad: true
+                });
+            });
+        })
+    </script>
 @endsection

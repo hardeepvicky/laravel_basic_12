@@ -70,6 +70,26 @@ class Party extends BaseModel
         return $this->hasMany(PartyTerm::class, 'party_id');
     }
 
+    public function address()
+    {
+        return $this->hasMany(PartyAddress::class, 'party_id');
+    }
+
+    public function state()
+    {
+        return $this->belongsTo(State::class);
+    }
+
+    public function district()
+    {
+        return $this->belongsTo(District::class);
+    }
+
+    public function city()
+    {
+        return $this->belongsTo(City::class);
+    }
+
     public function getUniqueValidationRules(Request $request)
     {
         $field_rules = [

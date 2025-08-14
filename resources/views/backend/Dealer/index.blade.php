@@ -31,6 +31,14 @@
                             </div>
                             <div class="col-md-4 col-lg-3 col-xxxl-2 mb-2">
                                 <?php
+                                $field = 'type';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <x-Inputs.drop-down :name="$field" :label="$label" :value="$search[$field]" :list="$type_list"
+                                    class="select2" />
+                            </div>
+                            <div class="col-md-4 col-lg-3 col-xxxl-2 mb-2">
+                                <?php
                                 $field = 'state_id';
                                 $label = get_value_from_list($field_labels, $field, $field);
                                 ?>
@@ -49,14 +57,6 @@
                                     :list="$empty_list" :value="$search[$field]"
                                     class="select2" 
                                 />
-                            </div>
-                            <div class="col-md-4 col-lg-3 col-xxxl-2 mb-2">
-                                <?php
-                                $field = 'type';
-                                $label = get_value_from_list($field_labels, $field, $field);
-                                ?>
-                                <x-Inputs.drop-down :name="$field" :label="$label" :value="$search[$field]" :list="$type_list"
-                                    class="select2" />
                             </div>
                             <div class="col-md-6 col-xxl-2 mb-2">
                                 <?php
