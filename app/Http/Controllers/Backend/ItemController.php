@@ -827,35 +827,38 @@ class ItemController extends BackendController
             "tags", "mainImage"
         ]);
 
+        $builder->with([
+            "tags",
+            "color",
+            "brand",
+            "mainImage",
+        ]);
+
         $records = $builder->get();
 
         foreach($records as $k => $record)
         {
             $record->afterFindForCsv();
+            $record->mainImage->afterFind();
         }
 
         $records = $records->toArray();
 
-        d($records, true);
+        // d($records, true);
 
         $csv_records = [];
         $user_cache_list = User::getListCache();
 
         $yes_no_list = laravel_constant('yes_no_list');
 
-        $type_list = Type::getListCache("code", "display_name");
+        $item_category_records = ItemCategory::getTreeRecords(ItemCategory::query());
+
+        $item_category_list = Util::getTreeListArray($item_category_records, "id", "name", false, false);
 
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
         foreach($records as $record)
         {
-            $user_list = [];
-
-            foreach($record['user'] as $user)
-            {
-                $user_list[] = $user['display_name'];
-            }
-
             $tag_list = [];
 
             foreach($record['tags'] as $tag)
@@ -865,30 +868,20 @@ class ItemController extends BackendController
 
             $csv_records[] = [
                 'ID' => $record['id'],
-
-                $field_labels['assign_to_user_id'] => $record['assign_to_user']['display_name'],
-                $field_labels['dept_id'] => $record['department']['display_name'],
-                $field_labels['task_type'] => get_value_from_list($type_list, $record['task_type']),
+                $field_labels['item_category_id'] => get_value_from_list($item_category_list, $record['item_category_id']),
                 $field_labels['name'] => $record['name'],
+                $field_labels['color_id'] => $record['color']['name'] ?? "",
+                $field_labels['brand_id'] => $record['brand']['name'] ?? "",
+                $field_labels['specification'] => $record['specification'] ?? "",
+                $field_labels['sku'] => $record['sku'] ?? "",
                 $field_labels['description'] => $record['description'] ?? "",
-                $field_labels['task_type'] => get_value_from_list($type_list, $record['task_type']),
-                $field_labels['start_date_time'] => if_date_time($record['start_date_time']),
-                $field_labels['duration'] => $record['duration'],
-                $field_labels['duration_type'] => get_value_from_list($type_list, $record['duration_type']),
-                $field_labels['end_date_time'] => if_date_time($record['end_date_time']),
-                $field_labels['priority'] => $record['priority'],
-                $field_labels['status'] => get_value_from_list($type_list, $record['status']),
-                $field_labels['is_draft'] => get_value_from_list($yes_no_list, $record['is_draft']),
-                $field_labels['is_completed'] => get_value_from_list($yes_no_list, $record['is_completed']),
-                $field_labels['complete_date_time'] => if_date_time($record['complete_date_time']),
-                $field_labels['complete_by'] => get_value_from_list($user_cache_list, $record['complete_by']),
-                $field_labels['is_verified'] => get_value_from_list($yes_no_list, $record['is_verified']),
-                $field_labels['verified_date_time'] => if_date_time($record['verified_date_time']),
-                $field_labels['verified_by'] => get_value_from_list($user_cache_list, $record['verified_by']),
-                $field_labels['rating'] => $record['rating'] ?? "",
-                $field_labels['review_remarks'] => $record['review_remarks'] ?? "",
-                $field_labels['taskUser'] => implode(", ", $user_list),
+                $field_labels['main_image_id'] => $record['main_image']['file_url'] ? url($record['main_image']['file_url']) : "",
+                'Main Image Name' => $record['main_image']['display_name'] ?? "",
+
                 $field_labels['tag_name'] => implode(", ", $tag_list),
+
+                $field_labels['is_active'] => get_value_from_list($yes_no_list, $record['is_active']),
+                $field_labels['list_display_order'] => $record['list_display_order'] ?? "",
 
                 'Created' => if_date_time($record['created_at']),
                 'Created By' => $user_cache_list[$record['created_by']] ?? "",
@@ -907,7 +900,8 @@ class ItemController extends BackendController
         $current_dt = DateUtility::getDateObj(null);
         $current_dt->setTimezone(DateUtility::$login_user_time_zone);
         $datetime = DateUtility::getDate($current_dt, DateUtility::DATETIME_OUT_FORMAT_FILE);
-        $file = $path . $this->tableName . "_$datetime.csv";
+        $file_prefix = str_class_name_to_human_text($this->modelClass);
+        $file = $path . $file_prefix . "-$datetime.csv";
 
         $csvUtility = new CsvUtility($file);
         $csvUtility->write($csv_records);

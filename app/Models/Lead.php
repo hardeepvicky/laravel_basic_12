@@ -105,6 +105,11 @@ class Lead extends BaseModel
         $this->parseTagsForModuleLinking();
     }
 
+    public function afterFindForCsv()
+    {
+        parent::afterFind();
+    }
+
     public function documentFile()
     {
         return $this->belongsToMany(DocumentFile::class, LeadFile::class);
@@ -272,6 +277,7 @@ class Lead extends BaseModel
             $this->save();
 
             $data['lead_id'] = $this->id;
+            $data['is_lead_transfered'] = 1;
             LeadHistory::create($data);
 
             $notification_data = [

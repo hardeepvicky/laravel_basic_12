@@ -444,16 +444,13 @@ class DistrictController extends BackendController
         return $this->view(__FUNCTION__);
     }
 
-    public function ajax_get_list($state_id = 0)
+    public function ajax_get_list($state_id)
     {
         $response = ["status" => 1];
 
-        $conditions = [];
-
-        if ($state_id)
-        {
-            $conditions[] = ["state_id", "=", $state_id];
-        }
+        $conditions = [
+            "state_id" => $state_id
+        ];
 
         $list = $this->modelClass::getList("id", "display_name", $conditions, "list_display_order");
 

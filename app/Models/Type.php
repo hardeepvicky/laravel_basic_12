@@ -232,4 +232,43 @@ class Type extends BaseModel
 
         return $records;
     }
+
+    public static function getRecordsOfModel($find_model_class)
+    {
+        $class_name = str_class_name_without_namespace($find_model_class);
+
+        return static::where("type", "like", $class_name . ".%")->get();
+    }
+
+    public static function getListOfModel($find_model_class, string $key_field = "code", string $value_field = "display_name") : array
+    {
+        $records = self::getRecordsOfModel($find_model_class);
+
+        $list = [];
+
+        foreach($records as $record)
+        {
+            if ($record->{$key_field})
+            {
+                $value = $record->{$value_field};
+                if ($value_field == "display_name")
+                {
+                    $value = $record->getDisplayName();
+                }
+
+                if (strpos($record->type, ".") >= 0)
+                {
+                    $field = substr($record->type, strpos($record->type, ".") + 1);
+
+                    $list[$field][$record->{$key_field}] = $value;
+                }
+                else
+                {
+                    $list[$record->{$key_field}] = $value;
+                }
+            }
+        }
+
+        return $list;
+    }
 }

@@ -804,6 +804,10 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
     $route_prefix = "lead";
     $controllerClass = LeadController::class;
     Route::resource($route_prefix, $controllerClass);
+
+    $name = "ajax_get_list";
+    Route::get($route_prefix . "-" . $name, [$controllerClass, $name])->name($name);
+
     Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
 
         $name = "copy";
@@ -814,9 +818,6 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
 
         $name = "de_activate";
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
-
-        $name = "ajax_get_list";
-        Route::get($name . "/{type}", [$controllerClass, $name])->name($name);
 
         $name = "ajax_update_field";
         Route::post($name, [$controllerClass, $name])->name($name);
@@ -845,7 +846,10 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
         $route_prefix = "export";
         Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
             $name = "csv";
-            Route::get($name, [$controllerClass, $name])->name($name);
+            Route::get($name, [$controllerClass, "export_" . $name])->name($name);
+
+            $name = "csv_history";
+            Route::get($name, [$controllerClass, "export_" . $name])->name($name);
         });
     });
 
@@ -890,7 +894,10 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
         $route_prefix = "export";
         Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
             $name = "csv";
-            Route::get($name, [$controllerClass, $name])->name($name);
+            Route::get($name, [$controllerClass, "export_" . $name])->name($name);
+
+            $name = "csv_history";
+            Route::get($name, [$controllerClass, "export_" . $name])->name($name);
         });
     });
 

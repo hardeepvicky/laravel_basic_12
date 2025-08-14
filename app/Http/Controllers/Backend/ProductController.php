@@ -631,8 +631,9 @@ class ProductController extends BackendController
                 $field_labels['meta_main_keyword'] => $record['meta_main_keyword'] ?? "",
                 $field_labels['product_catalog_id'] => $record['catalog']['document']['url'] ?? "",
 
-                'Active' => get_value_from_list($yes_no_list, $record['is_active']),
+                $field_labels['is_active'] => get_value_from_list($yes_no_list, $record['is_active']),
                 $field_labels['list_display_order'] => $record['list_display_order'] ?? "",
+                
                 'Created' => if_date_time($record['created_at']),
                 'Created By' => $user_cache_list[$record['created_by']] ?? "",
                 'Updated' => if_date_time($record['updated_at']),
@@ -650,7 +651,8 @@ class ProductController extends BackendController
         $current_dt = DateUtility::getDateObj(null);
         $current_dt->setTimezone(DateUtility::$login_user_time_zone);
         $datetime = DateUtility::getDate($current_dt, DateUtility::DATETIME_OUT_FORMAT_FILE);
-        $file = $path . $this->tableName . "_$datetime.csv";
+        $file_prefix = str_class_name_to_human_text($this->modelClass);
+        $file = $path . $file_prefix . "-$datetime.csv";
 
         $csvUtility = new CsvUtility($file);
         $csvUtility->write($csv_records);
@@ -728,7 +730,8 @@ class ProductController extends BackendController
         $current_dt = DateUtility::getDateObj(null);
         $current_dt->setTimezone(DateUtility::$login_user_time_zone);
         $datetime = DateUtility::getDate($current_dt, DateUtility::DATETIME_OUT_FORMAT_FILE);
-        $file = $path . $this->tableName . "_$datetime.csv";
+        $file_prefix = str_class_name_to_human_text(ProductCategoryAttribute::class);
+        $file = $path . $file_prefix . "-$datetime.csv";
 
         $csvUtility = new CsvUtility($file);
         $csvUtility->write($csv_records);

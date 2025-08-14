@@ -187,7 +187,7 @@ class TagsController extends BackendController
         }
         catch(Exception $ex)
         {
-            // Log::error($ex->getMessage());
+            Log::error($ex->getMessage());
             throw $ex;
         }
 

@@ -26,7 +26,7 @@ use App\Helpers\DateUtility;
         <div class="card-header card-no-border pb-0">
             History
 
-            <div class="btn btn-secondary call_link" data-bs-toggle="modal" data-bs-target="#modal-call-form">Call</div>
+            <a class="btn btn-secondary call_link" href="tel:+91{{ $record->mobile }}">Call</a>
             <div class="btn btn-secondary sms_link">SMS</div>
             <a class="btn btn-secondary whatsapp_link" href="https://web.whatsapp.com/" target="_blank" rel="noopener noreferrer">
                 Whatsapp
@@ -57,7 +57,7 @@ use App\Helpers\DateUtility;
                 <table class="table table-bordered summary-table">
                     <thead>
                         <tr class="border-bottom-primary">
-                            <th><?= get_value_from_list($history_field_labels, 'id', 'id') ?></th>
+                            <th>Sr. No.</th>
                             <th><?= get_value_from_list($history_field_labels, 'entry_by', 'entry_by') ?></th>
                             <th><?= get_value_from_list($history_field_labels, 'action_type', 'action_type') ?></th>
                             <th><?= get_value_from_list($history_field_labels, 'action', 'action') ?></th>
@@ -72,12 +72,12 @@ use App\Helpers\DateUtility;
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($record->history as $history)
+                        @foreach ($record->history as $i => $history)
                         <?php
                             $history->convertTimeZoneForDisplay();                            
                         ?>
                         <tr>
-                            <td>{{ $history->id }}</td>
+                            <td>{{ $i + 1 }}</td>
                             <td>{{ $history->entry_by }}</td>
                             <td>{{ get_value_from_list($action_type_list, $history->action_type) }}</td>
                             <td>
@@ -969,6 +969,17 @@ use App\Helpers\DateUtility;
 
                 modal.find(".modal-title").text("SMS");
                 modal.find(".action_type").val('{{ LeadHistory::ACTION_TYPE_SEND_SMS }}');
+
+                modal.modal("show");
+            });
+
+            $(".call_link").click(function(){
+                var modal = $("#modal-sms-whatsapp-email-form");
+
+                modal.find("form").find('input:text, textarea').val('');
+
+                modal.find(".modal-title").text("CALL");
+                modal.find(".action_type").val('{{ LeadHistory::ACTION_TYPE_CALL }}');
 
                 modal.modal("show");
             });

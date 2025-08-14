@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Exceptions\UserException;
+use App\Helpers\CsvUtility;
+use App\Helpers\DateUtility;
+use App\Helpers\FileUtility;
 use App\Helpers\LaravelExtend;
 use App\Models\Campaign;
 use App\Models\Carrier;
@@ -33,6 +36,7 @@ use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Notifications\Events\NotificationSent;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Validator;
 
@@ -49,6 +53,13 @@ class LeadController extends BackendController
         $cache_key_prefix = Route::currentRouteName();
 
         $builder = $this->_getBuildeForIndex($cache_key_prefix);
+
+        $builder->with([
+            "address" => function($q){
+                $q->orderBy("list_display_order");
+            },
+            "documentFile"
+        ]);
 
         $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
 
@@ -82,11 +93,7 @@ class LeadController extends BackendController
         $builder->where("is_customer", 0);
 
         $builder->with([
-            "state", "district", "city",
-            "address" => function($q){
-                $q->orderBy("list_display_order");
-            },
-            "documentFile"
+            "state", "district", "city", "dealer", "campaign", "assignTo"
         ]);
 
         if ($apply_sort) {
@@ -652,32 +659,6 @@ class LeadController extends BackendController
         $this->setForView(compact("model", "form", "addresses"));
 
         return $this->view("form");
-    }
-
-    public function ajax_get_list($type)
-    {
-        $response = ["status" => 1];
-
-        try {
-
-            $records = $this->modelClass::where("type", $type)->orderBy("list_display_order")->get();
-
-            $response['data'] = [];
-
-            foreach ($records as $record) {
-                $row = [
-                    "id" => $record->id,
-                    "name" => $record->getDisplayName(),
-                ];
-
-                $response['data'][] = $row;
-            }
-        } catch (Exception $ex) {
-            $response['status'] = 0;
-            $response['msg'] = $ex->getMessage();
-        }
-
-        return $this->responseJson($response);
     }
 
     public function history($lead_id, Request $request)
@@ -1297,52 +1278,38 @@ class LeadController extends BackendController
 
         $yes_no_list = laravel_constant('yes_no_list');
 
-        $type_list = Type::getListCache("code", "display_name");
+        $type_group_list = Type::getListOfModel(Lead::class);
+
+        $drop_down_list = DropDownValue::getListCache("id", "display_name");
 
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
         foreach($records as $record)
         {
-            $user_list = [];
-
-            foreach($record['user'] as $user)
-            {
-                $user_list[] = $user['display_name'];
-            }
-
-            $tag_list = [];
-
-            foreach($record['tags'] as $tag)
-            {
-                $tag_list[] = $tag['display_name'];
-            }
-
             $csv_records[] = [
                 'ID' => $record['id'],
-
-                $field_labels['assign_to_user_id'] => $record['assign_to_user']['display_name'],
-                $field_labels['dept_id'] => $record['department']['display_name'],
-                $field_labels['task_type'] => get_value_from_list($type_list, $record['task_type']),
                 $field_labels['name'] => $record['name'],
-                $field_labels['description'] => $record['description'] ?? "",
-                $field_labels['task_type'] => get_value_from_list($type_list, $record['task_type']),
-                $field_labels['start_date_time'] => if_date_time($record['start_date_time']),
-                $field_labels['duration'] => $record['duration'],
-                $field_labels['duration_type'] => get_value_from_list($type_list, $record['duration_type']),
-                $field_labels['end_date_time'] => if_date_time($record['end_date_time']),
-                $field_labels['priority'] => $record['priority'],
-                $field_labels['status'] => get_value_from_list($type_list, $record['status']),
-                $field_labels['is_draft'] => get_value_from_list($yes_no_list, $record['is_draft']),
-                $field_labels['is_completed'] => get_value_from_list($yes_no_list, $record['is_completed']),
-                $field_labels['complete_date_time'] => if_date_time($record['complete_date_time']),
-                $field_labels['complete_by'] => get_value_from_list($user_cache_list, $record['complete_by']),
-                $field_labels['is_verified'] => get_value_from_list($yes_no_list, $record['is_verified']),
-                $field_labels['verified_date_time'] => if_date_time($record['verified_date_time']),
-                $field_labels['verified_by'] => get_value_from_list($user_cache_list, $record['verified_by']),
-                $field_labels['rating'] => $record['rating'] ?? "",
-                $field_labels['review_remarks'] => $record['review_remarks'] ?? "",
-                $field_labels['taskUser'] => implode(", ", $user_list),
-                $field_labels['tag_name'] => implode(", ", $tag_list),
+                $field_labels['mobile'] => $record['mobile'],
+                $field_labels['mobile2'] => $record['mobile2'] ?? "",
+                $field_labels['email'] => $record['email'] ?? "",
+                $field_labels['status_type'] => get_value_from_list($type_group_list['status_type'], $record['status_type']),
+                $field_labels['assign_to_user_id'] => $record['assign_to']['display_name'] ?? "",
+                $field_labels['source_type'] => get_value_from_list($type_group_list['source_type'], $record['source_type']),
+                $field_labels['source_id'] => get_value_from_list($drop_down_list, $record['source_id']),
+                $field_labels['deal_type'] => get_value_from_list($type_group_list['deal_type'], $record['deal_type']),
+                $field_labels['dealer_id'] => $record['dealer']['name'] ?? "",
+                $field_labels['campaign_id'] => $record['campaign']['name'] ?? "",
+                $field_labels['state_id'] => $record['state']['name'] ?? "",
+                $field_labels['district_id'] => $record['district']['name'] ?? "",
+                $field_labels['city_id'] => $record['city']['name'] ?? "",
+                $field_labels['next_meeting_date_time'] => $record['next_meeting_date_time'] ? if_date_time($record['next_meeting_date_time']) : "",
+                $field_labels['company_name'] => $record['company_name'] ?? "",
+                $field_labels['brand_name'] => $record['brand_name'] ?? "",
+                $field_labels['company_gst_no'] => $record['company_gst_no'] ?? "",
+                $field_labels['remarks'] => $record['remarks'] ?? "",
+                $field_labels['purpose_price'] => $record['purpose_price'] ?? "",
+                $field_labels['payable_amount'] => $record['payable_amount'] ?? "",
+                $field_labels['payment_method_type'] => get_value_from_list($type_group_list['payment_method_type'], $record['payment_method_type']),
 
                 'Created' => if_date_time($record['created_at']),
                 'Created By' => $user_cache_list[$record['created_by']] ?? "",
@@ -1361,11 +1328,169 @@ class LeadController extends BackendController
         $current_dt = DateUtility::getDateObj(null);
         $current_dt->setTimezone(DateUtility::$login_user_time_zone);
         $datetime = DateUtility::getDate($current_dt, DateUtility::DATETIME_OUT_FORMAT_FILE);
-        $file = $path . $this->tableName . "_$datetime.csv";
+        $file_prefix = str_class_name_to_human_text($this->modelClass);
+        $file = $path . $file_prefix . "-$datetime.csv";
 
         $csvUtility = new CsvUtility($file);
         $csvUtility->write($csv_records);
 
         download_start($file, "application/octet-stream");
     }
+
+    public function export_csv_history()
+    {
+        $cache_key_prefix = Route::currentRouteName();
+
+        $builder = $this->_getBuildeForIndex($cache_key_prefix);
+
+        $builder->with(["history"]);
+
+        $this->beforeCsvExport($builder);
+
+        $records = $builder->get();
+
+        foreach($records as $k => $record)
+        {
+            $record->afterFindForCsv();
+        }
+
+        $records = $records->toArray();
+
+        // d($records, true);
+
+        $csv_records = [];
+        $user_cache_list = User::getListCache();
+
+        $yes_no_list = laravel_constant('yes_no_list');
+
+        $type_group_list = Type::getListOfModel(Lead::class);
+
+        $history_type_group_list = Type::getListOfModel(LeadHistory::class);
+
+        $drop_down_list = DropDownValue::getListCache("id", "display_name");
+
+        $field_labels = FieldSetting::getDynamicFields($this->modelClass);
+
+        $history_field_labels = FieldSetting::getDynamicFields(LeadHistory::class);
+
+        foreach($records as $record)
+        {
+            $base_row = [
+                'Lead ID' => $record['id'],
+                $field_labels['name'] => $record['name'],
+                $field_labels['mobile'] => $record['mobile'],
+                $field_labels['mobile2'] => $record['mobile2'] ?? "",
+                $field_labels['email'] => $record['email'] ?? "",
+            ];
+
+            foreach($record['history'] as $history)
+            {
+                $row = array_merge($base_row, [
+                    $history_field_labels['entry_by'] => $history['entry_by'],
+                    $history_field_labels['action_type'] => get_value_from_list($history_type_group_list['action_type'], $history['action_type']),
+                    $history_field_labels['action'] => $history['action'] ?? "",
+                    $history_field_labels['response_type_id'] => get_value_from_list($drop_down_list, $history['response_type_id']),
+                    $history_field_labels['response'] => $history['response'] ?? "",
+                    $history_field_labels['status_type'] => get_value_from_list($type_group_list['status_type'], $history['status_type']),
+                    $history_field_labels['remarks'] => $history['remarks'] ?? "",
+                    $history_field_labels['next_meeting_date_time'] => $history['next_meeting_date_time'] ? if_date_time($history['next_meeting_date_time']) : "",
+                    $history_field_labels['is_lead_transfered'] => get_value_from_list($yes_no_list, $history['is_lead_transfered']),
+                    $history_field_labels['assign_to_user_id'] => get_value_from_list($user_cache_list, $history['assign_to_user_id']),
+
+                    'Created' => if_date_time($history['created_at']),
+                    'Created By' => $user_cache_list[$history['created_by']] ?? "",
+                    'Updated' => if_date_time($history['updated_at']),
+                    'Updated By' => $user_cache_list[$history['updated_by']] ?? "",
+                ]);
+
+                $csv_records[] = $row;
+            }
+        }
+
+        // d($csv_records, true);
+
+        $this->saveSqlLog();
+
+        $path = laravel_constant('path.temp');
+        FileUtility::createFolder($path);
+
+        $current_dt = DateUtility::getDateObj(null);
+        $current_dt->setTimezone(DateUtility::$login_user_time_zone);
+        $datetime = DateUtility::getDate($current_dt, DateUtility::DATETIME_OUT_FORMAT_FILE);
+        $file_prefix = str_class_name_to_human_text(LeadHistory::class);
+        $file = $path . $file_prefix . "-$datetime.csv";
+
+        $csvUtility = new CsvUtility($file);
+        $csvUtility->write($csv_records);
+
+        download_start($file, "application/octet-stream");
+    }
+
+    
+    public function ajax_get_list(Request $request)
+    {
+        $response = ["status" => 1, "data" => []];
+
+        try
+        {
+            $search_term = $request->get("query");
+
+            if ($search_term && strlen(trim($search_term)) > 0)
+            {
+                $search_term = urldecode(trim($search_term));
+                
+                $records = $this->modelClass::
+                            where("mobile", 'LIKE', '%' . $search_term . '%')
+                            ->orWhere("mobile2", 'LIKE', '%' . $search_term . '%')
+                            ->orderBy("name", "ASC")
+                            ->limit(20)
+                            ->get();
+                 
+            }
+            else 
+            {
+                $limit = $request->get("limit");
+
+                if ($limit)
+                {
+                    $records = $this->modelClass::orderBy("name", "ASC")
+                                ->limit($limit)
+                                ->get();
+                }
+            }
+
+            if  (isset($records) && $records->count() > 0)
+            {
+                foreach($records as $record)
+                {
+                    $row = [];
+
+                    $row['display'] = $record->getDisplayName();
+
+                    $routePrefix = "lead";
+                    if ($record->is_customer)
+                    {   
+                        $row['display'] .= " (Customer)";
+                        $routePrefix = "customer";
+                    }
+                    else
+                    {
+                        $row['display'] .= " (Lead)";
+                    }
+
+                    $row['url'] = route($routePrefix . ".edit", [$record]);
+
+                    $response['data'][] = $row;
+                }
+            }    
+        }
+        catch(Exception $ex)
+        {
+            Log::error($ex->getMessage());
+            throw $ex;
+        }
+
+        return $this->responseJson($response);
+    }
 }
+

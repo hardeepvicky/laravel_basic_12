@@ -201,9 +201,9 @@ class StateController extends BackendController
     {
         $response = ["status" => 1];
 
-        $conditions = [];
-
-        $conditions[] = ["country_id", "=", $country_id];
+        $conditions = [
+            "country_id" => $country_id
+        ];
 
         $list = $this->modelClass::getList("id", "display_name", $conditions, "name");
 

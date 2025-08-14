@@ -29,15 +29,7 @@
                 </div>
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-md-12 col-xxl-6">
-                            <div class="form-group mb-3">
-                                <?php
-                                $field = 'name';
-                                $label = get_value_from_list($field_labels, $field, $field);
-                                ?>
-                                <x-Inputs.text-field :name="$field" :label="$label" value="{{ $model->{$field} }}"
-                                    placeholder="Enter {{ $label }}" mandatory="true" />
-                            </div>
+                        <div class="col-md-12 col-xxl-6">                            
                             <div class="row">
                                 <div class="col-lg-6">
                                     <div class="form-group mb-3">
@@ -45,9 +37,9 @@
                                         $field = 'mobile';
                                         $label = get_value_from_list($field_labels, $field, $field);
                                         ?>
-                                        <x-Inputs.text-field :name="$field" :label="$label"
+                                        <x-Inputs.text-field :id="$field" :name="$field" :label="$label"
                                             value="{{ $model->{$field} }}" class="validate-mobile"
-                                            placeholder="Enter {{ $label }}" mandatory="true" />
+                                            placeholder="Enter {{ $label }}" autocomplete="off" mandatory="true" />
                                     </div>
                                 </div>
                                 <div class="col-lg-6">
@@ -60,7 +52,17 @@
                                             value="{{ $model->{$field} }}" class="validate-mobile"
                                             placeholder="Enter {{ $label }}" />
                                     </div>
-                                </div>
+                                </div>                                
+                                <div class="col-lg-6">
+                                    <div class="form-group mb-3">
+                                        <?php
+                                        $field = 'name';
+                                        $label = get_value_from_list($field_labels, $field, $field);
+                                        ?>
+                                        <x-Inputs.text-field :name="$field" :label="$label" value="{{ $model->{$field} }}"
+                                            placeholder="Enter {{ $label }}" mandatory="true" />
+                                    </div>   
+                                </div>   
                                 <div class="col-lg-6">
                                     <div class="form-group mb-3">
                                         <?php
@@ -71,7 +73,7 @@
                                             value="{{ $model->{$field} }}" class="validate-email"
                                             placeholder="Enter {{ $label }}" />
                                     </div>
-                                </div>                                
+                                </div>                          
                             </div>
 
                             <div class="row">
@@ -622,6 +624,49 @@
                 default_data : district_cities
             }).trigger("change", {
                 pageLoad: true
+            });
+
+            var leadSearchEngine = new Bloodhound({
+                datumTokenizer: Bloodhound.tokenizers.whitespace,
+                queryTokenizer: Bloodhound.tokenizers.whitespace,
+                remote: {
+                    url: '/lead-ajax_get_list?query=%QUERY',
+                    wildcard: '%QUERY',
+                    transform: function(response) {
+                        var result = $.map(response['data'], function(item) {
+                            return item;
+                        });
+
+                        console.log(result)
+                        return result;
+                    }
+                },
+            });
+
+            $('#mobile').typeahead({
+                hint: true,
+                highlight: true,
+                minLength: 1
+            }, {
+                name: 'mobile',
+                display : 'display',
+                source: leadSearchEngine,
+                templates: {
+                    suggestion: function(data) {
+                        return `<div>
+                            <a href="${data.url}">
+                                <span> ${data.display}</span>
+                            </a>
+                        </div>
+                    `;
+                    }
+                }
+            }).bind('typeahead:select', function(ev, suggestion) {
+                if (typeof suggestion.url == "string")
+                {
+                    $.loader.init().setInfo("Redirecting....").show();
+                    window.location.href = suggestion.url;
+                }
             });
 
             $.events.execAtLast(function() {

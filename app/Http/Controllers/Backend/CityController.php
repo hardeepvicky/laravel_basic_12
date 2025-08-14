@@ -482,12 +482,12 @@ class CityController extends BackendController
 
         if ($state_id)
         {
-            $conditions[] = ["state_id", "=", $state_id];
+            $conditions["state_id"] = $state_id;
         }
 
         if ($district_id)
         {
-            $conditions[] = ["district_id", "=", $district_id];
+            $conditions["district_id"] = $district_id;
         }
 
         $list = $this->modelClass::getList("id", "display_name", $conditions, "list_display_order");

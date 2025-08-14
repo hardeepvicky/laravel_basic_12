@@ -4,6 +4,10 @@
     </div>
 
     <div class="card-body p-1">
+        <div class="m-2">
+            <a href="{{ route($routePrefix . ".export.csv") }}" class="btn btn-secondary">Export CSV</a>
+            <a href="{{ route($routePrefix . ".export.csv_history") }}" class="btn btn-secondary">Export History CSV</a>
+        </div>
         <div class="table-responsive">
             <table class="table table-bordered summary-table summary_table_with_search">
                 <thead>
