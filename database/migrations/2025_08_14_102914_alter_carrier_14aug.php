@@ -17,7 +17,7 @@ return new class extends MyMigration
             $table->foreignId("district_id")->after("state_id")->nullable()->constrained("districts")->onDelete("restrict");
             $table->foreignId("city_id")->after("district_id")->nullable()->constrained("cities")->onDelete("restrict");
             $table->string("company_name")->after("city_id")->nullable();
-            $table->string("email")->after("phone_no")->nullable();
+            // $table->string("email")->after("phone_no")->nullable();
         });
     }
 
