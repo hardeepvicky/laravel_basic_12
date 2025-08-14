@@ -76,8 +76,19 @@
                                         $label = get_value_from_list($field_labels, $field, $field);
                                         ?>
                                         <x-Inputs.text-field :name="$field" :label="$label"
-                                            value="{{ $model->{$field} }}" class="validate-phone"
+                                            value="{{ $model->{$field} }}"
                                             placeholder="Enter {{ $label }}" />
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group mb-3">
+                                        <?php
+                                        $field = 'gst_no';
+                                        $label = get_value_from_list($field_labels, $field, $field);
+                                        ?>
+                                        <x-Inputs.text-field :name="$field" :label="$label"
+                                            value="{{ $model->{$field} }}" 
+                                            placeholder="Enter {{ $label }}"  />
                                     </div>
                                 </div>
                             </div>
