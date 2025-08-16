@@ -859,8 +859,8 @@ use App\Helpers\DateUtility;
                 modal.find(".next-date-time-picker").flatpickr({
                     enableTime: true,        
                     minDate: "today",
-                    minTime: new Date().getHours() + ":" + new Date().getMinutes(),
-                    dateFormat: constants.dateTimeFormat
+                    dateFormat: constants.dateTimeFormat,
+                    time_24hr: true
                 });
 
                 modal.find(".template-table").srTableTemplate({

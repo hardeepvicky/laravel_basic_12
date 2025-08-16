@@ -37,6 +37,7 @@ $(document).ready(function () {
         noCalendar: true,
         enableTime: true,
         dateFormat: constants.timeFormat,
+        time_24hr: true
     });
 
     // flatpickr(".date-month-picker", {
