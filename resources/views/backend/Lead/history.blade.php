@@ -74,7 +74,7 @@ use App\Helpers\DateUtility;
                     <tbody>
                         @foreach ($record->history as $i => $history)
                         <?php
-                            $history->convertTimeZoneForDisplay();                            
+                            $history->afterFind();                            
                         ?>
                         <tr>
                             <td>{{ $i + 1 }}</td>
@@ -90,12 +90,12 @@ use App\Helpers\DateUtility;
                                 <div class="more-less-text">{{ $history->response }}</div>
                             </td>
                             <td>
-                                @if($record->recording_file_url)
+                                @if($history->recording_file_url)
                                 <?php 
-                                    $mime_type = get_mime_type_from_extension($record->recording_file);
+                                    $mime_type = get_mime_type_from_extension($history->recording_file);
                                 ?>
                                 <audio controls class="full-audio">
-                                    <source src="{{ $record->recording_file_url }}" type="{{ $mime_type }}">
+                                    <source src="{{ $history->recording_file_url }}" type="{{ $mime_type }}">
                                     Your browser does not support the audio element.
                                 </audio>
                                 @endif
@@ -198,7 +198,7 @@ use App\Helpers\DateUtility;
                     <h3 class="modal-title fs-5">Tranfer To Another User</h3>
                     <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body" style="height: 80vh; overflow-y:scroll">
+                <div class="modal-body" style="height: 40vh; overflow-y:scroll">
                     <x-form.start action="{{ route('lead.transfer_lead', ['lead_id' => $record->id]) }}" method="POST" />
                         <x-Inputs.text-field type="hidden" name="entry_by" :label="$false" value="MANUAL" />
                         <x-Inputs.text-field type="hidden" name="action_type" :label="$false" value="{{ LeadHistory::ACTION_TYPE_LEAD_TRANSFER }}" />
@@ -210,6 +210,36 @@ use App\Helpers\DateUtility;
                             <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
                                 :list="$user_list" class="modal-select2"
                                 mandatory="true" />
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary closed" type="button" data-bs-dismiss="modal">Close</button>
+                    <button class="btn btn-primary submit" type="button">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal-snooze-form" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title fs-5">Snooze</h3>
+                    <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="height: 40vh; overflow-y:scroll">
+                    <x-form.start action="{{ route('lead.snooze', ['lead_id' => $record->id]) }}" method="POST" />
+                        <div class="form-group mb-3">
+                            <?php
+                            $field = 'snooze_minute';
+                            $label = get_value_from_list($field_labels, $field, $field);
+                            ?>
+                            <x-Inputs.group-text-field :name="$field" :label="$label"
+                                class="validate-int"
+                                placeholder="Enter {{ $label }}"
+                                secondaryText='<span class="input-group-text">Minutes</span>'
+                                secondaryTextPosition="last" mandatory="true" />
                         </div>
                     </form>
                 </div>
@@ -960,6 +990,12 @@ use App\Helpers\DateUtility;
 
             $('#modal-dispatch-form .submit').click(function() {
                 $('#modal-dispatch-form form').trigger("submit");
+            });
+
+            modal_form_init($("#modal-snooze-form"));
+
+            $('#modal-snooze-form .submit').click(function() {
+                $('#modal-snooze-form form').trigger("submit");
             });
 
             $(".sms_link").click(function(){

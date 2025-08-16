@@ -129,4 +129,6 @@ return [
     'EMAIL_FROM' => env("EMAIL_FROM", false),
     'EMAIL_NAME' => env("EMAIL_NAME", false),
     'DEVELOPER_TEAM_EMAIL' => env("DEVELOPER_TEAM_EMAIL", false),
+
+    'ASTERISK_SERVER_URL' => env('ASTERISK_SERVER_URL', 'http://localhost/asterisk_file_download/get_audio_file.php'),
 ];

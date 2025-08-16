@@ -678,8 +678,6 @@ class LeadController extends BackendController
 
         $record->convertTimeZoneForDisplay();
 
-        // d($record->toArray(), true);
-
         $form = [
             'url' => route($this->routePrefix . '.history_store', $lead_id),
             'method' => 'POST',
@@ -769,6 +767,33 @@ class LeadController extends BackendController
             if ($validatedData['next_meeting_date_time'])
             {
                 $lead->changeNextFollowupDateTime($validatedData['next_meeting_date_time']);
+            }
+
+            if ($validatedData['action_type'] == LeadHistory::ACTION_TYPE_CALL && $lead->assignTo?->name)
+            {
+                $voip_no = $lead->assignTo->name;
+                if (!is_numeric($voip_no))
+                {
+                    $msg = "User " . $lead->assignTo->getDisplayName() . " has name : $voip_no, but only numeric is used for voip call";
+                    throw new UserException($msg, UserException::ERROR_USER_DATA_WRONG);
+                }
+
+                $url = config("app.ASTERISK_SERVER_URL") . "?voip_no=" . $voip_no;
+
+                $storage_path = Lead::getStoragePath() . "asterisk/" . $voip_no;
+
+                $disk = Lead::getStorageDisk();
+
+                $full_path = $disk->path($storage_path);
+
+                $current_dt = DateUtility::getDateObj(null);
+                $current_dt->setTimezone(DateUtility::$login_user_time_zone);
+                $datetime = DateUtility::getDate($current_dt, DateUtility::DATETIME_OUT_FORMAT_FILE);
+
+                get_and_save_file_from_url($url, $full_path . "/" . $datetime . ".wav");
+
+                $model->recording_file = $storage_path . "/" . $datetime . ".wav";
+                $model->save();
             }
 
             if (LaravelExtend::$errors) {
@@ -1252,6 +1277,76 @@ class LeadController extends BackendController
         $lead->save();
 
         return redirect()->route("customer.index")->with('success', "Convert to Customer Successfully");
+    }
+
+    public function snooze($lead_id, Request $request)
+    {
+        $lead = $this->modelClass::findOrFail($lead_id);
+
+        $rules = [
+            "snooze_minute" => ["required", "integer", "min:5", "max:120"],
+        ];
+
+        $validatedData = $request->validate($rules);
+
+        DB::beginTransaction();
+
+        try {
+
+            $lead->is_snooze = true;
+            $lead->snooze_minute = $validatedData['snooze_minute'];
+            $lead->snooze_datetime = DateUtility::change(null, $lead->snooze_minute, DateUtility::MINTUES, DateUtility::DATETIME_FORMAT);
+
+            $lead->save();
+
+            DB::commit();
+
+            $request = request();
+
+            if ($request->ajax()) {
+                return $this->responseJson([
+                    'status' => 1,
+                ]);
+            }
+
+            $this->saveSqlLog();
+
+            return back()->with('success', "Snoozed successfully");
+        } 
+        catch (UserException $ex) {
+            DB::rollBack();
+
+            $request = request();
+
+            if ($request->ajax()) {
+                return $this->responseJson([
+                    'status' => 0,
+                    'msg' => $ex->getMessage(),
+                    "custom_errors" => LaravelExtend::$errors
+                ]);
+            }
+
+            $this->saveSqlLog();
+
+            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", LaravelExtend::$errors);
+        }
+        catch (Exception $ex) {
+            DB::rollBack();
+
+            $request = request();
+
+            if ($request->ajax()) {
+                return $this->responseJson([
+                    'status' => 0,
+                    'msg' => get_exception_display_message($ex),
+                    "custom_errors" => LaravelExtend::$errors
+                ]);
+            }
+
+            $this->saveSqlLog();
+
+            return back()->withInput()->with('fail', get_exception_display_message($ex))->with("custom_errors", LaravelExtend::$errors);
+        }
     }
 
     public function export_csv()

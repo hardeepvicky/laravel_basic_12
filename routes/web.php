@@ -854,6 +854,9 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
         $name = "dispatch";
         Route::post($name . "/{lead_id}", [$controllerClass, $name])->name($name);
 
+        $name = "snooze";
+        Route::post($name . "/{lead_id}", [$controllerClass, $name])->name($name);
+
         $name = "convert_to_customer";
         Route::get($name . "/{lead_id}", [$controllerClass, $name])->name($name);
 

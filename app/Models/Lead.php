@@ -17,6 +17,7 @@ class Lead extends BaseModel
 
     protected $casts = [
         'next_meeting_date_time' => 'datetime',
+        'snooze_datetime' => 'datetime',
     ];
 
     protected static array $unique_fields = [];

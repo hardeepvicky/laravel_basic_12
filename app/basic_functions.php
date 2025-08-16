@@ -1227,3 +1227,18 @@ function check_internet_connection($host = 'www.google.com', $port = 80, $timeou
         return false;
     }
 }
+
+function get_and_save_file_from_url($url, $savePath)
+{
+    if (!is_dir(dirname($savePath))) {
+        mkdir(dirname($savePath), 0777, true);
+    }
+
+    $fileContent = file_get_contents($url);
+
+    if ($fileContent === false) {
+        throw new UserException("Failed to download from: $url");
+    }
+
+    file_put_contents($savePath, $fileContent);
+}
