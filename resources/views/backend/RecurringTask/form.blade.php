@@ -323,6 +323,7 @@ $false = false;
 
                 start_date_picker = flatpickr("#start_date_time", {
                     enableTime: true,
+                    time_24hr: true,
                     dateFormat: constants.dateTimeFormat,
                     onChange: function(selectedDates, dateStr, instance) {
                         const selectedDate = selectedDates[0];
