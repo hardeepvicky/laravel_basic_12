@@ -348,7 +348,14 @@ class TaskController extends BackendController
         }
         $contact_type_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
 
-        $department_list = Department::getList("id", "display_name", [], "list_display_order");
+        $dept_conditions = [];
+
+        if ($this->model->dept_id)
+        {
+            $dept_conditions["or_id"] = $this->model->dept_id;
+        }
+
+        $department_list = Department::getList("id", "display_name", $dept_conditions, "list_display_order");
 
         $party_list = Party::getList("id", "display_name", [], "list_display_order");
 

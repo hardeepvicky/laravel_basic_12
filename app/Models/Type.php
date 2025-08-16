@@ -97,6 +97,11 @@ class Type extends BaseModel
                     "status_type" => "Status",
                 ]
             ],
+            Branch::class => [
+                "fields" => [
+                    "type" => "Type",
+                ]
+            ],
         ];
 
         return $types;
