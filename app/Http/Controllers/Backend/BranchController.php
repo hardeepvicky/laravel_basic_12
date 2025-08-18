@@ -55,6 +55,7 @@ class BranchController extends BackendController
             ["field" => "state_id", "type" => "int"],
             ["field" => "city_id", "type" => "int"],
             ["field" => "mobile", "type" => "string"],
+            ["field" => "phone_no", "type" => "string"],
             ["field" => "is_active", "type" => "int"],
         ]);
 
@@ -62,6 +63,7 @@ class BranchController extends BackendController
         $condition_list = $array_helper->convertModelSearchConditionToList();
 
         $builder = $this->modelClass::where($conditions);
+        $builder->with(["state", "district", "city"]);
 
         if ($apply_sort) {
             $cache_key_for_sort = $cache_key_prefix . "-index-extra-params";

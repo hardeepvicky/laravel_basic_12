@@ -85,6 +85,16 @@ class State extends BaseModel
         return $name;
     }
 
+    public function getShortName()
+    {
+        if ($this->short_name)
+        {
+            return $this->short_name;
+        }
+        
+        return $this->name;
+    }
+
     public function getUniqueValidationRules(Request $request)
     {
         $field_rules = [

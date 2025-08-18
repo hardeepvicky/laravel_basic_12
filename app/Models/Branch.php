@@ -53,9 +53,19 @@ class Branch extends BaseModel
         parent::afterFind();
     }
 
-    public function company()
+    public function state()
     {
-        return $this->belongsTo(Company::class);
+        return $this->belongsTo(State::class);
+    }
+
+    public function district()
+    {
+        return $this->belongsTo(District::class);
+    }
+
+    public function city()
+    {
+        return $this->belongsTo(City::class);
     }
 
     public function getUniqueValidationRules(Request $request)

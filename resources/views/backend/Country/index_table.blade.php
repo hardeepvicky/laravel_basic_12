@@ -9,8 +9,21 @@
                 <thead>
                     <tr>
                         <th>
+                            <span class="btn btn-light text-dark border-primary clear_search_conditions mb-1">Clear</span>
                             <?php
                             $field = "name";
+                            ?>
+                            <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]"/>
+                        </th>                        
+                        <th>
+                            <?php
+                            $field = "short_name";
+                            ?>
+                            <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]"/>
+                        </th>                        
+                        <th>
+                            <?php
+                            $field = "phonecode";
                             ?>
                             <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]"/>
                         </th>                        
@@ -20,13 +33,15 @@
                             <?= sortable_anchor('id', get_value_from_list($field_labels, 'id', 'id')) ?>
                             | <?= sortable_anchor('name', get_value_from_list($field_labels, 'name', 'name')) ?>
                         </th>
-                        <th><?= sortable_anchor('short_name', 'Short Name') ?></th>
-                        <th><?= sortable_anchor('phonecode', 'Phone Code') ?></th>
-                        <th>Timezone</th>
-                        <th><?= sortable_anchor('iso3', 'Phone Name') ?></th>
-                        <th><?= sortable_anchor('currency_name', 'Currency') ?></th>
-                        <th style="width:8%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
-                        <th style="width:8%"><?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?></th>
+                        <th style="width:8%"><?= sortable_anchor('short_name', get_value_from_list($field_labels, 'short_name', 'short_name')) ?></th>
+                        <th style="width:8%"><?= sortable_anchor('phonecode', get_value_from_list($field_labels, 'phonecode', 'phonecode')) ?></th>
+                        <th style="width:8%"><?= sortable_anchor('timezone', get_value_from_list($field_labels, 'timezone', 'timezone')) ?></th>
+                        <th style="width:8%"><?= sortable_anchor('iso3', get_value_from_list($field_labels, 'iso3', 'iso3')) ?></th>
+                        <th style="width:8%"><?= sortable_anchor('currency_name', get_value_from_list($field_labels, 'currency_name', 'currency_name')) ?></th>
+                        <th style="width:10%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
+                        <th style="width:10%"><?= sortable_anchor('created_by', get_value_from_list($field_labels, 'created_by', 'created_by')) ?></th>
+                        <th style="width:10%"><?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?></th>
+                        <th style="width:10%"><?= sortable_anchor('updated_by', get_value_from_list($field_labels, 'updated_by', 'updated_by')) ?></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -46,10 +61,16 @@
                             <td>{{ $record->iso3 }}</td>
                             <td>{{ $record->currency_name }}</td>
                             <td>
-                                <x-Backend.created-and-by :datetime="$record->created_at" :userId="$record->created_by" />
+                                <x-Backend.celec-date-time :value="$record->created_at" />
                             </td>
                             <td>
-                                <x-Backend.created-and-by :datetime="$record->updated_at" :userId="$record->updated_by" />
+                                {{ get_value_from_list($userListCache, $record->created_by) }}
+                            </td>
+                            <td>
+                                <x-Backend.celec-date-time :value="$record->updated_at" :userId="$record->updated_by" />
+                            </td>
+                            <td>
+                                {{ get_value_from_list($userListCache, $record->updated_by) }}
                             </td>
                         </tr>
                     @endforeach

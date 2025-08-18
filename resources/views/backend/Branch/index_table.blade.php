@@ -22,22 +22,34 @@
                             <?php
                             $field = "type";
                             ?>
-                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$type_list" :value="$search[$field]" />
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$type_list" :value="$search[$field]" class="select2" />
                         </th>
                         <th>
                             <?php
                             $field = "state_id";
                             ?>
-                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$state_list" :value="$search[$field]" class="mb-1"/>
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$state_list" :value="$search[$field]" class="select2 mb-1"/>
 
                             <?php
                             $field = "city_id";
                             ?>
-                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$district_city_list" :value="$search[$field]" />
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$district_city_list" :value="$search[$field]" class="select2" />
+                        </th>
+                        <th>
+                            <?php
+                            $field = "mobile";
+                            ?>
+                            <x-Inputs.text-field :id="$field" :name="$field" :label="$false" :value="$search[$field]"/>
+                        </th>
+                        <th>
+                            <?php
+                            $field = "phone_no";
+                            ?>
+                            <x-Inputs.text-field :id="$field" :name="$field" :label="$false" :value="$search[$field]"/>
                         </th>
                     </tr>
                     <tr class="border-bottom-primary">
-                        <th style="width:15%">
+                        <th style="width:12%">
                             <?= sortable_anchor('id', get_value_from_list($field_labels, 'id', 'id')) ?>
                             | <?= sortable_anchor('name', get_value_from_list($field_labels, 'name', 'name')) ?>
                         </th>
@@ -49,8 +61,8 @@
                             | <?= sortable_anchor('distirct.name', get_value_from_list($field_labels, 'district_id', 'district_id')) ?>
                             | <?= sortable_anchor('city.name', get_value_from_list($field_labels, 'city_id', 'city_id')) ?>
                         </th>
-                        <th style="width:10%"><?= sortable_anchor('mobile', get_value_from_list($field_labels, 'mobile', 'mobile')) ?></th>
-                        <th style="width:10%"><?= sortable_anchor('phone_no', get_value_from_list($field_labels, 'phone_no', 'phone_no')) ?></th>
+                        <th style="width:8%"><?= sortable_anchor('mobile', get_value_from_list($field_labels, 'mobile', 'mobile')) ?></th>
+                        <th style="width:8%"><?= sortable_anchor('phone_no', get_value_from_list($field_labels, 'phone_no', 'phone_no')) ?></th>
                         <th style="width:8%"><?= sortable_anchor('list_display_order', get_value_from_list($field_labels, 'list_display_order', 'list_display_order')) ?></th>
                         <th style="width:8%"><?= sortable_anchor('is_active', 'Activate / De-Active') ?></th>
                         <th style="width:10%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
@@ -71,7 +83,7 @@
                             </th>
                             <td>{{ get_value_from_list($type_list, $record->type) }}</td>
                             <td>
-                                {{ $record->state?->getDisplayName() }}
+                                {{ $record->state?->getShortName() }}
                                 >> {{ $record->district?->getDisplayName() }}
                                 >> {{ $record->city?->getDisplayName() }}
                             </td>

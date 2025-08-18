@@ -17,28 +17,23 @@
                         <?php 
                             $field = "name";
                         ?>
-                        <input name="{{ $field }}" value="{{ $search[$field] }}" />
+                        <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
                         <?php 
                             $field = "type";
                         ?>
-                        <input name="{{ $field }}" value="{{ $search[$field] }}" />
+                        <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
                         <?php 
                             $field = "state_id";
                         ?>
-                        <input name="{{ $field }}" value="{{ $search[$field] }}" />
+                        <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
                         <?php 
                             $field = "city_id";
                         ?>
-                        <input name="{{ $field }}" value="{{ $search[$field] }}" />
+                        <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
                         <?php 
                             $field = "mobile";
                         ?>
-                        <input name="{{ $field }}" value="{{ $search[$field] }}" />
-                        <?php 
-                            $field = "is_active";
-                        ?>
-                        <input name="{{ $field }}" value="{{ $search[$field] }}" />
-                        <x-Backend.summary-search-form-footer :selectedPaginationLimit="$pagination_limit" :paginationListOptions="$paginationList" />
+                        <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
                     </form>
                 </div>
             </div>

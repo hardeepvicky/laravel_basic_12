@@ -15,19 +15,19 @@
                 <?php 
                     $field = "name";
                 ?>
-                <input name="{{ $field }}" value="{{ $search[$field] }}" />
+                <input type="text"  name="{{ $field }}" value="{{ $search[$field] }}" />
                 <?php 
                     $field = "type";
                 ?>
-                <input name="{{ $field }}" value="{{ $search[$field] }}" />
-                <?php 
+                <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
+                <?php
                     $field = "short_name";
                 ?>
-                <input name="{{ $field }}" value="{{ $search[$field] }}" />
+                <input type="text"  name="{{ $field }}" value="{{ $search[$field] }}" />
                 <?php 
                     $field = "code";
                 ?>
-                <input name="{{ $field }}" value="{{ $search[$field] }}" />
+                <input type="text"  name="{{ $field }}" value="{{ $search[$field] }}" />
             </form>
         </div>
     </div>

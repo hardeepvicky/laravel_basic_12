@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Exceptions\UserException;
+use App\Helpers\ArrayHelper;
 use App\Helpers\FileUtility;
 use App\Helpers\ImportUtility;
 use App\Helpers\LaravelExtend;
@@ -55,8 +56,11 @@ class CityController extends BackendController
             ["field" => "is_active", "type" => "int"],
         ]);
 
+        $array_helper =  new ArrayHelper($conditions);
+        $condition_list = $array_helper->convertModelSearchConditionToList();
+
         $builder = $this->modelClass::where($conditions);
-        $builder->with("state");
+        $builder->with(["state", "district"]);
 
         if ($apply_sort)
         {
@@ -73,6 +77,23 @@ class CityController extends BackendController
 
             $builder->orderBy($sort_params['sort_by'], $sort_params['sort_dir']);
         }
+
+        $my_country = Country::getMyCountry();
+
+        $district_conditions = [];
+
+        if (isset($condition_list['state_id']))
+        {
+            $district_conditions['state_id'] = $condition_list['state_id'];
+        }
+        else
+        {
+            $district_conditions['state_id'] = State::where("country_id", $my_country->id)->pluck("id")->toArray();
+        }
+        
+        $district_list = District::getList("id", "display_name", $district_conditions);
+    
+        $this->setForView(compact("district_list"));
 
         return $builder;
     }

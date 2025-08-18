@@ -1242,3 +1242,14 @@ function get_and_save_file_from_url($url, $savePath)
 
     file_put_contents($savePath, $fileContent);
 }
+
+function str_get_first_letter($string) {
+    $words = explode(' ', trim($string));
+    $acronym = '';
+    foreach ($words as $word) {
+        if (!empty($word)) {
+            $acronym .= substr($word, 0, 1);
+        }
+    }
+    return $acronym;
+}

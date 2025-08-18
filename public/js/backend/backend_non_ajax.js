@@ -325,7 +325,9 @@ $(document).ready(function () {
 
     $(document).on("click", ".summary_table_with_search .clear_search_conditions", function (e) {
 
-        $("form.summary_search").clearForm();
+        $("form.summary_search").find("input[type='text']").val("");
+        $("form.summary_search").find("select").val("").trigger("change");
+        $("form.summary_search").find("input[type='checkbox'], input[type='radio']").prop("checked", false);
         
         $("form.summary_search").trigger("submit");
     });
