@@ -9,38 +9,66 @@
         </div>
 
         <div class="table-responsive">
-            <table class="table table-striped table-bordered table-hover">
+            <table class="table table-bordered summary_table_with_search">
                 <thead>
                     <tr>
                         <th style="width:10%">
+                            <span class="btn btn-light text-dark border-primary clear_search_conditions mb-1">Clear</span>
                             <?php
-                            $field = 'name';
+                            $field = "name";
                             ?>
-                            <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]" />
+                            <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]"/>
+                        </th>
+                        <th style="width:15%">
+                            <?php
+                            $field = "item_category_id";
+                            ?>
+                            <x-Inputs.drop-down :name="$field" :label="$false" :value="$search[$field]" :list="$item_category_list" class="select2" />
+                        </th>
+                        <th style="width:8%">
+                            <?php
+                            $field = "color_id";
+                            ?>
+                            <x-Inputs.drop-down :name="$field" :label="$false" :value="$search[$field]" :list="$color_list" class="select2" />
+                        </th>
+                        <th style="width:8%">
+                            <?php
+                            $field = "brand_id";
+                            ?>
+                            <x-Inputs.drop-down :name="$field" :label="$false" :value="$search[$field]" :list="$brand_list" class="select2" />
+                        </th>
+                        <th style="width:8%">
+                            <?php
+                            $field = "size";
+                            ?>
+                            <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]"/>
+                        </th>
+                        <th style="width:8%">
+                            <?php
+                            $field = "specification";
+                            ?>
+                            <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]"/>
                         </th>
                     </tr>
                     <tr class="border-bottom-primary">
-                        <th style="width:15%">
+                        <th>
                             <?= sortable_anchor('id', get_value_from_list($field_labels, 'id', 'id')) ?>
                             | <?= sortable_anchor('name', get_value_from_list($field_labels, 'name', 'name')) ?>
                         </th>
-                        <th><?= sortable_anchor('category.name', get_value_from_list($field_labels, 'item_category_id', 'item_category_id')) ?>
-                        </th>
+                        <th><?= sortable_anchor('category.name', get_value_from_list($field_labels, 'item_category_id', 'item_category_id')) ?></th>
                         <th>{{ get_value_from_list($field_labels, 'color_id', 'color_id') }}</th>
                         <th>{{ get_value_from_list($field_labels, 'brand_id', 'brand_id') }}</th>
                         <th>{{ get_value_from_list($field_labels, 'size', 'size') }}</th>
                         <th>{{ get_value_from_list($field_labels, 'specification', 'specification') }}</th>
-                        <th>{{ get_value_from_list($field_labels, 'main_image_id', 'main_image_id') }}</th>
-                        <th style="width:10%">
+                        <th style="width:10%">{{ get_value_from_list($field_labels, 'main_image_id', 'main_image_id') }}</th>
+                        <th style="width:8%">
                             <?= sortable_anchor('list_display_order', get_value_from_list($field_labels, 'list_display_order', 'list_display_order')) ?>
                         </th>
-                        <th style="width:10%"><?= sortable_anchor('is_active', 'Activate / De-Active') ?></th>
-                        <th style="width:10%">
-                            <?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?>
-                        </th>
-                        <th style="width:10%">
-                            <?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?>
-                        </th>
+                        <th style="width:8%"><?= sortable_anchor('is_active', 'Activate / De-Active') ?></th>
+                        <th style="width:10%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
+                        <th style="width:10%"><?= sortable_anchor('created_by', get_value_from_list($field_labels, 'created_by', 'created_by')) ?></th>
+                        <th style="width:10%"><?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?></th>
+                        <th style="width:10%"><?= sortable_anchor('updated_by', get_value_from_list($field_labels, 'updated_by', 'updated_by')) ?></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -76,14 +104,20 @@
                                     {{ $record->list_display_order }}
                                 </a>
                             </td>
-                            <td>
+                             <td>
                                 <x-Backend.active_deactive :isActive="$record->is_active" :id="$record->id" :routePrefix="$routePrefix" />
                             </td>
                             <td>
-                                <x-Backend.created-and-by :datetime="$record->created_at" :userId="$record->created_by" />
+                                <x-Backend.celec-date-time :value="$record->created_at" />
                             </td>
                             <td>
-                                <x-Backend.created-and-by :datetime="$record->updated_at" :userId="$record->updated_by" />
+                                {{ get_value_from_list($userListCache, $record->created_by) }}
+                            </td>
+                            <td>
+                                <x-Backend.celec-date-time :value="$record->updated_at" :userId="$record->updated_by" />
+                            </td>
+                            <td>
+                                {{ get_value_from_list($userListCache, $record->updated_by) }}
                             </td>
                         </tr>
                         <tr id="record-{{ $record->id }}" class="hidden">

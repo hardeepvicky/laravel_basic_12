@@ -15,74 +15,35 @@ $false = false;
     <div class="card-body">
         <form method="GET" class="summary_search" action="{{ route($routePrefix . '.index') }}">
             <input type="hidden" name="is_sort_clear" value="1" />
-            <div class="row mb-4">
-                <div class="col-sm-6 col-md-3 col-xl-2 mb-2">
-                    <?php
-                    $field = 'pagination_limit';
-                    ?>
-                    <x-Inputs.drop-down :name="$field" label="Limit" :list="$paginationList" :value="$pagination_limit"
-                        :pleaseSelect="$false" class="pagination_limit" />
-                </div>
-                <div class="col-md-6 col-lg-4 col-xxxl-3 mb-2">
-                    <?php
-                    $field = 'item_category_id';
-                    $label = get_value_from_list($field_labels, $field, $field);
-                    ?>
-                    <x-Inputs.drop-down :name="$field" :label="$label" :value="$search[$field]" :list="$item_category_list"
-                        class="select2" />
+            <?php
+                $field = "item_category_id";
+            ?>
+            <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
+            
+            <?php
+                $field = "is_find_nested_child";
+            ?>
+            <input type="text"  name="{{ $field }}" value="{{ $search[$field] }}" />
 
-                    <?php 
-                        $field = "is_find_nested_child";
-                    ?>
-                    <x-Inputs.checkbox :name="$field" label="Find Nested Child" :value="$search[$field]" />
-                </div>
-                <div class="col-md-4 col-lg-3 col-xxxl-2 mb-2">
-                    <?php
-                    $field = "name";
-                    $label = get_value_from_list($field_labels, $field, $field);
-                    ?>
-                    <x-Inputs.text-field :name="$field" :label="$label" :value="$search[$field]" />
-                </div>
-                <div class="col-md-4 col-lg-3 col-xxxl-2 mb-2">
-                    <?php
-                    $field = "sku";
-                    $label = get_value_from_list($field_labels, $field, $field);
-                    ?>
-                    <x-Inputs.text-field :name="$field" :label="$label" :value="$search[$field]" />
-                </div>
-                <div class="col-md-4 col-lg-3 col-xxxl-2 mb-2">
-                    <?php
-                    $field = "color_id";
-                    $label = get_value_from_list($field_labels, $field, $field);
-                    ?>
-                    <x-Inputs.drop-down :name="$field" :label="$label" :value="$search[$field]" :list="$color_list"
-                        class="select2" />
-                </div>
-                <div class="col-md-4 col-lg-3 col-xxxl-2 mb-2">
-                    <?php
-                    $field = "brand_id";
-                    $label = get_value_from_list($field_labels, $field, $field);
-                    ?>
-                    <x-Inputs.drop-down :name="$field" :label="$label" :value="$search[$field]" :list="$brand_list"
-                        class="select2" />
-                </div>
-                <div class="col-md-4 col-lg-3 col-xxxl-2 mb-2">
-                    <?php
-                    $field = "tag_name";
-                    $label = get_value_from_list($field_labels, $field, $field);
-                    ?>
-                    <x-Inputs.text-field :name="$field" :label="$label" :value="$search[$field]" />
-                </div>
-                <div class="col-md-4 col-lg-3 col-xxxl-2 mb-2">
-                    <?php
-                    $field = 'is_active';
-                    $label = get_value_from_list($field_labels, $field, $field);
-                    ?>
-                    <x-Inputs.drop-down :name="$field" :label="$label" :value="$search[$field]" :list="$yes_no_list"
-                        class="select2" />
-                </div>
-            </div>
-            <x-Backend.summary-search-form-footer :showPaginationDropDown="$false" />
+            <?php
+                $field = "name";
+            ?>
+            <input type="text"  name="{{ $field }}" value="{{ $search[$field] }}" />
+
+            <?php
+                $field = "color_id";
+            ?>
+            <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
+
+            <?php
+                $field = "brand_id";
+            ?>
+            <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
+
+            <?php
+                $field = "tag_name";
+            ?>
+            <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
         </form>
     </div>
 </div>

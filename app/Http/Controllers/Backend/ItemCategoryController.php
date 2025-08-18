@@ -50,6 +50,7 @@ class ItemCategoryController extends BackendController
             ["field" => "parent_id", "type" => "int", "view_field" => "parent_id"],
             ["field" => "is_find_nested_child", "type" => "bool", "view_field" => "is_find_nested_child"],
             ["field" => "name", "type" => "string", "view_field" => "name"],
+            ["field" => "short_name", "type" => "string", "view_field" => "short_name"],
             ["field" => "is_last_node", "type" => "", "view_field" => "is_last_node"],
             ["field" => "is_active", "type" => "", "view_field" => "is_active"],
         ]);

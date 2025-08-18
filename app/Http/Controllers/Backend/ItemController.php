@@ -78,9 +78,10 @@ class ItemController extends BackendController
             ["field" => "item_category_id", "type" => "int"],
             ["field" => "is_find_nested_child", "type" => "bool"],
             ["field" => "name", "type" => "string"],
-            ["field" => "sku", "type" => "string"],
             ["field" => "color_id", "type" => "int"],
             ["field" => "brand_id", "type" => "int"],
+            ["field" => "size", "type" => "string"],
+            ["field" => "specification", "type" => "string"],
             ["field" => "is_active", "type" => "int"],
         ]);
 
