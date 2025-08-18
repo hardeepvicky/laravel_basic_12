@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Exceptions\UserException;
+use App\Helpers\ArrayHelper;
 use App\Helpers\CsvUtility;
 use App\Helpers\DateUtility;
 use App\Helpers\FileUtility;
@@ -68,11 +69,17 @@ class DealerController extends BackendController
             ["field" => "id", "type" => "int", "cache" => false],
             ["field" => "type", "type" => "string_equal"],
             ["field" => "name", "type" => "string"],
+            ["field" => "company_name", "type" => "string"],
             ["field" => "mobile", "type" => "string"],
+            ["field" => "mobile2", "type" => "string"],
+            ["field" => "phone_no", "type" => "string"],
             ["field" => "state_id", "type" => "int"],
-            ["field" => "district_id", "type" => "int"],
+            ["field" => "city_id", "type" => "int"],
             ["field" => "is_active", "type" => "int"],
         ]);
+
+        $array_helper =  new ArrayHelper($conditions);
+        $condition_list = $array_helper->convertModelSearchConditionToList();
 
         $builder = $this->modelClass::where($conditions);
 
@@ -94,6 +101,31 @@ class DealerController extends BackendController
 
             $builder->orderBy($sort_params['sort_by'], $sort_params['sort_dir']);
         }
+
+        $my_country = Country::getMyCountry();
+
+        $state_conditions = [
+            ["country_id", $my_country->id],
+            ["is_active", 1]
+        ];
+
+        $district_conditions = [
+            ["is_active", 1]
+        ];
+
+        if (isset($condition_list['state_id']))
+        {
+            $state_conditions[] = ["id", $condition_list['state_id']];
+            $district_conditions[] = ["state_id", $condition_list['state_id']];
+        }
+        
+        $district_cities = City::getWithDistrict($state_conditions, $district_conditions, [["is_active", 1]]);
+    
+        $district_city_collection = collect($district_cities);
+
+        $district_city_list = $district_city_collection->pluck('name', 'id')->toArray();
+
+        $this->setForView(compact("district_city_list"));
 
         return $builder;
     }

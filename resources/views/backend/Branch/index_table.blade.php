@@ -58,7 +58,7 @@
                         </th>
                         <th style="width:12%">
                             <?= sortable_anchor('state.name', get_value_from_list($field_labels, 'state_id', 'state_id')) ?>
-                            | <?= sortable_anchor('distirct.name', get_value_from_list($field_labels, 'district_id', 'district_id')) ?>
+                            | <?= sortable_anchor('district.name', get_value_from_list($field_labels, 'district_id', 'district_id')) ?>
                             | <?= sortable_anchor('city.name', get_value_from_list($field_labels, 'city_id', 'city_id')) ?>
                         </th>
                         <th style="width:8%"><?= sortable_anchor('mobile', get_value_from_list($field_labels, 'mobile', 'mobile')) ?></th>

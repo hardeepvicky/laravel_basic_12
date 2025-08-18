@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Exceptions\UserException;
+use App\Helpers\ArrayHelper;
 use App\Helpers\CsvUtility;
 use App\Helpers\DateUtility;
 use App\Helpers\FileUtility;
@@ -86,8 +87,11 @@ class LeadController extends BackendController
             ["field" => "state_id", "type" => "int"],
             ["field" => "district_id", "type" => "int"],
             ["field" => "city_id", "type" => "int"],
-            ["field" => "campaign_id", "type" => "int"],
+            ["field" => "assign_to_user_id", "type" => "int"],
         ]);
+
+        $array_helper =  new ArrayHelper($conditions);
+        $condition_list = $array_helper->convertModelSearchConditionToList();
 
         $builder = $this->modelClass::where($conditions);
         $builder->where("is_customer", 0);
@@ -111,6 +115,32 @@ class LeadController extends BackendController
             $builder->orderBy($sort_params['sort_by'], $sort_params['sort_dir']);
         }
 
+        
+        $my_country = Country::getMyCountry();
+
+        $state_conditions = [
+            ["country_id", $my_country->id],
+            ["is_active", 1]
+        ];
+
+        $district_conditions = [
+            ["is_active", 1]
+        ];
+
+        if (isset($condition_list['state_id']))
+        {
+            $state_conditions[] = ["id", $condition_list['state_id']];
+            $district_conditions[] = ["state_id", $condition_list['state_id']];
+        }
+        
+        $district_cities = City::getWithDistrict($state_conditions, $district_conditions, [["is_active", 1]]);
+    
+        $district_city_collection = collect($district_cities);
+
+        $district_city_list = $district_city_collection->pluck('name', 'id')->toArray();
+
+        $this->setForView(compact("district_city_list"));
+
         return $builder;
     }
 
@@ -124,13 +154,7 @@ class LeadController extends BackendController
 
         $state_list = State::getIndianList();
 
-        $my_country = Country::getMyCountry();
-
-        $district_cities = City::getWithDistrict([["country_id", $my_country->id]], [["is_active", 1]], [["is_active", 1]]);
         
-        $district_city_collection = collect($district_cities);
-
-        $district_city_list = $district_city_collection->pluck('name', 'id')->toArray();
 
         $type_conditions = [
             'type' => Type::getType($this->model, "source_type")
@@ -231,7 +255,22 @@ class LeadController extends BackendController
 
         $this->setForView(compact("model", 'form'));
 
+        $this->_set_date_for_add_and_edit();
+
         return $this->view("form");
+    }
+
+    private function _set_date_for_add_and_edit()
+    {
+        $my_country = Country::getMyCountry();
+
+        $district_cities = City::getWithDistrict([["country_id", $my_country->id]], [["is_active", 1]], [["is_active", 1]]);
+        
+        $district_city_collection = collect($district_cities);
+
+        $district_city_list = $district_city_collection->pluck('name', 'id')->toArray();
+
+        $this->setForView(compact("district_city_list"));
     }
 
     private function _common_validation_rules()
@@ -587,6 +626,7 @@ class LeadController extends BackendController
         $addresses = $this->model->address?->toArray() ?? [];
 
         $this->setForView(compact("model", "form", "products", "addresses"));
+        $this->_set_date_for_add_and_edit();
 
         return $this->view("form");
     }

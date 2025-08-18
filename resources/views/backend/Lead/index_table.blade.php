@@ -12,31 +12,95 @@
             <table class="table table-bordered summary-table summary_table_with_search">
                 <thead>
                     <tr>
-                        <th>
+                        <th style="width:10%">
+                            <span class="btn btn-light text-dark border-primary clear_search_conditions mb-1">Clear</span>
                             <?php
                             $field = "name";
                             ?>
-                            <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]"/>
-                        </th>                        
+                            <x-Inputs.text-field :id="$field" :name="$field" :label="$false" :value="$search[$field]"/>
+                        </th>
+                        <th style="width:10%">
+                            <?php
+                            $field = "assign_to_user_id";
+                            ?>
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$user_list" :value="$search[$field]" class="select2" />
+                        </th>
+                        <th style="width:10%">
+                            <?php
+                            $field = "status_type";
+                            ?>
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$status_type_list" :value="$search[$field]" class="select2" />
+                        </th>
+                        <th style="width:12%">
+                            <?php
+                            $field = "state_id";
+                            ?>
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$state_list" :value="$search[$field]" class="select2 mb-1"/>
+
+                            <?php
+                            $field = "city_id";
+                            ?>
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$district_city_list" :value="$search[$field]" class="select2" />
+                        </th>
+                        <th style="width:10%">
+                            <?php
+                            $field = "mobile";
+                            ?>
+                            <x-Inputs.text-field :id="$field" :name="$field" :label="$false" :value="$search[$field]"/>
+                        </th>
+                        <th style="width:10%">
+                            <?php
+                            $field = "mobile2";
+                            ?>
+                            <x-Inputs.text-field :id="$field" :name="$field" :label="$false" :value="$search[$field]"/>
+                        </th>
+                        <th style="width:10%">
+                            <?php
+                            $field = "source_id";
+                            ?>
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$source_list" :value="$search[$field]" class="select2" />
+                        </th>
+                        <th style="width:10%">
+                            <?php
+                            $field = "source_type";
+                            ?>
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$source_type_list" :value="$search[$field]" class="select2" />
+                        </th>
+                        <th style="width:10%">
+                            <?php
+                            $field = "dealer_id";
+                            ?>
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$dealer_list" :value="$search[$field]" class="select2" />
+                        </th>
+                        <th style="width:10%">
+                            <?php
+                            $field = "deal_type";
+                            ?>
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$deal_type_list" :value="$search[$field]" class="select2" />
+                        </th>
                     </tr>
                     <tr class="border-bottom-primary">
-                        <th style="width:15%">
+                        <th>
                             <?= sortable_anchor('id', get_value_from_list($field_labels, 'id', 'id')) ?>
                             | <?= sortable_anchor('name', get_value_from_list($field_labels, 'name', 'name')) ?>
                         </th>
                         <th><?= sortable_anchor('assignTo.person_name', get_value_from_list($field_labels, 'assign_to_user_id', 'assign_to_user_id')) ?></th>
                         <th><?= sortable_anchor('status_type', get_value_from_list($field_labels, 'status_type', 'status_type')) ?></th>
-                        <th><?= sortable_anchor('state.name', get_value_from_list($field_labels, 'state_id', 'state_id')) ?></th>
-                        <th><?= sortable_anchor('distirct.name', get_value_from_list($field_labels, 'district_id', 'district_id')) ?></th>
-                        <th><?= sortable_anchor('city.name', get_value_from_list($field_labels, 'city_id', 'city_id')) ?></th>
+                        <th>
+                            <?= sortable_anchor('state.name', get_value_from_list($field_labels, 'state_id', 'state_id')) ?>
+                            | <?= sortable_anchor('district.name', get_value_from_list($field_labels, 'district_id', 'district_id')) ?>
+                            | <?= sortable_anchor('city.name', get_value_from_list($field_labels, 'city_id', 'city_id')) ?>
+                        </th>
                         <th><?= sortable_anchor('mobile', get_value_from_list($field_labels, 'mobile', 'mobile')) ?></th>
                         <th><?= sortable_anchor('mobile2', get_value_from_list($field_labels, 'mobile2', 'mobile2')) ?></th>
-                        <th><?= sortable_anchor('source_type', get_value_from_list($field_labels, 'source_type', 'source_type')) ?></th>
                         <th><?= sortable_anchor('source_id', get_value_from_list($field_labels, 'source_id', 'source_id')) ?></th>
-                        <th><?= sortable_anchor('deal_type', get_value_from_list($field_labels, 'deal_type', 'deal_type')) ?></th>
+                        <th><?= sortable_anchor('source_type', get_value_from_list($field_labels, 'source_type', 'source_type')) ?></th>
                         <th><?= sortable_anchor('dealer_id', get_value_from_list($field_labels, 'dealer_id', 'dealer_id')) ?></th>
-                        <th style="width:8%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
-                        <th style="width:8%"><?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?></th>
+                        <th><?= sortable_anchor('deal_type', get_value_from_list($field_labels, 'deal_type', 'deal_type')) ?></th>
+                        <th style="width:10%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
+                        <th style="width:10%"><?= sortable_anchor('created_by', get_value_from_list($field_labels, 'created_by', 'created_by')) ?></th>
+                        <th style="width:10%"><?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?></th>
+                        <th style="width:10%"><?= sortable_anchor('updated_by', get_value_from_list($field_labels, 'updated_by', 'updated_by')) ?></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -51,24 +115,32 @@
                             </th>
                             <td>{{ $record->assignTo?->getDisplayName() }}</td>
                             <td>{{ get_value_from_list($status_type_list, $record->status_type) }}</td>
-                            <td>{{ $record->state?->getDisplayName() }}</td>
-                            <td>{{ $record->district?->getDisplayName() }}</td>
-                            <td>{{ $record->city?->getDisplayName() }}</td>
+                            <td>
+                                {{ $record->state?->getShortName() }}
+                                >> {{ $record->district?->getDisplayName() }}
+                                >> {{ $record->city?->getDisplayName() }}
+                            </td>
                             <td>{{ $record->mobile }}</td>
                             <td>{{ $record->mobile2 }}</td>
-                            <td>{{ get_value_from_list($source_type_list, $record->source_type) }}</td>
                             <td>{{ get_value_from_list($source_list, $record->source_id) }}</td>
-                            <td>{{ get_value_from_list($deal_type_list, $record->deal_type) }}</td>
+                            <td>{{ get_value_from_list($source_type_list, $record->source_type) }}</td>
                             <td>{{ get_value_from_list($dealer_list, $record->dealer_id) }}</td>
+                            <td>{{ get_value_from_list($deal_type_list, $record->deal_type) }}</td>
                             <td>
-                                <x-Backend.created-and-by :datetime="$record->created_at" :userId="$record->created_by" />
+                                <x-Backend.celec-date-time :value="$record->created_at" />
                             </td>
                             <td>
-                                <x-Backend.created-and-by :datetime="$record->updated_at" :userId="$record->updated_by" />
+                                {{ get_value_from_list($userListCache, $record->created_by) }}
+                            </td>
+                            <td>
+                                <x-Backend.celec-date-time :value="$record->updated_at" :userId="$record->updated_by" />
+                            </td>
+                            <td>
+                                {{ get_value_from_list($userListCache, $record->updated_by) }}
                             </td>
                         </tr>
                         <tr id="record-{{ $record->id }}" class="hidden">
-                            <td style="background-color: var(--body--bs-body-bg)"></td>                            
+                            <td style="background-color: var(--body--bs-body-bg)"></td>
                             <td colspan="12">
                                 <div class="row">
                                     <div class="col-md-6 col-xl-3">
@@ -140,7 +212,7 @@
                                                     </tbody>
                                                 </table>
                                             </div>
-                                        </div>     
+                                        </div>
                                     </div>
                                     <div class="col-md-6 col-xl-5">
                                         <div class="card">
@@ -173,7 +245,7 @@
                                                     </tbody>
                                                 </table>
                                             </div>
-                                        </div>                                          
+                                        </div>
                                     </div>
                                 </div>
 
