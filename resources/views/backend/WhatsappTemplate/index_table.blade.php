@@ -9,8 +9,15 @@
                 <thead>
                     <tr>
                         <th style="width:10%">
+                            <span class="btn btn-light text-dark border-primary clear_search_conditions mb-1">Clear</span>
                             <?php
                             $field = "name";
+                            ?>
+                            <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]"/>
+                        </th>
+                        <th style="width:10%">
+                            <?php
+                            $field = "language";
                             ?>
                             <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]"/>
                         </th>                        
@@ -22,9 +29,11 @@
                         </th>
                         <th><?= sortable_anchor('language', get_value_from_list($field_labels, 'language', 'language')) ?></th>
                         <th><?= sortable_anchor('name', get_value_from_list($field_labels, 'name', 'name')) ?></th>
-                        <th style="width:12%"><?= sortable_anchor('is_active', get_value_from_list($field_labels, 'is_active', 'is_active')) ?></th>
-                        <th style="width:12%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
-                        <th style="width:12%"><?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?></th>
+                        <th style="width:8%"><?= sortable_anchor('is_active', 'Activate / De-Active') ?></th>
+                        <th style="width:10%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
+                        <th style="width:10%"><?= sortable_anchor('created_by', get_value_from_list($field_labels, 'created_by', 'created_by')) ?></th>
+                        <th style="width:10%"><?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?></th>
+                        <th style="width:10%"><?= sortable_anchor('updated_by', get_value_from_list($field_labels, 'updated_by', 'updated_by')) ?></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -43,11 +52,17 @@
                                 <x-Backend.active_deactive :isActive="$record->is_active" :id="$record->id" :routePrefix="$routePrefix" />
                             </td>
                             <td>
-                                <x-Backend.created-and-by :datetime="$record->created_at" :userId="$record->created_by" />
+                                <x-Backend.celec-date-time :value="$record->created_at" />
                             </td>
                             <td>
-                                <x-Backend.created-and-by :datetime="$record->updated_at" :userId="$record->updated_by" />
+                                {{ get_value_from_list($userListCache, $record->created_by) }}
                             </td>
+                            <td>
+                                <x-Backend.celec-date-time :value="$record->updated_at" :userId="$record->updated_by" />
+                            </td>
+                            <td>
+                                {{ get_value_from_list($userListCache, $record->updated_by) }}
+                            </td> 
                         </tr>
                         <tr id="record-{{ $record->id }}" class="hidden">
                             <td style="background-color: var(--body--bs-body-bg)"></td>
