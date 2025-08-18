@@ -323,6 +323,13 @@ $(document).ready(function () {
         }
     });
 
+    $(document).on("click", ".summary_table_with_search .clear_search_conditions", function (e) {
+
+        $("form.summary_search").clearForm();
+        
+        $("form.summary_search").trigger("submit");
+    });
+
     $(document).on("click", "a.ajaxify", function(e){
         e.preventDefault();
 

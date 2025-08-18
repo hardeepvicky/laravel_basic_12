@@ -19,87 +19,60 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-12 col-xxl-6">
-                            <div class="row">
-                                <div class="col-lg-6">
-                                    <div class="form-group mb-3">
-                                        <?php
-                                        $field = 'company_id';
-                                        $label = get_value_from_list($field_labels, $field, $field);
-                                        ?>
-                                        <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
-                                            :list="$company_list" value="{{ $model->{$field} }}"
-                                            class="select2 " 
-                                            mandatory="true" />
-                                    </div>
-                                </div>
-                                <div class="col-lg-6">
-                                    <div class="form-group mb-3">
-                                        <?php
-                                        $field = 'type';
-                                        $label = get_value_from_list($field_labels, $field, $field);
-                                        ?>
-                                        <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
-                                            :list="$type_list" value="{{ $model->{$field} }}"
-                                            class="select2 " 
-                                            mandatory="true" />
-                                    </div>
-                                </div>
-                                <div class="col-lg-6">
-                                    <div class="form-group mb-3">
-                                        <?php
-                                        $field = 'name';
-                                        $label = get_value_from_list($field_labels, $field, $field);
-                                        ?>
-                                        <x-Inputs.text-field :name="$field" :label="$label" value="{{ $model->{$field} }}"
-                                            placeholder="Enter {{ $label }}" mandatory="true" />
-                                    </div>
-                                </div>
-                                <div class="col-lg-6">
-                                    <div class="form-group mb-3">
-                                        <?php
-                                        $field = 'mobile';
-                                        $label = get_value_from_list($field_labels, $field, $field);
-                                        ?>
-                                        <x-Inputs.text-field :name="$field" :label="$label"
-                                            value="{{ $model->{$field} }}" class="validate-mobile"
-                                            placeholder="Enter {{ $label }}" mandatory="true" />
-                                    </div>
-                                </div>
-                                <div class="col-lg-6">
-                                    <div class="form-group mb-3">
-                                        <?php
-                                        $field = 'email';
-                                        $label = get_value_from_list($field_labels, $field, $field);
-                                        ?>
-                                        <x-Inputs.text-field :name="$field" :label="$label"
-                                            value="{{ $model->{$field} }}" class="validate-email"
-                                            placeholder="Enter {{ $label }}" mandatory="true" />
-                                    </div>
-                                </div>
-                                <div class="col-lg-6">
-                                    <div class="form-group mb-3">
-                                        <?php
-                                        $field = 'phone_no';
-                                        $label = get_value_from_list($field_labels, $field, $field);
-                                        ?>
-                                        <x-Inputs.text-field :name="$field" :label="$label"
-                                            value="{{ $model->{$field} }}" class="validate-phone"
-                                            placeholder="Enter {{ $label }}"  />
-                                    </div>
-                                </div>
-                                <div class="col-lg-6">
-                                    <div class="form-group mb-3">
-                                        <?php
-                                        $field = 'gst_no';
-                                        $label = get_value_from_list($field_labels, $field, $field);
-                                        ?>
-                                        <x-Inputs.text-field :name="$field" :label="$label"
-                                            value="{{ $model->{$field} }}" 
-                                            placeholder="Enter {{ $label }}"  />
-                                    </div>
-                                </div>
+                            <div class="form-group mb-3">
+                                <?php
+                                $field = 'type';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
+                                    :list="$type_list" value="{{ $model->{$field} }}"
+                                    class="select2 " 
+                                    mandatory="true" />
                             </div>
-
+                            <div class="form-group mb-3">
+                                <?php
+                                $field = 'name';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <x-Inputs.text-field :name="$field" :label="$label" value="{{ $model->{$field} }}"
+                                    placeholder="Enter {{ $label }}" mandatory="true" />
+                            </div>
+                            <div class="form-group mb-3">
+                                <?php
+                                $field = 'mobile';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <x-Inputs.text-field :name="$field" :label="$label"
+                                    value="{{ $model->{$field} }}" class="validate-mobile"
+                                    placeholder="Enter {{ $label }}" mandatory="true" />
+                            </div>
+                            <div class="form-group mb-3">
+                                <?php
+                                $field = 'email';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <x-Inputs.text-field :name="$field" :label="$label"
+                                    value="{{ $model->{$field} }}" class="validate-email"
+                                    placeholder="Enter {{ $label }}" mandatory="true" />
+                            </div>
+                            <div class="form-group mb-3">
+                                <?php
+                                $field = 'phone_no';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <x-Inputs.text-field :name="$field" :label="$label"
+                                    value="{{ $model->{$field} }}" class="validate-phone"
+                                    placeholder="Enter {{ $label }}"  />
+                            </div>
+                            <div class="form-group mb-3">
+                                <?php
+                                $field = 'gst_no';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <x-Inputs.text-field :name="$field" :label="$label"
+                                    value="{{ $model->{$field} }}" 
+                                    placeholder="Enter {{ $label }}"  />
+                            </div>
                             <div class="row">
                                 <div class="col-lg-6">
                                     <div class="form-group mb-3">
@@ -170,29 +143,22 @@
                                     <div id="{{ $field . '-suggestion-box' }}" class="suggestion-box hidden"></div>
                                 </div>
                             </div>
-
-                            <div class="row">
-                                <div class="col-xl-6">
-                                    <div class="form-group mb-3">
-                                        <?php
-                                        $field = 'list_display_order';
-                                        $label = get_value_from_list($field_labels, $field, $field);
-                                        ?>
-                                        <x-Inputs.text-field type="number" :name="$field" :label="$label"
-                                            value="{{ $model->{$field} }}" placeholder="Enter {{ $label }}"
-                                            mandatory="true" autocomplete="off" />
-                                    </div>
-                                </div>
-                                <div class="col-xl-6" style="padding-top: 30px">
-                                    <div class="form-group mb-3">
-                                        <?php
-                                        $field = 'is_active';
-                                        $label = get_value_from_list($field_labels, $field, $field);
-                                        ?>
-                                        <x-Inputs.checkbox :name="$field" :label="$label"
-                                            value="{{ $model->{$field} }}" />
-                                    </div>
-                                </div>
+                            <div class="form-group mb-3">
+                                <?php
+                                $field = 'list_display_order';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <x-Inputs.text-field type="number" :name="$field" :label="$label"
+                                    value="{{ $model->{$field} }}" placeholder="Enter {{ $label }}"
+                                    mandatory="true" autocomplete="off" />
+                            </div>
+                            <div class="form-group mb-3">
+                                <?php
+                                $field = 'is_active';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <x-Inputs.checkbox :name="$field" :label="$label"
+                                    value="{{ $model->{$field} }}" />
                             </div>
                         </div>
                     </div>

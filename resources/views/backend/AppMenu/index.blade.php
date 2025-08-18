@@ -21,7 +21,6 @@
                         ?>
                         <x-Inputs.drop-down :name="$field" :label="$label" :value="$search[$field]" :list="$tree_list"
                             class="select2" />
-
                         <?php 
                             $field = "is_find_nested_child";
                         ?>

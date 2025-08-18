@@ -12,23 +12,45 @@
                 <thead>
                     <tr>
                         <th>
+                            <span class="btn btn-light text-dark border-primary clear_search_conditions mb-1">Clear</span>
                             <?php
                             $field = "name";
                             ?>
-                            <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]"/>
-                        </th>                        
+                            <x-Inputs.text-field :id="$field" :name="$field" :label="$false" :value="$search[$field]"/>
+                        </th>
+                        <th>
+                            <?php
+                            $field = "type";
+                            ?>
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$type_list" :value="$search[$field]" />
+                        </th>
+                        <th>
+                            <?php
+                            $field = "state_id";
+                            ?>
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$state_list" :value="$search[$field]" class="mb-1"/>
+
+                            <?php
+                            $field = "city_id";
+                            ?>
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$district_city_list" :value="$search[$field]" />
+                        </th>
                     </tr>
                     <tr class="border-bottom-primary">
                         <th style="width:15%">
                             <?= sortable_anchor('id', get_value_from_list($field_labels, 'id', 'id')) ?>
                             | <?= sortable_anchor('name', get_value_from_list($field_labels, 'name', 'name')) ?>
                         </th>
-                        <th><?= sortable_anchor('company.name', get_value_from_list($field_labels, 'company_id', 'company_id')) ?></th>
-                        <th><?= sortable_anchor('state.name', get_value_from_list($field_labels, 'state_id', 'state_id')) ?></th>
-                        <th><?= sortable_anchor('distirct.name', get_value_from_list($field_labels, 'district_id', 'district_id')) ?></th>
-                        <th><?= sortable_anchor('city.name', get_value_from_list($field_labels, 'city_id', 'city_id')) ?></th>
-                        <th><?= sortable_anchor('mobile', get_value_from_list($field_labels, 'mobile', 'mobile')) ?></th>
-                        <th><?= sortable_anchor('phone_no', get_value_from_list($field_labels, 'phone_no', 'phone_no')) ?></th>
+                        <th style="width:12%">
+                            <?= sortable_anchor('type', get_value_from_list($field_labels, 'type', 'type')) ?>
+                        </th>
+                        <th style="width:15%">
+                            <?= sortable_anchor('state.name', get_value_from_list($field_labels, 'state_id', 'state_id')) ?>
+                            | <?= sortable_anchor('distirct.name', get_value_from_list($field_labels, 'district_id', 'district_id')) ?>
+                            | <?= sortable_anchor('city.name', get_value_from_list($field_labels, 'city_id', 'city_id')) ?>
+                        </th>
+                        <th style="width:12%"><?= sortable_anchor('mobile', get_value_from_list($field_labels, 'mobile', 'mobile')) ?></th>
+                        <th style="width:12%"><?= sortable_anchor('phone_no', get_value_from_list($field_labels, 'phone_no', 'phone_no')) ?></th>
                         <th style="width:8%"><?= sortable_anchor('list_display_order', get_value_from_list($field_labels, 'list_display_order', 'list_display_order')) ?></th>
                         <th style="width:8%"><?= sortable_anchor('is_active', 'Activate / De-Active') ?></th>
                         <th style="width:8%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
@@ -45,10 +67,12 @@
                                     </div>
                                 </x-Backend.celec-summary-table-first-column>
                             </th>
-                            <td>{{ $record->company?->getDisplayName() }}</td>
-                            <td>{{ $record->state?->getDisplayName() }}</td>
-                            <td>{{ $record->district?->getDisplayName() }}</td>
-                            <td>{{ $record->city?->getDisplayName() }}</td>
+                            <td>{{ get_value_from_list($type_list, $record->type) }}</td>
+                            <td>
+                                {{ $record->state?->getDisplayName() }}
+                                >> {{ $record->district?->getDisplayName() }}
+                                >> {{ $record->city?->getDisplayName() }}
+                            </td>
                             <td>{{ $record->mobile }}</td>
                             <td>{{ $record->phone_no }}</td>
                             <td class="text-center">
@@ -71,7 +95,7 @@
                             </td>
                         </tr>
                         <tr id="record-{{ $record->id }}" class="hidden">
-                            <td style="background-color: var(--body--bs-body-bg)"></td>                            
+                            <td style="background-color: var(--body--bs-body-bg)"></td>
                             <td colspan="10">
                                 <div class="row">
                                     <div class="col-md-6 col-xl-4">

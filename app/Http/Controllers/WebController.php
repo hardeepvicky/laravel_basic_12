@@ -30,7 +30,7 @@ class WebController extends Controller
 
     protected $modelClass;
 
-    protected int $paginationLimit = 10;
+    protected int $paginationLimit = 100;
 
     /**
      * variable to store data which will pass to view

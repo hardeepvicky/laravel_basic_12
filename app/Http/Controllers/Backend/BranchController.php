@@ -3,12 +3,15 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Exceptions\UserException;
+use App\Helpers\ArrayHelper;
 use App\Helpers\CsvUtility;
 use App\Helpers\DateUtility;
 use App\Helpers\FileUtility;
 use App\Helpers\LaravelExtend;
 use App\Models\Branch;
+use App\Models\City;
 use App\Models\Company;
+use App\Models\Country;
 use App\Models\FieldSetting;
 use App\Models\State;
 use App\Models\Type;
@@ -47,19 +50,18 @@ class BranchController extends BackendController
 
         $conditions = $this->getConditions($cache_key, [
             ["field" => "id", "type" => "int", "cache" => false],
-            ["field" => "company_id", "type" => "int"],
+            ["field" => "type", "type" => "string_equal"],
             ["field" => "name", "type" => "string"],
             ["field" => "state_id", "type" => "int"],
-            ["field" => "district_id", "type" => "int"],
+            ["field" => "city_id", "type" => "int"],
             ["field" => "mobile", "type" => "string"],
             ["field" => "is_active", "type" => "int"],
         ]);
 
-        $builder = $this->modelClass::where($conditions);
+        $array_helper =  new ArrayHelper($conditions);
+        $condition_list = $array_helper->convertModelSearchConditionToList();
 
-        $builder->with([
-            "company"
-        ]);
+        $builder = $this->modelClass::where($conditions);
 
         if ($apply_sort) {
             $cache_key_for_sort = $cache_key_prefix . "-index-extra-params";
@@ -75,6 +77,33 @@ class BranchController extends BackendController
 
             $builder->orderBy($sort_params['sort_by'], $sort_params['sort_dir']);
         }
+
+        
+
+        $my_country = Country::getMyCountry();
+
+        $state_conditions = [
+            ["country_id", $my_country->id],
+            ["is_active", 1]
+        ];
+
+        $district_conditions = [
+            ["is_active", 1]
+        ];
+
+        if (isset($condition_list['state_id']))
+        {
+            $state_conditions[] = ["id", $condition_list['state_id']];
+            $district_conditions[] = ["state_id", $condition_list['state_id']];
+        }
+        
+        $district_cities = City::getWithDistrict($state_conditions, $district_conditions, [["is_active", 1]]);
+    
+        $district_city_collection = collect($district_cities);
+
+        $district_city_list = $district_city_collection->pluck('name', 'id')->toArray();
+
+        $this->setForView(compact("district_city_list"));
 
         return $builder;
     }
@@ -108,13 +137,11 @@ class BranchController extends BackendController
             $company_conditions["or_id"] = $this->model->company_id;
         }
 
-        $company_list = Company::getList("id", "display_name", $company_conditions, "list_display_order");
-
         $state_list = State::getIndianList();
 
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
-        $this->setForView(compact("type_list",  "company_list", "state_list", "field_labels"));
+        $this->setForView(compact("type_list", "state_list", "field_labels"));
 
         return parent::beforeViewRender();
     }
@@ -138,7 +165,6 @@ class BranchController extends BackendController
     private function _common_validation_rules()
     {
         return [
-            "company_id" => ["required"],
             "type" => ["required"],
             "name" => ["required"],
             "email" => ["required"],
@@ -314,7 +340,6 @@ class BranchController extends BackendController
         {
             $csv_records[] = [
                 'ID' => $record['id'],
-                $field_labels['company_id'] => $record['company']['name'] ?? "",
                 $field_labels['type'] => get_value_from_list($type_group_list['type'], $record['type']),
                 $field_labels['name'] => $record['name'],
                 $field_labels['mobile'] => $record['mobile'] ?? "",
