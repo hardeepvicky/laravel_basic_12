@@ -56,20 +56,20 @@ $false = false;
                             {!! array_print($record->placeholders) !!}
                         </td>
                         <td>
-                                <x-Backend.active_deactive :isActive="$record->is_active" :id="$record->id" :routePrefix="$routePrefix" />
-                            </td>
-                            <td>
-                                <x-Backend.celec-date-time :value="$record->created_at" />
-                            </td>
-                            <td>
-                                {{ get_value_from_list($userListCache, $record->created_by) }}
-                            </td>
-                            <td>
-                                <x-Backend.celec-date-time :value="$record->updated_at" :userId="$record->updated_by" />
-                            </td>
-                            <td>
-                                {{ get_value_from_list($userListCache, $record->updated_by) }}
-                            </td>
+                            <x-Backend.active_deactive :isActive="$record->is_active" :id="$record->id" :routePrefix="$routePrefix" />
+                        </td>
+                        <td>
+                            <x-Backend.celec-date-time :value="$record->created_at" />
+                        </td>
+                        <td>
+                            {{ get_value_from_list($userListCache, $record->created_by) }}
+                        </td>
+                        <td>
+                            <x-Backend.celec-date-time :value="$record->updated_at" :userId="$record->updated_by" />
+                        </td>
+                        <td>
+                            {{ get_value_from_list($userListCache, $record->updated_by) }}
+                        </td>
                     </tr>
                     <tr id="record-{{ $record->id }}" class="hidden">
                         <td style="background-color: var(--body--bs-body-bg)"></td>
