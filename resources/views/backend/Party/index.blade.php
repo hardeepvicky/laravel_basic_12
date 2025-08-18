@@ -10,7 +10,7 @@
         <div class="col-xxxl-12">
             @include($partial_path . '.page_header')
 
-            <div class="card">
+            <div class="card hidden">
                 <div class="card-body">
                     <form method="GET" class="summary_search" action="{{ route($routePrefix . '.index') }}">
                         <input type="hidden" name="is_sort_clear" value="1" />

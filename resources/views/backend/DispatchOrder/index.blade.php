@@ -14,103 +14,59 @@
                 <div class="card-body">
                     <form method="GET" class="summary_search" action="{{ route($routePrefix . '.index') }}">
                         <input type="hidden" name="is_sort_clear" value="1" />
+
+                        <div class="hidden">
+                            <?php
+                                $field = "status_type";
+                            ?>
+                            <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
+
+                            <?php
+                                $field = "carrier_id";
+                            ?>
+                            <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
+
+                            <?php
+                                $field = "docket_no";
+                            ?>
+                            <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
+
+                            <?php
+                                $field = "tracking_no";
+                            ?>
+                            <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
+                            <?php
+                                $field = "builty_no";
+                            ?>
+                            <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
+
+                            <?php
+                                $field = "country_id";
+                            ?>
+                            <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
+
+                            <?php
+                                $field = "state_id";
+                            ?>
+                            <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
+
+                            <?php
+                                $field = "district_id";
+                            ?>
+                            <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
+
+                            <?php
+                                $field = "city_id";
+                            ?>
+                            <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
+
+                            <?php
+                                $field = "pincode";
+                            ?>
+                            <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
+                        </div>
+
                         <div class="row mb-4">
-                            <div class="col-sm-6 col-md-3 col-xl-2 mb-2">
-                                <?php
-                                $field = 'pagination_limit';
-                                ?>
-                                <x-Inputs.drop-down :name="$field" label="Limit" :list="$paginationList" :value="$pagination_limit" :pleaseSelect="$false"
-                                    class="pagination_limit" />
-                            </div>            
-                            <div class="col-md-4 col-lg-3 col-xxxl-2 mb-2">
-                                <?php
-                                $field = 'status_type';
-                                $label = get_value_from_list($field_labels, $field, $field);
-                                ?>
-                                <x-Inputs.drop-down :name="$field" :label="$label" :value="$search[$field]" :list="$status_type_list"
-                                    class="select2" />
-                            </div>          
-                            <div class="col-md-4 col-lg-3 col-xxxl-2 mb-2">
-                                <?php
-                                $field = 'carrier_id';
-                                $label = get_value_from_list($field_labels, $field, $field);
-                                ?>
-                                <x-Inputs.drop-down :name="$field" :label="$label" :value="$search[$field]" :list="$carrier_list"
-                                    class="select2" />
-                            </div>      
-                            <div class="col-md-6 col-xxl-2 mb-2">
-                                <?php
-                                $field = 'docket_no';
-                                $label = get_value_from_list($field_labels, $field, $field);
-                                ?>
-                                <x-Inputs.text-field :name="$field" :label="$label" :value="$search[$field]" />
-                            </div>
-                            <div class="col-md-6 col-xxl-2 mb-2">
-                                <?php
-                                $field = 'tracking_no';
-                                $label = get_value_from_list($field_labels, $field, $field);
-                                ?>
-                                <x-Inputs.text-field :name="$field" :label="$label" :value="$search[$field]" />
-                            </div>
-                            <div class="col-md-6 col-xxl-2 mb-2">
-                                <?php
-                                $field = 'builty_no';
-                                $label = get_value_from_list($field_labels, $field, $field);
-                                ?>
-                                <x-Inputs.text-field :name="$field" :label="$label" :value="$search[$field]" />
-                            </div>                            
-                            <div class="col-md-4 col-lg-3 col-xxxl-2 mb-2">
-                                <?php
-                                $field = 'country_id';
-                                $label = get_value_from_list($field_labels, $field, $field);
-                                ?>
-                                <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$country_list"
-                                        :value="$search[$field]" class="select2 cascade-drop-down" 
-                                        data-sr-cascade-target="#state_id"
-                                        data-sr-cascade-url="/state/ajax_get_list/{v}" 
-                                        />
-                            </div>
-                            <div class="col-md-4 col-lg-3 col-xxxl-2 mb-2">
-                                <?php
-                                $field = 'state_id';
-                                $label = get_value_from_list($field_labels, $field, $field);
-                                ?>
-                                <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$state_list"
-                                        :value="$search[$field]" class="select2 cascade-drop-down" 
-                                        data-sr-cascade-target="#district_id"
-                                        data-sr-cascade-url="/district/ajax_get_list/{v}" 
-                                        />
-                            </div>
-                            <div class="col-md-4 col-lg-3 col-xxxl-2 mb-2">
-                                <?php
-                                $field = 'district_id';
-                                $label = get_value_from_list($field_labels, $field, $field);
-                                ?>
-                                <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
-                                    :list="$empty_list" :value="$search[$field]"
-                                    class="select2 cascade-drop-down" 
-                                    data-sr-cascade-target="#city_id"
-                                    data-sr-cascade-url="/city/ajax_get_list/0/{v}" 
-                                />
-                            </div>
-                            <div class="col-md-4 col-lg-3 col-xxxl-2 mb-2">
-                                <?php
-                                $field = 'city_id';
-                                $label = get_value_from_list($field_labels, $field, $field);
-                                ?>
-                                <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
-                                    :list="$empty_list" :value="$search[$field]"
-                                    class="select2" 
-                                />
-                            </div>       
-                            <div class="col-md-6 col-xxl-2 mb-2">
-                                <?php
-                                $field = 'pincode';
-                                $label = get_value_from_list($field_labels, $field, $field);
-                                ?>
-                                <x-Inputs.text-field :name="$field" :label="$label" :value="$search[$field]" />
-                            </div>                     
-                            
                             <div class="col-md-4 col-lg-3 col-xxxl-2 mb-2">
                                 <x-Inputs.text-field id="from_date" name="from_date" label="From Created Date"
                                     :value="$search['from_date']" class="form-control date-picker" data-date-end="input#to_date"

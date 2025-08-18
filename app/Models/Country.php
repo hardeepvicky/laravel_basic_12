@@ -54,6 +54,16 @@ class Country extends BaseModel
         return $this->name . " (" . $this->short_name . ")";
     }
 
+    public function getShortName()
+    {
+        if ($this->short_name)
+        {
+            return $this->short_name;
+        }
+        
+        return $this->name;
+    }
+
     public static function getMyCountry()
     {
         $record = self::query()->where("name", "india")->first();

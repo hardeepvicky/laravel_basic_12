@@ -8,28 +8,69 @@
             <table class="table table-bordered summary-table summary_table_with_search">
                 <thead>
                     <tr>
-                        <th>
+                        <th style="width:10%">
+                            <span class="btn btn-light text-dark border-primary clear_search_conditions mb-1">Clear</span>
+                        </th>
+                        <th style="width:10%">
                             <?php
-                            $field = "type";
+                            $field = "status_type";
                             ?>
-                            <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]"/>
-                        </th>                        
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$status_type_list" :value="$search[$field]" class="select2" />
+                        </th>
+                        <th style="width:10%">
+                            <?php
+                            $field = "carrier_id";
+                            ?>
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$carrier_list" :value="$search[$field]" class="select2" />
+                        </th>
+                        <th style="width:12%">
+                            <?php
+                            $field = "country_id";
+                            ?>
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$country_list" :value="$search[$field]" class="select2 mb-1"/>
+                        </th>
+                        <th style="width:12%">                            
+                            <?php
+                            $field = "state_id";
+                            ?>
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$state_list" :value="$search[$field]" class="select2 mb-1"/>
+
+                            <?php
+                            $field = "city_id";
+                            ?>
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$district_city_list" :value="$search[$field]" class="select2" />
+                        </th>
+                        <th style="width:10%">
+                            <?php
+                            $field = "docket_no";
+                            ?>
+                            <x-Inputs.text-field :id="$field" :name="$field" :label="$false" :value="$search[$field]"/>
+                        </th>               
+                        <th style="width:10%">
+                            <?php
+                            $field = "tracking_no";
+                            ?>
+                            <x-Inputs.text-field :id="$field" :name="$field" :label="$false" :value="$search[$field]"/>
+                        </th>               
                     </tr>
                     <tr class="border-bottom-primary">
                         <th style="width:10%">
                             <?= sortable_anchor('id', get_value_from_list($field_labels, 'id', 'id')) ?>
-                            | <?= sortable_anchor('name', get_value_from_list($field_labels, 'name', 'name')) ?>
                         </th>
                         <th><?= sortable_anchor('status_type', get_value_from_list($field_labels, 'status_type', 'status_type')) ?></th>
                         <th><?= sortable_anchor('carrier.name', get_value_from_list($field_labels, 'carrier_id', 'carrier_id')) ?></th>
                         <th><?= sortable_anchor('country.name', get_value_from_list($field_labels, 'country_id', 'country_id')) ?></th>
-                        <th><?= sortable_anchor('state.name', get_value_from_list($field_labels, 'state_id', 'state_id')) ?></th>
-                        <th><?= sortable_anchor('district.name', get_value_from_list($field_labels, 'district_id', 'district_id')) ?></th>
-                        <th><?= sortable_anchor('city.name', get_value_from_list($field_labels, 'city_id', 'city_id')) ?></th>
+                        <th>
+                            <?= sortable_anchor('state.name', get_value_from_list($field_labels, 'state_id', 'state_id')) ?>
+                            | <?= sortable_anchor('district.name', get_value_from_list($field_labels, 'district_id', 'district_id')) ?>                        
+                            | <?= sortable_anchor('city.name', get_value_from_list($field_labels, 'city_id', 'city_id')) ?>
+                        </th>
                         <th><?= sortable_anchor('docket_no', get_value_from_list($field_labels, 'docket_no', 'docket_no')) ?></th>
                         <th><?= sortable_anchor('tracking_no', get_value_from_list($field_labels, 'tracking_no', 'tracking_no')) ?></th>
-                        <th style="width:8%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
-                        <th style="width:8%"><?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?></th>
+                        <th style="width:10%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
+                        <th style="width:10%"><?= sortable_anchor('created_by', get_value_from_list($field_labels, 'created_by', 'created_by')) ?></th>
+                        <th style="width:10%"><?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?></th>
+                        <th style="width:10%"><?= sortable_anchor('updated_by', get_value_from_list($field_labels, 'updated_by', 'updated_by')) ?></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -44,22 +85,32 @@
                             </th>
                             <td>{{ get_value_from_list($status_type_list, $record->status_type) }}</td>
                             <td>{{ $record->carrier?->getDisplayName() }}</td>
-                            <td>{{ $record->country?->getDisplayName() }}</td>
-                            <td>{{ $record->state?->getDisplayName() }}</td>
-                            <td>{{ $record->district?->getDisplayName() }}</td>
-                            <td>{{ $record->city?->getDisplayName() }}</td>
-                            <td>{{ $record->docket_no }}</td>
-                            <td>{{ $record->tracking_no }}</td>
                             <td>
-                                <x-Backend.created-and-by :datetime="$record->created_at" :userId="$record->created_by" />
+                                {{ $record->country?->getShortName() }}
                             </td>
                             <td>
-                                <x-Backend.created-and-by :datetime="$record->updated_at" :userId="$record->updated_by" />
+                                {{ $record->state?->getShortName() }}
+                                >> {{ $record->district?->getDisplayName() }}
+                                >> {{ $record->city?->getDisplayName() }}
+                            </td>
+                            <td>{{ $record->docket_no }}</td>
+                            <td>{{ $record->tracking_no }}</td>
+                             <td>
+                                <x-Backend.celec-date-time :value="$record->created_at" />
+                            </td>
+                            <td>
+                                {{ get_value_from_list($userListCache, $record->created_by) }}
+                            </td>
+                            <td>
+                                <x-Backend.celec-date-time :value="$record->updated_at" :userId="$record->updated_by" />
+                            </td>
+                            <td>
+                                {{ get_value_from_list($userListCache, $record->updated_by) }}
                             </td>
                         </tr>
                         <tr id="record-{{ $record->id }}" class="hidden">
                             <td style="background-color: var(--body--bs-body-bg)"></td>                            
-                            <td colspan="9">
+                            <td colspan="8">
                                 <div class="row">
                                     <div class="col-md-6">
                                         <label class="info">

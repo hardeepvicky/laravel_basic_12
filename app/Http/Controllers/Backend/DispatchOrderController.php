@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Exceptions\UserException;
+use App\Helpers\ArrayHelper;
 use App\Helpers\LaravelExtend;
 use App\Models\Campaign;
 use App\Models\Carrier;
@@ -79,6 +80,9 @@ class DispatchOrderController extends BackendController
             ["field" => "created_at", "type" => "to_date", "view_field" => "to_date"],
         ]);
 
+        $array_helper =  new ArrayHelper($conditions);
+        $condition_list = $array_helper->convertModelSearchConditionToList();
+
         $builder = $this->modelClass::where($conditions);
 
         $builder->with([
@@ -100,6 +104,40 @@ class DispatchOrderController extends BackendController
             $builder->orderBy($sort_params['sort_by'], $sort_params['sort_dir']);
         }
 
+        if (isset($condition_list['country_id']))
+        {
+            $country_id = $condition_list['country_id'];
+
+            $state_list = State::getList("id", "display_name", ["country_id" => $country_id]);
+
+            $state_conditions = [
+                ["country_id", $country_id],
+                ["is_active", 1]
+            ];
+
+            $district_conditions = [
+                ["is_active", 1]
+            ];
+
+            if (isset($condition_list['state_id']))
+            {
+                $state_conditions[] = ["id", $condition_list['state_id']];
+                $district_conditions[] = ["state_id", $condition_list['state_id']];
+            }
+            
+            $district_cities = City::getWithDistrict($state_conditions, $district_conditions, [["is_active", 1]]);
+        
+            $district_city_collection = collect($district_cities);
+
+            $district_city_list = $district_city_collection->pluck('name', 'id')->toArray();
+        }
+        else
+        {
+            $state_list = $district_city_list = [];
+        }
+
+        $this->setForView(compact("state_list", "district_city_list"));
+
         return $builder;
     }
 
@@ -110,10 +148,6 @@ class DispatchOrderController extends BackendController
         }
 
         $country_list = Country::getList("id", "name");
-
-        $state_list = State::getIndianList();
-
-        $my_country = Country::getMyCountry();
 
         $type_conditions = [
             'type' => Type::getType($this->model, "status_type")
@@ -131,7 +165,7 @@ class DispatchOrderController extends BackendController
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
         $this->setForView(compact(
-            "country_list", "state_list", "status_type_list", "carrier_list",
+            "country_list", "status_type_list", "carrier_list",
             "field_labels", 
         ));
 
