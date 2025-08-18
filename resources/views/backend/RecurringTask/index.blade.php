@@ -15,14 +15,35 @@ $false = false;
     <div class="card-body">
         <form method="GET" class="summary_search" action="{{ route($routePrefix . '.index') }}">
             <input type="hidden" name="is_sort_clear" value="1" />
+            <div class="hidden">
+                
+                <?php 
+                    $field = "name";
+                ?>
+                <input type="text"  name="{{ $field }}" value="{{ $search[$field] }}" />
+                
+                <?php 
+                    $field = "dept_id";
+                ?>
+                <input type="text"  name="{{ $field }}" value="{{ $search[$field] }}" />
+
+                <?php 
+                    $field = "assign_to_user_id";
+                ?>
+                <input type="text"  name="{{ $field }}" value="{{ $search[$field] }}" />
+                
+                <?php 
+                    $field = "priority";
+                ?>
+                <input type="text"  name="{{ $field }}" value="{{ $search[$field] }}" />
+                
+                <?php 
+                    $field = "recurring_type";
+                ?>
+                <input type="text"  name="{{ $field }}" value="{{ $search[$field] }}" />
+
+            </div>
             <div class="row mb-4">
-                <div class="col-sm-6 col-md-3 col-xl-2 mb-2">
-                    <?php
-                    $field = 'pagination_limit';
-                    ?>
-                    <x-Inputs.drop-down :name="$field" label="Limit" :list="$paginationList" :value="$pagination_limit"
-                        :pleaseSelect="$false" class="pagination_limit" />
-                </div>
                 <div class="col-md-4 col-lg-3 col-xxxl-2 mb-2">
                     <?php
                     $field = "task_type";

@@ -18,34 +18,51 @@ $false = false;
                 <thead>
                     <tr>
                         <th style="width:10%">
+                            <span class="btn btn-light text-dark border-primary clear_search_conditions mb-1">Clear</span>
                             <?php
                             $field = "assign_to_user_id";
                             ?>
-                            <x-Inputs.drop-down :name="$field" :label="$false" :value="$search[$field]" :list="$user_list"/>
+                            <x-Inputs.drop-down :name="$field" :label="$false" :value="$search[$field]" :list="$user_list" class="select2"/>
                         </th>
-                        <th></th>
-                        <th></th>
-                        <th></th>
-                        <th style="width:5%">
+                        <th style="width:10%">
+                            <?php
+                            $field = "name";
+                            ?>
+                            <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]" />
+                        </th>
+                        <th style="width:10%">
+                            <?php
+                            $field = "dept_id";
+                            ?>
+                            <x-Inputs.drop-down :name="$field" :label="$false" :value="$search[$field]" :list="$department_list"  class="select2"/>
+                        </th>
+                        <th style="width:10%">
+                            <?php
+                            $field = "priority";
+                            ?>
+                            <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]" />
+                        </th>
+                        <th style="width:10%">
                             <?php
                             $field = "status";
-                            $label = get_value_from_list($field_labels, $field, $field);
                             ?>
-                            <x-Inputs.drop-down :name="$field" :label="$false" :value="$search[$field]" :list="$status_list" />
+                            <x-Inputs.drop-down :name="$field" :label="$false" :value="$search[$field]" :list="$status_list"  class="select2"/>
                         </th>
                     </tr>
                     <tr class="border-bottom-primary">
-                        <th style="width:10%">
+                        <th>
                             <?= sortable_anchor('id', get_value_from_list($field_labels, 'id', 'id')) ?>
                             | <?= sortable_anchor('assignToUser.name', get_value_from_list($field_labels, 'assign_to_user_id', 'assign_to_user_id')) ?>
                         </th>
-                        <th style="width:10%"><?= sortable_anchor('name', get_value_from_list($field_labels, 'name', 'name')) ?></th>
-                        <th style="width:5%"><?= sortable_anchor('department.name', get_value_from_list($field_labels, 'dept_id', 'dept_id')) ?>
-                        <th style="width:5%"><?= sortable_anchor('priority', get_value_from_list($field_labels, 'priority', 'priority')) ?> </th>
-                        <th style="width:5%"><?= sortable_anchor('status', get_value_from_list($field_labels, 'status', 'status')) ?> </th>
+                        <th><?= sortable_anchor('name', get_value_from_list($field_labels, 'name', 'name')) ?></th>
+                        <th><?= sortable_anchor('department.name', get_value_from_list($field_labels, 'dept_id', 'dept_id')) ?>
+                        <th><?= sortable_anchor('priority', get_value_from_list($field_labels, 'priority', 'priority')) ?> </th>
+                        <th><?= sortable_anchor('status', get_value_from_list($field_labels, 'status', 'status')) ?> </th>
                         <th style="width:8%">Time & Duration</th>
-                        <th style="width:6%"><?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?></th>
-                        <th style="width:6%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
+                        <th style="width:10%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
+                        <th style="width:10%"><?= sortable_anchor('created_by', get_value_from_list($field_labels, 'created_by', 'created_by')) ?></th>
+                        <th style="width:10%"><?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?></th>
+                        <th style="width:10%"><?= sortable_anchor('updated_by', get_value_from_list($field_labels, 'updated_by', 'updated_by')) ?></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -70,18 +87,23 @@ $false = false;
                                 <span>{{ $record->duration }} {{ get_value_from_list($duration_type_list, $record->duration_type) }}</span>
                             </label>
                         </td>
-                        
                         <td>
-                            <x-Backend.created-and-by :datetime="$record->updated_at_user_tz" :userId="$record->updated_by" />
+                            <x-Backend.celec-date-time :value="$record->created_at" />
                         </td>
                         <td>
-                            <x-Backend.created-and-by :datetime="$record->created_at_user_tz" :userId="$record->created_by" />
+                            {{ get_value_from_list($userListCache, $record->created_by) }}
+                        </td>
+                        <td>
+                            <x-Backend.celec-date-time :value="$record->updated_at" :userId="$record->updated_by" />
+                        </td>
+                        <td>
+                            {{ get_value_from_list($userListCache, $record->updated_by) }}
                         </td>
                         
                     </tr>
                     <tr id="record-{{ $record->id }}" class="hidden">
                         <td style="background-color: var(--body--bs-body-bg)"></td>
-                        <td colspan="5">
+                        <td colspan="8">
                             <div class="row">
                                 <div class="col-sm-12">
                                     <label class="info">

@@ -11,20 +11,14 @@
 
             @include($partial_path . '.page_header')
 
-            <div class="card">
+            <div class="card hidden">
                 <div class="card-body">
                     <form method="GET" class="summary_search" action="{{ route($routePrefix . '.index') }}">
                         <input type="hidden" name="is_sort_clear" value="1" />
-                        <div class="row mb-4">
-                            <div class="col-md-4 col-lg-3 col-xxxl-2 mb-2">
-                                <x-Inputs.text-field name="name" label="Name" :value="$search['name']" autocomplete="off" />
-                            </div>
-                            <div class="col-md-4 col-lg-3 col-xxxl-2 mb-2">
-                                <x-Inputs.drop-down name="is_active" label="Active" :value="$search['is_active']" :list="$yes_no_list"
-                                    class="select2" />
-                            </div>
-                        </div>
-                        <x-Backend.summary-search-form-footer :selectedPaginationLimit="$pagination_limit" />
+                        <?php 
+                            $field = "name";
+                        ?>
+                        <input type="text"  name="{{ $field }}" value="{{ $search[$field] }}" />
                     </form>
                 </div>
             </div>

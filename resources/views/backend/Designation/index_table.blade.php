@@ -8,24 +8,33 @@
             <table class="table table-striped table-bordered table-hover">
                 <thead>
                     <tr>
-                        <th>
+                        <th style="width:10%">
+                            <span class="btn btn-light text-dark border-primary clear_search_conditions mb-1">Clear</span>
                             <?php
                             $field = "name";
                             ?>
                             <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]"/>
                         </th>                        
+                        <th style="width:10%">
+                            <?php
+                            $field = "short_name";
+                            ?>
+                            <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]"/>
+                        </th>                         
                     </tr>
                     <tr class="border-bottom-primary">
-                        <th style="width:25%">
+                        <th>
                             <?= sortable_anchor('id', get_value_from_list($field_labels, 'id', 'id')) ?>
                             | <?= sortable_anchor('name', get_value_from_list($field_labels, 'name', 'name')) ?>
                         </th>
                         <th><?= sortable_anchor('short_name', get_value_from_list($field_labels, 'short_name', 'short_name')) ?></th>
-                        <th style="width:12%"><?= sortable_anchor('level', get_value_from_list($field_labels, 'level', 'level')) ?></th>
-                        <th style="width:12%"><?= sortable_anchor('list_display_order', get_value_from_list($field_labels, 'list_display_order', 'list_display_order')) ?></th>
-                        <th style="width:12%"><?= sortable_anchor('is_active', 'Activate / De-Active') ?></th>
-                        <th style="width:12%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
-                        <th style="width:12%"><?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?></th>                        
+                        <th style="width:8%"><?= sortable_anchor('level', get_value_from_list($field_labels, 'level', 'level')) ?></th>
+                        <th style="width:8%"><?= sortable_anchor('is_active', 'Activate / De-Active') ?></th>
+                        <th style="width:8%"><?= sortable_anchor('list_display_order', get_value_from_list($field_labels, 'list_display_order', 'list_display_order')) ?></th>
+                        <th style="width:10%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
+                        <th style="width:10%"><?= sortable_anchor('created_by', get_value_from_list($field_labels, 'created_by', 'created_by')) ?></th>
+                        <th style="width:10%"><?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?></th>
+                        <th style="width:10%"><?= sortable_anchor('updated_by', get_value_from_list($field_labels, 'updated_by', 'updated_by')) ?></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -56,10 +65,16 @@
                                 <x-Backend.active_deactive :isActive="$record->is_active" :id="$record->id" :routePrefix="$routePrefix" />
                             </td>
                             <td>
-                                <x-Backend.created-and-by :datetime="$record->created_at" :userId="$record->created_by" />
+                                <x-Backend.celec-date-time :value="$record->created_at" />
                             </td>
                             <td>
-                                <x-Backend.created-and-by :datetime="$record->updated_at" :userId="$record->updated_by" />
+                                {{ get_value_from_list($userListCache, $record->created_by) }}
+                            </td>
+                            <td>
+                                <x-Backend.celec-date-time :value="$record->updated_at" :userId="$record->updated_by" />
+                            </td>
+                            <td>
+                                {{ get_value_from_list($userListCache, $record->updated_by) }}
                             </td>
                         </tr>
                     @endforeach
