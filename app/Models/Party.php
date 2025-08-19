@@ -20,6 +20,7 @@ class Party extends BaseModel
     const TYPE_VENDOR = "VENDOR";
     const TYPE_SUPPLIER = "SUPPLIER";
     const TYPE_CONTRACTOR = "CONTRACTOR";
+    const TYPE_CARRIER = "CARRIER";
 
     public static array $child_model_class = [
         TaskParty::class => [
@@ -117,6 +118,7 @@ class Party extends BaseModel
             self::TYPE_VENDOR => "Vendor",
             self::TYPE_SUPPLIER => "Supplier",
             self::TYPE_CONTRACTOR => "Contractor",
+            self::TYPE_CARRIER => "Carrier",
         ];
 
         return $list;

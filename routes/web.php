@@ -820,7 +820,10 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
     Route::resource($route_prefix, $controllerClass);
 
     $name = "ajax_get_list";
-    Route::get($route_prefix . "-" . $name, [$controllerClass, $name])->name($name);
+    Route::get($route_prefix . "-" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
+
+    $name = "add_draft";
+    Route::any($route_prefix . "-" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
 
     Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
 

@@ -27,6 +27,7 @@ use App\Models\LeadItem;
 use App\Models\LeadProduct;
 use App\Models\Notification;
 use App\Models\NotificationSetting;
+use App\Models\Party;
 use App\Models\Product;
 use App\Models\State;
 use App\Models\Type;
@@ -154,8 +155,6 @@ class LeadController extends BackendController
 
         $state_list = State::getIndianList();
 
-        
-
         $type_conditions = [
             'type' => Type::getType($this->model, "source_type")
         ];
@@ -231,7 +230,7 @@ class LeadController extends BackendController
         $history_field_labels = FieldSetting::getDynamicFields(LeadHistory::class);
 
         $this->setForView(compact(
-            "address_type_list", "state_list", "district_cities", "district_city_list",
+            "address_type_list", "state_list", 
             "source_type_list", "deal_type_list", "status_type_list", "source_list", "payment_method_type_list", "dealer_list", "product_list", "item_list", "campaign_list",
             "user_list", "action_type_list", "lead_history_response_list",
             "field_labels", "address_field_labels", "product_field_labels", "item_field_labels", "history_field_labels"
@@ -270,7 +269,7 @@ class LeadController extends BackendController
 
         $district_city_list = $district_city_collection->pluck('name', 'id')->toArray();
 
-        $this->setForView(compact("district_city_list"));
+        $this->setForView(compact("district_cities", "district_city_list"));
     }
 
     private function _common_validation_rules()
@@ -606,6 +605,75 @@ class LeadController extends BackendController
         }
     }
 
+    public function add_draft(Request $request)
+    {
+        if ($request->isMethod("post"))
+        {
+            $validatedData = $request->validate([
+                'name' => 'nullable',
+                'email' => 'required_without_all:mobile,url,image,video',
+                'mobile' => 'required_without_all:email,url,image,video',
+                'url' => 'required_without_all:email,mobile,image,video',
+                'image' => 'required_without_all:email,mobile,url,video|image|mimes:jpeg,png,jpg,gif,svg|max:5120',
+                'video' => 'required_without_all:email,mobile,url,image|file|mimes:mp4,avi,mov,wmv,flv,mkv|max:102400',
+            ]);
+
+            DB::beginTransaction();
+
+            try {
+                // dd($validatedData);
+
+                $save_data = $validatedData;
+                unset($save_data['image']);
+                unset($save_data['video']);
+
+                if (!$save_data['name'])
+                {
+                    $save_data['name'] = "Unkown";
+                }
+
+                if ($request->hasFile('image')) 
+                {
+                    $path = rtrim(Lead::getStoragePath(), "/");
+                    $filepath = $request->file('image')->store($path, DEFAULT_DISK);
+                    $save_data['image'] = $filepath;
+                } 
+
+                if ($request->hasFile('video')) 
+                {
+                    $path = rtrim(Lead::getStoragePath(), "/");
+                    $filepath = $request->file('video')->store($path, DEFAULT_DISK);
+                    $save_data['video'] = $filepath;
+                } 
+
+                $this->model = $this->modelClass::create($save_data);
+
+                if (LaravelExtend::$errors) {
+                    throw new UserException("There are some errors", UserException::ERROR_USER_DATA_WRONG);
+                }
+
+                DB::commit();
+
+                return $this->afterSave($this->model);
+            } catch (Exception $ex) {
+                DB::rollBack();
+
+                $this->saveSqlLog();
+
+                return back()->withInput()->with('fail', get_exception_display_message($ex))->with("custom_errors", LaravelExtend::$errors);
+            }
+        }
+
+        $form = [
+            'url' => route($this->routePrefix . '.add_draft'),
+            'method' => 'POST',
+        ];
+
+        $this->setForView(compact("form"));
+
+        return $this->view(__FUNCTION__);
+    }
+
     public function edit($id)
     {
         $this->model = $model = $this->modelClass::with([
@@ -727,7 +795,7 @@ class LeadController extends BackendController
         $items = $record->items?->toArray() ?? [];
         $addresses = $record->address?->toArray() ?? [];
 
-        $carrier_list = Carrier::getList();
+        $carrier_list = Party::getList("id", "display_name", ["type" => Party::TYPE_CARRIER]);
 
         $model = new LeadHistory();
 

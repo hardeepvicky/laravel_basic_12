@@ -9,11 +9,12 @@
                 <thead>
                     <tr>
                         <th>
+                            <span class="btn btn-light text-dark border-primary clear_search_conditions mb-1">Clear</span>
                             <?php
                             $field = "name";
                             ?>
                             <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]"/>
-                        </th>                        
+                        </th>
                     </tr>
                     <tr class="border-bottom-primary">
                         <th style="width:15%">
@@ -53,14 +54,20 @@
                                 <x-Backend.active_deactive :isActive="$record->is_active" :id="$record->id" :routePrefix="$routePrefix" />
                             </td>
                             <td>
-                                <x-Backend.created-and-by :datetime="$record->created_at" :userId="$record->created_by" />
+                                <x-Backend.celec-date-time :value="$record->created_at" />
                             </td>
                             <td>
-                                <x-Backend.created-and-by :datetime="$record->updated_at" :userId="$record->updated_by" />
+                                {{ get_value_from_list($userListCache, $record->created_by) }}
+                            </td>
+                            <td>
+                                <x-Backend.celec-date-time :value="$record->updated_at" :userId="$record->updated_by" />
+                            </td>
+                            <td>
+                                {{ get_value_from_list($userListCache, $record->updated_by) }}
                             </td>
                         </tr>
                         <tr id="record-{{ $record->id }}" class="hidden">
-                            <td style="background-color: var(--body--bs-body-bg)"></td>                            
+                            <td style="background-color: var(--body--bs-body-bg)"></td>
                             <td colspan="10">
                                 <div class="row">
                                     <div class="col-md-6">

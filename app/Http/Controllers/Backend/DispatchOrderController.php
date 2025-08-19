@@ -24,6 +24,7 @@ use App\Models\LeadItem;
 use App\Models\LeadProduct;
 use App\Models\Notification;
 use App\Models\NotificationSetting;
+use App\Models\Party;
 use App\Models\Product;
 use App\Models\State;
 use App\Models\Type;
@@ -160,7 +161,7 @@ class DispatchOrderController extends BackendController
 
         $status_type_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
 
-        $carrier_list = Carrier::getList();
+        $carrier_list = Party::getList("id", "display_name", ["type" => Party::TYPE_CARRIER]);
 
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 

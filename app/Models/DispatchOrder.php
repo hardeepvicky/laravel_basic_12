@@ -93,7 +93,7 @@ class DispatchOrder extends BaseModel
 
     public function carrier()
     {
-        return $this->belongsTo(Carrier::class);
+        return $this->belongsTo(Party::class);
     }
 
     public function lead()

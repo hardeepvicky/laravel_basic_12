@@ -18,6 +18,8 @@ use Illuminate\Support\Facades\Route;
 
 class DocumentFileController extends BackendController
 {
+    protected int $paginationLimit = 10;
+    
     public String $routePrefix = "document-file";
 
     protected $modelClass = DocumentFile::class;

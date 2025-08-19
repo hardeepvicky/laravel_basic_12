@@ -24,6 +24,8 @@ class Lead extends BaseModel
 
     protected static array $list_fields = ["id", "name", "mobile"];
 
+    protected static array $file_fields = ["image", "video"];
+
     public static array $child_model_class = [
         LeadAddress::class => [
             "foreignKey" => ["lead_id"],
