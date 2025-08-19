@@ -4,15 +4,10 @@ namespace App\Http\Controllers\Backend;
 
 use App\Helpers\ArrayHelper;
 use App\Helpers\LaravelExtend;
-use App\Models\Department;
-use App\Models\DropDownValue;
 use App\Models\FieldSetting;
 use App\Models\ItemCategory;
-use App\Models\ProductCategory;
 use App\Models\ProductCategoryAttribute;
-use App\Models\Type;
 use App\Models\Uom;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Support\Facades\DB;

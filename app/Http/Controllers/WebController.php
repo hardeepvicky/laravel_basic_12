@@ -6,18 +6,14 @@ use App\Exceptions\UserException;
 use App\Helpers\ArrayHelper;
 use App\Helpers\DateUtility;
 use App\Helpers\LaravelExtend;
-use App\Models\BaseModel;
 use App\Models\BaseModelInterface;
 use App\Models\Setting;
 use App\Traits\CacheTrait;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
 
 class WebController extends Controller
 {

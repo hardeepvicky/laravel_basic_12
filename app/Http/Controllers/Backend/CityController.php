@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Backend;
 
 use App\Exceptions\UserException;
 use App\Helpers\ArrayHelper;
-use App\Helpers\FileUtility;
 use App\Helpers\ImportUtility;
 use App\Helpers\LaravelExtend;
 use App\Helpers\Util;
@@ -16,11 +15,9 @@ use App\Models\ImportLog;
 use App\Models\State;
 use Illuminate\Http\Request;
 use Exception;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
-use Illuminate\Validation\Rule;
 
 class CityController extends BackendController
 {

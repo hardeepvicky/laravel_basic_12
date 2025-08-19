@@ -4,37 +4,24 @@ namespace App\Http\Controllers\Backend;
 
 use App\Exceptions\UserException;
 use App\Helpers\ArrayHelper;
+use App\Helpers\CsvUtility;
+use App\Helpers\DateUtility;
+use App\Helpers\FileUtility;
 use App\Helpers\LaravelExtend;
-use App\Models\Campaign;
-use App\Models\Carrier;
 use App\Models\City;
 use App\Models\Country;
-use App\Models\Dealer;
 use App\Models\DispatchOrder;
-use App\Models\DispatchOrderItem;
-use App\Models\DispatchOrderProduct;
 use App\Models\DocumentFile;
-use App\Models\DropDownValue;
 use App\Models\FieldSetting;
-use App\Models\Item;
-use App\Models\Lead;
-use App\Models\LeadAddress;
-use App\Models\LeadHistory;
-use App\Models\LeadItem;
-use App\Models\LeadProduct;
-use App\Models\Notification;
-use App\Models\NotificationSetting;
 use App\Models\Party;
 use App\Models\Product;
 use App\Models\State;
 use App\Models\Type;
 use App\Models\User;
 use App\Notifications\GeneralNotification;
-use App\Rules\MobileNumber;
 use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Notifications\Events\NotificationSent;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Validator;
 
@@ -171,138 +158,6 @@ class DispatchOrderController extends BackendController
         ));
 
         return parent::beforeViewRender();
-    }
-
-    private function _common_validation_rules()
-    {
-        return [
-            "name" => ["required"],
-            "mobile" => ["required", new MobileNumber],
-            "mobile2" => ["nullable", new MobileNumber],
-            "state_id" => ["required"],
-            "city_id" => ["required"],
-            "assign_to_user_id" => ["required"],
-            "status_type" => ["required"],
-            "company_name" => ["nullable"],
-            "brand_name" => ["nullable"],
-            "company_gst_no" => ["nullable"],
-            "source_type" => ["nullable"],
-            "source_id" => ["nullable"],
-            "deal_type" => ["required"],
-            "dealer_id" => [],
-            "campaign_id" => ["nullable"],
-            "purpose_price" => ["nullable"],
-            "payment_method_type" => ["nullable"],
-            "profile_img" => ["nullable"],
-            "remarks" => ["nullable"],
-            "leadFile" => [],
-            "addresses" => [],
-            "products" => [],
-        ];
-    }
-
-    private function _common_validation_messages()
-    {
-        return [];
-    }
-
-    private function _beforeSave($validatedData)
-    {
-        if (isset($validatedData['city_id']) && $validatedData['city_id'])
-        {
-            $my_country = Country::getMyCountry();
-
-            $district_cities = City::getWithDistrict([["country_id", $my_country->id]], [["is_active", 1]], [["is_active", 1]]);
-
-            foreach($district_cities as $city)
-            {
-                if ($city['id'] == $validatedData['city_id'])
-                {
-                    $validatedData['district_id'] = $city['district_id'];
-                    break;
-                }
-            }
-
-            if (!isset($validatedData['district_id']))
-            {
-                LaravelExtend::addError("City", "District ID not found");
-            }
-        }
-
-        return $validatedData;
-    }
-
-    private function _saveOthers($validatedData)
-    {
-        if (isset($validatedData['leadFile'])) {
-
-            $ids = explode(",", $validatedData['leadFile']);
-
-            $document_files = DocumentFile::find($ids);
-
-            $this->model->documentFile()->sync($document_files);
-        }
-    }
-
-    public function edit($id)
-    {
-        $this->model = $model = $this->modelClass::with([])->findOrFail($id);
-
-        $this->beforeEdit($model);
-
-        $form = [
-            'url' => route($this->routePrefix . '.update', $id),
-            'method' => 'PUT',
-        ];
-
-        $this->setForView(compact("model", "form"));
-
-        return $this->view("form");
-    }
-
-    public function update($id, Request $request)
-    {
-        $this->model = $model = $this->modelClass::findOrFail($id);
-
-        $this->beforeEdit($model);
-
-        $rules = $this->_common_validation_rules();
-
-        $rules = LaravelExtend::merge_validation_rules($rules, $model->getRequiedIfRules($request));
-        $rules = LaravelExtend::merge_validation_rules($rules, $model->getUniqueValidationRules($request));
-
-        // dd($rules);
-
-        $messages = $this->_common_validation_messages();
-
-        $validatedData = $request->validate($rules, $messages);
-
-        DB::beginTransaction();
-
-        try {
-            $save_data = $this->_beforeSave($validatedData);
-            unset($save_data['leadFile']);
-
-            $this->model->fill($save_data);
-
-            $this->model->save();
-
-            $this->_saveOthers($validatedData);
-
-            if (LaravelExtend::$errors) {
-                throw new UserException("There are some errors", UserException::ERROR_USER_DATA_WRONG);
-            }
-
-            DB::commit();
-
-            return $this->afterSave($this->model);
-        } catch (Exception $ex) {
-            DB::rollBack();
-
-            $this->saveSqlLog();
-
-            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", LaravelExtend::$errors);
-        }
     }
 
     public function export_csv()

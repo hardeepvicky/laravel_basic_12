@@ -19,7 +19,6 @@ use App\Models\ItemCategory;
 use App\Models\ItemFile;
 use App\Models\Setting;
 use App\Models\Tag;
-use App\Models\Type;
 use App\Models\Uom;
 use App\Models\User;
 use Illuminate\Http\Request;

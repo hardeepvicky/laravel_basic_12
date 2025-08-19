@@ -11,10 +11,7 @@ use App\Models\Lead;
 use App\Models\LeadHistory;
 use App\Models\Type;
 use App\Models\User;
-use Exception;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Validator;
 
 class CustomerController extends LeadController
 {

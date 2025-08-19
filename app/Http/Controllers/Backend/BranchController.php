@@ -10,7 +10,6 @@ use App\Helpers\FileUtility;
 use App\Helpers\LaravelExtend;
 use App\Models\Branch;
 use App\Models\City;
-use App\Models\Company;
 use App\Models\Country;
 use App\Models\FieldSetting;
 use App\Models\State;
@@ -21,7 +20,6 @@ use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Validator;
 
 class BranchController extends BackendController
 {

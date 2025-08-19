@@ -3,15 +3,11 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Helpers\LaravelExtend;
-use App\Models\City;
-use App\Models\State;
 use App\Models\Tag;
 use Illuminate\Http\Request;
 use Exception;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Validation\Rule;
 
 class TagsController extends BackendController
 {

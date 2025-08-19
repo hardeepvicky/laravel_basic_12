@@ -13,11 +13,9 @@ use App\Models\ImportLog;
 use App\Models\State;
 use Illuminate\Http\Request;
 use Exception;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
-use Illuminate\Validation\Rule;
 
 class DistrictController extends BackendController
 {
