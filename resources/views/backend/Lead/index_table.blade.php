@@ -107,24 +107,12 @@
                             |
                             <?= sortable_anchor('city.name', get_value_from_list($field_labels, 'city_id', 'city_id')) ?>
                         </th>
-                        <th><?= sortable_anchor('mobile', get_value_from_list($field_labels, 'mobile', 'mobile')) ?>
-                        </th>
-                        <th><?= sortable_anchor('mobile2', get_value_from_list($field_labels, 'mobile2', 'mobile2')) ?>
-                        </th>
-                        <th><?= sortable_anchor('source_id', get_value_from_list($field_labels, 'source_id', 'source_id')) ?>
-                        </th>
-                        <th><?= sortable_anchor('source_type', get_value_from_list($field_labels, 'source_type', 'source_type')) ?>
-                        </th>
-                        <th><?= sortable_anchor('dealer_id', get_value_from_list($field_labels, 'dealer_id', 'dealer_id')) ?>
-                        </th>
-                        <th><?= sortable_anchor('deal_type', get_value_from_list($field_labels, 'deal_type', 'deal_type')) ?>
-                        </th>
-                        <th style="width:10%">
-                            <?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?>
-                        </th>
-                        <th style="width:10%">
-                            <?= sortable_anchor('created_by', get_value_from_list($field_labels, 'created_by', 'created_by')) ?>
-                        </th>
+                        <th><?= sortable_anchor('mobile', get_value_from_list($field_labels, 'mobile', 'mobile')) ?></th>
+                        <th><?= sortable_anchor('mobile2', get_value_from_list($field_labels, 'mobile2', 'mobile2')) ?></th>
+                        <th><?= sortable_anchor('source_id', get_value_from_list($field_labels, 'source_id', 'source_id')) ?></th>
+                        <th><?= sortable_anchor('source_type', get_value_from_list($field_labels, 'source_type', 'source_type')) ?></th>
+                        <th><?= sortable_anchor('dealer_id', get_value_from_list($field_labels, 'dealer_id', 'dealer_id')) ?></th>
+                        <th><?= sortable_anchor('deal_type', get_value_from_list($field_labels, 'deal_type', 'deal_type')) ?></th>
                         <th style="width:10%">
                             <?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?>
                         </th>
@@ -158,13 +146,7 @@
                             <td>{{ get_value_from_list($dealer_list, $record->dealer_id) }}</td>
                             <td>{{ get_value_from_list($deal_type_list, $record->deal_type) }}</td>
                             <td>
-                                <x-Backend.celec-date-time :value="$record->created_at" />
-                            </td>
-                            <td>
-                                {{ get_value_from_list($userListCache, $record->created_by) }}
-                            </td>
-                            <td>
-                                <x-Backend.celec-date-time :value="$record->updated_at" :userId="$record->updated_by" />
+                                <x-Backend.celec-date-time :value="$record->updated_at"/>
                             </td>
                             <td>
                                 {{ get_value_from_list($userListCache, $record->updated_by) }}

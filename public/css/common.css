@@ -231,7 +231,7 @@ label.info {
 
 .celec_info {
     margin: 0 5px 2px 0;    
-    max-width: 200px;
+    min-width: 100px;
     display: inline-block;
     font-size: 14px;
 

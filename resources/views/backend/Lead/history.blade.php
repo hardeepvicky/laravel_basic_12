@@ -58,17 +58,17 @@ use App\Helpers\DateUtility;
                     <thead>
                         <tr class="border-bottom-primary">
                             <th>Sr. No.</th>
+                            <th style="width:10%">{{ get_value_from_list($history_field_labels, 'created_at', 'created_at') }}</th>
                             <th><?= get_value_from_list($history_field_labels, 'entry_by', 'entry_by') ?></th>
                             <th><?= get_value_from_list($history_field_labels, 'action_type', 'action_type') ?></th>
                             <th><?= get_value_from_list($history_field_labels, 'action', 'action') ?></th>
                             <th><?= get_value_from_list($history_field_labels, 'response_type_id', 'response_type_id') ?></th>
                             <th><?= get_value_from_list($history_field_labels, 'response', 'response') ?></th>
                             <th><?= get_value_from_list($history_field_labels, 'recording_file', 'recording_file') ?></th>
-                            <th><?= get_value_from_list($history_field_labels, 'assign_to_user_id', 'assign_to_user_id') ?></th>
                             <th><?= get_value_from_list($history_field_labels, 'remarks', 'remarks') ?></th>
                             <th><?= get_value_from_list($history_field_labels, 'status_type', 'status_type') ?></th>
+                            <th><?= get_value_from_list($history_field_labels, 'assign_to_user_id', 'assign_to_user_id') ?></th>
                             <th style="width:10%"><?= get_value_from_list($history_field_labels, 'next_meeting_date_time', 'next_meeting_date_time') ?></th>
-                            <th style="width:10%">{{ get_value_from_list($history_field_labels, 'created_at', 'created_at') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -78,6 +78,9 @@ use App\Helpers\DateUtility;
                         ?>
                         <tr>
                             <td>{{ $i + 1 }}</td>
+                            <td>
+                                <x-Backend.created-and-by :datetime="$history->created_at" :userId="$history->created_by" />
+                            </td>
                             <td>{{ $history->entry_by }}</td>
                             <td>{{ get_value_from_list($action_type_list, $history->action_type) }}</td>
                             <td>
@@ -99,10 +102,7 @@ use App\Helpers\DateUtility;
                                     Your browser does not support the audio element.
                                 </audio>
                                 @endif
-                            </td>
-                            <td>
-                                {{ get_value_from_list($userListCache, $history->assign_to_user_id) }}
-                            </td>
+                            </td>                            
                             <td>
                                 <div class="more-less-text">{{ $history->remarks }}</div>
                             </td>
@@ -110,10 +110,10 @@ use App\Helpers\DateUtility;
                                 {{ get_value_from_list($status_type_list, $history->status_type) }}
                             </td>
                             <td>
-                                <x-Backend.created-and-by :datetime="$history->next_meeting_date_time" userId="0" />
+                                {{ get_value_from_list($userListCache, $history->assign_to_user_id) }}
                             </td>
                             <td>
-                                <x-Backend.created-and-by :datetime="$history->created_at" :userId="$history->created_by" />
+                                <x-Backend.created-and-by :datetime="$history->next_meeting_date_time" userId="0" />
                             </td>
                         </tr>
 

@@ -833,9 +833,6 @@ class LeadController extends BackendController
             case LeadHistory::ACTION_TYPE_CHANGE_STATUS:
                 $rules['status_type'] = ["required"];
                 break;
-            case LeadHistory::ACTION_TYPE_LEAD_TRANSFER:
-                $rules['assing_to_user_id'] = ["required"];
-                break;
             case LeadHistory::ACTION_TYPE_DISPATCH:
                 $rules['remarks'] = ["required"];
                 break;
@@ -865,11 +862,19 @@ class LeadController extends BackendController
 
             $validatedData = $model->convertTimeZoneBeforeQueryToDatabase($validatedData);
 
+            $validatedData['assign_to_user_id'] = $lead->assign_to_user_id;
+
             $model = LeadHistory::create($validatedData);
 
             if ($validatedData['status_type'] != $lead->status_type)
             {
                 $lead->changeStatus($validatedData['status_type']);
+            }
+
+            if ($validatedData['response_type_id'])
+            {
+                $lead->response_type_id = $validatedData['response_type_id'];
+                $lead->save();
             }
 
             if ($validatedData['next_meeting_date_time'])
@@ -1102,6 +1107,7 @@ class LeadController extends BackendController
 
             $validatedData['lead_id'] = $lead_id;
             $validatedData = $model->convertTimeZoneBeforeQueryToDatabase($validatedData);
+            $validatedData['assing_to_user_id'] = $lead->assign_to_user_id;
 
             $model = LeadHistory::create($validatedData);
 
