@@ -89,6 +89,7 @@ class LeadController extends BackendController
             ["field" => "district_id", "type" => "int"],
             ["field" => "city_id", "type" => "int"],
             ["field" => "assign_to_user_id", "type" => "int"],
+            ["field" => "response_type_id", "type" => "int"],
         ]);
 
         $array_helper =  new ArrayHelper($conditions);

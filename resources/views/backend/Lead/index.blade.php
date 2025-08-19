@@ -71,6 +71,11 @@
                             $field = "deal_type";
                         ?>
                         <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
+
+                        <?php 
+                            $field = "response_type_id";
+                        ?>
+                        <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
                     </form>
                 </div>
             </div>

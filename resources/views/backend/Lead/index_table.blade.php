@@ -35,6 +35,13 @@
                             <x-Inputs.drop-down :id="$field" :name="$field" :label="$false"
                                 :value="$search[$field]" :list="$status_type_list" :value="$search[$field]" class="select2" />
                         </th>
+                        <th style="width:10%">
+                            <?php
+                            $field = 'response_type_id';
+                            ?>
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false"
+                                :value="$search[$field]" :list="$lead_history_response_list" :value="$search[$field]" class="select2" />
+                        </th>
                         <th style="width:12%">
                             <?php
                             $field = 'state_id';
@@ -96,10 +103,9 @@
                             <?= sortable_anchor('id', get_value_from_list($field_labels, 'id', 'id')) ?>
                             | <?= sortable_anchor('name', get_value_from_list($field_labels, 'name', 'name')) ?>
                         </th>
-                        <th><?= sortable_anchor('assignTo.person_name', get_value_from_list($field_labels, 'assign_to_user_id', 'assign_to_user_id')) ?>
-                        </th>
+                        <th><?= sortable_anchor('assignTo.person_name', get_value_from_list($field_labels, 'assign_to_user_id', 'assign_to_user_id')) ?></th>
                         <th><?= sortable_anchor('status_type', get_value_from_list($field_labels, 'status_type', 'status_type')) ?>
-                        </th>
+                        <th><?= sortable_anchor('response_type_id', get_value_from_list($field_labels, 'response_type_id', 'response_type_id')) ?></th>
                         <th>
                             <?= sortable_anchor('state.name', get_value_from_list($field_labels, 'state_id', 'state_id')) ?>
                             |
@@ -134,6 +140,7 @@
                             </th>
                             <td>{{ $record->assignTo?->getDisplayName() }}</td>
                             <td>{{ get_value_from_list($status_type_list, $record->status_type) }}</td>
+                            <td>{{ get_value_from_list($lead_history_response_list, $record->response_type_id) }}</td>
                             <td>
                                 {{ $record->state?->getShortName() }}
                                 >> {{ $record->district?->getDisplayName() }}
