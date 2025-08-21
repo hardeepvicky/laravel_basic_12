@@ -110,7 +110,7 @@ class Item extends BaseModel
     public function getUniqueValidationRules(Request $request)
     {
         $field_rules = [
-            "sku" => [Rule::unique($this->connection . "." . $this->getTable(), "name")],
+            "sku" => [Rule::unique($this->connection . "." . $this->getTable(), "sku")],
         ];
 
         if ($this->id) {

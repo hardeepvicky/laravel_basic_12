@@ -44,21 +44,7 @@ class Product extends BaseModel
     {
         parent::beforeSave();
 
-        if ($this->size_uom_id)
-        {
-            if ($this->length)
-            {
-                $this->length = Uom::convertToParentUomValue($this->size_uom_id, $this->length);
-            }
-            if ($this->width)
-            {
-                $this->width = Uom::convertToParentUomValue($this->size_uom_id, $this->width);
-            }
-            if ($this->height)
-            {
-                $this->height = Uom::convertToParentUomValue($this->size_uom_id, $this->height);
-            }
-        }
+        $this->convertToParentUom();
     }
     
     public function afterFind()
@@ -76,11 +62,6 @@ class Product extends BaseModel
     public function category()
     {
         return $this->belongsTo(ProductCategory::class);
-    }
-
-    public function catalog()
-    {
-        return $this->belongsTo(ProductCatalog::class, "product_catalog_id");
     }
 
     public function productAttributes()
@@ -116,6 +97,11 @@ class Product extends BaseModel
     public function mainImage()
     {
         return $this->belongsTo(DocumentFile::class);
+    }
+
+    public function catalog()
+    {
+        return $this->belongsTo(DocumentFile::class, "catalog_document_file_id");
     }
 
     protected function getDisplayNameAttribute()
@@ -184,6 +170,40 @@ class Product extends BaseModel
         return $labels;
     }
 
+    public function convertToParentUom()
+    {
+        if ($this->size_uom_id)
+        {
+            if ($this->length)
+            {
+                $this->length = Uom::convertToParentUomValue($this->size_uom_id, $this->length);
+            }
+
+            if ($this->width)
+            {
+                $this->width = Uom::convertToParentUomValue($this->size_uom_id, $this->width);
+            }
+
+            if ($this->height)
+            {
+                $this->height = Uom::convertToParentUomValue($this->size_uom_id, $this->height);
+            }
+
+            if ($this->gross_length)
+            {
+                $this->gross_length = Uom::convertToParentUomValue($this->size_uom_id, $this->gross_length);
+            }
+            if ($this->gross_width)
+            {
+                $this->gross_width = Uom::convertToParentUomValue($this->size_uom_id, $this->gross_width);
+            }
+            if ($this->gross_height)
+            {
+                $this->gross_height = Uom::convertToParentUomValue($this->size_uom_id, $this->gross_height);
+            }
+        }
+    }
+
     public function convertToChildUom()
     {
         if ($this->size_uom_id)
@@ -192,13 +212,28 @@ class Product extends BaseModel
             {
                 $this->length = Uom::convertToChildUomValue($this->size_uom_id, $this->length);
             }
+
             if ($this->width)
             {
                 $this->width = Uom::convertToChildUomValue($this->size_uom_id, $this->width);
             }
+            
             if ($this->height)
             {
                 $this->height = Uom::convertToChildUomValue($this->size_uom_id, $this->height);
+            }
+
+            if ($this->gross_length)
+            {
+                $this->gross_length = Uom::convertToChildUomValue($this->size_uom_id, $this->gross_length);
+            }
+            if ($this->gross_width)
+            {
+                $this->gross_width = Uom::convertToChildUomValue($this->size_uom_id, $this->gross_width);
+            }
+            if ($this->gross_height)
+            {
+                $this->gross_height = Uom::convertToChildUomValue($this->size_uom_id, $this->gross_height);
             }
         }
     }
@@ -248,6 +283,25 @@ class Product extends BaseModel
                     {
                         $record->height *= $uoms[$record->size_uom_id]['conversion_factor'];
                         $record->height = round($record->height, 3);
+                    }
+
+                    if ($record->gross_length)
+                    {
+                        $record->gross_length *= $uoms[$record->size_uom_id]['conversion_factor'];
+                        $record->gross_length = round($record->gross_length, 3);
+                    }
+
+                    if ($record->gross_width)
+                    {
+                        $record->gross_width *= $uoms[$record->size_uom_id]['conversion_factor'];
+
+                        $record->gross_width = round($record->gross_width, 3);
+                    }
+
+                    if ($record->gross_height)
+                    {
+                        $record->gross_height *= $uoms[$record->size_uom_id]['conversion_factor'];
+                        $record->gross_height = round($record->gross_height, 3);
                     }
                 }
             }

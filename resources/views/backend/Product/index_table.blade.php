@@ -29,10 +29,12 @@
                         <th><?= sortable_anchor('model_name', get_value_from_list($field_labels, 'model_name', 'model_name')) ?></th>
                         <th>Catalog</th>
                         <th>{{ get_value_from_list($field_labels, 'main_image_id', 'main_image_id') }}</th>
-                        <th style="width:10%"><?= sortable_anchor('list_display_order', get_value_from_list($field_labels, 'list_display_order', 'list_display_order')) ?></th>
-                        <th style="width:10%"><?= sortable_anchor('is_active', 'Activate / De-Active') ?></th>
-                        <th style="width:10%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
-                        <th style="width:10%"><?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?></th>
+                        <th style="width:8%"><?= sortable_anchor('list_display_order', get_value_from_list($field_labels, 'list_display_order', 'list_display_order')) ?></th>
+                        <th style="width:8%"><?= sortable_anchor('is_active', 'Activate / De-Active') ?></th>
+                        <th style="width:8%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
+                        <th style="width:8%"><?= sortable_anchor('created_by', get_value_from_list($field_labels, 'created_by', 'created_by')) ?></th>
+                        <th style="width:8%"><?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?></th>
+                        <th style="width:8%"><?= sortable_anchor('updated_by', get_value_from_list($field_labels, 'updated_by', 'updated_by')) ?></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -47,10 +49,10 @@
                             </th>
                             <td>{{ get_value_from_list($product_category_list, $record->product_category_id) }}</td>
                             <td>{{ $record->model_name }}</td>
-                            <td>                                
-                                <?php
-                                if ($record->catalog):
-                                    $documents = [$record->catalog->document]; 
+                            <td>
+                                <?php 
+                                if (isset($record->catalog) && $record->catalog):
+                                    $documents = [$record->catalog]; 
                                 ?>
                                     <x-backend.document-files :records="$documents" />
                                 <?php endif; ?>
@@ -73,23 +75,36 @@
                             </td>
                             <td>
                                 <x-Backend.active_deactive :isActive="$record->is_active" :id="$record->id" :routePrefix="$routePrefix" />
+                            </td>   
+                            <td>
+                                <x-Backend.celec-date-time :value="$record->created_at" />
                             </td>
                             <td>
-                                <x-Backend.created-and-by :datetime="$record->created_at" :userId="$record->created_by" />
+                                {{ get_value_from_list($userListCache, $record->created_by) }}
                             </td>
                             <td>
-                                <x-Backend.created-and-by :datetime="$record->updated_at" :userId="$record->updated_by" />
-                            </td>                            
+                                <x-Backend.celec-date-time :value="$record->updated_at" :userId="$record->updated_by" />
+                            </td>
+                            <td>
+                                {{ get_value_from_list($userListCache, $record->updated_by) }}
+                            </td>                                                    
                         </tr>
                         <tr id="record-{{ $record->id }}" class="hidden">
                             <td style="background-color: var(--body--bs-body-bg)"></td>                            
-                            <td colspan="9">
+                            <td colspan="10">
                                 <div class="row">
                                     <div class="col-md-12 col-xl-5">
                                         <label class="info">
-                                            Size :
+                                            Net Size :
                                             <span>
                                                 {{ $record->length }} x {{ $record->width }} x {{ $record->height }} {{ $record->size_uom_name }}
+                                            </span>
+                                        </label>
+
+                                        <label class="info">
+                                            Gross Size :
+                                            <span>
+                                                {{ $record->gross_length }} x {{ $record->gross_width }} x {{ $record->gross_height }} {{ $record->size_uom_name }}
                                             </span>
                                         </label>
 

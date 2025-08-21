@@ -2,23 +2,20 @@
 
 namespace App\Http\Controllers\Backend;
 
+use App\Exceptions\UserException;
 use App\Helpers\LaravelExtend;
-use App\Helpers\Util;
+use App\Models\AutoSerialPattern;
 use App\Models\FieldSetting;
-use App\Models\Party;
-use App\Models\ProductCatalog;
-use App\Models\ProductCategory;
-use App\Rules\MobileNumber;
 use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
-class ProductCatalogController extends BackendController
+class AutoSerialPatternController extends BackendController
 {
-    public String $routePrefix = "product-catalog";
+    public String $routePrefix = "auto-serial-pattern";
 
-    protected $modelClass = ProductCatalog::class;
+    protected $modelClass = AutoSerialPattern::class;
 
     protected $model = null;
 
@@ -29,6 +26,7 @@ class ProductCatalogController extends BackendController
         $builder = $this->_getBuildeForIndex($cache_key_prefix);
 
         $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
+        // dd($records->toArray());
 
         $this->setForView(compact("records"));
 
@@ -41,21 +39,19 @@ class ProductCatalogController extends BackendController
 
         $conditions = $this->getConditions($cache_key, [
             ["field" => "id", "type" => "int", "cache" => false],
-            ["field" => "product_category_id", "type" => "int"],
-            ["field" => "name", "type" => "string"],
-            ["field" => "is_active", "type" => "int"],
+            ["field" => "type_id", "type" => "int"],
         ]);
 
         $builder = $this->modelClass::where($conditions);
+        $builder->with(["type"]);
 
-        $builder->with(["category", "document"]);
-
-        if ($apply_sort) {
+        if ($apply_sort)
+        {
             $cache_key_for_sort = $cache_key_prefix . "-index-extra-params";
 
             $clear_cache = request('is_sort_clear', false);
 
-            $this->model = new $this->modelClass;
+            $this->model = new $this->modelClass();
 
             $sort_params = $this->getSortBy($this->model, $cache_key_for_sort, [
                 ["key" => "sort_by", "default" => "id"],
@@ -70,16 +66,17 @@ class ProductCatalogController extends BackendController
 
     protected function beforeViewRender()
     {
-        $product_category_records = ProductCategory::getTreeRecords(ProductCategory::query());
+        if (!parent::beforeViewRender()) {
+            return false;
+        }
 
-        $product_category_list = Util::getTreeListArray($product_category_records, "id", "name", false, false);
+        $type_list = AutoSerialPattern::getTypeList();
 
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
         
-        $this->setForView(compact("product_category_list", "field_labels"));
-
-        return parent::beforeViewRender();
+        $this->setForView(compact("type_list", "field_labels"));
     }
+
 
     public function create()
     {
@@ -100,28 +97,26 @@ class ProductCatalogController extends BackendController
     private function _common_validation_rules()
     {
         return [
-            "product_category_id" => ["required"],
-            "name" => ["required"],
-            "document_file_id" => ["required"],
-            "list_display_order" => ["nullable"],
-            "is_active" => ""
+            'type' => ["required"],
+            'pattern' => ["required", "max:80"],
         ];
     }
 
     private function _common_validation_messages()
     {
-        return [];
+        return [
+        ];
     }
 
     public function store(Request $request)
     {
         $this->beforeCreate();
 
+        $this->model = new $this->modelClass();
+
         $rules = $this->_common_validation_rules();
 
-        $model = new $this->modelClass();
-
-        $rules = LaravelExtend::merge_validation_rules($rules, $model->getUniqueValidationRules($request));
+        $rules = LaravelExtend::merge_validation_rules($rules, $this->model->getUniqueValidationRules($request));
 
         $messages = $this->_common_validation_messages();
 
@@ -129,26 +124,33 @@ class ProductCatalogController extends BackendController
 
         DB::beginTransaction();
 
-        try {
+        try
+        {
             $this->model = $this->modelClass::create($validatedData);
 
+            if (LaravelExtend::$errors) {
+                throw new Exception("There are some errors");
+            }
+            
             DB::commit();
 
-            return $this->afterSave($model);
-        } catch (Exception $ex) {
+            return $this->afterSave($this->model);
+        }
+        catch(Exception $ex)
+        {
             DB::rollBack();
-
+            
             $this->saveSqlLog();
 
-            return back()->withInput()->with('fail', $ex->getMessage());
+            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", LaravelExtend::$errors);
         }
     }
 
     public function edit($id)
     {
-        $model = $this->modelClass::findOrFail($id);
+        $this->model = $model = $this->modelClass::findOrFail($id);
 
-        $this->beforeEdit($model);
+        $this->beforeEdit($this->model);
 
         $form = [
             'url' => route($this->routePrefix . '.update', $id),
@@ -168,9 +170,7 @@ class ProductCatalogController extends BackendController
 
         $rules = $this->_common_validation_rules();
 
-        $rules = LaravelExtend::merge_validation_rules($rules, $model->getUniqueValidationRules($request));
-
-        // dd($rules);
+        $rules = LaravelExtend::merge_validation_rules($rules, $this->model->getUniqueValidationRules($request));
 
         $messages = $this->_common_validation_messages();
 
@@ -178,22 +178,27 @@ class ProductCatalogController extends BackendController
 
         DB::beginTransaction();
 
-        try {
-            // d($validatedData, true);
+        try
+        {
+            $model->fill($validatedData);
 
-            $this->model->fill($validatedData);
+            $model->save();
 
-            $this->model->save();
+            if (LaravelExtend::$errors) {
+                throw new Exception("There are some errors");
+            }
 
             DB::commit();
 
-            return $this->afterSave($this->model);
-        } catch (Exception $ex) {
+            return $this->afterSave($model);
+        }
+        catch(Exception $ex)
+        {
             DB::rollBack();
 
             $this->saveSqlLog();
 
-            return back()->withInput()->with('fail', $ex->getMessage());
+            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", LaravelExtend::$errors);
         }
     }
 
@@ -211,31 +216,5 @@ class ProductCatalogController extends BackendController
         $this->setForView(compact("model", "form"));
 
         return $this->view("form");
-    }
-
-    public function ajax_get_list($product_category_id)
-    {
-        $response = ["status" => 1];
-
-        try {
-
-            $records = $this->modelClass::where("product_category_id", $product_category_id)->orderBy("list_display_order")->get();
-
-            $response['data'] = [];
-
-            foreach ($records as $record) {
-                $row = [
-                    "id" => $record->id,
-                    "name" => $record->getDisplayName(),
-                ];
-
-                $response['data'][] = $row;
-            }
-        } catch (Exception $ex) {
-            $response['status'] = 0;
-            $response['msg'] = $ex->getMessage();
-        }
-
-        return $this->responseJson($response);
     }
 }

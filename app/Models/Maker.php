@@ -2,35 +2,42 @@
 
 namespace App\Models;
 
+use App\Exceptions\UserException;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Unique;
 
-class ProductCatalog extends BaseModel
+class Maker extends BaseModel
 {
     protected $appends = [
-        'display_name',
+        'display_name'
     ];
 
-    protected static array $unique_fields = ["product_category_id", "name"];
+    protected static array $unique_fields = ["name"];
 
-    protected static array $list_fields = ["id", "name", "product_category_id"];
+    protected static array $list_fields = ["id", "name"];
+
+    protected static array $fields_containg_tags = ["description"];
+
+    public string $field_for_create_tag = "name";
 
     public static array $child_model_class = [
-        Product::class => [
-            "foreignKey" => ["product_catalog_id"],
+        ProductSerial::class => [
+            "foreignKey" => ["make_id"],
             "preventDelete" => true
-        ]
+        ],        
     ];
 
-    public function category()
+    public function afterFind()
     {
-        return $this->belongsTo(ProductCategory::class, "product_category_id");
+        parent::afterFind();
+
+        $this->parseTagsForModuleLinking();
     }
 
-    public function document()
+    public function afterFindForCsv()
     {
-        return $this->belongsTo(DocumentFile::class, "document_file_id");
+        parent::afterFind();
     }
 
     protected function getDisplayNameAttribute()
@@ -40,13 +47,15 @@ class ProductCatalog extends BaseModel
 
     public function getDisplayName()
     {
-        return $this->name;
+        $name = $this->name;
+
+        return $name;
     }
 
     public function getUniqueValidationRules(Request $request)
     {
         $field_rules = [
-            "name" => [Rule::unique($this->connection . "." . $this->getTable(), "name")->where("product_category_id", $request->get("product_category_id"))],
+            "name" => [Rule::unique($this->connection . "." . $this->getTable(), "name")],
         ];
 
         if ($this->id) {

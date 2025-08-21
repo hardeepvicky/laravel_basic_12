@@ -49,7 +49,7 @@ class ProductController extends BackendController
             "videos",
             "otherFiles",
             "keywords",
-            "catalog.document"
+            "catalog"
         ]);
 
         $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
@@ -187,12 +187,14 @@ class ProductController extends BackendController
     {
         return [
             "product_category_id" => ["required"],
-            "product_catalog_id" => ["required"],
             "name" => ["required", "min:3", "max:80"],
             "model_name" => ["required", "max:80"],
             "length" => ["required"],
             "width" => ["required"],
             "height" => ["required"],
+            "gross_length" => ["required"],
+            "gross_width" => ["required"],
+            "gross_height" => ["required"],
             "size_uom_id" => ["required"],
             "net_weight" => ["required"],
             "gross_weight" => ["required"],
@@ -207,6 +209,7 @@ class ProductController extends BackendController
             "videos" => [],
             "other_files" => [],
             "keywords" => [],
+            "catalog_document_file_id" => "",
             "list_display_order" => "",
             "is_active" => "",
         ];
@@ -582,7 +585,7 @@ class ProductController extends BackendController
 
         $builder->with([
             "mainImage",
-            "catalog.document"
+            "catalog"
         ]);
 
         $records = $builder->get();
@@ -592,6 +595,8 @@ class ProductController extends BackendController
         foreach($records as $k => $record)
         {
             $record->afterFindForCsv();
+            $record->mainImage?->afterFind();
+            $record->catalog?->afterFind();
         }
 
         $records = $records->toArray();
@@ -621,15 +626,18 @@ class ProductController extends BackendController
                 $field_labels['length'] => $record['length'],
                 $field_labels['width'] => $record['width'],
                 $field_labels['height'] => $record['height'],
+                $field_labels['gross_length'] => $record['gross_length'],
+                $field_labels['gross_width'] => $record['gross_width'],
+                $field_labels['gross_height'] => $record['gross_height'],
                 $field_labels['size_uom_id'] => $record['size_uom_name'],
                 $field_labels['net_weight'] => $record['net_weight'],
                 $field_labels['gross_weight'] => $record['gross_weight'],
                 'Weight UOM' => 'kg.',
-                $field_labels['height'] => $record['height'],
                 $field_labels['description'] => $record['description'] ?? "",
                 $field_labels['seo_title'] => $record['seo_title'] ?? "",
                 $field_labels['meta_main_keyword'] => $record['meta_main_keyword'] ?? "",
-                $field_labels['product_catalog_id'] => $record['catalog']['document']['url'] ?? "",
+                $field_labels['main_image_id'] => isset($record['main_image']['file_url']) ? url($record['main_image']['file_url']) : "",
+                $field_labels['catalog_document_file_id'] => isset($record['catalog']['file_url']) ? url($record['catalog']['file_url']) : "",
 
                 $field_labels['is_active'] => get_value_from_list($yes_no_list, $record['is_active']),
                 $field_labels['list_display_order'] => $record['list_display_order'] ?? "",
