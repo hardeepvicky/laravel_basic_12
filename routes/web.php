@@ -625,6 +625,9 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
 
             $name = "csv_attribute";
             Route::get($name, [$controllerClass, $name])->name($name);
+
+            $name = "csv_specification";
+            Route::get($name, [$controllerClass, $name])->name($name);
         });
     });
 

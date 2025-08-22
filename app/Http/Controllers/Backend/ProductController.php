@@ -53,7 +53,9 @@ class ProductController extends BackendController
                 $q->orderBy("display_order", "ASC");
             },
             "productAttributes.categoryAttribute",
-            "specifications",
+            "specifications" => function($q){
+                $q->orderBy("list_display_order", "ASC");
+            },
             "mainImage",
             "images",
             "videos",
@@ -325,11 +327,9 @@ class ProductController extends BackendController
 
         unset($validatedData['specifications']['(sr-id)']);
 
-        // d($validatedData, true);
-
         if (isset($validatedData['specifications']))
         {
-            $rules = [
+            $base_rules = [
                 "group_name" => ["required"],
                 "name" => ["required"],
                 "value" => ["required"],
@@ -340,16 +340,15 @@ class ProductController extends BackendController
 
             $existing_id_list = $this->model->specifications()->pluck("id", "id")->toArray();
 
-            $validatedData['product_id'] = $this->model->id;
-
-            $rules = LaravelExtend::merge_validation_rules($rules, $child_model->getUniqueValidationRules($validatedData));
-
             $display_order = 0;
 
             foreach($validatedData['specifications'] as $specification)
             {
+                $specification['product_id'] = $this->model->id;
+                $rules = LaravelExtend::merge_validation_rules($base_rules, $child_model->getUniqueValidationRules($specification));
+                
                 $validator = Validator::make($specification, $rules);
-
+                
                 if ($validator->fails())
                 {
                     foreach($validator->errors()->all() as $error_msg)
@@ -472,7 +471,13 @@ class ProductController extends BackendController
     public function edit($id, $current_tab = "default")
     {
         $model = $this->model = $this->modelClass::with([
-            "images", "videos", "otherFiles", "keywords"
+            "images", "videos", "otherFiles", "keywords",
+            "productAttributes" => function($q){
+                $q->orderBy("display_order", "ASC");
+            },
+            "specifications" => function($q){
+                $q->orderBy("list_display_order", "ASC");
+            },
         ])
         ->findOrFail($id);
 
@@ -517,7 +522,7 @@ class ProductController extends BackendController
 
             case "seo":
                 $rules = [
-                    "seo_title" => ["required", "max:80"],
+                    "seo_title" => ["nullable", "max:80"],
                     "meta_main_keyword" => ["nullable", "max:45"],
                     "meta_description" => ["nullable", "max:255"],
                     "keywords" => [],
@@ -734,7 +739,6 @@ class ProductController extends BackendController
 
         $builder->with([
             "mainImage",
-            "catalog"
         ]);
 
         $records = $builder->get();
@@ -786,7 +790,6 @@ class ProductController extends BackendController
                 $field_labels['seo_title'] => $record['seo_title'] ?? "",
                 $field_labels['meta_main_keyword'] => $record['meta_main_keyword'] ?? "",
                 $field_labels['main_image_id'] => isset($record['main_image']['file_url']) ? url($record['main_image']['file_url']) : "",
-                $field_labels['catalog_document_file_id'] => isset($record['catalog']['file_url']) ? url($record['catalog']['file_url']) : "",
 
                 $field_labels['is_active'] => get_value_from_list($yes_no_list, $record['is_active']),
                 $field_labels['list_display_order'] => $record['list_display_order'] ?? "",
@@ -888,6 +891,89 @@ class ProductController extends BackendController
         $current_dt->setTimezone(DateUtility::$login_user_time_zone);
         $datetime = DateUtility::getDate($current_dt, DateUtility::DATETIME_OUT_FORMAT_FILE);
         $file_prefix = str_class_name_to_human_text(ProductCategoryAttribute::class);
+        $file = $path . $file_prefix . "-$datetime.csv";
+
+        $csvUtility = new CsvUtility($file);
+        $csvUtility->write($csv_records);
+
+        download_start($file, "application/octet-stream");
+    }
+
+    public function csv_specification()
+    {
+        $cache_key_prefix = Route::currentRouteName();
+
+        $builder = $this->_getBuildeForIndex($cache_key_prefix);
+
+        $this->beforeCsvExport($builder);
+
+        $builder->with([
+            "specifications" => function($q){
+                $q->orderBy("list_display_order", "ASC");
+            },
+        ]);
+
+        $records = $builder->get();
+
+        foreach($records as $k => $record)
+        {
+            $record->afterFindForCsv();
+        }
+
+        $records = $records->toArray();
+
+        // d($records, true);
+
+        $csv_records = [];
+        $user_cache_list = User::getListCache();
+
+        $yes_no_list = laravel_constant('yes_no_list');
+
+        $product_category_records = ProductCategory::getTreeRecords(ProductCategory::query());
+
+        $product_category_list = Util::getTreeListArray($product_category_records, "id", "name", false, false);
+
+        $field_labels = FieldSetting::getDynamicFields($this->modelClass);
+
+        $specification_field_labels = FieldSetting::getDynamicFields(ProductSpecification::class);
+
+        foreach($records as $record)
+        {
+            foreach($record['specifications'] as $specification)
+            {
+                $csv_records[] = [
+                    'Product ID' => $record['id'],
+
+                    $field_labels['product_category_id'] => get_value_from_list($product_category_list, $record['product_category_id']),
+                    $field_labels['name'] => $record['name'],
+                    $field_labels['model_name'] => $record['model_name'],
+                    $field_labels['sku'] => $record['sku'],
+
+                    $specification_field_labels['group_name'] => $specification['group_name'] ?? "",
+                    $specification_field_labels['name'] => $specification['name'] ?? "",
+                    $specification_field_labels['value'] => $specification['value'] ?? "",
+                    $specification_field_labels['is_active'] => $specification['is_active'] ?? "",
+                    $specification_field_labels['list_display_order'] => $specification['list_display_order'] ?? "",
+                    
+                    'Created' => if_date_time($specification['created_at']),
+                    'Created By' => $user_cache_list[$specification['created_by']] ?? "",
+                    'Updated' => if_date_time($specification['updated_at']),
+                    'Updated By' => $user_cache_list[$specification['updated_by']] ?? "",
+                ];
+            }
+        }
+
+        // d($csv_records, true);
+
+        $this->saveSqlLog();
+
+        $path = laravel_constant('path.temp');
+        FileUtility::createFolder($path);
+
+        $current_dt = DateUtility::getDateObj(null);
+        $current_dt->setTimezone(DateUtility::$login_user_time_zone);
+        $datetime = DateUtility::getDate($current_dt, DateUtility::DATETIME_OUT_FORMAT_FILE);
+        $file_prefix = str_class_name_to_human_text(ProductSpecification::class);
         $file = $path . $file_prefix . "-$datetime.csv";
 
         $csvUtility = new CsvUtility($file);

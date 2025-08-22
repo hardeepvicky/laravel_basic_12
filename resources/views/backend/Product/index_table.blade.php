@@ -6,8 +6,8 @@
     <div class="card-body p-1">
         <div class="m-2">
             <a href="{{ route($routePrefix . '.export.csv') }}" class="btn btn-secondary">Export CSV</a>
-            <a href="{{ route($routePrefix . '.export.csv_attribute') }}" class="btn btn-secondary">Export Attribute
-                CSV</a>
+            <a href="{{ route($routePrefix . '.export.csv_attribute') }}" class="btn btn-secondary">Export Attribute</a>
+            <a href="{{ route($routePrefix . '.export.csv_specification') }}" class="btn btn-secondary">Export Specification CSV</a>
         </div>
 
         <div class="table-responsive">

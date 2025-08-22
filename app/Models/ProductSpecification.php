@@ -36,12 +36,12 @@ class ProductSpecification extends BaseModel
             "name" => [Rule::unique($this->connection . "." . $this->getTable(), "name")->where("product_id", $data['product_id'])],
         ];
 
-        if ($this->id) {
+        if (isset($data['id']) && $data['id']) {
             foreach ($field_rules as $field => $rules) {
                 foreach ($rules as $rule) {
                     if ($rule instanceof Unique) {
                         // d([$field => $this->id]);
-                        $rule->ignore($this->id, $this->primaryKey);
+                        $rule->ignore($data['id'], $this->primaryKey);
                     }
                 }
             }
