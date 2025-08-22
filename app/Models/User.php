@@ -47,6 +47,7 @@ class User extends Authenticatable implements BaseModelInterface
         'sub_dept_id',
         'desg_id',
         'country_id',
+        'branch_id',
         'name',
         'person_name',
         'person_last_name',

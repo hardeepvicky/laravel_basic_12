@@ -48,7 +48,7 @@ class ProductSerial extends BaseModel
 
     public function maker()
     {
-        return $this->belongsTo(Maker::class);
+        return $this->belongsTo(Maker::class, "make_id");
     }
 
     public function dealer()
@@ -83,7 +83,7 @@ class ProductSerial extends BaseModel
 
     public function getUniqueValidationRules(Request $request)
     {
-        $field_rules = [
+        $field_rules = [    
             "serial_no" => [Rule::unique($this->connection . "." . $this->getTable(), "serial_no")],
         ];
 
@@ -145,6 +145,17 @@ class ProductSerial extends BaseModel
     {
         $labels = parent::getFieldLabels();
 
+        $labels['type'] = "Type";
+        $labels['no_of_serials'] = "No. Of Serials to generate";
+
         return $labels;
+    }
+
+    public static function getNextSerialNo()
+    {
+        $next_serial_no = AutoSerialPattern::getNextCounter(AutoSerialPattern::TYPE_PRODUCT);
+        $next_serial_no = str_pad($next_serial_no, 8, "0", STR_PAD_LEFT);
+
+        return $next_serial_no;
     }
 }

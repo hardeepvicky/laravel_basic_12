@@ -515,7 +515,7 @@
             });
 
             $.events.execAtLast(function() {
-                $("#state_id").trigger("change", {
+                $("#state_id").trigger("sr-cascade.change", {
                     pageLoad: true
                 });
             });

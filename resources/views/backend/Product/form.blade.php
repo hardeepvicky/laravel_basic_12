@@ -18,16 +18,14 @@
                 </div>
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-md-12 col-xxl-5">
+                        <div class="col-md-12 col-xxl-6">
                             <div class="form-group mb-3">
                                 <?php
                                 $field = 'product_category_id';
                                 $label = get_value_from_list($field_labels, $field, $field);
                                 ?>
                                 <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$product_category_list"
-                                    value="{{ $model->{$field} }}" class="select2 cascade-drop-down" 
-                                    data-sr-cascade-target="#product_catalog_id"
-                                    data-sr-cascade-url="/product-catalog/ajax_get_list/{v}" 
+                                    value="{{ $model->{$field} }}" class="select2" 
                                     mandatory="true"
                                     />
                             </div>
@@ -312,10 +310,8 @@
                             $.loader.hide();
                         })
                 }
-            }).trigger("change", {
-                pageLoad: true
             });
-
+            
             $("#images").browseGallery({
                 opener: "#choose-images",
                 postfix: "choose-images",
@@ -349,7 +345,7 @@
 
             $.events.execAtLast(function() {
 
-                $("#product_category_id").trigger("change", {
+                $("#product_category_id").trigger("sr-cascade.change", {
                     pageLoad: true
                 });
             });

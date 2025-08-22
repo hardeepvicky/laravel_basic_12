@@ -269,6 +269,15 @@ class PartyController extends BackendController
                     "name.required" => "Term is required"
                 ]);
 
+                if ($validator->fails())
+                {
+                    foreach($validator->errors()->all() as $error_msg)
+                    {               
+                        LaravelExtend::addError("", $error_msg, "Addresses");
+                    }
+                    continue;
+                }
+
                 $display_order++;
                 if ($term['id'])
                 {

@@ -336,7 +336,7 @@ $false = false;
                         return response;
                     },
                     default_data : users
-                }).trigger("change", {
+                }).trigger("sr-cascade.change", {
                     pageLoad: true
                 });
 

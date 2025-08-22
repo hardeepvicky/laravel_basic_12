@@ -27,6 +27,8 @@ class SectionRoutes
 
         "item.ajax_get_child_uom_list",
 
+        "product-serial.ajax_get_unlinked_list",
+
         "*.ajax_get_list",
         "*.ajax_get_code_list",
         "*.ajax_get_count",

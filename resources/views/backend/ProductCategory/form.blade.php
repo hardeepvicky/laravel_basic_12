@@ -330,7 +330,7 @@ use App\Models\ProductCategoryAttribute;
                     show_hide_template_field(_tr);
                 });
 
-                $(".cascade-drop-down").trigger("change", {
+                $(".cascade-drop-down").trigger("sr-cascade.change", {
                     pageLoad: true
                 });
 

@@ -622,7 +622,7 @@
                     return response;
                 },
                 default_data : district_cities
-            }).trigger("change", {
+            }).trigger("sr-cascade.change", {
                 pageLoad: true
             });
 
@@ -670,7 +670,7 @@
             });
 
             $.events.execAtLast(function() {
-                $("#state_id").trigger("change", {
+                $("#state_id").trigger("sr-cascade.change", {
                     pageLoad: true
                 });
 

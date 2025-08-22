@@ -83,6 +83,15 @@ use App\Models\User;
                             :value="$model->{$field}" class="select2" mandatory="true" />
                     </div>
 
+                    <div class="form-group mb-3 type-block type-block-{{ User::TYPE_INTERNAL }}">
+                        <?php
+                        $field = 'branch_id';
+                        $label = get_value_from_list($field_labels, $field, $field);
+                        ?>
+                        <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$branch_list"
+                            :value="$model->{$field}" class="select2" mandatory="true" />
+                    </div>
+
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group mb-3">

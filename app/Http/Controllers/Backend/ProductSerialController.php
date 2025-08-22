@@ -10,29 +10,34 @@ use App\Helpers\FileUtility;
 use App\Helpers\ImportUtility;
 use App\Helpers\LaravelExtend;
 use App\Helpers\Util;
-use App\Models\DocumentFile;
+use App\Models\AutoSerialPattern;
+use App\Models\Branch;
 use App\Models\DropDownValue;
 use App\Models\FieldSetting;
 use App\Models\ImportLog;
 use App\Models\Item;
 use App\Models\ItemCategory;
-use App\Models\ItemFile;
+use App\Models\Maker;
+use App\Models\Product;
+use App\Models\ProductCategory;
+use App\Models\ProductSerial;
 use App\Models\Setting;
-use App\Models\Tag;
-use App\Models\Uom;
+use App\Models\SqlLog;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Exception;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Validator;
 
 class ProductSerialController extends BackendController
 {
     public String $routePrefix = "product-serial";
 
-    protected $modelClass = Item::class;
-    protected Item | null $model = null;
+    protected $modelClass = ProductSerial::class;
+    protected ProductSerial | null $model = null;
 
     public function index()
     {
@@ -41,29 +46,20 @@ class ProductSerialController extends BackendController
         $builder = $this->_getBuildeForIndex($cache_key_prefix);
 
         $builder->with([
-            "tags",
-            "color",
-            "brand",
-            "mainImage",
-            "images",
-            "otherFiles",
+            "category",
+            "product",
+            "maker",
+            "dealer",
+            "branch"
         ]);
 
         $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
 
-        foreach($records as $record)
-        {
-            if ($record->mainImage?->id)
-            {
-                $record->mainImage->afterFind();
-            }
-        }
+        $product_category_records = ProductCategory::getTreeRecords(ProductCategory::query());
 
-        $item_category_records = ItemCategory::getTreeRecords(ItemCategory::query());
+        $product_category_list = Util::getTreeListArray($product_category_records, "id", "name", false, false);
 
-        $item_category_list = Util::getTreeListArray($item_category_records, "id", "name", false, false);
-
-        $this->setForView(compact("records", "item_category_list"));
+        $this->setForView(compact("records", "product_category_list"));
 
         return $this->viewIndex(__FUNCTION__);
     }
@@ -74,14 +70,14 @@ class ProductSerialController extends BackendController
 
         $conditions = $this->getConditions($cache_key, [
             ["field" => "id", "type" => "int", "cache" => false],
-            ["field" => "item_category_id", "type" => "int"],
+            ["field" => "product_category_id", "type" => "int"],
             ["field" => "is_find_nested_child", "type" => "bool"],
-            ["field" => "name", "type" => "string"],
-            ["field" => "color_id", "type" => "int"],
-            ["field" => "brand_id", "type" => "int"],
-            ["field" => "size", "type" => "string"],
-            ["field" => "specification", "type" => "string"],
-            ["field" => "is_active", "type" => "int"],
+            ["field" => "product_id", "type" => "int"],
+            ["field" => "make_id", "type" => "int"],
+            ["field" => "branch_id", "type" => "int"],
+            ["field" => "serial_no", "type" => "string"],
+            ["field" => "is_in", "type" => "int"],
+            ["field" => "is_sold", "type" => "int"],
         ]);
 
         $builder = $this->modelClass::query();
@@ -90,16 +86,14 @@ class ProductSerialController extends BackendController
         $condition_list = $array_helper->convertModelSearchConditionToList();
 
         if (
-            (isset($condition_list["item_category_id"]) && $condition_list["item_category_id"])
+            (isset($condition_list["product_category_id"]) && $condition_list["product_category_id"])
             && (isset($condition_list["is_find_nested_child"]) && $condition_list["is_find_nested_child"])
-        )
-        {
-            $child_id_list = ItemCategory::getChildIdList([$condition_list["item_category_id"]]);
+        ) {
+            $child_id_list = ProductCategory::getChildIdList([$condition_list["product_category_id"]]);
 
-            if ($child_id_list)
-            {
-                $builder->whereIn("item_category_id", $child_id_list);
-                $conditions = $array_helper->unsetValues($conditions, ["item_category_id"], true, [ArrayHelper::UNSET_VALUE_REMOVE_PARENT_IF_FOUND_CHILD]);
+            if ($child_id_list) {
+                $builder->whereIn("product_category_id", $child_id_list);
+                $conditions = $array_helper->unsetValues($conditions, ["product_category_id"], true, [ArrayHelper::UNSET_VALUE_REMOVE_PARENT_IF_FOUND_CHILD]);
             }
         }
 
@@ -108,18 +102,6 @@ class ProductSerialController extends BackendController
         // d($conditions, true);
 
         $builder = $builder->where($conditions);
-
-        $tag_conditions = $this->getConditions($cache_key . "-2", [
-            ["field" => "name", "type" => "string", "view_field" => "tag_name"],
-        ]);
-
-        $builder = $this->modelClass::where($conditions);
-
-        if ($tag_conditions) {
-            $builder->wherehas("tags", function ($query) use ($tag_conditions) {
-                $query->where($tag_conditions);
-            });
-        }
 
         if ($apply_sort) {
             $cache_key_for_sort = $cache_key_prefix . "-index-extra-params";
@@ -136,6 +118,14 @@ class ProductSerialController extends BackendController
             $builder->orderBy($sort['sort_by'], $sort['sort_dir']);
         }
 
+        $product_list = [];
+
+        if (isset($condition_list['product_category_id'])) {
+            $product_list = Product::getList("id", "display_name", ["product_category_id" => $condition_list['product_category_id']], "list_display_order");
+        }
+
+        $this->setForView(compact("product_list"));
+
         return $builder;
     }
 
@@ -145,20 +135,12 @@ class ProductSerialController extends BackendController
             $this->model = new $this->modelClass();
         }
 
-        $color_list = DropDownValue::getList("id", "display_name", ["type" => DropDownValue::COLOR], "name");
-        $brand_list = DropDownValue::getList("id", "display_name", ["type" => DropDownValue::BRAND], "name");
-
-        $sku_pattern = Setting::getValue("item_sku_pattern");
-
-        if (!$sku_pattern)
-        {
-            $label = Setting::LABELS['item_sku_pattern'];
-            throw new UserException("Setting : $label is not set yet", UserException::ERROR_USER_DATA_WRONG);
-        }
+        $maker_list = Maker::getList("id", "display_name", [], "list_display_order");
+        $branch_list = Branch::getList("id", "display_name", [], "list_display_order");
 
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
-        $this->setForView(compact("color_list", "brand_list", "sku_pattern", "field_labels"));
+        $this->setForView(compact("maker_list", "branch_list", "field_labels"));
 
         return parent::beforeViewRender();
     }
@@ -174,47 +156,20 @@ class ProductSerialController extends BackendController
             'method' => 'POST',
         ];
 
-        $this->set_data_for_add_edit($model);
-
         $this->setForView(compact("model", 'form'));
 
-        return $this->view("form");
-    }
+        $this->set_data_for_add_edit($model);
 
-    private function set_data_for_add_edit($model)
-    {
-        $qb = ItemCategory::where("is_active", 1);
-
-        $conditions = ["is_active" => 1];
-
-        if ($model->item_category_id)
-        {
-            $qb->orWhere("id", $model->item_category_id);
-        }
-
-        $item_category_records = ItemCategory::getTreeRecords($qb);
-
-        $item_category_list = Util::getTreeListArray($item_category_records, "id", "name");
-
-        $this->setForView(compact("item_category_list"));
+        return $this->view(__FUNCTION__);
     }
 
     private function _common_validation_rules()
     {
-        return [
-            "name" => ["required"],
-            "description" => ["nullable"],
-            "item_category_id" => ["required"],
-            "color_id" => ["nullable"],
-            "brand_id" => ["nullable"],
-            "size" => ["nullable"],
-            "specification" => ["nullable"],
-            "sku" => ["required"],
-            "images" => [],
-            "other_files" => [],
-            "tag_name" => [],
-            "list_display_order" => "",
-            "is_active" => "",
+        return [            
+            "product_category_id" => ["required"],
+            "product_id" => ["required"],
+            "make_id" => ["required"],
+            "children" => []
         ];
     }
 
@@ -223,11 +178,38 @@ class ProductSerialController extends BackendController
         return [];
     }
 
+    private function set_data_for_add_edit($model)
+    {
+        $qb = ProductCategory::where("is_active", 1);
+
+        $conditions = ["is_active" => 1];
+
+        if ($model->product_category_id) {
+            $qb->orWhere("id", $model->product_category_id);
+        }
+
+        $product_category_records = ProductCategory::getTreeRecords($qb);
+
+        $product_category_list = Util::getTreeListArray($product_category_records, "id", "name");
+
+        $next_serial_no = ProductSerial::getNextSerialNo();
+
+        $type_list = [
+            "auto" => "Auto",
+            "manual" => "Manual",
+        ];
+
+        $this->setForView(compact("product_category_list", "next_serial_no", "type_list"));
+    }
+
     public function store(Request $request)
     {
         $this->beforeCreate();
 
         $rules = $this->_common_validation_rules();
+
+        $rules['type'] = ["required"];
+        $rules['no_of_serials'] = ["nullable", "numeric", "max:1000"];
 
         $messages = $this->_common_validation_messages();
 
@@ -245,35 +227,45 @@ class ProductSerialController extends BackendController
 
         try {
             $save_data = $validatedData;
+            unset($save_data['children']);
 
-            unset($save_data['tag_name']);
-            unset($save_data['images']);
-            unset($save_data['other_files']);
+            $auth_user = Auth::user();
 
-            // dd($save_data);
-
-            $this->model->fill($save_data);
-
-            if (!$this->model->save()) {
-                throw new UserException("Fail To save", UserException::ERROR_LARAVEL_FAIL);
+            if (!$auth_user->branch_id) {
+                throw new UserException("No branch is assigned to you");
             }
 
-            $this->_saveOthers($validatedData);
+            $save_data['branch_id'] = $auth_user->branch_id;
+            $save_data['is_in'] = 1;
 
-            $document_file = $this->model->images()->first();
+            if ($save_data['type'] == "auto") {
+                for ($i = 0; $i < $save_data['no_of_serials']; $i++) {
+                    $save_data['serial_no'] = ProductSerial::getNextSerialNo();
+                    AutoSerialPattern::increaseCount(AutoSerialPattern::TYPE_PRODUCT);
 
-            if ($document_file)
-            {
-                $this->model->main_image_id = $document_file->id;
+                    $this->model = new $this->modelClass;
+                    $this->model->fill($save_data);
 
-                $this->model->save();
+                    if (!$this->model->save()) {
+                        throw new UserException("Fail To save", UserException::ERROR_LARAVEL_FAIL);
+                    }
+                }
+            } else {
+                $save_data['serial_no'] = ProductSerial::getNextSerialNo();
+                AutoSerialPattern::increaseCount(AutoSerialPattern::TYPE_PRODUCT);
+
+                $this->model->fill($save_data);
+
+                if (!$this->model->save()) {
+                    throw new UserException("Fail To save", UserException::ERROR_LARAVEL_FAIL);
+                }
+
+                $this->_saveOthers($validatedData);
             }
 
             if (LaravelExtend::$errors) {
                 throw new Exception("There are some errors");
             }
-
-            $this->updateUserInfoAfterSave($this->model);
 
             DB::commit();
 
@@ -289,74 +281,42 @@ class ProductSerialController extends BackendController
 
     private function _saveOthers($validatedData)
     {
-        $this->model->itemFile()->delete();
+        if (isset($validatedData['children'])) {
 
-        if (isset($validatedData['images'])) {
+            unset($validatedData['children']['(sr-id)']);
 
-            $ids = explode(",", $validatedData['images']);
+            // d($validatedData, true);
 
-            $document_files = DocumentFile::find($ids);
-
-            foreach($document_files as $document_file)
-            {
-                $itemFile = new ItemFile([
-                    "file_type" => "image",
-                    "document_file_id" => $document_file->id
-                ]);
-
-                $this->model->itemFile()->save($itemFile);
-            }
-        }
-
-        if (isset($validatedData['other_files'])) {
-
-            $ids = explode(",", $validatedData['other_files']);
-
-            $document_files = DocumentFile::find($ids);
-
-            foreach($document_files as $document_file)
-            {
-                $itemFile = new ItemFile([
-                    "file_type" => "",
-                    "document_file_id" => $document_file->id
-                ]);
-
-                $this->model->itemFile()->save($itemFile);
-            }
-        }
-
-        if (isset($validatedData['tag_name'])) {
-            // dd($validatedData['tag_name']);
-            $model_class_name = str_class_name_without_namespace($this->modelClass);
-
-            if (!$model_class_name) {
-                throw new UserException("could not found model_class_name");
-            }
-
-            $model_class_name = str_class_name_to_human_text($model_class_name);
-
-            $tag_names = explode(",", $validatedData['tag_name']);
-
-            $this->model->tags()->delete();
-
-            foreach ($tag_names as $tag_name) {
-                $save_data = [
-                    "main_table_field" => "name",
-                    "name" => $tag_name,
+            if (isset($validatedData['children'])) {
+                $rules = [
+                    "product_serial_id" => ["required"],
                 ];
 
-                $save_data['search_term'] = $model_class_name . "." . $save_data['name'];
+                foreach ($validatedData['children'] as $child) {
+                    $validator = Validator::make($child, $rules, [
+                        "product_serial_id.required" => "Serial No. is required"
+                    ]);
 
-                Tag::createTag($save_data, $this->model, $this->model);
+                    if ($validator->fails())
+                    {
+                        foreach($validator->errors()->all() as $error_msg)
+                        {               
+                            LaravelExtend::addError("", $error_msg, "Sub Products");
+                        }
+                        continue;
+                    }
+
+                    $child_model = $this->modelClass::findOrFail($child['product_serial_id']);
+                    $child_model->parent_id = $this->model->id;
+                    $child_model->save();
+                }
             }
         }
     }
 
     public function edit($id)
     {
-        $model = $this->model = $this->modelClass::with([
-            "tags", "images", "otherFiles"
-        ])->findOrFail($id);
+        $model = $this->model = $this->modelClass::findOrFail($id);
 
         $this->beforeEdit($this->model);
 
@@ -367,9 +327,11 @@ class ProductSerialController extends BackendController
 
         $this->set_data_for_add_edit($model);
 
-        $this->setForView(compact("model", "form"));
+        $children = $this->modelClass::where("parent_id", $id)->get()->toArray();
 
-        return $this->view("form");
+        $this->setForView(compact("model", "form", "children"));
+
+        return $this->view(__FUNCTION__);
     }
 
     public function update($id, Request $request)
@@ -379,8 +341,6 @@ class ProductSerialController extends BackendController
         $this->beforeEdit($this->model);
 
         $rules = $this->_common_validation_rules();
-
-        $rules = LaravelExtend::merge_validation_rules($rules, $this->model->getUniqueValidationRules($request));
 
         // d($rules);
 
@@ -398,9 +358,7 @@ class ProductSerialController extends BackendController
 
             $save_data = $validatedData;
 
-            unset($save_data['tag_name']);
-            unset($save_data['images']);
-            unset($save_data['other_files']);
+            unset($save_data['children']);
 
             // dd($save_data);
 
@@ -432,9 +390,7 @@ class ProductSerialController extends BackendController
 
     public function copy($id)
     {
-        $model = $this->model = $this->modelClass::with([
-            "tags", "images", "otherFiles"
-        ])->findOrFail($id);
+        $model = $this->model = $this->modelClass::findOrFail($id);
 
         $this->beforeEdit($model);
 
@@ -450,99 +406,6 @@ class ProductSerialController extends BackendController
         return $this->view("form");
     }
 
-    public function ajax_get_list($category_id)
-    {
-        $response = ["status" => 1];
-
-        try {
-
-            $records = $this->modelClass::where("item_category_id", $category_id)->get();
-
-            $response['data'] = [];
-
-            foreach ($records as $record) {
-                $row = [
-                    "id" => $record->id,
-                    "name" => $record->getDisplayName(),
-                ];
-
-                $response['data'][] = $row;
-            }
-        } catch (Exception $ex) {
-            $response['status'] = 0;
-            $response['msg'] = $ex->getMessage();
-        }
-
-        return $this->responseJson($response);
-    }
-
-    public function ajax_get_child_uom_list($item_id)
-    {
-        $response = ["status" => 1];
-
-        try {
-
-            $model = $this->modelClass::where("id", $item_id)->with(["category"])->first();
-            
-            if (!$model)
-            {
-                throw new UserException("Invalid Item ID : $item_id");
-            }
-
-            $records = Uom::where("is_active", 1)
-                        ->where(function($q) use($model) {
-                            $q->where("id", $model->category->base_uom_id)
-                            ->orWhere("parent_id", $model->category->base_uom_id);
-                        })
-                        ->orderBy("list_display_order", "ASC")
-                        ->get();
-
-            $response['data'] = [];
-
-            foreach ($records as $record) {
-                $row = [
-                    "id" => $record->id,
-                    "name" => $record->short_name,
-                    "conversion_factor" => $record->conversion_factor,
-                ];
-
-                $response['data'][] = $row;
-            }
-        } catch (Exception $ex) {
-            $response['status'] = 0;
-            $response['msg'] = $ex->getMessage();
-        }
-
-        return $this->responseJson($response);
-    }
-
-    public function mark_as_main_image($id, $document_file_id)
-    {
-        $response = ["status" => 0, "msg" => ""];
-
-        try
-        {
-            $product = $this->modelClass::findorFail($id);
-
-            $document_file = DocumentFile::findorFail($document_file_id);
-            $document_file->afterFind();
-
-            $product->main_image_id = $document_file->id;
-            $product->save();
-
-            $response['status'] = 1;
-
-            $response['url'] = $document_file->file_url;
-        }
-        catch(Exception $ex)
-        {
-            $response['status'] = 0;
-            $response['msg'] = get_exception_display_message($ex);
-        }
-
-        return $this->responseJson($response);
-    }
-
     public function import_excel(Request $request)
     {
         $sample = "samples/item.csv";
@@ -552,13 +415,11 @@ class ProductSerialController extends BackendController
         ]);
 
         $import_log_id = $request->get("import_log_id", false);
-        if ($import_log_id)
-        {
+        if ($import_log_id) {
             $importLogModel = ImportLog::find($import_log_id);
         }
 
-        if (!isset($importLogModel))
-        {
+        if (!isset($importLogModel)) {
             $save = [
                 'type' => str_class_name_without_namespace($this->modelClass),
                 "status_info" => "Processing...."
@@ -575,14 +436,13 @@ class ProductSerialController extends BackendController
 
         $this->setForView(compact("form", "import_log_id"));
 
-        if ($request->isMethod('POST'))
-        {
+        if ($request->isMethod('POST')) {
             $import_log_id = "";
 
             $this->setForView(compact("import_log_id"));
             $rules = [
                 "file" => [
-                    "required", 
+                    "required",
                     "file",
                     "max:5200",
                     "mimes:xlsx"
@@ -591,8 +451,7 @@ class ProductSerialController extends BackendController
 
             $request->validate($rules);
 
-            try
-            {
+            try {
                 $start_seconds = microtime(true);
 
                 $this->beforeCsvImport();
@@ -605,12 +464,10 @@ class ProductSerialController extends BackendController
 
                 $importUtility = new ImportUtility($sample, $full_file_path);
 
-                if (!$importUtility->checkHeaders())
-                {
+                if (!$importUtility->checkHeaders()) {
                     $this->setForView(array('errors' => $importUtility->errors));
-                    
-                    foreach($importUtility->errors as $error_msg)
-                    {
+
+                    foreach ($importUtility->errors as $error_msg) {
                         LaravelExtend::addError("", $error_msg);
                     }
 
@@ -660,76 +517,60 @@ class ProductSerialController extends BackendController
                 $item_category_list = array_flip(Util::applyAll($item_category_list, ["strtolower"]));
 
                 $brand_list = array_flip(Util::applyAll(DropDownValue::getList("id", "name", ["type" => DropDownValue::BRAND]), ["strtolower"]));
-                
+
                 $color_list = array_flip(Util::applyAll(DropDownValue::getList("id", "name", ["type" => DropDownValue::COLOR]), ["strtolower"]));
 
                 $sku_pattern = Setting::getValue("item_sku_pattern");
 
-                if (!$sku_pattern)
-                {
+                if (!$sku_pattern) {
                     $label = Setting::LABELS['item_sku_pattern'];
                     throw new UserException("Setting : $label is not set yet", UserException::ERROR_USER_DATA_WRONG);
                 }
-                
-                foreach($csv_records as $i => $record)
-                {
+
+                foreach ($csv_records as $i => $record) {
                     $record = Util::applyAll($record, array("trim"));
                     $validate = true;
 
                     $category_name = strtolower($record["item_category_id"]);
-                    if (isset($item_category_list[$category_name]))
-                    {
+                    if (isset($item_category_list[$category_name])) {
                         $record['item_category_id'] = $item_category_list[$category_name];
                         $msg_list['Category Found']++;
-                    }
-                    else
-                    {
+                    } else {
                         LaravelExtend::addError($header_flip['item_category_id'], $record['item_category_id'] . " is not found", "Row #" . ($i + 2));
                         $validate = false;
                     }
 
                     $color_name = strtolower($record["color_id"]);
-                    if (isset($color_list[$color_name]))
-                    {
+                    if (isset($color_list[$color_name])) {
                         $record['color_id'] = $color_list[$color_name];
                         $msg_list['Color Found']++;
-                    }
-                    else
-                    {
+                    } else {
                         LaravelExtend::addError($header_flip['color_id'], $record['color_id'] . " is not found", "Row #" . ($i + 2));
                         $validate = false;
                     }
 
                     $brand_name = strtolower($record["brand_id"]);
-                    if (isset($brand_list[$brand_name]))
-                    {
+                    if (isset($brand_list[$brand_name])) {
                         $record['brand_id'] = $brand_list[$brand_name];
                         $msg_list['Brand Found']++;
-                    }
-                    else
-                    {
+                    } else {
                         LaravelExtend::addError($header_flip['brand_id'], $record['brand_id'] . " is not found", "Row #" . ($i + 2));
                         $validate = false;
                     }
-                    
-                    if ($validate)
-                    {   
+
+                    if ($validate) {
                         $model = new $this->modelClass();
                         $record['sku'] = Item::getSkuFromPattern($sku_pattern, $record);
 
                         // d($record, true);
-                        
+
                         $is_insert = $is_update = null;
-                        if ($model->insertOrUpdate($record, $is_insert, $is_update))
-                        {
+                        if ($model->insertOrUpdate($record, $is_insert, $is_update)) {
                             $accept_count++;
 
-                            if ($is_insert)
-                            {
+                            if ($is_insert) {
                                 $msg_list['Item Insert']++;
-                            }
-                            else if ($is_update)
-                            {
+                            } else if ($is_update) {
                                 $msg_list['Item Update']++;
                             }
 
@@ -737,9 +578,7 @@ class ProductSerialController extends BackendController
 
                             $importLogModel->status_info = "Processing... $percent % " . ", Time Taken : " . Util::niceTime(microtime(true) - $start_seconds);
                             $importLogModel->saveQuietly();
-                        }
-                        else
-                        {
+                        } else {
                             LaravelExtend::addError("", "Fail To Save", "Row #" . ($i + 2));
                         }
                     }
@@ -754,8 +593,7 @@ class ProductSerialController extends BackendController
                 $importLogModel->exec_time = microtime(true) - $start_seconds;
 
                 $text_list = [];
-                foreach($msg_list as $text => $count)
-                {
+                foreach ($msg_list as $text => $count) {
                     $text_list[] = $text . " : " . $count;
                 }
 
@@ -764,8 +602,7 @@ class ProductSerialController extends BackendController
                 $msg = "Total Count : $total_count, Accept Count : $accept_count";
                 $msg .= ", " . implode(", ", $text_list);
 
-                if (LaravelExtend::$errors)
-                {
+                if (LaravelExtend::$errors) {
                     throw new UserException("Unable to Save all records. " . $msg, UserException::ERROR_USER_DATA_WRONG);
                 }
 
@@ -774,40 +611,32 @@ class ProductSerialController extends BackendController
                 $importLogModel->save();
 
                 Session::flash('success', $msg);
-            }
-            catch(UserException $ex)
-            {
+            } catch (UserException $ex) {
                 $msg = $ex->getMessage();
 
-                if (isset($importLogModel))
-                {
+                if (isset($importLogModel)) {
                     $importLogModel->flash_msg = $msg;
                     $importLogModel->have_error = 1;
 
-                    if (LaravelExtend::$errors)
-                    {
-                        $importLogModel->errors = LaravelExtend::$errors;                    
+                    if (LaravelExtend::$errors) {
+                        $importLogModel->errors = LaravelExtend::$errors;
                     }
 
                     $importLogModel->save();
                 }
-                
+
                 return back()->With("fail", $msg)->with("custom_errors", LaravelExtend::$errors);
-            }
-            
-            catch(\Exception $ex)
-            {
+            } catch (\Exception $ex) {
                 $msg = get_exception_display_message($ex);
 
-                if (isset($importLogModel))
-                {
+                if (isset($importLogModel)) {
                     $importLogModel->flash_msg = $msg;
                     $importLogModel->have_error = 1;
                     $importLogModel->save();
                 }
-                
-                Session::flash('fail', $msg);  
-                
+
+                Session::flash('fail', $msg);
+
                 return back()->With("fail", $msg);
             }
         }
@@ -822,20 +651,18 @@ class ProductSerialController extends BackendController
         $builder = $this->_getBuildeForIndex($cache_key_prefix);
 
         $this->beforeCsvExport($builder);
-        
+
         $builder->with([
-            "tags",
-            "color",
-            "brand",
-            "mainImage",
+            "category",
+            "product",
+            "maker",
+            "branch"
         ]);
 
         $records = $builder->get();
 
-        foreach($records as $k => $record)
-        {
+        foreach ($records as $k => $record) {
             $record->afterFindForCsv();
-            $record->mainImage->afterFind();
         }
 
         $records = $records->toArray();
@@ -853,31 +680,21 @@ class ProductSerialController extends BackendController
 
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
-        foreach($records as $record)
-        {
-            $tag_list = [];
-
-            foreach($record['tags'] as $tag)
-            {
-                $tag_list[] = $tag['display_name'];
-            }
-
+        foreach ($records as $record) {
+            
             $csv_records[] = [
                 'ID' => $record['id'],
-                $field_labels['item_category_id'] => get_value_from_list($item_category_list, $record['item_category_id']),
-                $field_labels['name'] => $record['name'],
-                $field_labels['color_id'] => $record['color']['name'] ?? "",
-                $field_labels['brand_id'] => $record['brand']['name'] ?? "",
-                $field_labels['specification'] => $record['specification'] ?? "",
-                $field_labels['sku'] => $record['sku'] ?? "",
-                $field_labels['description'] => $record['description'] ?? "",
-                $field_labels['main_image_id'] => $record['main_image']['file_url'] ? url($record['main_image']['file_url']) : "",
-                'Main Image Name' => $record['main_image']['display_name'] ?? "",
-
-                $field_labels['tag_name'] => implode(", ", $tag_list),
-
-                $field_labels['is_active'] => get_value_from_list($yes_no_list, $record['is_active']),
-                $field_labels['list_display_order'] => $record['list_display_order'] ?? "",
+                $field_labels['product_category_id'] => get_value_from_list($item_category_list, $record['product_category_id']),
+                $field_labels['product_id'] => $record['product']['display_name'] ?? "",
+                $field_labels['make_id'] => $record['maker']['display_name'] ?? "",
+                $field_labels['serial_no'] => "`" . $record['serial_no'],
+                $field_labels['branch_id'] => $record['branch']['display_name'] ?? "",
+                $field_labels['customer_id'] => $record['customer']['display_name'] ?? "",
+                $field_labels['dealer_id'] => $record['dealer']['display_name'] ?? "",                
+                $field_labels['is_in'] => get_value_from_list($yes_no_list, $record['is_in']),
+                $field_labels['is_sold'] => get_value_from_list($yes_no_list, $record['is_sold']),
+                $field_labels['is_return'] => get_value_from_list($yes_no_list, $record['is_return']),
+                $field_labels['return_count'] => $record['return_count'] ?? "",     
 
                 'Created' => if_date_time($record['created_at']),
                 'Created By' => $user_cache_list[$record['created_by']] ?? "",
@@ -905,4 +722,50 @@ class ProductSerialController extends BackendController
         download_start($file, "application/octet-stream");
     }
 
+    public function ajax_get_unlinked_list()
+    {
+        $response = ["status" => 1];
+
+        try {
+
+            $pattern_array = [
+                ["field" => "product_serial_id", "type" => "int"],
+                ["field" => "product_id", "type" => "int"],
+            ];
+
+            $condition_list = $this->getConditions(null, $pattern_array, true);
+
+            if (empty($condition_list)) {
+                throw new UserException("No any condition applied");
+            }
+
+            $qb = $this->modelClass::where("product_id", $condition_list['product_id'])->where(function ($q) use ($condition_list) {
+                $q->orWhere("parent_id", 0);
+
+                if (isset($condition_list['product_serial_id']) && $condition_list['product_serial_id']) {
+                    $q->orWhere("parent_id", $condition_list['product_serial_id']);
+                }
+            });
+
+            SqlLog::addSelectQuery($qb);
+
+            $records = $qb->get();
+
+            $response['data'] = [];
+
+            foreach ($records as $record) {
+                $row = [
+                    "id" => $record->id,
+                    "name" => $record->getDisplayName(),
+                ];
+
+                $response['data'][] = $row;
+            }
+        } catch (Exception $ex) {
+            $response['status'] = 0;
+            $response['msg'] = $ex->getMessage();
+        }
+
+        return $this->responseJson($response);
+    }
 }

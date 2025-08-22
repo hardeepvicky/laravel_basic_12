@@ -84,8 +84,7 @@ $page_header_links = [['title' => 'Create', 'url' => route($routePrefix . '.crea
                     $label = get_value_from_list($field_labels, $field, $field);
                     ?>
                     <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :value="$search[$field]"
-                        :list="$sub_type_list" class="select2" class="select2"
-                    />
+                        :list="$sub_type_list" class="select2" />
                 </div>
 
                 <div class="col-md-4 col-lg-3 col-xxxl-2 mb-2 type-block-{{ User::TYPE_INTERNAL }}">
@@ -94,7 +93,15 @@ $page_header_links = [['title' => 'Create', 'url' => route($routePrefix . '.crea
                     $label = get_value_from_list($field_labels, $field, $field);
                     ?>
                     <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :value="$search[$field]"
-                        :list="$user_category_list" class="select2" class="select2" />
+                        :list="$user_category_list" class="select2" />
+                </div>
+                <div class="col-md-4 col-lg-3 col-xxxl-2 mb-2 type-block-{{ User::TYPE_INTERNAL }}">
+                    <?php
+                    $field = "branch_id";
+                    $label = get_value_from_list($field_labels, $field, $field);
+                    ?>
+                    <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :value="$search[$field]"
+                        :list="$branch_list" class="select2" />
                 </div>
 
                 <div class="col-md-4 col-lg-3 col-xxxl-2 mb-2 type-block type-block-{{ User::TYPE_EXTERNAL }}">
@@ -103,7 +110,7 @@ $page_header_links = [['title' => 'Create', 'url' => route($routePrefix . '.crea
                     $label = get_value_from_list($field_labels, $field, $field);
                     ?>
                     <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :value="$search[$field]"
-                        :list="$country_list" class="select2" class="select2" />
+                        :list="$country_list" class="select2" />
                 </div>
             </div>
             <x-Backend.summary-search-form-footer :selectedPaginationLimit="$pagination_limit" />
@@ -136,7 +143,7 @@ $page_header_links = [['title' => 'Create', 'url' => route($routePrefix . '.crea
 
         }).trigger("change");
 
-        $(".cascade-drop-down").trigger("change", {
+        $(".cascade-drop-down").trigger("sr-cascade.change", {
             pageLoad: true
         });        
     });

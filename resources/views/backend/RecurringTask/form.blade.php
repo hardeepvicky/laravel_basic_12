@@ -387,7 +387,7 @@ $false = false;
 
                 $("#is_draft").change(show_hide_field);
 
-                $(".cascade-drop-down").trigger("change", {
+                $(".cascade-drop-down").trigger("sr-cascade.change", {
                     pageLoad: true
                 });
 

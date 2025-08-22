@@ -6,6 +6,7 @@ use App\Exceptions\UserException;
 use App\Helpers\FileUtility;
 use App\Helpers\LaravelExtend;
 use App\Models\BaseModel;
+use App\Models\Branch;
 use App\Models\Country;
 use App\Models\Department;
 use App\Models\Designation;
@@ -69,6 +70,7 @@ class UserController extends BackendController
             ["field" => "type", "type" => "string_equal"],
             ["field" => "sub_type", "type" => "string_equal"],
             ["field" => "user_category_id", "type" => "int"],
+            ["field" => "branch_id", "type" => "int"],
             ["field" => "country_id", "type" => "int"],
         ]);
 
@@ -130,11 +132,17 @@ class UserController extends BackendController
 
         $user_category_list = DropDownValue::getList("id", "display_name", ["type" => DropDownValue::USER_CATEGORY], "name");
 
+        $branch_list = Branch::getList("id", "display_name", [], "list_display_order");
+
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
         $user_allow_ip_field_labels = FieldSetting::getDynamicFields("UserAllowIp");
 
-        $this->setForView(compact("type_list", "country_list", "my_country", "sub_type_list", "user_category_list", "field_labels", "user_allow_ip_field_labels"));
+        $this->setForView(compact(
+            "type_list", "country_list", "my_country", "sub_type_list", "user_category_list", 
+            "branch_list",
+            "field_labels", "user_allow_ip_field_labels"
+        ));
 
         return parent::beforeViewRender();
     }
@@ -196,6 +204,7 @@ class UserController extends BackendController
             'email' => ['required'],
             'type' => ['required'],
             'country_id' => ['required'],
+            'branch_id' => ['required'],
             'sub_type' => ["required"],
             'user_category_id' => [],
             'mobile' => ['required', new MobileNumber],
