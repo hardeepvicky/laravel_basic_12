@@ -576,11 +576,27 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
 
     $route_prefix = "product";
     $controllerClass = ProductController::class;
-    Route::resource($route_prefix, $controllerClass);
     $name = "ajax_get_list";
     Route::get($route_prefix . "-" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
     Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
 
+        Route::get("/", [$controllerClass, "index"])->name("index");
+        
+        $name = "create";
+        Route::get($name, [$controllerClass, $name])->name($name);
+        
+        $name = "store";
+        Route::post($name, [$controllerClass, $name])->name($name);
+        
+        $name = "edit";
+        Route::get("/{id}/" . $name . "/{tab?}", [$controllerClass, $name])->name($name);
+
+        $name = "update";
+        Route::put("/{id}/{tab?}", [$controllerClass, $name])->name($name);
+
+        $name = "destroy";
+        Route::delete("/{id}", [$controllerClass, $name])->name($name);
+            
         $name = "copy";
         Route::get("{id}/" . $name, [$controllerClass, $name])->name($name);
 

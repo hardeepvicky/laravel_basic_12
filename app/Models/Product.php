@@ -30,6 +30,18 @@ class Product extends BaseModel
             "foreignKey" => ["product_id"],
             "preventDelete" => false
         ],
+        ProductKeyword::class => [
+            "foreignKey" => ["product_id"],
+            "preventDelete" => false
+        ],
+        ProductAttribute::class => [
+            "foreignKey" => ["product_id"],
+            "preventDelete" => false
+        ],
+        ProductSpecification::class => [
+            "foreignKey" => ["product_id"],
+            "preventDelete" => false
+        ],
         LeadProduct::class => [
             "foreignKey" => ["product_id"],
             "preventDelete" => true
@@ -79,6 +91,11 @@ class Product extends BaseModel
         return $this->hasMany(ProductKeyword::class, 'product_id');
     }
 
+    public function specifications()
+    {
+        return $this->hasMany(ProductSpecification::class, 'product_id');
+    }
+
     public function images()
     {
         return $this->belongsToMany(DocumentFile::class, ProductFile::class)->where("file_type", "image");
@@ -102,6 +119,21 @@ class Product extends BaseModel
     public function catalog()
     {
         return $this->belongsTo(DocumentFile::class, "catalog_document_file_id");
+    }
+
+    public function installationGuide()
+    {
+        return $this->belongsTo(DocumentFile::class, "installation_guide_document_file_id");
+    }
+
+    public function userManual()
+    {
+        return $this->belongsTo(DocumentFile::class, "user_manual_document_file_id");
+    }
+
+    public function troubleshoot()
+    {
+        return $this->belongsTo(DocumentFile::class, "troubleshoot_document_file_id");
     }
 
     protected function getDisplayNameAttribute()
