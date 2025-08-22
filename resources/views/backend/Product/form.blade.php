@@ -65,7 +65,7 @@
                                                 <x-Inputs.text-field :name="$field" :label="$label"
                                                     value="{{ $model->{$field} }}" class="validate-float"
                                                     placeholder="Enter {{ $label }}"
-                                                    mandatory="true" />
+                                                    />
                                             </div>
                                             <div class="form-group w-50 mb-3">
                                                 <?php
@@ -75,7 +75,6 @@
                                                 <x-Inputs.text-field :name="$field" :label="$label"
                                                     value="{{ $model->{$field} }}" class="validate-float"
                                                     placeholder="Enter {{ $label }}"
-                                                    mandatory="true"
                                                     />
                                             </div>
                                             <div class="form-group w-50 mb-3">
@@ -86,7 +85,7 @@
                                                 <x-Inputs.text-field :name="$field" :label="$label"
                                                     value="{{ $model->{$field} }}" class="validate-float"
                                                     placeholder="Enter {{ $label }}"
-                                                    mandatory="true" />
+                                                    />
                                             </div>                                    
                                         </div>
                                         <div class="d-flex align-items-start">
@@ -98,7 +97,7 @@
                                                 <x-Inputs.text-field :name="$field" :label="$label"
                                                     value="{{ $model->{$field} }}" class="validate-float"
                                                     placeholder="Enter {{ $label }}"
-                                                    mandatory="true" />
+                                                     />
                                             </div>
                                             <div class="form-group w-50 mb-3">
                                                 <?php
@@ -108,7 +107,6 @@
                                                 <x-Inputs.text-field :name="$field" :label="$label"
                                                     value="{{ $model->{$field} }}" class="validate-float"
                                                     placeholder="Enter {{ $label }}"
-                                                    mandatory="true"
                                                     />
                                             </div>
                                             <div class="form-group w-50 mb-3">
@@ -119,17 +117,17 @@
                                                 <x-Inputs.text-field :name="$field" :label="$label"
                                                     value="{{ $model->{$field} }}" class="validate-float"
                                                     placeholder="Enter {{ $label }}"
-                                                    mandatory="true" />
+                                                    />
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="form-group w-100 mb-3 p-1">
+                                    <div class="form-group flex-shrink-1 mb-3 p-1">
                                         <?php
                                         $field = 'size_uom_id';
                                         $label = get_value_from_list($field_labels, $field, $field);
                                         ?>
                                         <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$uom_list"
-                                            value="{{ $model->{$field} }}" class="select2" mandatory="true" />
+                                            value="{{ $model->{$field} }}" class="select2" />
                                     </div>
                                 </div>
                             </div>
