@@ -18,12 +18,14 @@ use App\Models\ProductCategory;
 use App\Models\ProductCategoryAttribute;
 use App\Models\ProductFile;
 use App\Models\ProductKeyword;
+use App\Models\ProductSpecification;
 use App\Models\Uom;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Validator;
 
 class ProductController extends BackendController
 {
@@ -32,6 +34,13 @@ class ProductController extends BackendController
     protected $modelClass = Product::class;
 
     protected Product | null $model = null;
+
+    const TABS = [
+        "default" => "Default",
+        "specification" => "Specification",
+        "seo" => "SEO",
+        "other" => "Others",
+    ];
 
     public function index()
     {
@@ -44,12 +53,18 @@ class ProductController extends BackendController
                 $q->orderBy("display_order", "ASC");
             },
             "productAttributes.categoryAttribute",
+            "specifications" => function($q){
+                $q->orderBy("list_display_order", "ASC");
+            },
             "mainImage",
             "images",
             "videos",
             "otherFiles",
             "keywords",
-            "catalog"
+            "catalog",
+            "installationGuide",
+            "userManual",
+            "troubleshoot",
         ]);
 
         $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
@@ -140,7 +155,9 @@ class ProductController extends BackendController
 
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
-        $this->setForView(compact("field_labels"));
+        $specification_field_labels = FieldSetting::getDynamicFields(ProductSpecification::class);
+
+        $this->setForView(compact("field_labels", "specification_field_labels"));
 
         return parent::beforeViewRender();
     }
@@ -156,11 +173,13 @@ class ProductController extends BackendController
             'method' => 'POST',
         ];
 
-        $this->setForView(compact("model", 'form'));
+        $current_tab = $model->tab_name = array_key_first(self::TABS);
+
+        $this->setForView(compact("model", 'form', 'current_tab'));
 
         $this->set_data_for_add_edit($model);
 
-        return $this->view("form");
+        return $this->view("tabs");
     }
 
     private function set_data_for_add_edit($model)
@@ -180,7 +199,9 @@ class ProductController extends BackendController
 
         $uom_list = Uom::getUomListForCode("size");
 
-        $this->setForView(compact("product_category_list", "uom_list"));
+        $tabs = self::TABS;
+
+        $this->setForView(compact("product_category_list", "uom_list", "tabs"));
     }
 
     private function _common_validation_rules()
@@ -198,20 +219,18 @@ class ProductController extends BackendController
             "size_uom_id" => ["nullable"],
             "net_weight" => ["nullable"],
             "gross_weight" => ["nullable"],
-            "sku" => ["required", "max:255"],
-            "description" => ["nullable"],
-            "description_html" => ["nullable"],
-            "seo_title" => ["nullable", "max:80"],
-            "meta_main_keyword" => ["nullable", "max:45"],
-            "meta_description" => ["nullable", "max:255"],
+            "sku" => ["required", "max:255"],            
             "product_attributes" => [],
             "images" => [],
             "videos" => [],
-            "other_files" => [],
-            "keywords" => [],
+            "other_files" => [],            
             "catalog_document_file_id" => "",
+            "installation_guide_document_file_id" => "",
+            "user_manual_document_file_id" => "",
+            "troubleshoot_document_file_id" => "",
             "list_display_order" => "",
             "is_active" => "",
+            "tab_name" => "",
         ];
     }
 
@@ -270,7 +289,12 @@ class ProductController extends BackendController
 
             DB::commit();
 
-            return $this->afterSave($this->model);
+            $this->saveSqlLog();
+
+            $next_tab = Util::getNextTab(self::TABS, $validatedData['tab_name'], $is_last_tab);
+
+            return redirect()->route($this->routePrefix . ".edit", ["id" => $this->model->id, "tab" => $next_tab])->with('success', 'Record created successfully');
+
         } catch (Exception $ex) {
             DB::rollBack();
 
@@ -298,6 +322,79 @@ class ProductController extends BackendController
                 ]);
 
                 $this->model->productAttributes()->save($child_model);
+            }
+        }
+
+        unset($validatedData['specifications']['(sr-id)']);
+
+        if (isset($validatedData['specifications']))
+        {
+            $base_rules = [
+                "group_name" => ["required"],
+                "name" => ["required"],
+                "value" => ["required"],
+                "is_active" => ""
+            ];
+
+            $child_model = new ProductSpecification();
+
+            $existing_id_list = $this->model->specifications()->pluck("id", "id")->toArray();
+
+            $display_order = 0;
+
+            foreach($validatedData['specifications'] as $specification)
+            {
+                $specification['product_id'] = $this->model->id;
+                $rules = LaravelExtend::merge_validation_rules($base_rules, $child_model->getUniqueValidationRules($specification));
+                
+                $validator = Validator::make($specification, $rules);
+                
+                if ($validator->fails())
+                {
+                    foreach($validator->errors()->all() as $error_msg)
+                    {               
+                        LaravelExtend::addError("", $error_msg, "Specification");
+                    }
+                    continue;
+                }
+
+                $display_order++;
+                if ($specification['id'])
+                {
+                    $child_model = ProductSpecification::find($specification['id']);
+
+                    if (!$child_model)
+                    {
+                        $child_model = new ProductSpecification();
+                    }
+                    else
+                    {
+                        unset($existing_id_list[$specification['id']]);
+                    }
+                }
+                else
+                {
+                    $child_model = new ProductSpecification();
+                }
+
+                $specification['list_display_order'] = $display_order;
+
+                $child_model->fill($specification);
+
+                $this->model->specifications()->save($child_model);
+            }
+
+            if ($existing_id_list)
+            {
+                $existing_records = $this->model->specifications()->where("id", $existing_id_list)->get();
+
+                foreach($existing_records as $existing_record)
+                {
+                    if (!$existing_record->safeDelete($existing_record))
+                    {
+                        LaravelExtend::addError($existing_record->name, "Can not delete, bcoz it is asscoicated with other modules.", "Term");
+                    }
+                }
             }
         }
 
@@ -371,10 +468,16 @@ class ProductController extends BackendController
         }
     }
 
-    public function edit($id)
+    public function edit($id, $current_tab = "default")
     {
         $model = $this->model = $this->modelClass::with([
-            "images", "videos", "otherFiles", "keywords"
+            "images", "videos", "otherFiles", "keywords",
+            "productAttributes" => function($q){
+                $q->orderBy("display_order", "ASC");
+            },
+            "specifications" => function($q){
+                $q->orderBy("list_display_order", "ASC");
+            },
         ])
         ->findOrFail($id);
 
@@ -383,28 +486,60 @@ class ProductController extends BackendController
         $model->convertToChildUom();
 
         $form = [
-            'url' => route($this->routePrefix . '.update', $id),
+            'url' => route($this->routePrefix . '.update', [$id, $current_tab]),
             'method' => 'PUT',
         ];
 
-        $this->setForView(compact("model", "form"));
+        $this->setForView(compact("model", "form", "current_tab"));
 
         $this->set_data_for_add_edit($model);
 
-        return $this->view("form");
+        return $this->view("tabs");
     }
 
-    public function update($id, Request $request)
+    public function update($id, $current_tab, Request $request)
     {
         $this->model = $this->modelClass::findOrFail($id);
 
         $this->beforeEdit($this->model);
 
-        $rules = $this->_common_validation_rules();
+        $messages = [];
 
-        $rules = LaravelExtend::merge_validation_rules($rules, $this->model->getUniqueValidationRules($request));
+        switch($current_tab)
+        {
+            case "default":
+                $rules = $this->_common_validation_rules();
+                $rules = LaravelExtend::merge_validation_rules($rules, $this->model->getUniqueValidationRules($request));
+                $messages = $this->_common_validation_messages();
+                break;
 
-        $messages = $this->_common_validation_messages();
+            case "specification":
+                $rules = [
+                    "specifications" => [],
+                    "tab_name" => ""
+                ];
+                break;
+
+            case "seo":
+                $rules = [
+                    "seo_title" => ["nullable", "max:80"],
+                    "meta_main_keyword" => ["nullable", "max:45"],
+                    "meta_description" => ["nullable", "max:255"],
+                    "keywords" => [],
+                    "tab_name" => ""
+                ];
+                break;
+
+            case "other":
+                $rules = [
+                    "description" => ["nullable"],
+                    "description_html" => ["nullable"],
+                    "tab_name" => ""
+                ];
+                break;
+        }
+
+        
 
         $validatedData = $request->validate($rules, $messages);
 
@@ -413,11 +548,17 @@ class ProductController extends BackendController
         try {
             $save_data = $validatedData;
             unset($save_data['product_attributes']);
+            unset($save_data['keywords']);
             unset($save_data['images']);
             unset($save_data['videos']);
             unset($save_data['otherFiles']);
+            unset($save_data['specifications']);
 
             $this->model->fill($save_data);
+
+            $tab_name = $request->input("tab_name");
+
+            $this->model->tab_name = Util::getNextTab(self::TABS, $tab_name, $is_last_tab);
 
             if (!$this->model->save())
             {
@@ -431,14 +572,27 @@ class ProductController extends BackendController
             }
 
             DB::commit();
+            
+            $this->saveSqlLog();
 
-            return $this->afterSave($this->model);
+            $is_last_tab = false;
+            $next_tab = Util::getNextTab(self::TABS, $current_tab, $is_last_tab);
+
+            if ($is_last_tab)
+            {
+                return redirect()->route($this->routePrefix . ".index")->with('success', 'Record updated successfully');
+            }
+            else
+            {   
+                return redirect()->route($this->routePrefix . ".edit", ["id" => $this->model->id, "tab" => $next_tab])->with('success', 'Record updated successfully');
+            }
+
         } catch (Exception $ex) {
             DB::rollBack();
 
             $this->saveSqlLog();
 
-            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", LaravelExtend::$errors);
+            return back()->withInput()->with('fail', get_exception_display_message($ex))->with("custom_errors", LaravelExtend::$errors);
         }
     }
 
@@ -585,7 +739,6 @@ class ProductController extends BackendController
 
         $builder->with([
             "mainImage",
-            "catalog"
         ]);
 
         $records = $builder->get();
@@ -637,7 +790,6 @@ class ProductController extends BackendController
                 $field_labels['seo_title'] => $record['seo_title'] ?? "",
                 $field_labels['meta_main_keyword'] => $record['meta_main_keyword'] ?? "",
                 $field_labels['main_image_id'] => isset($record['main_image']['file_url']) ? url($record['main_image']['file_url']) : "",
-                $field_labels['catalog_document_file_id'] => isset($record['catalog']['file_url']) ? url($record['catalog']['file_url']) : "",
 
                 $field_labels['is_active'] => get_value_from_list($yes_no_list, $record['is_active']),
                 $field_labels['list_display_order'] => $record['list_display_order'] ?? "",
@@ -739,6 +891,89 @@ class ProductController extends BackendController
         $current_dt->setTimezone(DateUtility::$login_user_time_zone);
         $datetime = DateUtility::getDate($current_dt, DateUtility::DATETIME_OUT_FORMAT_FILE);
         $file_prefix = str_class_name_to_human_text(ProductCategoryAttribute::class);
+        $file = $path . $file_prefix . "-$datetime.csv";
+
+        $csvUtility = new CsvUtility($file);
+        $csvUtility->write($csv_records);
+
+        download_start($file, "application/octet-stream");
+    }
+
+    public function csv_specification()
+    {
+        $cache_key_prefix = Route::currentRouteName();
+
+        $builder = $this->_getBuildeForIndex($cache_key_prefix);
+
+        $this->beforeCsvExport($builder);
+
+        $builder->with([
+            "specifications" => function($q){
+                $q->orderBy("list_display_order", "ASC");
+            },
+        ]);
+
+        $records = $builder->get();
+
+        foreach($records as $k => $record)
+        {
+            $record->afterFindForCsv();
+        }
+
+        $records = $records->toArray();
+
+        // d($records, true);
+
+        $csv_records = [];
+        $user_cache_list = User::getListCache();
+
+        $yes_no_list = laravel_constant('yes_no_list');
+
+        $product_category_records = ProductCategory::getTreeRecords(ProductCategory::query());
+
+        $product_category_list = Util::getTreeListArray($product_category_records, "id", "name", false, false);
+
+        $field_labels = FieldSetting::getDynamicFields($this->modelClass);
+
+        $specification_field_labels = FieldSetting::getDynamicFields(ProductSpecification::class);
+
+        foreach($records as $record)
+        {
+            foreach($record['specifications'] as $specification)
+            {
+                $csv_records[] = [
+                    'Product ID' => $record['id'],
+
+                    $field_labels['product_category_id'] => get_value_from_list($product_category_list, $record['product_category_id']),
+                    $field_labels['name'] => $record['name'],
+                    $field_labels['model_name'] => $record['model_name'],
+                    $field_labels['sku'] => $record['sku'],
+
+                    $specification_field_labels['group_name'] => $specification['group_name'] ?? "",
+                    $specification_field_labels['name'] => $specification['name'] ?? "",
+                    $specification_field_labels['value'] => $specification['value'] ?? "",
+                    $specification_field_labels['is_active'] => $specification['is_active'] ?? "",
+                    $specification_field_labels['list_display_order'] => $specification['list_display_order'] ?? "",
+                    
+                    'Created' => if_date_time($specification['created_at']),
+                    'Created By' => $user_cache_list[$specification['created_by']] ?? "",
+                    'Updated' => if_date_time($specification['updated_at']),
+                    'Updated By' => $user_cache_list[$specification['updated_by']] ?? "",
+                ];
+            }
+        }
+
+        // d($csv_records, true);
+
+        $this->saveSqlLog();
+
+        $path = laravel_constant('path.temp');
+        FileUtility::createFolder($path);
+
+        $current_dt = DateUtility::getDateObj(null);
+        $current_dt->setTimezone(DateUtility::$login_user_time_zone);
+        $datetime = DateUtility::getDate($current_dt, DateUtility::DATETIME_OUT_FORMAT_FILE);
+        $file_prefix = str_class_name_to_human_text(ProductSpecification::class);
         $file = $path . $file_prefix . "-$datetime.csv";
 
         $csvUtility = new CsvUtility($file);

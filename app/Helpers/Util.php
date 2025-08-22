@@ -441,4 +441,35 @@ class Util
 
         return $res;
     }
+
+    public static function getNextTab($tabs, $tab, &$is_last_tab)
+    {
+        $keys = array_keys($tabs);
+        
+        if (!$tab)
+        {
+            return 0;
+        }
+        
+        $next_index = $current_index = 0;
+        for ($i = 0; $i < count($keys); $i++)
+        {
+            if ($keys[$i] == $tab)
+            {
+                $current_index = $i;
+                if ($i < count($keys) - 1)
+                {
+                    $next_index = $i + 1;
+                }
+                else
+                {
+                    $next_index = $i;
+                }
+            }
+        }
+        
+        $is_last_tab = $current_index == (count($keys) - 1);
+        
+        return $keys[$next_index];
+	}
 }
