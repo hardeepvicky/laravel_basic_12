@@ -196,11 +196,10 @@
                                     <div class="form-group mb-3">
                                         <?php
                                         $field = "catalog_document_file_id";
-                                        $label = get_value_from_list($field_labels, $field, $field);
                                         $value = $model->catalog_document_file_id;
                                         ?>
                                         <span id="choose-catalog_document_file_id" class="btn btn-secondary">Choose Catalog</span>
-                                        <x-Inputs.text-field :id="$field" :name="$field" :label="$label" :value="$value" />                        
+                                        <x-Inputs.text-field :id="$field" :name="$field" :label="$false" :value="$value" />                        
                                     </div>
                                 </div>
                             </div>     
