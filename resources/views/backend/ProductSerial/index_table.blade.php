@@ -5,7 +5,7 @@
 
     <div class="card-body p-1">
         <div class="m-2">
-            <a href="{{ route($routePrefix . ".export.csv") }}" class="btn btn-secondary">Export CSV</a>
+            <a href="{{ route($routePrefix . '.export.csv') }}" class="btn btn-secondary">Export CSV</a>
         </div>
 
         <div class="table-responsive">
@@ -13,58 +13,88 @@
                 <thead>
                     <tr>
                         <th style="width:10%">
-                            <span class="btn btn-light text-dark border-primary clear_search_conditions mb-1">Clear</span>
+                            <span
+                                class="btn btn-light text-dark border-primary clear_search_conditions mb-1">Clear</span>
                             <?php
-                            $field = "serial_no";
+                            $field = 'serial_no';
                             ?>
-                            <x-Inputs.text-field :id="$field"  :name="$field" :label="$false" :value="$search[$field]"/>
-                        </th>                        
+                            <x-Inputs.text-field :id="$field" :name="$field" :label="$false"
+                                :value="$search[$field]" />
+                        </th>
+                        <th style="width:15%">
+                            <?php
+                            $field = 'product_category_id';
+                            $label = 'Category';
+                            $category_list = [0 => '-'] + $product_category_list;
+                            ?>
+                            <x-Inputs.drop-down :name="$field" :label="$label" :value="$search[$field]" :list="$category_list"
+                                class="select2" />
+
+                            <?php
+                            $field = 'is_find_nested_child';
+                            ?>
+                            <x-Inputs.checkbox :name="$field" label="Find Nested Child" :value="$search[$field]" />
+                        </th>
                         <th style="width:20%">
                             <?php
                             $field = 'product_id';
                             $label = get_value_from_list($field_labels, $field, $field);
                             ?>
-                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :value="$search[$field]" :list="$product_list"
-                                class="select2"
-                                />
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
+                                :value="$search[$field]" :list="$product_list" class="select2" />
                         </th>
                         <th style="width:10%">
                             <?php
                             $field = 'make_id';
                             $label = get_value_from_list($field_labels, $field, $field);
                             ?>
-                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :value="$search[$field]" :list="$maker_list"
-                                class="select2"
-                                />
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
+                                :value="$search[$field]" :list="$maker_list" class="select2" />
                         </th>
                     </tr>
                     <tr class="border-bottom-primary">
                         <th>
                             <?= sortable_anchor('id', get_value_from_list($field_labels, 'id', 'id')) ?>
-                            | <?= sortable_anchor('serial_no', get_value_from_list($field_labels, 'serial_no', 'serial_no')) ?>
+                            |
+                            <?= sortable_anchor('serial_no', get_value_from_list($field_labels, 'serial_no', 'serial_no')) ?>
                         </th>
-                        <th><?= sortable_anchor('product.name', get_value_from_list($field_labels, 'product_id', 'product_id')) ?></th>
-                        <th><?= sortable_anchor('make.name', get_value_from_list($field_labels, 'make_id', 'make_id')) ?></th>
-                        <th style="width:10%"><?= sortable_anchor('is_parent_serial_no', get_value_from_list($field_labels, 'is_parent_serial_no', 'is_parent_serial_no')) ?></th>
-                        <th style="width:8%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
-                        <th style="width:8%"><?= sortable_anchor('created_by', get_value_from_list($field_labels, 'created_by', 'created_by')) ?></th>
-                        <th style="width:8%"><?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?></th>
-                        <th style="width:8%"><?= sortable_anchor('updated_by', get_value_from_list($field_labels, 'updated_by', 'updated_by')) ?></th>
+                        <th>Category</th>
+                        <th><?= sortable_anchor('product.name', get_value_from_list($field_labels, 'product_id', 'product_id')) ?>
+                        </th>
+                        <th><?= sortable_anchor('make.name', get_value_from_list($field_labels, 'make_id', 'make_id')) ?>
+                        </th>
+                        <th style="width:10%">
+                            <?= sortable_anchor('is_parent_serial_no', get_value_from_list($field_labels, 'is_parent_serial_no', 'is_parent_serial_no')) ?>
+                        </th>
+                        <th style="width:8%">
+                            <?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?>
+                        </th>
+                        <th style="width:8%">
+                            <?= sortable_anchor('created_by', get_value_from_list($field_labels, 'created_by', 'created_by')) ?>
+                        </th>
+                        <th style="width:8%">
+                            <?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?>
+                        </th>
+                        <th style="width:8%">
+                            <?= sortable_anchor('updated_by', get_value_from_list($field_labels, 'updated_by', 'updated_by')) ?>
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach ($records as $record)
                         <tr>
                             <th scope="row">
-                                <x-Backend.celec-summary-table-first-column :record="$record" :routePrefix="$routePrefix" buttons="edit,delete">
+                                <x-Backend.celec-summary-table-first-column :record="$record" :routePrefix="$routePrefix"
+                                    buttons="edit,delete">
                                     <div class="label">
-                                        {{ $record->id . " | " . $record->serial_no }}
+                                        {{ $record->id . ' | ' . $record->serial_no }}
                                     </div>
                                 </x-Backend.celec-summary-table-first-column>
                             </th>
+                            <td>{{ $record->product->category?->getDisplayName() }}</td>
                             <td>{{ $record->product?->getDisplayName() }}</td>
                             <td>{{ $record->maker?->getDisplayName() }}</td>
-                            <td>{{ $record->is_parent_serial_no ? "Parent" : "Child" }}</td>
+                            <td>{{ $record->is_parent_serial_no ? 'Parent' : 'Child' }}</td>
                             <td>
                                 <x-Backend.celec-date-time :value="$record->created_at" />
                             </td>

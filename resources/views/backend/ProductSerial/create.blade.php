@@ -26,9 +26,9 @@
                                         $field = 'no_of_serials';
                                         $label = get_value_from_list($field_labels, $field, $field);
                                         ?>
-                                        <x-Inputs.text-field type="number" :id="$field" :name="$field" :label="$label"
-                                            value="{{ $model->{$field} }}" placeholder="Enter {{ $label }}" mandatory="true"
-                                            class="validate-int"
+                                        <x-Inputs.text-field type="number" :id="$field" :name="$field"
+                                            :label="$label" value="{{ $model->{$field} }}"
+                                            placeholder="Enter {{ $label }}" mandatory="true" class="validate-int"
                                             min="1" max="1000" />
                                     </div>
                                 </div>
@@ -37,7 +37,8 @@
                                 <label class="d-block">
                                     <div class="d-flex align-items-start">
                                         <div>
-                                            <input type="radio" name="type" value="auto" class="type form-check-input" checked="true">
+                                            <input type="radio" name="type" value="auto"
+                                                class="type form-check-input" checked="true">
                                             <span class="fs-5 f-w-500">Auto</span>
                                         </div>
                                         <div class="ml-3 type-block type-block_auto">
@@ -52,14 +53,16 @@
                                             <?php
                                             $field = 'end_serial_no';
                                             ?>
-                                            <x-Inputs.text-field :id="$field" :name="$field" :label="$false" readonly="true" />
+                                            <x-Inputs.text-field :id="$field" :name="$field" :label="$false"
+                                                readonly="true" />
                                         </div>
                                     </div>
                                 </label>
                                 <label class="d-block">
                                     <div class="d-flex align-items-start">
                                         <div>
-                                            <input type="radio" name="type" value="manual" class="type form-check-input">
+                                            <input type="radio" name="type" value="manual"
+                                                class="type form-check-input">
                                             <span class="fs-5 f-w-500">Manual</span>
                                         </div>
                                         <div class="ml-3 type-block type-block_manual">
@@ -68,14 +71,14 @@
                                             $label = get_value_from_list($field_labels, $field, $field);
                                             ?>
                                             <x-Inputs.text-field id="manual_serial_no" :name="$field" :label="$false"
-                                                value="{{ $next_serial_no }}" placeholder="Enter {{ $label }}"
-                                                />
+                                                value="{{ $next_serial_no }}" placeholder="Enter {{ $label }}" />
                                         </div>
                                         <div class="ml-3 type-block type-block_manual">
                                             <?php
                                             $field = 'end_serial_no';
                                             ?>
-                                            <x-Inputs.text-field id="manual_end_serial_no" :name="$field" :label="$false" readonly="true" />
+                                            <x-Inputs.text-field id="manual_end_serial_no" :name="$field"
+                                                :label="$false" readonly="true" />
                                         </div>
                                     </div>
                                 </label>
@@ -87,13 +90,15 @@
                                 $value = $model->product_id;
                                 ?>
                                 <div class="d-flex align-items-start">
-                                    <span id="choose-product_id" class="btn btn-secondary flex-shrink-0">Choose Product</span>
-                                    <x-Inputs.text-field :id="$field" :name="$field" :label="$false" :value="$value" />
+                                    <span id="choose-product_id" class="btn btn-secondary flex-shrink-0">Choose
+                                        Product</span>
+                                    <x-Inputs.text-field :id="$field" :name="$field" :label="$false"
+                                        :value="$value" />
                                     <div class="gallery-files-preview m-1">
                                     </div>
                                 </div>
                             </div>
-                        
+
                             <div class="form-group mb-3">
                                 <?php
                                 $field = 'make_id';
@@ -101,13 +106,14 @@
                                 ?>
                                 <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
                                     :list="$maker_list" value="{{ $model->{$field} }}" class="select2" mandatory="true" />
-                            </div>                            
+                            </div>
                             <div class="form-group mb-3">
                                 <?php
                                 $field = 'is_parent_serial_no';
                                 $label = get_value_from_list($field_labels, $field, $field);
                                 ?>
-                                <x-Inputs.checkbox :id="$field" :name="$field" :label="$label" value="{{ $model->{$field} }}" />
+                                <x-Inputs.checkbox :id="$field" :name="$field" :label="$label"
+                                    value="{{ $model->{$field} }}" />
                             </div>
                         </div>
                         <div class="col-md-12 col-xxl-12">
@@ -119,15 +125,18 @@
                                     data-sr-table-template-min-row="0">
                                     <thead>
                                         <tr>
-                                            <th class="text-center" style="width : 50px;">
+                                            <th class="text-center" style="width : 8%;">
                                                 <span class="sr-table-template-add">
                                                     <i class="fas fa-plus-circle text-success icon"></i>
                                                 </span>
                                             </th>
-                                            <th style="width:60%">
+                                            <th style="width:50%">
                                                 {{ get_value_from_list($field_labels, 'product_id') }}
-                                            </th>                                            
-                                            <th style="width:30%">
+                                            </th>
+                                            <th style="width:20%">
+                                                {{ get_value_from_list($field_labels, 'make_id') }}
+                                            </th>
+                                            <th style="width:20%">
                                                 {{ get_value_from_list($field_labels, 'serial_no') }}
                                             </th>
                                         </tr>
@@ -157,18 +166,28 @@
                                                 <?php
                                                 $field = 'product_id';
                                                 ?>
-                                                <span class="btn btn-secondary choose-child_product_id flex-shrink-0">Choose Product</span>
-                                                <x-Inputs.text-field id="{{ $field }}-(sr-id)" :name="$field" :label="$false" :value="$value" class="child_product_id"/>
+                                                <span class="btn btn-secondary choose-child_product_id flex-shrink-0">Choose
+                                                    Product</span>
+                                                <x-Inputs.text-field id="{{ $field }}-(sr-id)" :name="$field"
+                                                    :label="$false" class="child_product_id" />
                                                 <div class="gallery-files-preview m-1">
                                                 </div>
                                             </td>
                                             <td>
                                                 <?php
+                                                $field = 'make_id';
+                                                ?>
+                                                <x-Inputs.drop-down id="{{ $field }}-(sr-id)"
+                                                    name="children[(sr-id)][{{ $field }}]" :label="$false"
+                                                    :list="$maker_list" class="will-required will-select2 make_id" />
+                                            </td>
+                                            <td>
+                                                <?php
                                                 $field = 'product_serial_id';
                                                 ?>
-                                                <x-Inputs.drop-down id="{{ $field }}-(sr-id)" name="children[(sr-id)][{{ $field }}]"
-                                                    :label="$false" :list="$empty_list" value="{{ $model->{$field} }}"
-                                                    class="will-required product_serial_id" />
+                                                <x-Inputs.drop-down id="{{ $field }}-(sr-id)"
+                                                    name="children[(sr-id)][{{ $field }}]" :label="$false"
+                                                    :list="$empty_list" class="will-required will-select2 product_serial_id" />
                                             </td>
                                         </tr>
                                         @php
@@ -203,18 +222,35 @@
                                                         $field = 'product_id';
                                                         $value = $child_arr[$field] ?? '';
                                                         ?>
-                                                        <span class="btn btn-secondary choose-child_product_id flex-shrink-0">Choose Product</span>
-                                                        <x-Inputs.text-field id="{{ $field }}-{{ $k }}" name="children[{{ $k }}][{{ $field }}]" :label="$false" :value="$value" class="child_product_id"/>
+                                                        <span
+                                                            class="btn btn-secondary choose-child_product_id flex-shrink-0">Choose
+                                                            Product</span>
+                                                        <x-Inputs.text-field id="{{ $field }}-{{ $k }}"
+                                                            name="children[{{ $k }}][{{ $field }}]"
+                                                            :label="$false" :value="$value"
+                                                            class="child_product_id" />
                                                         <div class="gallery-files-preview m-1">
                                                         </div>
+                                                    </td>
+                                                    <td>
+                                                        <?php
+                                                        $field = 'make_id';
+                                                        $value = $child_arr[$field] ?? '';
+                                                        ?>
+                                                        <x-Inputs.drop-down id="{{ $field }}-{{ $k }}"
+                                                            name="children[(sr-id)][{{ $field }}]"
+                                                            :label="$false" :list="$maker_list" :value="$value"
+                                                            class="will-required will-select2 make_id" />
+                                                    </td>
                                                     <td>
                                                         <?php
                                                         $field = 'product_serial_id';
                                                         $value = $child_arr[$field] ?? '';
                                                         ?>
                                                         <x-Inputs.drop-down id="{{ $field }}-{{ $k }}"
-                                                            name="children[{{ $k }}][{{ $field }}]" :label="$false" :list="$empty_list"
-                                                            :value="$value" class="product_serial_id" mandatory="true" />
+                                                            name="children[{{ $k }}][{{ $field }}]"
+                                                            :label="$false" :list="$empty_list" :value="$value"
+                                                            class="will-select2 product_serial_id" mandatory="true" />
                                                     </td>
                                                 </tr>
                                             @endforeach
@@ -244,7 +280,11 @@
     <script>
         $(function() {
 
+            $.fn.modal.Constructor.prototype.enforceFocus = function() {};
+
             var manual_serial_no_cleave;
+
+            var model_id = '<?= $model->id ?? 0 ?>';
 
             function toggle_is_parent_serial_no() {
 
@@ -254,13 +294,10 @@
 
                 var selector = "#is_parent_block";
 
-                if (is_parent_serial_no && qty <= 1)
-                {
+                if (is_parent_serial_no && qty <= 1) {
                     $(selector).show();
                     $(selector).find("input,select").removeAttr("disabled");
-                }
-                else
-                {
+                } else {
                     $(selector).hide();
                     $(selector).find("input,select").attr("disabled", true);
                 }
@@ -285,109 +322,97 @@
                 set_end_serial_no();
             }
 
-            function set_end_serial_no()
-            {
+            function set_end_serial_no() {
                 var type = $('input[name="type"]:checked').val();
                 var qty = $('#no_of_serials').val();
                 qty = qty ? parseInt(qty) : 0;
 
-                if (qty > 0)
-                {
-                    if (type == "manual")
-                    {
+                if (qty > 0) {
+                    if (type == "manual") {
                         var manual_serial_no = manual_serial_no_cleave.getRawValue();
                         manual_serial_no = manual_serial_no ? parseInt(manual_serial_no) : 0;
 
-                        if (manual_serial_no > 0)
-                        {
-                            var end_serial_no = manual_serial_no + qty -1;
-                            end_serial_no = end_serial_no.toString().padStart(8, "0");                            
+                        if (manual_serial_no > 0) {
+                            var end_serial_no = manual_serial_no + qty - 1;
+                            end_serial_no = end_serial_no.toString().padStart(8, "0");
                             $("#manual_end_serial_no").val(end_serial_no);
                         }
-                    }
-                    else if (type == "auto")
-                    {
+                    } else if (type == "auto") {
                         var serial_no = $('#serial_no').val();
                         serial_no = serial_no ? parseInt(serial_no) : 0;
 
-                        if (serial_no > 0)
-                        {
+                        if (serial_no > 0) {
                             var end_serial_no = serial_no + qty - 1;
-                            end_serial_no = end_serial_no.toString().padStart(8, "0");                            
+                            end_serial_no = end_serial_no.toString().padStart(8, "0");
                             $("#end_serial_no").val(end_serial_no);
                         }
                     }
                 }
             }
 
-            function load_child_serial_no(target, product_id, product_serial_id)
-            {
+            function load_child_serial_no(target, product_id, make_id, product_serial_id) {
                 var new_url = "/product-serial-ajax_get_unlinked_list?";
                 new_url += "product_id=" + product_id;
-                if (product_serial_id)
-                {
+                new_url += "&make_id=" + make_id;
+                if (product_serial_id) {
                     new_url += "&product_serial_id=" + product_serial_id;
                 }
 
                 console.log(new_url);
-                
-                $.get(new_url, function (response) {
+
+                $.get(new_url, function(response) {
                     try {
                         if (typeof response == "string") {
                             response = JSON.parse(response);
                         }
                     } catch (e) {
-                        console.error(feature + " Error on get " + new_url,response);
+                        console.error(feature + " Error on get " + new_url, response);
                         return;
                     }
 
                     var html = "";
                     var html = "<option value=''>Please Select</option>";
-                    
+
                     for (var i in response["data"]) {
                         var k = response["data"][i]["id"];
                         var v = response["data"][i]["name"];
 
-                        var attr = 'value="' + k +'"';
+                        var attr = 'value="' + k + '"';
 
-                        if (typeof response["data"][i]["auto_select"] != "undefined")
-                        {
-                            if (response["data"][i]["auto_select"])
-                            {
+                        if (typeof response["data"][i]["auto_select"] != "undefined") {
+                            if (response["data"][i]["auto_select"]) {
                                 attr += ' selected="selected"';
                             }
                         }
 
-                        html += '<option ' + attr +'>' + v +"</option>";
+                        html += '<option ' + attr + '>' + v + "</option>";
                     }
 
                     $(target).html(html);
 
                     var v = $(target).attr("data-value");
 
-                    if (v)
-                    {
+                    if (v) {
                         $(target).val(v);
                     }
                 });
             }
 
-            function int_child_product_id(_tr, last_id)
-            {
+            function int_child_product_id(_tr, last_id) {
                 _tr.find(".child_product_id").browseProductGallery({
                     opener: _tr.find(".choose-child_product_id"),
                     postfix: "choose-child_product_id-" + last_id,
-                    onSelect : function(id_list)
-                    {
+                    onSelect: function(id_list) {
                         var target = _tr.find("select.product_serial_id");
 
-                        if (id_list.length <= 0)
-                        {
+                        if (id_list.length <= 0) {
                             $(target).html("").trigger("change.select2");
                             return;
                         }
 
-                        load_child_serial_no(target, id_list[0], model_id);
+                        var make_id = _tr.find("select.make_id").val();
+
+                        load_child_serial_no(target, id_list[0], make_id, model_id);
                     }
                 });
             }
@@ -395,22 +420,37 @@
             $(".template-table").srTableTemplate({
                 brace_type: "(",
                 afterRowAdd(_table, last_id, _tr) {
-                    // _tr.find(".will-select2").select2({
-                    //     placeHolder: "Please Select",
-                    //     theme: "bootstrap-5",
-                    // });
+                    _tr.find(".will-select2").select2({
+                        placeHolder: "Please Select",
+                        theme: "bootstrap-5",
+                    });
 
                     _tr.find(".will-required").attr("required", true);
 
                     int_child_product_id(_tr, last_id);
+
+                    _tr.find(".make_id").change(function() {
+
+                        var _tr = $(this).closest("tr");
+
+                        var target = _tr.find("select.product_serial_id");
+                        var product_id = _tr.find(".child_product_id").val();
+                        var make_id = _tr.find("select.make_id").val();
+
+                        load_child_serial_no(target, product_id, make_id, model_id);
+                    })
                 }
             });
 
             var trs = $(".template-table").find(">tbody>tr").not(".sr-table-template-row");
-            trs.each(function(index, _tr){
+            trs.each(function(index, _tr) {
                 int_child_product_id($(_tr), index);
-                
-                load_child_serial_no($(_tr).find("select.product_serial_id"), $(_tr).find(".child_product_id").val(), model_id);
+
+                var target = $(_tr).find("select.product_serial_id");
+                var product_id = $(_tr).find(".child_product_id").val();
+                var make_id = $(_tr).find("select.make_id").val();
+
+                load_child_serial_no(target, product_id, make_id, model_id);
             })
 
             $("#is_parent_serial_no").on("input", toggle_is_parent_serial_no);
@@ -422,12 +462,12 @@
 
             $("#manual_serial_no, #no_of_serials").blur(set_end_serial_no);
             $("#manual_serial_no, #no_of_serials").on("input", set_end_serial_no);
-            
-            $("#no_of_serials").blur(function(){
+
+            $("#no_of_serials").blur(function() {
                 set_end_serial_no();
                 toggle_is_parent_serial_no();
             });
-            $("#no_of_serials").on("input", function(){
+            $("#no_of_serials").on("input", function() {
                 set_end_serial_no();
                 toggle_is_parent_serial_no();
             });
@@ -444,5 +484,4 @@
                 toggle_is_parent_serial_no();
             });
         });
-    </script>
-@endsection
+    </script>@endsection

@@ -36,11 +36,6 @@ class ProductSerial extends BaseModel
         parent::afterFind();
     }
 
-    public function category()
-    {
-        return $this->belongsTo(ProductCategory::class);
-    }
-
     public function product()
     {
         return $this->belongsTo(Product::class);
@@ -107,12 +102,6 @@ class ProductSerial extends BaseModel
 
         switch($field)
         {
-            case "product_category_id":
-                $ret_array = [
-                    $field => $this->category?->getDisplayName()
-                ];
-                break;
-                
             case "product_id":
                 $ret_array = [
                     $field => $this->product?->getDisplayName()

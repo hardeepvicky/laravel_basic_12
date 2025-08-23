@@ -498,6 +498,8 @@ use App\Models\User;
                             $("#profile_image").val(response['file']);
                             $("#inline-loader").hide();
                             $("#modal-crop").modal("hide");
+
+                            $.loader.hide();
                         });
                     });
                 });

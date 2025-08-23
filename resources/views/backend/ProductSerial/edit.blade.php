@@ -67,15 +67,18 @@
                                     data-sr-table-template-min-row="0">
                                     <thead>
                                         <tr>
-                                            <th class="text-center" style="width : 50px;">
+                                            <th class="text-center" style="width : 8%;">
                                                 <span class="sr-table-template-add">
                                                     <i class="fas fa-plus-circle text-success icon"></i>
                                                 </span>
                                             </th>
-                                            <th style="width:60%">
+                                            <th style="width:50%">
                                                 {{ get_value_from_list($field_labels, 'product_id') }}
-                                            </th>                                            
-                                            <th style="width:30%">
+                                            </th>
+                                            <th style="width:20%">
+                                                {{ get_value_from_list($field_labels, 'make_id') }}
+                                            </th>
+                                            <th style="width:20%">
                                                 {{ get_value_from_list($field_labels, 'serial_no') }}
                                             </th>
                                         </tr>
@@ -112,11 +115,19 @@
                                             </td>
                                             <td>
                                                 <?php
+                                                $field = 'make_id';
+                                                ?>
+                                                <x-Inputs.drop-down id="{{ $field }}-(sr-id)"
+                                                    name="children[(sr-id)][{{ $field }}]" :label="$false"
+                                                    :list="$maker_list" class="will-required will-select2 make_id" />
+                                            </td>
+                                            <td>
+                                                <?php
                                                 $field = 'product_serial_id';
                                                 ?>
                                                 <x-Inputs.drop-down id="{{ $field }}-(sr-id)" name="children[(sr-id)][{{ $field }}]"
                                                     :label="$false" :list="$empty_list" value="{{ $model->{$field} }}"
-                                                    class="will-required product_serial_id" />
+                                                    class="will-required will-select2 product_serial_id" />
                                             </td>
                                         </tr>
                                         @php
@@ -155,6 +166,17 @@
                                                         <x-Inputs.text-field id="{{ $field }}-{{ $k }}" name="children[{{ $k }}][{{ $field }}]" :label="$false" :value="$value" class="child_product_id"/>
                                                         <div class="gallery-files-preview m-1">
                                                         </div>
+                                                    </td>
+                                                    <td>
+                                                        <?php
+                                                        $field = 'make_id';
+                                                        $value = $child_arr[$field] ?? '';
+                                                        ?>
+                                                        <x-Inputs.drop-down id="{{ $field }}-{{ $k }}"
+                                                            name="children[(sr-id)][{{ $field }}]"
+                                                            :label="$false" :list="$maker_list" :value="$value"
+                                                            class="will-required will-select2 make_id" />
+                                                    </td>
                                                     <td>
                                                         <?php
                                                         $field = 'product_serial_id';
@@ -162,7 +184,7 @@
                                                         ?>
                                                         <x-Inputs.drop-down id="{{ $field }}-{{ $k }}"
                                                             name="children[{{ $k }}][{{ $field }}]" :label="$false" :list="$empty_list"
-                                                            :value="$value" class="product_serial_id" mandatory="true" />
+                                                            :value="$value" class="will-select2 product_serial_id" mandatory="true" />
                                                     </td>
                                                 </tr>
                                             @endforeach

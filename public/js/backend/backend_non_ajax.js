@@ -17,9 +17,9 @@ $(document).ready(function () {
 
     $(".table-export-csv").srTableCSVExport();
 
-    $(".select2").select2({
-        placeHolder: "Please Select",
-        theme: "bootstrap-5",
+    $("select.select2").not("select2-hidden-accessible").select2({
+        placeHolder : "Please Select",
+        theme : "bootstrap-5",
     });
 
     $(".fancybox").fancybox();

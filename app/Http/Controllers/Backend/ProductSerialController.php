@@ -46,14 +46,16 @@ class ProductSerialController extends BackendController
         $builder = $this->_getBuildeForIndex($cache_key_prefix);
 
         $builder->with([
-            "category",
             "product",
+            "product.category",
             "maker",
             "dealer",
             "branch"
         ]);
 
         $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
+
+        // d($records->toArray(), true);
 
         $product_category_records = ProductCategory::getTreeRecords(ProductCategory::query());
 
@@ -735,6 +737,7 @@ class ProductSerialController extends BackendController
             $pattern_array = [
                 ["field" => "product_serial_id", "type" => "int"],
                 ["field" => "product_id", "type" => "int"],
+                ["field" => "make_id", "type" => "int"],
             ];
 
             $condition_list = $this->getConditions(null, $pattern_array, true);
