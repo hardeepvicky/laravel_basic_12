@@ -981,4 +981,150 @@ class ProductController extends BackendController
 
         download_start($file, "application/octet-stream");
     }
+
+    public function gallery()
+    {
+        $cache_key_prefix = Route::currentRouteName();
+
+        $conditions = $this->getConditions($cache_key_prefix, [
+            ["field" => "product_category_id", "type" => "int"],
+            ["field" => "is_find_nested_child", "type" => "int"],
+            ["field" => "name", "type" => "string"],
+            ["field" => "model_name", "type" => "string"],
+        ]);
+
+        $array_helper =  new ArrayHelper($conditions);
+        $condition_list = $array_helper->convertModelSearchConditionToList();
+
+        $builder = $this->modelClass::query();
+
+        if (
+            (isset($condition_list["product_category_id"]) && $condition_list["product_category_id"])
+            && (isset($condition_list["is_find_nested_child"]) && $condition_list["is_find_nested_child"])
+        )
+        {
+            $child_id_list = ProductCategory::getChildIdList([$condition_list["product_category_id"]]);
+
+            if ($child_id_list)
+            {
+                $builder->whereIn("product_category_id", $child_id_list);
+                $conditions = $array_helper->unsetValues($conditions, ["product_category_id"], true, [ArrayHelper::UNSET_VALUE_REMOVE_PARENT_IF_FOUND_CHILD]);
+            }
+        }
+
+        $conditions = $array_helper->unsetValues($conditions, ["is_find_nested_child"], true, [ArrayHelper::UNSET_VALUE_REMOVE_PARENT_IF_FOUND_CHILD]);
+
+        $conditions[] = ["is_active", 1];
+
+        $builder->where($conditions);
+
+        $builder->with([
+            "mainImage",
+        ]);
+
+        $this->model = new $this->modelClass;
+
+        $cache_key_for_sort = $cache_key_prefix . "-index-extra-params";
+
+        $sort_by_list = [
+            "id" => "ID",
+            "name" => "Name",
+            "model_name" => "Model Name",
+            "product_category_id" => "Product Category",
+            "created_at" => "Created",
+            "updated_at" => "Updated",
+            "created_by" => "Created By",
+            "updated_by" => "Updated By",
+        ];
+
+        $sort_dir_list = [
+            "ASC" => "Ascending",
+            "DESC" => "Descending"
+        ];
+
+        $this->setForView(compact("sort_by_list", "sort_dir_list"));
+
+        $clear_cache = request('is_sort_clear', false);
+        $value = request('value', false);
+
+        if ($value) {
+            $builder->orderByRaw('FIELD(id,' . $value . ') DESC');
+            $builder->orderBy("id", "DESC");
+
+            $this->setForView([
+                "selected_value" => $value,
+                "selected_id_list" => explode(",", $value)
+            ]);
+
+            $sort = [
+                'sort_by' => 'id',
+                'sort_dir' => 'DESC'
+            ];
+
+        } else {
+            $sort = $this->getSortBy($this->model, $cache_key_for_sort, [
+                ["key" => "sort_by", "default" => "id"],
+                ["key" => "sort_dir", "default" => "DESC"],
+            ], $clear_cache);
+
+            $builder->orderBy($sort['sort_by'], $sort['sort_dir']);
+        }
+
+        $this->setForView($sort);
+
+        $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
+
+        // d($records->toArray(), true);
+
+        foreach($records as $record)
+        {
+            if ($record->mainImage?->id)
+            {
+                $record->mainImage->afterFind();
+            }
+        }
+        
+        $product_category_records = ProductCategory::getTreeRecords(ProductCategory::query());
+
+        $product_category_list = Util::getTreeListArray($product_category_records, "id", "name", false, false);
+
+        $index_table_id = request("index_table_id", "index_table");
+        $modal_id = request("modal_id", "");
+        $multiple = request("multiple", 0);
+
+        $this->setForView(compact("records", "product_category_list", "index_table_id", "modal_id", "multiple"));
+
+        return $this->viewIndex(__FUNCTION__);
+    }
+
+    public function preview(Request $request)
+    {
+        $ids = $request->get("ids");
+
+        if ($ids)
+        {
+            $id_list = explode(",", $ids);
+
+            $builder = $this->modelClass::whereIn("id", $id_list);
+            $builder->with([
+                "mainImage",
+            ]);
+
+            $records = $builder->get();
+
+            Product::convertRecordsForChildUom($records);
+
+            foreach($records as $record)
+            {
+                if ($record->mainImage?->id)
+                {
+                    $record->mainImage->afterFind();
+                }
+            }
+
+            $this->setForView(compact("records"));
+
+            return $this->viewIndex(__FUNCTION__);
+        }
+    }
 }

@@ -136,3 +136,20 @@ use App\Helpers\LaravelExtend;
 </div>
 
 <x-Backend.pagination-links :records="$records" />
+<script>
+    $(".file-block").click(function() {
+
+        var multiple = '<?= $multiple ?>';
+
+        if (multiple == "1")
+        { 
+            $(this).toggleClass("active");
+        }
+        else
+        {
+            $(".file-block").removeClass("active");
+
+            $(this).addClass("active");
+        }
+    });
+</script>

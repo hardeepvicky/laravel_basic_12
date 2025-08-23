@@ -118,7 +118,7 @@ class ProductSerialController extends BackendController
             $builder->orderBy($sort['sort_by'], $sort['sort_dir']);
         }
 
-        $product_list = [];
+        $product_list = Product::getList("id", "display_name", [], "list_display_order");
 
         if (isset($condition_list['product_category_id'])) {
             $product_list = Product::getList("id", "display_name", ["product_category_id" => $condition_list['product_category_id']], "list_display_order");
@@ -166,9 +166,9 @@ class ProductSerialController extends BackendController
     private function _common_validation_rules()
     {
         return [            
-            "product_category_id" => ["required"],
             "product_id" => ["required"],
             "make_id" => ["required"],
+            "is_parent_serial_no" => ["required"],
             "children" => []
         ];
     }
@@ -209,7 +209,8 @@ class ProductSerialController extends BackendController
         $rules = $this->_common_validation_rules();
 
         $rules['type'] = ["required"];
-        $rules['no_of_serials'] = ["nullable", "numeric", "max:1000"];
+        $rules['no_of_serials'] = ["nullable", "numeric", "min:1", "max:1000"];
+        $rules['serial_no'] = ["required"];
 
         $messages = $this->_common_validation_messages();
 
@@ -238,28 +239,21 @@ class ProductSerialController extends BackendController
             $save_data['branch_id'] = $auth_user->branch_id;
             $save_data['is_in'] = 1;
 
-            if ($save_data['type'] == "auto") {
-                for ($i = 0; $i < $save_data['no_of_serials']; $i++) {
-                    $save_data['serial_no'] = ProductSerial::getNextSerialNo();
-                    AutoSerialPattern::increaseCount(AutoSerialPattern::TYPE_PRODUCT);
-
-                    $this->model = new $this->modelClass;
-                    $this->model->fill($save_data);
-
-                    if (!$this->model->save()) {
-                        throw new UserException("Fail To save", UserException::ERROR_LARAVEL_FAIL);
-                    }
-                }
-            } else {
-                $save_data['serial_no'] = ProductSerial::getNextSerialNo();
-                AutoSerialPattern::increaseCount(AutoSerialPattern::TYPE_PRODUCT);
-
+            for ($i = 0; $i < $save_data['no_of_serials']; $i++) {
+                
+                $this->model = new $this->modelClass;
                 $this->model->fill($save_data);
-
+                
                 if (!$this->model->save()) {
                     throw new UserException("Fail To save", UserException::ERROR_LARAVEL_FAIL);
                 }
 
+                $save_data['serial_no'] = ProductSerial::getManualNextSerialNo($save_data['serial_no']);
+                AutoSerialPattern::increaseCount(AutoSerialPattern::TYPE_PRODUCT);
+            }
+
+            if ($save_data['no_of_serials'] == 1)
+            {
                 $this->_saveOthers($validatedData);
             }
 
@@ -286,6 +280,8 @@ class ProductSerialController extends BackendController
             unset($validatedData['children']['(sr-id)']);
 
             // d($validatedData, true);
+
+            $this->model->children()->update(["parent_id" => 0]);
 
             if (isset($validatedData['children'])) {
                 $rules = [
@@ -684,7 +680,6 @@ class ProductSerialController extends BackendController
             
             $csv_records[] = [
                 'ID' => $record['id'],
-                $field_labels['product_category_id'] => get_value_from_list($item_category_list, $record['product_category_id']),
                 $field_labels['product_id'] => $record['product']['display_name'] ?? "",
                 $field_labels['make_id'] => $record['maker']['display_name'] ?? "",
                 $field_labels['serial_no'] => "`" . $record['serial_no'],

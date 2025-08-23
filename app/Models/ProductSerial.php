@@ -147,6 +147,7 @@ class ProductSerial extends BaseModel
 
         $labels['type'] = "Type";
         $labels['no_of_serials'] = "No. Of Serials to generate";
+        $labels['is_parent_serial_no'] = "Is Parent Serial No.";
 
         return $labels;
     }
@@ -154,6 +155,15 @@ class ProductSerial extends BaseModel
     public static function getNextSerialNo()
     {
         $next_serial_no = AutoSerialPattern::getNextCounter(AutoSerialPattern::TYPE_PRODUCT);
+        $next_serial_no = str_pad($next_serial_no, 8, "0", STR_PAD_LEFT);
+
+        return $next_serial_no;
+    }
+
+    public static function getManualNextSerialNo($current_serial_no)
+    {
+        $current_serial_no = (int) $current_serial_no;
+        $next_serial_no =  $current_serial_no + 1;
         $next_serial_no = str_pad($next_serial_no, 8, "0", STR_PAD_LEFT);
 
         return $next_serial_no;

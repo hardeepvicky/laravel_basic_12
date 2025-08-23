@@ -178,8 +178,9 @@ class DocumentFileController extends BackendController
 
         $index_table_id = request("index_table_id", "index_table");
         $modal_id = request("modal_id", "");
+        $multiple = request("multiple", 0);
 
-        $this->setForView(compact("field_labels", "type_list", "index_table_id", "modal_id"));
+        $this->setForView(compact("field_labels", "type_list", "index_table_id", "modal_id", "multiple"));
 
         return parent::beforeViewRender();
     }

@@ -123,6 +123,7 @@ if (!isset($partial_path)) {
         <script src="{{ get_asset_url('assets/js/range/rangeslider.umd.min.js') }}"></script>
         <script src="{{ get_asset_url('assets/js/clipboard/clipboard.min.js') }}"></script>
         <script src="{{ get_asset_url('assets/js/theme-customizer/customizer.js') }}"></script>
+        <script src="{{ get_asset_url('assets/js/cleave/cleave.min.js') }}"></script>
 
         <script src="{{ get_asset_url('assets/libs/Croppie-2.6.4/croppie.min.js') }}"></script>
         <script src="{{ get_asset_url('assets/libs/fancybox/dist/jquery.fancybox.min.js') }}"></script>
@@ -152,6 +153,7 @@ if (!isset($partial_path)) {
         <script src="{{ get_asset_url('js/common_funtions.js') }}"></script>
         <script src="{{ get_asset_url('js/common_script_for_all_non_ajax_layout.js') }}"></script>
         <script src="{{ get_asset_url('js/backend/file-gallery.js') }}"></script>
+        <script src="{{ get_asset_url('js/backend/product-gallery.js') }}"></script>
         <script src="{{ get_asset_url('js/backend/backend_non_ajax.js') }}"></script>
         <script src="{{ get_asset_url('js/common.js') }}"></script>
     </div>
@@ -320,10 +322,6 @@ if (!isset($partial_path)) {
                 });
 
                 return false;
-            });
-
-            $(document).on("click", ".file-block", function() {
-                $(this).toggleClass("active");
             });
 
             $.events.lastCallbacks.map(function(cb) {

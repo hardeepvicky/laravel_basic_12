@@ -578,6 +578,10 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
     $controllerClass = ProductController::class;
     $name = "ajax_get_list";
     Route::get($route_prefix . "-" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
+    $name = "gallery";
+    Route::get($route_prefix . "-" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
+    $name = "preview";
+    Route::get($route_prefix . "-" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
     Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
 
         Route::get("/", [$controllerClass, "index"])->name("index");

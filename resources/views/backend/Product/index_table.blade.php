@@ -123,7 +123,7 @@
                                 <div class="row">
                                     <div class="col-md-12 col-xl-4">
                                         <label class="info">
-                                            Net Size :
+                                            Net Dimension :
                                             <span>
                                                 {{ $record->length }} x {{ $record->width }} x {{ $record->height }}
                                                 {{ $record->size_uom_name }}
@@ -131,7 +131,7 @@
                                         </label>
 
                                         <label class="info">
-                                            Gross Size :
+                                            Gross Dimension :
                                             <span>
                                                 {{ $record->gross_length }} x {{ $record->gross_width }} x
                                                 {{ $record->gross_height }} {{ $record->size_uom_name }}
