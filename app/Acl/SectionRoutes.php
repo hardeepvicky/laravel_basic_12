@@ -27,6 +27,9 @@ class SectionRoutes
 
         "item.ajax_get_child_uom_list",
 
+        "product.gallery",
+        "product.preview",
+
         "product-serial.ajax_get_unlinked_list",
 
         "*.ajax_get_list",
