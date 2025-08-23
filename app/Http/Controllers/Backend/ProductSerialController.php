@@ -184,6 +184,7 @@ class ProductSerialController extends BackendController
             "make_id" => ["required"],
             "is_parent_serial_no" => ["required"],
             "serial_no" => ["required"],
+            "remarks" => "",
             "children" => []
         ];
     }

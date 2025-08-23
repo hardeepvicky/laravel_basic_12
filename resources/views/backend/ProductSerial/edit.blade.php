@@ -49,7 +49,19 @@
                                 ?>
                                 <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
                                     :list="$maker_list" value="{{ $model->{$field} }}" class="select2" mandatory="true" />
-                            </div>                            
+                            </div>          
+                            <div class="form-group mb-3">
+                                <div class="textarea-wrapper">
+                                    <?php
+                                    $field = 'remarks';
+                                    $label = get_value_from_list($field_labels, $field, $field);
+                                    ?>
+                                    <x-Inputs.text-area :id="$field" :name="$field" :label="$label"
+                                        value="{{ $model->{$field} }}" class="auto-suggesstion-list" rows="3"
+                                        placeholder="Enter {{ $label }}" />
+                                    <div id="{{ $field . '-suggestion-box' }}" class="suggestion-box hidden"></div>
+                                </div>
+                            </div>                  
                             <div class="form-group mb-3">
                                 <?php
                                 $field = 'is_parent_serial_no';
