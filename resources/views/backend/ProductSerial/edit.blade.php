@@ -59,7 +59,7 @@
                             </div>
                         </div>
                         <div class="col-md-12 col-xxl-12">
-                            <div class="type-block type-block_manual">
+                            <div id="is_parent_block">
                                 <h4 class="b-b-info">
                                     Child Serial No.
                                 </h4>
