@@ -167,7 +167,10 @@ class ProductSerialController extends BackendController
             'method' => 'POST',
         ];
 
+        $model->no_of_serials = 1;
+
         $this->setForView(compact("model", 'form'));
+        
 
         $this->set_data_for_add_edit($model);
 
