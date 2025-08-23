@@ -108,6 +108,18 @@
                                     :list="$maker_list" value="{{ $model->{$field} }}" class="select2" mandatory="true" />
                             </div>
                             <div class="form-group mb-3">
+                                <div class="textarea-wrapper">
+                                    <?php
+                                    $field = 'remarks';
+                                    $label = get_value_from_list($field_labels, $field, $field);
+                                    ?>
+                                    <x-Inputs.text-area :id="$field" :name="$field" :label="$label"
+                                        value="{{ $model->{$field} }}" class="auto-suggesstion-list" rows="3"
+                                        placeholder="Enter {{ $label }}" />
+                                    <div id="{{ $field . '-suggestion-box' }}" class="suggestion-box hidden"></div>
+                                </div>
+                            </div>
+                            <div class="form-group mb-3">
                                 <?php
                                 $field = 'is_parent_serial_no';
                                 $label = get_value_from_list($field_labels, $field, $field);
@@ -279,8 +291,6 @@
 
     <script>
         $(function() {
-
-            $.fn.modal.Constructor.prototype.enforceFocus = function() {};
 
             var manual_serial_no_cleave;
 
@@ -476,6 +486,8 @@
                 opener: "#choose-product_id",
                 postfix: "choose-product_id",
             });
+
+            $(".type").change(toggle_type);
 
             $.events.execAtLast(function() {
 

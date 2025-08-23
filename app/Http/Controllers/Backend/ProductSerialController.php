@@ -230,7 +230,7 @@ class ProductSerialController extends BackendController
 
         $this->model = new $this->modelClass();
 
-        // $rules = LaravelExtend::merge_validation_rules($rules, $this->model->getUniqueValidationRules($request));
+        $rules = LaravelExtend::merge_validation_rules($rules, $this->model->getUniqueValidationRules($request));
 
         $messages = array_merge($messages, []);
 
@@ -351,7 +351,8 @@ class ProductSerialController extends BackendController
         $this->beforeEdit($this->model);
 
         $rules = $this->_common_validation_rules();
-
+        
+        $rules = LaravelExtend::merge_validation_rules($rules, $this->model->getUniqueValidationRules($request));
         // d($rules);
 
         $messages = $this->_common_validation_messages();
