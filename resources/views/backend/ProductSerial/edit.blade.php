@@ -25,7 +25,7 @@
                                 $label = get_value_from_list($field_labels, $field, $field);
                                 ?>
                                 <x-Inputs.text-field :id="$field" :name="$field" :label="$label"
-                                    value="{{ $next_serial_no }}" placeholder="Enter {{ $label }}"
+                                    value="{{ $model->{$field} }}" placeholder="Enter {{ $label }}"
                                     mandatory="true" />
                             </div>
 

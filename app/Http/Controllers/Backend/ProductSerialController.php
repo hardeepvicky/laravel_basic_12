@@ -68,10 +68,16 @@ class ProductSerialController extends BackendController
     {
         $cache_key = $cache_key_prefix . "-index";
 
-        $conditions = $this->getConditions($cache_key, [
-            ["field" => "id", "type" => "int", "cache" => false],
+        $product_conditions = $this->getConditions($cache_key . ".2", [
             ["field" => "product_category_id", "type" => "int"],
             ["field" => "is_find_nested_child", "type" => "bool"],
+        ]);
+
+        $array_helper =  new ArrayHelper($product_conditions);
+        $condition_list = $array_helper->convertModelSearchConditionToList();
+
+        $conditions = $this->getConditions($cache_key, [
+            ["field" => "id", "type" => "int", "cache" => false],
             ["field" => "product_id", "type" => "int"],
             ["field" => "make_id", "type" => "int"],
             ["field" => "branch_id", "type" => "int"],
@@ -82,26 +88,29 @@ class ProductSerialController extends BackendController
 
         $builder = $this->modelClass::query();
 
-        $array_helper =  new ArrayHelper($conditions);
-        $condition_list = $array_helper->convertModelSearchConditionToList();
-
-        if (
-            (isset($condition_list["product_category_id"]) && $condition_list["product_category_id"])
-            && (isset($condition_list["is_find_nested_child"]) && $condition_list["is_find_nested_child"])
-        ) {
-            $child_id_list = ProductCategory::getChildIdList([$condition_list["product_category_id"]]);
-
-            if ($child_id_list) {
-                $builder->whereIn("product_category_id", $child_id_list);
-                $conditions = $array_helper->unsetValues($conditions, ["product_category_id"], true, [ArrayHelper::UNSET_VALUE_REMOVE_PARENT_IF_FOUND_CHILD]);
-            }
-        }
-
-        $conditions = $array_helper->unsetValues($conditions, ["is_find_nested_child"], true, [ArrayHelper::UNSET_VALUE_REMOVE_PARENT_IF_FOUND_CHILD]);
-
         // d($conditions, true);
 
         $builder = $builder->where($conditions);
+
+        if ($product_conditions)
+        {
+            $builder->whereHas("product", function($q) use ($condition_list){
+                if (
+                    (isset($condition_list["product_category_id"]) && $condition_list["product_category_id"])
+                    && (isset($condition_list["is_find_nested_child"]) && $condition_list["is_find_nested_child"])
+                ) {
+                    $child_id_list = ProductCategory::getChildIdList([$condition_list["product_category_id"]]);
+
+                    if ($child_id_list) {
+                        $q->whereIn("product_category_id", $child_id_list);
+                    }
+                }
+                else
+                {
+                    $q->where("product_category_id", $condition_list["product_category_id"]);
+                }
+            });
+        }
 
         if ($apply_sort) {
             $cache_key_for_sort = $cache_key_prefix . "-index-extra-params";
@@ -169,6 +178,7 @@ class ProductSerialController extends BackendController
             "product_id" => ["required"],
             "make_id" => ["required"],
             "is_parent_serial_no" => ["required"],
+            "serial_no" => ["required"],
             "children" => []
         ];
     }
@@ -210,13 +220,12 @@ class ProductSerialController extends BackendController
 
         $rules['type'] = ["required"];
         $rules['no_of_serials'] = ["nullable", "numeric", "min:1", "max:1000"];
-        $rules['serial_no'] = ["required"];
 
         $messages = $this->_common_validation_messages();
 
         $this->model = new $this->modelClass();
 
-        $rules = LaravelExtend::merge_validation_rules($rules, $this->model->getUniqueValidationRules($request));
+        // $rules = LaravelExtend::merge_validation_rules($rules, $this->model->getUniqueValidationRules($request));
 
         $messages = array_merge($messages, []);
 
