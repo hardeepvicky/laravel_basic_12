@@ -31,18 +31,7 @@ if ($mandatory) {
 if (!$mandatory && $is_disabled) {
     $my_attributes['disabled'] = 'true';
 }
-?>
 
-@if (isset($label) && $label)
-<label class="form-label">
-    {{ $label }}
-    @if ($mandatory)
-    <span class="mandatory">*</span>
-    @endif
-</label>
-@endif
-
-<?php
 $value_list = [];
 
 $v = old($name_without_square_braces, $value);
@@ -58,24 +47,73 @@ if (is_string($v) && strpos($v, ',') !== false) {
 $my_attributes['data-value'] = implode(',', $value_list);
 ?>
 
-<select name="{{ $name }}" {{ $attributes->merge($my_attributes) }}>
-    @if (!$attributes->has('multiple'))
-    @if (isset($pleaseSelect) && $pleaseSelect)
-    <option value="">{{ is_string($pleaseSelect) ? $pleaseSelect : "Please Select" }}</option>
-    @endif
-    @endif
-    @foreach ($list as $k => $t)
-    @php
-    $attr = in_array($k, $value_list) ? 'selected="selected"' : '';
-    @endphp
-    <option value="{{ $k }}" {!! $attr !!}>{{ $t }}</option>
-    @endforeach
-</select>
+@if($layout == "horizontal")
 
-@if ($is_disabled)
-<input type="hidden" name="{{ $name }}" value="{{ implode(',', $value_list) }}" />
+    <div class="row mb-3">
+        <div class="col-sm-{{ $horizontalFirstColumnLength }}">
+            @if (isset($label) && $label)
+                <label class="form-label">
+                    {{ $label }}
+                    @if ($mandatory)
+                        <span class="mandatory">*</span>
+                    @endif
+                </label>
+            @endif
+        </div>
+        <div class="col-sm-{{ $horizontalSecondColumnLength }}">
+            <select name="{{ $name }}" {{ $attributes->merge($my_attributes) }}>
+                @if (!$attributes->has('multiple'))
+                @if (isset($pleaseSelect) && $pleaseSelect)
+                <option value="">{{ is_string($pleaseSelect) ? $pleaseSelect : "Please Select" }}</option>
+                @endif
+                @endif
+                @foreach ($list as $k => $t)
+                @php
+                $attr = in_array($k, $value_list) ? 'selected="selected"' : '';
+                @endphp
+                <option value="{{ $k }}" {!! $attr !!}>{{ $t }}</option>
+                @endforeach
+            </select>
+
+            @if ($is_disabled)
+                <input type="hidden" name="{{ $name }}" value="{{ implode(',', $value_list) }}" />
+            @endif
+
+            @error($errorName)
+                <div class="input-error">{{ $message }}</div>
+            @enderror
+        </div>
+    </div>
+@else
+
+    @if (isset($label) && $label)
+        <label class="form-label">
+            {{ $label }}
+            @if ($mandatory)
+            <span class="mandatory">*</span>
+            @endif
+        </label>
+    @endif
+
+    <select name="{{ $name }}" {{ $attributes->merge($my_attributes) }}>
+        @if (!$attributes->has('multiple'))
+        @if (isset($pleaseSelect) && $pleaseSelect)
+        <option value="">{{ is_string($pleaseSelect) ? $pleaseSelect : "Please Select" }}</option>
+        @endif
+        @endif
+        @foreach ($list as $k => $t)
+        @php
+        $attr = in_array($k, $value_list) ? 'selected="selected"' : '';
+        @endphp
+        <option value="{{ $k }}" {!! $attr !!}>{{ $t }}</option>
+        @endforeach
+    </select>
+
+    @if ($is_disabled)
+        <input type="hidden" name="{{ $name }}" value="{{ implode(',', $value_list) }}" />
+    @endif
+
+    @error($errorName)
+        <div class="input-error">{{ $message }}</div>
+    @enderror
 @endif
-
-@error($errorName)
-<div class="input-error">{{ $message }}</div>
-@enderror

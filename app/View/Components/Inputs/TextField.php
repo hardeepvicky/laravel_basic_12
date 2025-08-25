@@ -18,7 +18,10 @@ class TextField extends Component
         public $mandatory = false,
         public $preventCssClassAddToInput = false,
         public $isDisabled = false,
-        public $errorName = ""
+        public $errorName = "",
+        public $layout="",
+        public $horizontalFirstColumnLength="3",
+        public $horizontalSecondColumnLength="9",
     ) {
         //
 

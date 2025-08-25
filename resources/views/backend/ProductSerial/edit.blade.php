@@ -32,11 +32,10 @@
                             <div class="form-group mb-3">
                                 <?php
                                 $field = 'product_id';
-                                $value = $model->product_id;
                                 ?>
                                 <div class="d-flex align-items-start">
                                     <span id="choose-product_id" class="btn btn-secondary flex-shrink-0">Choose Product</span>
-                                    <x-Inputs.text-field :id="$field" :name="$field" :label="$false" :value="$value" />
+                                    <x-Inputs.text-field :id="$field" :name="$field" :label="$false" :value="$model->product_id" />
                                     <div class="gallery-files-preview m-1">
                                     </div>
                                 </div>
@@ -138,7 +137,7 @@
                                                 $field = 'product_serial_id';
                                                 ?>
                                                 <x-Inputs.drop-down id="{{ $field }}-(sr-id)" name="children[(sr-id)][{{ $field }}]"
-                                                    :label="$false" :list="$empty_list" value="{{ $model->{$field} }}"
+                                                    :label="$false" :list="$empty_list"
                                                     class="will-required will-select2 product_serial_id" />
                                             </td>
                                         </tr>
@@ -335,7 +334,7 @@
                 int_child_product_id($(_tr), index);
                 
                 load_child_serial_no($(_tr).find("select.product_serial_id"), $(_tr).find(".child_product_id").val(), model_id);
-            })
+            });
 
             $("#is_parent_serial_no").on("input", toggle_is_parent_serial_no);
 

@@ -1,47 +1,44 @@
 <div class="card" id="page-summary">
     <div class="card-header">
-        <x-Backend.pagination-links :records="$records" />
+        <a href="{{ route($routePrefix . '.export.csv') }}" class="btn btn-secondary">Export CSV</a>
+        <a href="{{ route($routePrefix . '.export.csv_attribute') }}" class="btn btn-secondary">Export Attribute</a>
+        <a href="{{ route($routePrefix . '.export.csv_specification') }}" class="btn btn-secondary">Export Specification CSV</a>
     </div>
 
-    <div class="card-body p-1">
-        <div class="m-2">
-            <a href="{{ route($routePrefix . '.export.csv') }}" class="btn btn-secondary">Export CSV</a>
-            <a href="{{ route($routePrefix . '.export.csv_attribute') }}" class="btn btn-secondary">Export Attribute</a>
-            <a href="{{ route($routePrefix . '.export.csv_specification') }}" class="btn btn-secondary">Export Specification CSV</a>
-        </div>
-
+    <div class="card-body p-1">        
         <div class="table-responsive">
             <table class="table table-bordered summary_table_with_search">
                 <thead>
                     <tr>
                         <th style="width:10%">
-                            <span class="btn btn-light text-dark border-primary clear_search_conditions mb-1">Clear</span>
-                            <?php
-                            $field = 'name';
-                            ?>
-                            <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]" />
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <span class="btn btn-light btn-sm text-dark border-primary clear_search_conditions mb-1">Clear</span>
+                                </div>
+                                <div class="col-sm-8">
+                                    <?php
+                                    $field = 'name';
+                                    ?>
+                                    <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]" class="form-control-sm"/>
+                                </div>
+                            </div>
                         </th>
                         <th style="width:15%">
                             <?php
                             $field = 'product_category_id';
                             $label = get_value_from_list($field_labels, $field, $field);
                             ?>
-                            <x-Inputs.drop-down :id="$field"  :name="$field" :label="$label" :value="$search[$field]" :list="$product_category_list"
-                                class="select2 cascade-drop-down"
+                            <x-Inputs.drop-down :id="$field"  :name="$field" :label="$false" :value="$search[$field]" :list="$product_category_list"
+                                class="select2 form-select-sm cascade-drop-down"
                                 data-sr-cascade-target="#product_id"
                                 data-sr-cascade-url="/product-ajax_get_list?product_category_id={v}"
                                  />
-
-                            <?php 
-                                $field = "is_find_nested_child";
-                            ?>
-                            <x-Inputs.checkbox :id="$field"  :name="$field" label="Find Nested Child" :value="$search[$field]" />
                         </th>
                         <th style="width:10%">
                             <?php
                             $field = 'model_name';
                             ?>
-                            <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]" />
+                            <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]" class="form-control-sm"/>
                         </th>
                     </tr>
                     <tr class="border-bottom-primary">
@@ -79,7 +76,7 @@
                                 <x-Backend.celec-summary-table-first-column :record="$record" :routePrefix="$routePrefix"
                                     buttons="copy,edit,delete,tr_details">
                                     <div class="label">
-                                        {{ $record->id . ' | ' . $record->name }}
+                                        {{ $record->name }}
                                     </div>
                                 </x-Backend.celec-summary-table-first-column>
                             </th>

@@ -43,18 +43,45 @@ if ($autocomplete) {
 
 ?>
 
-@if (isset($label) && $label)
-    <label class="form-label">
-        {{ $label }}
+@if($layout == "horizontal")
 
-        @if ($mandatory)
-            <span class="mandatory">*</span>
-        @endif
-    </label>
+    <div class="row mb-3">
+        <div class="col-sm-{{ $horizontalFirstColumnLength }}">
+            @if (isset($label) && $label)
+                <label class="form-label">
+                    {{ $label }}
+
+                    @if ($mandatory)
+                        <span class="mandatory">*</span>
+                    @endif
+                </label>
+            @endif
+        </div>
+        <div class="col-sm-{{ $horizontalSecondColumnLength }}">
+            <div class="form-group">
+                <input name="{{ $name }}" value="{!! old($name, $value) !!}" {{ $attributes->merge($my_attributes) }} />
+            </div>
+
+            @error($errorName)
+                <div class="input-error">{{ $message }}</div>
+            @enderror
+        </div>
+    </div>
+
+@else
+    @if (isset($label) && $label)
+        <label class="form-label">
+            {{ $label }}
+
+            @if ($mandatory)
+                <span class="mandatory">*</span>
+            @endif
+        </label>
+    @endif
+
+    <input name="{{ $name }}" value="{!! old($name, $value) !!}" {{ $attributes->merge($my_attributes) }} />
+
+    @error($errorName)
+        <div class="input-error">{{ $message }}</div>
+    @enderror
 @endif
-
-<input name="{{ $name }}" value="{!! old($name, $value) !!}" {{ $attributes->merge($my_attributes) }} />
-
-@error($errorName)
-    <div class="input-error">{{ $message }}</div>
-@enderror

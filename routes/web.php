@@ -9,9 +9,7 @@ use App\Http\Controllers\Backend\AppMenuController;
 use App\Http\Controllers\Backend\AutoSerialPatternController;
 use App\Http\Controllers\Backend\BranchController;
 use App\Http\Controllers\Backend\CampaignController;
-use App\Http\Controllers\Backend\CarrierController;
 use App\Http\Controllers\Backend\CityController;
-use App\Http\Controllers\Backend\CompanyController;
 use App\Http\Controllers\Backend\CountryController;
 use App\Http\Controllers\Backend\CustomerController;
 use App\Http\Controllers\Backend\DashboardController;
@@ -30,12 +28,10 @@ use App\Http\Controllers\Backend\EnquiryController as BackendEnquiryController;
 use App\Http\Controllers\Backend\ItemCategoryController;
 use App\Http\Controllers\Backend\ItemController;
 use App\Http\Controllers\Backend\LeadController;
-use App\Http\Controllers\Backend\MakeController;
 use App\Http\Controllers\Backend\MakerController;
 use App\Http\Controllers\Backend\NotificationController;
 use App\Http\Controllers\Backend\PartyController;
 use App\Http\Controllers\Backend\PermissionController;
-use App\Http\Controllers\Backend\ProductCatalogController;
 use App\Http\Controllers\Backend\ProductCategoryController;
 use App\Http\Controllers\Backend\ProductController;
 use App\Http\Controllers\Backend\ProductSerialController;
@@ -44,6 +40,7 @@ use App\Http\Controllers\Backend\PublicController;
 use App\Http\Controllers\Backend\RecordHistoryController;
 use App\Http\Controllers\Backend\RecurringTaskController;
 use App\Http\Controllers\Backend\RoleController;
+use App\Http\Controllers\Backend\SaleOrderController;
 use App\Http\Controllers\Backend\SampleController;
 use App\Http\Controllers\Backend\SettingsController;
 use App\Http\Controllers\Backend\StateController;
@@ -58,7 +55,6 @@ use App\Http\Controllers\Backend\WhatsappTemplateController;
 use App\Http\Controllers\Frontend\EnquiryController;
 use App\Http\Controllers\Frontend\PublicController as FrontendPublicController;
 use App\Http\Controllers\HomeController;
-use App\Livewire\Widget\LeadCounter;
 use App\Models\EmailLog;
 use App\Models\MailjetWebhook;
 use Illuminate\Http\Request;
@@ -1089,6 +1085,23 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
 
     $route_prefix = "product-serial";
     $controllerClass = ProductSerialController::class;
+    Route::resource($route_prefix, $controllerClass);
+    $name="ajax_get_unlinked_list";
+    Route::get($route_prefix . "-" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
+        $name = "ajax_update_field";
+        Route::post($name, [$controllerClass, $name])->name($name);
+
+        $route_prefix = "export";
+        Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+            $name = "csv";
+            Route::get($name, [$controllerClass, "export_" . $name])->name($name);
+        });
+    });
+
+    $route_prefix = "sale-order";
+    $controllerClass = SaleOrderController::class;
     Route::resource($route_prefix, $controllerClass);
     $name="ajax_get_unlinked_list";
     Route::get($route_prefix . "-" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);

@@ -1,7 +1,5 @@
 <div class="card" id="page-summary">
-    <div class="card-header">
-        <x-Backend.pagination-links :records="$records" />
-    </div>
+    <!-- <div class="card-header"></div> -->
 
     <div class="card-body p-1">
         <div class="table-responsive">
@@ -9,21 +7,23 @@
                 <thead>
                     <tr>
                         <th style="width:10%">
-                            <span class="btn btn-light text-dark border-primary clear_search_conditions mb-1">Clear</span>
-                            <?php
-                            $field = "name";
-                            ?>
-                            <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]"/>
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <span class="btn btn-light btn-sm text-dark border-primary clear_search_conditions mb-1">Clear</span>
+                                </div>
+                                <div class="col-sm-8">
+                                    <?php
+                                    $field = 'name';
+                                    ?>
+                                    <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]" class="form-control-sm" />
+                                </div>
+                            </div>
                         </th>
                         <th style="width:15%">
                             <?php
                             $field = "parent_id";
                             ?>
-                            <x-Inputs.drop-down :name="$field" :label="$false" :value="$search[$field]" :list="$tree_list" class="select2" />
-                            <?php 
-                                $field = "is_find_nested_child";
-                            ?>
-                            <x-Inputs.checkbox :name="$field" label="Find Nested Child" :value="$search[$field]" />
+                            <x-Inputs.drop-down :name="$field" :label="$false" :value="$search[$field]" :list="$tree_list" class="select2 form-select-sm" />
                         </th>                     
                     </tr>
                     <tr class="border-bottom-primary">

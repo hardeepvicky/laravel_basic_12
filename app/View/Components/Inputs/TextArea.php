@@ -13,11 +13,14 @@ class TextArea extends Component
      */
     public function __construct(
         public String $name,
-        public String $label,        
+        public String $label,
         public $value = "" ,
-        public $mandatory = false, 
-        public $preventCssClassAddToInput = false, 
-        public $errorName = ""      
+        public $mandatory = false,
+        public $preventCssClassAddToInput = false,
+        public $errorName = "",
+        public $layout="",
+        public $horizontalFirstColumnLength="3",
+        public $horizontalSecondColumnLength="9",
     )
     {
         //

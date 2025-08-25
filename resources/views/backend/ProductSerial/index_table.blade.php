@@ -1,55 +1,47 @@
 <div class="card" id="page-summary">
     <div class="card-header">
-        <x-Backend.pagination-links :records="$records" />
+        <a href="{{ route($routePrefix . '.export.csv') }}" class="btn btn-secondary">Export CSV</a>
     </div>
 
-    <div class="card-body p-1">
-        <div class="m-2">
-            <a href="{{ route($routePrefix . '.export.csv') }}" class="btn btn-secondary">Export CSV</a>
-        </div>
-
+    <div class="card-body p-1">        
         <div class="table-responsive">
             <table class="table table-bordered summary_table_with_search">
                 <thead>
                     <tr>
                         <th style="width:10%">
-                            <span
-                                class="btn btn-light text-dark border-primary clear_search_conditions mb-1">Clear</span>
-                            <?php
-                            $field = 'serial_no';
-                            ?>
-                            <x-Inputs.text-field :id="$field" :name="$field" :label="$false"
-                                :value="$search[$field]" />
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <span class="btn btn-light btn-sm text-dark border-primary clear_search_conditions mb-1">Clear</span>
+                                </div>
+                                <div class="col-sm-8">
+                                    <?php
+                                    $field = 'serial_no';
+                                    ?>
+                                    <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]" class="form-control-sm" />
+                                </div>
+                            </div>
                         </th>
                         <th style="width:15%">
                             <?php
                             $field = 'product_category_id';
-                            $label = 'Category';
                             $category_list = [0 => '-'] + $product_category_list;
                             ?>
-                            <x-Inputs.drop-down :name="$field" :label="$label" :value="$search[$field]" :list="$category_list"
-                                class="select2" />
-
-                            <?php
-                            $field = 'is_find_nested_child';
-                            ?>
-                            <x-Inputs.checkbox :name="$field" label="Find Nested Child" :value="$search[$field]" />
+                            <x-Inputs.drop-down :name="$field" :label="$false" :value="$search[$field]" :list="$category_list"
+                                class="select2 form-select-sm" />
                         </th>
-                        <th style="width:20%">
+                        <th style="width:15%">
                             <?php
                             $field = 'product_id';
-                            $label = get_value_from_list($field_labels, $field, $field);
                             ?>
-                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
-                                :value="$search[$field]" :list="$product_list" class="select2" />
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false"
+                                :value="$search[$field]" :list="$product_list" class="select2 form-select-sm" />
                         </th>
                         <th style="width:10%">
                             <?php
                             $field = 'make_id';
-                            $label = get_value_from_list($field_labels, $field, $field);
                             ?>
-                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
-                                :value="$search[$field]" :list="$maker_list" class="select2" />
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false"
+                                :value="$search[$field]" :list="$maker_list" class="select2 form-select-sm" />
                         </th>
                     </tr>
                     <tr class="border-bottom-primary">
@@ -87,7 +79,7 @@
                                 <x-Backend.celec-summary-table-first-column :record="$record" :routePrefix="$routePrefix"
                                     buttons="edit,delete">
                                     <div class="label">
-                                        {{ $record->id . ' | ' . $record->serial_no }}
+                                        {{ $record->serial_no }}
                                     </div>
                                 </x-Backend.celec-summary-table-first-column>
                             </th>
