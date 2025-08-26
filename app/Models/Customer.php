@@ -28,7 +28,12 @@ class Customer extends BaseModel
         
     ];
 
+    public const STATUS_CONVERTED = "CONVERTED";
+    public const STATUS_FAKE = "FAKE";
 
+    public const DEAL_TYPE_DIRECT = "DIRECT";
+    public const DEAL_TYPE_THROGH_DEALER = "THROGH_DEALER";
+    
     protected function getDisplayNameAttribute()
     {
         return $this->getDisplayName();
@@ -56,21 +61,6 @@ class Customer extends BaseModel
         parent::afterFind();
     }
 
-    public function address()
-    {
-        return $this->hasMany(LeadAddress::class, 'lead_id');
-    }
-
-    public function products()
-    {
-        return $this->hasMany(LeadProduct::class, 'lead_id');
-    }
-
-    public function history()
-    {
-        return $this->hasMany(LeadHistory::class, 'lead_id');
-    }
-
     public function state()
     {
         return $this->belongsTo(State::class);
@@ -96,9 +86,9 @@ class Customer extends BaseModel
         return $this->belongsTo(Dealer::class, "dealer_id");
     }
 
-    public function campaign()
+    public function lead()
     {
-        return $this->belongsTo(Campaign::class, "campaign_id");
+        return $this->belongsTo(Lead::class, "lead_id");
     }
 
     public function getRequiedIfRules(Request $request)
@@ -148,19 +138,6 @@ class Customer extends BaseModel
 
 
         switch ($field) {
-            case "source_type":
-
-                $list = [];
-
-                foreach ($class_info['constants'] as $constant => $label) {
-                    if (strpos($constant, "SOURCE_TYPE_") !== false) {
-                        $list[] = $label;
-                    }
-                }
-
-                return $list;
-
-                break;
 
             case "status_type":
                 $list = [];
@@ -185,18 +162,6 @@ class Customer extends BaseModel
 
                 return $list;
                 break;
-
-            case "payment_method_type":
-                $list = [];
-
-                foreach ($class_info['constants'] as $constant => $label) {
-                    if (strpos($constant, "PAYMENT_METHOD_") !== false) {
-                        $list[] = $label;
-                    }
-                }
-
-                return $list;
-                break;
         }
     }
 
@@ -207,14 +172,14 @@ class Customer extends BaseModel
             $this->assign_to_user_id = $data['assign_to_user_id'];
             $this->save();
 
-            $data['lead_id'] = $this->id;
+            $data['lead_id'] = $this->lead_id;
             $data['is_lead_transfered'] = 1;
             LeadHistory::create($data);
 
             $notification_data = [
                 'from_user_id' => LaravelExtend::getAuthUserId(),
                 "sub_type" => Notification::SUB_TYPE_INFO,
-                "msg" => "Lead $this->name is assigned to you"
+                "msg" => "Customer $this->name is assigned to you"
             ];
 
             $notifyObj = new GeneralNotification($notification_data);
@@ -270,12 +235,12 @@ class Customer extends BaseModel
             }
             else
             {
-                throw new UserException("You are not allowed to change lead history, only assignee or its parent designation user can change it.", UserException::ERROR_USER_ACTION_RESTRICT);
+                throw new UserException("You are not allowed to change customer history, only assignee or its parent designation user can change it.", UserException::ERROR_USER_ACTION_RESTRICT);
             }
         }
         else if (!is_admin_role_login())
         {
-            throw new UserException("Lead is not assigned, so only Admin can change it.", UserException::ERROR_USER_ACTION_RESTRICT);
+            throw new UserException("Customer is not assigned, so only Admin can change it.", UserException::ERROR_USER_ACTION_RESTRICT);
         }
     }
 
@@ -308,11 +273,6 @@ class Customer extends BaseModel
             case "dealer_id":
                 $ret_array = [
                     $field => $this->dealer?->getDisplayName()
-                ];
-                break;
-            case "campaign_id":
-                $ret_array = [
-                    $field => $this->campaign?->getDisplayName()
                 ];
                 break;
         }

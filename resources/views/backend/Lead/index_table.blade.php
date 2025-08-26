@@ -1,101 +1,103 @@
 <div class="card" id="page-summary">
-    <div class="card-header">
-        <x-Backend.pagination-links :records="$records" />
+    <div class="card-header p-2">
+        <a href="{{ route($routePrefix . '.export.csv') }}" class="btn btn-secondary">Export CSV</a>
+        <a href="{{ route($routePrefix . '.export.csv_history') }}" class="btn btn-secondary">Export History CSV</a>
     </div>
 
     <div class="card-body p-1">
-        <div class="m-2">
-            <a href="{{ route($routePrefix . '.export.csv') }}" class="btn btn-secondary">Export CSV</a>
-            <a href="{{ route($routePrefix . '.export.csv_history') }}" class="btn btn-secondary">Export History CSV</a>
-        </div>
         <div class="table-responsive">
             <table class="table table-bordered summary-table summary_table_with_search">
                 <thead>
                     <tr>
                         <th style="width:10%">
-                            <span
-                                class="btn btn-light text-dark border-primary clear_search_conditions mb-1">Clear</span>
-                            <?php
-                            $field = 'name';
-                            ?>
-                            <x-Inputs.text-field :id="$field" :name="$field" :label="$false"
-                                :value="$search[$field]" />
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <span class="btn btn-light btn-sm text-dark border-primary clear_search_conditions mb-1">Clear</span>
+                                </div>
+                                <div class="col-sm-8">
+                                    <?php
+                                    $field = 'name';
+                                    ?>
+                                    <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]" class="form-control-sm" />
+                                </div>
+                            </div>
                         </th>
                         <th style="width:10%">
                             <?php
                             $field = 'assign_to_user_id';
                             ?>
                             <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]"
-                                :list="$user_list" :value="$search[$field]" class="select2" />
+                                :list="$user_list" :value="$search[$field]" class="select2 form-select-sm" />
                         </th>
                         <th style="width:10%">
                             <?php
                             $field = 'status_type';
                             ?>
                             <x-Inputs.drop-down :id="$field" :name="$field" :label="$false"
-                                :value="$search[$field]" :list="$status_type_list" :value="$search[$field]" class="select2" />
+                                :value="$search[$field]" :list="$status_type_list" :value="$search[$field]" class="select2 form-select-sm" />
                         </th>
                         <th style="width:10%">
                             <?php
                             $field = 'response_type_id';
                             ?>
                             <x-Inputs.drop-down :id="$field" :name="$field" :label="$false"
-                                :value="$search[$field]" :list="$lead_history_response_list" :value="$search[$field]" class="select2" />
+                                :value="$search[$field]" :list="$lead_history_response_list" :value="$search[$field]" class="select2 form-select-sm" />
                         </th>
                         <th style="width:12%">
                             <?php
                             $field = 'state_id';
                             ?>
                             <x-Inputs.drop-down :id="$field" :name="$field" :label="$false"
-                                :value="$search[$field]" :list="$state_list" :value="$search[$field]" class="select2 mb-1" />
-
+                                :value="$search[$field]" :list="$state_list" :value="$search[$field]" class="select2 form-select-sm" />
+                        </th>
+                        <th style="width:20%">
                             <?php
                             $field = 'city_id';
                             ?>
                             <x-Inputs.drop-down :id="$field" :name="$field" :label="$false"
-                                :value="$search[$field]" :list="$district_city_list" :value="$search[$field]" class="select2" />
+                                :value="$search[$field]" :list="$district_city_list" :value="$search[$field]" class="select2 form-select-sm" />
                         </th>
                         <th style="width:10%">
                             <?php
                             $field = 'mobile';
                             ?>
                             <x-Inputs.text-field :id="$field" :name="$field" :label="$false"
-                                :value="$search[$field]" />
+                                :value="$search[$field]" class="form-control-sm"/>
                         </th>
                         <th style="width:10%">
                             <?php
                             $field = 'mobile2';
                             ?>
                             <x-Inputs.text-field :id="$field" :name="$field" :label="$false"
-                                :value="$search[$field]" />
+                                :value="$search[$field]" class="form-control-sm"/>
                         </th>
                         <th style="width:10%">
                             <?php
                             $field = 'source_id';
                             ?>
                             <x-Inputs.drop-down :id="$field" :name="$field" :label="$false"
-                                :value="$search[$field]" :list="$source_list" :value="$search[$field]" class="select2" />
+                                :value="$search[$field]" :list="$source_list" :value="$search[$field]" class="select2 form-select-sm" />
                         </th>
                         <th style="width:10%">
                             <?php
                             $field = 'source_type';
                             ?>
                             <x-Inputs.drop-down :id="$field" :name="$field" :label="$false"
-                                :value="$search[$field]" :list="$source_type_list" :value="$search[$field]" class="select2" />
+                                :value="$search[$field]" :list="$source_type_list" :value="$search[$field]" class="select2 form-select-sm" />
                         </th>
                         <th style="width:10%">
                             <?php
                             $field = 'dealer_id';
                             ?>
                             <x-Inputs.drop-down :id="$field" :name="$field" :label="$false"
-                                :value="$search[$field]" :list="$dealer_list" :value="$search[$field]" class="select2" />
+                                :value="$search[$field]" :list="$dealer_list" :value="$search[$field]" class="select2 form-select-sm" />
                         </th>
                         <th style="width:10%">
                             <?php
                             $field = 'deal_type';
                             ?>
                             <x-Inputs.drop-down :id="$field" :name="$field" :label="$false"
-                                :value="$search[$field]" :list="$deal_type_list" :value="$search[$field]" class="select2" />
+                                :value="$search[$field]" :list="$deal_type_list" :value="$search[$field]" class="select2 form-select-sm" />
                         </th>
                     </tr>
                     <tr class="border-bottom-primary">
@@ -108,7 +110,8 @@
                         <th><?= sortable_anchor('response_type_id', get_value_from_list($field_labels, 'response_type_id', 'response_type_id')) ?></th>
                         <th>
                             <?= sortable_anchor('state.name', get_value_from_list($field_labels, 'state_id', 'state_id')) ?>
-                            |
+                        </th>
+                        <th>
                             <?= sortable_anchor('district.name', get_value_from_list($field_labels, 'district_id', 'district_id')) ?>
                             |
                             <?= sortable_anchor('city.name', get_value_from_list($field_labels, 'city_id', 'city_id')) ?>
@@ -143,7 +146,9 @@
                             <td>{{ get_value_from_list($lead_history_response_list, $record->response_type_id) }}</td>
                             <td>
                                 {{ $record->state?->getShortName() }}
-                                >> {{ $record->district?->getDisplayName() }}
+                            </td>
+                            <td>
+                                {{ $record->district?->getDisplayName() }}
                                 >> {{ $record->city?->getDisplayName() }}
                             </td>
                             <td>{{ $record->mobile }}</td>
@@ -161,7 +166,7 @@
                         </tr>
                         <tr id="record-{{ $record->id }}" class="hidden">
                             <td style="background-color: var(--body--bs-body-bg)"></td>
-                            <td colspan="12">
+                            <td colspan="13">
                                 <div class="row">
                                     <div class="col-md-6 col-xl-3">
                                         <label class="info">

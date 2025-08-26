@@ -391,4 +391,35 @@ class Lead extends BaseModel
 
         return $ret_array;
     }
+
+    public function convertToCustomer()
+    {
+        $data = $this->getAttributes();
+
+        $save_data['lead_id'] = $data['id'];
+        $save_data['name'] = $data['name'];
+        $save_data['mobile'] = $data['mobile'];
+        $save_data['mobile2'] = $data['mobile2'];
+        $save_data['email'] = $data['email'];
+        $save_data['company_name'] = $data['company_name'];
+        $save_data['brand_name'] = $data['brand_name'];
+        $save_data['company_gst_no'] = $data['company_gst_no'];
+        $save_data['state_id'] = $data['state_id'];
+        $save_data['district_id'] = $data['district_id'];
+        $save_data['city_id'] = $data['city_id'];
+        $save_data['deal_type'] = $data['deal_type'];
+        $save_data['dealer_id'] = $data['dealer_id'];
+        $save_data['status_type'] = Lead::STATUS_CONVERTED;
+        $save_data['assign_to_user_id'] = $data['assign_to_user_id'];
+        $save_data['next_meeting_date_time'] = $data['next_meeting_date_time'];
+        $save_data['profile_img'] = $data['profile_img'];
+        $save_data['is_active'] = 1;
+
+        Customer::create($save_data);
+
+        $this->is_customer = 1;
+        $this->status_type = Lead::STATUS_CONVERTED;
+
+        $this->save();
+    }
 }

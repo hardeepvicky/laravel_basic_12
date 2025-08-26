@@ -87,6 +87,12 @@ class Type extends BaseModel
                     "payment_method_type" => "Payment Method",
                 ]
             ],
+            Customer::class => [
+                "fields" => [
+                    "deal_type" => "Deal Type",
+                    "status_type" => "Status",
+                ]
+            ],
             LeadHistory::class => [
                 "fields" => [
                     "action_type" => "Action Type",

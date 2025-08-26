@@ -115,7 +115,6 @@ class LeadController extends BackendController
             $builder->orderBy($sort_params['sort_by'], $sort_params['sort_dir']);
         }
 
-        
         $my_country = Country::getMyCountry();
 
         $state_conditions = [
@@ -790,6 +789,7 @@ class LeadController extends BackendController
             'method' => 'POST',
         ];
 
+        $histories = $record->history;
         $products = $record->products?->toArray() ?? [];
         $items = $record->items?->toArray() ?? [];
         $addresses = $record->address?->toArray() ?? [];
@@ -798,7 +798,7 @@ class LeadController extends BackendController
 
         $model = new LeadHistory();
 
-        $this->setForView(compact("record", "form", "model", "products", "items", "addresses", "carrier_list"));
+        $this->setForView(compact("record", "form", "model", "histories", "products", "items", "addresses", "carrier_list"));
 
         return $this->view(__FUNCTION__);
     }
@@ -1384,10 +1384,7 @@ class LeadController extends BackendController
     {
         $lead = $this->modelClass::findOrFail($lead_id);
 
-        $lead->is_customer = 1;
-        $lead->status_type = Lead::STATUS_CONVERTED;
-
-        $lead->save();
+        $lead->convertToCustomer();
 
         return redirect()->route("customer.index")->with('success', "Convert to Customer Successfully");
     }

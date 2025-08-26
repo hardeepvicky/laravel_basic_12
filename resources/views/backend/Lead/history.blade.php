@@ -35,16 +35,16 @@ use App\Helpers\DateUtility;
             <div class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modal-snooze-form">Snooze</div>
             <div class="btn btn-secondary dispatch_link" data-bs-toggle="modal" data-bs-target="#modal-dispatch-form">Dispatch</div>
             <div class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modal-transfer-form">Transfer</div>
-            @if($record->is_customer)
-                <a class="btn btn-secondary confirm" href="{{ route($routePrefix . ".convert_to_lead", ["lead_id" => $record->id])  }}">
-                    Convert To Lead
-                </a>
-            @else
-                <a class="btn btn-secondary confirm" href="{{ route($routePrefix . ".convert_to_customer", ["lead_id" => $record->id])  }}">
+            @if($record->lead_id)
+                <a class="btn btn-secondary confirm" href="{{ route("lead.convert_to_customer", ["lead_id" => $record->lead_id])  }}">
                     Convert To Customer
                 </a>
+            @elseif($record->is_customer)
+                <a class="btn btn-secondary confirm" href="{{ route("customer.convert_to_lead", [$record->id])  }}">
+                    Convert To Lead
+                </a>
             @endif
-            
+
             <div class="card-header-right">
                 <ul class="list-unstyled card-option" style="width: 230px;">
                     <li><i class="fa-solid fa-maximize full-card"></i></li>
@@ -72,9 +72,9 @@ use App\Helpers\DateUtility;
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($record->history as $i => $history)
+                        @foreach ($histories as $i => $history)
                         <?php
-                            $history->afterFind();                            
+                            $history->afterFind();
                         ?>
                         <tr>
                             <td>{{ $i + 1 }}</td>
@@ -94,7 +94,7 @@ use App\Helpers\DateUtility;
                             </td>
                             <td>
                                 @if($history->recording_file_url)
-                                <?php 
+                                <?php
                                     $mime_type = get_mime_type_from_extension($history->recording_file);
                                 ?>
                                 <audio controls class="full-audio">
@@ -102,7 +102,7 @@ use App\Helpers\DateUtility;
                                     Your browser does not support the audio element.
                                 </audio>
                                 @endif
-                            </td>                            
+                            </td>
                             <td>
                                 <div class="more-less-text">{{ $history->remarks }}</div>
                             </td>
@@ -132,7 +132,7 @@ use App\Helpers\DateUtility;
                     <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body" style="height: 80vh; overflow-y:scroll">
-                    <x-form.start action="{{ route('lead.history_store', ['lead_id' => $record->id]) }}" method="POST" />
+                    <x-form.start action="{{ route('lead.history_store', ['lead_id' => $record->lead_id ?? $record->id]) }}" method="POST" />
                         <x-Inputs.text-field type="hidden" name="entry_by" :label="$false" value="MANUAL" />
                         <x-Inputs.text-field type="hidden" name="action_type" :label="$false" value="" class="action_type" />
                         <div class="form-group mb-3">
@@ -157,7 +157,7 @@ use App\Helpers\DateUtility;
                             $label = get_value_from_list($history_field_labels, $field, $field);
                             ?>
                             <x-Inputs.text-area :id="$field" :name="$field" :label="$label" rows="3"/>
-                        </div>                        
+                        </div>
                         <div class="form-group mb-3">
                             <?php
                             $field = 'status_type';
@@ -199,7 +199,7 @@ use App\Helpers\DateUtility;
                     <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body" style="height: 40vh; overflow-y:scroll">
-                    <x-form.start action="{{ route('lead.transfer_lead', ['lead_id' => $record->id]) }}" method="POST" />
+                    <x-form.start action="{{ route('lead.transfer_lead', ['lead_id' => $record->lead_id ?? $record->id]) }}" method="POST" />
                         <x-Inputs.text-field type="hidden" name="entry_by" :label="$false" value="MANUAL" />
                         <x-Inputs.text-field type="hidden" name="action_type" :label="$false" value="{{ LeadHistory::ACTION_TYPE_LEAD_TRANSFER }}" />
                         <div class="form-group mb-3">
@@ -229,7 +229,7 @@ use App\Helpers\DateUtility;
                     <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body" style="height: 40vh; overflow-y:scroll">
-                    <x-form.start action="{{ route('lead.snooze', ['lead_id' => $record->id]) }}" method="POST" />
+                    <x-form.start action="{{ route($routePrefix . '.snooze', [$record->id]) }}" method="POST" />
                         <div class="form-group mb-3">
                             <?php
                             $field = 'snooze_minute';
@@ -259,9 +259,9 @@ use App\Helpers\DateUtility;
                     <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body" style="height: 80vh; overflow-y:scroll">
-                    <x-form.start action="{{ route('lead.dispatch', ['lead_id' => $record->id]) }}" method="POST" />
+                    <x-form.start action="{{ route('lead.dispatch', ['lead_id' => $record->lead_id ?? $record->id]) }}" method="POST" />
                         <x-Inputs.text-field type="hidden" name="entry_by" :label="$false" value="MANUAL" />
-                        <x-Inputs.text-field type="hidden" name="action_type" :label="$false" value="{{ LeadHistory::ACTION_TYPE_DISPATCH }}" />                        
+                        <x-Inputs.text-field type="hidden" name="action_type" :label="$false" value="{{ LeadHistory::ACTION_TYPE_DISPATCH }}" />
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
@@ -361,7 +361,7 @@ use App\Helpers\DateUtility;
                                     <x-Inputs.text-area :id="$field" :name="$field" :label="$label" rows="3"/>
                                 </div>
                             </div>
-                        </div>                        
+                        </div>
 
                         <div class="row mb-4">
                             <div class="col-md-12">
@@ -628,7 +628,7 @@ use App\Helpers\DateUtility;
                                 </table>
                             </div>
                         </div>
-                        
+
                         @if ($record->deal_type == Lead::DEAL_TYPE_DIRECT)
                         <div class="row mb-4">
                             <div class="col-md-12">
@@ -680,7 +680,7 @@ use App\Helpers\DateUtility;
                                                     $label = get_value_from_list($address_field_labels, $field, $field);
                                                     ?>
                                                     <x-inputs.drop-down name="addresses[(sr-id)][{{ $field }}]"
-                                                        :label="$label" 
+                                                        :label="$label"
                                                         :list="$address_type_list"
                                                         class="will-required will-select2" />
                                                 </div>
@@ -746,7 +746,7 @@ use App\Helpers\DateUtility;
                                                         </div>
                                                         <input type="hidden" name="addresses[{{ $k }}][id]"
                                                             value="{{ $child_arr['id'] ?? '' }}" />
-                                                    </td>                                                        
+                                                    </td>
                                                     <td>
                                                         <div class="form-group mb-2">
                                                             <?php
@@ -755,7 +755,7 @@ use App\Helpers\DateUtility;
                                                             $label = get_value_from_list($address_field_labels, $field, $field);
                                                             ?>
                                                             <x-inputs.drop-down name="addresses[{{ $k }}][{{ $field }}]"
-                                                                :label="$label" 
+                                                                :label="$label"
                                                                 :value="$value"
                                                                 :list="$address_type_list"
                                                                 class="will-required will-select2" />
@@ -857,7 +857,7 @@ use App\Helpers\DateUtility;
                 }, 500);
 
                 modal.find(".next-date-time-picker").flatpickr({
-                    enableTime: true,        
+                    enableTime: true,
                     minDate: "today",
                     dateFormat: constants.dateTimeFormat,
                     time_24hr: true
@@ -941,7 +941,7 @@ use App\Helpers\DateUtility;
                             console.log(xhr.responseText);
                             return false;
                         }
-                        
+
                         try {
                             var responseJson = JSON.parse(response);
                         } catch (e) {
@@ -950,7 +950,7 @@ use App\Helpers\DateUtility;
                         }
 
                         var first_error_ele = form_errors(modal.find("form"), responseJson);
-                        var modalBody = modal.find('.modal-body');                                
+                        var modalBody = modal.find('.modal-body');
                         if (modalBody.length > 0 && first_error_ele)
                         {
                             modalBody.animate({
@@ -978,14 +978,14 @@ use App\Helpers\DateUtility;
                 $('#modal-transfer-form form').trigger("submit");
             });
 
-            
+
             modal_form_init($("#modal-sms-whatsapp-email-form"));
 
             $('#modal-sms-whatsapp-email-form .submit').click(function() {
                 $('#modal-sms-whatsapp-email-form form').trigger("submit");
             });
 
-            
+
             modal_form_init($("#modal-dispatch-form"));
 
             $('#modal-dispatch-form .submit').click(function() {
