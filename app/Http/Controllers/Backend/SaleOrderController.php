@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Exceptions\UserException;
-use App\Helpers\ArrayHelper;
 use App\Helpers\CsvUtility;
 use App\Helpers\DateUtility;
 use App\Helpers\FileUtility;
 use App\Helpers\LaravelExtend;
 use App\Helpers\Util;
+use App\Models\AutoSerialPattern;
 use App\Models\Branch;
 use App\Models\Customer;
 use App\Models\Dealer;
@@ -19,13 +19,13 @@ use App\Models\ProductSerial;
 use App\Models\SaleOrder;
 use App\Models\SaleOrderProduct;
 use App\Models\SqlLog;
+use App\Models\StockProduct;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
 
 class SaleOrderController extends BackendController
@@ -44,7 +44,7 @@ class SaleOrderController extends BackendController
         $builder->with([
             "saleOrderProduct.product",
             "saleOrderProduct.product.category",
-            "saleOrderProduct.maker",
+            "saleOrderProduct.make",
             "dealer",
             "customer",
             "branch"
@@ -69,7 +69,7 @@ class SaleOrderController extends BackendController
 
         $conditions = $this->getConditions($cache_key, [
             ["field" => "id", "type" => "int", "cache" => false],
-            ["field" => "branch_id", "type" => "int"],
+            ["field" => "order_no", "type" => "string"],
             ["field" => "dealer_id", "type" => "int"],
             ["field" => "customer_id", "type" => "int"],
         ]);
@@ -109,11 +109,13 @@ class SaleOrderController extends BackendController
         $dealer_list = Dealer::getList("id", "display_name", [], "list_display_order");
         $customer_list = Customer::getList();
 
+        $default_maker = Maker::where("is_default", 1)->first();
+
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
         $sale_order_product_field_labels = FieldSetting::getDynamicFields(SaleOrderProduct::class);
 
-        $this->setForView(compact("maker_list", "branch_list", "dealer_list", "customer_list", 
+        $this->setForView(compact("maker_list", "branch_list", "dealer_list", "customer_list", "default_maker",
             "field_labels", "sale_order_product_field_labels"
         ));
 
@@ -125,6 +127,8 @@ class SaleOrderController extends BackendController
         $this->beforeCreate();
 
         $model = new $this->modelClass();
+
+        $model->order_no = AutoSerialPattern::getNextCounter(AutoSerialPattern::TYPE_SALE_ORDER);
 
         $form = [
             'url' => route($this->routePrefix . '.store'),
@@ -141,12 +145,11 @@ class SaleOrderController extends BackendController
     private function _common_validation_rules()
     {
         return [
-            "product_id" => ["required"],
-            "make_id" => ["required"],
-            "is_parent_serial_no" => ["required"],
-            "serial_no" => ["required"],
+            'dealer_id' => 'required_without_all:customer_id',
+            'customer_id' => 'required_without_all:dealer_id',
+            "estimated_dispatch_date" => ["required"],
             "remarks" => "",
-            "children" => []
+            "sale_order_products" => []
         ];
     }
 
@@ -189,12 +192,20 @@ class SaleOrderController extends BackendController
 
             $save_data['branch_id'] = $auth_user->branch_id;
 
+            $save_data = $this->model->convertTimeZoneBeforeQueryToDatabase($save_data);
+
+            // d($save_data, true);
+
             $this->model = new $this->modelClass;
             $this->model->fill($save_data);
+
+            $this->model->order_no = AutoSerialPattern::getNextCounter(AutoSerialPattern::TYPE_SALE_ORDER);
 
             if (!$this->model->save()) {
                 throw new UserException("Fail To save", UserException::ERROR_LARAVEL_FAIL);
             }
+
+            AutoSerialPattern::increaseCount(AutoSerialPattern::TYPE_SALE_ORDER);
 
             $this->_saveOthers($validatedData);
 
@@ -220,13 +231,16 @@ class SaleOrderController extends BackendController
 
             unset($validatedData['sale_order_products']['(sr-id)']);
 
-            d($validatedData, true);
+            // d($validatedData, true);
 
             if (isset($validatedData['sale_order_products'])) {
                 $base_rules = [
                     "product_id" => ["required"],
                     "make_id" => ["required"],
-                    "qty" => ["required"],
+                    "order_qty" => ["required"],
+                    "available_qty" => ["nullable"],
+                    "qty_to_manufacture" => ["nullable"],
+                    "remarks" => ["nullable"],
                 ];
 
                 $child_model = new SaleOrderProduct();
@@ -235,21 +249,15 @@ class SaleOrderController extends BackendController
 
                 $validatedData['sale_order_id'] = $this->model->id;
 
-                
-
                 $display_order = 0;
 
                 foreach ($validatedData['sale_order_products'] as $sale_order_product) {
 
-                    $rules = LaravelExtend::merge_validation_rules($base_rules, $child_model->getUniqueValidationRules($validatedData));
-
-                    $validator = Validator::make($sale_order_product, $rules, [
-                        "name.required" => "Term is required"
-                    ]);
+                    $validator = Validator::make($sale_order_product, $base_rules);
 
                     if ($validator->fails()) {
                         foreach ($validator->errors()->all() as $error_msg) {
-                            LaravelExtend::addError("", $error_msg, "Addresses");
+                            LaravelExtend::addError("", $error_msg, "Products");
                         }
                         continue;
                     }
@@ -332,6 +340,8 @@ class SaleOrderController extends BackendController
 
             unset($save_data['sale_order_products']);
 
+            $save_data = $this->model->convertTimeZoneBeforeQueryToDatabase($save_data);
+
             // dd($save_data);
 
             $this->model->fill($save_data);
@@ -357,6 +367,27 @@ class SaleOrderController extends BackendController
             return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", LaravelExtend::$errors);
         }
     }
+
+    public function copy($id)
+    {
+        $model = $this->model = $this->modelClass::with(["saleOrderProduct"])->findOrFail($id);
+
+        $model->order_no = AutoSerialPattern::getNextCounter(AutoSerialPattern::TYPE_SALE_ORDER);
+
+        $this->beforeCreate();
+
+        $form = [
+            'url' => route($this->routePrefix . '.store', $id),
+            'method' => 'POST',
+        ];
+
+        $this->set_data_for_add_edit($model);
+
+        $this->setForView(compact("model", "form"));
+
+        return $this->view("form");
+    }
+
 
     public function export_csv()
     {
@@ -497,6 +528,32 @@ class SaleOrderController extends BackendController
         } catch (Exception $ex) {
             $response['status'] = 0;
             $response['msg'] = $ex->getMessage();
+        }
+
+        return $this->responseJson($response);
+    }
+
+    public function ajax_get_available_qty_and_qty_to_manufacture($product_id, $make_id, $order_qty)
+    {
+        $response = ["status" => 1, "available_qty" => 0, "qty_to_manufacture" => 0];
+
+        $qb = StockProduct::where("make_id", $make_id)->where("product_id", $product_id);
+        $model = $qb->first();
+
+        if ($model)
+        {
+            $response['available_qty'] = $model->getAvialiableQty();
+
+            $left_qty = $response['available_qty'] - $order_qty;
+
+            if ($left_qty < 0)
+            {
+                $response['qty_to_manufacture'] = abs($left_qty);
+            }
+        }
+        else
+        {
+            $response['qty_to_manufacture'] = $order_qty;
         }
 
         return $this->responseJson($response);

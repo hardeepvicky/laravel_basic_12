@@ -38,8 +38,9 @@
                                     <x-Inputs.text-field :name="$field" :label="$label" :value="$model->{$field}"
                                         placeholder="Enter {{ $label }}" mandatory="true" />
                                     <div class="help-block">
-                                        {mmm}/{yyyy}-{counter}
+                                        {yyyy}-{mmm}-{dd}-{counter}
                                         <ul class="b-t-dark">
+                                            <li>31 : {dd}</li>
                                             <li>12 : {mm}</li>
                                             <li>Jan : {mmm}</li>
                                             <li>96 : {yy}</li>

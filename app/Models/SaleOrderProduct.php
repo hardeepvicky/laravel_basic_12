@@ -16,7 +16,12 @@ class SaleOrderProduct extends BaseModel
         return $this->belongsTo(Product::class);
     }
 
-    public function maker()
+    public function make()
+    {
+        return $this->belongsTo(Maker::class);
+    }
+
+    public function manufactureOrders()
     {
         return $this->belongsTo(Maker::class);
     }

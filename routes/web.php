@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\OtpVerifyController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Backend\AppMenuController;
 use App\Http\Controllers\Backend\AutoSerialPatternController;
+use App\Http\Controllers\Backend\BinController;
 use App\Http\Controllers\Backend\BranchController;
 use App\Http\Controllers\Backend\CampaignController;
 use App\Http\Controllers\Backend\CityController;
@@ -44,6 +45,7 @@ use App\Http\Controllers\Backend\SaleOrderController;
 use App\Http\Controllers\Backend\SampleController;
 use App\Http\Controllers\Backend\SettingsController;
 use App\Http\Controllers\Backend\StateController;
+use App\Http\Controllers\Backend\StockProductController;
 use App\Http\Controllers\Backend\SubDepartmentController;
 use App\Http\Controllers\Backend\TagsController;
 use App\Http\Controllers\Backend\TaskController;
@@ -1038,6 +1040,30 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
         });
     });
 
+    $route_prefix = "bin";
+    $controllerClass = BinController::class;
+    Route::resource($route_prefix, $controllerClass);
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
+        $name = "copy";
+        Route::get("{id}/" . $name, [$controllerClass, $name])->name($name);
+
+        $name = "activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "de_activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "ajax_update_field";
+        Route::post($name, [$controllerClass, $name])->name($name);
+
+        $route_prefix = "export";
+        Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+            $name = "csv";
+            Route::get($name, [$controllerClass, "export_" . $name])->name($name);
+        });
+    });
+
     $route_prefix = "auto-serial-pattern";
     $controllerClass = AutoSerialPatternController::class;
     Route::resource($route_prefix, $controllerClass);
@@ -1101,8 +1127,13 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
     Route::resource($route_prefix, $controllerClass);
     $name="ajax_get_unlinked_list";
     Route::get($route_prefix . "-" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
+    $name="ajax_get_available_qty_and_qty_to_manufacture";
+    Route::get($route_prefix . "-" . $name . "/{product_id}/{make_id?}/{order_qty?}", [$controllerClass, $name])->name($route_prefix . "." . $name);
     Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
 
+        $name = "copy";
+        Route::get("{id}/" . $name, [$controllerClass, $name])->name($name);
+        
         $name = "ajax_update_field";
         Route::post($name, [$controllerClass, $name])->name($name);
 
@@ -1112,6 +1143,17 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
             Route::get($name, [$controllerClass, "export_" . $name])->name($name);
         });
     });
+
+    $controller_prefix = "stock-product";
+    $controllerClass = StockProductController::class;
+    $name = "index";
+    Route::get($controller_prefix, [$controllerClass, $name])->name($controller_prefix . "." . $name);
+    $name = "export_csv";
+    Route::get($controller_prefix . "/export/csv", [$controllerClass, $name])->name($controller_prefix . "." . $name);
+    $name = "in";
+    Route::any($controller_prefix . "/" . $name, [$controllerClass, $name])->name($controller_prefix . "." . $name);    
+    $name = "out";
+    Route::any($controller_prefix . "/" . $name, [$controllerClass, $name])->name($controller_prefix . "." . $name);    
 
     Route::group(['prefix' => 'permissions', 'as' => 'permissions.'], function () {
 

@@ -18,6 +18,8 @@ class AutoSerialPattern extends BaseModel
 
     public const TYPE_PRODUCT_SERIAL = "PRODUCT_SERIAL";
     public const TYPE_ITEM_SERIAL = "ITEM_SERIAL";
+    public const TYPE_SALE_ORDER = "SALE_ORDER";
+    public const TYPE_BIN_CODE = "BIN_CODE";
 
     public function beforeSave()
     {
@@ -59,8 +61,10 @@ class AutoSerialPattern extends BaseModel
     public static function getTypeList()
     {
         return [
-            self::TYPE_PRODUCT_SERIAL => "Product No.",
-            self::TYPE_ITEM_SERIAL => "Item Code",
+            self::TYPE_PRODUCT_SERIAL => "Product Serial No.",
+            self::TYPE_ITEM_SERIAL => "Item Seial No.",
+            self::TYPE_SALE_ORDER => "Sale Order",
+            self::TYPE_BIN_CODE => "Bin Code",
         ];
     }
 
@@ -74,6 +78,11 @@ class AutoSerialPattern extends BaseModel
         }
 
         $pattern = $record->pattern;
+
+        if (strpos($pattern, "{dd}") !== false)
+        {
+            $pattern = str_replace("{dd}", date("d"), $pattern);
+        }
 
         if (strpos($pattern, "{mm}") !== false)
         {

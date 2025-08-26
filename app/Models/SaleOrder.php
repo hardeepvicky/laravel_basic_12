@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Exceptions\UserException;
+use App\Helpers\DateUtility;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Unique;
@@ -13,12 +13,20 @@ class SaleOrder extends BaseModel
         'display_name'
     ];
 
+    protected $casts = [
+        'estimated_dispatch_date' => 'date:' . DateUtility::DATE_OUT_FORMAT,
+        'dispatch_date_time' => 'date:' . DateUtility::DATE_OUT_FORMAT,
+    ];
+
     protected static array $unique_fields = ["order_no"];
 
     protected static array $list_fields = ["id", "order_no"];
 
     public static array $child_model_class = [
-        
+        SaleOrderProduct::class => [
+            "foreignKey" => "sale_order_id",
+            "preventDelete" => true
+        ],
     ];
 
     public function afterFindForCsv()

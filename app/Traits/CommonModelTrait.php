@@ -245,7 +245,7 @@ trait CommonModelTrait
 
         if (empty($data))
         {
-            foreach($date_fields as $field => $config)
+            foreach($date_fields as $field => $date_config)
             {
                 if ($this->{$field})
                 {
@@ -269,17 +269,48 @@ trait CommonModelTrait
                     }
                     else
                     {
+                        $date_config_first = '';
+
+                        if (strpos($date_config, ":") !== false)
+                        {
+                            $date_config_first = substr($date_config, 0, strpos($date_config, ":"));
+                        }
+                        else
+                        {
+                            $date_config_first = $date_config;
+                        }
+
+                        $format = 'c';
+
+                        if ($date_config_first == "date")
+                        {
+                            $format = "Y-m-d";
+                        }
+                        else 
+                        {
+                            $format = 'Y-m-d H:i:s';
+                        }
+
                         //consider as user input
                         $new_field = DateUtility::getDateObj($this->{$field}, DateUtility::$login_user_time_zone);
-                        $new_field->setTimezone(new DateTimeZone("UTC"));
-                        $this->{$field} = $new_field->format('c');
+
+                        if ($date_config_first == "date")
+                        {
+
+                        }
+                        else
+                        {
+                            $new_field->setTimezone(new DateTimeZone("UTC"));
+                        }
+                        
+                        $this->{$field} = $new_field->format($format);
                     }
                 }
             }
         }
         else
         {
-            foreach($date_fields as $field => $config)
+            foreach($date_fields as $field => $date_config)
             {
                 if (isset($data[$field]))
                 {
@@ -303,11 +334,41 @@ trait CommonModelTrait
                     }
                     else
                     {
-                        //consider as user input
+                        $date_config_first = '';
 
+                        if (strpos($date_config, ":") !== false)
+                        {
+                            $date_config_first = substr($date_config, 0, strpos($date_config, ":"));
+                        }
+                        else
+                        {
+                            $date_config_first = $date_config;
+                        }
+
+                        $format = 'c';
+
+                        if ($date_config_first == "date")
+                        {
+                            $format = "Y-m-d";
+                        }
+                        else 
+                        {
+                            $format = 'Y-m-d H:i:s';
+                        }
+
+                        //consider as user input
                         $new_field = DateUtility::getDateObj($data[$field], DateUtility::$login_user_time_zone);
-                        $new_field->setTimezone(new DateTimeZone("UTC"));
-                        $data[$field] = $new_field->format('c');
+
+                        if ($date_config_first == "date")
+                        {
+
+                        }
+                        else
+                        {
+                            $new_field->setTimezone(new DateTimeZone("UTC"));
+                        }
+                        
+                        $data[$field] = $new_field->format($format);
                     }
                 }
             }

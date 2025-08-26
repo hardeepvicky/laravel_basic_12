@@ -47,21 +47,21 @@
                             ?>
                             <x-Inputs.text-field layout="horizontal" :id="$field" :name="$field" :label="$label"
                                 value="{{ $model->{$field} }}" placeholder="Enter {{ $label }}"
-                                mandatory="true" class="date-picker"/>
-
+                                class="date-picker"
+                                mandatory="true" 
+                            />
                             
-                            <div class="textarea-wrapper">
-                                <?php
-                                $field = 'remarks';
-                                $label = get_value_from_list($field_labels, $field, $field);
-                                ?>
-                                <x-Inputs.text-area layout="horizontal" :id="$field" :name="$field" :label="$label"
-                                    value="{{ $model->{$field} }}" class="auto-suggesstion-list" rows="3"
-                                    placeholder="Enter {{ $label }}" />
-                                <div id="{{ $field . '-suggestion-box' }}" class="suggestion-box hidden"></div>
-                            </div>
+                            <?php
+                            $field = 'remarks';
+                            $label = get_value_from_list($field_labels, $field, $field);
+                            ?>
+                            <x-Inputs.text-area layout="horizontal" :id="$field" :name="$field" :label="$label"
+                                value="{{ $model->{$field} }}" 
+                                rows="3"
+                                placeholder="Enter {{ $label }}" />
                         </div>
-                        <div class="col-md-12 col-xxl-12">
+                            
+                        <div class="col-md-12">
                             <h4 class="b-b-info">
                                 Products
                             </h4>
@@ -74,14 +74,23 @@
                                                 <i class="fas fa-plus-circle text-success icon"></i>
                                             </span>
                                         </th>
-                                        <th style="width:50%">
+                                        <th style="width:30%">
                                             {{ get_value_from_list($sale_order_product_field_labels, 'product_id') }}
                                         </th>
                                         <th style="width:20%">
                                             {{ get_value_from_list($sale_order_product_field_labels, 'make_id') }}
                                         </th>
-                                        <th style="width:20%">
+                                        <th style="width:10%">
                                             {{ get_value_from_list($sale_order_product_field_labels, 'order_qty') }}
+                                        </th>
+                                        <th style="width:8%">
+                                            {{ get_value_from_list($sale_order_product_field_labels, 'available_qty') }}
+                                        </th>
+                                        <th style="width:8%">
+                                            {{ get_value_from_list($sale_order_product_field_labels, 'qty_to_manufacture') }}
+                                        </th>
+                                        <th>
+                                            {{ get_value_from_list($sale_order_product_field_labels, 'remarks') }}
                                         </th>
                                     </tr>
                                 </thead>
@@ -103,41 +112,73 @@
                                                     </span>
                                                 </div>
                                             </div>
-                                            <x-inputs.text-field type="hidden" name="children[(sr-id)][id]"
+                                            <x-inputs.text-field type="hidden" name="sale_order_products[(sr-id)][id]"
                                                 label="" />
                                         </td>
                                         <td>
                                             <?php
                                             $field = 'product_id';
                                             ?>
-                                            <span class="btn btn-secondary choose-child_product_id flex-shrink-0">Choose Product</span>
-                                            <x-Inputs.text-field id="{{ $field }}-(sr-id)" :name="$field" :label="$false" class="child_product_id"/>
-                                            <div class="gallery-files-info m-1">
+                                            <div class="row">
+                                                <div class="col-sm-8">
+                                                    <x-Inputs.drop-down name="sale_order_products[(sr-id)][{{ $field }}]" :label="$false" :list="$empty_list" class="will-select2 child_product_id"/>
+                                                </div>
+                                                <div class="col-sm-4">
+                                                    <div class="d-flex align-items-start">
+                                                        <span id="opener-product_id" class="btn btn-secondary opener-child_product_id flex-shrink-0">Choose</span>
+                                                        <input type="hidden" class="choose-child_product_id" />
+                                                    </div>
+                                                </div>
                                             </div>
                                         </td>
                                         <td>
                                             <?php
                                             $field = 'make_id';
+                                            if ($default_maker)
+                                            {
+                                                $model->{$field} = $default_maker->id;
+                                            }
                                             ?>
                                             <x-Inputs.drop-down id="{{ $field }}-(sr-id)"
-                                                name="children[(sr-id)][{{ $field }}]" :label="$false"
+                                                name="sale_order_products[(sr-id)][{{ $field }}]" :label="$false"
                                                 :list="$maker_list" class="will-required will-select2 make_id" />
                                         </td>
                                         <td>
                                             <?php
                                             $field = 'order_qty';
                                             ?>
-                                            <x-Inputs.text-field type="number" id="{{ $field }}-(sr-id)" name="children[(sr-id)][{{ $field }}]"
+                                            <x-Inputs.text-field type="number" id="{{ $field }}-(sr-id)" name="sale_order_products[(sr-id)][{{ $field }}]"
                                                 :label="$false"
                                                 class="will-required validate-int order_qty" />
                                         </td>
+                                        <td>
+                                            <?php
+                                            $field = 'available_qty';
+                                            ?>
+                                            <span class="{{ $field }}"></span>
+                                            <input type="hidden" name="sale_order_products[(sr-id)][{{ $field }}]" class="{{ $field }}">
+                                        </td>
+                                        <td>
+                                            <?php
+                                            $field = 'qty_to_manufacture';
+                                            ?>
+                                            <span class="{{ $field }}"></span>
+                                            <input type="hidden" name="sale_order_products[(sr-id)][{{ $field }}]" class="{{ $field }}">
+                                        </td>
+                                        <td>
+                                            <?php
+                                            $field = 'remarks';
+                                            ?>
+                                            <x-Inputs.text-field name="sale_order_products[(sr-id)][{{ $field }}]"
+                                                :label="$false" />
+                                        </td>
                                     </tr>
                                     @php
-                                        $children = old('children', $children ?? []);
-                                        unset($children['(sr-id)']);
+                                        $sale_order_products = old('sale_order_products', $model->saleOrderProduct?->toArray() ?? []);
+                                        unset($sale_order_products['(sr-id)']);
                                     @endphp
-                                    @if (isset($children))
-                                        @foreach ($children as $k => $child_arr)
+                                    @if (isset($sale_order_products))
+                                        @foreach ($sale_order_products as $k => $child_arr)
                                             <tr class="" sr-id="{{ $child_arr['id'] }}"
                                                 sr-counter="{{ $k }}">
                                                 <td>
@@ -156,7 +197,7 @@
                                                             </span>
                                                         </div>
                                                     </div>
-                                                    <input type="hidden" name="children[{{ $k }}][id]"
+                                                    <input type="hidden" name="sale_order_products[{{ $k }}][id]"
                                                         value="{{ $child_arr['id'] ?? '' }}" />
                                                 </td>
                                                 <td>
@@ -164,9 +205,18 @@
                                                     $field = 'product_id';
                                                     $value = $child_arr[$field] ?? '';
                                                     ?>
-                                                    <span class="btn btn-secondary choose-child_product_id flex-shrink-0">Choose Product</span>
-                                                    <x-Inputs.text-field id="{{ $field }}-(sr-id)" :name="$field" :label="$false" class="child_product_id"  :value="$value" class="child_product_id"/>
-                                                    <div class="gallery-files-info m-1">
+                                                    <div class="row">
+                                                        <div class="col-sm-8">
+                                                            <x-Inputs.drop-down name="sale_order_products[{{ $k }}][{{ $field }}]" 
+                                                                :label="$false" :list="$empty_list" :value="$value"
+                                                                class="will-select2 child_product_id"/>
+                                                        </div>
+                                                        <div class="col-sm-4">
+                                                            <div class="d-flex align-items-start">
+                                                                <span id="opener-product_id" class="btn btn-secondary opener-child_product_id flex-shrink-0">Choose</span>
+                                                                <input type="hidden" class="choose-child_product_id" />
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </td>
                                                 <td>
@@ -174,8 +224,8 @@
                                                     $field = 'make_id';
                                                     $value = $child_arr[$field] ?? '';
                                                     ?>
-                                                    <x-Inputs.drop-down id="{{ $field }}-(sr-id)"
-                                                        name="children[(sr-id)][{{ $field }}]" :label="$false" :value="$value"
+                                                    <x-Inputs.drop-down id="{{ $field }}-{{ $k }}"
+                                                        name="sale_order_products[{{ $k }}][{{ $field }}]" :label="$false" :value="$value"
                                                         :list="$maker_list" class="will-required will-select2 make_id" />
                                                 </td>
                                                 <td>
@@ -183,9 +233,33 @@
                                                     $field = 'order_qty';
                                                     $value = $child_arr[$field] ?? '';
                                                     ?>
-                                                    <x-Inputs.text-field type="number" id="{{ $field }}-(sr-id)" name="children[(sr-id)][{{ $field }}]"
+                                                    <x-Inputs.text-field type="number" id="{{ $field }}-{{ $k }}" name="sale_order_products[{{ $k }}][{{ $field }}]"
                                                         :label="$false" :value="$value"
                                                         class="will-required validate-int order_qty" />
+                                                </td>
+                                                <td>
+                                                    <?php
+                                                    $field = 'available_qty';
+                                                    $value = $child_arr[$field] ?? '';
+                                                    ?>
+                                                    <span class="{{ $field }}"></span>
+                                                    <input type="hidden" name="sale_order_products[{{ $k }}][{{ $field }}]" class="{{ $field }}"  :value="$value">
+                                                </td>
+                                                <td>
+                                                    <?php
+                                                    $field = 'qty_to_manufacture';
+                                                    $value = $child_arr[$field] ?? '';
+                                                    ?>
+                                                    <span class="{{ $field }}"></span>
+                                                    <input type="hidden" name="sale_order_products[{{ $k }}][{{ $field }}]" class="{{ $field }}" :value="$value">
+                                                </td>
+                                                <td>
+                                                    <?php
+                                                    $field = 'remarks';
+                                                    $value = $child_arr[$field] ?? '';
+                                                    ?>
+                                                    <x-Inputs.text-field name="sale_order_products[{{ $k }}][{{ $field }}]" class="{{ $field }}"
+                                                        :label="$false" />
                                                 </td>
                                             </tr>
                                         @endforeach
@@ -215,14 +289,68 @@
         $(function() {
             var model_id = '<?= $model->id ?? 0 ?>';
 
-            function int_child_product_id(_tr, last_id)
+            function load_qty_fields(_tr)
             {
-                _tr.find(".child_product_id").browseProductGallery({
-                    opener: _tr.find(".choose-child_product_id"),
-                    postfix: "choose-child_product_id-" + last_id,
-                    onSelect : function(id_list)
-                    {
+                var product_id = _tr.find("select.child_product_id").val();
+                var make_id = _tr.find("select.make_id").val();
+                var order_qty = _tr.find("input.order_qty").val();
 
+                if (product_id && make_id && order_qty)
+                {
+                    var url = `/sale-order-ajax_get_available_qty_and_qty_to_manufacture/${product_id}/${make_id}/${order_qty}`;
+                    ajaxGetJson(url, function(response){
+                        console.log(response);
+
+                        _tr.find("span.available_qty").html(response['available_qty']);
+                        _tr.find("input.available_qty").val(response['available_qty']);
+
+                        _tr.find("span.qty_to_manufacture").html(response['qty_to_manufacture']);
+                        _tr.find("input.qty_to_manufacture").val(response['qty_to_manufacture']);
+                    });
+                }
+            }
+
+            function load_product_list(target)
+            {
+                ajaxGetJson('{{ route("product.ajax_get_list") }}', function(response){
+
+                    var html = "";
+                    var html = "<option value=''>Please Select</option>";
+
+                    for (var i in response["data"]) {
+                        var k = response["data"][i]["id"];
+                        var v = response["data"][i]["name"];
+
+                        var attr = 'value="' + k + '"';
+
+                        if (typeof response["data"][i]["auto_select"] != "undefined") {
+                            if (response["data"][i]["auto_select"]) {
+                                attr += ' selected="selected"';
+                            }
+                        }
+
+                        html += '<option ' + attr + '>' + v + "</option>";
+                    }
+
+                    $(target).html(html);
+
+                    var v = $(target).attr("data-value");
+
+                    if (v) {
+                        $(target).val(v).trigger("change");
+                    }
+
+                });
+            }
+
+            function init_child_product_id(_tr, last_id) {
+
+                _tr.find(".choose-child_product_id").browseProductGallery({
+                    opener: _tr.find(".opener-child_product_id"),
+                    postfix: "choose-child_product_id",
+                    onSelect: function(id_list) {
+                        _tr.find(".child_product_id").attr("data-value", id_list[0]);
+                        load_product_list(_tr.find(".child_product_id"));
                     }
                 });
             }
@@ -237,13 +365,26 @@
 
                     _tr.find(".will-required").attr("required", true);
 
-                    int_child_product_id(_tr, last_id);
+                    load_product_list(_tr.find(".child_product_id"));
+
+                    init_child_product_id(_tr);
                 }
             });
 
             var trs = $(".template-table").find(">tbody>tr").not(".sr-table-template-row");
             trs.each(function(index, _tr){
-                int_child_product_id($(_tr), index);
+
+                load_product_list($(_tr).find(".child_product_id"));
+
+                init_child_product_id($(_tr), index);
+            });
+
+            $(document).on("change", ".child_product_id, .make_id", function(){
+                load_qty_fields($(this).closest("tr"));
+            });
+            
+            $(document).on("input", "input.order_qty", function(){
+                load_qty_fields($(this).closest("tr"));
             });
 
             $.events.execAtLast(function() {
