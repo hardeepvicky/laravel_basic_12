@@ -15,6 +15,7 @@ use App\Models\Dealer;
 use App\Models\FieldSetting;
 use App\Models\Maker;
 use App\Models\ProductCategory;
+use App\Models\ProductSerial;
 use App\Models\SaleOrder;
 use App\Models\SaleOrderProduct;
 use App\Models\SqlLog;
@@ -443,9 +444,10 @@ class SaleOrderController extends BackendController
         try {
 
             $pattern_array = [
-                ["field" => "product_serial_id", "type" => "int"],
+                ["field" => "id", "type" => "int"],
                 ["field" => "product_id", "type" => "int"],
                 ["field" => "make_id", "type" => "int"],
+                ["field" => "for", "type" => ""],
             ];
 
             $condition_list = $this->getConditions(null, $pattern_array, true);
@@ -454,13 +456,29 @@ class SaleOrderController extends BackendController
                 throw new UserException("No any condition applied");
             }
 
-            $qb = $this->modelClass::where("product_id", $condition_list['product_id'])->where(function ($q) use ($condition_list) {
-                $q->orWhere("parent_id", 0);
+            $qb = SaleOrderProduct::where("product_id", $condition_list['product_id']);
 
-                if (isset($condition_list['product_serial_id']) && $condition_list['product_serial_id']) {
-                    $q->orWhere("parent_id", $condition_list['product_serial_id']);
-                }
-            });
+
+            if (isset($condition_list['for']) && $condition_list['for'] == "ProductSerial")
+            {
+                $qb->where(function ($q) use ($condition_list) {
+
+                    $exist_sale_order_products_id_list = ProductSerial::whereNotNull('sale_order_product_id')->pluck("sale_order_product_id")->toArray();
+
+                    if ($exist_sale_order_products_id_list)
+                    {
+                        $q->whereNotIn('id', $exist_sale_order_products_id_list);
+                    }
+
+                    if (isset($condition_list['id']) && $condition_list['id']) {
+                        $q->orWhere("id", $condition_list['id']);
+                    }
+                });
+            }
+            
+            $qb->with([
+                "saleOrder"
+            ]);
 
             SqlLog::addSelectQuery($qb);
 
@@ -471,7 +489,7 @@ class SaleOrderController extends BackendController
             foreach ($records as $record) {
                 $row = [
                     "id" => $record->id,
-                    "name" => $record->getDisplayName(),
+                    "name" => $record->saleOrder->getDisplayName(),
                 ];
 
                 $response['data'][] = $row;

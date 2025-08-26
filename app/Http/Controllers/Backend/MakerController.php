@@ -99,6 +99,7 @@ class MakerController extends BackendController
         return [
             "name" => ["required"],
             "description" => ["nullable"],
+            "is_default" => ["nullable"],
             "list_display_order" => "",
             "is_active" => "",
         ];
@@ -121,7 +122,9 @@ class MakerController extends BackendController
 
         $rules = LaravelExtend::merge_validation_rules($rules, $this->model->getUniqueValidationRules($request));
 
-        $messages = array_merge($messages, []);
+        $messages = array_merge($messages, [
+            "is_default.unique" => "Only one record can be default"
+        ]);
 
         $validatedData = $request->validate($rules, $messages);
 
@@ -183,7 +186,9 @@ class MakerController extends BackendController
 
         $messages = $this->_common_validation_messages();
 
-        $messages = array_merge($messages, []);
+        $messages = array_merge($messages, [
+            "is_default.unique" => "Only one record can be default"
+        ]);
 
         $validatedData = $request->validate($rules, $messages);
 

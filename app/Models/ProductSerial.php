@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Exceptions\UserException;
+use App\Helpers\DateUtility;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Unique;
@@ -13,13 +14,23 @@ class ProductSerial extends BaseModel
         'display_name'
     ];
 
+    protected $casts = [
+        'manufacture_date_time' => 'datetime:' . DateUtility::DATETIME_OUT_FORMAT,
+    ];
+
     protected static array $unique_fields = ["serial_no"];
 
     protected static array $list_fields = ["id", "serial_no", "product_id"];
 
     public static array $child_model_class = [
-        
+        ProductSerial::class => [
+            "foreignKey" => "parent_id",
+            "preventDelete" => true
+        ],
     ];
+    
+    const TYPE_PARENT = "PARENT";
+    const TYPE_CHILD = "CHILD";
 
     public function beforeSave()
     {
@@ -141,20 +152,45 @@ class ProductSerial extends BaseModel
         return $labels;
     }
 
-    public static function getNextSerialNo()
+    public static function getAutoNextSerialNo()
     {
-        $next_serial_no = AutoSerialPattern::getNextCounter(AutoSerialPattern::TYPE_PRODUCT);
+        $next_serial_no = AutoSerialPattern::getNextCounter(AutoSerialPattern::TYPE_PRODUCT_SERIAL);
         $next_serial_no = str_pad($next_serial_no, 8, "0", STR_PAD_LEFT);
 
         return $next_serial_no;
     }
 
-    public static function getManualNextSerialNo($current_serial_no)
+    public static function getManualNextSerialNo()
+    {
+        $last_record = self::orderBy("id", "DESC")->first();
+
+        $last_serial_no = 0;
+        if ($last_record)
+        {
+            $last_serial_no = (int) $last_record->serial_no;
+        }
+
+        $last_serial_no += 1;
+        
+        $next_serial_no = str_pad($last_serial_no, 8, "0", STR_PAD_LEFT);
+
+        return $next_serial_no;
+    }
+
+    public static function getNextSerialNo($current_serial_no)
     {
         $current_serial_no = (int) $current_serial_no;
         $next_serial_no =  $current_serial_no + 1;
         $next_serial_no = str_pad($next_serial_no, 8, "0", STR_PAD_LEFT);
 
         return $next_serial_no;
+    }
+
+    public static function getTypeList()
+    {
+        return  [
+            self::TYPE_CHILD => "Child",
+            self::TYPE_PARENT => "Parent"
+        ];
     }
 }

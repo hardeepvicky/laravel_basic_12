@@ -633,6 +633,18 @@ class WebController extends Controller
             return redirect()->route($this->routePrefix . ".index")->with('success', $msg);
         }
 
+        $redirect_to_add = (bool) request("redirect_to_add", false);
+
+        if ($redirect_to_add) {
+            return redirect()->route($this->routePrefix . ".create")->with('success', $msg);
+        }
+
+        $redirect_to_edit = (bool) request("redirect_to_edit", false);
+
+        if ($redirect_to_edit) {
+            return redirect()->route($this->routePrefix . ".edit", [$model])->with('success', $msg);
+        }
+
         return back()->with('success', $msg);
     }
 

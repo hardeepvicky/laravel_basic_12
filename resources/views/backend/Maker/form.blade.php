@@ -49,6 +49,11 @@
                                 <div class="col-xl-6" style="padding-top: 30px">
                                     <div class="form-group mb-3">
                                         <?php
+                                        $field = 'is_default';
+                                        $label = get_value_from_list($field_labels, $field, $field);
+                                        ?>
+                                        <x-Inputs.checkbox :name="$field" :label="$label" value="{{ $model->{$field} }}" />
+                                        <?php
                                         $field = 'is_active';
                                         $label = get_value_from_list($field_labels, $field, $field);
                                         ?>

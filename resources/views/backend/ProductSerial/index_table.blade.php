@@ -24,9 +24,8 @@
                         <th style="width:15%">
                             <?php
                             $field = 'product_category_id';
-                            $category_list = [0 => '-'] + $product_category_list;
                             ?>
-                            <x-Inputs.drop-down :name="$field" :label="$false" :value="$search[$field]" :list="$category_list"
+                            <x-Inputs.drop-down :name="$field" :label="$false" :value="$search[$field]" :list="$product_category_list"
                                 class="select2 form-select-sm" />
                         </th>
                         <th style="width:15%">
@@ -51,12 +50,13 @@
                             <?= sortable_anchor('serial_no', get_value_from_list($field_labels, 'serial_no', 'serial_no')) ?>
                         </th>
                         <th>Category</th>
-                        <th><?= sortable_anchor('product.name', get_value_from_list($field_labels, 'product_id', 'product_id')) ?>
-                        </th>
-                        <th><?= sortable_anchor('make.name', get_value_from_list($field_labels, 'make_id', 'make_id')) ?>
+                        <th><?= sortable_anchor('product.name', get_value_from_list($field_labels, 'product_id', 'product_id')) ?></th>
+                        <th><?= sortable_anchor('make.name', get_value_from_list($field_labels, 'make_id', 'make_id')) ?></th>
+                        <th style="width:10%">
+                            <?= sortable_anchor('hierarchy_type', get_value_from_list($field_labels, 'hierarchy_type', 'hierarchy_type')) ?>
                         </th>
                         <th style="width:10%">
-                            <?= sortable_anchor('is_parent_serial_no', get_value_from_list($field_labels, 'is_parent_serial_no', 'is_parent_serial_no')) ?>
+                            <?= sortable_anchor('manufacture_date_time', get_value_from_list($field_labels, 'manufacture_date_time', 'manufacture_date_time')) ?>
                         </th>
                         <th style="width:8%">
                             <?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?>
@@ -86,7 +86,10 @@
                             <td>{{ $record->product->category?->getDisplayName() }}</td>
                             <td>{{ $record->product?->getDisplayName() }}</td>
                             <td>{{ $record->maker?->getDisplayName() }}</td>
-                            <td>{{ $record->is_parent_serial_no ? 'Parent' : 'Child' }}</td>
+                            <td>{{ get_value_from_list($type_list, $record->hierarchy_type) }}</td>
+                            <td>
+                                <x-Backend.celec-date-time :value="$record->manufacture_date_time" />
+                            </td>
                             <td>
                                 <x-Backend.celec-date-time :value="$record->created_at" />
                             </td>

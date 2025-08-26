@@ -15,7 +15,7 @@ class Product extends BaseModel
 
     protected static array $unique_fields = ["product_category_id", "name"];
 
-    protected static array $list_fields = ["id", "name", "sku"];
+    protected static array $list_fields = ["id", "name", "model_name", "sku"];
 
     protected static array $fields_containg_tags = ["description"];
 
@@ -143,14 +143,7 @@ class Product extends BaseModel
 
     public function getDisplayName()
     {
-        $name = $this->name;
-
-        if ($this->sku)
-        {
-            $name .= " (" . $this->sku . ")";
-        }
-
-        return $name;
+        return $this->model_name;
     }
 
     public function getUniqueValidationRules(Request $request)

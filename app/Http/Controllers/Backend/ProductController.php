@@ -629,11 +629,6 @@ class ProductController extends BackendController
 
             $conditions = $this->getConditions(null, $pattern_array);
 
-            if (empty($conditions))
-            {
-                throw new UserException("No any condition applied");
-            }
-
             $qb = $this->modelClass::where($conditions);
             $qb->where("is_active", 1);
 
@@ -1121,6 +1116,24 @@ class ProductController extends BackendController
                     $record->mainImage->afterFind();
                 }
             }
+
+            $this->setForView(compact("records"));
+
+            return $this->viewIndex(__FUNCTION__);
+        }
+    }
+
+    public function preview_small(Request $request)
+    {
+        $ids = $request->get("ids");
+
+        if ($ids)
+        {
+            $id_list = explode(",", $ids);
+
+            $builder = $this->modelClass::whereIn("id", $id_list);
+
+            $records = $builder->get();
 
             $this->setForView(compact("records"));
 

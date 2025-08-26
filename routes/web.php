@@ -578,6 +578,8 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
     Route::get($route_prefix . "-" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
     $name = "preview";
     Route::get($route_prefix . "-" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
+    $name = "preview_small";
+    Route::get($route_prefix . "-" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
     Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
 
         Route::get("/", [$controllerClass, "index"])->name("index");
@@ -1087,6 +1089,8 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
     $controllerClass = ProductSerialController::class;
     Route::resource($route_prefix, $controllerClass);
     $name="ajax_get_unlinked_list";
+    Route::get($route_prefix . "-" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
+    $name="ajax_get_unlinked_child_list";
     Route::get($route_prefix . "-" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
     Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
 

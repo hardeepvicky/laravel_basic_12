@@ -25,13 +25,7 @@
                             <input type="hidden" name="is_sort_clear" value="1" />
                             <input type="hidden" name="value" value="{{ $selected_value ?? '' }}" />
                             <div class="row m-1">
-                                <div class="col-sm-6 col-md-3 col-xl-2 mb-2">
-                                    <?php
-                                    $field = 'pagination_limit';
-                                    ?>
-                                    <x-Inputs.drop-down :name="$field" label="Limit" :list="$paginationList" :value="$pagination_limit"
-                                        :pleaseSelect="$false" class="pagination_limit" />
-                                </div>
+                                
                                 <div class="col-md-12 col-lg-6 col-xxxl-3 mb-2">
                                     <?php
                                     $field = 'product_category_id';
@@ -39,18 +33,6 @@
                                     ?>
                                     <x-Inputs.drop-down :name="$field" :label="$label" :value="$search[$field]"
                                         :list="$product_category_list" class="select2" />
-
-                                    <?php
-                                    $field = 'is_find_nested_child';
-                                    ?>
-                                    <x-Inputs.checkbox :name="$field" label="Find Nested Child" :value="$search[$field]" />
-                                </div>
-                                <div class="col-md-6 col-lg-3 col-xxxl-2 mb-2">
-                                    <?php
-                                    $field = 'name';
-                                    $label = get_value_from_list($field_labels, $field, $field);
-                                    ?>
-                                    <x-Inputs.text-field :name="$field" :label="$label" :value="$search[$field]" />
                                 </div>
                                 <div class="col-md-6 col-lg-3 col-xxxl-2 mb-2">
                                     <?php
@@ -58,6 +40,13 @@
                                     $label = get_value_from_list($field_labels, $field, $field);
                                     ?>
                                     <x-Inputs.text-field :name="$field" :label="$label" :value="$search[$field]" />
+                                </div>
+                                <div class="col-sm-6 col-md-3 col-xl-2 mb-2">
+                                    <?php
+                                    $field = 'pagination_limit';
+                                    ?>
+                                    <x-Inputs.drop-down :name="$field" label="Limit" :list="$paginationList" :value="$pagination_limit"
+                                        :pleaseSelect="$false" class="pagination_limit" />
                                 </div>
                                 <div class="col-md-4 col-lg-3 col-xxxl-2 mb-2">
                                     <label class="form-label">Sort</label>

@@ -60,7 +60,7 @@ jQuery.fn.extend({
             {
                 if (value)
                 {
-                    file_preview.load("/product-preview?ids=" + value);
+                    file_preview.load("/product-preview_small?ids=" + value);
                 }
                 else
                 {

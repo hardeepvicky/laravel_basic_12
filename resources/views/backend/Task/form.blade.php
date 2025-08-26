@@ -99,7 +99,7 @@ $false = false;
                                         <?php
                                         $field = 'start_date_time';
                                         $label = get_value_from_list($field_labels, $field, $field);
-                                        $value = $model->{$field} ?? $default_start_date_time;
+                                        $value = $model->{$field} ?? "";
                                         if ($value instanceof \Illuminate\Support\Carbon) {
                                             $value = $value->format(DateUtility::DATETIME_OUT_FORMAT);
                                         }
@@ -302,6 +302,7 @@ $false = false;
                 start_date_picker = flatpickr("#start_date_time", {
                     enableTime: true,
                     time_24hr: true,
+                    defaultDate: new Date(),
                     dateFormat: constants.dateTimeFormat,
                     onChange: function(selectedDates, dateStr, instance) {
                         const selectedDate = selectedDates[0];

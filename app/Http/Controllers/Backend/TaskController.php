@@ -108,8 +108,6 @@ class TaskController extends BackendController
 
         $this->today_other_task(false);
 
-        
-
         $this->saveSqlLog();
 
         return $this->viewIndex(__FUNCTION__);

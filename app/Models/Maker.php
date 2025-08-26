@@ -56,6 +56,7 @@ class Maker extends BaseModel
     {
         $field_rules = [
             "name" => [Rule::unique($this->connection . "." . $this->getTable(), "name")],
+            "is_default" => [Rule::unique($this->connection . "." . $this->getTable(), "is_default")],
         ];
 
         if ($this->id) {

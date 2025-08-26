@@ -16,8 +16,8 @@ class AutoSerialPattern extends BaseModel
        
     ];
 
-    public const TYPE_PRODUCT = "PRODUCT";
-    public const TYPE_ITEM = "ITEM";
+    public const TYPE_PRODUCT_SERIAL = "PRODUCT_SERIAL";
+    public const TYPE_ITEM_SERIAL = "ITEM_SERIAL";
 
     public function beforeSave()
     {
@@ -59,8 +59,8 @@ class AutoSerialPattern extends BaseModel
     public static function getTypeList()
     {
         return [
-            self::TYPE_PRODUCT => "Product",
-            self::TYPE_ITEM => "Item",
+            self::TYPE_PRODUCT_SERIAL => "Product No.",
+            self::TYPE_ITEM_SERIAL => "Item Code",
         ];
     }
 

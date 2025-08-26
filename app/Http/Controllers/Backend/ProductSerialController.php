@@ -7,21 +7,15 @@ use App\Helpers\ArrayHelper;
 use App\Helpers\CsvUtility;
 use App\Helpers\DateUtility;
 use App\Helpers\FileUtility;
-use App\Helpers\ImportUtility;
 use App\Helpers\LaravelExtend;
 use App\Helpers\Util;
 use App\Models\AutoSerialPattern;
 use App\Models\Branch;
-use App\Models\DropDownValue;
 use App\Models\FieldSetting;
-use App\Models\ImportLog;
-use App\Models\Item;
-use App\Models\ItemCategory;
 use App\Models\Maker;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Models\ProductSerial;
-use App\Models\Setting;
 use App\Models\SqlLog;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -147,11 +141,16 @@ class ProductSerialController extends BackendController
         }
 
         $maker_list = Maker::getList("id", "display_name", [], "list_display_order");
+
+        $default_maker = Maker::where("is_default", 1)->first();
+
         $branch_list = Branch::getList("id", "display_name", [], "list_display_order");
+
+        $type_list = ProductSerial::getTypeList();
 
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
-        $this->setForView(compact("maker_list", "branch_list", "field_labels"));
+        $this->setForView(compact("maker_list", "default_maker", "branch_list", "type_list", "field_labels"));
 
         return parent::beforeViewRender();
     }
@@ -170,7 +169,6 @@ class ProductSerialController extends BackendController
         $model->no_of_serials = 1;
 
         $this->setForView(compact("model", 'form'));
-        
 
         $this->set_data_for_add_edit($model);
 
@@ -179,12 +177,11 @@ class ProductSerialController extends BackendController
 
     private function _common_validation_rules()
     {
-        return [            
+        return [
             "product_id" => ["required"],
             "make_id" => ["required"],
-            "is_parent_serial_no" => ["required"],
             "serial_no" => ["required"],
-            "remarks" => "",
+            "manufacture_date_time" => ["required"],
             "children" => []
         ];
     }
@@ -208,14 +205,16 @@ class ProductSerialController extends BackendController
 
         $product_category_list = Util::getTreeListArray($product_category_records, "id", "name");
 
-        $next_serial_no = ProductSerial::getNextSerialNo();
+        $auto_next_serial_no = ProductSerial::getAutoNextSerialNo();
+
+        $manual_next_serial_no = ProductSerial::getManualNextSerialNo();
 
         $type_list = [
             "auto" => "Auto",
             "manual" => "Manual",
         ];
 
-        $this->setForView(compact("product_category_list", "next_serial_no", "type_list"));
+        $this->setForView(compact("product_category_list", "auto_next_serial_no", "manual_next_serial_no", "type_list"));
     }
 
     public function store(Request $request)
@@ -224,7 +223,8 @@ class ProductSerialController extends BackendController
 
         $rules = $this->_common_validation_rules();
 
-        $rules['type'] = ["required"];
+        $rules['hierarchy_type'] = ["required"];
+        $rules['serial_type'] = ["required"];
         $rules['no_of_serials'] = ["nullable", "numeric", "min:1", "max:1000"];
 
         $messages = $this->_common_validation_messages();
@@ -254,17 +254,21 @@ class ProductSerialController extends BackendController
             $save_data['branch_id'] = $auth_user->branch_id;
             $save_data['is_in'] = 1;
 
+            $save_data['serial_no'] = str_replace("-", "", $save_data['serial_no']);
+
+            $save_data = $this->model->convertTimeZoneBeforeQueryToDatabase($save_data);
+
             for ($i = 0; $i < $save_data['no_of_serials']; $i++) {
-                
+
                 $this->model = new $this->modelClass;
                 $this->model->fill($save_data);
-                
+
                 if (!$this->model->save()) {
                     throw new UserException("Fail To save", UserException::ERROR_LARAVEL_FAIL);
                 }
 
-                $save_data['serial_no'] = ProductSerial::getManualNextSerialNo($save_data['serial_no']);
-                AutoSerialPattern::increaseCount(AutoSerialPattern::TYPE_PRODUCT);
+                $save_data['serial_no'] = ProductSerial::getNextSerialNo($save_data['serial_no']);
+                AutoSerialPattern::increaseCount(AutoSerialPattern::TYPE_PRODUCT_SERIAL);
             }
 
             if ($save_data['no_of_serials'] == 1)
@@ -300,26 +304,68 @@ class ProductSerialController extends BackendController
 
             if (isset($validatedData['children'])) {
                 $rules = [
-                    "product_serial_id" => ["required"],
+                    "product_id" => ["required"],
+                    "make_id" => ["required"],
+                    "serial_no" => ["required", "max:8"],
                 ];
 
                 foreach ($validatedData['children'] as $child) {
-                    $validator = Validator::make($child, $rules, [
-                        "product_serial_id.required" => "Serial No. is required"
-                    ]);
+                    $validator = Validator::make($child, $rules);
 
                     if ($validator->fails())
                     {
                         foreach($validator->errors()->all() as $error_msg)
-                        {               
-                            LaravelExtend::addError("", $error_msg, "Sub Products");
+                        {
+                            LaravelExtend::addError("", $error_msg, "Child Serial No.");
                         }
                         continue;
                     }
 
-                    $child_model = $this->modelClass::findOrFail($child['product_serial_id']);
-                    $child_model->parent_id = $this->model->id;
-                    $child_model->save();
+                    $db_child_product_serial = ProductSerial::where("serial_no", $child['serial_no'])->first();
+
+                    $continue = true;
+                    if ($db_child_product_serial)
+                    {
+                        if ($db_child_product_serial->product_id != $child['product_id'])
+                        {
+                            LaravelExtend::addError("Model", "Product of Serial No. and choosen Product are mistmatched", "Child Serial No.");
+                            $continue = false;
+                        }
+
+                        if ($db_child_product_serial->make_id != $child['make_id'])
+                        {
+                            LaravelExtend::addError("Make", "Make of Serial No. and choosen Make are mistmatched", "Child Serial No.");
+                            $continue = false;
+                        }
+
+                        if ($continue)
+                        {
+                            $db_child_product_serial->parent_id = $this->model->id;
+                            $db_child_product_serial->save();
+                        }
+                    }
+                    else
+                    {
+                        $save_data = [
+                            "manufacture_date" => $this->model->manufacture_date,
+                            "branch_id" => $this->model->branch_id,
+                            "sale_order_product_id" => $this->model->sale_order_product_id,
+                            "serial_type" => "manual",
+                            "hierarchy_type" => ProductSerial::TYPE_CHILD
+                        ];
+
+                        $save_data = array_merge($save_data, $child);
+
+                        $child_model = new ProductSerial($save_data);
+                        $serial_no = str_replace("-", "", $child['serial_no']);                        
+                        $serial_no = str_pad($serial_no, 8, "0", STR_PAD_LEFT);
+                        $child_model->serial_no = $serial_no;
+                        $child_model->hierarchy_type = ProductSerial::TYPE_CHILD;                        
+                        $this->model->children()->save($child_model);
+                        
+                        ProductSerial::getNextSerialNo($serial_no);
+                        AutoSerialPattern::increaseCount(AutoSerialPattern::TYPE_PRODUCT_SERIAL);
+                    }
                 }
             }
         }
@@ -330,6 +376,8 @@ class ProductSerialController extends BackendController
         $model = $this->model = $this->modelClass::findOrFail($id);
 
         $this->beforeEdit($this->model);
+
+        $model->convertTimeZoneForDisplay();
 
         $form = [
             'url' => route($this->routePrefix . '.update', $id),
@@ -352,7 +400,7 @@ class ProductSerialController extends BackendController
         $this->beforeEdit($this->model);
 
         $rules = $this->_common_validation_rules();
-        
+
         $rules = LaravelExtend::merge_validation_rules($rules, $this->model->getUniqueValidationRules($request));
         // d($rules);
 
@@ -372,9 +420,11 @@ class ProductSerialController extends BackendController
 
             unset($save_data['children']);
 
-            // dd($save_data);
+            $save_data = $this->model->convertTimeZoneBeforeQueryToDatabase($save_data);
+            // d($save_data);
 
             $this->model->fill($save_data);
+            // d($this->model->manufacture_date_time, true);
 
             if (!$this->model->save()) {
                 throw new UserException("Fail To save", UserException::ERROR_LARAVEL_FAIL);
@@ -398,24 +448,6 @@ class ProductSerialController extends BackendController
 
             return back()->withInput()->with('fail', get_exception_display_message($ex))->with("custom_errors", LaravelExtend::$errors);
         }
-    }
-
-    public function copy($id)
-    {
-        $model = $this->model = $this->modelClass::findOrFail($id);
-
-        $this->beforeEdit($model);
-
-        $form = [
-            'url' => route($this->routePrefix . '.store', $id),
-            'method' => 'POST',
-        ];
-
-        $this->setForView(compact("model", "form"));
-
-        $this->set_data_for_add_edit($model);
-
-        return $this->view("form");
     }
 
     public function export_csv()
@@ -447,6 +479,8 @@ class ProductSerialController extends BackendController
 
         $yes_no_list = laravel_constant('yes_no_list');
 
+        $type_list = ProductSerial::getTypeList();
+
         $product_category_records = ProductCategory::getTreeRecords(ProductCategory::query());
 
         $product_category_list = Util::getTreeListArray($product_category_records, "id", "name", false, false);
@@ -454,22 +488,21 @@ class ProductSerialController extends BackendController
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
         foreach ($records as $record) {
-            
+
             $csv_records[] = [
                 'ID' => $record['id'],
+                $field_labels['hierarchy_type'] => get_value_from_list($type_list, $record['hierarchy_type']),
                 'Category' => get_value_from_list($product_category_list, $record['product']["product_category_id"]),
                 $field_labels['product_id'] => $record['product']['display_name'] ?? "",
                 $field_labels['make_id'] => $record['maker']['display_name'] ?? "",
+                $field_labels['serial_type'] => $record['serial_type'],
                 $field_labels['serial_no'] => "`" . $record['serial_no'],
-                $field_labels['branch_id'] => $record['branch']['display_name'] ?? "",
-                $field_labels['customer_id'] => $record['customer']['display_name'] ?? "",
-                $field_labels['dealer_id'] => $record['dealer']['display_name'] ?? "",                
-                $field_labels['is_parent_serial_no'] => get_value_from_list($yes_no_list, $record['is_parent_serial_no']),
+                $field_labels['manufacture_date_time'] => $record['manufacture_date_time'],
+                $field_labels['branch_id'] => $record['branch']['display_name'] ?? "",                
                 $field_labels['is_in'] => get_value_from_list($yes_no_list, $record['is_in']),
                 $field_labels['is_sold'] => get_value_from_list($yes_no_list, $record['is_sold']),
                 $field_labels['is_return'] => get_value_from_list($yes_no_list, $record['is_return']),
-                $field_labels['return_count'] => $record['return_count'] ?? "",     
-                $field_labels['remarks'] => $record['remarks'] ?? "",                
+                $field_labels['return_count'] => $record['return_count'] ?? "",
 
                 'Created' => if_date_time($record['created_at']),
                 'Created By' => $user_cache_list[$record['created_by']] ?? "",
@@ -504,24 +537,18 @@ class ProductSerialController extends BackendController
         try {
 
             $pattern_array = [
-                ["field" => "product_serial_id", "type" => "int"],
                 ["field" => "product_id", "type" => "int"],
                 ["field" => "make_id", "type" => "int"],
             ];
 
+            $conditions = $this->getConditions(null, $pattern_array);
             $condition_list = $this->getConditions(null, $pattern_array, true);
 
             if (empty($condition_list)) {
                 throw new UserException("No any condition applied");
             }
 
-            $qb = $this->modelClass::where("product_id", $condition_list['product_id'])->where(function ($q) use ($condition_list) {
-                $q->orWhere("parent_id", 0);
-
-                if (isset($condition_list['product_serial_id']) && $condition_list['product_serial_id']) {
-                    $q->orWhere("parent_id", $condition_list['product_serial_id']);
-                }
-            });
+            $qb = $this->modelClass::where($conditions);
 
             SqlLog::addSelectQuery($qb);
 
@@ -533,6 +560,79 @@ class ProductSerialController extends BackendController
                 $row = [
                     "id" => $record->id,
                     "name" => $record->getDisplayName(),
+                ];
+
+                $response['data'][] = $row;
+            }
+        } catch (Exception $ex) {
+            $response['status'] = 0;
+            $response['msg'] = $ex->getMessage();
+        }
+
+        return $this->responseJson($response);
+    }
+
+    public function ajax_get_unlinked_child_list(Request $request)
+    {
+        $response = ["status" => 1];
+
+        try {
+
+            $search_term = $request->get("query");
+
+            $pattern_array = [
+                ["field" => "product_serial_id", "type" => "int"],
+                ["field" => "product_id", "type" => "int"],
+                ["field" => "make_id", "type" => "int"],
+            ];
+
+            $condition_list = $this->getConditions(null, $pattern_array, true);
+
+            $qb = $this->modelClass::where(function($q) use($condition_list) {
+                $q->where("parent_id", 0);
+
+                if (isset($condition_list['product_serial_id']) && $condition_list['product_serial_id']) {
+                    $q->orWhere("parent_id", $condition_list['product_serial_id']);
+                }
+            });
+
+            if (isset($condition_list['product_id']))
+            {
+                $qb->where("product_id", $condition_list['product_id']);
+            }
+
+            if (isset($condition_list['make_id']))
+            {
+                $qb->where("make_id", $condition_list['make_id']);
+            }
+
+            if (isset($search_term) && trim($search_term))
+            {
+                $qb->where("serial_no", 'like', '%' . trim($search_term) . '%');
+            }
+
+            SqlLog::addSelectQuery($qb);
+
+            $qb->with([
+                "product",
+                "maker",
+            ]);
+
+            $records = $qb->get();
+
+            $response['data'] = [];
+
+            foreach ($records as $record) 
+            {
+                $display = $record->serial_no;
+
+                $display .= " (" . ($record->product?->model_name ?? "-") . ")";
+                $display .= " (" . ($record->maker?->model_name ?? "-") . ")";
+
+                $row = [
+                    "id" => $record->id,
+                    "name" => $record->serial_no,
+                    "display" => $display,
                 ];
 
                 $response['data'][] = $row;

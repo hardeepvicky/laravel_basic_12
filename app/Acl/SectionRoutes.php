@@ -31,6 +31,7 @@ class SectionRoutes
         "product.preview",
 
         "product-serial.ajax_get_unlinked_list",
+        "product-serial.ajax_get_unlinked_child_list",
 
         "*.ajax_get_list",
         "*.ajax_get_code_list",
