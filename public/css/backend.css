@@ -329,7 +329,7 @@ label.form-label {
 }
 
 .select2{
-    height: 42px;
+    min-height: 42px;
 }
 
 .select2-container .select2-selection--single {
