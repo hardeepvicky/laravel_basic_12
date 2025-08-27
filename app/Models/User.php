@@ -370,6 +370,11 @@ class User extends Authenticatable implements BaseModelInterface
         return $this->belongsTo(Country::class);
     }
 
+    public function branch()
+    {
+        return $this->belongsTo(Branch::class);
+    }
+
     public function department()
     {
         return $this->belongsTo(Department::class, "dept_id");

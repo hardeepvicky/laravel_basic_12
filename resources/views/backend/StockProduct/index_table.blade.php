@@ -69,14 +69,14 @@
                     @foreach ($records as $i => $record)
                         <tr>
                             <th scope="row">{{ $i + 1 }}</th>
-                            <td>{{ $record->product->category?->getDisplayName() }}</td>
+                            <td>{{ get_value_from_list($product_category_list, $record->product->product_category_id) }}</td>
                             <td>{{ $record->product?->getDisplayName() }}</td>
                             <td>{{ $record->maker?->getDisplayName() }}</td>
                             <td>{{ $record->branch?->getDisplayName() }}</td>
                             <td>{{ $record->bin?->getDisplayName() }}</td>
                             <td>{{ $record->qty }}</td>                            
                             <td>
-                                <x-Backend.celec-date-time :value="$record->updated_at" :userId="$record->updated_by" />
+                                <x-Backend.celec-date-time :value="$record->updated_at"/>
                             </td>
                             <td>
                                 {{ get_value_from_list($userListCache, $record->updated_by) }}

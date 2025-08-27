@@ -193,4 +193,22 @@ class ProductSerial extends BaseModel
             self::TYPE_PARENT => "Parent"
         ];
     }
+
+    public function markIn(Bin $bin)
+    {
+        $this->branch_id = $bin->branch_id;
+        $this->bin_id = $bin->id;
+        $this->is_in = true;
+
+        $this->save();
+    }
+
+    public function markOut()
+    {
+        $this->branch_id = null;
+        $this->bin_id = null;
+        $this->is_in = false;
+
+        $this->save();
+    }
 }

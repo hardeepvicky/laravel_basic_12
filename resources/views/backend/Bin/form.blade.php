@@ -91,11 +91,15 @@
     <script>
         $(function(){
             $("#branch_id").change(function(){
-                var text = $(this).find("option:selected").text();
+                var v = $(this).val();
+                if (v)
+                {
+                    var text = $(this).find("option:selected").text();
 
-                var code = $("#code").val();
+                    var code = $("#code").val();
 
-                $("#name").val(text + " " + code);
+                    $("#name").val(text + " " + code);
+                }
             }).trigger("change", {pageLoad : true});
         });
     </script>

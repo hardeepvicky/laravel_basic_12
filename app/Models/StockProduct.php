@@ -6,7 +6,7 @@ use App\Exceptions\UserException;
 
 class StockProduct extends BaseModel
 {
-    protected static array $unique_fields = ["branch_id", "bin_id", "product_id"];
+    protected static array $unique_fields = ["branch_id", "bin_id", "product_id", "make_id"];
 
     public static array $child_model_class = [
         StockProductTransaction::class => [
@@ -30,33 +30,12 @@ class StockProduct extends BaseModel
         return $this->belongsTo(Product::class);
     }
 
-    public function getRefDisplayName($field, $value)
+    public function make()
     {
-        $ret_array = [];
-
-        switch($field)
-        {
-            case "branch_id":
-                $ret_array = [
-                    $field => $this->branch->getDisplayName()
-                ];
-                break;
-            case "bin_id":
-                $ret_array = [
-                    $field => $this->bin->getDisplayName()
-                ];
-                break;
-            case "product_id":
-                $ret_array = [
-                    $field => $this->product->getDisplayName()
-                ];
-                break;
-        }
-
-        return $ret_array;
+        return $this->belongsTo(Maker::class);
     }
 
-    public function changeQty($branch_id, $bin_id, $product_id, $qty)
+    public static function changeQty($branch_id, $bin_id, $product_id, $make_id, $qty)
     {
         $qb = self::where("branch_id", $branch_id);
 
@@ -66,6 +45,7 @@ class StockProduct extends BaseModel
         }
 
         $qb->where("product_id", $product_id);
+        $qb->where("make_id", $make_id);
         $model = $qb->first();
 
         $product = Product::findOrFail($product_id);
@@ -99,8 +79,10 @@ class StockProduct extends BaseModel
 
             $save_data = [
                 "branch_id" => $branch_id,
-                "bin_id" => $branch_id,
-                "product_id" => $branch_id,
+                "bin_id" => $bin_id,
+                "product_id" => $product_id,
+                "make_id" => $make_id,
+                "opening_qty" => $qty,
                 "qty" => $qty
             ];
 

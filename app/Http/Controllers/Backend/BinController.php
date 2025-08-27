@@ -31,6 +31,11 @@ class BinController extends BackendController
 
     protected Bin | null $model = null;
 
+    protected function getModuleName(): string
+    {
+        return "Location";
+    }
+
     public function index()
     {
         $cache_key_prefix = Route::currentRouteName();
@@ -118,6 +123,7 @@ class BinController extends BackendController
 
         return $this->view("form");
     }
+    
 
     private function _common_validation_rules()
     {
@@ -257,6 +263,95 @@ class BinController extends BackendController
         $this->setForView(compact("model", "form"));
 
         return $this->view("form");
+    }
+
+    public function create_bulk()
+    {
+        $this->beforeCreate();
+
+        $form = [
+            'url' => route($this->routePrefix . '.store_bulk'),
+            'method' => 'POST',
+        ];
+
+        $this->setForView(compact('form'));
+
+        return $this->view(__FUNCTION__);
+    }
+
+    public function store_bulk(Request $request)
+    {
+        $this->beforeCreate();
+
+        $rules = [
+            'branch_id' => ['required'],
+            'qty' => ['required', "numeric", "min:1", "max:1000"],
+            'remarks' => ['nullable'],
+        ];
+
+        $validatedData = $request->validate($rules);
+
+        DB::beginTransaction();
+
+        try {
+
+            $counters = [
+                "Insert" => 0,
+                "Update" => 0,
+            ];
+
+            $branch = Branch::findOrFail($validatedData['branch_id']);
+
+            $model = null;
+
+            for($i = 1; $i <= $validatedData['qty']; $i++)
+            {
+                $save_data = [
+                    'branch_id' => $validatedData['branch_id'],
+                    'remarks' => $validatedData['remarks'],
+                    "list_display_order" => $i,
+                    "is_active" => 1
+                ];
+
+                $save_data['code'] = AutoSerialPattern::getNextCounter(AutoSerialPattern::TYPE_BIN_CODE);
+                $save_data['name'] = $branch->name . " " . $save_data['code'];
+
+                $is_insert = $is_update = false;
+                $model = Bin::insertOrUpdate($save_data, $is_insert, $is_update);
+
+                if ($is_insert)
+                {
+                    $counters['Insert']++;
+                }
+                else if ($is_update)
+                {
+                    $counters['Update']++;
+                }
+
+                AutoSerialPattern::increaseCount(AutoSerialPattern::TYPE_BIN_CODE);
+            }
+
+            if (LaravelExtend::$errors) {
+                throw new UserException("There are some errors", UserException::ERROR_USER_DATA_WRONG);
+            }
+
+            DB::commit();
+
+            $msg = "Records save successfully";
+
+            foreach($counters as $label => $count)
+            {
+                $msg .= " , " . $label . ":" . $count;
+            }
+
+            return $this->afterSave($model, null, $msg);
+        } catch (Exception $ex) {
+            DB::rollBack();
+
+            $this->saveSqlLog();
+
+            return back()->withInput()->with('fail', get_exception_display_message($ex))->with("custom_errors", LaravelExtend::$errors);
+        }
     }
 
     public function export_csv()

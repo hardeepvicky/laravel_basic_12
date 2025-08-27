@@ -46,20 +46,4 @@ class StockProductTransaction extends BaseModel
     {
         return $this->belongsTo(Branch::class);
     }
-
-    public function getRefDisplayName($field, $value)
-    {
-        $ret_array = [];
-
-        switch($field)
-        {
-            case "stock_product_id":
-                $ret_array = [
-                    $field => $this->stockProduct->getDisplayName()
-                ];
-                break;
-        }
-
-        return $ret_array;
-    }
 }

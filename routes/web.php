@@ -1048,6 +1048,12 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
         $name = "copy";
         Route::get("{id}/" . $name, [$controllerClass, $name])->name($name);
 
+        $name = "create_bulk";
+        Route::get("create/bulk", [$controllerClass, $name])->name($name);
+
+        $name = "store_bulk";
+        Route::post("store/bulk", [$controllerClass, $name])->name($name);
+
         $name = "activate";
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
 
