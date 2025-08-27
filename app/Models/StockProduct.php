@@ -87,7 +87,7 @@ class StockProduct extends BaseModel
                 "bin_id" => $bin_id,
                 "product_id" => $product_id,
                 "make_id" => $make_id,
-                "opening_qty" => $qty,
+                "opening_qty" => 0,
                 "qty" => $qty
             ];
 
