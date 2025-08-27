@@ -22,6 +22,10 @@ class SaleOrder extends BaseModel
 
     protected static array $list_fields = ["id", "order_no"];
 
+    const ORDER_FROM_TYPE_DEALER = "DEALER";
+    const ORDER_FROM_TYPE_CUSTOMER = "CUSTOMER";
+    const ORDER_FROM_TYPE_LEAD = "LEAD";
+
     public static array $child_model_class = [
         SaleOrderProduct::class => [
             "foreignKey" => "sale_order_id",
@@ -47,6 +51,11 @@ class SaleOrder extends BaseModel
     public function customer()
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    public function lead()
+    {
+        return $this->belongsTo(Lead::class);
     }
 
     public function carrier()
@@ -130,5 +139,14 @@ class SaleOrder extends BaseModel
         $labels = parent::getFieldLabels();
 
         return $labels;
+    }
+
+    public static function getOrderFromTypeList()
+    {
+        return [
+            self::ORDER_FROM_TYPE_DEALER => "Dealer",
+            self::ORDER_FROM_TYPE_CUSTOMER => "Customer",
+            self::ORDER_FROM_TYPE_LEAD => "New  Customer (Lead)",
+        ];
     }
 }

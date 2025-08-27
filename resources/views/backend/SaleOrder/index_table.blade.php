@@ -24,18 +24,23 @@
                         <th style="width:10%">
                             <?php
                             $field = 'dealer_id';
-                            $label = get_value_from_list($field_labels, $field, $field);
                             ?>
-                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false"
                                 :value="$search[$field]" :list="$dealer_list" class="select2" />
                         </th>
                         <th style="width:10%">
                             <?php
                             $field = 'customer_id';
-                            $label = get_value_from_list($field_labels, $field, $field);
                             ?>
-                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false"
                                 :value="$search[$field]" :list="$customer_list" class="select2" />
+                        </th>
+                        <th style="width:10%">
+                            <?php
+                            $field = 'lead_id';
+                            ?>
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false"
+                                :value="$search[$field]" :list="$lead_list" class="select2" />
                         </th>
                     </tr>
                     <tr class="border-bottom-primary">
@@ -46,6 +51,7 @@
                         </th>
                         <th><?= sortable_anchor('dealer.name', get_value_from_list($field_labels, 'dealer_id', 'dealer_id')) ?></th>
                         <th><?= sortable_anchor('customer.name', get_value_from_list($field_labels, 'customer_id', 'customer_id')) ?></th>
+                        <th><?= sortable_anchor('lead.name', get_value_from_list($field_labels, 'lead_id', 'lead_id')) ?></th>
                         <th style="width:10%">
                             <?= sortable_anchor('estimated_dispatch_date', get_value_from_list($field_labels, 'estimated_dispatch_date', 'estimated_dispatch_date')) ?>
                         </th>                       
@@ -75,6 +81,7 @@
                             </th>
                             <td>{{ $record->dealer?->getDisplayName() }}</td>
                             <td>{{ $record->customer?->getDisplayName() }}</td>
+                            <td>{{ $record->lead?->getDisplayName() }}</td>
                             <td>
                                 {{ if_date($record->estimated_dispatch_date) }}
                             </td>

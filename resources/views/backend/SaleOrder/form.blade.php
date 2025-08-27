@@ -3,6 +3,8 @@
 @section('content')
     <?php
     $page_header_links = [['title' => 'List', 'url' => route($routePrefix . '.index')]];
+
+    $disabled = isset($screen) && $screen == "edit" ? true : false;
     ?>
 
     @include($partial_path . '.page_header')
@@ -24,29 +26,66 @@
                             $label = get_value_from_list($field_labels, $field, $field);
                             ?>
                             <x-Inputs.text-field layout="horizontal" :id="$field" :name="$field" :label="$label"
-                                value="{{ $model->{$field} }}" placeholder="Enter {{ $label }}"
+                                :value="$model->{$field}" placeholder="Enter {{ $label }}"
                                 mandatory="true" disabled="true"/>
 
                             <?php
-                            $field = 'dealer_id';
+                            $field = 'order_from_type';
                             $label = get_value_from_list($field_labels, $field, $field);
                             ?>
                             <x-Inputs.drop-down layout="horizontal" :id="$field" :name="$field" :label="$label"
-                            :list="$dealer_list" value="{{ $model->{$field} }}" class="select2"/>
+                                :list="$order_from_type_list" 
+                                :value="$model->{$field}" 
+                                class="select2" 
+                                mandatory="true" 
+                                :disabled="$disabled"
+                                />
 
-                            <?php
-                            $field = 'customer_id';
-                            $label = get_value_from_list($field_labels, $field, $field);
-                            ?>
-                            <x-Inputs.drop-down layout="horizontal" :id="$field" :name="$field" :label="$label"
-                                :list="$customer_list" value="{{ $model->{$field} }}" class="select2"/>
+                            <div class="order_from_type-block order_from_type-block_dealer">
+                                <?php
+                                $field = 'dealer_id';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <x-Inputs.drop-down layout="horizontal" :id="$field" :name="$field" :label="$label"
+                                    :list="$dealer_list" 
+                                    :value="$model->{$field}" 
+                                    class="select2"
+                                    :disabled="$disabled"
+                                />
+                            </div>
+
+                            <div class="order_from_type-block order_from_type-block_customer">
+                                <?php
+                                $field = 'customer_id';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <x-Inputs.drop-down layout="horizontal" :id="$field" :name="$field" :label="$label"
+                                    :list="$customer_list" 
+                                    :value="$model->{$field}" 
+                                    class="select2" 
+                                    :disabled="$disabled"
+                                    />
+                            </div>
+
+                            <div class="order_from_type-block order_from_type-block_lead">
+                                <?php
+                                $field = 'lead_id';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <x-Inputs.drop-down layout="horizontal" :id="$field" :name="$field" :label="$label"
+                                    :list="$lead_list" 
+                                    :value="$model->{$field}" 
+                                    class="select2"
+                                    :disabled="$disabled"
+                                    />
+                            </div>
 
                             <?php
                             $field = 'estimated_dispatch_date';
                             $label = get_value_from_list($field_labels, $field, $field);
                             ?>
                             <x-Inputs.text-field layout="horizontal" :id="$field" :name="$field" :label="$label"
-                                value="{{ $model->{$field} }}" placeholder="Enter {{ $label }}"
+                                :value="$model->{$field}" placeholder="Enter {{ $label }}"
                                 class="date-picker"
                                 mandatory="true" 
                             />
@@ -56,7 +95,7 @@
                             $label = get_value_from_list($field_labels, $field, $field);
                             ?>
                             <x-Inputs.text-area layout="horizontal" :id="$field" :name="$field" :label="$label"
-                                value="{{ $model->{$field} }}" 
+                                :value="$model->{$field}" 
                                 rows="3"
                                 placeholder="Enter {{ $label }}" />
                         </div>
@@ -289,6 +328,27 @@
         $(function() {
             var model_id = '<?= $model->id ?? 0 ?>';
 
+            function order_from_type_toggle()
+            {
+                var order_from_type = $("#order_from_type").val();
+
+                var selector = ".order_from_type-block";
+                $(selector).hide();
+                $(selector).find("input,select").attr("disabled", true);
+                console.log("hide", selector);
+
+                if (order_from_type)
+                {
+                    order_from_type = order_from_type.toLowerCase().trim();
+                    selector = ".order_from_type-block_any, .order_from_type-block_" + order_from_type;
+                    console.log("show", selector);
+                    $(selector).show();
+                    $(selector).find("input,select").removeAttr("disabled");
+                }
+            }
+
+            $("#order_from_type").change(order_from_type_toggle);
+
             function load_qty_fields(_tr)
             {
                 var product_id = _tr.find("select.child_product_id").val();
@@ -389,6 +449,7 @@
 
             $.events.execAtLast(function() {
 
+                order_from_type_toggle();
             });
         });
     </script>

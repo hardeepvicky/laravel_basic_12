@@ -396,6 +396,16 @@ class Lead extends BaseModel
     {
         $data = $this->getAttributes();
 
+        $required_fields = ["name", "mobile", "state_id", "district_id", "city_id"];
+
+        foreach($required_fields as $field)
+        {
+            if ( !isset($data[$field]) || empty($data[$field]))
+            {
+                throw new UserException("$field have no value", UserException::ERROR_USER_DATA_WRONG);
+            }
+        }
+
         $save_data['lead_id'] = $data['id'];
         $save_data['name'] = $data['name'];
         $save_data['mobile'] = $data['mobile'];
@@ -415,11 +425,13 @@ class Lead extends BaseModel
         $save_data['profile_img'] = $data['profile_img'];
         $save_data['is_active'] = 1;
 
-        Customer::create($save_data);
+        $customer = Customer::create($save_data);
 
         $this->is_customer = 1;
         $this->status_type = Lead::STATUS_CONVERTED;
 
         $this->save();
+
+        return $customer;
     }
 }

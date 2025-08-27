@@ -13,6 +13,7 @@ use App\Models\Branch;
 use App\Models\Customer;
 use App\Models\Dealer;
 use App\Models\FieldSetting;
+use App\Models\Lead;
 use App\Models\Maker;
 use App\Models\ProductCategory;
 use App\Models\ProductSerial;
@@ -26,6 +27,7 @@ use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
 
 class SaleOrderController extends BackendController
@@ -72,6 +74,7 @@ class SaleOrderController extends BackendController
             ["field" => "order_no", "type" => "string"],
             ["field" => "dealer_id", "type" => "int"],
             ["field" => "customer_id", "type" => "int"],
+            ["field" => "lead_id", "type" => "int"],
         ]);
 
         $builder = $this->modelClass::query();
@@ -108,14 +111,19 @@ class SaleOrderController extends BackendController
         $branch_list = Branch::getList("id", "display_name", [], "list_display_order");
         $dealer_list = Dealer::getList("id", "display_name", [], "list_display_order");
         $customer_list = Customer::getList();
+        $lead_list = Lead::getList("id", "display_name", ["is_customer" => 0]);
 
         $default_maker = Maker::where("is_default", 1)->first();
+
+        $order_from_type_list = SaleOrder::getOrderFromTypeList();
 
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
         $sale_order_product_field_labels = FieldSetting::getDynamicFields(SaleOrderProduct::class);
 
-        $this->setForView(compact("maker_list", "branch_list", "dealer_list", "customer_list", "default_maker",
+        $this->setForView(compact("maker_list", "branch_list", 
+            "order_from_type_list", "dealer_list", "customer_list",  "lead_list",
+            "default_maker",
             "field_labels", "sale_order_product_field_labels"
         ));
 
@@ -144,9 +152,7 @@ class SaleOrderController extends BackendController
 
     private function _common_validation_rules()
     {
-        return [
-            'dealer_id' => 'required_without_all:customer_id',
-            'customer_id' => 'required_without_all:dealer_id',
+        return [            
             "estimated_dispatch_date" => ["required"],
             "remarks" => "",
             "sale_order_products" => []
@@ -164,11 +170,17 @@ class SaleOrderController extends BackendController
     {
         $this->beforeCreate();
 
-        $rules = $this->_common_validation_rules();
+        $this->model = new $this->modelClass();
 
+        $rules = $this->_common_validation_rules();
         $messages = $this->_common_validation_messages();
 
-        $this->model = new $this->modelClass();
+        $rules = LaravelExtend::merge_validation_rules($rules, [
+            "order_from_type" => ["required"],
+            'dealer_id' => ['required_without_all:customer_id,lead_id'],
+            'customer_id' => ['required_without_all:dealer_id,lead_id'],
+            'lead_id' => ['required_without_all:dealer_id,customer_id'],
+        ]);
 
         $rules = LaravelExtend::merge_validation_rules($rules, $this->model->getUniqueValidationRules($request));
 
@@ -203,6 +215,25 @@ class SaleOrderController extends BackendController
 
             if (!$this->model->save()) {
                 throw new UserException("Fail To save", UserException::ERROR_LARAVEL_FAIL);
+            }
+
+            if (isset($save_data['lead_id']) && $save_data['lead_id'])
+            {
+                try
+                {
+                    $lead = Lead::findOrFail($save_data['lead_id']);
+        
+                    $cutomer = $lead->convertToCustomer();
+
+                    $this->model->customer_id = $cutomer->id;
+                    $this->model->save();
+
+                    Session::flash("info", "Lead converted to Customer");
+                }
+                catch(UserException $ex)
+                {
+                    Session::flash("info", "System get error while converting lead to customer, please do it manually");
+                }
             }
 
             AutoSerialPattern::increaseCount(AutoSerialPattern::TYPE_SALE_ORDER);
@@ -308,7 +339,9 @@ class SaleOrderController extends BackendController
 
         $this->set_data_for_add_edit($model);
 
-        $this->setForView(compact("model", "form"));
+        $screen = "edit";
+
+        $this->setForView(compact("model", "form", "screen"));
 
         return $this->view("form");
     }
