@@ -44,7 +44,7 @@
                             $field = 'bin_id';
                             ?>
                             <x-Inputs.drop-down :id="$field" :name="$field" :label="$false"
-                                :value="$search[$field]" :list="$branch_list" class="select2 form-select-sm" />
+                                :value="$search[$field]" :list="$bin_list" class="select2 form-select-sm" />
                         </th>
                     </tr>
                     <tr class="border-bottom-primary">
@@ -71,7 +71,7 @@
                             <th scope="row">{{ $i + 1 }}</th>
                             <td>{{ get_value_from_list($product_category_list, $record->product->product_category_id) }}</td>
                             <td>{{ $record->product?->getDisplayName() }}</td>
-                            <td>{{ $record->maker?->getDisplayName() }}</td>
+                            <td>{{ $record->make?->getDisplayName() }}</td>
                             <td>{{ $record->branch?->getDisplayName() }}</td>
                             <td>{{ $record->bin?->getDisplayName() }}</td>
                             <td>{{ $record->qty }}</td>                            

@@ -15,6 +15,11 @@ class StockProduct extends BaseModel
         ]
     ];
 
+    public function afterFindForCsv()
+    {
+        parent::afterFind();
+    }
+
     public function branch()
     {
         return $this->belongsTo(Branch::class);

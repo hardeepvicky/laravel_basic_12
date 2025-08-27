@@ -202,6 +202,102 @@ class StockProductController extends BackendController
         return $this->viewIndex(__FUNCTION__);
     }
 
+    public function create()
+    {
+        $this->beforeCreate();
+
+        $model = new $this->modelClass();
+
+        $form = [
+            'url' => route($this->routePrefix . '.store'),
+            'method' => 'POST',
+        ];
+
+        $bin_list = Bin::getList("id", "display_name", [], "list_display_order");
+
+        $product_list = Product::getList("id", "display_name", [], "list_display_order");
+        
+        $make_list = Maker::getList("id", "display_name", [], "list_display_order");
+
+        $this->setForView(compact("model", 'form', 'bin_list', 'product_list', 'make_list'));
+
+
+        return $this->view("form");
+    }
+    
+
+    private function _common_validation_rules()
+    {
+        return [
+            "bin_id" => ["required"],
+            "product_id" => ["required"],
+            "make_id" => ["required"],
+            "qty" => ["required", "numeric", "min:1", "max:10000"],
+        ];
+    }
+
+    private function _common_validation_messages()
+    {
+        return [];
+    }
+
+    public function store(Request $request)
+    {
+        $this->beforeCreate();
+
+        $rules = $this->_common_validation_rules();
+
+        $model = new $this->modelClass();
+
+        $messages = $this->_common_validation_messages();
+
+        $validatedData = $request->validate($rules, $messages);
+
+        DB::beginTransaction();
+
+        try {
+
+            $bin = Bin::findOrFail($validatedData['bin_id']);
+            
+            StockProduct::changeQty($bin->branch_id, $validatedData['bin_id'], $validatedData['product_id'], $validatedData['make_id'], $validatedData['qty']);
+
+            DB::commit();
+
+            return $this->afterSave($model);
+        } catch (Exception $ex) {
+            DB::rollBack();
+
+            $this->saveSqlLog();
+
+            return back()->withInput()->with('fail', get_exception_display_message($ex))->with("custom_errors", LaravelExtend::$errors);
+        }
+    }
+
+    public function destroy($stock_product_transaction_id)
+    {
+        $request = request();
+
+        try {
+            $model = StockProductTransaction::findOrFail($stock_product_transaction_id);
+
+            $this->beforeDelete($model);
+
+            if (!$this->delete($model)) {
+                throw new Exception("Fail to Delete");
+            }
+
+            return $this->afterDestroy($model);
+        } catch (\Exception $ex) {
+            if ($request->ajax()) {
+                return $this->responseJson(['status' => 0, 'msg' => $ex->getMessage()]);
+            }
+
+            $this->saveSqlLog();
+
+            return back()->with('fail', $ex->getMessage());
+        }
+    }
+
     public function in(Request $request)
     {
         if ($request->isMethod("post"))
@@ -368,12 +464,16 @@ class StockProductController extends BackendController
 
         $records = $records->toArray();
 
-        d($records, true);
+        // d($records, true);
 
         $csv_records = [];
         $user_cache_list = User::getListCache();
 
         $yes_no_list = laravel_constant('yes_no_list');
+
+        $product_category_records = ProductCategory::getTreeRecords(ProductCategory::query());
+
+        $product_category_list = Util::getTreeListArray($product_category_records, "id", "name", false, false);
 
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
@@ -381,13 +481,12 @@ class StockProductController extends BackendController
         {
             $csv_records[] = [
                 'ID' => $record['id'],
+                'Category' => get_value_from_list($product_category_list, $record['product']['product_category_id']),
+                $field_labels['product_id'] => $record['product']['model_name'] ?? "",
+                $field_labels['make_id'] => $record['make']['name'] ?? "",
                 $field_labels['branch_id'] => $record['branch']['name'] ?? "",
-                $field_labels['name'] => $record['name'],
-                $field_labels['code'] => $record['code'],
-                $field_labels['remarks'] => $record['remarks'] ?? "",
-
-                $field_labels['is_active'] => get_value_from_list($yes_no_list, $record['is_active']),
-                $field_labels['list_display_order'] => $record['list_display_order'] ?? "",
+                $field_labels['bin_id'] => $record['bin']['name'] ?? "",
+                $field_labels['qty'] => $record['qty'],
 
                 'Created' => if_date_time($record['created_at']),
                 'Created By' => $user_cache_list[$record['created_by']] ?? "",

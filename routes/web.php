@@ -585,13 +585,13 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
     Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
 
         Route::get("/", [$controllerClass, "index"])->name("index");
-        
+
         $name = "create";
         Route::get($name, [$controllerClass, $name])->name($name);
-        
+
         $name = "store";
         Route::post($name, [$controllerClass, $name])->name($name);
-        
+
         $name = "edit";
         Route::get("/{id}/" . $name . "/{tab?}", [$controllerClass, $name])->name($name);
 
@@ -600,7 +600,7 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
 
         $name = "destroy";
         Route::delete("/{id}", [$controllerClass, $name])->name($name);
-            
+
         $name = "copy";
         Route::get("{id}/" . $name, [$controllerClass, $name])->name($name);
 
@@ -821,7 +821,7 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
         });
     });
 
-    
+
     $route_prefix = "lead";
     $controllerClass = LeadController::class;
     Route::resource($route_prefix, $controllerClass);
@@ -1087,7 +1087,7 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
 
     $route_prefix = "make";
     $controllerClass = MakerController::class;
-    Route::resource($route_prefix, $controllerClass);    
+    Route::resource($route_prefix, $controllerClass);
     Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
 
         $name = "copy";
@@ -1139,7 +1139,7 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
 
         $name = "copy";
         Route::get("{id}/" . $name, [$controllerClass, $name])->name($name);
-        
+
         $name = "ajax_update_field";
         Route::post($name, [$controllerClass, $name])->name($name);
 
@@ -1150,16 +1150,15 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
         });
     });
 
-    $controller_prefix = "stock-product";
+    $route_prefix = "stock-product";
     $controllerClass = StockProductController::class;
-    $name = "index";
-    Route::get($controller_prefix, [$controllerClass, $name])->name($controller_prefix . "." . $name);
+    Route::resource($route_prefix, $controllerClass)->except(["show", "edit", "update"]);
     $name = "export_csv";
-    Route::get($controller_prefix . "/export/csv", [$controllerClass, $name])->name($controller_prefix . "." . $name);
+    Route::get($route_prefix . "/export/csv", [$controllerClass, $name])->name($route_prefix . "." . $name);
     $name = "in";
-    Route::any($controller_prefix . "/" . $name, [$controllerClass, $name])->name($controller_prefix . "." . $name);    
+    Route::any($route_prefix . "-" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
     $name = "out";
-    Route::any($controller_prefix . "/" . $name, [$controllerClass, $name])->name($controller_prefix . "." . $name);    
+    Route::any($route_prefix . "-" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
 
     Route::group(['prefix' => 'permissions', 'as' => 'permissions.'], function () {
 
