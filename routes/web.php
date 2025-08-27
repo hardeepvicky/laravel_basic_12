@@ -11,6 +11,7 @@ use App\Http\Controllers\Backend\BinController;
 use App\Http\Controllers\Backend\BranchController;
 use App\Http\Controllers\Backend\CampaignController;
 use App\Http\Controllers\Backend\CityController;
+use App\Http\Controllers\Backend\CompetitorController;
 use App\Http\Controllers\Backend\CountryController;
 use App\Http\Controllers\Backend\CustomerController;
 use App\Http\Controllers\Backend\DashboardController;
@@ -820,6 +821,40 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
             Route::any($name, [$controllerClass, "import_". $name])->name($name);
         });
     });
+
+    $route_prefix = "competitor";
+    $controllerClass = CompetitorController::class;
+    Route::resource($route_prefix, $controllerClass);
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
+        $name = "copy";
+        Route::get("{id}/" . $name, [$controllerClass, $name])->name($name);
+
+        $name = "activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "de_activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "ajax_get_list";
+        Route::get($name . "/{type}", [$controllerClass, $name])->name($name);
+
+        $name = "ajax_update_field";
+        Route::post($name, [$controllerClass, $name])->name($name);
+
+        $route_prefix = "export";
+        Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+            $name = "csv";
+            Route::get($name, [$controllerClass, "export_" . $name])->name($name);
+        });
+
+        $route_prefix = "import";
+        Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+            $name = "csv";
+            Route::any($name, [$controllerClass, "import_". $name])->name($name);
+        });
+    });
+
 
 
     $route_prefix = "lead";

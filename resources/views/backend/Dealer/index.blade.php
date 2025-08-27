@@ -41,6 +41,11 @@
                         <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
 
                         <?php 
+                            $field = "company_name";
+                        ?>
+                        <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
+
+                        <?php 
                             $field = "mobile";
                         ?>
                         <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />

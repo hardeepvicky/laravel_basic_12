@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('dealers', function (Blueprint $table) {
             $table->id();
-            $table->string("type");            
-            $table->string("name");            
+            $table->string("type");
+            $table->string("name");
             $table->string("mobile", 15);
             $table->string("mobile2", 15)->nullable();
             $table->string("phone_no", 15)->nullable();

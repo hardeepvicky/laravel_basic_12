@@ -138,12 +138,7 @@
                                         <td>
                                             <div class="block">
                                                 <div class="left-block">
-                                                    <div class="sr-table-template-move-up">
-                                                        <i class="fas fa-arrow-circle-up icon"></i>
-                                                    </div>
-                                                    <div class="sr-table-template-move-down">
-                                                        <i class="fas fa-arrow-circle-down icon"></i>
-                                                    </div>
+                                                    
                                                 </div>
                                                 <div class="right-block">
                                                     <span class="sr-table-template-delete">
@@ -223,12 +218,7 @@
                                                 <td>
                                                     <div class="block">
                                                         <div class="left-block">
-                                                            <div class="sr-table-template-move-up">
-                                                                <i class="fas fa-arrow-circle-up icon"></i>
-                                                            </div>
-                                                            <div class="sr-table-template-move-down">
-                                                                <i class="fas fa-arrow-circle-down icon"></i>
-                                                            </div>
+                                                            
                                                         </div>
                                                         <div class="right-block">
                                                             <span class="sr-table-template-delete">

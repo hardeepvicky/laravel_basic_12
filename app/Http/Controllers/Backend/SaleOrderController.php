@@ -21,6 +21,7 @@ use App\Models\SaleOrder;
 use App\Models\SaleOrderProduct;
 use App\Models\SqlLog;
 use App\Models\StockProduct;
+use App\Models\Type;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Exception;
@@ -117,12 +118,26 @@ class SaleOrderController extends BackendController
 
         $order_from_type_list = SaleOrder::getOrderFromTypeList();
 
+        $type_conditions = [
+            'type' => Type::getType($this->model, "status")
+        ];
+        if ($this->model->status)
+        {
+            $type_id_list = Type::getIdFromCode($this->model, $this->model->status);
+
+            if ($type_id_list)
+            {
+                $type_conditions['or_id'] = $type_id_list;
+            }
+        }
+        $status_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
+
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
         $sale_order_product_field_labels = FieldSetting::getDynamicFields(SaleOrderProduct::class);
 
         $this->setForView(compact("maker_list", "branch_list", 
-            "order_from_type_list", "dealer_list", "customer_list",  "lead_list",
+            "order_from_type_list", "dealer_list", "customer_list",  "lead_list", "status_list",
             "default_maker",
             "field_labels", "sale_order_product_field_labels"
         ));
@@ -205,6 +220,7 @@ class SaleOrderController extends BackendController
             $save_data['branch_id'] = $auth_user->branch_id;
 
             $save_data = $this->model->convertTimeZoneBeforeQueryToDatabase($save_data);
+            $save_data['status'] = SaleOrder::STATUS_NEW;
 
             // d($save_data, true);
 

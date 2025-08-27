@@ -108,6 +108,11 @@ class Type extends BaseModel
                     "type" => "Type",
                 ]
             ],
+            SaleOrder::class => [
+                "fields" => [
+                    "status" => "Status",
+                ]
+            ],
         ];
 
         return $types;

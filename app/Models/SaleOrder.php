@@ -26,6 +26,10 @@ class SaleOrder extends BaseModel
     const ORDER_FROM_TYPE_CUSTOMER = "CUSTOMER";
     const ORDER_FROM_TYPE_LEAD = "LEAD";
 
+    const STATUS_NEW = "NEW";
+    const STATUS_PRODUCTION = "PRODUCTION";
+    const STATUS_GODOWN = "GODOWN";
+
     public static array $child_model_class = [
         SaleOrderProduct::class => [
             "foreignKey" => "sale_order_id",
@@ -148,5 +152,26 @@ class SaleOrder extends BaseModel
             self::ORDER_FROM_TYPE_CUSTOMER => "Customer",
             self::ORDER_FROM_TYPE_LEAD => "New  Customer (Lead)",
         ];
+    }
+
+    
+    public static function getCodeList(String $field)
+    {
+        $class_info = get_class_info(static::class);
+
+
+        switch ($field) {
+            case "status":
+                $list = [];
+
+                foreach ($class_info['constants'] as $constant => $label) {
+                    if (strpos($constant, "STATUS_") !== false) {
+                        $list[] = $label;
+                    }
+                }
+
+                return $list;
+                break;
+        }
     }
 }

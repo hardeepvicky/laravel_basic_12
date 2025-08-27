@@ -38,7 +38,7 @@
                     </div>
                 </div>
             </div>
-            <x-Backend.form-common-footer-buttons />
+            <x-Backend.form-common-footer-buttons class="buttons"/>
         </div>
     </div>
     </form>

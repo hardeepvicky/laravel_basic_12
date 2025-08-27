@@ -184,8 +184,8 @@ class DealerController extends BackendController
             "terms" => [],
             "dealerFile" => [],
             "addresses" => [],
+            "list_display_order" => ["required"],
             "is_active" => "",
-            "list_display_order" => ["nullable"],
         ];
     }
 
@@ -838,8 +838,6 @@ class DealerController extends BackendController
 
         $csv_records = [];
         $user_cache_list = User::getListCache();
-
-        $type_group_list = Type::getListOfModel($this->modelClass);
 
         $type_list = Dealer::getTypeList();
 
