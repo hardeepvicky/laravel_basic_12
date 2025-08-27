@@ -24,7 +24,7 @@ class StockProductTransaction extends BaseModel
 
         $change_qty = (-1 * $this->qty);
 
-        $this->stockProduct->qty += $change_qty;
+        $this->stockProduct->qty += $change_qty;        
 
         if ($this->stockProduct->qty < 0)
         {
@@ -39,11 +39,13 @@ class StockProductTransaction extends BaseModel
             throw new UserException($msg, UserException::ERROR_USER_ACTION_RESTRICT);
         }
 
+        $this->stockProduct->save();
+
         parent::beforeDelete();
     }
 
     public function stockProduct()
     {
-        return $this->belongsTo(Branch::class);
+        return $this->belongsTo(StockProduct::class);
     }
 }

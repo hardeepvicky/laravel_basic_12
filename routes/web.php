@@ -1155,10 +1155,12 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
     Route::resource($route_prefix, $controllerClass)->except(["show", "edit", "update"]);
     $name = "export_csv";
     Route::get($route_prefix . "/export/csv", [$controllerClass, $name])->name($route_prefix . "." . $name);
+    $name = "transactions";
+    Route::get($route_prefix . "/" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
     $name = "in";
-    Route::any($route_prefix . "-" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
+    Route::any($route_prefix . "/" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
     $name = "out";
-    Route::any($route_prefix . "-" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
+    Route::any($route_prefix . "/" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
 
     Route::group(['prefix' => 'permissions', 'as' => 'permissions.'], function () {
 

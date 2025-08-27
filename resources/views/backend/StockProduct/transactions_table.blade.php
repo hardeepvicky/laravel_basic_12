@@ -1,5 +1,5 @@
 <div class="card" id="page-summary">
-    <div class="card-header">
+    <div class="card-header p-2">
         <a href="{{ route($routePrefix . '.export_csv') }}" class="btn btn-secondary">Export CSV</a>
     </div>
 
@@ -68,7 +68,10 @@
                 <tbody>
                     @foreach ($records as $i => $record)
                         <tr>
-                            <th scope="row">{{ $i + 1 }}</th>
+                            <th scope="row">
+                                <x-Backend.celec-summary-table-first-column :record="$record" :routePrefix="$routePrefix" buttons="delete">
+                                </x-Backend.celec-summary-table-first-column>
+                            </th>
                             <td>{{ get_value_from_list($product_category_list, $record->stockProduct->product->product_category_id) }}</td>
                             <td>{{ $record->stockProduct->product?->getDisplayName() }}</td>
                             <td>{{ $record->stockProduct->maker?->getDisplayName() }}</td>

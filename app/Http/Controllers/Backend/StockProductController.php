@@ -142,7 +142,6 @@ class StockProductController extends BackendController
         $category_condition_list = $array_helper->convertModelSearchConditionToList();
 
         $stock_product_conditions = $this->getConditions($cache_key, [
-            ["field" => "id", "type" => "int", "cache" => false],
             ["field" => "branch_id", "type" => "int"],
             ["field" => "bin_id", "type" => "int"],
             ["field" => "product_id", "type" => "int"],
