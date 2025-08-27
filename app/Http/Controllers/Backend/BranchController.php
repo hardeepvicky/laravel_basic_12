@@ -29,6 +29,11 @@ class BranchController extends BackendController
 
     protected Branch | null $model = null;
 
+    protected function getModuleName(): string
+    {
+        return "Unit";
+    }
+
     public function index()
     {
         $cache_key_prefix = Route::currentRouteName();
