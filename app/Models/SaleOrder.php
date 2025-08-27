@@ -25,7 +25,7 @@ class SaleOrder extends BaseModel
     public static array $child_model_class = [
         SaleOrderProduct::class => [
             "foreignKey" => "sale_order_id",
-            "preventDelete" => true
+            "preventDelete" => false
         ],
     ];
 
