@@ -48,7 +48,7 @@
                         </th>
                     </tr>
                     <tr class="border-bottom-primary">
-                        <th>Sr.No.</th>
+                        <th>Actions</th>
                         <th>Category</th>
                         <th><?= get_value_from_list($field_labels, 'product_id', 'product_id') ?></th>
                         <th><?= get_value_from_list($field_labels, 'make_id', 'make_id') ?></th>
@@ -82,7 +82,7 @@
                                 <x-Backend.celec-date-time :value="$record->created_at"/>
                             </td>
                             <td>
-                                {{ get_value_from_list($userListCache, $record->updated_by) }}
+                                {{ get_value_from_list($userListCache, $record->created_by) }}
                             </td>
                         </tr>
                         
