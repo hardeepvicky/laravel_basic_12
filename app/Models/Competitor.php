@@ -70,6 +70,16 @@ class Competitor extends BaseModel
         return $this->belongsToMany(DocumentFile::class, CompetitorFile::class);
     }
 
+    public function productCategory()
+    {
+        return $this->belongsToMany(ProductCategory::class, CompetitorProductCategory::class);
+    }
+
+    public function competitorProductCategory()
+    {
+        return $this->hasMany(CompetitorProductCategory::class, 'competitor_id');
+    }
+
     public function files()
     {
         return $this->hasMany(CompetitorFile::class, 'competitor_id');
@@ -123,6 +133,8 @@ class Competitor extends BaseModel
     public function getFieldLabels()
     {
         $labels = parent::getFieldLabels();
+
+        $labels['competitorProductCategory'] = "Product Category";
 
         return $labels;
     }

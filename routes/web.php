@@ -856,7 +856,6 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
     });
 
 
-
     $route_prefix = "lead";
     $controllerClass = LeadController::class;
     Route::resource($route_prefix, $controllerClass);

@@ -19,6 +19,7 @@ use App\Models\District;
 use App\Models\DocumentFile;
 use App\Models\FieldSetting;
 use App\Models\ImportLog;
+use App\Models\ProductCategory;
 use App\Models\State;
 use App\Models\User;
 use App\Rules\MobileNumber;
@@ -47,7 +48,7 @@ class CompetitorController extends BackendController
             "address" => function($q){
                 $q->orderBy("list_display_order");
             },
-            "documentFile"
+            "documentFile", "productCategory"
         ]);
 
         $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
@@ -132,11 +133,15 @@ class CompetitorController extends BackendController
 
         $state_list = State::getIndianList();
 
+        $product_category_records = ProductCategory::getTreeRecords(ProductCategory::query());
+
+        $product_category_list = Util::getTreeListArray($product_category_records, "id", "name", false, false);
+
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
         $address_field_labels = FieldSetting::getDynamicFields(CompetitorAddress::class);
         
-        $this->setForView(compact("address_type_list", "state_list", "field_labels", "address_field_labels"));
+        $this->setForView(compact("address_type_list", "state_list", "product_category_list", "field_labels", "address_field_labels"));
 
         return parent::beforeViewRender();
     }
@@ -171,6 +176,7 @@ class CompetitorController extends BackendController
             "district_id" => ["required"],
             "city_id" => ["required"],
             "description" => ["nullable"],
+            "competitorProductCategory" => [],
             "files" => [],
             "addresses" => [],
             "list_display_order" => ["required"],
@@ -222,6 +228,11 @@ class CompetitorController extends BackendController
 
     private function _saveOthers($validatedData)
     {
+        if (isset($validatedData['competitorProductCategory']) && is_array($validatedData['competitorProductCategory'])) {
+            $records = ProductCategory::find($validatedData['competitorProductCategory']);
+            $this->model->productCategory()->sync($records);
+        }
+
         if (isset($validatedData['files'])) {
 
             $ids = explode(",", $validatedData['files']);

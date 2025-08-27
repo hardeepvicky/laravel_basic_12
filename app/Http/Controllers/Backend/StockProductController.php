@@ -50,13 +50,6 @@ class StockProductController extends BackendController
     {
         $cache_key = $cache_key_prefix . "-index";
 
-        $product_conditions = $this->getConditions($cache_key . ".2", [
-            ["field" => "product_category_id", "type" => "int"],
-        ]);
-
-        $array_helper =  new ArrayHelper($product_conditions);
-        $category_condition_list = $array_helper->convertModelSearchConditionToList();
-
         $conditions = $this->getConditions($cache_key, [
             ["field" => "id", "type" => "int", "cache" => false],
             ["field" => "branch_id", "type" => "int"],
@@ -90,10 +83,6 @@ class StockProductController extends BackendController
 
         $product_list = Product::getList("id", "display_name", [], "list_display_order");
 
-        if (isset($category_condition_list['product_category_id'])) {
-            $product_list = Product::getList("id", "display_name", ["product_category_id" => $category_condition_list['product_category_id']], "list_display_order");
-        }
-
         $this->setForView(compact("product_list"));
 
         $bin_list = [];
@@ -113,17 +102,13 @@ class StockProductController extends BackendController
             $this->model = new $this->modelClass();
         }
 
-        $product_category_records = ProductCategory::getTreeRecords(ProductCategory::query());
-
-        $product_category_list = Util::getTreeListArray($product_category_records, "id", "name", false, false);
-
         $branch_list = Branch::getList("id", "display_name", [], "list_display_order");
 
         $make_list = Maker::getList("id", "display_name", [], "list_display_order");
 
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
-        $this->setForView(compact("product_category_list", "branch_list", "make_list", "field_labels"));
+        $this->setForView(compact("branch_list", "make_list", "field_labels"));
 
         return parent::beforeViewRender();
     }

@@ -125,6 +125,17 @@
                                 class="select2"
                                 mandatory="true" />
 
+                            <?php
+                            $field = "competitorProductCategory";
+                            $label = get_value_from_list($field_labels, $field, $field);
+                            $value = implode(',', $model->competitorProductCategory?->pluck('product_category_id')->toArray());
+                            ?>
+                            <x-Inputs.drop-down name="competitorProductCategory[]" :label="$label" :list="$product_category_list" 
+                                :value="$value"
+                                layout="horizontal"
+                                class="select2" 
+                                multiple="multiple"  />
+
                             <div class="row mb-3">
                                 <h4 class="b-b-info">
                                     Addresses

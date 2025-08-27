@@ -154,6 +154,15 @@
                                                 {{ $record->gst_no }}
                                             </span>
                                         </label>
+
+                                        <h5>
+                                            {{ get_value_from_list($field_labels, 'competitorProductCategory', 'Product Categories') }}
+                                        </h5>
+                                        <ol>
+                                            @foreach ($record->productCategory as $productCategory)
+                                            <li>{{ $productCategory->getDisplayName() }}</li>
+                                            @endforeach
+                                        </ol>
                                         
                                         <h4 class="mt-2 mb-2 b-b-info">
                                             Description

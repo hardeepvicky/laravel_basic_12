@@ -8,15 +8,8 @@
             <table class="table table-bordered summary_table_with_search">
                 <thead>
                     <tr>
-                        <th style="width:10%">
+                        <th style="width:5%">
                             <span class="btn btn-light btn-sm text-dark border-primary clear_search_conditions mb-1">Clear</span>
-                        </th>
-                        <th style="width:15%">
-                            <?php
-                            $field = 'product_category_id';
-                            ?>
-                            <x-Inputs.drop-down :name="$field" :label="$false" :value="$search[$field]" :list="$product_category_list"
-                                class="select2 form-select-sm" />
                         </th>
                         <th style="width:15%">
                             <?php
@@ -49,7 +42,6 @@
                     </tr>
                     <tr class="border-bottom-primary">
                         <th>Sr.No.</th>
-                        <th>Category</th>
                         <th><?= sortable_anchor('product.name', get_value_from_list($field_labels, 'product_id', 'product_id')) ?></th>
                         <th><?= sortable_anchor('make.name', get_value_from_list($field_labels, 'make_id', 'make_id')) ?></th>
                         <th><?= sortable_anchor('branch.name', get_value_from_list($field_labels, 'branch_id', 'branch_id')) ?></th>
@@ -69,7 +61,6 @@
                     @foreach ($records as $i => $record)
                         <tr>
                             <th scope="row">{{ $i + 1 }}</th>
-                            <td>{{ get_value_from_list($product_category_list, $record->product->product_category_id) }}</td>
                             <td>{{ $record->product?->getDisplayName() }}</td>
                             <td>{{ $record->make?->getDisplayName() }}</td>
                             <td>{{ $record->branch?->getDisplayName() }}</td>
