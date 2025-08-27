@@ -69,6 +69,7 @@ class DealerController extends BackendController
             ["field" => "id", "type" => "int", "cache" => false],
             ["field" => "type", "type" => "string_equal"],
             ["field" => "name", "type" => "string"],
+            ["field" => "alias", "type" => "string"],
             ["field" => "company_name", "type" => "string"],
             ["field" => "mobile", "type" => "string"],
             ["field" => "mobile2", "type" => "string"],
@@ -170,6 +171,7 @@ class DealerController extends BackendController
         return [
             "type" => ["required"],
             "name" => ["required"],
+            "alias" => ["nullable"],
             "mobile" => ["required", new MobileNumber],
             "mobile2" => ["nullable", new MobileNumber],
             "phone_no" => ["nullable"],
@@ -588,6 +590,7 @@ class DealerController extends BackendController
                 $headers = array(
                     "Type" => "type",
                     "Name" => "name",
+                    "Alias" => "alias",
                     "Mobile" => "mobile",
                     "Mobile2" => "mobile2",
                     "Phone No" => "phone_no",
@@ -849,6 +852,7 @@ class DealerController extends BackendController
             $csv_records[] = [
                 'ID' => $record['id'],
                 $field_labels['name'] => $record['name'],
+                $field_labels['alias'] => $record['alias'] ?? "",
                 $field_labels['type'] => get_value_from_list($type_list, $record['type']),
                 $field_labels['mobile'] => $record['mobile'] ?? "",
                 $field_labels['mobile2'] => $record['mobile2'] ?? "",

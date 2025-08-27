@@ -20,6 +20,11 @@
                         <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
 
                         <?php 
+                            $field = "alias";
+                        ?>
+                        <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
+
+                        <?php 
                             $field = "type";
                         ?>
                         <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />

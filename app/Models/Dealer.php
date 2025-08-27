@@ -14,7 +14,7 @@ class Dealer extends BaseModel
 
     protected static array $unique_fields = ["type", "name"];
 
-    protected static array $list_fields = ["id", "name", "type"];
+    protected static array $list_fields = ["id", "name", "alias", "mobile", "type"];
 
     const TYPE_DEALER = "DEALER";
     const TYPE_TRADER = "TRADER";
@@ -51,9 +51,15 @@ class Dealer extends BaseModel
     {
         $name = $this->name;
 
-        $type_list = $this->getTypeList();
+        if ($this->alias)
+        {
+            $name .= " (" . $this->alias . ")";
+        }
 
-        $name .= " (" . get_value_from_list($type_list, $this->type) . ")";
+        if ($this->mobile)
+        {
+            $name .= " >> " . $this->mobile;
+        }
 
         return $name;
     }

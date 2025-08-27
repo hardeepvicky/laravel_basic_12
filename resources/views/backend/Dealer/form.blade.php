@@ -35,6 +35,14 @@
                                 <x-Inputs.text-field :name="$field" :label="$label" value="{{ $model->{$field} }}"
                                     placeholder="Enter {{ $label }}" mandatory="true" />
                             </div>
+                            <div class="form-group mb-3">
+                                <?php
+                                $field = 'alias';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <x-Inputs.text-field :name="$field" :label="$label" value="{{ $model->{$field} }}"
+                                    placeholder="Enter {{ $label }}" />
+                            </div>
                             <div class="row">
                                 <div class="col-lg-6">
                                     <div class="form-group mb-3">

@@ -109,7 +109,7 @@ class SaleOrderController extends BackendController
 
         $maker_list = Maker::getList("id", "display_name", [], "list_display_order");
         $branch_list = Branch::getList("id", "display_name", [], "list_display_order");
-        $dealer_list = Dealer::getList("id", "display_name", [], "list_display_order");
+        $dealer_list = Dealer::getList("id", "display_name", ["type" => Dealer::TYPE_DEALER], "list_display_order");
         $customer_list = Customer::getList();
         $lead_list = Lead::getList("id", "display_name", ["is_customer" => 0]);
 

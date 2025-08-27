@@ -95,7 +95,7 @@ class Lead extends BaseModel
 
         if ($this->mobile)
         {
-            $name .= " (M:" . $this->mobile . ")";
+            $name .= " >> " . $this->mobile;
         }
         
         return $name;
