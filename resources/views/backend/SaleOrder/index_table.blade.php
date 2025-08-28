@@ -52,7 +52,7 @@ $formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, 0);
                         <th><?= sortable_anchor('contact.name', get_value_from_list($field_labels, 'contact_id', 'contact_id')) ?></th>
                         <th style="width:10%">
                             <?= sortable_anchor('estimated_dispatch_date', get_value_from_list($field_labels, 'estimated_dispatch_date', 'estimated_dispatch_date')) ?>
-                        </th>                       
+                        </th>
                         <th style="width:8%">
                             <?= sortable_anchor('status', get_value_from_list($field_labels, 'status', 'status')) ?>
                         </th>
@@ -86,7 +86,13 @@ $formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, 0);
                                     </div>
                                 </x-Backend.celec-summary-table-first-column>
                             </th>
-                            <td>{{ $record->contact?->getDisplayName() }}</td>
+                            <td>
+                                @if(strtoupper($record->order_from_type) == "LEAD")
+                                    Lead >> {{ $record->customer?->name }} >> {{ $record->customer?->city?->getDisplayName() }}
+                                @else
+                                    {{ $record->contact?->getDisplayName() }}
+                                @endif
+                            </td>
                             <td>
                                 {{ if_date($record->estimated_dispatch_date) }}
                             </td>

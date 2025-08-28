@@ -52,7 +52,9 @@ class SaleOrderController extends BackendController
             "saleOrderProduct.product.category",
             "saleOrderProduct.make",
             "contact",
-            "branch"
+            "branch",
+            "customer",
+            "customer.city",
         ]);
 
         $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
