@@ -185,6 +185,7 @@ class SaleOrderController extends BackendController
     private function _common_validation_rules()
     {
         return [            
+            "party_order_ref_no" => ["nullable"],
             "contact_id" => ["required"],
             "estimated_dispatch_date" => ["required"],
             "total_amount" => ["required"],
@@ -473,9 +474,8 @@ class SaleOrderController extends BackendController
         $this->beforeCsvExport($builder);
 
         $builder->with([
-            "product",
-            "maker",
-            "branch"
+            "branch",
+            "contact"
         ]);
 
         $records = $builder->get();
@@ -486,16 +486,28 @@ class SaleOrderController extends BackendController
 
         $records = $records->toArray();
 
-        d($records, true);
+        // d($records, true);
 
         $csv_records = [];
         $user_cache_list = User::getListCache();
 
         $yes_no_list = laravel_constant('yes_no_list');
 
-        $product_category_records = ProductCategory::getTreeRecords(ProductCategory::query());
+        $order_from_type_list = SaleOrder::getOrderFromTypeList();
 
-        $product_category_list = Util::getTreeListArray($product_category_records, "id", "name", false, false);
+        $type_conditions = [
+            'type' => Type::getType($this->model, "status")
+        ];
+        if ($this->model->status)
+        {
+            $type_id_list = Type::getIdFromCode($this->model, $this->model->status);
+
+            if ($type_id_list)
+            {
+                $type_conditions['or_id'] = $type_id_list;
+            }
+        }
+        $status_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
 
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
@@ -503,18 +515,18 @@ class SaleOrderController extends BackendController
 
             $csv_records[] = [
                 'ID' => $record['id'],
-                'Category' => get_value_from_list($product_category_list, $record['product']["product_category_id"]),
-                $field_labels['product_id'] => $record['product']['display_name'] ?? "",
-                $field_labels['make_id'] => $record['maker']['display_name'] ?? "",
-                $field_labels['serial_no'] => "`" . $record['serial_no'],
+                $field_labels['order_no'] => $record['order_no'] ?? "",
+                $field_labels['party_order_ref_no'] => $record['party_order_ref_no'] ?? "",
                 $field_labels['branch_id'] => $record['branch']['display_name'] ?? "",
-                $field_labels['customer_id'] => $record['customer']['display_name'] ?? "",
-                $field_labels['dealer_id'] => $record['dealer']['display_name'] ?? "",
-                $field_labels['is_parent_serial_no'] => get_value_from_list($yes_no_list, $record['is_parent_serial_no']),
-                $field_labels['is_in'] => get_value_from_list($yes_no_list, $record['is_in']),
-                $field_labels['is_sold'] => get_value_from_list($yes_no_list, $record['is_sold']),
-                $field_labels['is_return'] => get_value_from_list($yes_no_list, $record['is_return']),
-                $field_labels['return_count'] => $record['return_count'] ?? "",
+                $field_labels['order_from_type'] => get_value_from_list($order_from_type_list, $record['order_from_type']),
+                $field_labels['contact_id'] => $record['contact']['display_name'] ?? "",                
+                $field_labels['status'] => get_value_from_list($status_list, $record['status']),
+                $field_labels['estimated_dispatch_date'] => $record['estimated_dispatch_date'] ?? "",
+                $field_labels['total_amount'] => $record['total_amount'] ?? "",
+                $field_labels['discount_per'] => $record['discount_per'] ?? "",
+                $field_labels['discount'] => $record['discount'] ?? "",
+                $field_labels['payable_amount'] => $record['payable_amount'] ?? "",
+                $field_labels['paid_amount'] => $record['paid_amount'] ?? "",
                 $field_labels['remarks'] => $record['remarks'] ?? "",
 
                 'Created' => if_date_time($record['created_at']),

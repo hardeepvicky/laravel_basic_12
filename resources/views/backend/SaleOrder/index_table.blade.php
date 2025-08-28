@@ -114,9 +114,17 @@ $formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, 0);
                         </tr>
                         <tr id="record-{{ $record->id }}" class="hidden">
                             <td style="background-color: var(--body--bs-body-bg)"></td>
-                            <td colspan="6">
+                            <td colspan="9">
                                 <div class="row">
-                                    <div class="col-md-12">
+                                    <div class="col-md-2">
+                                        <label class="info">
+                                            {{ get_value_from_list($field_labels, 'party_order_ref_no') }} :
+                                            <span>
+                                                {{ $record->party_order_ref_no }}
+                                            </span>
+                                        </label>
+                                    </div>
+                                    <div class="col-md-10">
                                         <div class="card">
                                             <div class="card-header border-l-secondary card-no-border">
                                                 <h3>Products</h3>
@@ -130,6 +138,8 @@ $formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, 0);
                                                             <th>{{ get_value_from_list($sale_order_product_field_labels, 'product_id') }}</th>
                                                             <th>{{ get_value_from_list($sale_order_product_field_labels, 'make_id') }}</th>
                                                             <th>{{ get_value_from_list($sale_order_product_field_labels, 'order_qty') }}</th>
+                                                            <th>{{ get_value_from_list($sale_order_product_field_labels, 'rate') }}</th>
+                                                            <th>{{ get_value_from_list($sale_order_product_field_labels, 'amount') }}</th>
                                                             <th>{{ get_value_from_list($sale_order_product_field_labels, 'available_qty') }}</th>
                                                             <th>{{ get_value_from_list($sale_order_product_field_labels, 'qty_to_manufacture') }}</th>
                                                             <th>{{ get_value_from_list($sale_order_product_field_labels, 'remarks') }}</th>
@@ -143,6 +153,8 @@ $formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, 0);
                                                                 <td>{{ $saleOrderProduct->product?->getDisplayName() }}</td>
                                                                 <td>{{ $saleOrderProduct->make?->getDisplayName() }}</td>
                                                                 <td>{{ $saleOrderProduct->order_qty }}</td>
+                                                                <td>{{ $saleOrderProduct->rate }}</td>
+                                                                <td>{{ $formatter->formatCurrency($saleOrderProduct->amount, "INR")  }}</td>
                                                                 <td>{{ $saleOrderProduct->available_qty }}</td>
                                                                 <td>{{ $saleOrderProduct->qty_to_manufacture }}</td>
                                                                 <td>{{ $saleOrderProduct->remarks }}</td>

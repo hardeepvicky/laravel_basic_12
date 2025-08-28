@@ -85,6 +85,14 @@
                             />
                             
                             <?php
+                            $field = 'party_order_ref_no';
+                            $label = get_value_from_list($field_labels, $field, $field);
+                            ?>
+                            <x-Inputs.text-field layout="horizontal" :id="$field" :name="$field" :label="$label"
+                                :value="$model->{$field}" placeholder="Enter {{ $label }}"
+                            />
+
+                            <?php
                             $field = 'remarks';
                             $label = get_value_from_list($field_labels, $field, $field);
                             ?>
