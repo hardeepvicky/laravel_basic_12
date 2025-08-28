@@ -637,11 +637,11 @@
 
             }
 
-            $(".order_qty, .rate").on("input", function(){
+            $(".order_qty, .rate").on("input keyup", function(){
                 cal_amount($(this).closest("tr"));
             });
 
-            $("#discount_per").on("input", function(){
+            $("#discount_per").on("input keyup", function(){
                 cal_grand_amount();
             });
 
