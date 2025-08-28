@@ -64,6 +64,13 @@ class Dealer extends BaseModel
         return $name;
     }
 
+    public function afterSave()
+    {
+        Contact::createContact("dealer", $this->id);
+
+        return parent::afterSave();
+    }
+
     public function afterFind()
     {
         parent::afterFind();

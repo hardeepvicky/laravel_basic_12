@@ -51,6 +51,13 @@ class Customer extends BaseModel
         return $name;
     }
 
+    public function afterSave()
+    {
+        Contact::createContact("customer", $this->id);
+
+        return parent::afterSave();
+    }
+
     public function afterFind()
     {
         parent::afterFind();

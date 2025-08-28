@@ -101,6 +101,13 @@ class Lead extends BaseModel
         return $name;
     }
 
+    public function afterSave()
+    {
+        Contact::createContact("lead", $this->id);
+
+        return parent::afterSave();
+    }
+
     public function afterFind()
     {
         parent::afterFind();
@@ -171,6 +178,11 @@ class Lead extends BaseModel
     public function campaign()
     {
         return $this->belongsTo(Campaign::class, "campaign_id");
+    }
+
+    public function customer()
+    {
+        return $this->hasOne(Customer::class);
     }
 
     public function getRequiedIfRules(Request $request)

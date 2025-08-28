@@ -344,13 +344,20 @@ class SaleOrderController extends BackendController
             }
         }
 
-         if (isset($validatedData['order_from_type']) && $validatedData['order_from_type'] == "lead")
+        if (isset($validatedData['order_from_type']) && $validatedData['order_from_type'] == "lead" && !$this->model->customer_id)
         {
             try
             {
-                $lead = Lead::findOrFail($validatedData['contact_id']);
+                $lead = Lead::with(["customer"])->findOrFail($validatedData['contact_id']);
     
-                $cutomer = $lead->convertToCustomer();
+                if ($lead->customer)
+                {
+                    $cutomer = $lead->customer;
+                }
+                else
+                {
+                    $cutomer = $lead->convertToCustomer();
+                }
 
                 $this->model->customer_id = $cutomer->id;
                 $this->model->save();
@@ -407,18 +414,16 @@ class SaleOrderController extends BackendController
 
         try {
 
+            list($order_from_type, $contact_id) = explode(".", $validatedData['contact_id']);
+
+            $validatedData['order_from_type'] = $order_from_type;
+            $validatedData['contact_id'] = $contact_id;
+
             $save_data = $validatedData;
 
             unset($save_data['sale_order_products']);
 
             $save_data = $this->model->convertTimeZoneBeforeQueryToDatabase($save_data);
-
-            list($order_from_type, $contact_id) = explode(".", $save_data['contact_id']);
-
-            $save_data['order_from_type'] = $order_from_type;
-            $save_data['contact_id'] = $contact_id;
-
-            // dd($save_data);
 
             $this->model->fill($save_data);
 

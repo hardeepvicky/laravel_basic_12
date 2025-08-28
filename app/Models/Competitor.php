@@ -53,6 +53,13 @@ class Competitor extends BaseModel
         return $name;
     }
 
+    public function afterSave()
+    {
+        Contact::createContact("competitor", $this->id);
+
+        return parent::afterSave();
+    }
+
     public function afterFind()
     {
         parent::afterFind();

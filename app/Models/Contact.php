@@ -210,4 +210,14 @@ class Contact extends BaseModel
 
         return $list;
     }
+
+    public static function createContact($type, $ref_id)
+    {
+        $save = [
+            "type" => $type,
+            "ref_id" => $ref_id
+        ];
+
+        static::insertOrUpdate($save, $is_insert, $is_update, true);
+    }
 }

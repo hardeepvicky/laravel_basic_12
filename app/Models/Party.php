@@ -33,6 +33,13 @@ class Party extends BaseModel
 
     public string $field_for_create_tag = "display_name";
 
+    public function afterSave()
+    {
+        Contact::createContact("party", $this->id);
+
+        return parent::afterSave();
+    }
+
     protected function getDisplayNameAttribute()
     {
         return $this->getDisplayName();
