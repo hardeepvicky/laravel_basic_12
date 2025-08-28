@@ -226,6 +226,7 @@ function sortable_url($sort_by)
 {
     $query_params = get_query_params_of_current_url_in_array();
     unset($query_params['is_sort_clear']);
+    unset($query_params['full_view']);
 
     $query_params['sort_by'] = $sort_by;
 

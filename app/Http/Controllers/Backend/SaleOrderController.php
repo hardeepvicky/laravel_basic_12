@@ -379,6 +379,12 @@ class SaleOrderController extends BackendController
 
         $this->beforeEdit($this->model);
 
+        if (strtoupper($model->order_from_type) == "LEAD" && $model->customer_id)
+        {
+            $model->order_from_type = "customer";
+            $model->contact_id = $model->customer_id;
+        }
+
         $form = [
             'url' => route($this->routePrefix . '.update', $id),
             'method' => 'PUT',
@@ -456,6 +462,12 @@ class SaleOrderController extends BackendController
         $model = $this->model = $this->modelClass::with(["saleOrderProduct"])->findOrFail($id);
 
         $model->order_no = AutoSerialPattern::getNextCounter(AutoSerialPattern::TYPE_SALE_ORDER);
+
+        if (strtoupper($model->order_from_type) == "LEAD" && $model->customer_id)
+        {
+            $model->order_from_type = "customer";
+            $model->contact_id = $model->customer_id;
+        }
 
         $this->beforeCreate();
 
