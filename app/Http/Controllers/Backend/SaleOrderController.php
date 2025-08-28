@@ -225,6 +225,11 @@ class SaleOrderController extends BackendController
         DB::beginTransaction();
 
         try {
+            list($order_from_type, $contact_id) = explode(".", $validatedData['contact_id']);
+
+            $validatedData['order_from_type'] = $order_from_type;
+            $validatedData['contact_id'] = $contact_id;
+
             $save_data = $validatedData;
             unset($save_data['sale_order_products']);
 
@@ -239,11 +244,6 @@ class SaleOrderController extends BackendController
             $save_data = $this->model->convertTimeZoneBeforeQueryToDatabase($save_data);
             $save_data['status'] = SaleOrder::STATUS_NEW;
 
-            list($order_from_type, $contact_id) = explode(".", $save_data['contact_id']);
-
-            $save_data['order_from_type'] = $order_from_type;
-            $save_data['contact_id'] = $contact_id;
-
             $this->model = new $this->modelClass;
             $this->model->fill($save_data);
 
@@ -251,25 +251,6 @@ class SaleOrderController extends BackendController
 
             if (!$this->model->save()) {
                 throw new UserException("Fail To save", UserException::ERROR_LARAVEL_FAIL);
-            }
-
-            if (isset($save_data['order_from_type']) && $save_data['order_from_type'] == "lead")
-            {
-                try
-                {
-                    $lead = Lead::findOrFail($save_data['contact_id']);
-        
-                    $cutomer = $lead->convertToCustomer();
-
-                    $this->model->customer_id = $cutomer->id;
-                    $this->model->save();
-
-                    Session::flash("info", "Lead converted to Customer");
-                }
-                catch(UserException $ex)
-                {
-                    Session::flash("info", "System get error while converting lead to customer, please do it manually");
-                }
             }
 
             AutoSerialPattern::increaseCount(AutoSerialPattern::TYPE_SALE_ORDER);
@@ -360,6 +341,25 @@ class SaleOrderController extends BackendController
                         }
                     }
                 }
+            }
+        }
+
+         if (isset($validatedData['order_from_type']) && $validatedData['order_from_type'] == "lead")
+        {
+            try
+            {
+                $lead = Lead::findOrFail($validatedData['contact_id']);
+    
+                $cutomer = $lead->convertToCustomer();
+
+                $this->model->customer_id = $cutomer->id;
+                $this->model->save();
+
+                Session::flash("info", "Lead converted to Customer");
+            }
+            catch(UserException $ex)
+            {
+                Session::flash("info", "System get error while converting lead to customer, please do it manually");
             }
         }
     }
