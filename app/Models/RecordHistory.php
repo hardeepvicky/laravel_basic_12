@@ -94,7 +94,8 @@ class RecordHistory extends BaseMongoModel
             RouteName::class,
             RoleRouteName::class,
             StockProduct::class,
-            StockProductTransaction::class
+            StockProductTransaction::class,
+            Contact::class
         ];
 
         $model_class = get_class($model);

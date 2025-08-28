@@ -184,7 +184,7 @@
                             <?php
                             $field = 'leadFile';
                             $label = get_value_from_list($field_labels, $field, $field);
-                            $value = implode(',', $model->lead->leadFile?->pluck('document_file_id')->toArray());
+                            $value = implode(',', $model->lead?->leadFile?->pluck('document_file_id')->toArray() ?? []);
                             ?>
 
                             <div class="row mb-3">

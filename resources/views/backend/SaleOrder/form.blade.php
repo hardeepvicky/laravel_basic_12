@@ -31,53 +31,47 @@
 
                             <?php
                             $field = 'order_from_type';
-                            $label = get_value_from_list($field_labels, $field, $field);
                             ?>
-                            <x-Inputs.drop-down layout="horizontal" :id="$field" :name="$field" :label="$label"
-                                :list="$order_from_type_list" 
-                                :value="$model->{$field}" 
-                                class="select2" 
-                                mandatory="true" 
-                                :disabled="$disabled"
-                                />
+                            <x-Inputs.text-field type="hidden" :id="$field" :name="$field" :label="$false" :value="$model->{$field}" />
 
-                            <div class="order_from_type-block order_from_type-block_dealer">
-                                <?php
-                                $field = 'dealer_id';
+                            <?php
+                                $field = 'contact_id';
                                 $label = get_value_from_list($field_labels, $field, $field);
-                                ?>
-                                <x-Inputs.drop-down layout="horizontal" :id="$field" :name="$field" :label="$label"
-                                    :list="$dealer_list" 
-                                    :value="$model->{$field}" 
-                                    class="select2"
-                                    :disabled="$disabled"
-                                />
-                            </div>
+                            ?>
 
-                            <div class="order_from_type-block order_from_type-block_customer">
-                                <?php
-                                $field = 'customer_id';
-                                $label = get_value_from_list($field_labels, $field, $field);
-                                ?>
-                                <x-Inputs.drop-down layout="horizontal" :id="$field" :name="$field" :label="$label"
-                                    :list="$customer_list" 
-                                    :value="$model->{$field}" 
-                                    class="select2" 
-                                    :disabled="$disabled"
-                                    />
-                            </div>
+                            <div class="row mb-3">
+                                <div class="col-sm-3">
+                                    @if (isset($label) && $label)
+                                        <label class="form-label">
+                                            {{ $label }}
+                                            <span class="mandatory">*</span>
+                                        </label>
+                                    @endif
+                                </div>                                
+                                <div class="col-sm-9">
+                                    <div class="d-flex align-items-start">
+                                        <span class="btn btn-outline-info summary-action-button open_contact_modal" style="padding: 9px 12px;">
+                                            <i class="fa-solid fa-user"></i>
+                                        </span>
+                                        <div class="flex-grow-1">
+                                            <select id="{{ $field }}" name="{{ $field }}" class="form-select select2" required="true">
+                                                <option value="">Please Select</option>
+                                                @foreach ($contact_list as $k => $t)
+                                                    @php
+                                                        $attr = $model->order_from_type == $t['type'] && $t['ref_id'] == $model->{$field} ? 'selected="selected"' : '';
+                                                    @endphp
+                                                    <option value="{{ $k }}" {!! $attr !!}>
+                                                        {{ $t['name'] }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
 
-                            <div class="order_from_type-block order_from_type-block_lead">
-                                <?php
-                                $field = 'lead_id';
-                                $label = get_value_from_list($field_labels, $field, $field);
-                                ?>
-                                <x-Inputs.drop-down layout="horizontal" :id="$field" :name="$field" :label="$label"
-                                    :list="$lead_list" 
-                                    :value="$model->{$field}" 
-                                    class="select2"
-                                    :disabled="$disabled"
-                                    />
+                                            @error($field)
+                                                <div class="input-error">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                             <?php
@@ -86,7 +80,7 @@
                             ?>
                             <x-Inputs.text-field layout="horizontal" :id="$field" :name="$field" :label="$label"
                                 :value="$model->{$field}" placeholder="Enter {{ $label }}"
-                                class="date-picker"
+                                class="custom-date-picker"
                                 mandatory="true" 
                             />
                             
@@ -113,14 +107,20 @@
                                                 <i class="fas fa-plus-circle text-success icon"></i>
                                             </span>
                                         </th>
-                                        <th style="width:30%">
+                                        <th style="width:20%">
                                             {{ get_value_from_list($sale_order_product_field_labels, 'product_id') }}
                                         </th>
-                                        <th style="width:20%">
+                                        <th style="width:10%">
                                             {{ get_value_from_list($sale_order_product_field_labels, 'make_id') }}
                                         </th>
-                                        <th style="width:10%">
+                                        <th style="width:8%">
                                             {{ get_value_from_list($sale_order_product_field_labels, 'order_qty') }}
+                                        </th>
+                                        <th style="width:8%">
+                                            {{ get_value_from_list($sale_order_product_field_labels, 'rate') }}
+                                        </th>
+                                        <th style="width:8%">
+                                            {{ get_value_from_list($sale_order_product_field_labels, 'amount') }}
                                         </th>
                                         <th style="width:8%">
                                             {{ get_value_from_list($sale_order_product_field_labels, 'available_qty') }}
@@ -184,6 +184,22 @@
                                             <x-Inputs.text-field type="number" id="{{ $field }}-(sr-id)" name="sale_order_products[(sr-id)][{{ $field }}]"
                                                 :label="$false"
                                                 class="will-required validate-int order_qty" />
+                                        </td>
+                                        <td>
+                                            <?php
+                                            $field = 'rate';
+                                            ?>
+                                            <x-Inputs.text-field id="{{ $field }}-(sr-id)" name="sale_order_products[(sr-id)][{{ $field }}]"
+                                                :label="$false"
+                                                class="will-required validate-float rate" />
+                                        </td>
+                                        <td>
+                                            <?php
+                                            $field = 'amount';
+                                            ?>
+                                            <x-Inputs.text-field id="{{ $field }}-(sr-id)" name="sale_order_products[(sr-id)][{{ $field }}]"
+                                                :label="$false"
+                                                class="will-required validate-float amount" readonly="true"/>
                                         </td>
                                         <td>
                                             <?php
@@ -268,6 +284,24 @@
                                                 </td>
                                                 <td>
                                                     <?php
+                                                    $field = 'rate';
+                                                    $value = $child_arr[$field] ?? '';
+                                                    ?>
+                                                    <x-Inputs.text-field id="{{ $field }}-{{ $k }}" name="sale_order_products[{{ $k }}][{{ $field }}]"
+                                                        :label="$false" :value="$value"
+                                                        class="will-required validate-float rate" />
+                                                </td>
+                                                <td>
+                                                    <?php
+                                                    $field = 'amount';
+                                                    $value = $child_arr[$field] ?? '';
+                                                    ?>
+                                                    <x-Inputs.text-field id="{{ $field }}-{{ $k }}" name="sale_order_products[{{ $k }}][{{ $field }}]"
+                                                        :label="$false" :value="$value"
+                                                        class="will-required validate-float amount" readonly="true"/>
+                                                </td>
+                                                <td>
+                                                    <?php
                                                     $field = 'available_qty';
                                                     $value = $child_arr[$field] ?? '';
                                                     ?>
@@ -305,6 +339,87 @@
                                 </tfoot>
                             </table>
                         </div>
+                        
+                        <div class="col-md-12 col-xxl-6 mt-3">
+                            <?php
+                                $field = 'total_amount';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                            ?>
+                            <div class="row mb-3">
+                                <div class="col-sm-3">
+                                    @if (isset($label) && $label)
+                                        <label class="form-label">
+                                            {{ $label }}
+                                        </label>
+                                    @endif
+                                </div>                                
+                                <div class="col-sm-3">
+                                    <input type="hidden" name="{{ $field }}" value="{{ $model->{$field} }}" class="{{ $field }}"/>
+                                    <span class="{{ $field }}">{{ $model->{$field} }}</span>
+                                </div>
+                            </div>
+
+                            <?php
+                            $field = 'discount_per';
+                            $label = get_value_from_list($field_labels, $field, $field);
+                            ?>
+                            <x-Inputs.text-field layout="horizontal" :id="$field" :name="$field" :label="$label"
+                                :value="$model->{$field}" 
+                                class="validate-float validate-less-than"
+                                data-less-than-from="99"
+                                horizontalSecondColumnLength="3"
+                                placeholder="Enter {{ $label }}"
+                                mandatory="true" 
+                            />
+
+                            <?php
+                                $field = 'discount';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                            ?>
+                            <div class="row mb-3">
+                                <div class="col-sm-3">
+                                    @if (isset($label) && $label)
+                                        <label class="form-label">
+                                            {{ $label }}
+                                        </label>
+                                    @endif
+                                </div>                                
+                                <div class="col-sm-3">
+                                    <input type="hidden" id="{{ $field }}" name="{{ $field }}" value="{{ $model->{$field} }}" class="{{ $field }}"/>
+                                    <span class="{{ $field }}">{{ $model->{$field} }}</span>
+                                </div>
+                            </div>
+
+                            <?php
+                                $field = 'payable_amount';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                            ?>
+                            <div class="row mb-3">
+                                <div class="col-sm-3">
+                                    @if (isset($label) && $label)
+                                        <label class="form-label">
+                                            {{ $label }}
+                                        </label>
+                                    @endif
+                                </div>                                
+                                <div class="col-sm-3">
+                                    <input type="hidden" id="{{ $field }}" name="{{ $field }}" value="{{ $model->{$field} }}" class="{{ $field }}"/>
+                                    <span class="big_amount {{ $field }}">{{ $model->{$field} }}</span>
+                                </div>
+                            </div>
+
+                            <?php
+                            $field = 'paid_amount';
+                            $label = get_value_from_list($field_labels, $field, $field);
+                            ?>
+                            <x-Inputs.text-field layout="horizontal" :id="$field" :name="$field" :label="$label"
+                                :value="$model->{$field}" 
+                                class="validate-float"
+                                horizontalSecondColumnLength="3"
+                                placeholder="Enter {{ $label }}"
+                                mandatory="true" 
+                            />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -317,6 +432,10 @@
     <script>
         $(function() {
             var model_id = '<?= $model->id ?? 0 ?>';
+            var currency_formatter = new Intl.NumberFormat('en-IN', { 
+                style: 'currency', 
+                currency: 'INR' 
+            });
 
             function order_from_type_toggle()
             {
@@ -435,6 +554,87 @@
             
             $(document).on("input", "input.order_qty", function(){
                 load_qty_fields($(this).closest("tr"));
+            });
+
+            $(".open_contact_modal").browseContact({
+                selectedValues : 0,
+                multiple : 0,
+                onSelect : function(id_list)
+                {
+                    var obj = id_list[0];
+
+                    console.log(obj);
+
+                    $("#contact_id").val(obj.type + "." + obj.id).trigger("change");
+                    $("#order_from_type").val(obj.type);
+                }
+            });
+
+            var estimated_dispatch_date = flatpickr("#estimated_dispatch_date", {
+                defaultDate: new Date(),
+                dateFormat: constants.dateFormat,
+                onChange: function(selectedDates, dateStr, instance) {
+                    const selectedDate = selectedDates[0];
+                    if (selectedDate) {
+                    }
+                }
+            });
+
+            function cal_amount(_tr)
+            {
+                var qty = _tr.find("input.order_qty").val();
+                qty = qty ? parseFloat(qty) : 0;
+
+                var rate = _tr.find("input.rate").val();
+                rate = rate ? parseFloat(rate) : 0;
+
+                var amount = qty * rate;
+
+                _tr.find(".amount").val(amount.toFixed(2));
+
+                cal_grand_amount();
+            }
+
+            function cal_grand_amount()
+            {
+                var total_amount = 0;
+                $("input.amount").each(function(){
+                    var v = $(this).val();
+                    v = v ? parseFloat(v) : 0;
+                    total_amount += v;
+                });
+
+                total_amount = Math.round(total_amount);
+
+                $("input.total_amount").val(total_amount);
+                $("span.total_amount").html(currency_formatter.format(total_amount));
+
+                var discount_per = $("#discount_per").val();
+                discount_per = discount_per ? parseFloat(discount_per) : 0;
+                var discount = 0;
+
+                if (discount_per > 0)
+                {
+                    discount = total_amount * discount_per / 100;
+                    discount = Math.round(discount);
+                }
+
+                $("input.discount").val(discount);
+                $("span.discount").html(currency_formatter.format(discount));
+
+                var payable_amount = total_amount - discount;
+
+                $("input.payable_amount").val(payable_amount);
+                $("span.payable_amount").html(currency_formatter.format(payable_amount));
+
+            }
+
+            $(".order_qty, .rate").on("input", function(){
+                cal_amount($(this).closest("tr"));
+            });
+
+            $("#discount_per").on("input", function(){
+                cal_grand_amount();
             });
 
             $.events.execAtLast(function() {

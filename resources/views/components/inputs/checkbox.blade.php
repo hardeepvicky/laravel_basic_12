@@ -46,7 +46,7 @@ $id = $attributes->get('id', $name);
 
     <input type="checkbox" name="{{ $name }}" value="1" id="{{ $id }}" {{ $attributes->except(["value", "id", "type", "name"])->merge($my_attributes) }} />
     @if (isset($label) && $label)
-        <label class="form-check-label" for="{{ $id }}">{{ $label }}</label>
+        <span class="form-check-label" for="{{ $id }}">{{ $label }}</span>
     @endif
 </label>
 

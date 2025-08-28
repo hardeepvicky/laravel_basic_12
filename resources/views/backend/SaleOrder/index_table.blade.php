@@ -1,3 +1,8 @@
+<?php
+
+$formatter = new NumberFormatter('en_IN', NumberFormatter::CURRENCY);
+$formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, 0);
+?>
 <div class="card" id="page-summary">
     <div class="card-header">
         <a href="{{ route($routePrefix . '.export.csv') }}" class="btn btn-secondary">Export CSV</a>
@@ -21,26 +26,21 @@
                                 </div>
                             </div>
                         </th>
-                        <th style="width:10%">
+                        <th style="width:25%">
                             <?php
-                            $field = 'dealer_id';
+                            $field = 'contact_id';
                             ?>
-                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false"
-                                :value="$search[$field]" :list="$dealer_list" class="select2" />
-                        </th>
-                        <th style="width:10%">
-                            <?php
-                            $field = 'customer_id';
-                            ?>
-                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false"
-                                :value="$search[$field]" :list="$customer_list" class="select2" />
-                        </th>
-                        <th style="width:10%">
-                            <?php
-                            $field = 'lead_id';
-                            ?>
-                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false"
-                                :value="$search[$field]" :list="$lead_list" class="select2" />
+                            <select id="{{ $field }}" name="{{ $field }}" class="form-select select2">
+                                <option value="">Please Select</option>
+                                @foreach ($contact_list as $k => $t)
+                                    @php
+                                        $attr = $k == $search[$field] ? 'selected="selected"' : '';
+                                    @endphp
+                                    <option value="{{ $k }}" {!! $attr !!}>
+                                        {{ $t['name'] }}
+                                    </option>
+                                @endforeach
+                            </select>
                         </th>
                     </tr>
                     <tr class="border-bottom-primary">
@@ -49,12 +49,19 @@
                             |
                             <?= sortable_anchor('order_no', get_value_from_list($field_labels, 'order_no', 'order_no')) ?>
                         </th>
-                        <th><?= sortable_anchor('dealer.name', get_value_from_list($field_labels, 'dealer_id', 'dealer_id')) ?></th>
-                        <th><?= sortable_anchor('customer.name', get_value_from_list($field_labels, 'customer_id', 'customer_id')) ?></th>
-                        <th><?= sortable_anchor('lead.name', get_value_from_list($field_labels, 'lead_id', 'lead_id')) ?></th>
+                        <th><?= sortable_anchor('contact.name', get_value_from_list($field_labels, 'contact_id', 'contact_id')) ?></th>
                         <th style="width:10%">
                             <?= sortable_anchor('estimated_dispatch_date', get_value_from_list($field_labels, 'estimated_dispatch_date', 'estimated_dispatch_date')) ?>
                         </th>                       
+                        <th style="width:8%">
+                            <?= sortable_anchor('status', get_value_from_list($field_labels, 'status', 'status')) ?>
+                        </th>
+                        <th style="width:8%">
+                            <?= sortable_anchor('payable_amount', get_value_from_list($field_labels, 'payable_amount', 'payable_amount')) ?>
+                        </th>
+                        <th style="width:8%">
+                            <?= sortable_anchor('paid_amount', get_value_from_list($field_labels, 'paid_amount', 'paid_amount')) ?>
+                        </th>
                         <th style="width:8%">
                             <?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?>
                         </th>
@@ -79,11 +86,18 @@
                                     </div>
                                 </x-Backend.celec-summary-table-first-column>
                             </th>
-                            <td>{{ $record->dealer?->getDisplayName() }}</td>
-                            <td>{{ $record->customer?->getDisplayName() }}</td>
-                            <td>{{ $record->lead?->getDisplayName() }}</td>
+                            <td>{{ $record->contact?->getDisplayName() }}</td>
                             <td>
                                 {{ if_date($record->estimated_dispatch_date) }}
+                            </td>
+                            <td>
+                                {{ get_value_from_list($status_list, $record->status) }}
+                            </td>
+                            <td>
+                                {{ $formatter->formatCurrency($record->payable_amount, "INR");  }}
+                            </td>
+                            <td>
+                                {{ $formatter->formatCurrency($record->paid_amount, "INR");  }}
                             </td>
                             <td>
                                 <x-Backend.celec-date-time :value="$record->created_at" />

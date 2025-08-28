@@ -328,7 +328,8 @@ label.form-label {
     max-height: 80vh;
 }
 
-.select2-container .select2-selection--single {
+.select2-container .select2-selection--single
+{
     height: 40px;
 }
 
@@ -336,15 +337,27 @@ label.form-label {
     height: 32px;
 }
 
-.summary_table_with_search .select2-container .select2-selection--single{
+.summary_table_with_search .select2-container .select2-selection--single
+{
     height: 30px;
 }
 
-.seleect2.select2-container--open{
-    height: 44px;
+
+.select2-small .select2-container .select2-selection--single
+{
+    height: 30px;
 }
 
-.select2-container--open .select2-selection--single{
-    border-bottom-left-radius: 0 !important;
-    border-bottom-right-radius: 0 !important;
+.select2-small .select2{
+    height: 32px;
+}
+
+.select2-small .select2-container .select2-selection--single
+{
+    height: 30px;
+}
+
+.big_amount{
+    font-size: 20px;
+    font-weight: bold;
 }

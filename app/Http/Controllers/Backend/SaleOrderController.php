@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Exceptions\UserException;
+use App\Helpers\ArrayHelper;
 use App\Helpers\CsvUtility;
 use App\Helpers\DateUtility;
 use App\Helpers\FileUtility;
@@ -10,6 +11,7 @@ use App\Helpers\LaravelExtend;
 use App\Helpers\Util;
 use App\Models\AutoSerialPattern;
 use App\Models\Branch;
+use App\Models\Contact;
 use App\Models\Customer;
 use App\Models\Dealer;
 use App\Models\FieldSetting;
@@ -23,6 +25,7 @@ use App\Models\SqlLog;
 use App\Models\StockProduct;
 use App\Models\Type;
 use App\Models\User;
+use App\Models\ViewContact;
 use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Support\Facades\Auth;
@@ -48,8 +51,7 @@ class SaleOrderController extends BackendController
             "saleOrderProduct.product",
             "saleOrderProduct.product.category",
             "saleOrderProduct.make",
-            "dealer",
-            "customer",
+            "contact",
             "branch"
         ]);
 
@@ -73,14 +75,25 @@ class SaleOrderController extends BackendController
         $conditions = $this->getConditions($cache_key, [
             ["field" => "id", "type" => "int", "cache" => false],
             ["field" => "order_no", "type" => "string"],
-            ["field" => "dealer_id", "type" => "int"],
-            ["field" => "customer_id", "type" => "int"],
-            ["field" => "lead_id", "type" => "int"],
+            ["field" => "contact_id", "type" => "string_equal"],
         ]);
+
+        $array_helper =  new ArrayHelper($conditions);
+        $condition_list = $array_helper->convertModelSearchConditionToList();
+
+        $conditions = $array_helper->unsetValues($conditions, ["contact_id"], true, [ArrayHelper::UNSET_VALUE_REMOVE_PARENT_IF_FOUND_CHILD]);
+
+        if (isset($condition_list['contact_id']))
+        {
+            list($order_from_type, $contact_id) = explode(".", $condition_list['contact_id']);
+
+            $conditions[] = ["order_from_type", $order_from_type];
+            $conditions[] = ["contact_id", $contact_id];
+        }
 
         $builder = $this->modelClass::query();
 
-        // d($conditions, true);
+        // d($conditions);
 
         $builder = $builder->where($conditions);
 
@@ -107,6 +120,10 @@ class SaleOrderController extends BackendController
         if (is_null($this->model)) {
             $this->model = new $this->modelClass();
         }
+
+        $contact_list = ViewContact::getList();
+
+        // d($contact_list, true);
 
         $maker_list = Maker::getList("id", "display_name", [], "list_display_order");
         $branch_list = Branch::getList("id", "display_name", [], "list_display_order");
@@ -136,7 +153,7 @@ class SaleOrderController extends BackendController
 
         $sale_order_product_field_labels = FieldSetting::getDynamicFields(SaleOrderProduct::class);
 
-        $this->setForView(compact("maker_list", "branch_list", 
+        $this->setForView(compact("maker_list", "branch_list", "contact_list",
             "order_from_type_list", "dealer_list", "customer_list",  "lead_list", "status_list",
             "default_maker",
             "field_labels", "sale_order_product_field_labels"
@@ -168,7 +185,13 @@ class SaleOrderController extends BackendController
     private function _common_validation_rules()
     {
         return [            
+            "contact_id" => ["required"],
             "estimated_dispatch_date" => ["required"],
+            "total_amount" => ["required"],
+            "discount_per" => ["nullable"],
+            "discount" => ["nullable"],
+            "payable_amount" => ["required"],
+            "paid_amount" => ["nullable"],
             "remarks" => "",
             "sale_order_products" => []
         ];
@@ -189,13 +212,6 @@ class SaleOrderController extends BackendController
 
         $rules = $this->_common_validation_rules();
         $messages = $this->_common_validation_messages();
-
-        $rules = LaravelExtend::merge_validation_rules($rules, [
-            "order_from_type" => ["required"],
-            'dealer_id' => ['required_without_all:customer_id,lead_id'],
-            'customer_id' => ['required_without_all:dealer_id,lead_id'],
-            'lead_id' => ['required_without_all:dealer_id,customer_id'],
-        ]);
 
         $rules = LaravelExtend::merge_validation_rules($rules, $this->model->getUniqueValidationRules($request));
 
@@ -222,7 +238,10 @@ class SaleOrderController extends BackendController
             $save_data = $this->model->convertTimeZoneBeforeQueryToDatabase($save_data);
             $save_data['status'] = SaleOrder::STATUS_NEW;
 
-            // d($save_data, true);
+            list($order_from_type, $contact_id) = explode(".", $save_data['contact_id']);
+
+            $save_data['order_from_type'] = $order_from_type;
+            $save_data['contact_id'] = $contact_id;
 
             $this->model = new $this->modelClass;
             $this->model->fill($save_data);
@@ -233,11 +252,11 @@ class SaleOrderController extends BackendController
                 throw new UserException("Fail To save", UserException::ERROR_LARAVEL_FAIL);
             }
 
-            if (isset($save_data['lead_id']) && $save_data['lead_id'])
+            if (isset($save_data['order_from_type']) && $save_data['order_from_type'] == "lead")
             {
                 try
                 {
-                    $lead = Lead::findOrFail($save_data['lead_id']);
+                    $lead = Lead::findOrFail($save_data['contact_id']);
         
                     $cutomer = $lead->convertToCustomer();
 
@@ -287,6 +306,8 @@ class SaleOrderController extends BackendController
                     "order_qty" => ["required"],
                     "available_qty" => ["nullable"],
                     "qty_to_manufacture" => ["nullable"],
+                    "rate" => ["required"],
+                    "amount" => ["required"],
                     "remarks" => ["nullable"],
                 ];
 
@@ -390,6 +411,11 @@ class SaleOrderController extends BackendController
             unset($save_data['sale_order_products']);
 
             $save_data = $this->model->convertTimeZoneBeforeQueryToDatabase($save_data);
+
+            list($order_from_type, $contact_id) = explode(".", $save_data['contact_id']);
+
+            $save_data['order_from_type'] = $order_from_type;
+            $save_data['contact_id'] = $contact_id;
 
             // dd($save_data);
 

@@ -47,19 +47,14 @@ class SaleOrder extends BaseModel
         return $this->belongsTo(Branch::class);
     }
 
-    public function dealer()
+    public function contact()
     {
-        return $this->belongsTo(Dealer::class);
+        return $this->belongsTo(ViewContact::class);
     }
 
     public function customer()
     {
         return $this->belongsTo(Customer::class);
-    }
-
-    public function lead()
-    {
-        return $this->belongsTo(Lead::class);
     }
 
     public function carrier()

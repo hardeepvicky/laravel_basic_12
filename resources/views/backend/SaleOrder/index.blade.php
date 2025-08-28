@@ -18,17 +18,7 @@
                 <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
 
                 <?php 
-                    $field = "dealer_id";
-                ?>
-                <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
-
-                <?php 
-                    $field = "customer_id";
-                ?>
-                <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
-
-                <?php 
-                    $field = "lead_id";
+                    $field = "contact_id";
                 ?>
                 <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
             </form>

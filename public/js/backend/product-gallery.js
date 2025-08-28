@@ -79,8 +79,8 @@ jQuery.fn.extend({
                 .find(".modal-footer button.select")
                 .click(function () {
                     var list = [];
-                    gallery_modal.find(".file-block.active").each(function () {
-                        var id = $(this).data("id");
+                    gallery_modal.find("input.product:checked").each(function () {
+                        var id = $(this).val();
                         list.push(id);
                     });
 
@@ -94,8 +94,6 @@ jQuery.fn.extend({
                         _this.val(list.join(","));
 
                         gallery_modal.modal("hide");
-
-                        $(".modal-backdrop").remove();
 
                         if (typeof obj.onSelect == "function") {
                             obj.onSelect(list);
@@ -158,7 +156,7 @@ jQuery.fn.extend({
                     }
                 });
         } else {
-            $.events.onError("File Galley", "url not found in data-url");
+            $.events.onError("Galley", "url not found in data-url");
         }
     },
 });

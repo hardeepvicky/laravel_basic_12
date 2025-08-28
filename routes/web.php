@@ -12,6 +12,7 @@ use App\Http\Controllers\Backend\BranchController;
 use App\Http\Controllers\Backend\CampaignController;
 use App\Http\Controllers\Backend\CityController;
 use App\Http\Controllers\Backend\CompetitorController;
+use App\Http\Controllers\Backend\ContactController;
 use App\Http\Controllers\Backend\CountryController;
 use App\Http\Controllers\Backend\CustomerController;
 use App\Http\Controllers\Backend\DashboardController;
@@ -1216,6 +1217,11 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
         $name = "ajax_request_access";
         Route::any($name . "/{route_name}", [PermissionController::class, $name])->name($name);
     });
+
+    $route_prefix = "contact";
+    $controllerClass = ContactController::class;
+    $name = "chooser";
+    Route::get($route_prefix . "-" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
 
     $controller_prefix = "setting";
     $controllerClass = SettingsController::class;
