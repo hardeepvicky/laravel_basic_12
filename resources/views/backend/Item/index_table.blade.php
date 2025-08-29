@@ -13,41 +13,41 @@
                 <thead>
                     <tr>
                         <th style="width:10%">
-                            <span class="btn btn-light text-dark border-primary clear_search_conditions mb-1">Clear</span>
-                            <?php
-                            $field = "name";
-                            ?>
-                            <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]"/>
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <span class="btn btn-light btn-sm text-dark border-primary clear_search_conditions mb-1">Clear</span>
+                                </div>
+                                <div class="col-sm-8">
+                                    <?php
+                                    $field = 'name';
+                                    ?>
+                                    <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]" class="form-control-sm" />
+                                </div>
+                            </div>
                         </th>
                         <th style="width:15%">
                             <?php
                             $field = "item_category_id";
                             ?>
-                            <x-Inputs.drop-down :name="$field" :label="$false" :value="$search[$field]" :list="$item_category_list" class="select2" />
-                        </th>
-                        <th style="width:8%">
-                            <?php
-                            $field = "color_id";
-                            ?>
-                            <x-Inputs.drop-down :name="$field" :label="$false" :value="$search[$field]" :list="$color_list" class="select2" />
-                        </th>
+                            <x-Inputs.drop-down :name="$field" :label="$false" :value="$search[$field]" :list="$item_category_list" class="select2" pleaseSelect="All" class="select2 form-select-sm"/>
+                        </th>                        
                         <th style="width:8%">
                             <?php
                             $field = "brand_id";
                             ?>
-                            <x-Inputs.drop-down :name="$field" :label="$false" :value="$search[$field]" :list="$brand_list" class="select2" />
+                            <x-Inputs.drop-down :name="$field" :label="$false" :value="$search[$field]" :list="$brand_list" class="select2" pleaseSelect="All" class="select2 form-select-sm"/>
                         </th>
                         <th style="width:8%">
                             <?php
                             $field = "size";
                             ?>
-                            <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]"/>
+                            <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]" class="form-control-sm"/>
                         </th>
                         <th style="width:8%">
                             <?php
                             $field = "specification";
                             ?>
-                            <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]"/>
+                            <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]" class="form-control-sm"/>
                         </th>
                     </tr>
                     <tr class="border-bottom-primary">
@@ -56,7 +56,6 @@
                             | <?= sortable_anchor('name', get_value_from_list($field_labels, 'name', 'name')) ?>
                         </th>
                         <th><?= sortable_anchor('category.name', get_value_from_list($field_labels, 'item_category_id', 'item_category_id')) ?></th>
-                        <th>{{ get_value_from_list($field_labels, 'color_id', 'color_id') }}</th>
                         <th>{{ get_value_from_list($field_labels, 'brand_id', 'brand_id') }}</th>
                         <th>{{ get_value_from_list($field_labels, 'size', 'size') }}</th>
                         <th>{{ get_value_from_list($field_labels, 'specification', 'specification') }}</th>
@@ -83,7 +82,6 @@
                                 </x-Backend.celec-summary-table-first-column>
                             </th>
                             <td>{{ get_value_from_list($item_category_list, $record->item_category_id) }}</td>
-                            <td>{{ $record->color?->getDisplayName() }}</td>
                             <td>{{ $record->brand?->getDisplayName() }}</td>
                             <td>{{ $record->size }}</td>
                             <td>{{ $record->specification }}</td>

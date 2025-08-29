@@ -9,36 +9,47 @@
                 <thead>
                     <tr>
                         <th style="width:12%">
-                            <span class="btn btn-light text-dark border-primary clear_search_conditions mb-1">Clear</span>
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <span class="btn btn-light btn-sm text-dark border-primary clear_search_conditions mb-1">Clear</span>
+                                </div>
+                                <div class="col-sm-8">
+                                    <?php
+                                    $field = 'name';
+                                    ?>
+                                    <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]" class="form-control-sm" />
+                                </div>
+                            </div>
+                        </th>
+                        <th style="width:10%">
                             <?php
-                            $field = "name";
+                            $field = "short_name";
                             ?>
-                            <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]"/>
+                            <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]" class="form-control-sm"/>
                         </th>
                         <th style="width:20%">
                             <?php
                             $field = "parent_id";
+                            $category_list = [0 => "Root"] + $tree_list;
                             ?>
-                            <x-Inputs.drop-down :name="$field" :label="$false" :value="$search[$field]" :list="$tree_list" class="select2" />
-                            <?php 
-                                $field = "is_find_nested_child";
-                            ?>
-                            <x-Inputs.checkbox :name="$field" label="Find Nested Child" :value="$search[$field]" />
+                            <x-Inputs.drop-down :name="$field" :label="$false" :value="$search[$field]" :list="$category_list" pleaseSelect="All" class="select2 form-select-sm" />
                         </th>
-                        <th>
+                        <th style="width:10%">
                             <?php
-                            $field = "short_name";
+                            $field = "type";
                             ?>
-                            <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]"/>
+                            <x-Inputs.drop-down :name="$field" :label="$false" :value="$search[$field]" :list="$type_list" pleaseSelect="All" class="select2 form-select-sm" />
                         </th>
+                        
                     </tr>
                     <tr class="border-bottom-primary">
                         <th style="width:10%">
                             <?= sortable_anchor('id', get_value_from_list($field_labels, 'id', 'id')) ?>
                             | <?= sortable_anchor('name', get_value_from_list($field_labels, 'name', 'name')) ?>
                         </th>
-                        <th><?= sortable_anchor('parent_id', get_value_from_list($field_labels, 'parent_id', 'parent_id')) ?></th>
                         <th><?= sortable_anchor('short_name', get_value_from_list($field_labels, 'short_name', 'short_name')) ?></th>
+                        <th><?= sortable_anchor('parent_id', get_value_from_list($field_labels, 'parent_id', 'parent_id')) ?></th>
+                        <th><?= sortable_anchor('type', get_value_from_list($field_labels, 'type', 'type')) ?></th>
                         <th><?= sortable_anchor('uom.name', get_value_from_list($field_labels, 'base_uom_id', 'base_uom_id')) ?></th>
                         <th style="width:8%">{{ get_value_from_list($field_labels, 'is_last_node', 'is_last_node') }}</th>
                         <th style="width:8%"><?= sortable_anchor('list_display_order', get_value_from_list($field_labels, 'list_display_order', 'list_display_order')) ?></th>
@@ -59,8 +70,9 @@
                                     </div>
                                 </x-Backend.celec-summary-table-first-column>
                             </th>
-                            <td>{{ get_value_from_list($tree_list, $record->parent_id) }}</td>
                             <td>{{ $record->short_name }}</td>
+                            <td>{{ get_value_from_list($tree_list, $record->parent_id) }}</td>
+                            <td>{{ get_value_from_list($type_list, $record->type) }}</td>
                             <td>{{ $record->uom?->getDisplayName() }}</td>
                             <td>{{ $record->is_last_node ? 'Last Node' : '' }}</td>
                             <td class="text-center">

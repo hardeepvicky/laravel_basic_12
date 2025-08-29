@@ -18,7 +18,7 @@ $false = false;
     <x-Backend.form-errors />
 
     <x-Form.start action="{{ $form['url'] }}" method="{{ $form['method'] }}" />
-    
+
     <div class="row">
         <div class="col-xxxl-10">
             <div class="card">
@@ -27,149 +27,110 @@ $false = false;
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-12 col-xxl-6">
-                            <div class="form-group mb-3">
                                 <?php
                                 $field = 'name';
                                 $label = get_value_from_list($field_labels, $field, $field);
                                 ?>
                                 <x-Inputs.text-field :name="$field" :label="$label" value="{{ $model->{$field} }}"
-                                    placeholder="Enter {{ $label }}" mandatory="true" autocomplete="off" />
-                            </div>
-                            <div class="form-group mb-3">
-                                <div class="textarea-wrapper">
-                                    <?php
+                                    placeholder="Enter {{ $label }}" layout="horizontal" mandatory="true" autocomplete="off" />
+
+                                <?php
                                     $field = 'description';
                                     $label = get_value_from_list($field_labels, $field, $field);
                                     ?>
                                     <x-Inputs.text-area :id="$field" :name="$field" :label="$label" rows="3"
-                                        value="{{ $model->{$field} }}" placeholder="Enter {{ $label }}"
-                                        class="auto-suggesstion-list" />
-                                    <div id="{{ $field . '-suggestion-box' }}" class="suggestion-box hidden"></div>
-                                </div>
-                            </div>
-                            <div class="form-group mb-3">
+                                        value="{{ $model->{$field} }}" placeholder="Enter {{ $label }}" layout="horizontal" />
+
                                 <?php
                                 $field = 'item_category_id';
                                 $label = get_value_from_list($field_labels, $field, $field);
                                 ?>
                                 <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$item_category_list"
-                                    :value="$model->{$field}" class="select2" mandatory="true" />
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group mb-3">
-                                        <?php
-                                        $field = 'color_id';
-                                        $label = get_value_from_list($field_labels, $field, $field);
-                                        ?>
-                                        <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$color_list"
-                                            :value="$model->{$field}" class="select2"/>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group mb-3">
-                                        <?php
-                                        $field = 'brand_id';
-                                        $label = get_value_from_list($field_labels, $field, $field);
-                                        ?>
-                                        <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$brand_list"
-                                            :value="$model->{$field}" class="select2"/>
-                                    </div>
-                                </div>       
-                                <div class="col-md-6">
-                                    <div class="form-group mb-3">
-                                        <?php
-                                        $field = 'size';
-                                        $label = get_value_from_list($field_labels, $field, $field);
-                                        ?>
-                                        <x-Inputs.text-field :id="$field" :name="$field" :label="$label" value="{{ $model->{$field} }}"
-                                            placeholder="Enter {{ $label }}" />
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group mb-3">
-                                        <?php
-                                        $field = 'specification';
-                                        $label = get_value_from_list($field_labels, $field, $field);
-                                        ?>
-                                        <x-Inputs.text-field :id="$field" :name="$field" :label="$label" value="{{ $model->{$field} }}"
-                                            placeholder="Enter {{ $label }}" />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="form-group mb-3">
+                                    :value="$model->{$field}" class="select2" mandatory="true" layout="horizontal"  />
+                                    
+                                <?php
+                                $field = 'brand_id';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$brand_list"
+                                    :value="$model->{$field}" class="select2" layout="horizontal" />
+                                <?php
+                                $field = 'size';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <x-Inputs.text-field :id="$field" :name="$field" :label="$label" value="{{ $model->{$field} }}"
+                                    placeholder="Enter {{ $label }}" layout="horizontal" />
+                                <?php
+                                $field = 'specification';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <x-Inputs.text-field :id="$field" :name="$field" :label="$label" value="{{ $model->{$field} }}"
+                                    placeholder="Enter {{ $label }}" layout="horizontal" />
                                 <?php
                                 $field = 'sku';
                                 $label = get_value_from_list($field_labels, $field, $field);
                                 ?>
                                 <x-Inputs.text-field :id="$field" :name="$field" :label="$label" value="{{ $model->{$field} }}"
-                                    placeholder="Enter {{ $label }}" mandatory="true" readonly="readonly" />
-                            </div>
-                            
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <div class="form-group mb-3">
-                                        <?php
-                                        $field = 'images';
-                                        $label = get_value_from_list($field_labels, $field, $field);
-                                        $value = implode(',', $model->images?->pluck('id')->toArray());
-                                        ?>
+                                    placeholder="Enter {{ $label }}" layout="horizontal"  mandatory="true" readonly="readonly" />
+
+                                <?php
+                                $field = 'images';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                $value = implode(',', $model->images?->pluck('id')->toArray());
+                                ?>
+                                <div class="row mb-3">
+                                    <div class="col-sm-3">
+                                        <label class="form-label">
+                                            {{ $label }}
+                                        </label>
+                                    </div>
+                                    <div class="col-sm-9">
                                         <span id="choose-images" class="btn btn-secondary">Choose Images</span>
                                         <x-Inputs.text-field :id="$field" :name="$field" :label="$false"
                                             :value="$value" multiple="multiple" />
                                     </div>
                                 </div>
-                                <div class="col-md-4">
-                                    <div class="form-group mb-3">
-                                        <?php
-                                        $field = 'other_files';
-                                        $label = get_value_from_list($field_labels, $field, $field);
-                                        $value = implode(',', $model->otherFiles?->pluck('id')->toArray());
-                                        ?>
+
+                                <?php
+                                $field = 'other_files';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                $value = implode(',', $model->otherFiles?->pluck('id')->toArray());
+                                ?>
+                                <div class="row mb-3">
+                                    <div class="col-sm-3">
+                                        <label class="form-label">
+                                            {{ $label }}
+                                        </label>
+                                    </div>
+                                    <div class="col-sm-9">
                                         <span id="choose-other_files" class="btn btn-secondary">Choose Files</span>
                                         <x-Inputs.text-field :id="$field" :name="$field" :label="$false"
                                             :value="$value" multiple="multiple" />
                                     </div>
                                 </div>
-                            </div>                            
-                            <div class="form-group mb-3">
+
                                 <?php
                                 $field = 'tag_name';
                                 $label = get_value_from_list($field_labels, $field, 'Tags');
                                 $value = implode(',', $model->tags?->pluck('name')->toArray()) ?? [];
                                 ?>
                                 <x-Inputs.choice :id="$field" :name="$field" :label="$label" :value="$value"
-                                    class="choice " placeholder="Enter {{ $label }}" />
-                            </div>
-                            <div class="row">
-                                <div class="col-xl-6">
-                                    <div class="form-group mb-3">
-                                        <?php
-                                        $field = 'list_display_order';
-                                        $label = get_value_from_list($field_labels, $field, $field);
-                                        ?>
-                                        <x-Inputs.text-field type="number" :name="$field" :label="$label"
-                                            value="{{ $model->{$field} }}" placeholder="Enter {{ $label }}"
-                                            mandatory="true" autocomplete="off" />
-                                    </div>
-                                </div>
-                                <div class="col-xl-6" style="padding-top: 30px">
-                                    <div class="form-group mb-3">
-                                        <?php
-                                        $field = 'is_active';
-                                        $label = get_value_from_list($field_labels, $field, $field);
-                                        ?>
-                                        <x-Inputs.checkbox :name="$field" :label="$label"
-                                            value="{{ $model->{$field} }}" />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        </div>
-                        <div class="col-md-12 col-xxl-6">
-                                            
-                        </div>
+                                    class="choice" layout="horizontal"  placeholder="Enter {{ $label }}" />
+
+                                <?php
+                                $field = 'list_display_order';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <x-Inputs.text-field type="number" :name="$field" :label="$label"
+                                    value="{{ $model->{$field} }}" placeholder="Enter {{ $label }}"
+                                    mandatory="true" layout="horizontal"  autocomplete="off" />
+
+                                <?php
+                                $field = 'is_active';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <x-Inputs.checkbox :name="$field" :label="$label"
+                                    value="{{ $model->{$field} }}" />
                     </div>
                     <div class="row">
                         <div class="col-xl-8">
@@ -183,7 +144,7 @@ $false = false;
 
     </form>
 
-    <script>        
+    <script>
         $(function() {
             var screen_name = '<?= $screen_name ?>';
             var sku_pattern = '<?= $sku_pattern ?>';

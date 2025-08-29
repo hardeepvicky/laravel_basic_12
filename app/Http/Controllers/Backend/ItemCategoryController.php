@@ -7,6 +7,7 @@ use App\Helpers\LaravelExtend;
 use App\Models\FieldSetting;
 use App\Models\ItemCategory;
 use App\Models\ProductCategoryAttribute;
+use App\Models\Type;
 use App\Models\Uom;
 use Illuminate\Http\Request;
 use Exception;
@@ -42,12 +43,11 @@ class ItemCategoryController extends BackendController
 
         $conditions = $this->getConditions($cache_key, [
             ["field" => "id", "type" => "int", "cache" => false],
-            ["field" => "parent_id", "type" => "int", "view_field" => "parent_id"],
-            ["field" => "is_find_nested_child", "type" => "bool", "view_field" => "is_find_nested_child"],
-            ["field" => "name", "type" => "string", "view_field" => "name"],
-            ["field" => "short_name", "type" => "string", "view_field" => "short_name"],
-            ["field" => "is_last_node", "type" => "", "view_field" => "is_last_node"],
-            ["field" => "is_active", "type" => "", "view_field" => "is_active"],
+            ["field" => "parent_id", "type" => "int"],
+            ["field" => "is_find_nested_child", "type" => "bool"],
+            ["field" => "name", "type" => "string"],
+            ["field" => "short_name", "type" => "string"],
+            ["field" => "type", "type" => "string_equal"],
         ]);
 
         $builder = $this->modelClass::query();
@@ -109,11 +109,25 @@ class ItemCategoryController extends BackendController
 
         $tree_list = $this->modelClass::getTreeList($qb);
 
-        $product_category_attribute = new ProductCategoryAttribute();
+        $type_conditions = [
+            'type' => Type::getType($this->model, "type")
+        ];
+
+        if ($this->model->type)
+        {
+            $type_id_list = Type::getIdFromCode($this->model, $this->model->type);
+
+            if ($type_id_list)
+            {
+                $type_conditions['or_id'] = $type_id_list;
+            }
+        }
+
+        $type_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
 
         $base_uom_list = Uom::getList("id", "name_short_name", ["parent_id" => 0], "list_display_order");
 
-        $this->setForView(compact("field_labels", "tree_list", "base_uom_list"));
+        $this->setForView(compact("field_labels", "tree_list", "base_uom_list", "type_list"));
 
         return parent::beforeViewRender();
     }
@@ -137,9 +151,10 @@ class ItemCategoryController extends BackendController
     private function _common_validation_rules()
     {
         return [
+            "parent_id" => ["nullable"],
+            "type" => ["required"],
             "name" => ["required"],
             "base_uom_id" => ["required"],
-            "parent_id" => ["nullable"],
             "short_name" => ["nullable"],
             "list_display_order" => "",
             "is_last_node" => "",

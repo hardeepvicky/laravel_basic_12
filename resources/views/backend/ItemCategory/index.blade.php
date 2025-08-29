@@ -32,6 +32,11 @@
                     $field = "short_name";
                 ?>
                 <input type="text"  name="{{ $field }}" value="{{ $search[$field] }}" />
+
+                <?php 
+                    $field = "type";
+                ?>
+                <input type="text"  name="{{ $field }}" value="{{ $search[$field] }}" />
             </form>
         </div>
     </div>

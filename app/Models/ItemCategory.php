@@ -17,6 +17,9 @@ class ItemCategory extends BaseModel
 
     protected static array $unique_fields = ["parent_id", "name"];
 
+    const TYPE_RAW_MATERIAL = "RAW_MATERIAL";
+    const TYPE_FIXED_ASSET = "FIXED_ASSET";
+
     public static array $child_model_class = [
         Item::class => [
             "foreignKey" => "item_category_id",
@@ -104,5 +107,28 @@ class ItemCategory extends BaseModel
     public static function getTreeList(Builder $qb) : array
     {
         return Util::getTreeListArray(self::getTreeRecords($qb, 4), "id", "name", false, false);
+    }
+
+    
+    public static function getCodeList(String $field)
+    {
+        $class_info = get_class_info(static::class);
+
+
+        switch ($field) {
+            case "type":
+
+                $list = [];
+
+                foreach ($class_info['constants'] as $constant => $label) {
+                    if (strpos($constant, "TYPE_") !== false) {
+                        $list[] = $label;
+                    }
+                }
+
+                return $list;
+
+                break;
+        }
     }
 }

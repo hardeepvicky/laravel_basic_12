@@ -113,6 +113,11 @@ class Type extends BaseModel
                     "status" => "Status",
                 ]
             ],
+            ItemCategory::class => [
+                "fields" => [
+                    "type" => "Type",
+                ]
+            ],
         ];
 
         return $types;
