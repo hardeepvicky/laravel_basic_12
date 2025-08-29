@@ -20,7 +20,7 @@
                                 </div>
                             </div>
                         </th>
-                        <th style="width:10%">
+                        <th style="width:20%">
                             <?php
                             $field = 'assign_to_user_id';
                             ?>

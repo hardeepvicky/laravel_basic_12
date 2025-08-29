@@ -122,7 +122,7 @@ class User extends Authenticatable implements BaseModelInterface
 
     protected static array $file_fields = ["profile_image"];
 
-    protected static array $list_fields = ["id", "name", "type", "sub_type", "person_name"];
+    protected static array $list_fields = ["id", "name", "type", "sub_type", "person_name", "dept_id", "desg_id"];
 
     public const TYPE_INTERNAL = "internal";
     public const TYPE_EXTERNAL = "external";
@@ -297,42 +297,36 @@ class User extends Authenticatable implements BaseModelInterface
 
         if ($this->type == self::TYPE_EXTERNAL) {
 
-            $sub_title = "(External)";
+            $sub_title = " >> External";
 
             if (isset($sub_type_list[$this->sub_type])) {
-                $sub_title = "(" . $sub_type_list[$this->sub_type] . ")";
+                $sub_title = " >> " . $sub_type_list[$this->sub_type];
             }
 
-            return $this->full_name . " " . $sub_title;
+            return $this->full_name . $sub_title;
         } else {
 
             $name = $this->name;
 
-            if ($this->type == self::TYPE_EXTERNAL) {
-                $name .= " (External)";
-            } else {
-                if ($this->person_name && strtolower($this->person_name) != strtolower($name)) {
+            if ($this->person_name && strtolower($this->person_name) != strtolower($name)) {
 
-                    if (strpos($this->person_name, " ") !== false) {
-                        $sub_str = trim(substr($this->person_name, 0, strpos($this->person_name, " ")));
-                    } else {
-                        $sub_str = $this->person_name;
-                    }
-
-                    $name = $sub_str . " >> " . $this->name;
+                if (strpos($this->person_name, " ") !== false) {
+                    $sub_str = trim(substr($this->person_name, 0, strpos($this->person_name, " ")));
+                } else {
+                    $sub_str = $this->person_name;
                 }
+
+                $name = $sub_str . " >> " . $this->name;
             }
 
-            $sub_title = "";
-
-            if (isset($sub_type_list[$this->sub_type]) && $this->sub_type != self::SUB_TYPE_TEAM_MEMBER)
+            if (isset($this->department))
             {
-                $sub_title = "(" . $sub_type_list[$this->sub_type] . ")";
+                $name .= " >> " . $this->department->getDisplayName();
             }
-            
-            if ($sub_title)
+
+            if (isset($this->designation))
             {
-                $name .= " " . $sub_title;
+                $name .= " >> " . $this->designation->getDisplayName();
             }
             
             return $name;
