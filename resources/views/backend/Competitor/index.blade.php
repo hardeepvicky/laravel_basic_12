@@ -71,4 +71,14 @@
             });
         })
     </script>
+
+    @if(request()->has('last_insert_id') && request()->has('last_insert_type'))
+    <script>
+        $(function(){
+            localStorage.setItem("last_contact_insert_type", "{!! request('last_insert_type') !!}");
+            localStorage.setItem("last_contact_insert_id", "{!! request('last_insert_id') !!}");
+            window.close();
+        });
+    </script>
+    @endif
 @endsection

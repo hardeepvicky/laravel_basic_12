@@ -644,7 +644,7 @@ class WebController extends Controller
         if ($redirect_to_edit) {
             return redirect()->route($this->routePrefix . ".edit", [$model])->with('success', $msg);
         }
-
+        
         return back()->with('success', $msg);
     }
 
@@ -711,9 +711,14 @@ class WebController extends Controller
 
         $this->saveSqlLog();
 
-        $redirect_to = request("redirect_to", "index");
+        $redirect_to = request("redirect_to", false);
 
-        return redirect()->route($this->routePrefix . "." . $redirect_to)->with('success', $msg);
+        if ($redirect_to)
+        {
+            return redirect()->route($this->routePrefix . "." . $redirect_to)->with('success', $msg);
+        }
+
+        return back()->with('success', $msg);
     }
 
     protected function beforeCsvImport()

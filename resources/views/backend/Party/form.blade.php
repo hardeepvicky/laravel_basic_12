@@ -87,7 +87,7 @@
                                         $label = get_value_from_list($field_labels, $field, $field);
                                         ?>
                                         <x-Inputs.text-field :name="$field" :label="$label"
-                                            value="{{ $model->{$field} }}" 
+                                            value="{{ $model->{$field} }}"
                                             placeholder="Enter {{ $label }}"  />
                                     </div>
                                 </div>
@@ -179,7 +179,7 @@
                                                         $label = get_value_from_list($address_field_labels, $field, $field);
                                                         ?>
                                                         <x-inputs.drop-down name="addresses[(sr-id)][{{ $field }}]"
-                                                            :label="$label" 
+                                                            :label="$label"
                                                             :list="$address_type_list"
                                                             class="will-required will-select2" />
                                                     </div>
@@ -245,7 +245,7 @@
                                                             </div>
                                                             <input type="hidden" name="addresses[{{ $k }}][id]"
                                                                 value="{{ $child_arr['id'] ?? '' }}" />
-                                                        </td>                                                        
+                                                        </td>
                                                         <td>
                                                             <div class="form-group mb-2">
                                                                 <?php
@@ -254,7 +254,7 @@
                                                                 $label = get_value_from_list($address_field_labels, $field, $field);
                                                                 ?>
                                                                 <x-inputs.drop-down name="addresses[{{ $k }}][{{ $field }}]"
-                                                                    :label="$label" 
+                                                                    :label="$label"
                                                                     :value="$value"
                                                                     :list="$address_type_list"
                                                                     class="will-required will-select2" />
@@ -313,7 +313,7 @@
                                         </tfoot>
                                     </table>
                                 </div>
-                            </div>                            
+                            </div>
                             <div class="row">
                                 <div class="col-md-12">
                                     <h4 class="b-b-info">
@@ -486,7 +486,13 @@
                 </div>
             </div>
 
-            <x-Backend.form-common-footer-buttons />
+            @if(request()->has('refer_from'))
+            <div class="form-buttons mb-4">
+                <button type="submit" class="btn btn-primary" name="save_and_close" value="1">Submit & Close</button>
+            </div>
+            @else
+                <x-Backend.form-common-footer-buttons />
+            @endif
         </div>
     </div>
     </form>
@@ -509,7 +515,7 @@
 
             var template_trs = $(".template-table").find("> tbody > tr").not(".sr-table-template-row");
             template_trs.find(".will-required").attr("required", true);
-            
+
             $("#partyFile").browseGallery({
                 opener: "#files-choose"
             });

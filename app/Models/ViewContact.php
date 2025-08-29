@@ -52,7 +52,7 @@ class ViewContact extends BaseModel
 
             if ($value_field == "display_name")
             {
-                $arr[$value_field] = ucfirst($arr['type']) . " >> " . $arr['name'] . " >> " . $arr['mobile'] . " >> " . $arr['city_name'];
+                $arr[$value_field] = ucfirst($arr['type']) . " >> " . $arr['name'] . " >> " . $arr['city_name'] . " >> " . $arr['mobile'] ;
             }
 
             $list[$arr['type'] . "." . $arr[$key_field]] = [

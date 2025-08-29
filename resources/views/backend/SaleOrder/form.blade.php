@@ -637,12 +637,67 @@
 
             }
 
-            $(".order_qty, .rate").on("input keyup", function(){
+            $(document).on("input keyup", ".order_qty, .rate", function(){
                 cal_amount($(this).closest("tr"));
             });
 
-            $("#discount_per").on("input keyup", function(){
+            $(document).on("input keyup", "#discount_per", function(){
                 cal_grand_amount();
+            });
+
+            function load_contact_list()
+            {
+                ajaxGetJson("/contact-ajax_get_list", function(response){
+                    var html = "";
+                    var html = "<option value=''>Please Select</option>";
+
+                    for (var i in response["data"]) {
+                        var k = response["data"][i]["key"];
+                        var v = response["data"][i]["name"];
+
+                        var attr = 'value="' + k + '"';
+
+                        if (typeof response["data"][i]["auto_select"] != "undefined") {
+                            if (response["data"][i]["auto_select"]) {
+                                attr += ' selected="selected"';
+                            }
+                        }
+
+                        html += '<option ' + attr + '>' + v + "</option>";
+                    }
+
+                    var target = "#contact_id";
+
+                    $(target).html(html);
+
+                    var v = $(target).attr("data-value");
+
+                    if (v) {
+                        $(target).val(v).trigger("change");
+                    }
+                });
+            }
+
+            $(window).on('storage', function(e) {
+                const event = e.originalEvent; // unwrap native event
+
+                if (event.key == "last_contact_insert_id")
+                {
+                    let type = localStorage.getItem("last_contact_insert_type");
+                    let id = event.newValue;
+
+                    console.log("type : ", type, "id : ", id);
+                    
+                    $("#order_from_type").val(type);
+
+                    $("#gallery-modal-main").modal("hide");
+
+                    $("#contact_id").attr("data-value", type + "." + id);
+
+                    load_contact_list();
+                }
+
+                console.log("StorageKey:", event.key, " Old Value : ", event.oldValue, " New Value : ", event.newValue);
             });
 
             $.events.execAtLast(function() {

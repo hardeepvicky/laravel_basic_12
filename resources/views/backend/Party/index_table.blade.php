@@ -9,52 +9,62 @@
                 <thead>
                     <tr>
                         <th style="width:10%">
-                            <span class="btn btn-light text-dark border-primary clear_search_conditions mb-1">Clear</span>
-                            <?php
-                            $field = "name";
-                            ?>
-                            <x-Inputs.text-field :id="$field" :name="$field" :label="$false" :value="$search[$field]"/>
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <span class="btn btn-light btn-sm text-dark border-primary clear_search_conditions mb-1">Clear</span>
+                                </div>
+                                <div class="col-sm-8">
+                                    <?php
+                                    $field = 'name';
+                                    ?>
+                                    <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]" class="form-control-sm"/>
+                                </div>
+                            </div>
                         </th>
                         <th style="width:10%">
                             <?php
                             $field = "type";
                             ?>
-                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$type_list" :value="$search[$field]" class="select2" />
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" 
+                                :list="$type_list" :value="$search[$field]" pleaseSelect="All" class="select2 form-select-sm" />
                         </th>
                         <th style="width:12%">
                             <?php
                             $field = "state_id";
                             ?>
-                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$state_list" :value="$search[$field]" class="select2 mb-1"/>
-
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" 
+                                :list="$state_list" :value="$search[$field]"  pleaseSelect="All" class="select2 form-select-sm"/>
+                        </th>
+                        <th style="width:15%">
                             <?php
                             $field = "city_id";
                             ?>
-                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$district_city_list" :value="$search[$field]" class="select2" />
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" 
+                                :list="$district_city_list" :value="$search[$field]" pleaseSelect="All" class="select2 form-select-sm" />
                         </th>
                         <th style="width:10%">
                             <?php
                             $field = "company_name";
                             ?>
-                            <x-Inputs.text-field :id="$field" :name="$field" :label="$false" :value="$search[$field]"/>
+                            <x-Inputs.text-field :id="$field" :name="$field" :label="$false" :value="$search[$field]" class="form-control-sm"/>
                         </th>                      
                         <th style="width:10%">
                             <?php
                             $field = "mobile";
                             ?>
-                            <x-Inputs.text-field :id="$field" :name="$field" :label="$false" :value="$search[$field]"/>
+                            <x-Inputs.text-field :id="$field" :name="$field" :label="$false" :value="$search[$field]" class="form-control-sm"/>
                         </th>                      
                         <th style="width:10%">
                             <?php
                             $field = "mobile2";
                             ?>
-                            <x-Inputs.text-field :id="$field" :name="$field" :label="$false" :value="$search[$field]"/>
+                            <x-Inputs.text-field :id="$field" :name="$field" :label="$false" :value="$search[$field]" class="form-control-sm"/>
                         </th>                      
                         <th style="width:10%">
                             <?php
                             $field = "phone_no";
                             ?>
-                            <x-Inputs.text-field :id="$field" :name="$field" :label="$false" :value="$search[$field]"/>
+                            <x-Inputs.text-field :id="$field" :name="$field" :label="$false" :value="$search[$field]" class="form-control-sm"/>
                         </th>                        
                     </tr>
                     <tr class="border-bottom-primary">
@@ -65,7 +75,9 @@
                         <th><?= sortable_anchor('type', get_value_from_list($field_labels, 'type', 'type')) ?></th>
                         <th>
                             <?= sortable_anchor('state.name', get_value_from_list($field_labels, 'state_id', 'state_id')) ?>
-                            | <?= sortable_anchor('district.name', get_value_from_list($field_labels, 'district_id', 'district_id')) ?>
+                        </th>
+                        <th>
+                            <?= sortable_anchor('district.name', get_value_from_list($field_labels, 'district_id', 'district_id')) ?>
                             | <?= sortable_anchor('city.name', get_value_from_list($field_labels, 'city_id', 'city_id')) ?>
                         </th>
                         <th><?= sortable_anchor('company_name', get_value_from_list($field_labels, 'company_name', 'company_name')) ?></th>
@@ -93,7 +105,9 @@
                             <td>{{ get_value_from_list($type_list, $record->type) }}</td>
                             <td>
                                 {{ $record->state?->getShortName() }}
-                                >> {{ $record->district?->getDisplayName() }}
+                            </td>
+                            <td>
+                                {{ $record->district?->getDisplayName() }}
                                 >> {{ $record->city?->getDisplayName() }}
                             </td>
                             <td>{{ $record->company_name }}</td>

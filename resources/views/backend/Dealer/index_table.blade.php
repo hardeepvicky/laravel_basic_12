@@ -31,19 +31,22 @@
                             <?php
                             $field = "type";
                             ?>
-                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$type_list" :value="$search[$field]" class="select2 form-select-sm" />
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" 
+                                :list="$type_list" :value="$search[$field]"  pleaseSelect="All" class="select2 form-select-sm" />
                         </th>
                         <th style="width:12%">
                             <?php
                             $field = "state_id";
                             ?>
-                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$state_list" :value="$search[$field]" class="select2 form-select-sm"/>
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" 
+                                :list="$state_list" :value="$search[$field]"  pleaseSelect="All" class="select2 form-select-sm"/>
                         </th>
                         <th style="width:15%">
                             <?php
                             $field = "city_id";
                             ?>
-                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$district_city_list" :value="$search[$field]" class="select2 form-select-sm" />
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]"
+                                 :list="$district_city_list" :value="$search[$field]"  pleaseSelect="All" class="select2 form-select-sm" />
                         </th>
                         <th style="width:10%">
                             <?php

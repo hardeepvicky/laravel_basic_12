@@ -1,4 +1,4 @@
-<div class="form-buttons mb-4">    
+<div class="form-buttons mb-4">
     @if(in_array("submit_and_redirect_to_edit", $buttonList))
         <button type="submit" class="btn btn-primary" name="redirect_to_edit" value="1">Submit & Edit</button>
     @endif

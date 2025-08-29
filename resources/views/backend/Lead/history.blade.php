@@ -36,12 +36,12 @@ use App\Helpers\DateUtility;
             <div class="btn btn-secondary dispatch_link" data-bs-toggle="modal" data-bs-target="#modal-dispatch-form">Dispatch</div>
             <div class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modal-transfer-form">Transfer</div>
             @if($record->lead_id)
-                <a class="btn btn-secondary confirm" href="{{ route("lead.convert_to_customer", ["lead_id" => $record->lead_id])  }}">
-                    Convert To Customer
-                </a>
-            @elseif($record->is_customer)
                 <a class="btn btn-secondary confirm" href="{{ route("customer.convert_to_lead", [$record->id])  }}">
                     Convert To Lead
+                </a>                
+            @elseif(isset($record->is_customer) && !$record->is_customer)
+                <a class="btn btn-secondary confirm" href="{{ route("lead.convert_to_customer", ["lead_id" => $record->id])  }}">
+                    Convert To Customer
                 </a>
             @endif
 

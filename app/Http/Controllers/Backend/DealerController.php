@@ -221,6 +221,16 @@ class DealerController extends BackendController
 
             DB::commit();
 
+            $save_and_close = (bool) request("save_and_close", false);
+
+            if ($save_and_close)
+            {
+                return redirect()->to(get_current_path_url([
+                    'last_insert_id' => $this->model->id,
+                    "last_insert_type" => "dealer"
+                ]));
+            }
+
             return $this->afterSave($model);
         } catch (Exception $ex) {
             DB::rollBack();

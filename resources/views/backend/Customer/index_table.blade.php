@@ -1,6 +1,5 @@
 <div class="card" id="page-summary">
     <div class="card-header p-2">
-        <a href="{{ route($routePrefix . '.export.csv') }}" class="btn btn-secondary">Export CSV</a>
     </div>
 
     <div class="card-body p-1">
@@ -26,35 +25,35 @@
                             $field = 'assign_to_user_id';
                             ?>
                             <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]"
-                                :list="$user_list" :value="$search[$field]" class="select2 form-select-sm" />
+                                :list="$user_list" :value="$search[$field]" pleaseSelect="All" class="select2 form-select-sm" />
                         </th>
                         <th style="width:10%">
                             <?php
                             $field = 'status_type';
                             ?>
                             <x-Inputs.drop-down :id="$field" :name="$field" :label="$false"
-                                :value="$search[$field]" :list="$status_type_list" :value="$search[$field]" class="select2 form-select-sm" />
+                                :value="$search[$field]" :list="$status_type_list" :value="$search[$field]" pleaseSelect="All" class="select2 form-select-sm" />
                         </th>
                         <th style="width:10%">
                             <?php
                             $field = 'response_type_id';
                             ?>
                             <x-Inputs.drop-down :id="$field" :name="$field" :label="$false"
-                                :value="$search[$field]" :list="$lead_history_response_list" :value="$search[$field]" class="select2 form-select-sm" />
+                                :value="$search[$field]" :list="$lead_history_response_list" :value="$search[$field]" pleaseSelect="All" class="select2 form-select-sm" />
                         </th>
                         <th style="width:12%">
                             <?php
                             $field = 'state_id';
                             ?>
                             <x-Inputs.drop-down :id="$field" :name="$field" :label="$false"
-                                :value="$search[$field]" :list="$state_list" :value="$search[$field]" class="select2 form-select-sm" />
+                                :value="$search[$field]" :list="$state_list" :value="$search[$field]" pleaseSelect="All" class="select2 form-select-sm" />
                         </th>
                         <th style="width:12%">
                             <?php
                             $field = 'city_id';
                             ?>
                             <x-Inputs.drop-down :id="$field" :name="$field" :label="$false"
-                                :value="$search[$field]" :list="$district_city_list" :value="$search[$field]" class="select2 form-select-sm" />
+                                :value="$search[$field]" :list="$district_city_list" :value="$search[$field]" pleaseSelect="All" class="select2 form-select-sm" />
                         </th>
                         <th style="width:10%">
                             <?php
@@ -75,14 +74,14 @@
                             $field = 'dealer_id';
                             ?>
                             <x-Inputs.drop-down :id="$field" :name="$field" :label="$false"
-                                :value="$search[$field]" :list="$dealer_list" :value="$search[$field]" class="select2 form-select-sm"/>
+                                :value="$search[$field]" :list="$dealer_list" :value="$search[$field]" pleaseSelect="All" class="select2 form-select-sm"/>
                         </th>
                         <th style="width:10%">
                             <?php
                             $field = 'deal_type';
                             ?>
                             <x-Inputs.drop-down :id="$field" :name="$field" :label="$false"
-                                :value="$search[$field]" :list="$deal_type_list" :value="$search[$field]" class="select2 form-select-sm" />
+                                :value="$search[$field]" :list="$deal_type_list" :value="$search[$field]" pleaseSelect="All" class="select2 form-select-sm" />
                         </th>
                     </tr>
                     <tr class="border-bottom-primary">

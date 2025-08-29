@@ -1220,7 +1220,11 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
 
     $route_prefix = "contact";
     $controllerClass = ContactController::class;
+    $name = "index";
+    Route::get($route_prefix, [$controllerClass, $name])->name($route_prefix . "." . $name);
     $name = "chooser";
+    Route::get($route_prefix . "-" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
+    $name = "ajax_get_list";
     Route::get($route_prefix . "-" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
 
     $controller_prefix = "setting";
