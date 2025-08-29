@@ -319,16 +319,6 @@ class User extends Authenticatable implements BaseModelInterface
                 $name = $sub_str . " >> " . $this->name;
             }
 
-            if (isset($this->department))
-            {
-                $name .= " >> " . $this->department->getDisplayName();
-            }
-
-            if (isset($this->designation))
-            {
-                $name .= " >> " . $this->designation->getDisplayName();
-            }
-            
             return $name;
         }
     }
