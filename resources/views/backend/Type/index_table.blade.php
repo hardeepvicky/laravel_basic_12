@@ -9,29 +9,36 @@
                 <thead>
                     <tr>
                         <th style="width:10%">
-                            <span class="btn btn-light text-dark border-primary clear_search_conditions mb-1">Clear</span>
-                            <?php
-                            $field = "name";
-                            ?>
-                            <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]"/>
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <span class="btn btn-light btn-sm text-dark border-primary clear_search_conditions mb-1">Clear</span>
+                                </div>
+                                <div class="col-sm-8">
+                                    <?php
+                                    $field = 'name';
+                                    ?>
+                                    <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]" class="form-control-sm" />
+                                </div>
+                            </div>
                         </th>        
                         <th>
                             <?php
                             $field = "type";
                             ?>
-                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$type_list" :value="$search[$field]" class="select2" />
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" 
+                                :list="$type_list" :value="$search[$field]" pleaseSelect="All" class="select2 form-select-sm"  />
                         </th>    
                         <th style="width:10%">
                             <?php
                             $field = "short_name";
                             ?>
-                            <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]"/>
+                            <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]" class="form-control-sm"/>
                         </th>                
                         <th style="width:10%">
                             <?php
                             $field = "code";
                             ?>
-                            <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]"/>
+                            <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]" class="form-control-sm"/>
                         </th>                
                     </tr>
                     <tr class="border-bottom-primary">

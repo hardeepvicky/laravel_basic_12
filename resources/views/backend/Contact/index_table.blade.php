@@ -14,13 +14,13 @@
                         pleaseSelect="All"
                         class="select2 form-select-sm" />
                 </th>
-                <th style="width:10%">
+                <th style="width:12%">
                     <?php
                     $field = 'name';
                     ?>
                     <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]" class="form-control-sm" />
                 </th>
-                <th>
+                <th style="width:12%">
                     <?php
                     $field = 'state_id';
                     ?>
@@ -28,7 +28,7 @@
                         pleaseSelect="All"
                         class="modal-select2 form-select-sm" />
                 </th>
-                <th>
+                <th style="width:15%">
                     <?php
                     $field = 'city_id';
                     ?>

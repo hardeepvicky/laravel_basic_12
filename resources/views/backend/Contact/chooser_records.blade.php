@@ -3,6 +3,7 @@
     <table class="table table-bordered summary_table_with_search">
         <thead>
             <tr>
+                <th style="width:6%"></th>
                 <th style="width:12%">
                     <div class="row">
                         <div class="col-sm-4">
@@ -18,13 +19,13 @@
                         </div>
                     </div>
                 </th>
-                <th style="width:10%">
+                <th style="width:12%">
                     <?php
                     $field = 'name';
                     ?>
                     <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]" class="form-control-sm" />
                 </th>
-                <th>
+                <th style="width:12%">
                     <?php
                     $field = 'state_id';
                     ?>
@@ -32,7 +33,7 @@
                         pleaseSelect="All"
                         class="modal-select2 form-select-sm" />
                 </th>
-                <th>
+                <th style="width:15%">
                     <?php
                     $field = 'city_id';
                     ?>
@@ -60,6 +61,7 @@
                 </th>
             </tr>
             <tr class="border-bottom-primary">
+                <th>Actions</th>                    
                 <th><?= sortable_anchor('type', 'Type') ?></th>
                 <th>
                     @if($multiple)
@@ -79,6 +81,29 @@
         <tbody>
             @foreach ($records as $record)
                 <tr>
+                    <td>
+                        <ul class="action">
+                            <?php
+                            $route_prefix_2 = $record->type;
+                            ?>
+                            @if (in_array($record->type, ["lead", "customer"]))
+                            <li>
+                                <a class="btn btn-outline-info summary-action-button" href="{{ route($route_prefix_2 . '.history',[$record->id]) }}">
+                                    <i class="fa-solid fa-clock-rotate-left"></i>
+                                </a>
+                            </li>
+                            @endif
+                            <li>
+                                <a class="btn btn-outline-primary summary-action-button" href="{{ route($route_prefix_2 . '.edit',[$record->id]) }}">
+                                    <i class="icon-pencil-alt"></i>
+                                </a>
+                            </li>
+                            <li>
+                                <x-Backend.summary-delete-button url="{{ route($route_prefix_2 . '.destroy', [$record->id]) }}" />
+                            </li>
+                        </ul> 
+                    </td>
+
                     <td>{{ get_value_from_list($type_list, $record->type) }}</td>
                     <td>
                         <label class="form-check custom-checkbox-group">
