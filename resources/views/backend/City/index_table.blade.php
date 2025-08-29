@@ -9,21 +9,31 @@
                 <thead>
                     <tr>
                         <th>
-                            <span class="btn btn-light text-dark border-primary clear_search_conditions mb-1">Clear</span>
-                            <?php
-                            $field = "name";
-                            ?>
-                            <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]"/>
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <span class="btn btn-light btn-sm text-dark border-primary clear_search_conditions mb-1">Clear</span>
+                                </div>
+                                <div class="col-sm-8">
+                                    <?php
+                                    $field = 'name';
+                                    ?>
+                                    <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]" class="form-control-sm" />
+                                </div>
+                            </div>
                         </th>         
                         <th>
                             <?php
                             $field = "state_id";
                             ?>
-                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$state_list" :value="$search[$field]" class="select2" />
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" 
+                                :list="$state_list" :value="$search[$field]" pleaseSelect="All" class="select2 form-select-sm" />
+                        </th>
+                        <th>
                             <?php
                             $field = "district_id";
                             ?>
-                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$district_list" :value="$search[$field]" class="select2" />
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" 
+                                :value="$search[$field]" :list="$district_list" :value="$search[$field]" pleaseSelect="All" class="select2 form-select-sm" />
                         </th>                 
                     </tr>
                     <tr class="border-bottom-primary">
@@ -33,7 +43,9 @@
                         </th>
                         <th style="width:15%">
                             <?= sortable_anchor('state.name', get_value_from_list($field_labels, 'state_id', 'state_id')) ?>
-                            | <?= sortable_anchor('district.name', get_value_from_list($field_labels, 'district_id', 'district_id')) ?>
+                        </th>
+                        <th style="width:15%">                            
+                            <?= sortable_anchor('district.name', get_value_from_list($field_labels, 'district_id', 'district_id')) ?>
                         </th>
                         <th style="width:8%"><?= sortable_anchor('list_display_order', get_value_from_list($field_labels, 'list_display_order', 'list_display_order')) ?></th>
                         <th style="width:8%"><?= sortable_anchor('is_active', 'Active / De-Active') ?></th>
@@ -53,11 +65,8 @@
                                     </div>
                                 </x-Backend.celec-summary-table-first-column>
                             </th>
-                            <td>
-                                {{ $record->state?->getShortName() }}
-                                >>
-                                {{ $record->district?->getDisplayName() }}
-                            </td>
+                            <td>{{ $record->state?->getShortName() }}</td>
+                            <td>{{ $record->district?->getDisplayName() }}</td>
                             <td class="text-center">
                                 <a class="x-editable" href="javascript:void();"id="list_display_order" data-type="number"
                                     data-name="list_display_order"

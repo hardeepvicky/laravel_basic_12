@@ -8,28 +8,46 @@
             <table class="table table-bordered summary-table summary_table_with_search">
                 <thead>
                     <tr>
-                        <th>
-                            <span class="btn btn-light text-dark border-primary clear_search_conditions mb-1">Clear</span>
-                            <?php
-                            $field = "name";
-                            ?>
-                            <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]"/>
+                        <th style="width:15%">
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <span class="btn btn-light btn-sm text-dark border-primary clear_search_conditions mb-1">Clear</span>
+                                </div>
+                                <div class="col-sm-8">
+                                    <?php
+                                    $field = 'name';
+                                    ?>
+                                    <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]" class="form-control-sm" />
+                                </div>
+                            </div>
                         </th>                        
                         <th>
                             <?php
                             $field = "short_name";
                             ?>
-                            <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]"/>
+                            <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]" class="form-control-sm"/>
                         </th>                        
                         <th>
                             <?php
                             $field = "phonecode";
                             ?>
-                            <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]"/>
+                            <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]" class="form-control-sm"/>
+                        </th>                        
+                        <th>
+                            <?php
+                            $field = "timezone";
+                            ?>
+                            <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]" class="form-control-sm"/>
+                        </th>                        
+                        <th>
+                            <?php
+                            $field = "iso3";
+                            ?>
+                            <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]" class="form-control-sm"/>
                         </th>                        
                     </tr>
                     <tr class="border-bottom-primary">
-                        <th style="width:15%">
+                        <th>
                             <?= sortable_anchor('id', get_value_from_list($field_labels, 'id', 'id')) ?>
                             | <?= sortable_anchor('name', get_value_from_list($field_labels, 'name', 'name')) ?>
                         </th>

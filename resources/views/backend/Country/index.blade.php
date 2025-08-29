@@ -12,16 +12,29 @@
         <div class="card-body">
             <form method="GET" class="summary_search" action="{{ route($routePrefix . '.index') }}">
                 <input type="hidden" name="is_sort_clear" value="1" />
+                
                 <?php 
                     $field = "name";
                 ?>
                 <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
+                
                 <?php 
                     $field = "short_name";
                 ?>
                 <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
+
                 <?php 
                     $field = "phonecode";
+                ?>
+                <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />                
+
+                <?php 
+                    $field = "timezone";
+                ?>
+                <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />                
+
+                <?php 
+                    $field = "iso3";
                 ?>
                 <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />                
             </form>

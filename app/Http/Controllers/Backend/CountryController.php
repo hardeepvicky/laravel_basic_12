@@ -37,7 +37,8 @@ class CountryController extends BackendController
             ["field" => "name", "type" => "string"],
             ["field" => "short_name", "type" => "string_equal"],
             ["field" => "phonecode", "type" => "int"],
-            ["field" => "is_active", "type" => "int"],
+            ["field" => "timezone", "type" => "string"],
+            ["field" => "iso3", "type" => "string"],
         ]);
 
         $builder = $this->modelClass::where($conditions);
