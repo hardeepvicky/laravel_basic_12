@@ -19,125 +19,113 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-12 col-xxl-6">
-                            <div class="form-group mb-3">
-                                <?php
-                                $field = 'type';
-                                $label = get_value_from_list($field_labels, $field, $field);
-                                ?>
-                                <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$type_list"
-                                    value="{{ $model->{$field} }}" class="select2" mandatory="true" />
-                            </div>
-                            <div class="form-group mb-3">
-                                <?php
-                                $field = 'name';
-                                $label = get_value_from_list($field_labels, $field, $field);
-                                ?>
-                                <x-Inputs.text-field :name="$field" :label="$label" value="{{ $model->{$field} }}"
-                                    placeholder="Enter {{ $label }}" mandatory="true" />
-                            </div>
-                            <div class="form-group mb-3">
-                                <?php
-                                $field = 'alias';
-                                $label = get_value_from_list($field_labels, $field, $field);
-                                ?>
-                                <x-Inputs.text-field :name="$field" :label="$label" value="{{ $model->{$field} }}"
-                                    placeholder="Enter {{ $label }}" />
-                            </div>
-                            <div class="row">
-                                <div class="col-lg-6">
-                                    <div class="form-group mb-3">
-                                        <?php
-                                        $field = 'mobile';
-                                        $label = get_value_from_list($field_labels, $field, $field);
-                                        ?>
-                                        <x-Inputs.text-field :name="$field" :label="$label"
-                                            value="{{ $model->{$field} }}" class="validate-mobile"
-                                            placeholder="Enter {{ $label }}" mandatory="true" />
-                                    </div>
-                                </div>
-                                <div class="col-lg-6">
-                                    <div class="form-group mb-3">
-                                        <?php
-                                        $field = 'mobile2';
-                                        $label = get_value_from_list($field_labels, $field, $field);
-                                        ?>
-                                        <x-Inputs.text-field :name="$field" :label="$label"
-                                            value="{{ $model->{$field} }}" class="validate-mobile"
-                                            placeholder="Enter {{ $label }}" />
-                                    </div>
-                                </div>
-                                <div class="col-lg-6">
-                                    <div class="form-group mb-3">
-                                        <?php
-                                        $field = 'phone_no';
-                                        $label = get_value_from_list($field_labels, $field, $field);
-                                        ?>
-                                        <x-Inputs.text-field :name="$field" :label="$label"
-                                            value="{{ $model->{$field} }}" class="validate-phone"
-                                            placeholder="Enter {{ $label }}" />
-                                    </div>
-                                </div>
-                                <div class="col-lg-6">
-                                    <div class="form-group mb-3">
-                                        <?php
-                                        $field = 'company_name';
-                                        $label = get_value_from_list($field_labels, $field, $field);
-                                        ?>
-                                        <x-Inputs.text-field :name="$field" :label="$label"
-                                            value="{{ $model->{$field} }}"
-                                            placeholder="Enter {{ $label }}" />
-                                    </div>
-                                </div>
-                                <div class="col-lg-6">
-                                    <div class="form-group mb-3">
-                                        <?php
-                                        $field = 'gst_no';
-                                        $label = get_value_from_list($field_labels, $field, $field);
-                                        ?>
-                                        <x-Inputs.text-field :name="$field" :label="$label"
-                                            value="{{ $model->{$field} }}" 
-                                            placeholder="Enter {{ $label }}"  />
-                                    </div>
-                                </div>
-                            </div>
+                            <?php
+                            $field = 'type';
+                            $label = get_value_from_list($field_labels, $field, $field);
+                            ?>
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$type_list"
+                                :value="$model->{$field}" 
+                                layout="horizontal"
+                                class="select2" 
+                                mandatory="true" />
 
-                            <div class="row">
-                                <div class="col-lg-6">
-                                    <div class="form-group mb-3">
-                                        <?php
-                                        $field = 'state_id';
-                                        $label = get_value_from_list($field_labels, $field, $field);
-                                        ?>
-                                        <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
-                                            :list="$state_list" value="{{ $model->{$field} }}"
-                                            class="select2 cascade-drop-down" data-sr-cascade-target="#district_id"
-                                            data-sr-cascade-url="/district/ajax_get_list/{v}" mandatory="true" />
-                                    </div>
-                                </div>
-                                <div class="col-lg-6">
-                                    <div class="form-group mb-3">
-                                        <?php
-                                        $field = 'district_id';
-                                        $label = get_value_from_list($field_labels, $field, $field);
-                                        ?>
-                                        <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
-                                            :list="$empty_list" value="{{ $model->{$field} }}"
-                                            class="select2 cascade-drop-down" data-sr-cascade-target="#city_id"
-                                            data-sr-cascade-url="/city/ajax_get_list/0/{v}" mandatory="true" />
-                                    </div>
-                                </div>
-                                <div class="col-lg-6">
-                                    <div class="form-group mb-3">
-                                        <?php
-                                        $field = 'city_id';
-                                        $label = get_value_from_list($field_labels, $field, $field);
-                                        ?>
-                                        <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
-                                            :list="$empty_list" value="{{ $model->{$field} }}" class="select2"
-                                            mandatory="true" />
-                                    </div>
-                                </div>
-                            </div>
+                            <?php
+                            $field = 'name';
+                            $label = get_value_from_list($field_labels, $field, $field);
+                            ?>
+                            <x-Inputs.text-field :name="$field" :label="$label" :value="$model->{$field}"
+                                placeholder="Enter {{ $label }}"
+                                layout="horizontal"
+                                mandatory="true" />
+
+                            <?php
+                            $field = 'alias';
+                            $label = get_value_from_list($field_labels, $field, $field);
+                            ?>
+                            <x-Inputs.text-field :name="$field" :label="$label" :value="$model->{$field}"
+                                placeholder="Enter {{ $label }}" 
+                                layout="horizontal"/>
+
+                            <?php
+                            $field = 'mobile';
+                            $label = get_value_from_list($field_labels, $field, $field);
+                            ?>
+                            <x-Inputs.text-field :name="$field" :label="$label"
+                                :value="$model->{$field}" class="validate-mobile"
+                                placeholder="Enter {{ $label }}" 
+                                layout="horizontal"
+                                mandatory="true" />
+
+                            <?php
+                            $field = 'mobile2';
+                            $label = get_value_from_list($field_labels, $field, $field);
+                            ?>
+                            <x-Inputs.text-field :name="$field" :label="$label"
+                                :value="$model->{$field}" class="validate-mobile"
+                                placeholder="Enter {{ $label }}"
+                                layout="horizontal"
+                                />
+
+                            <?php
+                            $field = 'phone_no';
+                            $label = get_value_from_list($field_labels, $field, $field);
+                            ?>
+                            <x-Inputs.text-field :name="$field" :label="$label"
+                                :value="$model->{$field}" class="validate-phone"
+                                placeholder="Enter {{ $label }}"
+                                layout="horizontal" />
+
+                            <?php
+                            $field = 'company_name';
+                            $label = get_value_from_list($field_labels, $field, $field);
+                            ?>
+                            <x-Inputs.text-field :name="$field" :label="$label"
+                                :value="$model->{$field}"
+                                placeholder="Enter {{ $label }}" 
+                                layout="horizontal"/>
+
+                            <?php
+                            $field = 'gst_no';
+                            $label = get_value_from_list($field_labels, $field, $field);
+                            ?>
+                            <x-Inputs.text-field :name="$field" :label="$label"
+                                :value="$model->{$field}" 
+                                placeholder="Enter {{ $label }}" 
+                                layout="horizontal" />
+
+                            <?php
+                            $field = 'state_id';
+                            $label = get_value_from_list($field_labels, $field, $field);
+                            ?>
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
+                                :list="$state_list" :value="$model->{$field}"
+                                class="select2 cascade-drop-down"
+                                layout="horizontal"
+                                data-sr-cascade-target="#district_id"
+                                data-sr-cascade-url="/district/ajax_get_list/{v}" mandatory="true" />
+
+                            <?php
+                            $field = 'district_id';
+                            $label = get_value_from_list($field_labels, $field, $field);
+                            ?>
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
+                                :list="$empty_list" :value="$model->{$field}"
+                                class="select2 cascade-drop-down" 
+                                layout="horizontal"
+                                data-sr-cascade-target="#city_id"
+                                data-sr-cascade-url="/city/ajax_get_list/0/{v}" mandatory="true" />
+
+                            <?php
+                            $field = 'city_id';
+                            $label = get_value_from_list($field_labels, $field, $field);
+                            ?>
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
+                                :list="$empty_list" :value="$model->{$field}" 
+                                class="select2"
+                                layout="horizontal"
+                                mandatory="true" />
+
+                                
                             <div class="row mb-4">
                                 <div class="col-md-12">
                                     <h4 class="b-b-info">
@@ -453,7 +441,7 @@
                                     $label = get_value_from_list($field_labels, $field, $field);
                                     ?>
                                     <x-Inputs.text-area :id="$field" :name="$field" :label="$label"
-                                        rows="3" value="{{ $model->{$field} }}"
+                                        rows="3" :value="$model->{$field}"
                                         placeholder="Enter {{ $label }}" class="auto-suggesstion-list" />
                                     <div id="{{ $field . '-suggestion-box' }}" class="suggestion-box hidden"></div>
                                 </div>
@@ -476,7 +464,7 @@
                                         $label = get_value_from_list($field_labels, $field, $field);
                                         ?>
                                         <x-Inputs.text-field type="number" :name="$field" :label="$label"
-                                            value="{{ $model->{$field} }}" placeholder="Enter {{ $label }}"
+                                            :value="$model->{$field}" placeholder="Enter {{ $label }}"
                                             mandatory="true" autocomplete="off" />
                                     </div>
                                 </div>
@@ -487,7 +475,7 @@
                                         $label = get_value_from_list($field_labels, $field, $field);
                                         ?>
                                         <x-Inputs.checkbox :name="$field" :label="$label"
-                                            value="{{ $model->{$field} }}" />
+                                            :value="$model->{$field}" />
                                     </div>
                                 </div>
                             </div>
