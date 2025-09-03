@@ -67,7 +67,8 @@ class RecurringTaskController extends BackendController
             "assignToUser",
             "recurringTaskDate",
             "tags",
-            "user"
+            "user",
+            "documentFile"
         ]);
 
         if ($tag_conditions) {

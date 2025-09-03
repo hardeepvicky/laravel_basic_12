@@ -69,6 +69,7 @@ if ($autocomplete) {
     </div>
 
 @else
+
     @if (isset($label) && $label)
         <label class="form-label">
             {{ $label }}

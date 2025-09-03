@@ -75,7 +75,8 @@ class TaskController extends BackendController
             "department",
             "assignToUser",
             "tags",
-            "user"
+            "user",
+            "documentFile"
         ]);
 
         if ($tag_conditions) {

@@ -9,11 +9,17 @@
                 <thead>
                     <tr>
                         <th>
-                            <span class="btn btn-light text-dark border-primary clear_search_conditions mb-1">Clear</span>
-                            <?php
-                            $field = "name";
-                            ?>
-                            <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]"/>
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <span class="btn btn-light btn-sm text-dark border-primary clear_search_conditions mb-1">Clear</span>
+                                </div>
+                                <div class="col-sm-8">
+                                    <?php
+                                    $field = 'name';
+                                    ?>
+                                    <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]" class="form-control-sm"/>
+                                </div>
+                            </div>
                         </th>
                     </tr>
                     <tr class="border-bottom-primary">
@@ -42,7 +48,7 @@
                             <td>{{ if_date($record->start_date) }}</td>
                             <td>{{ if_date($record->end_date) }}</td>
                             <td class="text-center">
-                                <a class="x-editable" href="javascript:void();"id="list_display_order" data-type="number"
+                                <a class="x-editable" href="javascript:void();" id="list_display_order" data-type="number"
                                     data-name="list_display_order"
                                     data-pk="{{ $record->id }}"
                                     data-url="{{ route($routePrefix . '.ajax_update_field') }}"

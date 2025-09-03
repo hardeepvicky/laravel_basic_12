@@ -13,36 +13,42 @@ $false = false;
             <table class="table table-bordered summary-table summary_table_with_search">
                 <thead>
                     <tr>
-                        <th style="width:10%">
-                            <span class="btn btn-light text-dark border-primary clear_search_conditions mb-1">Clear</span>
-                            <?php
-                            $field = "assign_to_user_id";
-                            ?>
-                            <x-Inputs.drop-down :name="$field" :label="$false" :value="$search[$field]" :list="$user_list" class="select2"/>
+                        <th style="width:15%">
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <span class="btn btn-light btn-sm text-dark border-primary clear_search_conditions mb-1">Clear</span>
+                                </div>
+                                <div class="col-sm-8"> 
+                                    <?php
+                                    $field = "assign_to_user_id";
+                                    ?>
+                                    <x-Inputs.drop-down :name="$field" :label="$false" :value="$search[$field]" :list="$user_list" pleaseSelect="All" class="select2 form-select-sm"/>
+                                </div>
+                            </div>
                         </th>
                         <th style="width:10%">
                             <?php
                             $field = "name";
                             ?>
-                            <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]" />
+                            <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]" class="form-control-sm" />
                         </th>
                         <th style="width:10%">
                             <?php
                             $field = "dept_id";
                             ?>
-                            <x-Inputs.drop-down :name="$field" :label="$false" :value="$search[$field]" :list="$department_list"  class="select2"/>
+                            <x-Inputs.drop-down :name="$field" :label="$false" :value="$search[$field]" :list="$department_list" pleaseSelect="All" class="select2 form-select-sm" />
                         </th>
                         <th style="width:10%">
                             <?php
                             $field = "priority";
                             ?>
-                            <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]" />
+                            <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]" class="form-control-sm"/>
                         </th>
                         <th style="width:10%">
                             <?php
                             $field = "recurring_type";
                             ?>
-                            <x-Inputs.drop-down :name="$field" :label="$false" :value="$search[$field]" :list="$recurring_type_list"  class="select2"/>
+                            <x-Inputs.drop-down :name="$field" :label="$false" :value="$search[$field]" :list="$recurring_type_list"  pleaseSelect="All" class="select2 form-select-sm" />
                         </th>
                     </tr>
                     <tr class="border-bottom-primary">
@@ -200,6 +206,8 @@ $false = false;
                                         </ol>
                                     </div>
                                 </div>
+
+                                <x-Backend.document-files :records="$record->documentFile" />
                             </td>
                         </tr>
                     @endforeach

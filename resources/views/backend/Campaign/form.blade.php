@@ -19,84 +19,67 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-12 col-xxl-6">
-                            <div class="form-group mb-3">
                                 <?php
                                 $field = 'name';
                                 $label = get_value_from_list($field_labels, $field, $field);
                                 ?>
                                 <x-Inputs.text-field :name="$field" :label="$label" value="{{ $model->{$field} }}"
-                                    placeholder="Enter {{ $label }}" mandatory="true" />
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group mb-3">
-                                        <?php
-                                        $field = 'start_date';
-                                        $label = get_value_from_list($field_labels, $field, $field);
-                                        ?>
-                                        <x-Inputs.text-field :name="$field" :label="$label"
-                                            value="{{ $model->{$field} }}" class="date-picker"
-                                            placeholder="Enter {{ $label }}" mandatory="true" />
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group mb-3">
-                                        <?php
-                                        $field = 'end_date';
-                                        $label = get_value_from_list($field_labels, $field, $field);
-                                        ?>
-                                        <x-Inputs.text-field :name="$field" :label="$label"
-                                            value="{{ $model->{$field} }}" class="date-picker"
-                                            placeholder="Enter {{ $label }}" />
-                                    </div>
-                                </div>
-                                
-                            </div>
-
-                            <div class="form-group mb-3">
-                                <div class="textarea-wrapper">
-                                    <?php
-                                    $field = 'description';
-                                    $label = get_value_from_list($field_labels, $field, $field);
-                                    ?>
-                                    <x-Inputs.text-area :id="$field" :name="$field" :label="$label"
-                                        rows="3" value="{{ $model->{$field} }}"
-                                        placeholder="Enter {{ $label }}" class="auto-suggesstion-list" />
-                                    <div id="{{ $field . '-suggestion-box' }}" class="suggestion-box hidden"></div>
-                                </div>
-                            </div>
-                            <div class="form-group mb-3">
+                                    placeholder="Enter {{ $label }}" layout="horizontal" mandatory="true" />
+                                    
                                 <?php
-                                $field = 'campaignFile';
+                                $field = 'start_date';
                                 $label = get_value_from_list($field_labels, $field, $field);
-                                $value = implode(',', $model->campaignFile?->pluck('document_file_id')->toArray());
                                 ?>
-                                <x-Inputs.text-field :id="$field" :name="$field" :label="$label"
-                                    :value="$value" multiple="multiple" />
-                                <span id="files-choose" class="btn btn-secondary">Choose Files</span>
-                            </div>
+                                <x-Inputs.text-field :name="$field" :label="$label"
+                                    value="{{ $model->{$field} }}" class="date-picker"
+                                    placeholder="Enter {{ $label }}"  layout="horizontal" mandatory="true" />
+
+                                <?php
+                                $field = 'end_date';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <x-Inputs.text-field :name="$field" :label="$label"
+                                    value="{{ $model->{$field} }}" class="date-picker" layout="horizontal"
+                                    placeholder="Enter {{ $label }}" />
+
+                                <?php
+                                $field = 'description';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <x-Inputs.text-area :id="$field" :name="$field" :label="$label"
+                                    rows="3" value="{{ $model->{$field} }}"
+                                    placeholder="Enter {{ $label }}" class="auto-suggesstion-list"  layout="horizontal" />
 
                             <div class="row">
-                                <div class="col-xl-6">
-                                    <div class="form-group mb-3">
-                                        <?php
-                                        $field = 'list_display_order';
-                                        $label = get_value_from_list($field_labels, $field, $field);
-                                        ?>
-                                        <x-Inputs.text-field type="number" :name="$field" :label="$label"
-                                            value="{{ $model->{$field} }}" placeholder="Enter {{ $label }}"
-                                            mandatory="true" autocomplete="off" />
-                                    </div>
+                                <div class="col-sm-3">
                                 </div>
-                                <div class="col-xl-6" style="padding-top: 30px">
-                                    <div class="form-group mb-3">
-                                        <?php
-                                        $field = 'is_active';
-                                        $label = get_value_from_list($field_labels, $field, $field);
-                                        ?>
-                                        <x-Inputs.checkbox :name="$field" :label="$label"
-                                            value="{{ $model->{$field} }}" />
-                                    </div>
+                                <div class="col-sm-9">
+                                    <?php
+                                    $field = 'campaignFile';
+                                    $label = get_value_from_list($field_labels, $field, $field);
+                                    $value = implode(',', $model->campaignFile?->pluck('document_file_id')->toArray());
+                                    ?>
+                                    <x-Inputs.text-field :id="$field" :name="$field" :label="$label"
+                                        :value="$value" multiple="multiple" />
+                                    <span id="files-choose" class="btn btn-secondary">Choose Files</span>
+                                </div>
+                            </div>
+
+                            <?php
+                            $field = 'list_display_order';
+                            $label = get_value_from_list($field_labels, $field, $field);
+                            ?>
+                            <x-Inputs.text-field type="number" :name="$field" :label="$label"
+                                value="{{ $model->{$field} }}" placeholder="Enter {{ $label }}"
+                                    layout="horizontal"
+                                mandatory="true" autocomplete="off" />
+
+
+                            <div class="row">
+                                <div class="col-sm-3">
+                                </div>
+                                <div class="col-sm-9">
+                                    <x-Inputs.checkbox name="is_active" label="Active" :value="$model->is_active" />
                                 </div>
                             </div>
                         </div>
@@ -111,8 +94,6 @@
 
     <script>
         $(function() {
-            suggestion_list($("#description"), $("#description-suggestion-box"), [], "/tags/ajax_get_list");
-
             $("#campaignFile").browseGallery({
                 opener: "#files-choose"
             });
