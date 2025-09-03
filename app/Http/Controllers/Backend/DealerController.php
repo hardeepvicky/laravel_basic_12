@@ -14,11 +14,15 @@ use App\Models\City;
 use App\Models\Country;
 use App\Models\Dealer;
 use App\Models\DealerAddress;
+use App\Models\DealerHistory;
 use App\Models\DealerTerm;
 use App\Models\District;
 use App\Models\DocumentFile;
+use App\Models\DropDownValue;
 use App\Models\FieldSetting;
 use App\Models\ImportLog;
+use App\Models\Lead;
+use App\Models\LeadHistory;
 use App\Models\State;
 use App\Models\Type;
 use App\Models\User;
@@ -119,9 +123,9 @@ class DealerController extends BackendController
             $state_conditions[] = ["id", $condition_list['state_id']];
             $district_conditions[] = ["state_id", $condition_list['state_id']];
         }
-        
+
         $district_cities = City::getWithDistrict($state_conditions, $district_conditions, [["is_active", 1]]);
-    
+
         $district_city_collection = collect($district_cities);
 
         $district_city_list = $district_city_collection->pluck('name', 'id')->toArray();
@@ -133,19 +137,49 @@ class DealerController extends BackendController
 
     protected function beforeViewRender()
     {
+        if (is_null($this->model)) {
+            $this->model = new $this->modelClass();
+        }
+
         $type_list = Dealer::getTypeList();
 
         $address_type_list = DealerAddress::getTypeList();
 
         $state_list = State::getIndianList();
 
+        $type_conditions = [
+            'type' => Type::getType(new Lead(), "status_type")
+        ];
+
+        if ($this->model->status_type)
+        {
+            $type_conditions['or_id'] = Type::getIdFromCode("status_type", $this->model->status_type);
+        }
+
+        $status_type_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
+
+        $type_conditions = [
+            'type' => Type::getType(new LeadHistory(), "action_type")
+        ];
+
+        $action_type_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
+
+        $history_response_list = DropDownValue::getList("id", "display_name", ["type" =>  DropDownValue::LEAD_HISTORY_RESPONSE], "list_display_order");
+
+        $user_list = User::getList("id", "display_name", ["type" => User::TYPE_INTERNAL], "person_name");
+
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
         $term_field_labels = FieldSetting::getDynamicFields(DealerTerm::class);
 
         $address_field_labels = FieldSetting::getDynamicFields(DealerAddress::class);
-        
-        $this->setForView(compact("type_list", "address_type_list", "state_list", "field_labels", "term_field_labels", "address_field_labels"));
+
+        $history_field_labels = FieldSetting::getDynamicFields(DealerHistory::class);
+
+        $this->setForView(compact("type_list", "address_type_list", "state_list",
+            "status_type_list", "action_type_list", "history_response_list", "user_list",
+            "field_labels", "term_field_labels", "address_field_labels", "history_field_labels"
+        ));
 
         return parent::beforeViewRender();
     }
@@ -280,7 +314,7 @@ class DealerController extends BackendController
                 if ($validator->fails())
                 {
                     foreach($validator->errors()->all() as $error_msg)
-                    {               
+                    {
                         LaravelExtend::addError("", $error_msg, "Terms");
                     }
                     continue;
@@ -354,7 +388,7 @@ class DealerController extends BackendController
                 if ($validator->fails())
                 {
                     foreach($validator->errors()->all() as $error_msg)
-                    {               
+                    {
                         LaravelExtend::addError("", $error_msg, "Addresses");
                     }
                     continue;
@@ -562,7 +596,7 @@ class DealerController extends BackendController
 
             $rules = [
                 "file_csv" => [
-                    "required", 
+                    "required",
                     "file",
                     "max:5200",
                     "mimes:csv"
@@ -588,7 +622,7 @@ class DealerController extends BackendController
                 if (!$importUtility->checkHeaders())
                 {
                     $this->setForView(array('errors' => $importUtility->errors));
-                    
+
                     foreach($importUtility->errors as $error_msg)
                     {
                         LaravelExtend::addError("", $error_msg);
@@ -716,9 +750,9 @@ class DealerController extends BackendController
                         LaravelExtend::addError($header_flip['state_id'], $record['state_id'] . " is not found", "Row #" . ($i + 2));
                         $validate = false;
                     }
-                    
+
                     if ($validate)
-                    {   
+                    {
                         $model = new $this->modelClass();
 
                         $record['created_by'] = $record['updated_by'] = LaravelExtend::getAuthUserId();
@@ -797,15 +831,15 @@ class DealerController extends BackendController
 
                     if (LaravelExtend::$errors)
                     {
-                        $importLogModel->errors = LaravelExtend::$errors;                    
+                        $importLogModel->errors = LaravelExtend::$errors;
                     }
 
                     $importLogModel->save();
                 }
-                
+
                 return back()->With("fail", $msg)->with("custom_errors", LaravelExtend::$errors);
             }
-            
+
             catch(\Exception $ex)
             {
                 $msg = get_exception_display_message($ex);
@@ -816,9 +850,9 @@ class DealerController extends BackendController
                     $importLogModel->have_error = 1;
                     $importLogModel->save();
                 }
-                
-                Session::flash('fail', $msg);  
-                
+
+                Session::flash('fail', $msg);
+
                 return back()->With("fail", $msg);
             }
         }
@@ -900,5 +934,362 @@ class DealerController extends BackendController
         $csvUtility->write($csv_records);
 
         download_start($file, "application/octet-stream");
+    }
+
+    public function history($dealer_id, Request $request)
+    {
+        $record = $this->modelClass::with([
+            "address" => function($q){
+                $q->orderBy("list_display_order");
+            },
+            "history" => function($q){
+                $q->orderBy("id", "DESC");
+            },
+            "dealerFile",
+            "documentFile"
+        ])->findOrFail($dealer_id);
+
+        $record->convertTimeZoneForDisplay();
+
+        $form = [
+            'url' => route($this->routePrefix . '.history_store', $dealer_id),
+            'method' => 'POST',
+        ];
+
+        $histories = $record->history;
+        $addresses = $record->address?->toArray() ?? [];
+
+        $model = new DealerHistory();
+
+        $this->setForView(compact("record", "form", "model", "histories", "addresses"));
+
+        return $this->view(__FUNCTION__);
+    }
+
+    public function history_store($dealer_id, Request $request)
+    {
+        $dealer = $this->modelClass::findOrFail($dealer_id);
+
+        $rules = [
+            "action_type" => ["required"],
+            "status_type" => ["required"],
+            "action" => "",
+            "response_type_id" => "",
+            "response" => "",
+            "remarks" => "",
+            "next_followup_date_time" => "",
+        ];
+
+        switch($request->input("action_type"))
+        {
+            case DealerHistory::ACTION_TYPE_CALL:
+                $rules['action'] = ["required"];
+                $rules['response_type_id'] = ["required"];
+                break;
+            case DealerHistory::ACTION_TYPE_SEND_SMS:
+            case DealerHistory::ACTION_TYPE_SEND_EMAIL:
+            case DealerHistory::ACTION_TYPE_SEND_WHATSAPP:
+                $rules['action'] = ["required"];
+                break;
+        }
+
+        switch($request->input("status_type"))
+        {
+            case Lead::STATUS_COLD:
+            case Lead::STATUS_HOT:
+            case Lead::STATUS_WARM:
+                $rules['next_followup_date_time'] = ["required"];
+                break;
+        }
+
+        $validatedData = $request->validate($rules);
+
+        DB::beginTransaction();
+
+        try {
+            // d($validatedData, true);
+
+            $dealer->canChangeHistory();
+
+            $validatedData['dealer_id'] = $dealer_id;
+
+            $model = new DealerHistory();
+
+            $validatedData = $model->convertTimeZoneBeforeQueryToDatabase($validatedData);
+
+            $validatedData['assign_to_user_id'] = $dealer->assign_to_user_id;
+
+            $model = DealerHistory::create($validatedData);
+
+            if ($validatedData['status_type'] != $dealer->status_type)
+            {
+                $dealer->changeStatus($validatedData['status_type']);
+            }
+
+            if ($validatedData['response_type_id'])
+            {
+                $dealer->response_type_id = $validatedData['response_type_id'];
+                $dealer->save();
+            }
+
+            if ($validatedData['remarks'])
+            {
+                $dealer->remarks = $validatedData['remarks'];
+                $dealer->save();
+            }
+
+            if ($validatedData['next_followup_date_time'])
+            {
+                $dealer->changeNextFollowupDateTime($validatedData['next_followup_date_time']);
+            }
+
+            if ($validatedData['action_type'] == DealerHistory::ACTION_TYPE_CALL && $dealer->assignTo?->name)
+            {
+                $voip_no = $dealer->assignTo->name;
+                if (!is_numeric($voip_no))
+                {
+                    $msg = "User " . $dealer->assignTo->getDisplayName() . " has name : $voip_no, but only numeric is used for voip call";
+                    throw new UserException($msg, UserException::ERROR_USER_DATA_WRONG);
+                }
+
+                $url = config("app.ASTERISK_SERVER_URL") . "?voip_no=" . $voip_no;
+
+                $storage_path = Dealer::getStoragePath() . "asterisk/" . $voip_no;
+
+                $disk = Dealer::getStorageDisk();
+
+                $full_path = $disk->path($storage_path);
+
+                $current_dt = DateUtility::getDateObj(null);
+                $current_dt->setTimezone(DateUtility::$login_user_time_zone);
+                $datetime = DateUtility::getDate($current_dt, DateUtility::DATETIME_OUT_FORMAT_FILE);
+
+                get_and_save_file_from_url($url, $full_path . "/" . $datetime . ".wav");
+
+                $model->recording_file = $storage_path . "/" . $datetime . ".wav";
+                $model->save();
+            }
+
+            if (LaravelExtend::$errors) {
+                throw new UserException("There are some errors", UserException::ERROR_USER_DATA_WRONG);
+            }
+
+            DB::commit();
+
+            $request = request();
+
+            if ($request->ajax()) {
+                return $this->responseJson([
+                    'status' => 1,
+                ]);
+            }
+
+            $this->saveSqlLog();
+
+            return back()->with('success', "History Saved successfully");
+        }
+        catch (UserException $ex) {
+            DB::rollBack();
+
+            $request = request();
+
+            if ($request->ajax()) {
+                return $this->responseJson([
+                    'status' => 0,
+                    'msg' => $ex->getMessage(),
+                    "custom_errors" => LaravelExtend::$errors
+                ]);
+            }
+
+            $this->saveSqlLog();
+
+            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", LaravelExtend::$errors);
+        }
+        catch (Exception $ex) {
+            DB::rollBack();
+
+            $request = request();
+
+            if ($request->ajax()) {
+                return $this->responseJson([
+                    'status' => 0,
+                    'msg' => get_exception_display_message($ex),
+                    "custom_errors" => LaravelExtend::$errors
+                ]);
+            }
+
+            $this->saveSqlLog();
+
+            return back()->withInput()->with('fail', get_exception_display_message($ex))->with("custom_errors", LaravelExtend::$errors);
+        }
+    }
+
+    
+    public function change_files($lead_id, Request $request)
+    {
+        $lead = $this->modelClass::findOrFail($lead_id);
+
+        $rules = [
+            "dealerFile" => ["required"],
+        ];
+
+        $validatedData = $request->validate($rules);
+
+        DB::beginTransaction();
+
+        try {
+
+            if (isset($validatedData['dealerFile'])) {
+
+                $ids = explode(",", $validatedData['dealerFile']);
+
+                $document_files = DocumentFile::find($ids);
+
+                $lead->documentFile()->sync($document_files);
+            }
+
+            if (LaravelExtend::$errors) {
+                throw new Exception("There are some errors");
+            }
+
+            DB::commit();
+
+            $request = request();
+
+            if ($request->ajax()) {
+                return $this->responseJson([
+                    'status' => 1,
+                ]);
+            }
+
+            $this->saveSqlLog();
+
+            return back()->with('success', "Files Saved successfully");
+        } 
+        catch (UserException $ex) {
+            DB::rollBack();
+
+            $request = request();
+
+            if ($request->ajax()) {
+                return $this->responseJson([
+                    'status' => 0,
+                    'msg' => $ex->getMessage(),
+                    "custom_errors" => LaravelExtend::$errors
+                ]);
+            }
+
+            $this->saveSqlLog();
+
+            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", LaravelExtend::$errors);
+        }
+        catch (Exception $ex) {
+            DB::rollBack();
+
+            $request = request();
+
+            if ($request->ajax()) {
+                return $this->responseJson([
+                    'status' => 0,
+                    'msg' => get_exception_display_message($ex),
+                    "custom_errors" => LaravelExtend::$errors
+                ]);
+            }
+
+            $this->saveSqlLog();
+
+            return back()->withInput()->with('fail', get_exception_display_message($ex))->with("custom_errors", LaravelExtend::$errors);
+        }
+    }
+
+    
+    public function transfer($dealer_id, Request $request)
+    {
+        $dealer = $this->modelClass::findOrFail($dealer_id);
+
+        $rules = [
+            "action_type" => ["required"],
+            "assign_to_user_id" => ["required"],
+        ];
+
+        $validatedData = $request->validate($rules);
+
+        DB::beginTransaction();
+
+        try {
+            // d($validatedData, true);
+
+            if ($dealer->status_type == Lead::STATUS_DEAD)
+            {
+                throw new UserException("Dealer is dead", UserException::ERROR_USER_ACTION_RESTRICT);
+            }
+
+            if ($dealer->status_type == Lead::STATUS_FAKE)
+            {
+                throw new UserException("Dealer is Fake", UserException::ERROR_USER_ACTION_RESTRICT);
+            }
+
+            if ($validatedData['assign_to_user_id'] == $dealer->assign_to_user_id)
+            {
+                throw new UserException("Dealer is already assigned to this user", UserException::ERROR_USER_ACTION_RESTRICT);
+            }
+            else
+            {
+                $dealer->changeAssignTo($validatedData);
+            }
+
+            if (LaravelExtend::$errors) {
+                throw new UserException("There are some errors", UserException::ERROR_USER_DATA_WRONG);
+            }
+
+            DB::commit();
+
+            $request = request();
+
+            if ($request->ajax()) {
+                return $this->responseJson([
+                    'status' => 1,
+                ]);
+            }
+
+
+            $this->saveSqlLog();
+
+            return back()->with('success', "History Saved successfully");
+        } 
+        catch (UserException $ex) {
+            DB::rollBack();
+
+            $request = request();
+
+            if ($request->ajax()) {
+                return $this->responseJson([
+                    'status' => 0,
+                    'msg' => $ex->getMessage(),
+                    "custom_errors" => LaravelExtend::$errors
+                ]);
+            }
+
+            $this->saveSqlLog();
+
+            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", LaravelExtend::$errors);
+        }
+        catch (Exception $ex) {
+            DB::rollBack();
+
+            $this->saveSqlLog();
+
+            $request = request();
+
+            if ($request->ajax()) {
+                return $this->responseJson([
+                    'status' => 0,
+                    'msg' => get_exception_display_message($ex),
+                    "custom_errors" => LaravelExtend::$errors
+                ]);
+            }
+
+            return back()->withInput()->with('fail', get_exception_display_message($ex))->with("custom_errors", LaravelExtend::$errors);
+        }
     }
 }

@@ -50,16 +50,19 @@
                                     rows="3" value="{{ $model->{$field} }}"
                                     placeholder="Enter {{ $label }}" class="auto-suggesstion-list"  layout="horizontal" />
 
-                            <div class="row">
-                                <div class="col-sm-3">
-                                </div>
-                                <div class="col-sm-9">
-                                    <?php
+                            <div class="row mb-3">
+                                <?php
                                     $field = 'campaignFile';
                                     $label = get_value_from_list($field_labels, $field, $field);
                                     $value = implode(',', $model->campaignFile?->pluck('document_file_id')->toArray());
-                                    ?>
-                                    <x-Inputs.text-field :id="$field" :name="$field" :label="$label"
+                                ?>
+                                <div class="col-sm-3">
+                                    <label class="form-label">
+                                        {{ $label }}
+                                    </label>
+                                </div>
+                                <div class="col-sm-9">
+                                    <x-Inputs.text-field :id="$field" :name="$field" :label="$false"
                                         :value="$value" multiple="multiple" />
                                     <span id="files-choose" class="btn btn-secondary">Choose Files</span>
                                 </div>
