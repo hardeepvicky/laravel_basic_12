@@ -65,7 +65,7 @@
             </tr>
             <tr class="border-bottom-primary">
                 <th>
-                    @if($multiple)
+                    @if(isset($multiple) && $multiple)
                     <label class="form-check custom-checkbox-group">
                         <input type="checkbox" class="form-check-input chk-select-all" data-sr-chkselect-children="input.contact">
                     </label>
