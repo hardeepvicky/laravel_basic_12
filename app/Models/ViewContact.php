@@ -32,6 +32,11 @@ class ViewContact extends BaseModel
         return ucfirst($this->type) . " >> " . $this->name . " >> " . $this->city_name;
     }
 
+    public function state()
+    {
+        return $this->belongsTo(State::class, "state_id");
+    }
+
     public static function fetchList(Builder $builder, String $key_field, String $value_field)
     {
         $model = new static();

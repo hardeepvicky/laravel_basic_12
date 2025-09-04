@@ -122,6 +122,9 @@ class ContactController extends BackendController
 
         $builder = ViewContact::query();
         $builder->where($conditions);
+        $builder->with([
+            "state"
+        ]);
 
 
         $my_country = Country::getMyCountry();
