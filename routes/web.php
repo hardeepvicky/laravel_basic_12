@@ -777,6 +777,18 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
         $name = "ajax_update_field";
         Route::post($name, [$controllerClass, $name])->name($name);
 
+        $name = "history";
+        Route::get($name . "/{party_id}", [$controllerClass, $name])->name($name);
+
+        $name = "history_store";
+        Route::post($name . "/{party_id}", [$controllerClass, $name])->name($name);
+
+        $name = "transfer";
+        Route::post($name . "/{party_id}", [$controllerClass, $name])->name($name);
+
+        $name = "change_files";
+        Route::post($name . "/{party_id}", [$controllerClass, $name])->name($name);
+
         $route_prefix = "export";
         Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
             $name = "csv";

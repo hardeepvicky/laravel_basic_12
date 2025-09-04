@@ -96,7 +96,7 @@
                     @foreach ($records as $record)
                         <tr>
                             <th scope="row">
-                                <x-Backend.celec-summary-table-first-column :record="$record" :routePrefix="$routePrefix" buttons="edit,copy,delete,tr_details">
+                                <x-Backend.celec-summary-table-first-column :record="$record" :routePrefix="$routePrefix" buttons="history,edit,copy,delete,tr_details">
                                     <div class="label">
                                         {{ $record->id . " | " . $record->name }}
                                     </div>

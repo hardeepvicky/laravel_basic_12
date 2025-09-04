@@ -815,7 +815,7 @@ class LeadController extends BackendController
 
     public function history_store($lead_id, Request $request)
     {
-        $lead = $this->modelClass::findOrFail($lead_id);
+        $lead = $this->modelClass::with(["customer"])->findOrFail($lead_id);
 
         $rules = [
             "entry_by" => ["required"],
@@ -875,15 +875,27 @@ class LeadController extends BackendController
 
             $model = LeadHistory::create($validatedData);
 
-            if ($validatedData['status_type'] != $lead->status_type)
-            {
-                $lead->changeStatus($validatedData['status_type']);
-            }
+            $lead->action_type = $validatedData['action_type'];
+            $lead->remarks = $validatedData['remarks'];
 
             if ($validatedData['response_type_id'])
             {
                 $lead->response_type_id = $validatedData['response_type_id'];
-                $lead->save();
+            }
+
+            $lead->save();
+
+            if (isset($lead->customer->id))
+            {
+                $lead->customer->action_type = $lead->action_type;
+                $lead->customer->remarks = $lead->remarks;
+                $lead->customer->response_type_id = $lead->response_type_id;
+                $lead->customer->save();
+            }
+
+            if ($validatedData['status_type'] != $lead->status_type)
+            {
+                $lead->changeStatus($validatedData['status_type']);
             }
 
             if ($validatedData['next_meeting_date_time'])

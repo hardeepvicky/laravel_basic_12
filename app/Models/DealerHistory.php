@@ -36,7 +36,7 @@ class DealerHistory extends BaseModel
         {
             case "dealer_id":
                 $ret_array = [
-                    $field => $this->lead?->getDisplayName()
+                    $field => $this->dealer?->getDisplayName()
                 ];
                 break;
 

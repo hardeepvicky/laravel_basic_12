@@ -101,6 +101,16 @@ class Party extends BaseModel
         return $this->belongsTo(City::class);
     }
 
+    public function history()
+    {
+        return $this->hasMany(PartyHistory::class, 'party_id');
+    }
+
+    public function assignTo()
+    {
+        return $this->belongsTo(User::class, "assign_to_user_id");
+    }
+
     public function getUniqueValidationRules(Request $request)
     {
         $field_rules = [
@@ -207,8 +217,8 @@ class Party extends BaseModel
             $this->assign_to_user_id = $data['assign_to_user_id'];
             $this->save();
 
-            $data['dealer_id'] = $this->id;
-            LeadHistory::create($data);
+            $data['party_id'] = $this->id;
+            PartyHistory::create($data);
 
             $notification_data = [
                 'from_user_id' => LaravelExtend::getAuthUserId(),

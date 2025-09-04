@@ -1021,21 +1021,19 @@ class DealerController extends BackendController
 
             $model = DealerHistory::create($validatedData);
 
-            if ($validatedData['status_type'] != $dealer->status_type)
-            {
-                $dealer->changeStatus($validatedData['status_type']);
-            }
+            $dealer->action_type = $validatedData['action_type'];
+            $dealer->remarks = $validatedData['remarks'];
 
             if ($validatedData['response_type_id'])
             {
                 $dealer->response_type_id = $validatedData['response_type_id'];
-                $dealer->save();
             }
 
-            if ($validatedData['remarks'])
+            $dealer->save();
+
+            if ($validatedData['status_type'] != $dealer->status_type)
             {
-                $dealer->remarks = $validatedData['remarks'];
-                $dealer->save();
+                $dealer->changeStatus($validatedData['status_type']);
             }
 
             if ($validatedData['next_followup_date_time'])

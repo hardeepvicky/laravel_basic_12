@@ -104,6 +104,10 @@
                             {{ get_value_from_list($field_labels, 'next_meeting_date_time', 'next_meeting_date_time') }} :
                             <x-Backend.celec-date-time :value="$record->next_meeting_date_time"/>
                         </label>
+                        <label class="info">
+                            {{ get_value_from_list($field_labels, 'remarks', 'remarks') }} :
+                            <span class="more-less" data-max="100">{!! $record->remarks !!}</span>
+                        </label>
                     </div>
                     <div class="col-md-6 col-xxl-3">
                         <label class="info">

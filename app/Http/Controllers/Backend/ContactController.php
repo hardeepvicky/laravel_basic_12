@@ -6,6 +6,7 @@ use App\Exceptions\UserException;
 use App\Helpers\ArrayHelper;
 use App\Models\City;
 use App\Models\Country;
+use App\Models\DropDownValue;
 use App\Models\FieldSetting;
 use App\Models\State;
 use App\Models\ViewContact;
@@ -27,6 +28,8 @@ class ContactController extends BackendController
         $builder = $this->_getBuildeForIndex($cache_key_prefix);
 
         $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
+
+        // d($records->toArray(), true);
 
         $this->setForView(compact("records"));
 
@@ -102,8 +105,6 @@ class ContactController extends BackendController
         $this->paginationLimit = request('pagination_limit', 100);
 
         $cache_key_prefix = Route::currentRouteName();
-
-        
 
         $conditions = $this->getConditions($cache_key_prefix, [
             ["field" => "type", "type" => "string_equal"],
@@ -217,9 +218,11 @@ class ContactController extends BackendController
 
         $state_list = State::getIndianList();
 
+        $response_type_list = DropDownValue::getList("id", "display_name", ["type" =>  DropDownValue::LEAD_HISTORY_RESPONSE], "list_display_order");
+
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
-        $this->setForView(compact("type_list", "state_list", "field_labels"));
+        $this->setForView(compact("type_list", "state_list", "response_type_list", "field_labels"));
 
         return parent::beforeViewRender();
     }

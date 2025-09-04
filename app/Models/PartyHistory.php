@@ -18,9 +18,9 @@ class PartyHistory extends BaseModel
     const ACTION_TYPE_SEND_EMAIL = "SEND_EMAIL";
     const ACTION_TYPE_CHANGE_STATUS = "CHANGE_STATUS";
 
-    public function dealer()
+    public function party()
     {
-        return $this->belongsTo(Dealer::class);
+        return $this->belongsTo(Party::class);
     }
 
     public function assignTo()
@@ -34,9 +34,9 @@ class PartyHistory extends BaseModel
 
         switch($field)
         {
-            case "dealer_id":
+            case "party_id":
                 $ret_array = [
-                    $field => $this->lead?->getDisplayName()
+                    $field => $this->party?->getDisplayName()
                 ];
                 break;
 

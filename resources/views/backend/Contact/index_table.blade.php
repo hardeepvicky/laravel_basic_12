@@ -64,6 +64,10 @@
                 <th><?= sortable_anchor('mobile', 'Mobile') ?></th>
                 <th><?= sortable_anchor('mobile2', 'Mobile2') ?></th>
                 <th><?= sortable_anchor('email', 'Email') ?></th>
+                <th><?= sortable_anchor('status_type', 'Status') ?></th>
+                <th><?= sortable_anchor('action_type', 'Action Type') ?></th>
+                <th><?= sortable_anchor('response_type_id', 'Response Type') ?></th>
+                <th><?= sortable_anchor('remarks', 'Remarks') ?></th>
             </tr>
         </thead>
         <tbody>
@@ -100,6 +104,10 @@
                     <td>{{ $record->mobile }}</td>
                     <td>{{ $record->mobile2 }}</td>
                     <td>{{ $record->email }}</td>
+                    <td>{{ $record->status_type }}</td>
+                    <td>{{ $record->action_type }}</td>
+                    <td>{{ get_value_from_list($response_type_list, $record->response_type_id) }}</td>
+                    <td>{{ $record->remarks }}</td>
                 </tr>
             @endforeach
         </tbody>

@@ -332,12 +332,24 @@ class Lead extends BaseModel
 
         $this->status_type = $status;
         $this->save();
+
+        if (isset($this->customer->id))
+        {
+            $this->customer->status_type = $status;
+            $this->customer->save();
+        }
     }
 
     public function changeNextFollowupDateTime($datetime)
     {
         $this->next_meeting_date_time = $datetime;
         $this->save();
+
+        if (isset($this->customer->id))
+        {
+            $this->customer->next_meeting_date_time = $datetime;
+            $this->customer->save();
+        }
     }
 
     public function canChangeHistory()
