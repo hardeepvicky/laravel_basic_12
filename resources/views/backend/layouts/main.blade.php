@@ -124,6 +124,7 @@ if (!isset($partial_path)) {
         <script src="{{ get_asset_url('assets/js/clipboard/clipboard.min.js') }}"></script>
         <script src="{{ get_asset_url('assets/js/theme-customizer/customizer.js') }}"></script>
         <script src="{{ get_asset_url('assets/js/cleave/cleave.min.js') }}"></script>
+        <script src="{{ get_asset_url('assets/js/tooltip.js') }}"></script>
 
         <script src="{{ get_asset_url('assets/libs/Croppie-2.6.4/croppie.min.js') }}"></script>
         <script src="{{ get_asset_url('assets/libs/fancybox/dist/jquery.fancybox.min.js') }}"></script>

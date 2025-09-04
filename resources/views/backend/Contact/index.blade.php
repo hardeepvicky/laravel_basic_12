@@ -62,6 +62,11 @@
                     $field = "next_followup_date_time";
                 ?>
                 <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
+                
+                <?php 
+                    $field = "product_id";
+                ?>
+                <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
             </form>
         </div>
         <div class="card-body">

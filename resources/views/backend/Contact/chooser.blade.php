@@ -67,7 +67,7 @@
         </div>
         <div class="card-body file-manager">
             <div id="{{ $index_table_id }}" class="index_table">
-                @include($viewPrefix . '.chooser_records')
+                @include($viewPrefix . '.index_table')
             </div>
         </div>
     </div>

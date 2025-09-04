@@ -37,6 +37,11 @@ class ViewContact extends BaseModel
         return $this->belongsTo(State::class, "state_id");
     }
 
+    public function product()
+    {
+        return $this->belongsToMany(Product::class, LeadProduct::class, "lead_id");
+    }
+
     public static function fetchList(Builder $builder, String $key_field, String $value_field)
     {
         $model = new static();

@@ -42,12 +42,6 @@
                     ?>
                     <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]" class="form-control-sm" />
                 </th>
-                <th style="width:8%">
-                    <?php
-                    $field = 'mobile2';
-                    ?>
-                    <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]" class="form-control-sm" />
-                </th>
                 <th style="width:15%">
                     <?php
                     $field = 'state_id';
@@ -64,24 +58,31 @@
                 </th>
                 <th style="width:10%">
                     <?php
-                    $field = 'email';
+                    $field = 'product_id';
                     ?>
-                    <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]" class="form-control-sm" />
+                    <x-Inputs.drop-down :name="$field" :label="$false" :value="$search[$field]" :list="$product_list" pleaseSelect="All" class="select2 form-select-sm" />
                 </th>
             </tr>
             <tr class="border-bottom-primary">
-                <th>Actions</th>
+                <th>
+                    @if($multiple)
+                    <label class="form-check custom-checkbox-group">
+                        <input type="checkbox" class="form-check-input chk-select-all" data-sr-chkselect-children="input.contact">
+                    </label>
+                    @endif
+                    <?= sortable_anchor('name', 'Name') ?>
+                </th>
                 <th><?= sortable_anchor('type', 'Type') ?></th>
                 <th><?= sortable_anchor('last_followup_date_time', 'Last') ?></th>
                 <th><?= sortable_anchor('next_followup_date_time', 'Next') ?></th>
                 <th><?= sortable_anchor('mobile', 'Mobile') ?></th>
-                <th><?= sortable_anchor('mobile2', 'Mobile2') ?></th>
                 <th>Location</th>
-                <th><?= sortable_anchor('email', 'Email') ?></th>
+                <th>Product</th>
                 <th><?= sortable_anchor('status_type', 'Status') ?></th>
                 <th><?= sortable_anchor('action_type', 'Action Type') ?></th>
                 <th><?= sortable_anchor('response_type_id', 'Response Type') ?></th>
                 <th><?= sortable_anchor('remarks', 'Remarks') ?></th>
+                <th>Created By</th>
             </tr>
         </thead>
         <tbody>
@@ -89,9 +90,10 @@
                 <tr>
                     <td>
                         <div class="celec_info">
-                            <div class="label">
-                                {!! $record->name !!}
-                            </div>
+                            <label class="form-check custom-checkbox-group">
+                                <input type="checkbox" class="form-check-input contact" data-type="{{ $record->type }}" value={{ $record->id }}>
+                                <span>{{ $record->name }}</span>
+                            </label>
 
                             <div class="divider"></div>
                             <div class="p-1">
@@ -122,15 +124,30 @@
                     <td><x-Backend.celec-date-time :value="$record->last_followup_date_time"/></td>
                     <td><x-Backend.celec-date-time :value="$record->next_followup_date_time"/></td>
                     <td>{{ $record->mobile }}</td>
-                    <td>{{ $record->mobile2 }}</td>
                     <td>
                         {{ $record->state->getShortName() }} >> {{ $record->district_name }} >> {{ $record->city_name }}
                     </td>
-                    <td>{{ $record->email }}</td>
+                    <td>
+                        <?php
+                        $product_list = [];
+                        foreach($record->product as $product)
+                        {
+                            $product_list[] = $product->model_name;
+                        }
+                        ?>
+
+                        @if($product_list)
+                        <button class="btn btn-outline-info mb-0 me-0" type="button" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="{{ implode(', ', $product_list) }}">
+                            {{ count($product_list) }} Products
+                        </button>         
+                        @endif               
+                    </td>
                     <td>{{ $record->status_type }}</td>
                     <td>{{ $record->action_type }}</td>
                     <td>{{ get_value_from_list($response_type_list, $record->response_type_id) }}</td>
                     <td>{{ $record->remarks }}</td>
+                    
+                    <td>{{ get_value_from_list($userListCache, $record->created_by) }}</td>
                 </tr>
             @endforeach
         </tbody>

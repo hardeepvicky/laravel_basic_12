@@ -8,6 +8,7 @@ use App\Models\City;
 use App\Models\Country;
 use App\Models\DropDownValue;
 use App\Models\FieldSetting;
+use App\Models\Product;
 use App\Models\State;
 use App\Models\ViewContact;
 use Illuminate\Http\Request;
@@ -36,7 +37,7 @@ class ContactController extends BackendController
         return $this->viewIndex(__FUNCTION__);
     }
 
-    private function _getBuildeForIndex($cache_key_prefix, $apply_sort = true)
+    private function _getBuildeForIndex($cache_key_prefix)
     {
         $cache_key = $cache_key_prefix . "-index";
 
@@ -51,7 +52,11 @@ class ContactController extends BackendController
             ["field" => "email", "type" => "string"],
             ["field" => "state_id", "type" => "int"],
             ["field" => "district_id", "type" => "int"],
-            ["field" => "city_id", "type" => "int"],
+            ["field" => "city_id", "type" => "int"],            
+        ]);
+
+        $product_conditions = $this->getConditions($cache_key . ".2", [
+            ["field" => "products.id", "type" => "int", "view_field" => "product_id"],
         ]);
 
         // d($conditions, true);
@@ -60,6 +65,8 @@ class ContactController extends BackendController
         $condition_list = $array_helper->convertModelSearchConditionToList();
 
         $builder = $this->modelClass::query();
+
+        $this->model = new $this->modelClass();
 
         if (isset($condition_list['last_followup_date_time']))
         {
@@ -75,102 +82,17 @@ class ContactController extends BackendController
 
         $builder->where($conditions);
 
-        if ($apply_sort) {
-            $cache_key_for_sort = $cache_key_prefix . "-index-extra-params";
-
-            $clear_cache = request('is_sort_clear', false);
-
-            $this->model = new $this->modelClass;
-
-            $sort_params = $this->getSortBy($this->model, $cache_key_for_sort, [
-                ["key" => "sort_by", "default" => "id"],
-                ["key" => "sort_dir", "default" => "DESC"],
-            ], $clear_cache);
-
-            $builder->orderBy($sort_params['sort_by'], $sort_params['sort_dir']);
-        }
-
-        $my_country = Country::getMyCountry();
-
-        $state_conditions = [
-            ["country_id", $my_country->id],
-            ["is_active", 1]
-        ];
-
-        $district_conditions = [
-            ["is_active", 1]
-        ];
-
-        if (isset($condition_list['state_id']))
-        {
-            $state_conditions[] = ["id", $condition_list['state_id']];
-            $district_conditions[] = ["state_id", $condition_list['state_id']];
-        }
-        
-        $district_cities = City::getWithDistrict($state_conditions, $district_conditions, [["is_active", 1]]);
-    
-        $district_city_collection = collect($district_cities);
-
-        $district_city_list = $district_city_collection->pluck('name', 'id')->toArray();
-
-        $this->setForView(compact("district_city_list"));
-
-        return $builder;
-    }
-
-    public function chooser()
-    {
-        $this->paginationLimit = request('pagination_limit', 100);
-
-        $cache_key_prefix = Route::currentRouteName();
-
-        $conditions = $this->getConditions($cache_key_prefix, [
-            ["field" => "type", "type" => "string_equal"],
-            ["field" => "name", "type" => "string"],
-            ["field" => "last_followup_date_time", "type" => "date"],
-            ["field" => "next_followup_date_time", "type" => "date"],
-            ["field" => "mobile", "type" => "string"],
-            ["field" => "mobile2", "type" => "string"],
-            ["field" => "email", "type" => "string"],
-            ["field" => "state_id", "type" => "int"],
-            ["field" => "district_id", "type" => "int"],
-            ["field" => "city_id", "type" => "int"],
-        ]);
-
-        $array_helper =  new ArrayHelper($conditions);
-        $condition_list = $array_helper->convertModelSearchConditionToList();
-
-        $builder = ViewContact::query();
-        $builder->where($conditions);
         $builder->with([
-            "state"
+            "state",
+            "product"
         ]);
 
-
-        $my_country = Country::getMyCountry();
-
-        $state_conditions = [
-            ["country_id", $my_country->id],
-            ["is_active", 1]
-        ];
-
-        $district_conditions = [
-            ["is_active", 1]
-        ];
-
-        if (isset($condition_list['state_id']))
+        if ($product_conditions)
         {
-            $state_conditions[] = ["id", $condition_list['state_id']];
-            $district_conditions[] = ["state_id", $condition_list['state_id']];
+            $builder->whereHas("product", function($q) use ($product_conditions) {
+                $q->where($product_conditions);
+            });
         }
-        
-        $district_cities = City::getWithDistrict($state_conditions, $district_conditions, [["is_active", 1]]);
-    
-        $district_city_collection = collect($district_cities);
-
-        $district_city_list = $district_city_collection->pluck('name', 'id')->toArray();
-
-        $this->model = new $this->modelClass;
 
         $cache_key_for_sort = $cache_key_prefix . "-index-extra-params";
 
@@ -216,6 +138,44 @@ class ContactController extends BackendController
 
         $this->setForView($sort);
 
+        $my_country = Country::getMyCountry();
+
+        $state_conditions = [
+            ["country_id", $my_country->id],
+            ["is_active", 1]
+        ];
+
+        $district_conditions = [
+            ["is_active", 1]
+        ];
+
+        if (isset($condition_list['state_id']))
+        {
+            $state_conditions[] = ["id", $condition_list['state_id']];
+            $district_conditions[] = ["state_id", $condition_list['state_id']];
+        }
+        
+        $district_cities = City::getWithDistrict($state_conditions, $district_conditions, [["is_active", 1]]);
+    
+        $district_city_collection = collect($district_cities);
+
+        $district_city_list = $district_city_collection->pluck('name', 'id')->toArray();
+
+        $this->setForView(compact("district_city_list"));
+
+        return $builder;
+    }
+
+    public function chooser()
+    {
+        $this->paginationLimit = request('pagination_limit', 100);
+
+        $cache_key_prefix = Route::currentRouteName();
+
+        $builder = $this->_getBuildeForIndex($cache_key_prefix);
+
+        $this->model = new $this->modelClass;
+
         $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
 
         // d($records->toArray(), true);
@@ -224,7 +184,7 @@ class ContactController extends BackendController
         $modal_id = request("modal_id", "");
         $multiple = (bool) request("multiple", false);
 
-        $this->setForView(compact("records", "district_city_list", "index_table_id", "modal_id", "multiple"));
+        $this->setForView(compact("records", "index_table_id", "modal_id", "multiple"));
 
         return $this->viewIndex(__FUNCTION__);
     }
@@ -243,9 +203,11 @@ class ContactController extends BackendController
 
         $response_type_list = DropDownValue::getList("id", "display_name", ["type" =>  DropDownValue::LEAD_HISTORY_RESPONSE], "list_display_order");
 
+        $product_list = Product::getList("id", "model_name", [], "list_display_order");
+
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
-        $this->setForView(compact("type_list", "state_list", "response_type_list", "field_labels"));
+        $this->setForView(compact("type_list", "state_list", "product_list", "response_type_list", "field_labels"));
 
         return parent::beforeViewRender();
     }

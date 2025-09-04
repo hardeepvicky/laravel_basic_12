@@ -2,6 +2,6 @@
 
 @section('content')
 
-    @include($viewPrefix . '.chooser_records')
+    @include($viewPrefix . '.index_table')
 
 @endsection
