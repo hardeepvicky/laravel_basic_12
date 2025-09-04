@@ -43,6 +43,16 @@
                             $field = "email";
                         ?>
                         <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
+                        
+                        <?php 
+                            $field = "last_followup_date_time";
+                        ?>
+                        <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
+                        
+                        <?php 
+                            $field = "next_followup_date_time";
+                        ?>
+                        <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
                     </form>
                 </div>
             </div>

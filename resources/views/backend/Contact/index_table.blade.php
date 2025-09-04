@@ -24,6 +24,30 @@
                         pleaseSelect="All"
                         class="select2 form-select-sm" />
                 </th>
+                <th style="width:8%">
+                    <?php
+                    $field = 'last_followup_date_time';
+                    ?>
+                    <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]" class="form-control-sm date-picker" />
+                </th>
+                <th style="width:8%">
+                    <?php
+                    $field = 'next_followup_date_time';
+                    ?>
+                    <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]" class="form-control-sm date-picker" />
+                </th>
+                <th style="width:8%">
+                    <?php
+                    $field = 'mobile';
+                    ?>
+                    <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]" class="form-control-sm" />
+                </th>
+                <th style="width:8%">
+                    <?php
+                    $field = 'mobile2';
+                    ?>
+                    <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]" class="form-control-sm" />
+                </th>
                 <th style="width:15%">
                     <?php
                     $field = 'state_id';
@@ -38,18 +62,6 @@
                         pleaseSelect="All"
                         class="modal-select2 form-select-sm" />
                 </th>
-                <th style="width:8%">
-                    <?php
-                    $field = 'mobile';
-                    ?>
-                    <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]" class="form-control-sm" />
-                </th>
-                <th style="width:8%">
-                    <?php
-                    $field = 'mobile2';
-                    ?>
-                    <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]" class="form-control-sm" />
-                </th>
                 <th style="width:10%">
                     <?php
                     $field = 'email';
@@ -60,9 +72,11 @@
             <tr class="border-bottom-primary">
                 <th>Actions</th>
                 <th><?= sortable_anchor('type', 'Type') ?></th>
-                <th>Location</th>
+                <th><?= sortable_anchor('last_followup_date_time', 'Last') ?></th>
+                <th><?= sortable_anchor('next_followup_date_time', 'Next') ?></th>
                 <th><?= sortable_anchor('mobile', 'Mobile') ?></th>
                 <th><?= sortable_anchor('mobile2', 'Mobile2') ?></th>
+                <th>Location</th>
                 <th><?= sortable_anchor('email', 'Email') ?></th>
                 <th><?= sortable_anchor('status_type', 'Status') ?></th>
                 <th><?= sortable_anchor('action_type', 'Action Type') ?></th>
@@ -105,11 +119,13 @@
                         </div>
                     </td>
                     <td>{{ get_value_from_list($type_list, $record->type) }}</td>
+                    <td><x-Backend.celec-date-time :value="$record->last_followup_date_time"/></td>
+                    <td><x-Backend.celec-date-time :value="$record->next_followup_date_time"/></td>
+                    <td>{{ $record->mobile }}</td>
+                    <td>{{ $record->mobile2 }}</td>
                     <td>
                         {{ $record->state->getShortName() }} >> {{ $record->district_name }} >> {{ $record->city_name }}
                     </td>
-                    <td>{{ $record->mobile }}</td>
-                    <td>{{ $record->mobile2 }}</td>
                     <td>{{ $record->email }}</td>
                     <td>{{ $record->status_type }}</td>
                     <td>{{ $record->action_type }}</td>

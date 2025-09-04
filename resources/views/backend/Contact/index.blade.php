@@ -52,10 +52,20 @@
                     $field = "email";
                 ?>
                 <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
+                
+                <?php 
+                    $field = "last_followup_date_time";
+                ?>
+                <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
+                
+                <?php 
+                    $field = "next_followup_date_time";
+                ?>
+                <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
             </form>
         </div>
         <div class="card-body">
-            <div class="index_table">
+            <div class="index_table" id="index_table">
                 @include($viewPrefix . '.index_table')
             </div>
         </div>

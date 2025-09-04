@@ -200,6 +200,7 @@ class Dealer extends BaseModel
 
     public function changeNextFollowupDateTime($datetime)
     {
+        $this->last_followup_date_time = $this->next_followup_date_time;
         $this->next_followup_date_time = $datetime;
         $this->save();
     }

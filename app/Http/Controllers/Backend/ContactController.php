@@ -43,6 +43,8 @@ class ContactController extends BackendController
         $conditions = $this->getConditions($cache_key, [
             ["field" => "id", "type" => "int", "cache" => false],
             ["field" => "type", "type" => "string_equal"],
+            ["field" => "last_followup_date_time", "type" => "date"],
+            ["field" => "next_followup_date_time", "type" => "date"],
             ["field" => "name", "type" => "string"],
             ["field" => "mobile", "type" => "string"],
             ["field" => "mobile2", "type" => "string"],
@@ -52,10 +54,26 @@ class ContactController extends BackendController
             ["field" => "city_id", "type" => "int"],
         ]);
 
+        // d($conditions, true);
+
         $array_helper =  new ArrayHelper($conditions);
         $condition_list = $array_helper->convertModelSearchConditionToList();
 
-        $builder = $this->modelClass::where($conditions);
+        $builder = $this->modelClass::query();
+
+        if (isset($condition_list['last_followup_date_time']))
+        {
+            $builder->whereDate('last_followup_date_time', $condition_list['last_followup_date_time']);
+        }
+
+        if (isset($condition_list['next_followup_date_time']))
+        {
+            $builder->whereDate('next_followup_date_time', $condition_list['next_followup_date_time']);
+        }
+
+        $conditions = $array_helper->unsetValues($conditions, ["last_followup_date_time", "next_followup_date_time"], true, [ArrayHelper::UNSET_VALUE_REMOVE_PARENT_IF_FOUND_CHILD]);
+
+        $builder->where($conditions);
 
         if ($apply_sort) {
             $cache_key_for_sort = $cache_key_prefix . "-index-extra-params";
@@ -109,6 +127,8 @@ class ContactController extends BackendController
         $conditions = $this->getConditions($cache_key_prefix, [
             ["field" => "type", "type" => "string_equal"],
             ["field" => "name", "type" => "string"],
+            ["field" => "last_followup_date_time", "type" => "date"],
+            ["field" => "next_followup_date_time", "type" => "date"],
             ["field" => "mobile", "type" => "string"],
             ["field" => "mobile2", "type" => "string"],
             ["field" => "email", "type" => "string"],
