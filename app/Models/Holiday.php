@@ -33,6 +33,21 @@ class Holiday extends BaseModel
         return $this->short_name;
     }
 
+    public function holidayDate()
+    {
+        return $this->hasMany(HolidayDate::class);
+    }
+
+    public function holidayBranch()
+    {
+        return $this->hasMany(HolidayBranch::class);
+    }
+
+    public function branch()
+    {
+        return $this->belongsToMany(Branch::class, HolidayBranch::class);
+    }
+
     public function getUniqueValidationRules(Request $request)
     {
         $field_rules = [

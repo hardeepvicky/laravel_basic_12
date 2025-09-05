@@ -137,9 +137,12 @@
                         ?>
 
                         @if($product_list)
-                        <button class="btn btn-outline-info mb-0 me-0" type="button" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="{{ implode(', ', $product_list) }}">
-                            {{ count($product_list) }} Products
-                        </button>         
+                            @if (count($product_list) == 1)
+                                {{ $product_list[0] }}
+                            @else
+                                <button class="btn btn-outline-info mb-0 me-0" type="button" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="{{ implode(', ', $product_list) }}">
+                                    {{ count($product_list) }} Products
+                                </button>         
                         @endif               
                     </td>
                     <td>{{ $record->status_type }}</td>

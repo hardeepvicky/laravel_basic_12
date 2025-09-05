@@ -30,6 +30,11 @@ class ExpCity extends BaseModel
         // ], 
     ];
 
+    public function country()
+    {
+        return $this->belongsTo(ExpCountry::class);
+    }
+
     public function state()
     {
         return $this->belongsTo(ExpState::class);

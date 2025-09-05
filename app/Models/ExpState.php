@@ -11,7 +11,7 @@ class ExpState extends BaseModel
 {
     protected static array $unique_fields = ["country_id", "name"];
 
-    protected static array $list_fields = ["id", "name", "short_name"];
+    protected static array $list_fields = ["id", "name", "iso2"];
 
     protected $appends = [
         'display_name',

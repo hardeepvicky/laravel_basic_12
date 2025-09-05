@@ -11,7 +11,7 @@ class ExpCountry extends BaseModel
         'display_name',
     ];
 
-    protected static array $list_fields = ["id", "name", "short_name"];
+    protected static array $list_fields = ["id", "name", "iso3"];
 
     public static array $child_model_class = [
         ExpState::class => [
