@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Backend;
 
+use App\Exceptions\UserException;
 use App\Models\Country;
 use App\Models\ExpCountry;
 use App\Models\ExpState;
@@ -188,5 +189,24 @@ class ExportCountryController extends BackendController
 
             return back()->withInput()->with('fail', $ex->getMessage());
         }
+    }
+
+    public function ajax_get_by_phonecode($phonecode)
+    {
+        $response = ["status" => 1];
+        try {
+            $model = $this->modelClass::where("phonecode", $phonecode)->first();
+
+            if ($model)
+            {
+                $response['data'] = $model->toArray();
+            }
+
+        } catch (Exception $ex) {
+            $response['status'] = 0;
+            $response['msg'] = $ex->getMessage();
+        }
+
+        return $this->responseJson($response);
     }
 }

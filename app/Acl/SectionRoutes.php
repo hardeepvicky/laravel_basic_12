@@ -35,6 +35,8 @@ class SectionRoutes
         "product-serial.ajax_get_unlinked_list",
         "product-serial.ajax_get_unlinked_child_list",
 
+        "export-country.ajax_get_by_phonecode",
+
         "*.ajax_get_list",
         "*.ajax_get_code_list",
         "*.ajax_get_count",

@@ -26,7 +26,6 @@ use App\Models\ExpState;
 use App\Models\FieldSetting;
 use App\Models\Item;
 use App\Models\Lead;
-use App\Models\LeadHistory;
 use App\Models\Notification;
 use App\Models\NotificationSetting;
 use App\Models\Party;
@@ -99,7 +98,7 @@ class ExportLeadController extends BackendController
         $builder->where("is_customer", 0);
 
         $builder->with([
-            "state", "district", "city", "dealer", "campaign", "assignTo"
+            "state", "country", "city", "dealer", "campaign", "assignTo"
         ]);
 
         if ($apply_sort) {
@@ -117,27 +116,23 @@ class ExportLeadController extends BackendController
             $builder->orderBy($sort_params['sort_by'], $sort_params['sort_dir']);
         }
 
-        $state_conditions = [
-            ["is_active", 1]
-        ];
+        $state_list = $city_list = [];
+
+        $state_conditions = ["is_active" => 1];
 
         if (isset($condition_list['country_id']))
         {
-            $state_conditions[] = ["country_id", $condition_list['country_id']];
+            $state_conditions["country_id"] = $condition_list['country_id'];
+            $state_list = ExpState::getList("id", "display_name", $state_conditions, "name");
         }
-
-        $state_list = ExpState::getList("id", "display_name", $state_conditions, "name");
         
-        $city_conditions = [
-            ["is_active", 1]
-        ];
+        $city_conditions = ["is_active" => 1];
 
         if (isset($condition_list['state_id']))
         {
-            $city_conditions[] = ["state_id", $condition_list['state_id']];
+            $city_conditions["state_id"] = $condition_list['state_id'];
+            $city_list = ExpCity::getList("id", "display_name", $city_conditions, "name");
         }
-        
-        $city_list = ExpCity::getList("id", "display_name", $city_conditions, "name");
     
         $this->setForView(compact("state_list", "city_list"));
 
@@ -150,12 +145,12 @@ class ExportLeadController extends BackendController
             $this->model = new $this->modelClass();
         }
 
-        $lead = new Lead();
+        $exp_lead = new Lead();
 
         $address_type_list = ExpLeadAddress::getTypeList();
 
         $type_conditions = [
-            'type' => Type::getType($lead, "source_type")
+            'type' => Type::getType($exp_lead, "source_type")
         ];
 
         if ($this->model->source_type)
@@ -166,7 +161,7 @@ class ExportLeadController extends BackendController
         $source_type_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
 
         $type_conditions = [
-            'type' => Type::getType($lead, "deal_type")
+            'type' => Type::getType($exp_lead, "deal_type")
         ];
 
         if ($this->model->deal_type)
@@ -177,7 +172,7 @@ class ExportLeadController extends BackendController
         $deal_type_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
 
         $type_conditions = [
-            'type' => Type::getType($lead, "status_type")
+            'type' => Type::getType($exp_lead, "status_type")
         ];
 
         if ($this->model->status_type)
@@ -188,7 +183,7 @@ class ExportLeadController extends BackendController
         $status_type_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
 
         $type_conditions = [
-            'type' => Type::getType($lead, "payment_method_type")
+            'type' => Type::getType($exp_lead, "payment_method_type")
         ];
 
         if ($this->model->payment_method_type)
@@ -213,7 +208,7 @@ class ExportLeadController extends BackendController
         $country_list = ExpCountry::getList();
 
         $type_conditions = [
-            'type' => Type::getType(new LeadHistory(), "action_type")
+            'type' => Type::getType(new ExpLeadHistory(), "action_type")
         ];
 
         $action_type_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
@@ -315,7 +310,7 @@ class ExportLeadController extends BackendController
         DB::beginTransaction();
 
         try {
-
+            // d($validatedData, true);
             $save_data = $this->_beforeSave($validatedData);
             unset($save_data['leadFile']);
             unset($save_data['addresses']);
@@ -750,7 +745,7 @@ class ExportLeadController extends BackendController
         return $this->view("form");
     }
 
-    public function history($lead_id, Request $request)
+    public function history($exp_lead_id, Request $request)
     {
         $record = $this->modelClass::with([
             "address" => function($q){
@@ -763,12 +758,12 @@ class ExportLeadController extends BackendController
             },
             "leadFile",
             "documentFile"
-        ])->findOrFail($lead_id);
+        ])->findOrFail($exp_lead_id);
 
         $record->convertTimeZoneForDisplay();
 
         $form = [
-            'url' => route($this->routePrefix . '.history_store', $lead_id),
+            'url' => route($this->routePrefix . '.history_store', $exp_lead_id),
             'method' => 'POST',
         ];
 
@@ -779,16 +774,16 @@ class ExportLeadController extends BackendController
 
         $carrier_list = Party::getList("id", "display_name", ["type" => Party::TYPE_CARRIER]);
 
-        $model = new LeadHistory();
+        $model = new ExpLeadHistory();
 
         $this->setForView(compact("record", "form", "model", "histories", "products", "items", "addresses", "carrier_list"));
 
         return $this->view(__FUNCTION__);
     }
 
-    public function history_store($lead_id, Request $request)
+    public function history_store($exp_lead_id, Request $request)
     {
-        $lead = $this->modelClass::with(["customer"])->findOrFail($lead_id);
+        $exp_lead = $this->modelClass::with(["customer"])->findOrFail($exp_lead_id);
 
         $rules = [
             "entry_by" => ["required"],
@@ -803,19 +798,19 @@ class ExportLeadController extends BackendController
 
         switch($request->input("action_type"))
         {
-            case LeadHistory::ACTION_TYPE_CALL:
+            case ExpLeadHistory::ACTION_TYPE_CALL:
                 $rules['action'] = ["required"];
                 $rules['response_type_id'] = ["required"];                                
                 break;
-            case LeadHistory::ACTION_TYPE_SEND_SMS:
-            case LeadHistory::ACTION_TYPE_SEND_EMAIL:
-            case LeadHistory::ACTION_TYPE_SEND_WHATSAPP:
+            case ExpLeadHistory::ACTION_TYPE_SEND_SMS:
+            case ExpLeadHistory::ACTION_TYPE_SEND_EMAIL:
+            case ExpLeadHistory::ACTION_TYPE_SEND_WHATSAPP:
                 $rules['action'] = ["required"];
                 break;
-            case LeadHistory::ACTION_TYPE_CHANGE_STATUS:
+            case ExpLeadHistory::ACTION_TYPE_CHANGE_STATUS:
                 $rules['status_type'] = ["required"];
                 break;
-            case LeadHistory::ACTION_TYPE_DISPATCH:
+            case ExpLeadHistory::ACTION_TYPE_DISPATCH:
                 $rules['remarks'] = ["required"];
                 break;
         }
@@ -836,52 +831,52 @@ class ExportLeadController extends BackendController
         try {
             // d($validatedData, true);
 
-            $lead->canChangeHistory();
+            $exp_lead->canChangeHistory();
 
-            $validatedData['lead_id'] = $lead_id;
+            $validatedData['exp_lead_id'] = $exp_lead_id;
 
-            $model = new LeadHistory();
+            $model = new ExpLeadHistory();
 
             $validatedData = $model->convertTimeZoneBeforeQueryToDatabase($validatedData);
 
-            $validatedData['assign_to_user_id'] = $lead->assign_to_user_id;
+            $validatedData['assign_to_user_id'] = $exp_lead->assign_to_user_id;
 
-            $model = LeadHistory::create($validatedData);
+            $model = ExpLeadHistory::create($validatedData);
 
-            $lead->action_type = $validatedData['action_type'];
-            $lead->remarks = $validatedData['remarks'];
+            $exp_lead->action_type = $validatedData['action_type'];
+            $exp_lead->remarks = $validatedData['remarks'];
 
             if ($validatedData['response_type_id'])
             {
-                $lead->response_type_id = $validatedData['response_type_id'];
+                $exp_lead->response_type_id = $validatedData['response_type_id'];
             }
 
-            $lead->save();
+            $exp_lead->save();
 
-            if (isset($lead->customer->id))
+            if (isset($exp_lead->customer->id))
             {
-                $lead->customer->action_type = $lead->action_type;
-                $lead->customer->remarks = $lead->remarks;
-                $lead->customer->response_type_id = $lead->response_type_id;
-                $lead->customer->save();
+                $exp_lead->customer->action_type = $exp_lead->action_type;
+                $exp_lead->customer->remarks = $exp_lead->remarks;
+                $exp_lead->customer->response_type_id = $exp_lead->response_type_id;
+                $exp_lead->customer->save();
             }
 
-            if ($validatedData['status_type'] != $lead->status_type)
+            if ($validatedData['status_type'] != $exp_lead->status_type)
             {
-                $lead->changeStatus($validatedData['status_type']);
+                $exp_lead->changeStatus($validatedData['status_type']);
             }
 
             if ($validatedData['next_followup_date_time'])
             {
-                $lead->changeNextFollowupDateTime($validatedData['next_followup_date_time']);
+                $exp_lead->changeNextFollowupDateTime($validatedData['next_followup_date_time']);
             }
 
-            if ($validatedData['action_type'] == LeadHistory::ACTION_TYPE_CALL && $lead->assignTo?->name)
+            if ($validatedData['action_type'] == ExpLeadHistory::ACTION_TYPE_CALL && $exp_lead->assignTo?->name)
             {
-                $voip_no = $lead->assignTo->name;
+                $voip_no = $exp_lead->assignTo->name;
                 if (!is_numeric($voip_no))
                 {
-                    $msg = "User " . $lead->assignTo->getDisplayName() . " has name : $voip_no, but only numeric is used for voip call";
+                    $msg = "User " . $exp_lead->assignTo->getDisplayName() . " has name : $voip_no, but only numeric is used for voip call";
                     throw new UserException($msg, UserException::ERROR_USER_DATA_WRONG);
                 }
 
@@ -957,9 +952,9 @@ class ExportLeadController extends BackendController
         }
     }
 
-    public function transfer_lead($lead_id, Request $request)
+    public function transfer_lead($exp_lead_id, Request $request)
     {
-        $lead = $this->modelClass::findOrFail($lead_id);
+        $exp_lead = $this->modelClass::findOrFail($exp_lead_id);
 
         $rules = [
             "entry_by" => ["required"],
@@ -974,23 +969,23 @@ class ExportLeadController extends BackendController
         try {
             // d($validatedData, true);
 
-            if ($lead->status_type == Lead::STATUS_DEAD)
+            if ($exp_lead->status_type == Lead::STATUS_DEAD)
             {
                 throw new UserException("Lead is dead", UserException::ERROR_USER_ACTION_RESTRICT);
             }
 
-            if ($lead->status_type == Lead::STATUS_FAKE)
+            if ($exp_lead->status_type == Lead::STATUS_FAKE)
             {
                 throw new UserException("Lead is Fake", UserException::ERROR_USER_ACTION_RESTRICT);
             }
 
-            if ($validatedData['assign_to_user_id'] == $lead->assign_to_user_id)
+            if ($validatedData['assign_to_user_id'] == $exp_lead->assign_to_user_id)
             {
                 throw new UserException("Lead is already assigned to this user", UserException::ERROR_USER_ACTION_RESTRICT);
             }
             else
             {
-                $lead->changeAssignTo($validatedData);
+                $exp_lead->changeAssignTo($validatedData);
             }
 
             if (LaravelExtend::$errors) {
@@ -1048,9 +1043,9 @@ class ExportLeadController extends BackendController
         }
     }
 
-    public function dispatch($lead_id, Request $request)
+    public function dispatch($exp_lead_id, Request $request)
     {
-        $this->model = $lead = $this->modelClass::findOrFail($lead_id);
+        $this->model = $exp_lead = $this->modelClass::findOrFail($exp_lead_id);
 
         $rules = [
             "entry_by" => ["required"],
@@ -1085,34 +1080,34 @@ class ExportLeadController extends BackendController
         try {
             // d($validatedData, true);
 
-            if ($lead->status_type == Lead::STATUS_DEAD)
+            if ($exp_lead->status_type == ExpLead::STATUS_DEAD)
             {
                 throw new UserException("Lead is dead", UserException::ERROR_USER_ACTION_RESTRICT);
             }
 
-            if ($lead->status_type == Lead::STATUS_FAKE)
+            if ($exp_lead->status_type == ExpLead::STATUS_FAKE)
             {
                 throw new UserException("Lead is Fake", UserException::ERROR_USER_ACTION_RESTRICT);
             }
 
-            $lead->canChangeHistory();
+            $exp_lead->canChangeHistory();
 
-            $model = new LeadHistory();
+            $model = new ExpLeadHistory();
 
-            $validatedData['lead_id'] = $lead_id;
+            $validatedData['exp_lead_id'] = $exp_lead_id;
             $validatedData = $model->convertTimeZoneBeforeQueryToDatabase($validatedData);
-            $validatedData['assing_to_user_id'] = $lead->assign_to_user_id;
+            $validatedData['assing_to_user_id'] = $exp_lead->assign_to_user_id;
 
-            $model = LeadHistory::create($validatedData);
+            $model = ExpLeadHistory::create($validatedData);
 
-            if ($validatedData['status_type'] != $lead->status_type)
+            if ($validatedData['status_type'] != $exp_lead->status_type)
             {
-                $lead->changeStatus($validatedData['status_type']);
+                $exp_lead->changeStatus($validatedData['status_type']);
             }
 
             if ($validatedData['next_followup_date_time'])
             {
-                $lead->changeNextFollowupDateTime($validatedData['next_followup_date_time']);
+                $exp_lead->changeNextFollowupDateTime($validatedData['next_followup_date_time']);
             }
 
             $this->_saveOthers($validatedData);
@@ -1120,13 +1115,13 @@ class ExportLeadController extends BackendController
             $dispatch = new DispatchOrder();
             $dispatch->type = str_class_name_to_human_text($this->modelClass);
             $dispatch->status_type = DispatchOrder::STATUS_PENDING;
-            $dispatch->lead_id = $lead_id;
+            $dispatch->lead_id = $exp_lead_id;
 
             $dispatch->fill($dispatchData);
 
-            if ($lead->deal_type == Lead::DEAL_TYPE_THROGH_DEALER)
+            if ($exp_lead->deal_type == Lead::DEAL_TYPE_THROGH_DEALER)
             {
-                $primary_address = $lead->expDealer->address()->where("is_primary", 1)->first();
+                $primary_address = $exp_lead->expDealer->address()->where("is_primary", 1)->first();
 
                 if (!$primary_address)
                 {
@@ -1136,16 +1131,14 @@ class ExportLeadController extends BackendController
                 $dispatch->addr1 = $primary_address->addr1;
                 $dispatch->addr2 = $primary_address->addr2;
                 $dispatch->pincode = $primary_address->pincode;
-                $dispatch->country_id = $lead->expDealer->country_id;
-                $dispatch->state_id = $lead->expDealer->state_id;
-                $dispatch->district_id = $lead->expDealer->district_id;
-                $dispatch->city_id = $lead->expDealer->city_id;
+                $dispatch->country_id = $exp_lead->expDealer->country_id;
+                $dispatch->state_id = $exp_lead->expDealer->state_id;
+                $dispatch->district_id = $exp_lead->expDealer->district_id;
+                $dispatch->city_id = $exp_lead->expDealer->city_id;
             }
             else
             {
-                
-
-                $primary_address = $lead->address()->where("is_primary", 1)->first();
+                $primary_address = $exp_lead->address()->where("is_primary", 1)->first();
 
                 if (!$primary_address)
                 {
@@ -1155,10 +1148,10 @@ class ExportLeadController extends BackendController
                 $dispatch->addr1 = $primary_address->addr1;
                 $dispatch->addr2 = $primary_address->addr2;
                 $dispatch->pincode = $primary_address->pincode;
-                $dispatch->country_id = $lead->country_id;
-                $dispatch->state_id = $lead->state_id;
-                $dispatch->district_id = $lead->district_id;
-                $dispatch->city_id = $lead->city_id;
+                $dispatch->country_id = $exp_lead->country_id;
+                $dispatch->state_id = $exp_lead->state_id;
+                $dispatch->district_id = $exp_lead->district_id;
+                $dispatch->city_id = $exp_lead->city_id;
             }
 
             if (!$dispatch->save())
@@ -1168,7 +1161,7 @@ class ExportLeadController extends BackendController
 
             $existing_id_list = $this->model->products()->pluck("id", "id")->toArray();
 
-            foreach($lead->products as $product)
+            foreach($exp_lead->products as $product)
             {
                 $save = $product->toArray();
                 unset($save['id']);
@@ -1197,7 +1190,7 @@ class ExportLeadController extends BackendController
 
             $existing_id_list = $this->model->items()->pluck("id", "id")->toArray();
 
-            foreach($lead->items as $item)
+            foreach($exp_lead->items as $item)
             {
                 $save = $item->toArray();
                 unset($save['id']);
@@ -1298,9 +1291,9 @@ class ExportLeadController extends BackendController
         }
     }
 
-    public function change_files($lead_id, Request $request)
+    public function change_files($exp_lead_id, Request $request)
     {
-        $lead = $this->modelClass::findOrFail($lead_id);
+        $exp_lead = $this->modelClass::findOrFail($exp_lead_id);
 
         $rules = [
             "leadFile" => ["required"],
@@ -1318,7 +1311,7 @@ class ExportLeadController extends BackendController
 
                 $document_files = DocumentFile::find($ids);
 
-                $lead->documentFile()->sync($document_files);
+                $exp_lead->documentFile()->sync($document_files);
             }
 
             if (LaravelExtend::$errors) {
@@ -1375,18 +1368,18 @@ class ExportLeadController extends BackendController
         }
     }
 
-    public function convert_to_customer($lead_id)
+    public function convert_to_customer($exp_lead_id)
     {
-        $lead = $this->modelClass::findOrFail($lead_id);
+        $exp_lead = $this->modelClass::findOrFail($exp_lead_id);
 
-        $lead->convertToCustomer();
+        $exp_lead->convertToCustomer();
 
         return redirect()->route("customer.index")->with('success', "Convert to Customer Successfully");
     }
 
-    public function snooze($lead_id, Request $request)
+    public function snooze($exp_lead_id, Request $request)
     {
-        $lead = $this->modelClass::findOrFail($lead_id);
+        $exp_lead = $this->modelClass::findOrFail($exp_lead_id);
 
         $rules = [
             "snooze_minute" => ["required", "integer", "min:5", "max:120"],
@@ -1398,11 +1391,11 @@ class ExportLeadController extends BackendController
 
         try {
 
-            $lead->is_snooze = true;
-            $lead->snooze_minute = $validatedData['snooze_minute'];
-            $lead->snooze_datetime = DateUtility::change(null, $lead->snooze_minute, DateUtility::MINTUES, DateUtility::DATETIME_FORMAT);
+            $exp_lead->is_snooze = true;
+            $exp_lead->snooze_minute = $validatedData['snooze_minute'];
+            $exp_lead->snooze_datetime = DateUtility::change(null, $exp_lead->snooze_minute, DateUtility::MINTUES, DateUtility::DATETIME_FORMAT);
 
-            $lead->save();
+            $exp_lead->save();
 
             DB::commit();
 
@@ -1565,13 +1558,13 @@ class ExportLeadController extends BackendController
 
         $type_group_list = Type::getListOfModel(Lead::class);
 
-        $history_type_group_list = Type::getListOfModel(LeadHistory::class);
+        $history_type_group_list = Type::getListOfModel(ExpLeadHistory::class);
 
         $drop_down_list = DropDownValue::getListCache("id", "display_name");
 
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
-        $history_field_labels = FieldSetting::getDynamicFields(LeadHistory::class);
+        $history_field_labels = FieldSetting::getDynamicFields(ExpLeadHistory::class);
 
         foreach($records as $record)
         {
@@ -1617,7 +1610,7 @@ class ExportLeadController extends BackendController
         $current_dt = DateUtility::getDateObj(null);
         $current_dt->setTimezone(DateUtility::$login_user_time_zone);
         $datetime = DateUtility::getDate($current_dt, DateUtility::DATETIME_OUT_FORMAT_FILE);
-        $file_prefix = str_class_name_to_human_text(LeadHistory::class);
+        $file_prefix = str_class_name_to_human_text(ExpLeadHistory::class);
         $file = $path . $file_prefix . "-$datetime.csv";
 
         $csvUtility = new CsvUtility($file);

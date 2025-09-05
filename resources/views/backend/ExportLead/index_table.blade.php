@@ -9,7 +9,7 @@
             <table class="table table-bordered summary-table summary_table_with_search">
                 <thead>
                     <tr>
-                        <th style="width:10%">
+                        <th style="width:15%">
                             <div class="row">
                                 <div class="col-sm-4">
                                     <span class="btn btn-light btn-sm text-dark border-primary clear_search_conditions mb-1">Clear</span>
@@ -22,7 +22,7 @@
                                 </div>
                             </div>
                         </th>
-                        <th style="width:20%">
+                        <th style="width:15%">
                             <?php
                             $field = 'assign_to_user_id';
                             ?>
@@ -43,19 +43,25 @@
                             <x-Inputs.drop-down :id="$field" :name="$field" :label="$false"
                                 :value="$search[$field]" :list="$lead_history_response_list" :value="$search[$field]" pleaseSelect="All" class="select2 form-select-sm" />
                         </th>
-                        <th style="width:12%">
+                        <th style="width:10%">
+                            <?php
+                            $field = 'country_id';
+                            ?>
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false"
+                                :value="$search[$field]" :list="$country_list" :value="$search[$field]" pleaseSelect="All" class="select2 form-select-sm" />
+                        </th>
+                        <th style="width:20%">
                             <?php
                             $field = 'state_id';
                             ?>
                             <x-Inputs.drop-down :id="$field" :name="$field" :label="$false"
                                 :value="$search[$field]" :list="$state_list" :value="$search[$field]" pleaseSelect="All" class="select2 form-select-sm" />
-                        </th>
-                        <th style="width:20%">
+                        
                             <?php
                             $field = 'city_id';
                             ?>
                             <x-Inputs.drop-down :id="$field" :name="$field" :label="$false"
-                                :value="$search[$field]" :list="$district_city_list" :value="$search[$field]" pleaseSelect="All" class="select2 form-select-sm" />
+                                :value="$search[$field]" :list="$city_list" :value="$search[$field]" pleaseSelect="All" class="select2 form-select-sm" />
                         </th>
                         <th style="width:10%">
                             <?php
@@ -109,10 +115,10 @@
                         <th><?= sortable_anchor('status_type', get_value_from_list($field_labels, 'status_type', 'status_type')) ?>
                         <th><?= sortable_anchor('response_type_id', get_value_from_list($field_labels, 'response_type_id', 'response_type_id')) ?></th>
                         <th>
-                            <?= sortable_anchor('state.name', get_value_from_list($field_labels, 'state_id', 'state_id')) ?>
+                            <?= sortable_anchor('country.name', get_value_from_list($field_labels, 'country_id', 'country_id')) ?>
                         </th>
                         <th>
-                            <?= sortable_anchor('district.name', get_value_from_list($field_labels, 'district_id', 'district_id')) ?>
+                            <?= sortable_anchor('state.name', get_value_from_list($field_labels, 'state_id', 'state_id')) ?>
                             |
                             <?= sortable_anchor('city.name', get_value_from_list($field_labels, 'city_id', 'city_id')) ?>
                         </th>
@@ -145,10 +151,10 @@
                             <td>{{ get_value_from_list($status_type_list, $record->status_type) }}</td>
                             <td>{{ get_value_from_list($lead_history_response_list, $record->response_type_id) }}</td>
                             <td>
-                                {{ $record->state?->getShortName() }}
+                                {{ $record->country?->getShortName() }}
                             </td>
                             <td>
-                                {{ $record->district?->getDisplayName() }}
+                                {{ $record->state?->getDisplayName() }}
                                 >> {{ $record->city?->getDisplayName() }}
                             </td>
                             <td>{{ $record->mobile }}</td>

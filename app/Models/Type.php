@@ -98,6 +98,11 @@ class Type extends BaseModel
                     "action_type" => "Action Type",
                 ]
             ],
+            ExpLeadHistory::class => [
+                "fields" => [
+                    "action_type" => "Action Type",
+                ]
+            ],
             DispatchOrder::class => [
                 "fields" => [
                     "status_type" => "Status",

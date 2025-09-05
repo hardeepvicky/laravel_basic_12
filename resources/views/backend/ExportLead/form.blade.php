@@ -72,19 +72,35 @@
                                 class="validate-email"
                                 placeholder="Enter {{ $label }}" />
 
-                            <?php   
-                            $field = 'country_id';
-                            $label = get_value_from_list($field_labels, $field, $field);
-                            ?>
-                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
-                                :list="$state_list" 
-                                :value="$model->{$field}"
-                                layout="horizontal"
-                                class="select2" 
-                                data-sr-cascade-target="#city_id"
-                                data-sr-cascade-url="/export-states/ajax_get_list_with_district/{v}" 
-                                mandatory="true" 
-                            />
+                            <div class="row">
+                                <div class="col-sm-7">
+                                    <?php   
+                                    $field = 'country_id';
+                                    $label = get_value_from_list($field_labels, $field, $field);
+                                    ?>
+                                    <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
+                                        :list="$country_list"
+                                        :value="$model->{$field}"
+                                        layout="horizontal"
+                                        class="select2 cascade-drop-down" 
+                                        data-sr-cascade-target="#state_id"
+                                        data-sr-cascade-url="/export-state/ajax_get_list/{v}" 
+                                        mandatory="true" 
+                                    />
+                                </div>
+                                <div class="col-sm-5">
+                                    <?php   
+                                    $field = 'country_phonecode';
+                                    $label = "Country Phonecode";
+                                    ?>
+                                    <x-Inputs.text-field :id="$field" :name="$field" :label="$label"
+                                        :value="$model->{$field}"
+                                        layout="horizontal"
+                                        horizontalFirstColumnLength="6"
+                                        horizontalSecondColumnLength="6"
+                                    />
+                                </div>
+                            </div>
 
                             <?php   
                             $field = 'state_id';
@@ -94,9 +110,9 @@
                                 :list="$empty_list" 
                                 :value="$model->{$field}"
                                 layout="horizontal"
-                                class="select2" 
+                                class="select2 cascade-drop-down" 
                                 data-sr-cascade-target="#city_id"
-                                data-sr-cascade-url="/export-city/ajax_get_list_with_district/{v}" 
+                                data-sr-cascade-url="/export-city/ajax_get_list/0/{v}"
                                 mandatory="true" 
                             />
 
@@ -582,7 +598,6 @@
     </form>
 
     <script>
-        var district_cities = JSON.parse('<?= json_encode($district_cities) ?>');
         $(function() {
             suggestion_list($("#remarks"), $("#remarks-suggestion-box"), [], "/tags/ajax_get_list");
 
@@ -614,20 +629,6 @@
                     $(".deal_type-block-" + v).show();
                     $(".deal_type-block-" + v).find("input,select").removeAttr("disabled");
                 }
-            });
-
-            $("#state_id").cascade({
-                beforeGet: function (src, url) {
-                    $.loader.init().setInfo("Fetching City ...").show();
-                    return url;
-                },
-                afterGet: function (src, dest, response) {
-                    $.loader.init().hide();
-                    return response;
-                },
-                default_data : district_cities
-            }).trigger("sr-cascade.change", {
-                pageLoad: true
             });
 
             var leadSearchEngine = new Bloodhound({
@@ -673,26 +674,36 @@
                 }
             });
 
+            $("#country_id").change(function(){
+                var v = $(this).val();
+
+                if (v)
+                {
+                    ajaxGetJson("/export-country/ajax_get/" + v, function(response){
+                        $("#country_phonecode").val("+" + response['data']['phonecode']);
+                    });
+                }
+            });
+
+            $("#country_phonecode").change(function(){
+                var v = $(this).val();
+
+                if (v)
+                {
+                    ajaxGetJson("/export-country/ajax_get_by_phonecode/" + v, function(response){
+                        if (typeof response['data'] != "undefined")
+                        {
+                            $("#country_id").val(response['data']['id']).trigger("change");
+                        }
+                    });
+                }
+            });
+
             $.events.execAtLast(function() {
-                $("#state_id").trigger("sr-cascade.change", {
+                $("#country_id").trigger("sr-cascade.change", {
                     pageLoad: true
                 });
 
-                $("#city_id").change(function(){
-                    var v = $(this).val();
-
-                    if (v)
-                    {
-                        for(var i in district_cities)
-                        {
-                            if (district_cities[i]['id'] == v)
-                            {
-                                $("#state_id").val(district_cities[i]['state_id']).trigger('change', {eventBubble : false});
-                                return;
-                            }
-                        }
-                    }
-                });
 
                 $("#deal_type").trigger("change");
 

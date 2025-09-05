@@ -32,10 +32,14 @@
                         <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
                         
                         <?php 
+                            $field = "country_id";
+                        ?>
+                        <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
+                        
+                        <?php 
                             $field = "state_id";
                         ?>
                         <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
-
 
                         <?php 
                             $field = "city_id";

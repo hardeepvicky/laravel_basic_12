@@ -323,6 +323,11 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
     $controllerClass = ExportCountryController::class;
     Route::resource($route_prefix, $controllerClass);
     Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+        $name = "ajax_get";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "ajax_get_by_phonecode";
+        Route::get($name . "/{phonecode}", [$controllerClass, $name])->name($name);
     });
 
     $route_prefix = "export-state";
@@ -334,6 +339,9 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
 
         $name = "de_activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "ajax_get";
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
 
         $name = "ajax_get_list";
@@ -1340,28 +1348,28 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
         Route::post($name, [$controllerClass, $name])->name($name);
 
         $name = "history";
-        Route::get($name . "/{lead_id}", [$controllerClass, $name])->name($name);
+        Route::get($name . "/{exp_lead_id}", [$controllerClass, $name])->name($name);
 
         $name = "history_store";
-        Route::post($name . "/{lead_id}", [$controllerClass, $name])->name($name);
+        Route::post($name . "/{exp_lead_id}", [$controllerClass, $name])->name($name);
 
         $name = "transfer_lead";
-        Route::post($name . "/{lead_id}", [$controllerClass, $name])->name($name);
+        Route::post($name . "/{exp_lead_id}", [$controllerClass, $name])->name($name);
 
         $name = "address";
-        Route::post($name . "/{lead_id}", [$controllerClass, $name])->name($name);
+        Route::post($name . "/{exp_lead_id}", [$controllerClass, $name])->name($name);
 
         $name = "change_files";
-        Route::post($name . "/{lead_id}", [$controllerClass, $name])->name($name);
+        Route::post($name . "/{exp_lead_id}", [$controllerClass, $name])->name($name);
 
         $name = "dispatch";
-        Route::post($name . "/{lead_id}", [$controllerClass, $name])->name($name);
+        Route::post($name . "/{exp_lead_id}", [$controllerClass, $name])->name($name);
 
         $name = "snooze";
-        Route::post($name . "/{lead_id}", [$controllerClass, $name])->name($name);
+        Route::post($name . "/{exp_lead_id}", [$controllerClass, $name])->name($name);
 
         $name = "convert_to_customer";
-        Route::get($name . "/{lead_id}", [$controllerClass, $name])->name($name);
+        Route::get($name . "/{exp_lead_id}", [$controllerClass, $name])->name($name);
 
         $route_prefix = "export";
         Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {

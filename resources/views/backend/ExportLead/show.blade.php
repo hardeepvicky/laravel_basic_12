@@ -72,14 +72,14 @@
                     </div>
                     <div class="col-md-6 col-xxl-3">
                         <label class="info">
+                            {{ get_value_from_list($field_labels, 'country_id', 'country_id') }}
+                            :
+                            <span>{{ $record->country?->getDisplayName() }}</span>
+                        </label>
+                        <label class="info">
                             {{ get_value_from_list($field_labels, 'state_id', 'state_id') }}
                             :
                             <span>{{ $record->state?->getDisplayName() }}</span>
-                        </label>
-                        <label class="info">
-                            {{ get_value_from_list($field_labels, 'district_id', 'district_id') }}
-                            :
-                            <span>{{ $record->district?->getDisplayName() }}</span>
                         </label>
                         <label class="info">
                             {{ get_value_from_list($field_labels, 'city_id', 'city_id') }}
@@ -101,8 +101,8 @@
                             <span>{{ $record->assignTo?->getDisplayName() }}</span>
                         </label>
                         <label class="info">
-                            {{ get_value_from_list($field_labels, 'next_meeting_date_time', 'next_meeting_date_time') }} :
-                            <x-Backend.celec-date-time :value="$record->next_meeting_date_time"/>
+                            {{ get_value_from_list($field_labels, 'next_followup_date_time', 'next_followup_date_time') }} :
+                            <x-Backend.celec-date-time :value="$record->next_followup_date_time"/>
                         </label>
                         <label class="info">
                             {{ get_value_from_list($field_labels, 'remarks', 'remarks') }} :

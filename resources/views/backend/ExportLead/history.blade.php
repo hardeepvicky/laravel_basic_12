@@ -26,7 +26,7 @@ use App\Helpers\DateUtility;
         <div class="card-header card-no-border pb-0">
             History
 
-            <a class="btn btn-secondary call_link" href="tel:+91{{ $record->mobile }}">Call</a>
+            <a class="btn btn-secondary call_link" href="tel:+{{ $record->country->phonecode }}{{ $record->mobile }}">Call</a>
             <div class="btn btn-secondary sms_link">SMS</div>
             <a class="btn btn-secondary whatsapp_link" href="https://web.whatsapp.com/" target="_blank" rel="noopener noreferrer">
                 Whatsapp
@@ -36,11 +36,9 @@ use App\Helpers\DateUtility;
             <div class="btn btn-secondary dispatch_link" data-bs-toggle="modal" data-bs-target="#modal-dispatch-form">Dispatch</div>
             <div class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modal-transfer-form">Transfer</div>
             @if($record->lead_id)
-                <a class="btn btn-secondary confirm" href="{{ route("customer.convert_to_lead", [$record->id])  }}">
-                    Convert To Lead
-                </a>                
+                              
             @elseif(isset($record->is_customer) && !$record->is_customer)
-                <a class="btn btn-secondary confirm" href="{{ route("lead.convert_to_customer", ["lead_id" => $record->id])  }}">
+                <a class="btn btn-secondary confirm" href="{{ route("export-lead.convert_to_customer", [$record->id])  }}">
                     Convert To Customer
                 </a>
             @endif
@@ -68,7 +66,7 @@ use App\Helpers\DateUtility;
                             <th><?= get_value_from_list($history_field_labels, 'remarks', 'remarks') ?></th>
                             <th><?= get_value_from_list($history_field_labels, 'status_type', 'status_type') ?></th>
                             <th><?= get_value_from_list($history_field_labels, 'assign_to_user_id', 'assign_to_user_id') ?></th>
-                            <th style="width:10%"><?= get_value_from_list($history_field_labels, 'next_meeting_date_time', 'next_meeting_date_time') ?></th>
+                            <th style="width:10%"><?= get_value_from_list($history_field_labels, 'next_followup_date_time', 'next_followup_date_time') ?></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -113,7 +111,7 @@ use App\Helpers\DateUtility;
                                 {{ get_value_from_list($userListCache, $history->assign_to_user_id) }}
                             </td>
                             <td>
-                                <x-Backend.created-and-by :datetime="$history->next_meeting_date_time" userId="0" />
+                                <x-Backend.created-and-by :datetime="$history->next_followup_date_time" userId="0" />
                             </td>
                         </tr>
 
@@ -132,7 +130,7 @@ use App\Helpers\DateUtility;
                     <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body" style="height: 80vh; overflow-y:scroll">
-                    <x-form.start action="{{ route('lead.history_store', ['lead_id' => $record->lead_id ?? $record->id]) }}" method="POST" />
+                    <x-form.start action="{{ route('export-lead.history_store', [$record->lead_id ?? $record->id]) }}" method="POST" />
                         <x-Inputs.text-field type="hidden" name="entry_by" :label="$false" value="MANUAL" />
                         <x-Inputs.text-field type="hidden" name="action_type" :label="$false" value="" class="action_type" />
                         <div class="form-group mb-3">
@@ -176,7 +174,7 @@ use App\Helpers\DateUtility;
                         </div>
                         <div class="form-group mb-3">
                             <?php
-                            $field = 'next_meeting_date_time';
+                            $field = 'next_followup_date_time';
                             $label = get_value_from_list($history_field_labels, $field, $field);
                             ?>
                             <x-Inputs.text-field :id="$field" :name="$field" :label="$label" class="next-date-time-picker"/>
@@ -199,7 +197,7 @@ use App\Helpers\DateUtility;
                     <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body" style="height: 40vh; overflow-y:scroll">
-                    <x-form.start action="{{ route('lead.transfer_lead', ['lead_id' => $record->lead_id ?? $record->id]) }}" method="POST" />
+                    <x-form.start action="{{ route('export-lead.transfer_lead', [$record->lead_id ?? $record->id]) }}" method="POST" />
                         <x-Inputs.text-field type="hidden" name="entry_by" :label="$false" value="MANUAL" />
                         <x-Inputs.text-field type="hidden" name="action_type" :label="$false" value="{{ LeadHistory::ACTION_TYPE_LEAD_TRANSFER }}" />
                         <div class="form-group mb-3">
@@ -259,7 +257,7 @@ use App\Helpers\DateUtility;
                     <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body" style="height: 80vh; overflow-y:scroll">
-                    <x-form.start action="{{ route('lead.dispatch', ['lead_id' => $record->lead_id ?? $record->id]) }}" method="POST" />
+                    <x-form.start action="{{ route('export-lead.dispatch', [$record->lead_id ?? $record->id]) }}" method="POST" />
                         <x-Inputs.text-field type="hidden" name="entry_by" :label="$false" value="MANUAL" />
                         <x-Inputs.text-field type="hidden" name="action_type" :label="$false" value="{{ LeadHistory::ACTION_TYPE_DISPATCH }}" />
                         <div class="row">
@@ -277,7 +275,7 @@ use App\Helpers\DateUtility;
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
                                     <?php
-                                    $field = 'next_meeting_date_time';
+                                    $field = 'next_followup_date_time';
                                     $label = get_value_from_list($history_field_labels, $field, $field);
                                     ?>
                                     <x-Inputs.text-field :id="$field" :name="$field" :label="$label" class="next-date-time-picker"/>

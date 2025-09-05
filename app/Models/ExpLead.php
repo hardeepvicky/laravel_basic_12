@@ -27,34 +27,26 @@ class ExpLead extends BaseModel
     protected static array $file_fields = ["image", "video"];
 
     public static array $child_model_class = [
-        LeadAddress::class => [
-            "foreignKey" => ["lead_id"],
+        ExpLeadAddress::class => [
+            "foreignKey" => ["exp_lead_id"],
             "preventDelete" => false
         ],
-        LeadFile::class => [
-            "foreignKey" => ["lead_id"],
+        ExpLeadFile::class => [
+            "foreignKey" => ["exp_lead_id"],
             "preventDelete" => false
         ],
-        LeadProduct::class => [
-            "foreignKey" => ["lead_id"],
+        ExpLeadProduct::class => [  
+            "foreignKey" => ["exp_lead_id"],
             "preventDelete" => false
         ],
-        LeadItem::class => [
-            "foreignKey" => ["lead_id"],
+        ExpLeadItem::class => [
+            "foreignKey" => ["exp_lead_id"],
             "preventDelete" => false
         ],
-        LeadHistory::class => [
-            "foreignKey" => ["lead_id"],
+        ExpLeadHistory::class => [
+            "foreignKey" => ["exp_lead_id"],
             "preventDelete" => true
         ],
-        TaskLead::class => [
-            "foreignKey" => ["lead_id"],
-            "preventDelete" => true
-        ], 
-        TaskCustomer::class => [
-            "foreignKey" => ["lead_id"],
-            "preventDelete" => true
-        ], 
     ];
 
     protected static array $fields_containg_tags = ["description"];
@@ -103,7 +95,7 @@ class ExpLead extends BaseModel
 
     public function afterSave()
     {
-        Contact::createContact("exp-lead", $this->id);
+        ExportContact::createContact("lead", $this->id);
 
         return parent::afterSave();
     }
@@ -122,32 +114,32 @@ class ExpLead extends BaseModel
 
     public function documentFile()
     {
-        return $this->belongsToMany(DocumentFile::class, LeadFile::class);
+        return $this->belongsToMany(DocumentFile::class, ExpLeadFile::class);
     }
 
     public function leadFile()
     {
-        return $this->hasMany(LeadFile::class, 'lead_id');
+        return $this->hasMany(ExpLeadFile::class, 'exp_lead_id');
     }
 
     public function address()
     {
-        return $this->hasMany(LeadAddress::class, 'lead_id');
+        return $this->hasMany(ExpLeadAddress::class, 'exp_lead_id');
     }
 
     public function products()
     {
-        return $this->hasMany(LeadProduct::class, 'lead_id');
+        return $this->hasMany(ExpLeadProduct::class, 'exp_lead_id');
     }
 
     public function items()
     {
-        return $this->hasMany(LeadItem::class, 'lead_id');
+        return $this->hasMany(ExpLeadItem::class, 'exp_lead_id');
     }
 
     public function history()
     {
-        return $this->hasMany(LeadHistory::class, 'lead_id');
+        return $this->hasMany(ExpLeadHistory::class, 'exp_lead_id');
     }
 
     public function country()
@@ -172,17 +164,17 @@ class ExpLead extends BaseModel
 
     public function dealer()
     {
-        return $this->belongsTo(Dealer::class, "dealer_id");
+        return $this->belongsTo(Dealer::class);
     }
 
     public function campaign()
     {
-        return $this->belongsTo(Campaign::class, "campaign_id");
+        return $this->belongsTo(Campaign::class);
     }
 
     public function customer()
     {
-        return $this->hasOne(Customer::class);
+        return $this->hasOne(ExpCustomer::class);
     }
 
     public function getRequiedIfRules(Request $request)
