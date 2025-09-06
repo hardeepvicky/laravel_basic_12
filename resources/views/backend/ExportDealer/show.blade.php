@@ -107,7 +107,7 @@
                         <?php
                         $field = 'dealerFile';
                         $label = get_value_from_list($field_labels, $field, $field);
-                        $value = implode(',', $record->leadFile?->pluck('document_file_id')->toArray() ?? []);
+                        $value = implode(',', $record->dealerFile?->pluck('document_file_id')->toArray() ?? []);
                         ?>
                         <x-Inputs.text-field :id="$field" :name="$field" :label="$label"
                             :value="$value" multiple="multiple" />

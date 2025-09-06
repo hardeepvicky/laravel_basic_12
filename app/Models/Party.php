@@ -202,12 +202,12 @@ class Party extends BaseModel
             }
             else
             {
-                throw new UserException("You are not allowed to change lead history, only assignee or its parent designation user can change it.", UserException::ERROR_USER_ACTION_RESTRICT);
+                throw new UserException("You are not allowed to change history, only assignee or its parent designation user can change it.", UserException::ERROR_USER_ACTION_RESTRICT);
             }
         }
         else if (!is_admin_role_login())
         {
-            throw new UserException("Lead is not assigned, so only Admin can change it.", UserException::ERROR_USER_ACTION_RESTRICT);
+            throw new UserException("Party is not assigned, so only Admin can change it.", UserException::ERROR_USER_ACTION_RESTRICT);
         }
     }
 
@@ -224,7 +224,7 @@ class Party extends BaseModel
             $notification_data = [
                 'from_user_id' => LaravelExtend::getAuthUserId(),
                 "sub_type" => Notification::SUB_TYPE_INFO,
-                "msg" => "Dealer $this->name is assigned to you"
+                "msg" => "Party $this->name is assigned to you"
             ];
 
             $notifyObj = new GeneralNotification($notification_data);

@@ -1219,17 +1219,17 @@ class PartyController extends BackendController
 
             if ($party->status_type == Lead::STATUS_DEAD)
             {
-                throw new UserException("Dealer is dead", UserException::ERROR_USER_ACTION_RESTRICT);
+                throw new UserException("Party is dead", UserException::ERROR_USER_ACTION_RESTRICT);
             }
 
             if ($party->status_type == Lead::STATUS_FAKE)
             {
-                throw new UserException("Dealer is Fake", UserException::ERROR_USER_ACTION_RESTRICT);
+                throw new UserException("Party is Fake", UserException::ERROR_USER_ACTION_RESTRICT);
             }
 
             if ($validatedData['assign_to_user_id'] == $party->assign_to_user_id)
             {
-                throw new UserException("Dealer is already assigned to this user", UserException::ERROR_USER_ACTION_RESTRICT);
+                throw new UserException("Party is already assigned to this user", UserException::ERROR_USER_ACTION_RESTRICT);
             }
             else
             {

@@ -90,7 +90,7 @@ class ExportPartyController extends BackendController
         $builder = $this->modelClass::where($conditions);
 
         $builder->with([
-            "state", "district", "city",
+            "state", "country", "city",
         ]);
 
         if ($apply_sort) {
@@ -1002,7 +1002,7 @@ class ExportPartyController extends BackendController
 
             $party->canChangeHistory();
 
-            $validatedData['party_id'] = $party_id;
+            $validatedData['exp_party_id'] = $party_id;
 
             $model = new ExpPartyHistory();
 
@@ -1114,12 +1114,12 @@ class ExportPartyController extends BackendController
     }
 
 
-    public function change_files($lead_id, Request $request)
+    public function change_files($exp_party_id, Request $request)
     {
-        $lead = $this->modelClass::findOrFail($lead_id);
+        $exp_party = $this->modelClass::findOrFail($exp_party_id);
 
         $rules = [
-            "dealerFile" => ["required"],
+            "partyFile" => ["required"],
         ];
 
         $validatedData = $request->validate($rules);
@@ -1128,13 +1128,13 @@ class ExportPartyController extends BackendController
 
         try {
 
-            if (isset($validatedData['dealerFile'])) {
+            if (isset($validatedData['partyFile'])) {
 
-                $ids = explode(",", $validatedData['dealerFile']);
+                $ids = explode(",", $validatedData['partyFile']);
 
                 $document_files = DocumentFile::find($ids);
 
-                $lead->documentFile()->sync($document_files);
+                $exp_party->documentFile()->sync($document_files);
             }
 
             if (LaravelExtend::$errors) {
@@ -1192,9 +1192,9 @@ class ExportPartyController extends BackendController
     }
 
 
-    public function transfer($party_id, Request $request)
+    public function transfer($exp_party_id, Request $request)
     {
-        $party = $this->modelClass::findOrFail($party_id);
+        $party = $this->modelClass::findOrFail($exp_party_id);
 
         $rules = [
             "action_type" => ["required"],
@@ -1210,17 +1210,17 @@ class ExportPartyController extends BackendController
 
             if ($party->status_type == Lead::STATUS_DEAD)
             {
-                throw new UserException("Dealer is dead", UserException::ERROR_USER_ACTION_RESTRICT);
+                throw new UserException("Party is dead", UserException::ERROR_USER_ACTION_RESTRICT);
             }
 
             if ($party->status_type == Lead::STATUS_FAKE)
             {
-                throw new UserException("Dealer is Fake", UserException::ERROR_USER_ACTION_RESTRICT);
+                throw new UserException("Party is Fake", UserException::ERROR_USER_ACTION_RESTRICT);
             }
 
             if ($validatedData['assign_to_user_id'] == $party->assign_to_user_id)
             {
-                throw new UserException("Dealer is already assigned to this user", UserException::ERROR_USER_ACTION_RESTRICT);
+                throw new UserException("Party is already assigned to this user", UserException::ERROR_USER_ACTION_RESTRICT);
             }
             else
             {

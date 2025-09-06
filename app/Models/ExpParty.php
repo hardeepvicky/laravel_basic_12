@@ -26,10 +26,18 @@ class ExpParty extends BaseModel
     const TYPE_CARRIER = "CARRIER";
 
     public static array $child_model_class = [
-        // TaskParty::class => [
-        //     "foreignKey" => ["party_id"],
-        //     "preventDelete" => true
-        // ],        
+        ExpPartyAddress::class => [
+            "foreignKey" => ["exp_party_id"],
+            "preventDelete" => false
+        ],
+        ExpPartyFile::class => [
+            "foreignKey" => ["exp_party_id"],
+            "preventDelete" => false
+        ],
+        ExpPartyTerm::class => [
+            "foreignKey" => ["exp_party_id"],
+            "preventDelete" => false
+        ],        
     ];
 
     protected static array $fields_containg_tags = ["description"];
@@ -68,22 +76,22 @@ class ExpParty extends BaseModel
 
     public function documentFile()
     {
-        return $this->belongsToMany(DocumentFile::class, PartyFile::class);
+        return $this->belongsToMany(DocumentFile::class, ExpPartyFile::class);
     }
 
     public function partyFile()
     {
-        return $this->hasMany(PartyFile::class, 'exp_party_id');
+        return $this->hasMany(ExpPartyFile::class, 'exp_party_id');
     }
 
     public function terms()
     {
-        return $this->hasMany(PartyTerm::class, 'exp_party_id');
+        return $this->hasMany(ExpPartyTerm::class, 'exp_party_id');
     }
 
     public function address()
     {
-        return $this->hasMany(PartyAddress::class, 'exp_party_id');
+        return $this->hasMany(ExpPartyAddress::class, 'exp_party_id');
     }
 
     public function state()
@@ -202,12 +210,12 @@ class ExpParty extends BaseModel
             }
             else
             {
-                throw new UserException("You are not allowed to change lead history, only assignee or its parent designation user can change it.", UserException::ERROR_USER_ACTION_RESTRICT);
+                throw new UserException("You are not allowed to change history, only assignee or its parent designation user can change it.", UserException::ERROR_USER_ACTION_RESTRICT);
             }
         }
         else if (!is_admin_role_login())
         {
-            throw new UserException("Lead is not assigned, so only Admin can change it.", UserException::ERROR_USER_ACTION_RESTRICT);
+            throw new UserException("Export Party is not assigned, so only Admin can change it.", UserException::ERROR_USER_ACTION_RESTRICT);
         }
     }
 
@@ -218,13 +226,13 @@ class ExpParty extends BaseModel
             $this->assign_to_user_id = $data['assign_to_user_id'];
             $this->save();
 
-            $data['party_id'] = $this->id;
-            PartyHistory::create($data);
+            $data['exp_party_id'] = $this->id;
+            ExpPartyHistory::create($data);
 
             $notification_data = [
                 'from_user_id' => LaravelExtend::getAuthUserId(),
                 "sub_type" => Notification::SUB_TYPE_INFO,
-                "msg" => "Dealer $this->name is assigned to you"
+                "msg" => "Export Party $this->name is assigned to you"
             ];
 
             $notifyObj = new GeneralNotification($notification_data);
