@@ -20,13 +20,21 @@
                 </th>
                 <th style="width:8%">
                     <?php
-                    $field = 'last_followup_date_time';
+                    $field = 'from_last_followup_date_time';
+                    ?>
+                    <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]" class="form-control-sm date-picker" />
+                    <?php
+                    $field = 'to_last_followup_date_time';
                     ?>
                     <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]" class="form-control-sm date-picker" />
                 </th>
                 <th style="width:8%">
                     <?php
-                    $field = 'next_followup_date_time';
+                    $field = 'from_next_followup_date_time';
+                    ?>
+                    <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]" class="form-control-sm date-picker" />
+                    <?php
+                    $field = 'to_next_followup_date_time';
                     ?>
                     <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]" class="form-control-sm date-picker" />
                 </th>
@@ -43,6 +51,7 @@
                     <x-Inputs.drop-down :name="$field" :label="$false" :value="$search[$field]" :list="$state_list"
                         pleaseSelect="All"
                         class="modal-select2 form-select-sm mb-1" />
+
                     <?php
                     $field = 'city_id';
                     ?>
@@ -71,10 +80,10 @@
                 <th><?= sortable_anchor('next_followup_date_time', 'Next') ?></th>
                 <th><?= sortable_anchor('mobile', 'Mobile') ?></th>
                 <th>Location</th>
-                <th>Product</th>
+                <th>Model</th>
                 <th><?= sortable_anchor('status_type', 'Status') ?></th>
-                <th><?= sortable_anchor('action_type', 'Action Type') ?></th>
-                <th><?= sortable_anchor('response_type_id', 'Response Type') ?></th>
+                <th><?= sortable_anchor('action_type', 'Action') ?></th>
+                <th><?= sortable_anchor('response_type_id', 'Response') ?></th>
                 <th><?= sortable_anchor('remarks', 'Remarks') ?></th>
                 <th>Created By</th>
             </tr>
@@ -140,8 +149,8 @@
                             @endif
                         @endif               
                     </td>
-                    <td>{{ $record->status_type }}</td>
-                    <td>{{ $record->action_type }}</td>
+                    <td>{{ get_value_from_list($status_type_list, $record->status_type) }}</td>
+                    <td>{{ get_value_from_list($action_type_list, $record->action_type) }}</td>
                     <td>{{ get_value_from_list($response_type_list, $record->response_type_id) }}</td>
                     <td>{{ $record->remarks }}</td>
                     

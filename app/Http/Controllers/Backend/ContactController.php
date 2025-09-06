@@ -8,8 +8,11 @@ use App\Models\City;
 use App\Models\Country;
 use App\Models\DropDownValue;
 use App\Models\FieldSetting;
+use App\Models\Lead;
+use App\Models\LeadHistory;
 use App\Models\Product;
 use App\Models\State;
+use App\Models\Type;
 use App\Models\ViewContact;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -44,8 +47,10 @@ class ContactController extends BackendController
         $conditions = $this->getConditions($cache_key, [
             ["field" => "id", "type" => "int", "cache" => false],
             ["field" => "type", "type" => "string_equal"],
-            ["field" => "last_followup_date_time", "type" => "date"],
-            ["field" => "next_followup_date_time", "type" => "date"],
+            ["field" => "from_last_followup_date_time", "type" => "date"],
+            ["field" => "to_last_followup_date_time", "type" => "date"],
+            ["field" => "from_next_followup_date_time", "type" => "date"],
+            ["field" => "to_next_followup_date_time", "type" => "date"],
             ["field" => "name", "type" => "string"],
             ["field" => "mobile", "type" => "string"],
             ["field" => "mobile2", "type" => "string"],
@@ -68,17 +73,27 @@ class ContactController extends BackendController
 
         $this->model = new $this->modelClass();
 
-        if (isset($condition_list['last_followup_date_time']))
+        if (isset($condition_list['from_last_followup_date_time']))
         {
-            $builder->whereDate('last_followup_date_time', $condition_list['last_followup_date_time']);
+            $builder->whereDate('last_followup_date_time', ">=", $condition_list['from_last_followup_date_time']);
         }
 
-        if (isset($condition_list['next_followup_date_time']))
+        if (isset($condition_list['to_last_followup_date_time']))
         {
-            $builder->whereDate('next_followup_date_time', $condition_list['next_followup_date_time']);
+            $builder->whereDate('last_followup_date_time', "<=", $condition_list['to_last_followup_date_time']);
         }
 
-        $conditions = $array_helper->unsetValues($conditions, ["last_followup_date_time", "next_followup_date_time"], true, [ArrayHelper::UNSET_VALUE_REMOVE_PARENT_IF_FOUND_CHILD]);
+        if (isset($condition_list['from_next_followup_date_time']))
+        {
+            $builder->whereDate('next_followup_date_time', ">=", $condition_list['from_next_followup_date_time']);
+        }
+
+        if (isset($condition_list['to_next_followup_date_time']))
+        {
+            $builder->whereDate('next_followup_date_time', "<=", $condition_list['to_next_followup_date_time']);
+        }
+
+        $conditions = $array_helper->unsetValues($conditions, ["from_last_followup_date_time", "to_last_followup_date_time", "from_next_followup_date_time", "to_next_followup_date_time"], true, [ArrayHelper::UNSET_VALUE_REMOVE_PARENT_IF_FOUND_CHILD]);
 
         $builder->where($conditions);
 
@@ -201,13 +216,30 @@ class ContactController extends BackendController
 
         $state_list = State::getIndianList();
 
+        $lead = new Lead();
+
+        $type_conditions = [
+            'type' => Type::getType($lead, "status_type")
+        ];
+
+        $status_type_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
+
+        $type_conditions = [
+            'type' => Type::getType(new LeadHistory(), "action_type")
+        ];
+
+        $action_type_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
+
         $response_type_list = DropDownValue::getList("id", "display_name", ["type" =>  DropDownValue::LEAD_HISTORY_RESPONSE], "list_display_order");
 
         $product_list = Product::getList("id", "model_name", [], "list_display_order");
 
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
-        $this->setForView(compact("type_list", "state_list", "product_list", "response_type_list", "field_labels"));
+        $this->setForView(compact(
+            "type_list", "state_list", "product_list", "response_type_list", "status_type_list", "action_type_list",
+            "field_labels"
+        ));
 
         return parent::beforeViewRender();
     }

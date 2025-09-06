@@ -50,6 +50,8 @@ class ExportContactController extends BackendController
 
         $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
 
+        // d(LaravelExtend::getQueryLog("", -5), true);
+
         // d($records->toArray(), true);
 
         $this->setForView(compact("records"));
@@ -64,8 +66,10 @@ class ExportContactController extends BackendController
         $conditions = $this->getConditions($cache_key, [
             ["field" => "id", "type" => "int", "cache" => false],
             ["field" => "type", "type" => "string_equal"],
-            ["field" => "last_followup_date_time", "type" => "date"],
-            ["field" => "next_followup_date_time", "type" => "date"],
+            ["field" => "from_last_followup_date_time", "type" => "date"],
+            ["field" => "to_last_followup_date_time", "type" => "date"],
+            ["field" => "from_next_followup_date_time", "type" => "date"],
+            ["field" => "to_next_followup_date_time", "type" => "date"],
             ["field" => "name", "type" => "string"],
             ["field" => "mobile", "type" => "string"],
             ["field" => "mobile2", "type" => "string"],
@@ -79,7 +83,7 @@ class ExportContactController extends BackendController
             ["field" => "products.id", "type" => "int", "view_field" => "product_id"],
         ]);
 
-        // d($conditions, true);
+        // d($conditions);
 
         $array_helper =  new ArrayHelper($conditions);
         $condition_list = $array_helper->convertModelSearchConditionToList();
@@ -88,17 +92,27 @@ class ExportContactController extends BackendController
 
         $this->model = new $this->modelClass();
 
-        if (isset($condition_list['last_followup_date_time']))
+        if (isset($condition_list['from_last_followup_date_time']))
         {
-            $builder->whereDate('last_followup_date_time', $condition_list['last_followup_date_time']);
+            $builder->whereDate('last_followup_date_time', ">=", $condition_list['from_last_followup_date_time']);
         }
 
-        if (isset($condition_list['next_followup_date_time']))
+        if (isset($condition_list['to_last_followup_date_time']))
         {
-            $builder->whereDate('next_followup_date_time', $condition_list['next_followup_date_time']);
+            $builder->whereDate('last_followup_date_time', "<=", $condition_list['to_last_followup_date_time']);
         }
 
-        $conditions = $array_helper->unsetValues($conditions, ["last_followup_date_time", "next_followup_date_time"], true, [ArrayHelper::UNSET_VALUE_REMOVE_PARENT_IF_FOUND_CHILD]);
+        if (isset($condition_list['from_next_followup_date_time']))
+        {
+            $builder->whereDate('next_followup_date_time', ">=", $condition_list['from_next_followup_date_time']);
+        }
+
+        if (isset($condition_list['to_next_followup_date_time']))
+        {
+            $builder->whereDate('next_followup_date_time', "<=", $condition_list['to_next_followup_date_time']);
+        }
+
+        $conditions = $array_helper->unsetValues($conditions, ["from_last_followup_date_time", "to_last_followup_date_time", "from_next_followup_date_time", "to_next_followup_date_time"], true, [ArrayHelper::UNSET_VALUE_REMOVE_PARENT_IF_FOUND_CHILD]);
 
         $builder->where($conditions);
 
