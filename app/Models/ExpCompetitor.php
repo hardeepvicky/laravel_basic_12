@@ -17,18 +17,22 @@ class ExpCompetitor extends BaseModel
     protected static array $list_fields = ["id", "name", "alias", "mobile", "city_id"];
 
     public static array $child_model_class = [
-        // CompetitorAddress::class => [
-        //     "foreignKey" => ["competitor_id"],
-        //     "preventDelete" => false
-        // ],
-        // CompetitorFile::class => [
-        //     "foreignKey" => ["competitor_id"],
-        //     "preventDelete" => false
-        // ],
-        // CompetitorLink::class => [
-        //     "foreignKey" => ["competitor_id"],
-        //     "preventDelete" => false
-        // ],        
+        ExpCompetitorAddress::class => [
+            "foreignKey" => ["exp_competitor_id"],
+            "preventDelete" => false
+        ],
+        ExpCompetitorFile::class => [
+            "foreignKey" => ["exp_competitor_id"],
+            "preventDelete" => false
+        ],
+        ExpCompetitorLink::class => [
+            "foreignKey" => ["exp_competitor_id"],
+            "preventDelete" => false
+        ],
+        ExpCompetitorProductCategory::class => [
+            "foreignKey" => ["exp_competitor_id"],
+            "preventDelete" => false
+        ],
     ];
 
     protected function getDisplayNameAttribute()
@@ -74,47 +78,47 @@ class ExpCompetitor extends BaseModel
 
     public function documentFile()
     {
-        return $this->belongsToMany(DocumentFile::class, CompetitorFile::class);
+        return $this->belongsToMany(DocumentFile::class, ExpCompetitorFile::class);
     }
 
     public function productCategory()
     {
-        return $this->belongsToMany(ProductCategory::class, CompetitorProductCategory::class);
+        return $this->belongsToMany(ProductCategory::class, ExpCompetitorProductCategory::class);
     }
 
     public function competitorProductCategory()
     {
-        return $this->hasMany(CompetitorProductCategory::class, 'competitor_id');
+        return $this->hasMany(ExpCompetitorProductCategory::class, 'exp_competitor_id');
     }
 
     public function files()
     {
-        return $this->hasMany(CompetitorFile::class, 'competitor_id');
+        return $this->hasMany(ExpCompetitorFile::class, 'exp_competitor_id');
     }
 
     public function address()
     {
-        return $this->hasMany(CompetitorAddress::class, 'competitor_id');
+        return $this->hasMany(ExpCompetitorAddress::class, 'exp_competitor_id');
     }
 
     public function links()
     {
-        return $this->hasMany(CompetitorLink::class, 'competitor_id');
+        return $this->hasMany(ExpCompetitorLink::class, 'exp_competitor_id');
     }
 
     public function state()
     {
-        return $this->belongsTo(State::class);
+        return $this->belongsTo(ExpState::class);
     }
 
-    public function district()
+    public function country()
     {
-        return $this->belongsTo(District::class);
+        return $this->belongsTo(ExpCountry::class);
     }
 
     public function city()
     {
-        return $this->belongsTo(City::class);
+        return $this->belongsTo(ExpCity::class);
     }
 
     public function getUniqueValidationRules(Request $request)

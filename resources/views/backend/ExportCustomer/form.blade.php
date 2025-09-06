@@ -36,7 +36,7 @@
                             <x-Inputs.text-field :id="$field" :name="$field" :label="$label"
                                 :value="$model->{$field}"
                                 layout="horizontal"
-                                class="validate-mobile"
+                                class=""
                                 placeholder="Enter {{ $label }}"
                                 autocomplete="off"
                                 mandatory="true" />
@@ -48,7 +48,7 @@
                             <x-Inputs.text-field :name="$field" :label="$label"
                                 :value="$model->{$field}"
                                 layout="horizontal"
-                                class="validate-mobile"
+                                class=""
                                 placeholder="Enter {{ $label }}"
                             />
 

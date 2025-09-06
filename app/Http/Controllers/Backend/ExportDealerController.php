@@ -895,8 +895,8 @@ class ExportDealerController extends BackendController
                 $field_labels['email'] => $record['email'] ?? "",
                 $field_labels['company_name'] => $record['company_name'] ?? "",
                 $field_labels['gst_no'] => $record['gst_no'] ?? "",
+                $field_labels['country_id'] => $record['country']['name'] ?? "",
                 $field_labels['state_id'] => $record['state']['name'] ?? "",
-                $field_labels['country_id'] => $record['district']['name'] ?? "",
                 $field_labels['city_id'] => $record['city']['name'] ?? "",
                 $field_labels['description'] => $record['description'] ?? "",
 

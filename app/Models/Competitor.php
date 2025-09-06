@@ -28,7 +28,11 @@ class Competitor extends BaseModel
         CompetitorLink::class => [
             "foreignKey" => ["competitor_id"],
             "preventDelete" => false
-        ],        
+        ], 
+        CompetitorProductCategory::class => [
+            "foreignKey" => ["competitor_id"],
+            "preventDelete" => false
+        ],       
     ];
 
     protected function getDisplayNameAttribute()

@@ -658,7 +658,7 @@ class CompetitorController extends BackendController
 
                             if ($city)
                             {
-                                $record['city_id'] = $district->id;
+                                $record['city_id'] = $city->id;
                                 $msg_list['City Found']++;
                             }
                             else

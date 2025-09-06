@@ -29,6 +29,7 @@ use App\Http\Controllers\Backend\EmailTemplateController;
 use App\Http\Controllers\Backend\EmployeeController;
 use App\Http\Controllers\Backend\EnquiryController as BackendEnquiryController;
 use App\Http\Controllers\Backend\ExportCityController;
+use App\Http\Controllers\Backend\ExportCompetitorController;
 use App\Http\Controllers\Backend\ExportContactController;
 use App\Http\Controllers\Backend\ExportCountryController;
 use App\Http\Controllers\Backend\ExportCustomerController;
@@ -1503,6 +1504,39 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
 
         $name = "change_files";
         Route::post($name . "/{exp_party_id}", [$controllerClass, $name])->name($name);
+
+        $route_prefix = "export";
+        Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+            $name = "csv";
+            Route::get($name, [$controllerClass, "export_" . $name])->name($name);
+        });
+
+        $route_prefix = "import";
+        Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+            $name = "csv";
+            Route::any($name, [$controllerClass, "import_". $name])->name($name);
+        });
+    });
+
+    $route_prefix = "export-competitor";
+    $controllerClass = ExportCompetitorController::class;
+    Route::resource($route_prefix, $controllerClass);
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
+        $name = "copy";
+        Route::get("{id}/" . $name, [$controllerClass, $name])->name($name);
+
+        $name = "activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "de_activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "ajax_get_list";
+        Route::get($name . "/{type}", [$controllerClass, $name])->name($name);
+
+        $name = "ajax_update_field";
+        Route::post($name, [$controllerClass, $name])->name($name);
 
         $route_prefix = "export";
         Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {

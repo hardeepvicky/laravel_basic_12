@@ -51,7 +51,7 @@
                             $label = get_value_from_list($field_labels, $field, $field);
                             ?>
                             <x-Inputs.text-field :name="$field" :label="$label"
-                                :value="$model->{$field}" class="validate-mobile"
+                                :value="$model->{$field}" class=""
                                 placeholder="Enter {{ $label }}" 
                                 layout="horizontal"
                                 mandatory="true" />
@@ -61,7 +61,7 @@
                             $label = get_value_from_list($field_labels, $field, $field);
                             ?>
                             <x-Inputs.text-field :name="$field" :label="$label"
-                                :value="$model->{$field}" class="validate-mobile"
+                                :value="$model->{$field}" class=""
                                 placeholder="Enter {{ $label }}"
                                 layout="horizontal"
                                 />
