@@ -101,7 +101,7 @@
                         </label>
                         <label class="info">
                             {{ get_value_from_list($field_labels, 'next_followup_date_time', 'next_followup_date_time') }} :
-                            <x-Backend.celec-date-time :value="$record->next_followup_date_time"/>
+                            <x-Backend.celec-date-time :value="$record->next_followup_date_time" :utcDate="$record->next_followup_date_time_original" :timezone="$record->state->timezone"/>
                         </label>
                         <label class="info">
                             {{ get_value_from_list($field_labels, 'remarks', 'remarks') }} :

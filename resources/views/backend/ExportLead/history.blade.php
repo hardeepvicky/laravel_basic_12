@@ -35,8 +35,10 @@ use App\Helpers\DateUtility;
             <div class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modal-snooze-form">Snooze</div>
             <div class="btn btn-secondary dispatch_link" data-bs-toggle="modal" data-bs-target="#modal-dispatch-form">Dispatch</div>
             <div class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modal-transfer-form">Transfer</div>
-            @if($record->lead_id)
-                              
+            @if($record->exp_lead_id)
+                <a class="btn btn-secondary confirm" href="{{ route("export-customer.convert_to_lead", [$record->exp_lead_id])  }}">
+                    Convert To Lead
+                </a>          
             @elseif(isset($record->is_customer) && !$record->is_customer)
                 <a class="btn btn-secondary confirm" href="{{ route("export-lead.convert_to_customer", [$record->id])  }}">
                     Convert To Customer
@@ -111,7 +113,7 @@ use App\Helpers\DateUtility;
                                 {{ get_value_from_list($userListCache, $history->assign_to_user_id) }}
                             </td>
                             <td>
-                                <x-Backend.created-and-by :datetime="$history->next_followup_date_time" userId="0" />
+                                <x-Backend.celec-date-time :value="$history->next_followup_date_time" :utcDate="$history->next_followup_date_time_original" :timezone="$record->state->timezone"/>
                             </td>
                         </tr>
 

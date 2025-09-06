@@ -2,8 +2,8 @@
 
 /**
  * Date Utility
- * 
- * 
+ *
+ *
  * @created    08-11-2016
  * @copyright  Copyright (C) 2016
  * @license    Proprietary
@@ -37,7 +37,7 @@ class DateUtility
     public static \DateTimeZone | null $login_user_time_zone = null;
 
     /**
-     * convert time string to standered date object 
+     * convert time string to standered date object
      * @param String $date
      * @param $timezone
      * @return DateTime object
@@ -48,7 +48,7 @@ class DateUtility
 
             if (is_int($date)) {
                 $timestamp = $date;
-            } 
+            }
             else if (is_object($date))
             {
                 return $date;
@@ -73,7 +73,7 @@ class DateUtility
      * Convert String Date to Specfic String date Format
      * If Date is given null then current date is formated
      * It does not change the timezone of date
-     * 
+     *
      * @param String $date NULL
      * @param String $format NULL
      * @param $timezone NULL
@@ -95,7 +95,7 @@ class DateUtility
 
     /**
      * compare dates and return the diffrence between them
-     * 
+     *
      * @param String $start_date
      * @param String $end_date
      * @param int $type
@@ -157,10 +157,10 @@ class DateUtility
 
     /**
      * compare two dates
-     * 
+     *
      * if from_date is greater than to_date then return > 0
      * if not return < 0
-     * 
+     *
      * @param type $first_date
      * @param type $second_date
      * @return int
@@ -189,7 +189,7 @@ class DateUtility
 
     /**
      * Add/Remove days/Months/Years/Weeks/Hours/Seconds in date
-     * 
+     *
      * @param String $date
      * @param String $duration
      * @param String $duration_type
@@ -221,11 +221,11 @@ class DateUtility
 
     /**
      * return day list between two dates
-     * 
+     *
      * @param String $start_date
      * @param String $end_date
      * @param String $key_format {n}, 'Y-m-d', 'd'
-     * @param String $format 
+     * @param String $format
      * @return type
      */
     public static function getDayListBetweenTwoDates($start_date, $end_date, $key_format = "{n}", $format = NULL, $hierarchy = FALSE)
@@ -269,7 +269,7 @@ class DateUtility
 
     /**
      * return month list between two dates
-     * 
+     *
      * @param String $start_date
      * @param String $end_date
      * @return type
@@ -323,7 +323,7 @@ class DateUtility
 
     public static function getCelecDate($date, $timezone = null)
     {
-        $dt = self::getDateObj($date, $timezone);        
+        $dt = self::getDateObj($date, $timezone);
 
         $ret_array['date'] = $dt->format(self::DATE_OUT_FORMAT);
         $ret_array['time'] = $dt->format(self::TIME_OUT_FORMAT);

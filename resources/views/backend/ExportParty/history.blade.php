@@ -87,7 +87,7 @@ use App\Helpers\DateUtility;
                                 {{ get_value_from_list($userListCache, $history->assign_to_user_id) }}
                             </td>
                             <td>
-                                <x-Backend.created-and-by :datetime="$history->next_meeting_date_time" userId="0" />
+                                <x-Backend.celec-date-time :value="$history->next_followup_date_time" :utcDate="$history->next_followup_date_time_original" :timezone="$record->state->timezone"/>
                             </td>
                         </tr>
 
