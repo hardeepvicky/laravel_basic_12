@@ -6,6 +6,7 @@ use App\Exceptions\UserException;
 use App\Helpers\ArrayHelper;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 trait CacheTrait
 {
@@ -14,135 +15,93 @@ trait CacheTrait
 
     public static function optimizeCacheKey($key): string
     {
-        $str = preg_replace('/[^a-zA-Z0-9]+/', '-', $key);
+        $str = preg_replace('/[^a-zA-Z0-9_|-]+/', '-', $key);
 
         return $str;
     }
 
-    public static function getCache($key)
+    public static function getCache($key, array $tags = [])
     {
         $base_cache_key = static::getCacheKey();
 
-        $cache_key = $base_cache_key . "-" . static::optimizeCacheKey($key);
+        $cache_key = static::optimizeCacheKey($key);
 
-        $result = null;
+        $tags[] = $base_cache_key;
 
-        if (Cache::has($cache_key)) {
-            $result = Cache::get($cache_key);
-            self::addLog($base_cache_key, "get", $cache_key, $result);
-        }
-        else
+        foreach($tags as $k => $tag)
         {
-            self::addLog($base_cache_key, "not-found", $cache_key);
+            $tags[$k] = static::optimizeCacheKey($tag);
         }
 
-        return $result;
+        $instance = Cache::tags($tags);
+
+        return $instance->get($cache_key);
     }
 
-    public static function addCache($key, $data, $cache_time_in_seconds = null)
+    public static function addCache($key, $data, $cache_time_in_seconds = null, array $tags = [])
     {
-        if (!$cache_time_in_seconds)
-        {
+        if (!$cache_time_in_seconds) {
             $cache_time_in_seconds = static::$cache_time_in_seconds;
         }
 
         $base_cache_key = static::getCacheKey();
 
-        $cache_key = $base_cache_key . "-" . static::optimizeCacheKey($key);
+        $tags[] = $base_cache_key;
+
+        foreach($tags as $k => $tag)
+        {
+            $tags[$k] = static::optimizeCacheKey($tag);
+        }
+
+        $instance = Cache::tags($tags);
+
+        $cache_key = static::optimizeCacheKey($key);
 
         //put cache
-        if (!Cache::put($cache_key, $data, $cache_time_in_seconds))
-        {
+        if (!$instance->put($cache_key, $data, $cache_time_in_seconds)) {
             throw new UserException("Fail To Put Cache", UserException::ERROR_LARAVEL_FAIL);
         }
-        else
-        {
-            self::addLog($base_cache_key, "put", $cache_key, $data);
-        }
 
-        //make refrence to cache keys 
-        $list_of_cache_keys = [];
-        if (Cache::has($base_cache_key)) {
-            $list_of_cache_keys = Cache::get($base_cache_key);
-            self::addLog($base_cache_key, "get", $base_cache_key, $list_of_cache_keys);
-        }
-        else
-        {
-            self::addLog($base_cache_key, "not-found", $base_cache_key);
-        }
-
-        if (!in_array($cache_key, $list_of_cache_keys)) {
-            $list_of_cache_keys[] = $cache_key;
-        }
-
-        if (!Cache::put($base_cache_key, $list_of_cache_keys, $cache_time_in_seconds)) {
-            throw new UserException("Fail To Put Cache", UserException::ERROR_LARAVEL_FAIL);
-        }
-        else
-        {
-            self::addLog($base_cache_key, "put", $base_cache_key, $list_of_cache_keys);
-        }
+        Log::debug("Cache-put", [
+            "tags" => $tags,
+            "key" => $cache_key,
+            "time" => $cache_time_in_seconds,
+            "data" => $data
+        ]);
     }
 
-    public static function forgotCache($key = null)
+    public static function forgotCache($key = null, array $tags = [])
     {
         $base_cache_key = static::getCacheKey();
 
-        if (Cache::has($base_cache_key)) {
-            $list_of_cache_keys = Cache::get($base_cache_key);
+        if (empty($tags))
+        {
+            $tags = [$base_cache_key];
+        }
 
-            self::addLog($base_cache_key, "get", $base_cache_key, $list_of_cache_keys);
+        foreach($tags as $k => $tag)
+        {
+            $tags[$k] = static::optimizeCacheKey($tag);
+        }
 
-            foreach ($list_of_cache_keys as $cache_key) {
-                if (is_null($key) || $cache_key == $key)
-                {
-                    if (Cache::has($cache_key))
-                    {
-                        if (!Cache::forget($cache_key))
-                        {
-                            throw new UserException("Fail To Forgot Cache", UserException::ERROR_LARAVEL_FAIL);
-                        }
-                        else
-                        {
-                            self::addLog($base_cache_key, "forget", $cache_key);
-                        }
-                    }
-                    else
-                    {
-                        self::addLog($base_cache_key, "not-found", $cache_key);
-                    }
-                }
-            }
+        $instance = Cache::tags($tags);
+
+        if ($key)
+        {
+            $cache_key = static::optimizeCacheKey($key);
+            $instance->forget($cache_key);
+
+            Log::debug("Cache-forget", [
+                "tags" => $tags,
+                "key" => $cache_key,
+            ]);
         }
         else
         {
-            self::addLog($base_cache_key, "not-found", $base_cache_key);
+            $instance->flush();
+            Log::debug("Cache-flush", [
+                "tags" => $tags,
+            ]);
         }
-    }
-
-    protected static function addLog($base_cache_key, string $op, $cache_key, $data = null)
-    {
-        $cache_log_level = env("APP_CACHE_LOG_LEVEL", 0);
-
-        if ($cache_log_level == 0)
-        {
-            return;
-        }
-
-        if ($cache_log_level == 1)
-        {
-            $data = null;
-        }
-        
-        if (is_array($data) && count($data) > 0)
-        {
-            $data = array_purge_if_exceed_limit($data, 20, true);
-        }
-
-        self::$cache_logs[$base_cache_key][] = [
-            "op" => $op,
-            "cache_key" => $cache_key,
-            "data" => $data
-        ];
     }
 }

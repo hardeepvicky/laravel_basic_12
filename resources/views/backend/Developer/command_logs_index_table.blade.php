@@ -14,8 +14,9 @@ use App\Helpers\Util;
                     <tr class="border-bottom-primary">
                         <th>Command</th>
                         <th>Description</th>
-                        <th><?= sortable_anchor('exec_time', 'Time Taken (Seconds)') ?></th>                        
+                        <th><?= sortable_anchor('exec_time', 'Time Taken (Seconds)') ?></th>
                         <th>Info</th>
+                        <th style="width: 30%">Console Output</th>
                         <th>
                             <?= sortable_anchor('created_at', 'Created') ?>
                             | <?= sortable_anchor('updated_at', 'Updated') ?>
@@ -31,38 +32,41 @@ use App\Helpers\Util;
                         <td>{{ Util::niceTime($record->exec_time) }}</td>
                         <td>
                             @if(isset($record->info) && is_array($record->info))
-                            <div id="info-{{ $record->id }}" class="h-200">
+                            <div id="info-{{ $record->id }}" class="mx-h-200">
                                 {!! array_print($record->info) !!}
                             </div>
 
                             <span class="btn btn-info btn-sm css-toggler mt-1 mb-1"
                                 data-sr-css-class-toggle-target="#info-{{ $record->id }}"
-                                data-sr-css-class-toggle-class="h-200" data-sr-css-class-toggle-applied-text="More"
+                                data-sr-css-class-toggle-class="mx-h-200" data-sr-css-class-toggle-applied-text="More"
                                 data-sr-css-class-toggle-not-applied-text="Less">
                                 More
                             </span>
                             @endif
-                        </td>                        
-                        <td>
-                            <x-Backend.index-table-info :record="$record" :userList="$userListCache" />
                         </td>
                         <td>
-                            <div class="mt-2 mb-2">
-                                @if (isset($record->sql_log_file_url))
-                                <a href="{{ $record->sql_log_file_url }}"
-                                    class="btn btn-outline-secondary">
-                                    <i class="fas fa-download"></i>
-                                    SQL Log
-                                </a>
-                                @endif
-
-                                @if (isset($record->sql_dml_log_file_url))
-                                <a href="{{ $record->sql_dml_log_file_url }}"
-                                    class="btn btn-outline-secondary">
-                                    <i class="fas fa-download"></i>
-                                    DML SQL Log
-                                </a>
+                            @if(isset($record->output) && is_array($record->output))
+                            <div id="output-{{ $record->id }}" class="mx-h-200">
+                                {!! array_print($record->output, 80) !!}
                             </div>
+
+                            <span class="btn btn-info btn-sm css-toggler mt-1 mb-1"
+                                data-sr-css-class-toggle-target="#output-{{ $record->id }}"
+                                data-sr-css-class-toggle-class="mx-h-200" data-sr-css-class-toggle-applied-text="More"
+                                data-sr-css-class-toggle-not-applied-text="Less">
+                                More
+                            </span>
+                            @endif
+                        </td>
+                        <td>
+                            <x-Backend.index-table-info :record="$record" :userList="$userListCache"
+                                :options="$index_table_info_options" />
+                        </td>
+                        <td>
+                            @if($record->sql_log_id)
+                            <a class="btn btn-outline-secondary mt-2 mb-2"  href="{{ route('developer.sql_logs', ['id' => $record->sql_log_id ])  }}">
+                                Open SQL Log Link
+                            </a>
                             @endif
                         </td>
                     </tr>

@@ -3,140 +3,99 @@
 namespace App\Models;
 
 use App\Exceptions\UserException;
-use App\Helpers\ArrayHelper;
 use App\Helpers\DateUtility;
+use App\Helpers\LaravelExtend;
+use App\Notifications\TaskStatusChange;
 use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\Unique;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class Task extends BaseModel
 {
     use HasFactory;
+
     protected $appends = [
         'display_name',
     ];
 
     protected $casts = [
-        'start_date_time' => 'date',
-        'end_date_time' => 'date',
-        'cannot_edit_reason_array' => 'array'
+        'start_date_time' => 'datetime',
+        'end_date_time' => 'datetime',
+        'cannot_edit_reason_array' => 'array',
+        'cannot_delete_reason_array' => 'array',
     ];
 
-    public array $child_model_class = [
-        Task::class => [
-            "foreignKey" => "parent_id",
-            "preventDelete" => true,
-        ],
-        TaskRecurringDate::class => [
+    protected static array $fields_containg_tags = ["description"];
+
+    public string $field_for_create_tag = "name";
+
+    public static array $child_model_class = [
+        TaskFile::class => [
             "foreignKey" => "task_id",
-            "preventDelete" => false,
+            "preventDelete" => false
+        ],
+        TaskUser::class => [
+            "foreignKey" => "task_id",
+            "preventDelete" => false
+        ],
+        TaskTakenAction::class => [
+            "foreignKey" => "task_id",
+            "preventDelete" => false
         ],
     ];
 
-    public const TYPE_ONE_TIME = "ONE_TIME";
-    public const TYPE_RECURRING = "RECURRING";
-
-    public const ONE_TIME_IMMDIATE = "IMMDIATE";
-    public const ONE_TIME_AFTER_1_DAY = "AFTER_1_DAY";
-    public const ONE_TIME_AFTER_2_DAY = "AFTER_2_DAY";
-    public const ONE_TIME_AFTER_3_DAY = "AFTER_3_DAY";
-    public const ONE_TIME_AFTER_WEEK = "AFTER_WEEK";
-    public const ONE_TIME_AFTER_MONTH = "AFTER_MONTH";
-    public const ONE_TIME_CUSTOM = "CUSTOM";
-
-    public const RECURRING_DAILY = "DAILY";
-    public const RECURRING_WEEKLY = "WEEKLY";
-    public const RECURRING_2_WEEK = "2 WEEKLY";
-    public const RECURRING_MONTHLY = "MONTHLY";
-    public const RECURRING_QUATARLY = "QUATARLY";
-    public const RECURRING_YEARLY = "YEARLY";
-    public const RECURRING_CUSTOM = "CUSTOM";
+    public const TASK_TYPE_PROJECT = "PROJECT";
+    public const TASK_TYPE_TARGET = "TARGET";
+    public const TASK_TYPE_OTHER = "OTHER";
 
     public const STATUS_DRAFT = "DRAFT";
     public const STATUS_CREATED = "CREATED";
     public const STATUS_ASSIGNED = "ASSIGNED";
     public const STATUS_CONFIRM = "CONFIRM";
+    public const STATUS_IN_PROGRESS = "IN_PROGRESS";
     public const STATUS_COMPLETED = "COMPLETED";
     public const STATUS_VERIFIED = "VERIFIED";
-    public const STATUS_IN_PROGRESS = "IN_PROGRESS";
 
-    public const COMPLETE_TIME_1_DAY = "1_DAY";
-    public const COMPLETE_TIME_2_DAY = "2_DAY";
-    public const COMPLETE_TIME_3_DAY = "3_DAY";
-    public const COMPLETE_TIME_4_DAY = "4_DAY";
-    public const COMPLETE_TIME_5_DAY = "5_DAY";
-    public const COMPLETE_TIME_WEEK = "WEEK";
-    public const COMPLETE_TIME_2_WEEK = "2_WEEK";
-    public const COMPLETE_TIME_MONTH = "MONTH";
-    public const COMPLETE_TIME_QUARTER = "QUARTER";
+    public const DURATION_TYPE_HOUR = "HOUR";
+    public const DURATION_TYPE_DAY = "DAY";
+    public const DURATION_TYPE_WEEK = "WEEK";
+    public const DURATION_TYPE_MONTH = "MONTH";
+    public const DURATION_TYPE_YEAR = "YEAR";
 
+    public const CONTACT_TYPE_LEAD = "LEAD";
+    public const CONTACT_TYPE_CUSTOMER = "CUSTOMER";
+    public const CONTACT_TYPE_DEALER = "DEALER";
+    public const CONTACT_TYPE_PARTY = "PARTY";
 
     public function beforeSave()
     {
-        // dd($this->getAttributes());
-
-        $group = $this->getClassDisplayName();
-
         if ($this->is_draft) {
             $this->status = self::STATUS_DRAFT;
-        } else {
-            if ($this->type == self::TYPE_ONE_TIME) {
-                if (!$this->one_time_type) {
-                    $this->addError("One Time", "Can not be empty", $group);
-                }
-
-                if (!$this->start_date_time) {
-                    $this->addError("Start Date", "Can not be empty", $group);
-                }
-
-                if (!$this->end_date_time) {
-                    $this->addError("End Date", "Can not be empty", $group);
-                }
-            } else if ($this->type == self::TYPE_RECURRING) {
-                $this->start_date_time = $this->end_date_time = null;
-            }
+        } else if (!$this->id && !$this->status) {
+            $this->status = self::STATUS_CREATED;
         }
 
         return parent::beforeSave();
     }
 
-    public function setDefaultAttributes() {}
-
-    public function getFieldLabels()
+    public function afterFind()
     {
-        $labels = parent::getFieldLabels();
+        parent::afterFind();
 
-        $labels['one_time_type'] = "When To Start";
-
-        return $labels;
+        $this->parseTagsForModuleLinking();
     }
 
-    public function getUniqueValidationRules(Request $request)
+    public function afterFindForCsv()
     {
-        return [];
+        parent::afterFind();
     }
 
-    public function getRequiedIfRules(Request $request)
+
+    public function department()
     {
-        $rules = [];
-
-        if (!$request->input("is_draft", false)) {
-            $rules["priority"] = ["required"];
-        }
-
-        if ($request->input("type") == self::TYPE_ONE_TIME) {
-            $rules["assign_to_user_id"] = ["required"];
-            $rules["one_time_type"] = ["required"];
-            $rules["start_date_time"] = ["required"];
-            $rules["end_date_time"] = ["required"];
-        } else {
-            $rules["recurring_type"] = ["required"];
-            $rules["complete_time_in_days"] = ["required"];
-        }
-
-        return $rules;
+        return $this->belongsTo(Department::class, "dept_id");
     }
 
     public function assignToUser()
@@ -144,9 +103,76 @@ class Task extends BaseModel
         return $this->belongsTo(User::class, "assign_to_user_id");
     }
 
-    public function taskRecurringDate()
+    public function tags()
     {
-        return $this->hasMany(TaskRecurringDate::class);
+        $class_name = str_class_name_without_namespace($this);
+
+        return $this->hasMany(Tag::class, 'foreign_id')->where("foreign_model", $class_name);
+    }
+
+    public function user()
+    {
+        return $this->belongsToMany(User::class, TaskUser::class);
+    }
+
+    public function taskUser()
+    {
+        return $this->hasMany(TaskUser::class, 'task_id');
+    }
+
+    public function documentFile()
+    {
+        return $this->belongsToMany(DocumentFile::class, TaskFile::class);
+    }
+
+    public function taskFile()
+    {
+        return $this->hasMany(TaskFile::class, 'task_id');
+    }
+
+    public function taskParty()
+    {
+        return $this->hasMany(TaskParty::class, 'task_id');
+    }
+
+    public function party()
+    {
+        return $this->belongsToMany(Party::class, TaskParty::class);
+    }
+
+    public function taskLead()
+    {
+        return $this->hasMany(TaskLead::class, 'task_id');
+    }
+
+    public function lead()
+    {
+        return $this->belongsToMany(Lead::class, TaskLead::class);
+    }
+
+    public function taskCustomer()
+    {
+        return $this->hasMany(TaskCustomer::class, 'task_id');
+    }
+
+    public function customer()
+    {
+        return $this->belongsToMany(Lead::class, TaskCustomer::class);
+    }
+
+    public function taskDealer()
+    {
+        return $this->hasMany(TaskDealer::class, 'task_id');
+    }
+
+    public function dealer()
+    {
+        return $this->belongsToMany(Dealer::class, TaskDealer::class);
+    }
+    
+    public function taskTakenAction()
+    {
+        return $this->hasMany(TaskTakenAction::class, 'task_id');
     }
 
     protected function getDisplayNameAttribute()
@@ -159,288 +185,363 @@ class Task extends BaseModel
         return $this->name;
     }
 
+    
+    public function setDefaultAttributes() {}
+
+    public function getUniqueValidationRules(Request $request)
+    {
+        return [];
+    }
+
+    public function getRequiedIfRules(Request $request)
+    {
+        $rules = [];
+
+        if (!$request->input("is_draft", false)) {
+            $rules["dept_id"] = ["required"];
+            $rules["assign_to_user_id"] = ["required"];
+            $rules["priority"] = ["required"];
+            $rules["start_date_time"] = ["required"];
+            $rules["duration_type"] = ["required"];
+            $rules["duration"] = ["required"];
+        }
+
+        return $rules;
+    }
+
+    public function getFieldLabels()
+    {
+        $labels = parent::getFieldLabels();
+
+        $labels['tag_name'] = "Tags";
+        $labels['from_start_date'] = "From Start Date";
+        $labels['to_start_date'] = "To Start Date";
+        $labels['taskUser'] = "Link Users";
+        $labels['taskFile'] = "Files";
+        $labels['taskParty'] = "Link Party";
+        $labels['taskLead'] = "Link Lead";
+        $labels['taskCustomer'] = "Link Customer";
+        $labels['taskDealer'] = "Link Dealer";
+
+        return $labels;
+    }
+
+    public function getRefDisplayName($field, $value)
+    {
+        $ret_array = [];
+
+        switch($field)
+        {
+            case "dept_id":
+                $ret_array = [
+                    $field => $this->department->getDisplayName()
+                ];
+                break;
+
+            case "assign_to_user_id":
+                $ret_array = [
+                    $field => $this->assignToUser->getDisplayName()
+                ];
+                break;
+        }
+
+        return $ret_array;
+    }
+
+    public function isAutorizeForChangeStatusToVerify(string &$error_msg)
+    {
+        $auth_user = Auth::user();
+        if ($auth_user->hasRole(Role::TYPE_SYSTEM_ADMIN))
+        {
+            return true;
+        }
+
+        if ($this->created_by == $auth_user->id)
+        {
+            return true;
+        }
+
+        $error_msg = "Only Admin or Task creator can verify the task";
+
+        return false;
+    }
+
+    public function canDelete(string &$error_msg)
+    {
+        $status_codes = [Task::STATUS_DRAFT, Task::STATUS_CREATED, Task::STATUS_ASSIGNED, Task::STATUS_CONFIRM];
+
+        if (in_array($this->status, $status_codes) )
+        {
+            return true;
+        }
+
+        $type_conditions = [];
+        $type_conditions['type'] = Type::getType($this, "status");
+        $status_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
+        
+        $error_msg = "Can't Delete, Task Status is " . $status_list[$this->status];
+
+        $editable_status_label = [];
+
+        foreach($status_list as $status_code => $label)
+        {
+            if (!in_array($status_code, $status_codes))
+            {
+                $editable_status_label[] = $label;
+            }
+        }
+        
+        $error_msg .= ", Only Status with " . implode(", ", $editable_status_label);
+
+        $error_msg .= " can be delete";
+
+        return false;
+    }
+
     public function changeStatus($status)
     {
-        $this->status = $status;
+        if ($this->status == $status) {
+            return false;
+        }
 
-        switch ($status) {
-            case self::STATUS_ASSIGNED:
-                break;
+        try {
+            $this->load(["assignToUser", "user"]);
 
-            case self::STATUS_COMPLETED:
-                $this->is_completed = true;
+            DB::beginTransaction();
+
+            $old_status = $this->status;
+
+            $admin_user_list = LaravelExtend::getAdminUserList();
+
+            if ($status == self::STATUS_COMPLETED)
+            {
+                $user_id_list = array_keys($admin_user_list);
+                $user_id_list[] = $this->assignToUser->id;
+                $user_id_list = array_merge($user_id_list, $this->user->pluck("id")->toArray());
+
+                $user_name_list = [];
+                $user_name_list[] = $this->assignToUser->getDisplayName();
+                foreach($this->user as $user)
+                {
+                    $user_name_list[] = $user->getDisplayName();
+                }
+
+                if (!in_array(LaravelExtend::getAuthUserId(), $user_id_list))
+                {
+                    $msg = "Only " . implode(", ", $user_name_list);
+                    $msg .= " can mark complete for task " . $this->name;
+
+                    throw new UserException($msg, UserException::ERROR_USER_ACTION_RESTRICT);
+                }
+            }
+
+            if ($status == self::STATUS_VERIFIED)
+            {
+                $user_id_list = $this->assignToUser->designation->getUserIdListBasedOnDesignationLevel();
+                $user_id_list = array_merge($user_id_list, array_keys($admin_user_list));
+                $user_id_list[] = $this->created_by;
+
+                $users = User::find($user_id_list);
+                $user_name_list = [];
+                foreach($users as $user)
+                {
+                    $user_name_list[] = $user->getDisplayName();
+                }
+
+                if (!in_array(LaravelExtend::getAuthUserId(), $user_id_list))
+                {
+                    $msg = "Only " . implode(", ", $user_name_list);
+                    $msg .= " can verify the task " . $this->name;
+
+                    throw new UserException($msg, UserException::ERROR_USER_ACTION_RESTRICT);
+                }
+            }
+
+            switch ($status) {
+                case self::STATUS_ASSIGNED:
+                    break;
+
+                case self::STATUS_COMPLETED:
+                    $this->is_completed = true;
+                    $this->complete_date_time = DateUtility::getDate(null, DateUtility::DATETIME_FORMAT);
+                    $this->complete_by = LaravelExtend::getAuthUserId();
+                    break;
+
+                case self::STATUS_VERIFIED:
+                    $this->is_verified = true;
+                    $this->verified_date_time = DateUtility::getDate(null, DateUtility::DATETIME_FORMAT);
+                    $this->verified_by = LaravelExtend::getAuthUserId();
+                    break;
+            }
+
+            $this->status = $status;
+
+            if (!$this->saveQuietly()) {
+                throw new UserException("Fail To Save", UserException::ERROR_LARAVEL_FAIL);
+            }
+
+            $type = Type::getType($this, "status");
+
+            if ($old_status) {
+                $old_status_type = Type::getByCode($type, $old_status);
+
+                if ($old_status_type->count() == 0) {
+                    throw new UserException("Type $type not found : " . $old_status);
+                } else if ($old_status_type->count() > 1) {
+                    throw new UserException("Type $type more than 1 found : " . $old_status);
+                }
+
+                $old_status_type = $old_status_type->first();
+            }
+
+            $new_status_type = Type::getByCode($type, $status);
+
+            if ($new_status_type->count() == 0) {
+                throw new UserException("Type $type not found : " . $status);
+            } else if ($new_status_type->count() > 1) {
+                throw new UserException("Type $type more than 1 found : " . $status);
+            }
+
+            $new_status_type = $new_status_type->first();
+
+            $notification_data = [
+                'from_user_id' => LaravelExtend::getAuthUserId(),
+                "sub_type" => Notification::SUB_TYPE_INFO,
+                "model_name" => get_class($this),
+                'model_id' => $this->id,
+                "link" => route("task.index", ["id" => $this->id]),
+                "msg" => ""
+            ];
+
+            if ($this->prev_status == Task::STATUS_CREATED) {
+                if ($this->task->status == Task::STATUS_ASSIGNED) {
+                    $notification_data['msg'] = "New Task assign to " . $this->assignToUser?->getDisplayName();
+                }
+            } else if ($this->status == Task::STATUS_VERIFIED) {
+                $msg = "Task $this->name has verified";
+
+                $notification_data['msg'] = $msg;
+            } else {
+                $msg = "Status of Task $this->name change from ";
+
+                $msg .= $old_status_type?->name ?? "";
+
+                $msg .= " to ";
+
+                $msg .= $new_status_type?->name ?? "";
+
+                $notification_data['msg'] = $msg;
+            }
+
+            $notificationObj = new TaskStatusChange($this, $notification_data);
+
+            if ($this->assign_to_user_id == LaravelExtend::getAuthUserId()) {
+                $created_by_user = User::find($this->created_by);
+                if ($created_by_user)
+                {
+                    $created_by_user->notify($notificationObj);
+                }
+            } else {
+                $this->assignToUser->notify($notificationObj);
+            }
+
+            if ($this->is_send_notification && $this->user->count() > 0)
+            {
+                \Illuminate\Support\Facades\Notification::send($this->user, $notificationObj);   
+            }
+
+            DB::commit();
+
+        } catch (Exception $ex) {
+
+            DB::rollBack();
+
+            throw $ex;
+        }
+
+        return true;
+    }
+
+    public static function getEndDate($start_date_time, String $duration, String $duration_type)
+    {
+        $end_date_time = null;
+
+        switch ($duration_type) {
+            case self::DURATION_TYPE_HOUR:
+                $end_date_time = DateUtility::change($start_date_time, $duration, DateUtility::HOURS);
                 break;
-            case self::STATUS_VERIFIED:
-                $this->is_verified = true;
+            case self::DURATION_TYPE_DAY:
+                $end_date_time = DateUtility::change($start_date_time, $duration, DateUtility::DAYS);
+                break;
+            case self::DURATION_TYPE_MONTH:
+                $end_date_time = DateUtility::change($start_date_time, $duration, DateUtility::MONTHS);
+                break;
+            case self::DURATION_TYPE_WEEK:
+                $end_date_time = DateUtility::change($start_date_time, $duration, DateUtility::WEEKS);
+                break;
+            case self::DURATION_TYPE_YEAR:
+                $end_date_time = DateUtility::change($start_date_time, $duration, DateUtility::YEARS);
                 break;
         }
 
-        if (!$this->save()) {
-            throw new UserException("Fail To Save", UserException::ERROR_LARAVEL_FAIL);
-        }
+        return $end_date_time;
     }
 
     public static function getCodeList(String $field)
     {
-        switch ($field) {
-            case "type":
-                return [
-                    self::TYPE_ONE_TIME,
-                    self::TYPE_RECURRING,
-                ];
-                break;
-            case "one_time_type":
-                return [
-                    self::ONE_TIME_AFTER_1_DAY,
-                    self::ONE_TIME_AFTER_2_DAY,
-                    self::ONE_TIME_AFTER_3_DAY,
-                    self::ONE_TIME_AFTER_MONTH,
-                    self::ONE_TIME_AFTER_WEEK,
-                    self::ONE_TIME_CUSTOM
-                ];
-                break;
+        $class_info = get_class_info(static::class);
 
-            case "recurring_type":
-                return [
-                    self::RECURRING_DAILY,
-                    self::RECURRING_WEEKLY,
-                    self::RECURRING_2_WEEK,
-                    self::RECURRING_MONTHLY,
-                    self::RECURRING_QUATARLY,
-                    self::RECURRING_YEARLY,
-                    self::RECURRING_CUSTOM,
-                ];
+
+        switch ($field) {
+            case "task_type":
+
+                $list = [];
+
+                foreach ($class_info['constants'] as $constant => $label) {
+                    if (strpos($constant, "TASK_TYPE_") !== false) {
+                        $list[] = $label;
+                    }
+                }
+
+                return $list;
+
                 break;
 
             case "status":
-                return [
-                    self::STATUS_ASSIGNED,
-                    self::STATUS_COMPLETED,
-                    self::STATUS_CONFIRM,
-                    self::STATUS_DRAFT,
-                    self::STATUS_VERIFIED,
-                    self::STATUS_IN_PROGRESS,
-                    self::STATUS_CREATED,
-                ];
-                break;
+                $list = [];
 
-            case "complete_time_in_days":
-                return [
-                    self::COMPLETE_TIME_1_DAY,
-                    self::COMPLETE_TIME_2_DAY,
-                    self::COMPLETE_TIME_3_DAY,
-                    self::COMPLETE_TIME_4_DAY,
-                    self::COMPLETE_TIME_5_DAY,
-                    self::COMPLETE_TIME_WEEK,
-                    self::COMPLETE_TIME_2_WEEK,
-                    self::COMPLETE_TIME_MONTH,
-                    self::COMPLETE_TIME_QUARTER,
-                ];
-                break;
-        }
-    }
-
-    public static function setDates(array $record): array
-    {
-        $days_to_add = 0;
-
-        switch ($record['complete_time_in_days']) {
-            case self::COMPLETE_TIME_1_DAY:
-                $days_to_add = 1;
-                break;
-            case self::COMPLETE_TIME_2_DAY:
-                $days_to_add = 2;
-                break;
-            case self::COMPLETE_TIME_3_DAY:
-                $days_to_add = 3;
-                break;
-            case self::COMPLETE_TIME_4_DAY:
-                $days_to_add = 4;
-                break;
-            case self::COMPLETE_TIME_5_DAY:
-                $days_to_add = 5;
-                break;
-            case self::COMPLETE_TIME_WEEK:
-                $days_to_add = 7;
-                break;
-            case self::COMPLETE_TIME_2_WEEK:
-                $days_to_add = 14;
-                break;
-            case self::COMPLETE_TIME_MONTH:
-                $days_to_add = 30;
-                break;
-            case self::COMPLETE_TIME_QUARTER:
-                $days_to_add = 90;
-                break;
-        }
-
-        if (isset($record['start_date_time'])) {
-            $record['end_date_time'] = DateUtility::change($record['start_date_time'], $days_to_add, DateUtility::DAYS, DateUtility::DATE_FORMAT);
-        }
-
-        return $record;
-    }
-
-    public static function createRecurringTask(Task $task): int
-    {
-        $save_count = 0;
-
-        if ($task->type == self::TYPE_RECURRING) {
-            $today = date(DateUtility::DATE_FORMAT);
-
-            $days = 0;
-
-            if ($task->recurring_type != self::RECURRING_CUSTOM) {
-                switch ($task->recurring_type) {
-                    case self::RECURRING_DAILY:
-                        $days = 1;
-                        break;
-                    case self::RECURRING_WEEKLY:
-                        $days = 7;
-                        break;
-                    case self::RECURRING_2_WEEK:
-                        $days = 14;
-                        break;
-                    case self::RECURRING_MONTHLY:
-                        $days = 30;
-                        break;
-                    case self::RECURRING_QUATARLY:
-                        $days = 90;
-                        break;
-                    case self::RECURRING_YEARLY:
-                        $days = 365;
-                        break;
-                }
-
-                if ($days > 0) {
-                    $next_date = DateUtility::getDate($task->created_at, DateUtility::DATE_FORMAT);
-
-                    while (DateUtility::compare($next_date, $today) <= 0) {
-                        try {
-                            $record = $task->getAttributes();
-                            unset($record["id"]);
-                            unset($record["created_at"]);
-                            unset($record["updated_at"]);
-                            unset($record["created_by"]);
-                            unset($record["updated_by"]);
-
-
-                            $record['type'] = self::TYPE_ONE_TIME;
-                            $record['one_time_type'] = self::ONE_TIME_CUSTOM;
-                            $record['is_draft'] = 0;
-                            $record['is_completed'] = 0;
-                            $record['is_verified'] = 0;
-                            $record['can_edit'] = 0;
-                            $record['cannot_edit_reason_array'] = ['Task created from recurring task by system'];
-
-                            $record['start_date_time'] = $next_date;
-                            $record['parent_id'] = $task->id;
-                            $record["created_by"] = $record["updated_by"] = 0;
-
-                            $record = self::setDates($record);
-
-                            // d($record);
-
-                            $count = Task::where("parent_id", $record['parent_id'])->whereDate("start_date_time", $record['start_date_time'])->count();
-
-                            if ($count == 0) {
-                                $model = new Task($record);
-
-                                if ($model->save()) {
-                                    $save_count++;
-                                } else {
-                                    throw new UserException("Fail To Save", UserException::ERROR_LARAVEL_FAIL);
-                                }
-                            }
-                        } catch (Exception $ex) {
-                            d($model?->custom_errors);
-                            throw $ex;
-                        }
-
-                        $next_date = DateUtility::change($next_date, $days, DateUtility::DAYS, DateUtility::DATE_FORMAT);
+                foreach ($class_info['constants'] as $constant => $label) {
+                    if (strpos($constant, "STATUS_") !== false) {
+                        $list[] = $label;
                     }
                 }
-            } else {
-                $task->load("taskRecurringDate");
 
-                foreach ($task->taskRecurringDate as $task_custom_date) {
-                    if (DateUtility::compare($task_custom_date->date, $today) <= 0) {
-                        try {
-                            $record = $task->getAttributes();
-                            unset($record["id"]);
-                            unset($record["created_at"]);
-                            unset($record["updated_at"]);
-                            unset($record["created_by"]);
-                            unset($record["updated_by"]);
+                return $list;
+                break;
 
+            case "duration_type":
+                $list = [];
 
-                            $record['type'] = self::TYPE_ONE_TIME;
-                            $record['one_time_type'] = self::ONE_TIME_CUSTOM;
-                            $record['is_draft'] = 0;
-                            $record['is_completed'] = 0;
-                            $record['is_verified'] = 0;
-                            $record['can_edit'] = 0;
-                            $record['cannot_edit_reason_array'] = ['Task created from recurring task by system'];
-
-                            $record['start_date_time'] = $task_custom_date->date->toDateString();
-                            $record['parent_id'] = $task->id;
-                            $record["created_by"] = $record["updated_by"] = 0;
-
-                            $record = self::setDates($record);
-
-                            // d($record);
-
-                            $count = Task::where("parent_id", $record['parent_id'])->whereDate("start_date_time", $record['start_date_time'])->count();
-
-                            if ($count == 0) {
-                                $model = new Task($record);
-
-                                if ($model->save()) {
-                                    $save_count++;
-                                } else {
-                                    throw new UserException("Fail To Save", UserException::ERROR_LARAVEL_FAIL);
-                                }
-                            }
-                        } catch (Exception $ex) {
-                            d($model?->custom_errors);
-                            throw $ex;
-                        }
+                foreach ($class_info['constants'] as $constant => $label) {
+                    if (strpos($constant, "DURATION_TYPE_") !== false) {
+                        $list[] = $label;
                     }
                 }
-            }
-        }
 
-        return $save_count;
-    }
+                return $list;
+                break;
 
-    public function getDisplayFieldsToUser()
-    {
-        $attributes = $this->getAttributes();
+            case "contact_type":
+                $list = [];
 
-        if (!$attributes) {
-            $table_info = $this->getTableInfo($this->getTable());
-
-            if (isset($table_info['columns']) || $table_info['columns']) {
-                foreach ($table_info['columns'] as $field => $field_attr) {
-                    $attributes[] = $field;
+                foreach ($class_info['constants'] as $constant => $label) {
+                    if (strpos($constant, "CONTACT_TYPE_") !== false) {
+                        $list[] = $label;
+                    }
                 }
-            }
+
+                return $list;
+                break;
         }
-
-        $arrayHelper = new ArrayHelper($attributes);
-        $arrayHelper->unsetValues([
-            "code",
-            "is_pre_defined",
-            "can_edit",
-            "cannot_edit_reason_array",
-            "can_delete",
-            "cannot_delete_reason_array",
-            "created_at",
-            "updated_at",
-            "created_by",
-            "updated_by",
-        ]);
-
-        return $arrayHelper->getData();
     }
 }

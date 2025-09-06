@@ -6,54 +6,33 @@
     $false = false;
     ?>
 
-    @include($partial_path . '.page_header')
+    <div class="row">
+        <div class="col-xxxl-10">
 
-    <div class="card">
-        <div class="card-body">
+            @include($partial_path . '.page_header')
 
-            <form method="GET" class="summary_search" action="{{ route($routePrefix . '.index') }}">
-                <input type="hidden" name="is_sort_clear" value="1" />
+            <div class="card hidden">
+                <div class="card-body">
+                    <form method="GET" class="summary_search" action="{{ route($routePrefix . '.index') }}">
+                        <input type="hidden" name="is_sort_clear" value="1" />
+                        <?php 
+                            $field = "name";
+                        ?>
+                        <input type="text"  name="{{ $field }}" value="{{ $search[$field] }}" />
 
-                <div class="row mb-4">
-                    <div class="col-md-1">
-                        <?php
-                        $field = 'pagination_limit';
+                        <?php 
+                            $field = "short_name";
                         ?>
-                        <x-Inputs.drop-down :name="$field" label="Limit" :list="$paginationList" :value="$pagination_limit" :pleaseSelect="$false"
-                            class="pagination_limit" />
-                    </div>
+                        <input type="text"  name="{{ $field }}" value="{{ $search[$field] }}" />
 
-                    <div class="col-md-3">
-                        <?php
-                        $field = 'name';
-                        $label = get_value_from_list($field_labels, $field, $field);
-                        ?>
-                        <x-Inputs.text-field :name="$field" :label="$label" :value="$search[$field]" />
-                    </div>
-                    <div class="col-md-3">
-                        <?php
-                        $field = 'level';
-                        $label = get_value_from_list($field_labels, $field, $field);
-                        ?>
-                        <x-Inputs.text-field :name="$field" :label="$label" :value="$search[$field]" />
-                    </div>
-                    <div class="col-md-3">
-                        <?php
-                        $field = 'is_active';
-                        $label = get_value_from_list($field_labels, $field, $field);
-                        ?>
-                        <x-Inputs.drop-down :name="$field" :label="$label" :value="$search[$field]" :list="$yes_no_list"
-                            class="select2" />
-                    </div>
+                    </form>
                 </div>
+            </div>
 
-                <x-Backend.summary-search-form-footer :showPaginationDropDown="$false" />
-            </form>
+
+            <div id="index_table">
+                @include($viewPrefix . '.index_table')
+            </div>
         </div>
-    </div>
-
-
-    <div id="index_table">
-        @include($viewPrefix . '.index_table')
     </div>
 @endsection

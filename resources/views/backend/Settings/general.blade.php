@@ -36,6 +36,13 @@
                                 :value="$value" />
                         </div>
                         <div class="form-group mb-3">
+                            <?php $field = 'company_tag_line';
+                            $value = get_value($record_list, $field);
+                            $label = Setting::LABELS[$field]; ?>
+                            <x-inputs.text-field name="data[text][{{ $field }}]" :label="$label"
+                                :value="$value" />
+                        </div>
+                        <div class="form-group mb-3">
                             <?php $field = 'company_email';
                             $value = get_value($record_list, $field);
                             $label = Setting::LABELS[$field]; ?>
@@ -72,6 +79,32 @@
                             $label = Setting::LABELS[$field]; ?>
                             <x-inputs.text-field name="data[text][{{ $field }}]" :label="$label" :value="$value"
                                 class="form-control validate-int" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6 col-sm-12">
+                <div class="card border border-primary">
+                    <div class="card-header bg-transparent border-primary">
+                        <h4 class="card-title">Item</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group mb-3">
+                            <?php $field = 'item_sku_pattern';
+                            $value = get_value($record_list, $field);
+                            $label = Setting::LABELS[$field]; ?>
+                            <x-inputs.text-field name="data[text][{{ $field }}]" :label="$label" :value="$value"/>
+                            <div class="help-block">
+                                {category}-{brand}-{color}-{size}-{specification}
+                                <ul class="b-t-dark">
+                                    <li>Category : {category}</li>
+                                    <li>Color : {color}</li>
+                                    <li>Brand : {brand}</li>
+                                    <li>Size : {size}</li>
+                                    <li>Specification : {specification}</li>                                    
+                                </ul>
+                            </div>
                         </div>
                     </div>
                 </div>

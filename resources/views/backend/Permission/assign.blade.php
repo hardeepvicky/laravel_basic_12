@@ -23,14 +23,16 @@
                     <div class="col-lg-12">
                         {!! csrf_field() !!}
                         <div class="row mb-4">
-                            <label class="col-md-2 col-sm-23 col-form-label" style="text-align:right;">Role</label>
-                            <div class="col-md-6 col-sm-12">
-                                <select id="role_id" name="role_id" class ="form-control select2" required="required">
+                            <label class="col-md-2 col-sm-6 col-form-label" style="text-align:right;">Role</label>
+                            <div class="col-md-10 col-sm-6">
+                                <select id="role_id" name="role_id[]" class ="form-control select2" required="required" multiple="true">
                                     <option value="">Please Select</option>
                                     @foreach ($role_list as $k => $t)
                                         <option value="{{ $k }}">{{ $t }}</option>
                                     @endforeach
                                 </select>
+
+                                <span class="btn btn-primary" id="get_permissions">Search</span>
                             </div>
                         </div>
 
@@ -46,11 +48,15 @@
     <script type="text/javascript">
         $(document).ready(function() {
 
-            $("select#role_id").change(function() {
-                var id = $(this).val();
+            $("#get_permissions").click(function() {
 
-                var v = $(this).val();
-                v = v ? v : 0;
+                var v = $("#role_id").val();
+                v = v ? v : [];
+
+                if (v.length == 0)
+                {
+                    return;
+                }
 
                 if ($("#permission_block").not(":empty").length > 0) {
                     Swal.fire({
@@ -66,10 +72,9 @@
                             $("#permission_block").html("");
                             if (v) {
                                 $.loader.show();
-                                $("#permission_block").load("/permissions/ajax_get_permissions/" +
-                                    v, () => {
-                                        $.loader.hide();
-                                    });
+                                $("#permission_block").load("/permissions/ajax_get_permissions", {role_ids : v}, function(){
+                                    $.loader.hide();
+                                });
                             }
                         }
                     });
@@ -77,7 +82,7 @@
                     $("#permission_block").html("");
                     if (v) {
                         $.loader.show();
-                        $("#permission_block").load("/permissions/ajax_get_permissions/" + v, () => {
+                        $("#permission_block").load("/permissions/ajax_get_permissions", {role_ids : v}, function(){
                             $.loader.hide();
                         });
                     }
@@ -85,22 +90,27 @@
             });
 
             $("form").submit(function() {
-                var len = $("input.chk-action").length;
 
-                if (len <= 0) {
-                    $("select#role_id").trigger("change");
+                var v = $("#role_id").val();
+
+                if (v.length == 0)
+                {
+                    Swal.fire(
+                        'Error!',
+                        'Please Select At One Role',
+                        'error'
+                    )
                     return false;
                 }
 
-                var check_len = $("input.chk-action:checked").length;
+                var len = $("#hidden_routes input").length;
 
-                if (check_len <= 0) {
+                if (len <= 0) {
                     Swal.fire(
                         'Error!',
                         'Please Select At Least One Checkbox',
                         'error'
                     )
-
                     return false;
                 }
             });

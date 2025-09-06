@@ -3,6 +3,7 @@
 namespace App\Helpers;
 
 use App\Exceptions\ApiException;
+use App\Exceptions\UserException;
 use App\Models\EmailLog;
 use Exception;
 use Illuminate\Support\Facades\App;
@@ -17,7 +18,7 @@ class EmailHelper
 
     private String $email_via, $from_email, $from_name, $subject, $html, $type;
     private array $cc_list = [], $to_list = [], $attachments = [];
-    private bool $is_sandbox = true;
+    private bool $is_sandbox = false;
 
     private $api_key, $api_secret;
 
@@ -25,46 +26,48 @@ class EmailHelper
 
     public function __construct()
     {
-        $this->email_via = env("EMAIL_API_PLATFORM");
+        $via = config("app.EMAIL_API_PLATFORM");
 
-        if (!$this->email_via) {
-            throw_exception("env : EMAIL_API_PLATFORM not set");
+        if (!$via) {
+            throw_exception("app.EMAIL_API_PLATFORM not set");
         }
+
+        $this->email_via = $via;
 
         if (!in_array($this->email_via, self::$enabled_api_platforms)) {
             throw_exception("email_via : $this->email_via is not enabled");
         }
 
         if ($this->email_via == self::EMAIL_VIA_MAILJET) {
-            $api_key = env('MAILJET_API_KEY');
+            $api_key = config('services.mailjet.api_key');
 
             if (!$api_key) {
-                throw_exception("env : MAILJET_API_KEY is not set");
+                throw_exception("services.mailjet.api_key is not set");
             }
 
             $this->api_key = $api_key;
 
-            $api_secret = env('MAILJET_API_SECRET');
+            $api_secret = config('services.mailjet.api_secret');
 
             if (!$api_secret) {
-                throw_exception("env : MAILJET_API_SECRET is not set");
+                throw_exception("services.mailjet.api_secret is not set");
             }
 
             $this->api_secret = $api_secret;
         } else if ($this->email_via == self::EMAIL_VIA_BREVO) {
-            $api_key = env('BREVO_API_KEY');
+            $api_key = config('services.brevo.api_key');
 
             if (!$api_key) {
-                throw_exception("env : BREVO_API_KEY is not set");
+                throw_exception("services.brevo.api_key");
             }
 
             $this->api_key = $api_key;
         }
 
-        $this->from_email = env("EMAIL_FROM");
-        $this->from_name = env("EMAIL_NAME");
+        $this->from_email = config('app.EMAIL_FROM');
+        $this->from_name = config('app.EMAIL_NAME');
 
-        $this->is_sandbox = !App::isProduction();
+        $this->is_sandbox = App::isLocal();
     }
 
     public function setSubject(String $subject)
@@ -138,7 +141,7 @@ class EmailHelper
 
     public function addAttachment($file, $filename = "")
     {
-        if (!FileUtility::isExist($file)) {
+        if (!file_exists($file)) {
             throw new Exception("file $file is not exist");
         }
 
@@ -168,6 +171,8 @@ class EmailHelper
     public function setSandbox(bool $value)
     {
         $this->is_sandbox = $value;
+
+        return $this;
     }
 
     public function saveToLog($log_extras = [])
@@ -176,7 +181,7 @@ class EmailHelper
 
         $this->emailLog = new EmailLog();
 
-        $path =  $this->emailLog->getFilePath();
+        $path =  $this->emailLog->getStoragePath();
 
         $file = $this->emailLog->getNextId() . ".html";
 
@@ -275,6 +280,11 @@ class EmailHelper
         try {
             $this->saveToLog($log_extras);
 
+            if (!check_internet_connection())
+            {
+                throw new UserException("Internet not working", UserException::ERROR_NETWORK_FAIL);
+            }
+
             switch ($this->email_via) {
                 case self::EMAIL_VIA_BREVO:
                     $api_result = $this->_sendViaBrevo();
@@ -289,19 +299,37 @@ class EmailHelper
                 default:
                     throw new Exception("No Email Via found");
             }
-        } catch (ApiException $ex) {
+        } 
+        catch (ApiException $ex) {
             $this->updateLog([
                 "is_sent" => 0,
                 "error_msg" => $ex->api_error_msg,
+                "error_code" => $ex->getCode(),
                 "api_response_code" => $ex->api_error_code
             ]);
 
             $result['errors'][] = $ex->getMessage();
-        } catch (Exception $ex) {
+        } 
+        catch (UserException $ex) {
             $this->updateLog([
                 "is_sent" => 0,
-                "error_msg" => $ex->getMessage()
+                "error_msg" => $ex->getMessage(),
+                "error_code" => $ex->getCode(),
+                "error_data" => $ex->data
             ]);
+
+            $result['fail'] = $result['total'];
+            $result['errors'][] = $ex->getMessage();
+        }
+        catch (Exception $ex) {
+            $this->updateLog([
+                "is_sent" => 0,
+                "error_msg" => $ex->getMessage(),
+                "error_code" => $ex->getCode(),
+            ]);
+
+            $result['fail'] = $result['total'];
+            $result['errors'][] = $ex->getMessage();
 
             throw $ex;
         }
@@ -311,34 +339,41 @@ class EmailHelper
 
     private function _sendViaBrevo()
     {
-        $data = array(
-            'sender' => [
-                'email' => $this->from_email,
-                'name' => $this->from_name
-            ],
-            'to' => $this->to_list,
-            'subject' => $this->subject,
-            'htmlContent' => $this->html
-        );
+        // $result = [
+        //     "total" => 0,
+        //     "success" => 0,
+        //     "fail" => 0,
+        //     "errors" => []
+        // ];
 
-        $config = \Brevo\Client\Configuration::getDefaultConfiguration()->setApiKey('api-key', $this->api_key);
+        // $data = array(
+        //     'sender' => [
+        //         'email' => $this->from_email,
+        //         'name' => $this->from_name
+        //     ],
+        //     'to' => $this->to_list,
+        //     'subject' => $this->subject,
+        //     'htmlContent' => $this->html
+        // );
 
-        $apiInstance = new \Brevo\Client\Api\TransactionalEmailsApi(new \GuzzleHttp\Client(), $config);
+        // $config = \Brevo\Client\Configuration::getDefaultConfiguration()->setApiKey('api-key', $this->api_key);
 
-        $sendSmtpEmail = new \Brevo\Client\Model\SendSmtpEmail($data);
+        // $apiInstance = new \Brevo\Client\Api\TransactionalEmailsApi(new \GuzzleHttp\Client(), $config);
 
-        try {
-            $result = $apiInstance->sendTransacEmail($sendSmtpEmail);
+        // $sendSmtpEmail = new \Brevo\Client\Model\SendSmtpEmail($data);
 
-            $msg_id = $result->getMessageId();
-            if ($msg_id) {
-                return $msg_id;
-            }
-        } catch (Exception $ex) {
-            throw $ex;
-        }
+        // try {
+        //     $result = $apiInstance->sendTransacEmail($sendSmtpEmail);
 
-        return false;
+        //     $msg_id = $result->getMessageId();
+        //     if ($msg_id) {
+        //         return $msg_id;
+        //     }
+        // } catch (Exception $ex) {
+        //     throw $ex;
+        // }
+
+        // return false;
     }
 
     private function _sendViaMailjet()
@@ -422,6 +457,8 @@ class EmailHelper
             "api_response" => $api_response
         ]);
 
+        $message_id_arr = [];
+
         if ($response->success()) {
             if (!$api_response) {
                 throw new ApiException('API : No Response on success', $response->getStatus());
@@ -429,20 +466,14 @@ class EmailHelper
                 throw new ApiException('API : Response->Messages on success', $response->getStatus());
             } else {
                 foreach ($api_response['Messages'] as $message) {
-                    $log = [
-                        "api_response" => $message,
-                    ];
-
                     if ($message['Status'] == "success") {
 
                         foreach ($message['To'] as $to) {
-
-                            $result['success']++;
-
                             if ($to['MessageID']) {
-                                $log['is_sent'] = true;
+                                $message_id_arr[] = $to;
+                                $result['success']++;
                             } else {
-                                $log['is_sent'] = false;
+                                $result['fail']++;
                             }
                         }
                     } else if ($message['Status'] == "error") {
@@ -453,10 +484,32 @@ class EmailHelper
                 }
             }
         } else {
+            $result['fail'] = $result['total'];
             $data = $response->getData();
             throw new ApiException($data['ErrorMessage'], $data['StatusCode'], $data);
         }
 
+        $this->updateLog([
+            "message_id_array" => $message_id_arr
+        ]);
+
         return $result;
+    }
+
+    public function getMailjetMessageStatus($msg_id)
+    {
+        $mj = new \Mailjet\Client($this->api_key, $this->api_secret, true, ['version' => 'v3.1']);        
+        $response = $mj->get(Resources::$Messagehistory, ['id' => $msg_id]);
+        
+        if ($response->success())
+        {
+            return $response->getData();
+        }
+        else
+        {
+            return $response->getData();
+        }
+
+        return [];
     }
 }

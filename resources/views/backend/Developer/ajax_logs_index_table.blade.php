@@ -1,6 +1,7 @@
 <?php
 
 use App\Helpers\Util;
+
 ?>
 <div class="card" id="page-summary">
     <div class="card-header border-t-info">
@@ -12,15 +13,13 @@ use App\Helpers\Util;
             <table class="table table-striped table-bordered table-hover">
                 <thead>
                     <tr class="border-bottom-primary">
-                        <th>
-                            Route Name
-                            <hr>
-                            <?= sortable_anchor('request_method', 'Request Method') ?>
+                        <th style="width: 20%">                  
+                            <?= sortable_anchor('route_name', 'Route Name') ?>
+                            | <?= sortable_anchor('request_method', 'Request Method') ?>
                         </th>
                         <th><?= sortable_anchor('exec_time', 'Time Taken (Seconds)') ?></th>
                         <th>Request</th>
-                        <th>Response</th>
-                        <th>Cache Logs</th>
+                        <th style="width:25%">Response</th>
                         <th>
                             <?= sortable_anchor('created_at', 'Created') ?>
                             | <?= sortable_anchor('updated_at', 'Updated') ?>
@@ -32,80 +31,59 @@ use App\Helpers\Util;
                     @foreach ($records as $record)
                     <tr>
                         <td>
-                            {{ $record->route_name_or_url }}
+                            {{ $record->route_name }}
 
                             <label class="info">
                                 Request Method : <span>{{ $record->request_method }}</span>
                             </label>
 
-                            <div id="url-{{ $record->id }}" class="h-200">
+                            <div id="url-{{ $record->id }}" class="mx-h-200 w-300">
                                 <label class="info">
-                                    Url : <span>{{ $record->url }}</span>
+                                    Url : <span>{{ str_short_with_dot($record->url, 180) }}</span>
                                 </label>
                             </div>
-                            
+
                             <span class="btn btn-info btn-sm css-toggler mt-1 mb-1"
-                                    data-sr-css-class-toggle-target="#url-{{ $record->id }}"
-                                    data-sr-css-class-toggle-class="h-200" data-sr-css-class-toggle-applied-text="More"
-                                    data-sr-css-class-toggle-not-applied-text="Less">
-                                    More
+                                data-sr-css-class-toggle-target="#url-{{ $record->id }}"
+                                data-sr-css-class-toggle-class="mx-h-200" data-sr-css-class-toggle-applied-text="More"
+                                data-sr-css-class-toggle-not-applied-text="Less">
+                                More
                             </span>
                         </td>
                         <td>{{ Util::niceTime($record->exec_time) }}</td>
                         <td>
-                            <div id="request-{{ $record->id }}" class="h-200">
+                            <div id="request-{{ $record->id }}" class="mx-h-200 w-300">
                                 {!! array_print($record->request, 100) !!}
                             </div>
 
                             <span class="btn btn-info btn-sm css-toggler mt-1 mb-1"
                                 data-sr-css-class-toggle-target="#request-{{ $record->id }}"
-                                data-sr-css-class-toggle-class="h-200" data-sr-css-class-toggle-applied-text="More"
+                                data-sr-css-class-toggle-class="mx-h-200" data-sr-css-class-toggle-applied-text="More"
                                 data-sr-css-class-toggle-not-applied-text="Less">
                                 More
                             </span>
                         </td>
                         <td>
-                            <div id="response-{{ $record->id }}" class="h-200">
+                            <div id="response-{{ $record->id }}" class="mx-h-200 w-300">
                                 {!! array_print($record->response, 100) !!}
                             </div>
 
                             <span class="btn btn-info btn-sm css-toggler mt-1 mb-1"
                                 data-sr-css-class-toggle-target="#response-{{ $record->id }}"
-                                data-sr-css-class-toggle-class="h-200" data-sr-css-class-toggle-applied-text="More"
+                                data-sr-css-class-toggle-class="mx-h-200" data-sr-css-class-toggle-applied-text="More"
                                 data-sr-css-class-toggle-not-applied-text="Less">
                                 More
                             </span>
                         </td>
                         <td>
-                            <div id="cache_logs-{{ $record->id }}" class="h-200">
-                                {!! array_print($record->cacheLog?->logs ?? [], 100) !!}
-                            </div>
-
-                            <span class="btn btn-info btn-sm css-toggler mt-1 mb-1"
-                                data-sr-css-class-toggle-target="#cache_logs-{{ $record->id }}"
-                                data-sr-css-class-toggle-class="h-200" data-sr-css-class-toggle-applied-text="More"
-                                data-sr-css-class-toggle-not-applied-text="Less">
-                                More
-                            </span>
+                            <x-Backend.index-table-info :record="$record" :userList="$userListCache"
+                                :options="$index_table_info_options" />
                         </td>
                         <td>
-                            <x-Backend.index-table-info :record="$record" :userList="$userListCache" />
-                        </td>
-                        <td>
+                            @if($record->sql_log_id)
                             <div class="mt-2 mb-2">
-                                @if (isset($record->sql_model['sql_log_file_url']))
-                                <a href="{{ $record->sql_model['sql_log_file_url'] }}"
-                                    class="btn btn-outline-secondary">
-                                    <i class="fas fa-download"></i>
-                                    SQL Log
-                                </a>
-                                @endif
-
-                                @if (isset($record->sql_model['sql_dml_log_file_url']))
-                                <a href="{{ $record->sql_model['sql_dml_log_file_url'] }}"
-                                    class="btn btn-outline-secondary">
-                                    <i class="fas fa-download"></i>
-                                    DML SQL Log
+                                <a href="{{ route('developer.sql_logs', ['id' => $record->sql_log_id ])  }}">
+                                    Open SQL Log Link
                                 </a>
                             </div>
                             @endif

@@ -17,6 +17,7 @@
             <x-Backend.form-errors />
         </p>
 
+        @if(isset($file_name) && isset($file_line_no))
         <div class="info-for-developer mb-2">
             <div>
                 File : {{ $file_name }}
@@ -27,15 +28,24 @@
             <div class="mt-2">
                 URL : {{ $current_url }}
             </div>
-
-            {!! $html !!}
         </div>
+        @endif
+        
+        {!! $html !!}
 
-        <div class="help-links text-center">
+        <div class="help-links text-center mt-1 mb-2">
             @if (is_ajax_request())
             @else
                 <span class="btn btn-secondary" onclick="history.back();">Back</span>
             @endif
         </div>
+
+        @if(isset($history) && is_array($history) && count($history) > 0)
+        @foreach($history as $arr)
+        <div class="info-for-developer">            
+            {!! array_print($arr, 255) !!}
+        </div>
+        @endforeach
+        @endif
     </div>
 </div>

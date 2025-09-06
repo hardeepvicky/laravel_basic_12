@@ -4,15 +4,10 @@
         <div class="d-flex flex-column h-100">
             <div class="auth-content my-auto">
                 <div class="text-center">
-                    <div class="avatar-lg mx-auto">
-                        <div class="avatar-title rounded-circle bg-light">
-                            <i class="bx bxs-envelope h2 mb-0 text-primary"></i>
-                        </div>
-                    </div>
+                    <x-Backend.session-flash />
 
                     <div class="list-container">
-                        <h2 class="list-title">Send OTP on</h2>
-
+                        <h4 class="mb-2 p-2">Click Below Button to send OTP</h4>
                         <ul class="custom-list-group mb-3" id="otp_via_list">
                             <li class="custom-list-group-item" id="otp_via_email">
                                 <span class="item-text">Email</span>
@@ -35,6 +30,7 @@
                         </div>
 
                         <form id="verify" class="mb-2">
+                            <h4 class="mb-2 p-2 b-t-primary">Enter OTP</h4>
                             <div class="row">
                                 <div class="col-2">
                                     <div class="mb-3">
@@ -87,7 +83,7 @@
 
                             <div class="mt-4">
                                 <button class="btn btn-primary w-100 waves-effect waves-light"
-                                    type="submit">Confirm</button>
+                                    type="submit">Verify</button>
                             </div>
                         </form>
 
@@ -110,6 +106,7 @@
 
         <script>
             $(function() {
+                var otp_sent_by_backend = parseBool('{{ request("otp_sent", false) }}');
                 var user = JSON.parse('<?= json_encode($user) ?>');
                 var send_via = '';
 
@@ -120,9 +117,7 @@
 
                     $.sr.wait(60, function(s) {
 
-                        $("#wait-time-block").html(
-                            "if you did not receive otp then you can send again in " + s +
-                            " seconds");
+                        $("#wait-time-block").html("if you did not receive otp then you can send again in " + s + " seconds");
 
                         if (s == 60) {
                             $("#wait-time-block").show();
@@ -146,8 +141,6 @@
 
                     send_via = 'email';
 
-                    $.loader.setInfo("Sending...").show();
-
                     send_email_user_otp(user, function(response) {
                         $("#alert_info .message").html(response['msg']);
                         $("#alert_info").show();
@@ -168,8 +161,6 @@
 
                     send_via = 'whatsapp';
 
-                    $.loader.setInfo("Sending...").show();
-
                     send_whatsapp_user_otp(user, function(response) {
                         $("#alert_info .message").html(response['msg']);
                         $("#alert_info").show();
@@ -177,6 +168,11 @@
                         on_send_otp();
                     });
                 });
+
+                if (otp_sent_by_backend)
+                {
+                    on_send_otp();
+                }
 
 
                 $("#verify").submit(function(e) {
@@ -206,12 +202,11 @@
 
                     var request = {
                         user_id: user.id,
-                        otp: list.join("")
+                        otp: list.join(""),
+                        timezone: getTimeZone()
                     };
 
-                    $.loader.setInfo("verifying...").show();
-
-                    ajaxPostJson("/ajax_user_otp_verify", request, function(response) {
+                    ajaxPostJson("/ajax_otp_verify", request, function(response) {
 
                         Swal.fire({
                             icon: "success",

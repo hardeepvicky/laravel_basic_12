@@ -13386,7 +13386,7 @@ body {
   background-color: transparent !important;
   color: var(--body-font-color);
   font-family: Nunito Sans, sans-serif;
-  font-size: 14px;
+  font-size: 15px;
   overflow-x: hidden
 }
 
@@ -13436,14 +13436,14 @@ body, html {
 }
 
 .h6, h6 {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 400;
   letter-spacing: .5px;
   line-height: 1
 }
 
 a {
-  font-size: 14px;
+  font-size: 15px;
   text-decoration: none
 }
 
@@ -30720,7 +30720,7 @@ header .header-right svg {
 }
 
 header .header-right a {
-  color: var(--body-font-color)
+  /* color: var(--body-font-color) */
 }
 
 header .btn-activity-primary {

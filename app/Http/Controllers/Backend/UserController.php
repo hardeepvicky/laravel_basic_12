@@ -5,13 +5,19 @@ namespace App\Http\Controllers\Backend;
 use App\Exceptions\UserException;
 use App\Helpers\FileUtility;
 use App\Helpers\LaravelExtend;
+use App\Models\BaseModel;
+use App\Models\Branch;
 use App\Models\Country;
+use App\Models\Department;
+use App\Models\Designation;
+use App\Models\DropDownValue;
 use App\Models\FieldSetting;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Role;
+use App\Models\Type;
 use App\Models\UserAllowIp;
-use App\Models\UserCategory;
+use App\Rules\MobileNumber;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
@@ -23,6 +29,8 @@ class UserController extends BackendController
     public String $routePrefix = "user";
 
     protected $modelClass = User::class;
+
+    protected User | null $model = null;
 
     public function index()
     {
@@ -36,61 +44,60 @@ class UserController extends BackendController
 
         $role_list = Role::getListCache();
 
-        $user_category_list = UserCategory::getListCache();
+        $department_list = Department::getListCache();
 
-        $this->setForView(compact("records", "role_list", "user_category_list"));
+        $designation_list = Designation::getListCache();
+
+        $this->setForView(compact("records", "role_list","department_list", "designation_list"));
 
         return $this->viewIndex(__FUNCTION__);
     }
 
-    protected function beforeViewRender()
-    {
-        $type_list = User::TYPE_LIST;
-
-        $country_list = Country::getListCache();
-
-        $my_country = Country::getMyCountry();
-
-        $field_labels = FieldSetting::getDynamicFields($this->modelClass);
-
-        $user_allow_ip_field_labels = FieldSetting::getDynamicFields("UserAllowIp");
-
-        $this->setForView(compact("type_list", "country_list", "my_country", "field_labels", "user_allow_ip_field_labels"));
-
-        return parent::beforeViewRender();
-    }
+    
 
     private function _getBuildeForIndex($cache_key_prefix, $apply_sort = true)
     {
-        $cache_key = $cache_key_prefix . "-index";
+        $cache_key = $cache_key_prefix;
 
-        $conditions = $this->getConditions($cache_key, [
+        $conditions = $this->getConditions($cache_key_prefix, [
+            ["field" => "id", "type" => "int", "cache" => false],
             ["field" => "name", "type" => "string"],
+            ["field" => "person_name", "type" => "string"],
+            ["field" => "person_last_name", "type" => "string"],
             ["field" => "email", "type" => "string"],
             ["field" => "mobile", "type" => "string"],
             ["field" => "is_active", "type" => "int"],
             ["field" => "type", "type" => "string_equal"],
+            ["field" => "sub_type", "type" => "string_equal"],
             ["field" => "user_category_id", "type" => "int"],
+            ["field" => "branch_id", "type" => "int"],
             ["field" => "country_id", "type" => "int"],
         ]);
 
-        $role_condition = $this->getConditions($cache_key . ".2", [
+        $cache_key = $cache_key_prefix . "-2";
+
+        $role_condition = $this->getConditions($cache_key, [
             ["field" => "role_id", "type" => "int"],
         ], true);
 
-        $builder = $this->modelClass::where($conditions)->whereHas(
-            'userRole',
-            function ($q) use ($role_condition) {
-                if (isset($role_condition['role_id'])) {
-                    $q->where("role_id", $role_condition['role_id']);
-                }
-            }
-        );
+        $builder = $this->modelClass::where($conditions);
 
-        $builder->with(["userCategory", "userAllowIp"]);
+        if ($role_condition)
+        {
+            $builder = $builder->whereHas(
+                'userRole',
+                function ($q) use ($role_condition) {
+                    if (isset($role_condition['role_id'])) {
+                        $q->where("role_id", $role_condition['role_id']);
+                    }
+                }
+            );
+        }
+
+        $builder->with(["userCategory", "userAllowIp", "department", "subDepartment", "designation"]);
 
         if ($apply_sort) {
-            $cache_key_for_sort = $cache_key_prefix . "-index-extra-params";
+            $cache_key_for_sort = $cache_key_prefix . "-extra-params";
 
             $clear_cache = request('is_sort_clear', false);
 
@@ -103,6 +110,41 @@ class UserController extends BackendController
         }
 
         return $builder;
+    }
+
+    protected function beforeViewRender()
+    {
+        if (is_null($this->model)) {
+            $this->model = new $this->modelClass();
+        }
+        
+        $type_list = User::TYPE_LIST;
+
+        $country_list = Country::getListCache();
+
+        $my_country = Country::getMyCountry();
+
+        $type_conditions = [
+            "type" => Type::getType($this->model, "sub_type")
+        ];
+
+        $sub_type_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
+
+        $user_category_list = DropDownValue::getList("id", "display_name", ["type" => DropDownValue::USER_CATEGORY], "name");
+
+        $branch_list = Branch::getList("id", "display_name", [], "list_display_order");
+
+        $field_labels = FieldSetting::getDynamicFields($this->modelClass);
+
+        $user_allow_ip_field_labels = FieldSetting::getDynamicFields("UserAllowIp");
+
+        $this->setForView(compact(
+            "type_list", "country_list", "my_country", "sub_type_list", "user_category_list", 
+            "branch_list",
+            "field_labels", "user_allow_ip_field_labels"
+        ));
+
+        return parent::beforeViewRender();
     }
 
     public function create()
@@ -135,21 +177,41 @@ class UserController extends BackendController
         }
         $role_list = Role::getList("id", "display_name", $conditions);
 
-        $this->setForView(compact("role_list"));
+        $conditions = [];
+
+        if ($model && $model->dept_id) {
+            $conditions['or_id'] = $model->dept_id;
+        }
+        $department_list = Department::getList("id", "display_name", $conditions);
+
+        $conditions = [];
+
+        if ($model && $model->desg_id) {
+            $conditions['or_id'] = $model->desg_id;
+        }
+
+        $designation_list = Designation::getList("id", "display_name", $conditions);
+
+        $this->setForView(compact("role_list", "department_list", "designation_list"));
     }
 
     private function _common_validation_rules()
     {
         return [
             'name' => ['required'],
-            'person_name' => ['nullable'],
+            'person_name' => ['required'],
+            'person_last_name' => ['nullable'],
             'email' => ['required'],
             'type' => ['required'],
-            'user_category_id' => ['required'],
             'country_id' => ['required'],
-            'mobile' => ['nullable'],
+            'branch_id' => ['required'],
+            'sub_type' => ["required"],
+            'user_category_id' => [],
+            'mobile' => ['required', new MobileNumber],
+            'whatsapp_mobile' => ['required', new MobileNumber],
             'roles' => ["required"],
             'allow_ip' => [],
+            'office_landline_no' => "",
             "dont_send_email" => "",
             "profile_image" => "",
             "is_active" => "",
@@ -169,6 +231,7 @@ class UserController extends BackendController
 
         $model = new $this->modelClass();
 
+        $rules = LaravelExtend::merge_validation_rules($rules, $model->getRequiredIfRules($request));
         $rules = LaravelExtend::merge_validation_rules($rules, $model->getUniqueValidationRules($request));
 
         $rules = array_merge_recursive($rules, [
@@ -193,10 +256,13 @@ class UserController extends BackendController
 
             $validatedData['created_via'] = User::CREATED_VIA_MANUAL_ADD;
 
+            
             $save_data = $validatedData;
-
+            
             unset($save_data['roles']);
             unset($save_data['allow_ip']);
+
+            $save_data = $model->convertTimeZoneBeforeQueryToDatabase($save_data);
 
             $model->fill($save_data);
             $model->setPassword($save_data['password']);
@@ -217,7 +283,6 @@ class UserController extends BackendController
             }
 
             DB::commit();
-            $this->saveSqlLog();
             return $this->afterSave($model);
         } catch (Exception $ex) {
             DB::rollBack();
@@ -228,7 +293,7 @@ class UserController extends BackendController
 
     public function edit($id)
     {
-        $model = $this->modelClass::with(["userRole", "userAllowIp"])->findOrFail($id);
+        $model = $this->modelClass::with(["userRole", "userAllowIp", "department", "subDepartment", "designation"])->findOrFail($id);
         $model->afterFind();
 
         $this->beforeEdit($model);
@@ -264,6 +329,7 @@ class UserController extends BackendController
         $rules = $this->_common_validation_rules();
         $messages = $this->_common_validation_messages();
 
+        $rules = LaravelExtend::merge_validation_rules($rules, $model->getRequiredIfRules($request));
         $rules = LaravelExtend::merge_validation_rules($rules, $model->getUniqueValidationRules($request));
 
         // dd($rules);
@@ -299,15 +365,13 @@ class UserController extends BackendController
 
             DB::commit();
 
-            $this->saveSqlLog();
-
             return $this->afterSave($model);
         } catch (\Exception $ex) {
             DB::rollBack();
 
             $this->saveSqlLog();
 
-            return back()->with('fail', $ex->getMessage())->withInput()->with("custom_errors", $this->custom_errors);
+            return back()->with('fail', get_exception_display_message($ex))->withInput()->with("custom_errors", $this->custom_errors);
         }
     }
 
@@ -386,12 +450,6 @@ class UserController extends BackendController
         }
     }
 
-
-    public function destroy($id)
-    {
-        abort(ACTION_NOT_PROCEED, "Because many tables contain created_by and updated_by field, which refer to user, can not delete");
-    }
-
     public function change_password(Request $request)
     {
         if ($request->isMethod("post")) {
@@ -416,5 +474,108 @@ class UserController extends BackendController
         }
 
         return $this->view(__FUNCTION__);
+    }
+
+    public function ajax_get_list()
+    {
+        $response = ["status" => 1];
+
+        try {
+
+            $pattern_array = [
+                ["field" => "name", "type" => "string"],
+                ["field" => "email", "type" => "string"],
+                ["field" => "mobile", "type" => "string"],
+                ["field" => "is_active", "type" => "int"],
+                ["field" => "type", "type" => "string_equal"],
+                ["field" => "user_category_id", "type" => "int"],
+                ["field" => "country_id", "type" => "int"],
+                ["field" => "dept_id", "type" => "int"],
+                ["field" => "sub_dept_id", "type" => "int"],
+                ["field" => "desg_id", "type" => "int"],
+            ];
+
+            $conditions = $this->getConditions(null, $pattern_array);
+
+            if (empty($conditions))
+            {
+                throw new UserException("No any condition applied");
+            }
+
+            $condition_list = $this->getConditions(null, $pattern_array, true);
+
+            $qb = $this->modelClass::where($conditions);
+            $qb->where("is_active", 1);
+
+            $default_user_id = null;
+
+            if (isset($condition_list['dept_id']) && isset($condition_list['dept_id']['value']) && $condition_list['dept_id']['value'])
+            {
+                $department = Department::with("headUser")->find($condition_list['dept_id']['value']);
+                $default_user_id = $department->headUser?->id;
+            }
+
+            $records = $qb->get();
+
+            // d(LaravelExtend::getQueryLog("", -2));
+
+            $response['data'] = [];
+
+            foreach ($records as $record) {
+                $row = [
+                    "id" => $record->id,
+                    "name" => $record->getDisplayName(),
+                    "auto_select" => $default_user_id == $record->id
+                ];
+
+                $response['data'][] = $row;
+            }
+        } catch (Exception $ex) {
+            $response['status'] = 0;
+            $response['msg'] = $ex->getMessage();
+        }
+
+        return $this->responseJson($response);
+    }
+
+    protected function beforeDelete($user)
+    {
+        parent::beforeDelete($user);
+
+        $model_list = LaravelExtend::getListOfModels();
+
+        foreach($model_list as $model_name => $model_class)
+        {
+            $main_model = new $model_class();
+
+            if ($main_model instanceof BaseModel)
+            {
+                $ref_model = new $model_class();
+
+                if ($model_class::tableHaveField($ref_model->getTable(), "created_by")) 
+                {
+                    $count = $model_class::where("created_by", $user->id)->count();
+
+                    $ref_class_display_name = $model_class::classDisplayName();
+
+                    if ($count > 0)
+                    {
+                        throw new \Exception("Record has associated data in $ref_class_display_name in created_by field. can't delete");
+                    }
+                }
+
+                if ($model_class::tableHaveField($ref_model->getTable(), "updated_by")) 
+                {
+                    $count = $model_class::where("updated_by", $user->id)->count();
+
+                    $ref_class_display_name = $model_class::classDisplayName();
+
+                    if ($count > 0)
+                    {
+                        throw new \Exception("Record has associated data in $ref_class_display_name in updated_by field. can't delete");
+                    }
+                }
+            }
+        }
     }
 }

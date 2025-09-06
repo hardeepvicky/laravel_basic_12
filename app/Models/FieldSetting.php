@@ -2,26 +2,15 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
 class FieldSetting extends BaseMongoModel
 {
     protected static array $unique_fields = ["type"];
 
-    public static function getDynamicFields($type)
+    public static function getDynamicFields($model_class)
     {
-        $type = str_class_name_without_namespace($type);
+        $model_class = str_class_name_without_namespace($model_class);
 
-        $cache_key = "-getDynamicFields-" . $type;
-
-        $fields = self::getCache($cache_key);
-
-        if ($fields) {
-            return $fields;
-        }
-
-
-        $ref_model_class = "App\\Models\\" . $type;
+        $ref_model_class = "App\\Models\\" . $model_class;
 
         $ref_model = $ref_model_class::query()->first();
 
@@ -31,7 +20,7 @@ class FieldSetting extends BaseMongoModel
 
         $fields = $ref_model->getFieldLabels();
 
-        $record = self::where("type", $type)->first();
+        $record = self::where("type", $model_class)->first();
 
         if (isset($record->field_labels) && is_array($record->field_labels) && count($record->field_labels) > 0) {
             foreach ($record->field_labels as $field => $custom_label) {
@@ -40,8 +29,6 @@ class FieldSetting extends BaseMongoModel
                 }
             }
         }
-
-        self::addCache($cache_key, $fields);
 
         return $fields;
     }

@@ -8,19 +8,23 @@ use Illuminate\Validation\Rules\Unique;
 
 class Designation extends BaseModel
 {
-    public array $child_model_class = [
-        Employee::class => [
-            "foreignKey" => "designation_id",
-            "preventDelete" => true
-        ],
-        User::class => [
-            "foreignKey" => "designation_id",
-            "preventDelete" => true
-        ],
-    ];
-
     protected $appends = [
         'display_name',
+    ];
+
+    protected static array $unique_fields = ["name"];
+
+    protected static array $list_fields = ["id", "name", "short_name"];
+
+    public static array $child_model_class = [
+        // Employee::class => [
+        //     "foreignKey" => "designation_id",
+        //     "preventDelete" => true
+        // ],
+        // User::class => [
+        //     "foreignKey" => "designation_id",
+        //     "preventDelete" => true
+        // ],
     ];
 
     protected function getDisplayNameAttribute()
@@ -30,7 +34,7 @@ class Designation extends BaseModel
 
     public function getDisplayName()
     {
-        return $this->name;
+        return $this->short_name;
     }
 
     public function getUniqueValidationRules(Request $request)
@@ -44,7 +48,6 @@ class Designation extends BaseModel
             foreach ($field_rules as $field => $rules) {
                 foreach ($rules as $rule) {
                     if ($rule instanceof Unique) {
-                        // d([$field => $this->id]);
                         $rule->ignore($this->id, $this->primaryKey);
                     }
                 }
@@ -52,5 +55,33 @@ class Designation extends BaseModel
         }
 
         return $field_rules;
+    }
+
+    public function getUserIdListBasedOnDesignationLevel()
+    {
+        $desg_id_list = self::where("level", "<", $this->level)->pluck("id")->toArray();
+
+        $user_id_list = [];
+
+        if ($desg_id_list)
+        {
+            $user_id_list = User::whereIn("desg_id", $desg_id_list)->pluck("id")->toArray();
+        }
+
+        return $user_id_list;
+    }
+
+    public function getParentUserIdListBasedOnDesignationLevel()
+    {
+        $desg_id_list = self::where("level", ">", $this->level)->pluck("id")->toArray();
+
+        $user_id_list = [];
+
+        if ($desg_id_list)
+        {
+            $user_id_list = User::whereIn("desg_id", $desg_id_list)->pluck("id")->toArray();
+        }
+
+        return $user_id_list;
     }
 }

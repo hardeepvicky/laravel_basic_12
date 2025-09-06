@@ -3,10 +3,10 @@
 namespace App\Console\Commands;
 
 use App\Exceptions\UserException;
+use App\Helpers\MyCommand;
 use App\Models\User;
-use Illuminate\Console\Command;
 
-class SetPasswordCommand extends Command
+class SetPasswordCommand extends MyCommand
 {
     /**
      * The name and signature of the console command.
@@ -20,13 +20,18 @@ class SetPasswordCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Set Password';
 
     /**
      * Execute the console command.
      */
     public function handle()
     {
+        $logModel = $this->logCreate([
+            "command" => $this->signature,
+            "description" => $this->description
+        ]);
+
         $id_or_email = $this->ask('Enter User Id or Email');
 
         $id_or_email = trim($id_or_email);
@@ -73,5 +78,9 @@ class SetPasswordCommand extends Command
         {
             throw new UserException("Fail To Save", UserException::ERROR_LARAVEL_FAIL);
         }
+
+        $logModel = $this->logUpdate([
+            "password changed of user : " . $user->getDisplayName()
+        ]);
     }
 }

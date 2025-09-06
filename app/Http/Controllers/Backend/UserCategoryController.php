@@ -34,7 +34,7 @@ class UserCategoryController extends BackendController
         $cache_key = $cache_key_prefix . "-index";
 
         $conditions = $this->getConditions($cache_key, [
-            ["field" => "id", "type" => "int"],
+            ["field" => "id", "type" => "int", "cache" => false],
             ["field" => "name", "type" => "string"],
             ["field" => "description", "type" => "string"],
             ["field" => "is_active", "type" => "int"],
@@ -129,8 +129,6 @@ class UserCategoryController extends BackendController
 
             DB::commit();
 
-            $this->saveSqlLog();
-
             return $this->afterSave($model);
         } catch (Exception $ex) {
             DB::rollBack();
@@ -185,8 +183,6 @@ class UserCategoryController extends BackendController
             $this->updateUserInfoAfterSave($model);
 
             DB::commit();
-
-            $this->saveSqlLog();
 
             return $this->afterSave($model);
         } catch (Exception $ex) {

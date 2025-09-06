@@ -8,6 +8,7 @@
     <meta content="Test Laravel" name="description" />
     <meta content="Hardeep" name="author" />
     <meta name="csrf-token" content="{{ csrf_token() }}" />
+    <meta name="user-id" content="{{ auth()->id() }}">
     <!-- App favicon -->
     <link rel="shortcut icon" href="/favicon.ico">
 
@@ -29,6 +30,8 @@
 
     <script src="{{ get_asset_url('assets/js/vendors/jquery/jquery.min.js') }}"></script>
     <script src="{{ get_asset_url('libs/events.js') }}"></script>
+
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
 <body>
@@ -70,15 +73,7 @@
     <script src="{{ get_asset_url('js/common_funtions.js') }}"></script>
     <script src="{{ get_asset_url('js/common_script_for_all_non_ajax_layout.js') }}"></script>
     <script src="{{ get_asset_url('js/backend/backend_non_ajax.js') }}"></script>
-    <script>
-        $(function() {
-            $.loader.init();
-            $.events.lastCallbacks.map(function(cb) {
-                cb();
-            });
-        });
-    </script>
-
+    <script src="{{ get_asset_url('js/backend/common.js') }}"></script>    
 </body>
 
 </html>

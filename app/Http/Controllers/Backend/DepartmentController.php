@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Backend;
 
 use App\Helpers\LaravelExtend;
 use App\Models\Department;
+use App\Models\FieldSetting;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Support\Facades\DB;
@@ -25,6 +27,8 @@ class DepartmentController extends BackendController
 
         $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
 
+        // d(LaravelExtend::getQueryLog("", -3));
+
         $this->setForView(compact("records"));
 
         return $this->viewIndex(__FUNCTION__);
@@ -35,11 +39,15 @@ class DepartmentController extends BackendController
         $cache_key = $cache_key_prefix . "-index";
 
         $conditions = $this->getConditions($cache_key, [
-            ["field" => "name", "type" => "string", "view_field" => "name"],
-            ["field" => "is_active", "type" => "", "view_field" => "is_active"],
+            ["field" => "id", "type" => "int", "cache" => false],
+            ["field" => "name", "type" => "string"],
+            ["field" => "short_name", "type" => "string"],
+            ["field" => "is_active", "type" => "int"],
         ]);
 
         $builder = $this->modelClass::where($conditions);
+
+        $builder->with(["headUser"]);
 
         if ($apply_sort)
         {
@@ -47,12 +55,14 @@ class DepartmentController extends BackendController
 
             $clear_cache = request('is_sort_clear', false);
 
-            $sort_params = $this->getRequestData($cache_key_for_sort, [
-                ["key" => "sort_by", "default" => "id"],
-                ["key" => "sort_dir", "default" => "DESC"],
+            $this->model = new $this->modelClass;
+
+            $sort = $this->getSortBy($this->model, $cache_key_for_sort, [
+                ["key" => "sort_by", "default" => "list_display_order"],
+                ["key" => "sort_dir", "default" => "ASC"],
             ], $clear_cache);
 
-            $builder->orderBy($sort_params['sort_by'], $sort_params['sort_dir']);
+            $builder->orderBy($sort['sort_by'], $sort['sort_dir']);
         }
 
         return $builder;
@@ -64,9 +74,15 @@ class DepartmentController extends BackendController
             $this->model = new $this->modelClass();
         }
 
-        $field_labels = $this->model->getFieldLabels();
+        $user_conditions = [
+            "type" => User::TYPE_INTERNAL,
+        ];
 
-        $this->setForView(compact("field_labels"));
+        $user_list = User::getList("id", "display_name", $user_conditions);
+
+        $field_labels = FieldSetting::getDynamicFields($this->modelClass);
+
+        $this->setForView(compact("user_list", "field_labels"));
 
         return parent::beforeViewRender();
     }
@@ -91,6 +107,8 @@ class DepartmentController extends BackendController
     {
         return [
             "name" => ["required"],
+            "short_name" => ["required"],
+            "dept_head_user_id" => ["nullable"],
             "list_display_order" => "",
             "is_active" => ""
         ];
@@ -132,8 +150,6 @@ class DepartmentController extends BackendController
             
             DB::commit();
 
-            $this->saveSqlLog();
-
             return $this->afterSave($model);
         }
         catch(Exception $ex)
@@ -142,9 +158,7 @@ class DepartmentController extends BackendController
             
             $this->saveSqlLog();
 
-            $this->custom_errors = array_merge_recursive($this->custom_errors, $this->model->custom_errors);
-
-            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", $this->custom_errors);
+            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", LaravelExtend::$errors);
         }
     }
 
@@ -195,17 +209,13 @@ class DepartmentController extends BackendController
 
             DB::commit();
 
-            $this->saveSqlLog();
-
             return $this->afterSave($this->model);
         } catch (Exception $ex) {
             DB::rollBack();
 
             $this->saveSqlLog();
 
-            $this->custom_errors = array_merge_recursive($this->custom_errors, $this->model->custom_errors);
-
-            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", $this->custom_errors);
+            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", LaravelExtend::$errors);
         }
     }
 }

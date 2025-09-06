@@ -12,16 +12,17 @@ $.ajaxSetup({
     cache: false,
     beforeSend : function(xhr)
     {
-        $.loader.init().setInfo("Loading...").show();
     },
     complete : function (xhr, status) {
-        $.loader.hide();
     }
 });
 
 $(document).ajaxError(function (event, xhr, settings, errorString) {
-    if (xhr.status == 403) {
-        $.events.onAjaxError(errorString, "Session is expired. Please Login");
+    
+    $.loader.init().hide();
+
+    if (xhr.status == 422) {
+        //laravel validation error        
     } 
     else if (
         typeof xhr.responseText == "string" &&
@@ -31,4 +32,8 @@ $(document).ajaxError(function (event, xhr, settings, errorString) {
             url: settings.url,
         });
     }
+});
+
+$(function(){
+    $("input.timezone").val(getTimeZone());
 });

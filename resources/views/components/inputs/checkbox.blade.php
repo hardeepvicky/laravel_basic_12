@@ -40,10 +40,13 @@ $id = $attributes->get('id', $name);
 ?>
 
 <label class="{{ $div_class }}">
-    <input type="hidden" name="{{ $name }}" value="0" />
-    <input type="checkbox" name="{{ $name }}" value="1" id="{{ $id }}" {{ $attributes->merge($my_attributes) }} />
+    @if (isset($hiddenField) && $hiddenField)
+        <input type="hidden" name="{{ $name }}" value="0" />
+    @endif
+
+    <input type="checkbox" name="{{ $name }}" value="1" id="{{ $id }}" {{ $attributes->except(["value", "id", "type", "name"])->merge($my_attributes) }} />
     @if (isset($label) && $label)
-    <label class="form-check-label" for="{{ $id }}">{{ $label }}</label>
+        <span class="form-check-label" for="{{ $id }}">{{ $label }}</span>
     @endif
 </label>
 

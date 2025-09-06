@@ -3,18 +3,18 @@
         <x-Backend.pagination-links :records="$records" />
     </div>
 
-    <div class="card-body p-1 summary_table_with_search" data-base_url="{{ route($routePrefix . '.index') }}">
+    <div class="card-body p-1">
         <div class="table-responsive">
-            <table class="table table-bordered summary-table">
+            <table class="table table-bordered summary-table summary_table_with_search">
                 <thead>
                     <tr class="border-bottom-primary">
                         <th><?= sortable_anchor('id', get_value_from_list($field_labels, 'id')) ?></th>
                         <th><?= sortable_anchor('type', get_value_from_list($field_labels, 'type')) ?></th>
                         <th><?= sortable_anchor('name', get_value_from_list($field_labels, 'name')) ?></th>
-                        <th><?= sortable_anchor('description', get_value_from_list($field_labels, 'description')) ?>
-                        </th>
+                        <th><?= sortable_anchor('description', get_value_from_list($field_labels, 'description')) ?></th>
                         <th><?= get_value_from_list($field_labels, 'is_active') ?></th>
-                        <th>Info</th>
+                        <th style="width:6%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
+                        <th style="width:6%"><?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?></th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -26,11 +26,13 @@
                         <td>{{ $record->name }}</td>
                         <td>{{ $record->description }}</td>
                         <td>
-                            <x-Backend.active_deactive :isActive="$record->is_active" :id="$record->id"
-                                :routePrefix="$routePrefix" />
+                            <x-Backend.active_deactive :isActive="$record->is_active" :id="$record->id" :routePrefix="$routePrefix" />
                         </td>
                         <td>
-                            <x-Backend.index-table-info :record="$record" :userList="$userListCache" />
+                            <x-Backend.created-and-by :datetime="$record->created_at" :userId="$record->created_by" />
+                        </td>
+                        <td>
+                            <x-Backend.created-and-by :datetime="$record->updated_at" :userId="$record->updated_by" />
                         </td>
                         <td>
                             <x-Backend.summary-comman-actions :id="$record->id" :routePrefix="$routePrefix" />

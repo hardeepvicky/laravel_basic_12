@@ -2,14 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\UserException;
+use App\Helpers\ArrayHelper;
 use App\Helpers\DateUtility;
-use App\Models\BaseModel;
+use App\Helpers\LaravelExtend;
+use App\Models\BaseModelInterface;
 use App\Models\Setting;
 use App\Traits\CacheTrait;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -24,7 +26,7 @@ class WebController extends Controller
 
     protected $modelClass;
 
-    protected int $paginationLimit = 10;
+    protected int $paginationLimit = 100;
 
     /**
      * variable to store data which will pass to view
@@ -37,6 +39,21 @@ class WebController extends Controller
             $model = new $this->modelClass();
 
             $this->tableName = $model->getTable();
+        }
+
+        $auth_user = Auth::user();
+
+        if ($auth_user)
+        {
+            if ($auth_user->login_timezone)
+            {
+                // LaravelExtend::addWarning("User", "Timezone is $auth_user->login_timezone", "Security");
+                DateUtility::$login_user_time_zone = new \DateTimeZone($auth_user->login_timezone);
+            }
+            else
+            {
+                LaravelExtend::addWarning("", "Users's timezone could not found, so datetime will be shown in UTC timezone", "Login");
+            }
         }
     }
 
@@ -87,7 +104,7 @@ class WebController extends Controller
 
     protected function viewIndex($view_name)
     {
-        if (request()->ajax()) {
+        if (request()->ajax() && !request("full_view")) {
             $view_name = "ajax_" . $view_name;
         }
 
@@ -147,11 +164,15 @@ class WebController extends Controller
         } else if ($method_name == "show") {
             $sub_title = "View";
         } else if ($method_name == "showLoginForm") {
-            $module_name = "Login";
+            $sub_title = "Login";
         } else if ($method_name == "sign_in_form") {
-            $module_name = "Sign In";
+            $sub_title = "Sign In";
         } else {
             $sub_title = str_replace("index", "List", $method_name);
+
+            $sub_title = str_replace("create", "Add", $sub_title);
+
+            $sub_title = str_replace("my", "", $sub_title);
 
             $sub_title = str_function_name_to_human_text($sub_title);
         }
@@ -172,7 +193,7 @@ class WebController extends Controller
         $cache_params = [];
 
         if (is_string($cache_prefix) && $cache_prefix) {
-            $cache_key = "request_" . $cache_prefix . "_user_" . $this->getAuthUserId();
+            $cache_key = "request_" . $cache_prefix . "_user-" . $this->getAuthUserId();
 
             $cache_params = self::getCache($cache_key);
 
@@ -216,16 +237,82 @@ class WebController extends Controller
         return $params;
     }
 
+    protected function getSortBy(Model $main_model, $cache_prefix, array $array, bool $is_cache_clear = false)
+    {
+        $params = $this->getRequestData($cache_prefix, $array, $is_cache_clear);
+
+        if (isset($params['sort_by']) && $params['sort_by'] && $params['sort_dir'] && $params['sort_dir'])
+        {
+            $sort_by = $params['sort_by'];
+            $sort_dir = $params['sort_dir'];
+
+            $arrayHelper = new ArrayHelper($params);
+
+            UserException::checkPossibleValues($sort_dir, ["ASC", "DESC"], ["before_check_convert_string" => ["trim", "strtolower"]]);
+
+            if (strpos($sort_by, ".") !== false)
+            {
+                list($relation_name, $field) = explode(".", $sort_by);
+
+                $relation_name = trim($relation_name);
+                $field = trim($field);
+
+                if (!$relation_name)
+                {
+                    throw new UserException("sort_by has (.) char so system is finding relation_name, which is not found");
+                }
+
+                $relation = LaravelExtend::getRelation($main_model, $relation_name);
+
+                if (!$relation)
+                {
+                    $class_name = str_class_name_without_namespace($main_model);
+                    throw new UserException("relation : $relation_name not found on $class_name");
+                }
+
+                $foreign_key = $relation->getForeignKeyName();
+
+                $relation_class = $relation->getRelated();
+
+                $main_table_name = $main_model->getTable();
+                
+                if (!isset($params['relation_table_field']))
+                {
+                    $params['relation_table_field'] = "name";
+                }
+
+                $query_builder = $relation_class::select($params['relation_table_field'])->whereColumn('id', $main_table_name . "." . $foreign_key);
+
+                return [
+                    "sort_by" => $query_builder,
+                    "sort_dir" => $sort_dir
+                ];
+            }
+            else
+            {
+                $arrayHelper = new ArrayHelper($params);
+
+                return $arrayHelper->getOnlyWhichHaveKeys(["sort_by", "sort_dir"], false, true);
+            }
+        }
+    }
+
     protected function getConditions($cache_prefix, array $array, bool $return_key_value_pair_conditions = false)
     {
         $conditions = [];
-        $search_variables = [];
+        $search_variables = $cache_variables = [];
 
         if (is_string($cache_prefix) && $cache_prefix) {
-            $cache_key = "getConditions_" . $cache_prefix . "_user_" . $this->getAuthUserId();
+            $cache_key = "conditions-" . $cache_prefix . "_user_" . $this->getAuthUserId();
         }
 
         $request_params = request()->all();
+
+        foreach ($request_params as $k => $v) {
+            if (is_string($v)) {
+                $request_params[$k] = urldecode($v);
+            }
+        }
 
         if (empty($request_params) && isset($cache_key)) {
             $cache_params = self::getCache($cache_key);
@@ -248,6 +335,7 @@ class WebController extends Controller
             $view_field = $row['view_field'] ?? $row['field'];
             $search_variables[$view_field] = "";
             $value = null;
+            $extra = $row['extra'] ?? [];
 
             if (isset($row['default']) && !empty($row['default'])) {
                 $value = $row['default'];
@@ -276,41 +364,51 @@ class WebController extends Controller
                             $v = trim($v);
                         }
 
-                        $arr = $this->parseConditionValue($v, $row['type']);
+                        $arr = $this->parseConditionValue($v, $row['type'], $extra);
                         $value[$k] = $arr['value'];
                     }
 
                     $parse_value = implode(",", $value);
                     if ($return_key_value_pair_conditions) {
-                        if ($op && $op != "=") {
-                            $conditions[$field . " " . $op] = $parse_value;
-                        } else {
-                            $conditions[$field] = $parse_value;
-                        }
+                        $conditions[$field] = [
+                            "value" => $parse_value,
+                            "op" => $op,
+                        ];
                     } else {
                         $conditions[] = [$field, $op, $parse_value];
                     }
                 }
             } else if (strlen($value) > 0) {
-                $arr = $this->parseConditionValue($value, $row['type']);
+                $arr = $this->parseConditionValue($value, $row['type'], $extra);
 
                 $parse_value = $arr['value'];
                 $op = $arr['op'];
 
                 if ($return_key_value_pair_conditions) {
-                    if ($op && $op != "=") {
-                        $conditions[$field . " " . $op] = $parse_value;
-                    } else {
-                        $conditions[$field] = $parse_value;
-                    }
+                    $conditions[$field] = [
+                        "value" => $parse_value,
+                        "op" => $op,
+                    ];
                 } else {
                     $conditions[] = [$field, $op, $parse_value];
                 }
             }
+
+            if (isset($row['cache'])) 
+            {
+                if ($row['cache'])
+                {
+                    $cache_variables[$view_field] = $value;
+                }
+            }
+            else
+            {
+                $cache_variables[$view_field] = $value;
+            }
         }
 
         if (isset($cache_key)) {
-            self::addCache($cache_key, $search_variables, laravel_constant("cache_time.summary_search"));
+            self::addCache($cache_key, $cache_variables, laravel_constant("cache_time.summary_search"));
         }
 
         if (!isset($this->data['search'])) {
@@ -322,7 +420,7 @@ class WebController extends Controller
         return $conditions;
     }
 
-    protected function parseConditionValue($value, String $type)
+    protected function parseConditionValue($value, String $type, array $extra = [])
     {
         $data_type = gettype($value);
 
@@ -348,26 +446,30 @@ class WebController extends Controller
                 break;
 
             case "date":
-                $parse_value = DateUtility::getDate($value, DateUtility::DATE_FORMAT);
+                $format = DateUtility::DATE_FORMAT;
                 break;
 
             case "from_date":
-                $parse_value = DateUtility::getDate($value, DateUtility::DATE_FORMAT);
+                $format = DateUtility::DATE_FORMAT;
                 $op = '>=';
                 break;
 
             case "to_date":
-                $parse_value = DateUtility::getDate($value, DateUtility::DATE_FORMAT);
+                $format = DateUtility::DATE_FORMAT;
                 $op = '<=';
                 break;
 
+            case "datetime":
+                $format = DateUtility::DATETIME_FORMAT;
+                break;
+
             case "from_datetime":
-                $parse_value = DateUtility::getDate($value);
+                $format = DateUtility::DATETIME_FORMAT;
                 $op = '>=';
                 break;
 
             case "to_datetime":
-                $parse_value = DateUtility::getDate($value);
+                $format = DateUtility::DATETIME_FORMAT;
                 $op = '<=';
                 break;
 
@@ -404,19 +506,19 @@ class WebController extends Controller
                 break;
         }
 
+        if (in_array($type, ["date", "from_date", "to_date", "datetime", "from_datetime", "to_datetime"])) {
+            $parse_value = DateUtility::getDate($value, $format, DateUtility::$login_user_time_zone);
+        }
+
         return [
             "value" => $parse_value,
             "op" => $op
         ];
     }
 
-    protected function getPaginagteRecords($builder, $cache_key_prefix)
+    protected function getPaginagteRecords($builder, String $cache_key_prefix)
     {
-        $cache_key = null;
-
-        if (is_string($cache_key_prefix) && $cache_key_prefix) {
-            $cache_key = "pagination_limit-" . $cache_key_prefix . "-user-" . $this->getAuthUserId();
-        }
+        $cache_key = $cache_key_prefix . "-pagination_limit";
 
         $params = $this->getRequestData($cache_key, [
             ["key" => "pagination_limit", "default" => $this->paginationLimit],
@@ -426,7 +528,7 @@ class WebController extends Controller
             throw_exception("pagination_limit can not be less than 1");
         }
 
-        $paginationList = [5 => 5, 10 => 10, 20 => 20, 50 => 50, 100 => 100];
+        $paginationList = [10 => 10, 20 => 20, 50 => 50, 100 => 100, 200 => 200];
 
         $this->setForView([
             "pagination_limit" => $params['pagination_limit'],
@@ -446,16 +548,16 @@ class WebController extends Controller
 
     protected function beforeEdit($model)
     {
-        if (BaseModel::tableHaveField($model->getTable(), "is_pre_defined")) {
+        if ($model->tableHaveField($model->getTable(), "is_pre_defined")) {
             if ($model->is_pre_defined) {
                 abort(ACTION_NOT_PROCEED, "Pre-Defined Record can not be edit");
             }
         }
 
-        if (BaseModel::tableHaveField($model->getTable(), "can_edit")) {
+        if ($model->tableHaveField($model->getTable(), "can_edit")) {
             if (!$model->can_edit) {
                 $msg = "Record can not be edit";
-                if (BaseModel::tableHaveField($model->getTable(), "cannot_edit_reason_array") || array_key_exists("cannot_edit_reason_array", $model->attributes)) {
+                if ($model->tableHaveField($model->getTable(), "cannot_edit_reason_array") || array_key_exists("cannot_edit_reason_array", $model->attributes)) {
 
                     if ($model->cannot_edit_reason_array) {
                         $arr = $model->cannot_edit_reason_array;
@@ -470,71 +572,27 @@ class WebController extends Controller
 
     protected function updateUserInfoAfterSave(Model $model)
     {
-        if (App::environment('production')) {
-            return false;
-        }
-
-        $auth_user = Auth::user();
-
-        if ($auth_user) {
-            // dd($model->wasRecentlyCreated);
-            if ($model->wasRecentlyCreated) {
-                $auth_user->changeCreatedByUsage($model, 1);
-            } else {
-                $auth_user->changeUpdatedByUsage($model, 1);
-            }
-
-            // d($this->getQueryLog());
-            // exit;
-        }
+       
     }
 
     protected function updateUserInfoAfterDelete(Model $model)
     {
-        $auth_user = Auth::user();
-        if ($auth_user) {
-            die("Under Development");
-        }
+        
     }
 
     protected function updateUserInfoForCreateBulk(array $models)
     {
-        if (App::environment('production')) {
-            return false;
-        }
-
-        $auth_user = Auth::user();
-
-        if ($auth_user) {
-            $auth_user->changeCreatedByUsageBulk($models);
-        }
+        
     }
 
     protected function updateUserInfoForUpdateBulk(array $models)
     {
-        if (App::environment('production')) {
-            return false;
-        }
-
-        $auth_user = Auth::user();
-
-        if ($auth_user) {
-            $auth_user->changeUpdatedByUsageBulk($models);
-        }
+        
     }
 
     protected function updateUserInfoForDeleteBulk(array $models)
     {
-        if (App::environment('production')) {
-            return false;
-        }
-
-        $auth_user = Auth::user();
-        // $auth_user = (User) $auth_user;
-
-        if ($auth_user) {
-            die("Under Development");
-        }
+        
     }
 
     protected function afterSave($model, $prefix = null, $msg = null)
@@ -561,29 +619,49 @@ class WebController extends Controller
             throw_exception("msg variable required");
         }
 
+        $request = request();
+
+        if ($request->ajax()) {
+            return $this->responseJson(['status' => 1, 'msg' => $msg]);
+        }
+
+        $this->saveSqlLog();
+
         $redirect_to_index = (bool) request("redirect_to_index", false);
 
         if ($redirect_to_index) {
             return redirect()->route($this->routePrefix . ".index")->with('success', $msg);
         }
 
+        $redirect_to_add = (bool) request("redirect_to_add", false);
+
+        if ($redirect_to_add) {
+            return redirect()->route($this->routePrefix . ".create")->with('success', $msg);
+        }
+
+        $redirect_to_edit = (bool) request("redirect_to_edit", false);
+
+        if ($redirect_to_edit) {
+            return redirect()->route($this->routePrefix . ".edit", [$model])->with('success', $msg);
+        }
+        
         return back()->with('success', $msg);
     }
 
     protected function beforeDelete($model)
     {
-        if (BaseModel::tableHaveField($model->getTable(), "is_pre_defined")) {
+        if ($model->tableHaveField($model->getTable(), "is_pre_defined")) {
             if ($model->is_pre_defined) {
                 abort(ACTION_NOT_PROCEED, "Pre-Defined Record can not be delete");
             }
         }
 
-        if (BaseModel::tableHaveField($model->getTable(), "can_delete")) {
+        if ($model->tableHaveField($model->getTable(), "can_delete")) {
             if (!$model->can_delete) {
                 $msg = "Record can not be delete";
-                if (BaseModel::tableHaveField($model->getTable(), "cannot_delete_reason_array") || array_key_exists("cannot_delete_reason_array", $model->attributes)) {
+                if ($model->tableHaveField($model->getTable(), "cannot_delete_reason_array") || array_key_exists("cannot_delete_reason_array", $model->attributes)) {
                     if ($model->cannot_delete_reason_array) {
-                        $msg .= "Reason : " . implode(", ", $model->cannot_delete_reason_array);
+                        $msg .= ", Reason : " . implode(", ", $model->cannot_delete_reason_array);
                     }
                 }
 
@@ -592,12 +670,10 @@ class WebController extends Controller
         }
     }
 
-    protected function delete(BaseModel $model)
+    protected function delete(BaseModelInterface $model)
     {
         try {
             DB::beginTransaction();
-
-            $this->beforeDelete($model);
 
             $this->deleteCascade($model);
 
@@ -630,12 +706,19 @@ class WebController extends Controller
         }
 
         if ($request->ajax()) {
-            return response()->json(['status' => 1, 'msg' => $msg]);
+            return $this->responseJson(['status' => 1, 'msg' => $msg]);
         }
 
-        $redirect_to = request("redirect_to", "index");
+        $this->saveSqlLog();
 
-        return redirect()->route($this->routePrefix . "." . $redirect_to)->with('success', $msg);
+        $redirect_to = request("redirect_to", false);
+
+        if ($redirect_to)
+        {
+            return redirect()->route($this->routePrefix . "." . $redirect_to)->with('success', $msg);
+        }
+
+        return back()->with('success', $msg);
     }
 
     protected function beforeCsvImport()

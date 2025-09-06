@@ -48,6 +48,7 @@ function ajaxHandleResponse(url, response, callback) {
                 var responseJson = JSON.parse(response);
             }
         } catch (e) {
+            $.loader.hide();
             $.events.onAjaxError("JSON Parse Error", response, {
                 url: url,
             });
@@ -56,6 +57,7 @@ function ajaxHandleResponse(url, response, callback) {
     }
 
     if (typeof responseJson["status"] == "undefined") {
+        $.loader.hide();
         $.events.onAjaxError("Missing", "Response JSON Should have status", {
             url: url,
         });
@@ -67,17 +69,29 @@ function ajaxHandleResponse(url, response, callback) {
             callback(responseJson);
         }
     } else if (typeof responseJson["msg"] != "undefined") {
-        $.events.onUserError(responseJson["msg"]);
+        $.loader.hide();
+        
+        if (typeof responseJson['custom_errors'] == "object")
+        {
+            $.events.customErrors(responseJson["msg"], responseJson['custom_errors']);
+        }
+        else
+        {
+            $.events.onUserError(responseJson["msg"]);
+        }
     } else {
+        $.loader.hide();
         $.events.onAjaxError("Missing", "Response JSON Should have msg", {
             url: url,
         });
     }
+
+    return responseJson;
 }
 
 function ajaxGetJson(url, callback) {
     $.loader.init();
-    $.loader.setInfo("Loading...").show();
+    $.loader.setInfo("Sending Request...").show();
 
     $.get(url, function (response) {
         $.loader.hide();
@@ -90,7 +104,7 @@ function ajaxGetJson(url, callback) {
 
 function ajaxPostJson(url, data, callback) {
     $.loader.init();
-    $.loader.setInfo("Loading...").show();
+    $.loader.setInfo("Sending Request...").show();
 
     $.post(url, data, function (response) {
         $.loader.hide();
@@ -101,41 +115,52 @@ function ajaxPostJson(url, data, callback) {
     });
 }
 
-function form_errors(form, errors) {
-    var error_input_found = false;
+function form_errors(form, responseJson) {
 
     form.find(".error-message").remove();
 
-    for (var field in errors) {
-        var errs = errors[field];
-        var key = "[name='" + field + "']";
-        var input = form.find("input" + key);
-        var select = form.find("select" + key);
+    var first_error_msg = null;
+    var any_field_found = false;
 
-        if (input.length > 0) {
-            error_input_found = true;
-            for (var e in errs) {
-                input
-                    .parent()
-                    .append(
-                        '<span class="error-message">' + errs[e] + "<span>"
-                    );
+    if (typeof responseJson['errors'] == "object")
+    {
+        for (var field_name in responseJson['errors'])
+        {
+            var errors = responseJson['errors'][field_name];
+
+            var field = form.find("[name='"+ field_name +"']");
+
+            var html = "";
+
+            for (var a in errors)
+            {
+                html += '<span class="error-message">' + errors[a] + '</span>';
             }
-        }
 
-        if (select.length > 0) {
-            error_input_found = true;
-            for (var e in errs) {
-                select
-                    .parent()
-                    .append(
-                        '<span class="error-message">' + errs[e] + "<span>"
-                    );
+            if (field.length > 0)
+            {
+                any_field_found = true;
+                field.parent().append(html);
+            }
+            else
+            {
+                first_error_msg = html;
             }
         }
     }
+    else if (typeof responseJson['message'] == "string")
+    {
+        $.events.onUserError(responseJson['message']);
+    }
 
-    return error_input_found;
+    if (any_field_found)
+    {
+        return form.find(".error-message").first();
+    }
+    else
+    {
+        $.events.onUserError(first_error_msg);
+    }
 }
 
 function confirmDialog(text, onYes) {
@@ -215,8 +240,8 @@ function send_email_user_otp(user, callback) {
     });
 }
 
-function send_whatsapp_user_otp(user_id, callback) {
-    ajaxGetJson("/send_whatsapp_user_otp/" + user_id, function (response) {
+function send_whatsapp_user_otp(user, callback) {
+    ajaxGetJson("/send_whatsapp_user_otp/" + user.uid, function (response) {
         if (typeof callback == "function") {
             callback(response);
         }
@@ -257,4 +282,103 @@ function add_form_to_body_and_submit(method, action, params) {
         $form.remove();
         $("#responseArea").removeClass("hidden"); // Show a message to the user
     }, 100);
+}
+
+function getTimeZone() {
+    var userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+    if (userTimeZone == "Asia/Calcutta") {
+        userTimeZone = "Asia/Kolkata";
+    }
+
+    return userTimeZone;
+}
+
+function get_celec_date_time(date) {
+    if (!date) {
+        date = new Date();
+    }
+
+    var divider = $('<div class="divider"></div>');
+
+    var date_div = $('<div class="label">');
+    date_div.html(DateUtil.getFormattedDateTime(date, "d-M-Y"));
+
+    var time = DateUtil.getFormattedDateTime(date, "D H:i");
+
+    console.log(time);
+
+    var time_div = $('<div class="label">');
+    time_div.html(time);
+
+    var div = $("<div>");
+    div.addClass("celec_info_inline");
+    div.append(date_div);
+    div.append(divider);
+    div.append(time_div);
+
+    return div;
+}
+
+function getBasenameFromPath(path) {
+    // Find the last occurrence of '/' or '\'
+    const lastSlashIndex = Math.max(path.lastIndexOf('/'), path.lastIndexOf('\\'));
+
+    // If a slash is found, return the substring after it
+    if (lastSlashIndex !== -1) {
+        return path.substring(lastSlashIndex + 1);
+    }
+
+    // If no slash is found, the whole path is likely the filename
+    return path;
+}
+
+function getFilenameFromPath(path)
+{
+    path = getBasenameFromPath(path);
+
+    const lastIndex = path.lastIndexOf('.');
+
+    // If a slash is found, return the substring after it
+    if (lastIndex !== -1) {
+        return path.substring(0, lastIndex);
+    }
+
+    return path;
+}
+
+function get_array_to_url(data)
+{
+    var list = [];
+
+    for(var i in data)
+    {
+        i = encodeURIComponent(i);
+        list.push(i + "=" + encodeURIComponent(data[i]));
+    }
+
+    return list.join("&");
+}
+
+function parseBool(value) {
+    if (typeof value === 'boolean') {
+        return value; // Already a boolean
+    }
+    if (typeof value === 'string') {
+        value = value.toLowerCase().trim(); // Case-insensitive and trim whitespace
+        if (value === 'true' || value === '1' || value === 'yes') {
+            return true;
+        }
+        if (value === 'false' || value === '0' || value === 'no') {
+            return false;
+        }
+    }
+    return null;
+}
+
+function get_other_country_date_time(datetime, timezone, callback)
+{
+    $.post("/get_date_time_for_timezone", {datetime : DateUtil.getFormattedDateTime(datetime, 'Y-M-d H:i:s'), timezone}, function(response){
+        callback(response);
+    });
 }

@@ -2,19 +2,27 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Helpers\DateUtility;
+use App\Exceptions\UserException;
 use App\Helpers\LaravelExtend;
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\WebController;
+use App\Models\Country;
+use App\Models\FieldSetting;
+use App\Models\Role;
 use App\Models\Setting;
+use App\Models\Type;
 use App\Models\User;
+use App\Rules\MobileNumber;
+use App\Rules\ReCaptcha;
 use Exception;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
 
-class RegisterController extends Controller
+class RegisterController extends WebController
 {
     /*
     |--------------------------------------------------------------------------
@@ -44,146 +52,99 @@ class RegisterController extends Controller
      */
     protected function validator(array $data)
     {
-        return Validator::make($data, [
-            'name' => ['required', 'string', 'max:255'],
+        $rules = [
+            'type' => ['required', 'string', 'max:255'],
+            'sub_type' => ['required', 'string', 'max:255'],
+            'country_id' => ['required'],
+            'person_name' => ['required', 'string', 'max:255'],
+            'person_last_name' => ['required', 'string', 'max:255'],
+            'mobile' => ['required', new MobileNumber],
+            'whatsapp_mobile' => ['required', new MobileNumber],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
-        ]);
+            'password' => ['required', 'string', 'min:6', 'confirmed'],
+            "g-recaptcha-response" => ['required', new ReCaptcha]
+        ];
+
+        $user = new User();
+        $rules = LaravelExtend::merge_validation_rules($rules, $user->getRequiredIfRules(request()));
+        $rules = LaravelExtend::merge_validation_rules($rules, $user->getUniqueValidationRules(request()));
+
+        return Validator::make($data, $rules,
+        [
+            "g-recaptcha-response.required" => "Google Capcha verification required"
+        ]
+        );
+    }
+
+    public function signup_form()
+    {
+        $type_conditions = [
+            "type" => Type::getType(new User(), "sub_type_for_signup_form")
+        ];
+
+        $sub_type_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
+
+        $country_list = Country::getListCache();
+
+        $my_country = Country::getMyCountry();
+
+        $model = new User();
+        if ($my_country)
+        {
+            $model->country_id = $my_country->id;
+        }
+
+        $field_labels = FieldSetting::getDynamicFields(User::class);
+
+        $this->setForView(compact("sub_type_list", "country_list", "my_country", "model", "field_labels"));
+
+        return $this->view(__FUNCTION__);
     }
 
     public function register()
     {
         $request = request();
 
-        $recaptcha_response = $request->input('g-recaptcha-response');
+        $data = $request->all();
 
-        if (is_null($recaptcha_response)) {
-            return redirect()->back()->with('fail', 'Please Complete the Recaptcha to proceed');
-        }
+        $validateData = $this->validator($data)->validate();
 
-        $url = "https://www.google.com/recaptcha/api/siteverify";
+        DB::beginTransaction();
 
-        $body = [
-            'secret' => config('services.recaptcha.secret'),
-            'response' => $recaptcha_response,
-            'remoteip' => $request->ip() //anonymize the ip to be GDPR compliant. Otherwise just pass the default ip address
-        ];
+        try
+        {
+            $role = Role::where("code", "external_user")->first();
 
-        $response = Http::asForm()->post($url, $body);
-
-        $result = json_decode($response);
-
-        if ($response->successful() && $result->success == true) {
-
-            $data = request()->all();
-
-            $this->validator($data)->validate();
-
-            $user = User::create([
-                'type' => config("constant.user_type.backend"),
-                'name' => $data['name'],
-                'email' => $data['email'],
-                'password' => Hash::make($data['password']),
-                "uid" => User::generateUID()
-            ]);
-
-
-            LaravelExtend::send_email_otp($user);
-
-            return redirect($this->_getVerifyScreenLink($user));
-        } else {
-            return redirect()->back()->with('fail', 'Please Complete the Recaptcha Again to proceed');
-        }
-
-        return null;
-    }
-
-    public function ajax_send_email_otp($user_id)
-    {
-        $response = ["status" => 0, "msg" => "unknown"];
-
-        try {
-            $user = User::findOrFail($user_id);
-
-            LaravelExtend::send_email_otp($user);
-
-            $response['status'] = 1;
-        } catch (Exception $ex) {
-            $response['msg'] = $ex->getMessage();
-        }
-
-        return $response;
-    }
-
-    public function email_otp_verify($uid)
-    {
-        $user = User::where("uid", $uid)->first();
-
-        if (!$user) {
-            return redirect()->route("login")->with('fail', "Invalid UID");
-        }
-
-        if ($user->email_verified_at) {
-            return redirect(route("home"));
-        }
-
-        if ($user->dont_send_email) {
-            return redirect()->route("login")->with('fail', "We can't send email. Beacuase Don't send email is enabled");
-        }
-
-        $company_name = Setting::getValue("company_name");
-
-        return view("auth.email_otp_verify", [
-            "user_id" => $user->id,
-            "user_email" => $user->email,
-            "company_name" => $company_name,
-            "redirect_to" => "/home"
-        ]);
-    }
-
-    public function ajax_email_otp_verify()
-    {
-        $response = ["status" => 0, "msg" => "unknown"];
-
-        try {
-            $data = request()->all();
-
-            Validator::make($data, [
-                'user_id' => ['required'],
-                'otp' => ['required'],
-            ])->validate();
-
-            $user = User::findOrFail($data['user_id']);
-
-            if (!$user) {
-                throw_exception("Worng User ID");
+            if (!$role) {
+                throw new UserException("Role Not Found: external_user");
             }
+            
+            $user = new User();
+            
+            $validateData['name'] = $user->getNextId();
 
-            $diff = DateUtility::diff(date(DateUtility::DATETIME_FORMAT), $user->otp_sent_datetime, DateUtility::MINTUES);
+            $validateData['password'] = Hash::make($validateData['password']);
 
-            if ($diff > 15) {
-                throw new Exception("OTP has expired");
-            }
+            $validateData["created_via"] = User::CREATED_VIA_REGISTRATION;
 
-            if ($data['otp'] != $user->otp) {
-                throw new Exception("Wrong OTP");
-            }
+            $user = User::create($validateData);
 
-            $user->email_verified_at = date("Y-m-d H:i:s");
-            $user->is_active = 1;
+            $user->assignRoles([$role->id]);
 
-            if (!$user->save()) {
-                throw_exception("Fail To Save User");
-            }
+            $url = url()->query(config("url") . "/otp_verify/" . $user->uid, ["otp_sent" => true]);
 
-            $this->guard()->login($user);
-
-            $response['status'] = 1;
-        } catch (Exception $ex) {
-            $response['msg'] = $ex->getMessage();
+            DB::commit();
+            
+            return redirect($url);
         }
+        catch(Exception $ex)
+        {
+            DB::rollBack();
 
-        return $response;
+            throw $ex;
+
+            return redirect()->back()->with('fail', $ex->getMessage());
+        }
     }
 
 
@@ -253,5 +214,42 @@ class RegisterController extends Controller
             "layout" => "auth.layouts.login",
             "company_name" => $company_name,
         ]);
+    }
+
+    
+    public function save_data_before_signup(Request $request)
+    {
+        $response = ["status" => 1];
+
+        $data = $request->only([
+            "sub_type", "country_id"
+        ]);
+
+        Session::put("save_data_before_signup", $data);
+        Session::put("user_timezone", $request->get("timezone"));
+        
+        return $this->responseJson($response);
+    }
+
+    public function save_data_before_signin(Request $request)
+    {
+        $response = ["status" => 1];
+
+        Session::put("user_timezone", $request->get("timezone"));
+        
+        return $this->responseJson($response);
+    }
+
+    protected function beforeViewRender()
+    {
+        if (!parent::beforeViewRender()) {
+            return false;
+        }
+
+        $this->routePrefix = "";
+
+        $this->viewPrefix = "auth";
+
+        $this->layout = "auth.layouts.login";
     }
 }

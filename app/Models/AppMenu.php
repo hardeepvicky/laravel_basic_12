@@ -13,7 +13,7 @@ class AppMenu extends BaseModel
 {
     protected static array $unique_fields = ["parent_id", "name"];
 
-    public array $child_model_class = [
+    public static array $child_model_class = [
         AppMenu::class => [
             "foreignKey" => "parent_id",
             "preventDelete" => true,
@@ -22,6 +22,10 @@ class AppMenu extends BaseModel
             "foreignKey" => "app_menu_id",
             "preventDelete" => false,
         ]
+    ];
+
+    protected $casts = [
+        "show_in_static_menu" => "array"
     ];
 
     protected $appends = [
@@ -34,10 +38,23 @@ class AppMenu extends BaseModel
         {
             $this->parent_id = 0;
         }
-
-        if ($this->id > 0 && $this->parent_id == $this->id)
+        
+        if ($this->id)
         {
-            $this->addError("Parent", "Parent and name are same", "Menu");
+            if ($this->is_link)
+            {
+                $child_id_list = self::getChildIdList([$this->id]);
+
+                if ($child_id_list)
+                {
+                    $this->addError("Parent", "This Record has children, can not make as link", $this->getClassDisplayName());
+                }
+            }
+
+            if ($this->id == $this->parent_id)
+            {
+                $this->addError("Parent", "Menu can not be parent of itself", $this->getClassDisplayName());
+            }
         }
 
         return parent::beforeSave();
@@ -147,7 +164,7 @@ class AppMenu extends BaseModel
 
     public static function getTreeList(array $conditions = []) : array
     {
-        return Util::getTreeListArray(self::getTreeRecords($conditions, 2), "id", "name", false, false);
+        return Util::getTreeListArray(self::getTreeRecords($conditions, 3), "id", "name", false, false);
     }
 
     public static function getTreeRecordsWithRelation(array $conditions = [], $max_depth = 10) : array
@@ -167,20 +184,5 @@ class AppMenu extends BaseModel
         {
             $this->getChildren();
         }
-    }
-
-    public static function getChildIdList(array $parent_id_list)
-    {
-        $qb = self::query();
-        $qb->whereIn("parent_id", $parent_id_list);
-
-        $id_list = $qb->pluck("id")->toArray();
-
-        if ($id_list)
-        {
-            $id_list = array_merge($id_list, self::getChildIdList($id_list));
-        }
-
-        return $id_list;
     }
 }

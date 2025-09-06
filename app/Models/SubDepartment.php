@@ -8,9 +8,17 @@ use Illuminate\Validation\Rules\Unique;
 
 class SubDepartment extends BaseModel
 {
-    public array $child_model_class = [
+    protected $appends = [
+        'display_name',
+    ];
+
+    protected static array $unique_fields = ["department_id", "name"];
+
+    protected static array $list_fields = ["id", "department_id", "name", "short_name"];
+
+    public static array $child_model_class = [
         User::class => [
-            "foreignKey" => ["sub_department_id"],
+            "foreignKey" => ["sub_dept_id"],
             "preventDelete" => true
         ]
     ];
@@ -27,7 +35,7 @@ class SubDepartment extends BaseModel
 
     public function getDisplayName()
     {
-        return $this->name;
+        return $this->short_name;
     }
 
     public function getUniqueValidationRules(Request $request)
@@ -48,5 +56,21 @@ class SubDepartment extends BaseModel
         }
 
         return $field_rules;
+    }
+
+    public function getRefDisplayName($field, $value)
+    {
+        $ret_array = [];
+
+        switch($field)
+        {
+            case "department_id":
+                $ret_array = [
+                    $field => $this->department->getDisplayName()
+                ];
+                break;
+        }
+
+        return $ret_array;
     }
 }

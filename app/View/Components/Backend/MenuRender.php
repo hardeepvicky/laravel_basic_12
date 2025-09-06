@@ -14,6 +14,7 @@ class MenuRender extends BackendComponent
      */
     public function __construct(
         public array $menus,
+        public int $level = 0
     )
     {
         $this->view_path = "menu-render";

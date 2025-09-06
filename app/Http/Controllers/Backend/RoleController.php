@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Exceptions\UserException;
+use App\Models\FieldSetting;
 use Illuminate\Http\Request;
 use App\Models\Role;
 use Exception;
@@ -36,6 +37,7 @@ class RoleController extends BackendController
         $cache_key = $cache_key_prefix . "-index";
 
         $conditions = $this->getConditions($cache_key, [
+            ["field" => "id", "type" => "int", "cache" => false],
             ["field" => "name", "type" => "string", "view_field" => "name"],
             ["field" => "is_admin", "type" => "", "view_field" => "is_admin"],
             ["field" => "is_active", "type" => "", "view_field" => "is_active"],
@@ -58,6 +60,15 @@ class RoleController extends BackendController
         }
 
         return $builder;
+    }
+
+    protected function beforeViewRender()
+    {
+        $field_labels = FieldSetting::getDynamicFields($this->modelClass);
+
+        $this->setForView(compact("field_labels"));
+
+        return parent::beforeViewRender();
     }
 
     public function create()
@@ -119,8 +130,6 @@ class RoleController extends BackendController
             $this->updateUserInfoAfterSave($model);
             
             DB::commit();
-
-            $this->saveSqlLog();
 
             return $this->afterSave($model);
         }
@@ -185,8 +194,6 @@ class RoleController extends BackendController
             $this->updateUserInfoAfterSave($model);
 
             DB::commit();
-
-            $this->saveSqlLog();
 
             return $this->afterSave($model);
         }

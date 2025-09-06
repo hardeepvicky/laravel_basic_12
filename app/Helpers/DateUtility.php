@@ -2,8 +2,8 @@
 
 /**
  * Date Utility
- * 
- * 
+ *
+ *
  * @created    08-11-2016
  * @copyright  Copyright (C) 2016
  * @license    Proprietary
@@ -12,6 +12,8 @@
  */
 
 namespace App\Helpers;
+
+use DateTime;
 
 class DateUtility
 {
@@ -22,7 +24,7 @@ class DateUtility
     const DATE_OUT_FORMAT = "d-M-Y";
     const TIME_OUT_FORMAT = "H:i";
     const DATETIME_OUT_FORMAT = 'd-M-Y H:i';
-    const DATETIME_OUT_FORMAT_FILE = 'd-M-Y_H-i-s';
+    const DATETIME_OUT_FORMAT_FILE = 'd-M-Y_H-i';
 
     const YEARS = "years";
     const MONTHS = "months";
@@ -32,37 +34,36 @@ class DateUtility
     const MINTUES = "minutes";
     const SECONDS = "seconds";
 
-    public static $login_user_time_zone = "+5:30";
+    public static \DateTimeZone | null $login_user_time_zone = null;
 
     /**
-     * convert time string to standered date object 
+     * convert time string to standered date object
      * @param String $date
-     * @param String $timezone
+     * @param $timezone
      * @return DateTime object
      */
-    protected static function getDateObj($date = "", $timezone = NULL)
+    public static function getDateObj($date = "", \DateTimeZone | null $timezone = NULL) : DateTime | null
     {
         if ($date) {
 
             if (is_int($date)) {
                 $timestamp = $date;
-            } else {
+            }
+            else if (is_object($date))
+            {
+                return $date;
+            }
+            else {
                 $timestamp = strtotime($date);
             }
 
             if ($timestamp == false || $timestamp == -1) {
-                return false;
+                return null;
             }
 
-            $date = new \DateTime(date(self::DATETIME_FORMAT, $timestamp));
+            $date = new \DateTime(date(self::DATETIME_FORMAT, $timestamp), $timezone);
         } else {
-            $date = new \Datetime();
-        }
-
-        if ($timezone) {
-            $date->setTimezone(new \DateTimeZone($timezone));
-        } else if (self::$login_user_time_zone) {
-            $date->setTimezone(new \DateTimeZone(self::$login_user_time_zone));
+            $date = new \Datetime(now());
         }
 
         return $date;
@@ -72,13 +73,13 @@ class DateUtility
      * Convert String Date to Specfic String date Format
      * If Date is given null then current date is formated
      * It does not change the timezone of date
-     * 
+     *
      * @param String $date NULL
      * @param String $format NULL
-     * @param String $timezone NULL
+     * @param $timezone NULL
      * @return String date
      */
-    public static function getDate($date = NULL, $format = NULL, $timezone = NULL)
+    public static function getDate($date = NULL, $format = NULL, \DateTimeZone | null $timezone = NULL)
     {
         $date = self::getDateObj($date, $timezone);
 
@@ -88,17 +89,13 @@ class DateUtility
 
         $format = $format ? $format : self::DATETIME_FORMAT;
 
-        if ($date) {
-            return $date->format($format);
-        } else {
-            return $date->format($format);
-        }
+        return $date->format($format);
     }
 
 
     /**
      * compare dates and return the diffrence between them
-     * 
+     *
      * @param String $start_date
      * @param String $end_date
      * @param int $type
@@ -160,10 +157,10 @@ class DateUtility
 
     /**
      * compare two dates
-     * 
+     *
      * if from_date is greater than to_date then return > 0
      * if not return < 0
-     * 
+     *
      * @param type $first_date
      * @param type $second_date
      * @return int
@@ -192,7 +189,7 @@ class DateUtility
 
     /**
      * Add/Remove days/Months/Years/Weeks/Hours/Seconds in date
-     * 
+     *
      * @param String $date
      * @param String $duration
      * @param String $duration_type
@@ -212,8 +209,6 @@ class DateUtility
         if (in_array($duration_type, [DateUtility::DAYS, DateUtility::WEEKS, DateUtility::MONTHS, DateUtility::YEARS])) {
             if ($format) {
                 $f = $format;
-            } else {
-                $f = DateUtility::DATE_FORMAT;
             }
         }
 
@@ -226,11 +221,11 @@ class DateUtility
 
     /**
      * return day list between two dates
-     * 
+     *
      * @param String $start_date
      * @param String $end_date
      * @param String $key_format {n}, 'Y-m-d', 'd'
-     * @param String $format 
+     * @param String $format
      * @return type
      */
     public static function getDayListBetweenTwoDates($start_date, $end_date, $key_format = "{n}", $format = NULL, $hierarchy = FALSE)
@@ -274,7 +269,7 @@ class DateUtility
 
     /**
      * return month list between two dates
-     * 
+     *
      * @param String $start_date
      * @param String $end_date
      * @return type
@@ -328,7 +323,7 @@ class DateUtility
 
     public static function getCelecDate($date, $timezone = null)
     {
-        $dt = self::getDateObj($date, $timezone);        
+        $dt = self::getDateObj($date, $timezone);
 
         $ret_array['date'] = $dt->format(self::DATE_OUT_FORMAT);
         $ret_array['time'] = $dt->format(self::TIME_OUT_FORMAT);

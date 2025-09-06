@@ -97,9 +97,9 @@ class AppMenuSeeder extends Seeder
             $save['parent_id'] = $parent_id;
 
             try {
+                $model = AppMenu::insertOrUpdate($save, $is_insert, $is_update);
                 // d($save, true);
-                $id = $model->insertOrUpdate($save, $is_insert, $is_update);
-
+                
                 if ($is_insert) {
                     $this->multi_counters["AppMenu"]['insert_count']++;
                 }
@@ -110,7 +110,7 @@ class AppMenuSeeder extends Seeder
 
                 if (isset($record['children']) && is_array($record['children']) && count($record['children']) > 0)
                 {
-                    $this->save($record['children'], $id);
+                    $this->save($record['children'], $model->id);
                 }
 
                 if (isset($record['child_records'])) {
@@ -129,9 +129,9 @@ class AppMenuSeeder extends Seeder
                             unset($child_record['id']);
                             unset($child_record['app_menu_id']);
 
-                            $child_record['app_menu_id'] = $id;
+                            $child_record['app_menu_id'] = $model->id;
 
-                            $child_id = $child_model->insertOrUpdate($child_record, $is_insert, $is_update);
+                            $child_model = AppMenuRelatedLink::insertOrUpdate($child_record, $is_insert, $is_update);
 
                             if ($is_insert) {
                                 $this->multi_counters['AppMenuRelatedLink']['insert_count']++;
@@ -155,10 +155,5 @@ class AppMenuSeeder extends Seeder
                 }
             }
         }
-    }
-
-    public function getParentId($name)
-    {
-        // AppMenu::where("name", $name)->get();
     }
 }

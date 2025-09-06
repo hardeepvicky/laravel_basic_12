@@ -4,15 +4,13 @@ namespace App\Models;
 
 class AjaxLog extends BaseMongoModel
 {
-    protected $guarded = ["id"];
-
     public static function getStoragePath()
     {
         return "logs/ajax/";
     }
 
-    public function cacheLog()
+    public function sqlLog()
     {
-        return $this->belongsTo(CacheLog::class);
+        return $this->belongsTo(SqlLog::class);
     }
 }

@@ -6,11 +6,10 @@
         </div>
         <p style="font-size:1.1em">Hi, {{ $name }}</p>
         <p>Use the following OTP to complete login. OTP is valid for 15 minutes</p>
-        <h2
-            style="background: #00466a;margin: 0 auto;width: max-content;padding: 0 10px;color: #fff;border-radius: 4px;">
+        <h2 style="background: #00466a;margin: 0 auto;width: max-content;padding: 0 10px;color: #fff;border-radius: 4px;">
             {{ $otp }}</h2>
 
-        <a href="{{ $verify_link }}" target="_blank">Click here to go to Enter OTP</a>
+        <a href="{{ $verify_link }}" target="_blank">Click here to go to screen to enter OTP</a>
 
         <p style="color: #00466a;">Company Email : {{ $company_email }}</p>
     </div>

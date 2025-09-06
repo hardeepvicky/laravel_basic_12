@@ -268,8 +268,15 @@ class Util
     {
         $time = round($time, 1);
 
+        $prefix = "";
+        if ($time < 0)
+        {
+            $prefix = "-";
+            $time = abs($time);
+        }
+
         if ($time < 60) {
-            return $time . " s";
+            return $prefix . $time . " s";
         }
 
         $min = floor($time / 60);
@@ -280,7 +287,7 @@ class Util
                 return $min . " m $seconds s";
             }
 
-            return $min . " m ";
+            return $prefix . $min . " m ";
         }
 
         $hour = floor($min / 60);
@@ -288,20 +295,20 @@ class Util
 
         if ($hour < 24) {
             if ($min) {
-                return $hour . " h $min m";
+                return $prefix . $hour . " h $min m";
             }
 
-            return $hour . " h ";
+            return $prefix . $hour . " h ";
         }
 
         $days = floor($hour / 24);
         $hour = $hour % 24;
 
         if ($hour) {
-            return $days . " d $hour h $min m";
+            return $prefix . $days . " d $hour h $min m";
         }
 
-        return $days . " d";
+        return $prefix . $days . " d";
     }
 
     public static function niceNumber($number, $count = 0)
@@ -434,4 +441,35 @@ class Util
 
         return $res;
     }
+
+    public static function getNextTab($tabs, $tab, &$is_last_tab)
+    {
+        $keys = array_keys($tabs);
+        
+        if (!$tab)
+        {
+            return 0;
+        }
+        
+        $next_index = $current_index = 0;
+        for ($i = 0; $i < count($keys); $i++)
+        {
+            if ($keys[$i] == $tab)
+            {
+                $current_index = $i;
+                if ($i < count($keys) - 1)
+                {
+                    $next_index = $i + 1;
+                }
+                else
+                {
+                    $next_index = $i;
+                }
+            }
+        }
+        
+        $is_last_tab = $current_index == (count($keys) - 1);
+        
+        return $keys[$next_index];
+	}
 }

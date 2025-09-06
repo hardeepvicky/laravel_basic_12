@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Models\Country;
+use App\Models\FieldSetting;
 use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Support\Facades\DB;
@@ -32,10 +33,12 @@ class CountryController extends BackendController
         $cache_key = $cache_key_prefix . "-index";
 
         $conditions = $this->getConditions($cache_key, [
+            ["field" => "id", "type" => "int", "cache" => false],
             ["field" => "name", "type" => "string"],
             ["field" => "short_name", "type" => "string_equal"],
             ["field" => "phonecode", "type" => "int"],
-            ["field" => "is_active", "type" => "int"],
+            ["field" => "timezone", "type" => "string"],
+            ["field" => "iso3", "type" => "string"],
         ]);
 
         $builder = $this->modelClass::where($conditions);
@@ -54,6 +57,15 @@ class CountryController extends BackendController
         }
 
         return $builder;
+    }
+
+    protected function beforeViewRender()
+    {
+        $field_labels = FieldSetting::getDynamicFields($this->modelClass);
+
+        $this->setForView(compact("field_labels"));
+
+        return parent::beforeViewRender();
     }
 
     public function create()
@@ -120,8 +132,6 @@ class CountryController extends BackendController
 
             DB::commit();
 
-            $this->saveSqlLog();
-
             return $this->afterSave($model);
         } catch (Exception $ex) {
             DB::rollBack();
@@ -174,8 +184,6 @@ class CountryController extends BackendController
             $this->updateUserInfoAfterSave($model);
 
             DB::commit();
-
-            $this->saveSqlLog();
 
             return $this->afterSave($model);
         } catch (Exception $ex) {

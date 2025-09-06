@@ -15,10 +15,11 @@
                         </th>
                         <th><?= sortable_anchor('is_link', get_value_from_list($field_labels, 'is_link', 'is_link')) ?>
                         </th>
-                        <th><?= sortable_anchor('is_active', 'Activate / De-Active') ?></th>
+                        <th style="width:12%"><?= sortable_anchor('is_active', 'Activate / De-Active') ?></th>
                         <th>Menu Info</th>
-                        <th>Info</th>
-                        <th>Actions</th>
+                        <th style="width:10%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
+                        <th style="width:10%"><?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?></th>
+                        <th style="width:8%">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -27,7 +28,17 @@
                         <th scope="row">{{ $record->id }}</th>
                         <td>{{ get_value_from_list($tree_list, $record->parent_id) }}</td>
                         <td>{{ $record->name }}</td>
-                        <td>{{ $record->menu_display_order }}</td>
+                        <td>
+                            <a class="x-editable" href="javascript:void();"id="menu_display_order" 
+                                data-type="number" 
+                                data-name="menu_display_order"
+                                data-pk="{{ $record->id }}" 
+                                data-url="{{ route($routePrefix . ".ajax_update_field") }}" 
+                                data-title="Enter Display Order"
+                            >
+                                {{ $record->menu_display_order }}
+                            </a>
+                        </td>
                         <td>{{ $record->is_link ? 'Yes' : "No" }}</td>
                         <td>
                             <x-Backend.active_deactive :isActive="$record->is_active" :id="$record->id"
@@ -63,11 +74,13 @@
                             {!! array_print($record->url_params) !!}
                         </td>
                         <td>
-                            <x-Backend.index-table-info :record="$record" :userList="$userListCache" />
+                            <x-Backend.created-and-by :datetime="$record->created_at" :userId="$record->created_by" />
                         </td>
                         <td>
-                            <x-Backend.summary-comman-actions :id="$record->id" :routePrefix="$routePrefix"
-                                buttons="edit,copy,delete" />
+                            <x-Backend.created-and-by :datetime="$record->updated_at" :userId="$record->updated_by" />
+                        </td>
+                        <td>
+                            <x-Backend.summary-comman-actions :id="$record->id" :routePrefix="$routePrefix" buttons="edit,copy,delete" />
                         </td>
                     </tr>
                     @endforeach

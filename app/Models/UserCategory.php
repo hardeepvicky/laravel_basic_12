@@ -11,7 +11,7 @@ class UserCategory extends BaseModel
 {
     use HasFactory;
 
-    public array $child_model_class = [
+    public static array $child_model_class = [
         User::class => [
             "foreignKey" => "user_category_id",
             "preventDelete" => true,

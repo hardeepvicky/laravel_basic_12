@@ -5,7 +5,7 @@ $(document).ready(function()
 
     $("input[type='checkbox'].chk-select-all").chkSelectAll();
 
-    $(".select2").select2({
+    $("select.select2").not("select2-hidden-accessible").select2({
         placeHolder : "Please Select",
         theme : "bootstrap-5",
     });
@@ -17,4 +17,19 @@ $(document).ready(function()
     $(".fancybox").fancybox();
 
     $(".i-data-table").idataTable();
+
+    $(".date-picker").flatpickr({
+        dateFormat: constants.dateFormat
+    });
+
+    $(".date-time-picker").flatpickr({
+        enableTime: true,        
+        dateFormat: constants.dateTimeFormat
+    });
+
+    $(".time-picker").flatpickr({
+        noCalendar: true,
+        enableTime: true,
+        dateFormat: constants.timeFormat,
+    });
 });

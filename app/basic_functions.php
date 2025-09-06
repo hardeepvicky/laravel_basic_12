@@ -34,7 +34,7 @@ function d($arg, $will_exit = false)
 {
     $callBy = debug_backtrace()[0];
 
-    if (!env("APP_DEBUG")) {
+    if (!config('app.debug')) {
         return;
     }
 
@@ -42,22 +42,11 @@ function d($arg, $will_exit = false)
         $console = new ConsoleOutput();
 
         $console->addLogMessage("File : " . $callBy['file']);
-        $console->addLogMessage("Line : " . $callBy['line']);        
-
-        if (is_array($arg))
-        {
-            dump($arg);
-        }
-        else if (is_scalar($arg))
-        {
-            $console->addLogMessage(gettype($arg) . " : " . $arg);
-        }
-        else
-        {
-            $console->addLogMessage(gettype($arg));
-        }
-
+        $console->addLogMessage("Line : " . $callBy['line']);            
+        $console->addLogMessage("Data Type : " . gettype($arg));
         $console->writeLogToConsole();
+
+        dump($arg);
 
     } else {
 
@@ -75,7 +64,7 @@ function d($arg, $will_exit = false)
             print_r($arg);
         }
 
-        echo "</pre>";
+        echo "</pre>";        
     }
 
     if ($will_exit) {
@@ -83,7 +72,71 @@ function d($arg, $will_exit = false)
     }
 }
 
-function array_print($array, $max_string_len = 45, $indent = 0)
+
+function print_var_name($var)
+{
+    foreach ($GLOBALS as $var_name => $value) {
+        if ($value === $var) {
+            return $var_name;
+        }
+    }
+
+    return false;
+}
+
+function print_for_debug($arg, $label = "", bool $show_data_type = false, $depth = 0)
+{
+    echo '<ul class="array_print indent-' . $depth . '" >';
+
+    $type = gettype($arg);
+
+    echo '<li>';
+
+    if ($show_data_type)
+    {
+        echo ' (' . $type . ") : ";
+    }
+
+    if ($label)
+    {
+        echo " " . $label . " => ";
+    }
+
+    if ($type == "object")
+    {
+        $arg = (array) $arg;
+    }
+
+    if($type == "array") { 
+        if (empty($arg))               
+        {
+            echo "[]";
+        }
+        else
+        {
+            foreach ($arg as $key => $value) {
+                print_for_debug($value, $key, $show_data_type, $depth + 1);
+            }
+        }
+    }
+    else
+    {
+        if (is_bool($arg)) {
+            echo  $arg ? "True" : "False";
+        } else if (is_null($arg)) {
+            echo "NULL";
+        }
+        else
+        {
+            print_r(htmlspecialchars($arg));
+        }         
+    }
+    
+    echo '</li>';
+    echo '</ul>';
+}
+
+function array_print($array, int $max_string_len = 45, int $indent = 0)
 {
     if (is_array($array)) {
         $array = array_short_string_with_dot($array, $max_string_len, false);
@@ -102,6 +155,14 @@ function array_print($array, $max_string_len = 45, $indent = 0)
         }
 
         echo '</ul>';
+    }
+}
+
+
+function obj_print($arg, $max_string_len = 45, $indent = 0)
+{
+    if (is_object($arg)) {
+        array_print($arg, $max_string_len, $indent);
     }
 }
 
@@ -165,6 +226,7 @@ function sortable_url($sort_by)
 {
     $query_params = get_query_params_of_current_url_in_array();
     unset($query_params['is_sort_clear']);
+    unset($query_params['full_view']);
 
     $query_params['sort_by'] = $sort_by;
 
@@ -230,7 +292,7 @@ function sortable_anchor(String $sort_by, String $title, array $attrs = [])
 function if_date_time($datetime)
 {
     if ($datetime) {
-        return DateUtility::getDate($datetime, DateUtility::DATETIME_OUT_FORMAT, 'Asia/Kolkata');
+        return DateUtility::getDate($datetime, DateUtility::DATETIME_OUT_FORMAT);
     }
 
     return "";
@@ -239,7 +301,7 @@ function if_date_time($datetime)
 function if_date($datetime)
 {
     if ($datetime) {
-        return DateUtility::getDate($datetime, DateUtility::DATE_OUT_FORMAT, 'Asia/Kolkata');
+        return DateUtility::getDate($datetime, DateUtility::DATE_OUT_FORMAT);
     }
 
     return "";
@@ -300,15 +362,22 @@ function curl_post_request($url, $params, $headers = [])
 
 function str_class_name_without_namespace($class_name)
 {
-    if (strpos($class_name, "\\") >= 0) {
+    if (is_object($class_name))
+    {
+        $class_name = get_class($class_name);
+    }
+
+    if (is_string($class_name) && strpos($class_name, "\\") >= 0) {
         $arr = explode("\\", $class_name);
 
         if ($arr) {
             $class_name = end($arr);
+
+            return $class_name;
         }
     }
 
-    return $class_name;
+    return null;
 }
 
 function str_space_before_every_capital_letter($str)
@@ -357,22 +426,11 @@ function array_check_value_and_throw_error($arr, $keys, $msg = "")
     }
 
     foreach ($keys as $key) {
-        if (!isset($arr[$key]) || strlen($arr[$key]) == 0 || is_null($arr[$key])) {
+        if (!isset($arr[$key]) || is_null($arr[$key]) || empty($arr[$key])) {
             $msg = str_replace("{key}", $key, $msg);
             throw new Exception($msg);
         }
     }
-}
-
-function print_var_name($var)
-{
-    foreach ($GLOBALS as $var_name => $value) {
-        if ($value === $var) {
-            return $var_name;
-        }
-    }
-
-    return false;
 }
 
 function laravel_constant($name)
@@ -812,6 +870,17 @@ function array_check_data_type_and_throw_error(array $array, array $valid_data_t
     }
 }
 
+function array_get_only_scaler_values(array $array)
+{
+    foreach ($array as $k => $v) {
+        if (!is_scalar($v)) {
+            unset($array[$k]);
+        }
+    }
+
+    return $array;
+}
+
 
 function array_check_value_is_scaler_and_throw_error(array $array, bool $recursive = false, $msg = "", $msg_prefix = "")
 {
@@ -900,7 +969,7 @@ function date_get_for_file_name()
 {
     $dt = new DateTime();
 
-    return $dt->format("Y-m-d_H-i-s-u");
+    return $dt->format("Y-m-d_H-i-s");
 }
 
 
@@ -915,10 +984,55 @@ function is_developer_role_login()
     return false;
 }
 
-function get_value_from_list($list, $key, $default = "")
+function is_admin_role_login()
 {
-    if (isset($list[$key])) {
-        return $list[$key];
+    $auth_user = Auth::user();
+
+    if ($auth_user) {
+        return $auth_user->hasRole(Role::TYPE_SYSTEM_ADMIN);
+    }
+
+    return false;
+}
+
+function get_value_from_list($list, $find_key, $default = "")
+{
+    if (is_null($find_key))
+    {
+        return $default;
+    }
+
+    if (!is_array($find_key))
+    {
+        if (!is_scalar($find_key))
+        {
+            throw new UserException("arg 2 : key should be scaler or array, found : " . gettype($find_key));
+        }
+        $keys = [$find_key];
+    }
+    else
+    {
+        $keys = $find_key;
+    }
+
+    foreach($keys as $key)
+    {
+        $key = trim($key);
+
+        if (isset($list[$key])) {
+            return $list[$key];
+        }
+    }
+
+    foreach($list as $k => $v)
+    {
+        foreach($keys as $key)
+        {
+            if (trim(strtolower($k)) == trim(strtolower($key)))
+            {
+                return $v;
+            }
+        }
     }
 
     return $default;
@@ -955,14 +1069,26 @@ function get_asset_url($file)
     }
 }
 
+function str_short_with_dot($str, $max_string_len = 45)
+{
+    if ($str)
+    {
+        if (strlen($str) > $max_string_len)
+        {
+            $str = substr($str, 0, $max_string_len) . "....";
+        }
+    }
+
+    return $str;
+}
+
 function array_short_string_with_dot(array $arr, $max_string_len = 45, bool $recursive = true)
 {
     foreach ($arr as $k => $v) {
         if (is_string($v)) {
 
-            if (strlen($v) > $max_string_len) {
-                $arr[$k] = substr($v, 0, $max_string_len) . "....";
-            }
+            $arr[$k] = str_short_with_dot($v, $max_string_len);
+
         } else if (is_array($v) && $recursive) {
             $arr[$k] = array_short_string_with_dot($v, $max_string_len, $recursive);
         }
@@ -1006,4 +1132,125 @@ function is_ajax_request()
         return true;
     }
     return false;
+}
+
+function array_get_scaler_value_only(array $data)
+{
+    $list = [];
+
+    foreach($data as $k => $v)
+    {
+        if (is_scalar($v))
+        {
+            $list[$k] = $v;
+        }
+    }
+
+    return $list;
+}
+
+function get_value_from_object($obj, $keys, $default = "")
+{
+    if (!is_object($obj))
+    {
+        return $default;
+    }
+
+    foreach($keys as $key)
+    {
+        if ($obj->{$key})
+        {
+            return $obj->{$key};
+        }
+    }
+
+    return $default;
+}
+
+function str_space_after_every_captial_letter(string $string): string
+{
+    // The regex `/(?=[A-Z])/` looks for a position that is immediately
+    // followed by an uppercase letter (positive lookahead).
+    // We replace this position with a space.
+    return preg_replace('/(?=[A-Z])/', ' ', $string);
+}
+
+function check_string_is_date_time(string $str, string $format = "Y-m-d H:i:s")
+{
+    $sub_value = $str;
+
+    if (strpos($str, "T") !== false)
+    {
+        $sub_value = substr($str, 0, strpos($str, "T"));
+        $format = substr($format, 0, strpos($format, "T"));
+    }
+    else if (strpos($str, " ")  !== false)
+    {
+        $sub_value = substr($str, 0, strpos($str, " "));
+        $format = substr($format, 0, strpos($format, " "));
+    }
+
+    if ($format && $sub_value)
+    {
+        $dateTime = \DateTime::createFromFormat($format, $sub_value);
+
+        if ($dateTime && $dateTime->format($format) === $sub_value)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function get_exception_display_message(Exception $ex)
+{
+    $msg = $ex->getMessage();
+
+    if (config('app.debug'))
+    {
+        $msg .= ", File : " . $ex->getFile() . ":" . $ex->getLine();
+    }
+
+    return $msg;
+}
+
+function check_internet_connection($host = 'www.google.com', $port = 80, $timeout = 5) {
+    // The @ suppresses warnings that fsockopen() might throw if it can't connect
+    $connected = @fsockopen($host, $port, $errno, $errstr, $timeout);
+    
+    if ($connected) {
+        // A connection was successfully opened, so we have internet
+        fclose($connected); // Close the connection
+        return true;
+    } else {
+        // The connection failed, so we are likely offline
+        return false;
+    }
+}
+
+function get_and_save_file_from_url($url, $savePath)
+{
+    if (!is_dir(dirname($savePath))) {
+        mkdir(dirname($savePath), 0777, true);
+    }
+
+    $fileContent = file_get_contents($url);
+
+    if ($fileContent === false) {
+        throw new UserException("Failed to download from: $url");
+    }
+
+    file_put_contents($savePath, $fileContent);
+}
+
+function str_get_first_letter($string) {
+    $words = explode(' ', trim($string));
+    $acronym = '';
+    foreach ($words as $word) {
+        if (!empty($word)) {
+            $acronym .= substr($word, 0, 1);
+        }
+    }
+    return $acronym;
 }

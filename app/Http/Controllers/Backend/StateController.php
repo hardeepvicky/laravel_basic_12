@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Models\Country;
+use App\Models\FieldSetting;
 use App\Models\State;
 use Illuminate\Http\Request;
 use Exception;
@@ -33,6 +34,7 @@ class StateController extends BackendController
         $cache_key = $cache_key_prefix . "-index";
 
         $conditions = $this->getConditions($cache_key, [
+            ["field" => "id", "type" => "int", "cache" => false],
             ["field" => "name", "type" => "string"],
             ["field" => "short_name", "type" => "string"],
             ["field" => "country_id", "type" => "int"],
@@ -63,7 +65,9 @@ class StateController extends BackendController
 
         $my_country = Country::getMyCountry();
 
-        $this->setForView(compact("country_list", "my_country"));
+        $field_labels = FieldSetting::getDynamicFields($this->modelClass);
+
+        $this->setForView(compact("country_list", "my_country", "field_labels"));
 
         return parent::beforeViewRender();
     }
@@ -127,8 +131,6 @@ class StateController extends BackendController
 
             DB::commit();
 
-            $this->saveSqlLog();
-
             return $this->afterSave($model);
         } catch (Exception $ex) {
             DB::rollBack();
@@ -184,8 +186,6 @@ class StateController extends BackendController
 
             DB::commit();
 
-            $this->saveSqlLog();
-
             return $this->afterSave($model);
         } catch (Exception $ex) {
             DB::rollBack();
@@ -194,5 +194,29 @@ class StateController extends BackendController
 
             return back()->withInput()->with('fail', $ex->getMessage());
         }
+    }
+
+    
+    public function ajax_get_list($country_id)
+    {
+        $response = ["status" => 1];
+
+        $conditions = [
+            "country_id" => $country_id
+        ];
+
+        $list = $this->modelClass::getList("id", "display_name", $conditions, "name");
+
+        $response['data'] = [];
+
+        foreach($list as $k => $v)
+        {
+            $response['data'][] = [
+                'id' => $k,
+                'name' => $v,
+            ];
+        }
+
+        return $this->responseJson($response);
     }
 }

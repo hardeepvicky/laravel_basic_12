@@ -60,7 +60,7 @@ if (!$mandatory && $is_disabled) {
     @if ($secondaryTextPosition == 'first')
         {!! $secondaryText !!}
     @endif
-    <input name="{{ $name }}" value="{{ old($name, $value) }}" {{ $attributes->merge($my_attributes) }} />
+    <input name="{{ $name }}" value="{!! old($name, $value) !!}" {{ $attributes->merge($my_attributes) }} />
 
     @if ($secondaryTextPosition == 'last')
         {!! $secondaryText !!}

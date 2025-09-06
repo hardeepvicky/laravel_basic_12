@@ -2,13 +2,18 @@
 
 namespace App\Http\Controllers\Backend;
 
+use App\Acl\SectionRoutes;
+use App\Helpers\ArrayHelper;
+use App\Helpers\FileUtility;
 use App\Helpers\LaravelExtend;
 use App\Models\AjaxLog;
 use App\Models\CommandLog;
 use App\Models\EmailLog;
+use App\Models\ImportLog;
+use App\Models\PermissionChangeLog;
+use App\Models\Role;
 use App\Models\SqlLog;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
+use App\Models\WhatsappLog;
 use Illuminate\Support\Facades\Route;
 
 class DeveloperController extends BackendController
@@ -24,98 +29,26 @@ class DeveloperController extends BackendController
         return $this->view(__FUNCTION__);
     }
 
-    protected function parseConditionValue($value, String $type)
+    protected function beforeViewRender()
     {
-        $data_type = gettype($value);
-
-        $type = strtolower(trim($type));
-
-        if (in_array($type, ["string", "date", "from_date", "to_date", "datetime", "from_datetime", "to_datetime"])) {
-            if ($data_type != "string") {
-                throw_exception("input value is not typeof string");
-            }
+        if (!parent::beforeViewRender()) {
+            return false;
         }
 
-        $parse_value = null;
-        $op = '=';
-
-        switch ($type) {
-            case "string":
-                $parse_value = "%" . (string) $value . "%";
-                $op = 'LIKE';
-                break;
-
-            case "string_equal":
-                $parse_value = (string) $value;
-                break;
-
-            case "date":
-                $parse_value = Carbon::parse($value);
-                break;
-
-            case "from_date":
-                $parse_value = Carbon::parse($value);
-                $op = '>=';
-                break;
-
-            case "to_date":
-                $parse_value = Carbon::parse($value);
-                $parse_value->addHours(23.99);
-                $op = '<=';
-                break;
-
-            case "from_datetime":
-                $parse_value = Carbon::parse($value);
-                $op = '>=';
-                break;
-
-            case "to_datetime":
-                $parse_value = Carbon::parse($value);
-                $op = '<=';
-                break;
-
-            case "int":
-                $parse_value = (int) $value;
-                break;
-
-            case "from_int":
-                $parse_value = (int) $value;
-                $op = '>=';
-                break;
-
-            case "to_int":
-                $parse_value = (int) $value;
-                $op = '<=';
-                break;
-
-            case "float":
-                $parse_value = (float) $value;
-                break;
-
-            case "from_float":
-                $parse_value = (float) $value;
-                $op = '>=';
-                break;
-
-            case "to_float":
-                $parse_value = (float) $value;
-                $op = '<=';
-                break;
-
-            case "bool":
-            case "boolean":
-                $parse_value = (bool) $value;
-                break;
-
-            default:
-                $parse_value = $value;
-                break;
-        }
-
-        return [
-            "value" => $parse_value,
-            "op" => $op
+        $index_table_info_options = [
+            "show_as" => "full_datetime"
         ];
+
+        // d($index_table_info_options);
+
+        $this->setForView(compact("index_table_info_options"));
+
+        return true;
+    }
+
+    protected function parseConditionValue($value, String $type, array $extra = [])
+    {
+        return LaravelExtend::getMongodbParseCondition($value, $type, $extra);
     }
 
     public function sql_logs()
@@ -123,51 +56,35 @@ class DeveloperController extends BackendController
         $cache_key_prefix = Route::currentRouteName();
 
         $conditions = $this->getConditions($cache_key_prefix, [
-            ["field" => "route_name_or_url", "type" => "string", "view_field" => "route_name_or_url"],
+            ["field" => "id", "type" => "", "cache" => false],
+            ["field" => "route_name", "type" => "string"],
+            ["field" => "request_method", "type" => "string"],
+            ["field" => "url", "type" => "string"],
             ["field" => "created_at", "type" => "from_date", "view_field" => "from_date"],
             ["field" => "created_at", "type" => "to_date", "view_field" => "to_date"],
+            ["field" => "auth_user_id", "type" => "int"],
             ["field" => "have_dml_query", "type" => "int"],
             ["field" => "have_heavy_query", "type" => "int"],
         ]);
 
+        $arry_helper = new ArrayHelper($conditions);
+        $condition_list = $arry_helper->convertModelSearchConditionToList();
+
         // dd($conditions);
 
-        $builder = SqlLog::where($conditions)->with("cacheLog");
+        $builder = SqlLog::where($conditions);
 
-        $cache_key_for_sort = $cache_key_prefix . "-index-extra-params";
+        if (isset($condition_list['id'])) {
+        } else {
+            $builder->where(function ($q) {
+                $q->orWhere(function ($q2) {
+                    $q2->whereNotNull("route_name");
+                    $q2->whereNotNull("url");
+                });
+            });
+        }
 
-        $clear_cache = request('is_sort_clear', false);
-
-        $sort_params = $this->getRequestData($cache_key_for_sort, [
-            ["key" => "sort_by", "default" => "created_at"],
-            ["key" => "sort_dir", "default" => "DESC"],
-        ], $clear_cache);
-
-        $builder->orderBy($sort_params['sort_by'], $sort_params['sort_dir']);
-
-        $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
-
-        // d($records[0]->cacheLog, true);
-
-        $this->setForView(compact("records"));
-
-        return $this->viewIndex(__FUNCTION__);
-    }
-
-    public function email_logs()
-    {
-        $cache_key_prefix = Route::currentRouteName();
-
-        $conditions = $this->getConditions(Route::currentRouteName(), [
-            ["field" => "from_email", "type" => "string", "view_field" => "from_email"],
-            ["field" => "to_email", "type" => "string", "view_field" => "to_email"],
-            ["field" => "created", "type" => "from_date", "view_field" => "from_date"],
-            ["field" => "created", "type" => "to_date", "view_field" => "to_date"],
-        ]);
-
-        $builder = EmailLog::where($conditions);
-
-        $cache_key_for_sort = $cache_key_prefix . "-index-extra-params";
+        $cache_key_for_sort = $cache_key_prefix . "-extra-params";
 
         $clear_cache = request('is_sort_clear', false);
 
@@ -180,7 +97,7 @@ class DeveloperController extends BackendController
 
         $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
 
-        //dd($records);
+        // d($records->toArray(), true);
 
         $this->setForView(compact("records"));
 
@@ -201,13 +118,7 @@ class DeveloperController extends BackendController
 
         $builder = AjaxLog::where($conditions);
 
-        $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
-
-        // d($records->toArray(), true);
-
-        $builder = AjaxLog::where($conditions);
-
-        $cache_key_for_sort = $cache_key_prefix . "-index-extra-params";
+        $cache_key_for_sort = $cache_key_prefix . "-extra-params";
 
         $clear_cache = request('is_sort_clear', false);
 
@@ -233,9 +144,6 @@ class DeveloperController extends BackendController
 
         $conditions = $this->getConditions($cache_key_prefix, [
             ["field" => "command", "type" => "string"],
-            ["field" => "description", "type" => "string"],
-            ["field" => "have_dml_query", "type" => "bool", "view_field" => "have_dml_query"],
-            ["field" => "have_heavy_query", "type" => "bool", "view_field" => "have_heavy_query"],
             ["field" => "created_at", "type" => "from_date", "view_field" => "from_date"],
             ["field" => "created_at", "type" => "to_date", "view_field" => "to_date"],
         ]);
@@ -243,8 +151,9 @@ class DeveloperController extends BackendController
         // dd($conditions);
 
         $builder = CommandLog::where($conditions);
+        $builder->with(["sqlLog"]);
 
-        $cache_key_for_sort = $cache_key_prefix . "-index-extra-params";
+        $cache_key_for_sort = $cache_key_prefix . "-extra-params";
 
         $clear_cache = request('is_sort_clear', false);
 
@@ -260,5 +169,196 @@ class DeveloperController extends BackendController
         $this->setForView(compact("records"));
 
         return $this->viewIndex(__FUNCTION__);
+    }
+
+    public function email_logs()
+    {
+        $cache_key_prefix = Route::currentRouteName();
+
+        $conditions = $this->getConditions(Route::currentRouteName(), [
+            ["field" => "subject", "type" => "string"],
+            ["field" => "from_email", "type" => "string"],
+            ["field" => "to_email", "type" => "string"],
+            ["field" => "is_sent", "type" => "int"],
+            ["field" => "is_sandbox", "type" => "int"],
+            ["field" => "created_at", "type" => "from_date", "view_field" => "from_date"],
+            ["field" => "created_at", "type" => "to_date", "view_field" => "to_date"],
+        ]);
+
+        $builder = EmailLog::where($conditions);
+
+        $cache_key_for_sort = $cache_key_prefix . "-extra-params";
+
+        $clear_cache = request('is_sort_clear', false);
+
+        $sort_params = $this->getRequestData($cache_key_for_sort, [
+            ["key" => "sort_by", "default" => "created_at"],
+            ["key" => "sort_dir", "default" => "DESC"],
+        ], $clear_cache);
+
+        $builder->orderBy($sort_params['sort_by'], $sort_params['sort_dir']);
+
+        $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
+
+        //dd($records);
+
+        $this->setForView(compact("records"));
+
+        return $this->viewIndex(__FUNCTION__);
+    }
+
+    public function whatsapp_logs()
+    {
+        $cache_key_prefix = Route::currentRouteName();
+
+        $conditions = $this->getConditions(Route::currentRouteName(), [
+            ["field" => "api_platform", "type" => "string"],
+            ["field" => "template_name", "type" => "string"],
+            ["field" => "template_lanugage", "type" => "string"],
+            ["field" => "country_code", "type" => "string"],
+            ["field" => "to_name", "type" => "string"],
+            ["field" => "to_mobile", "type" => "string"],
+            ["field" => "to_user_id", "type" => "int"],
+            ["field" => "is_sent", "type" => "int"],
+            ["field" => "is_sandbox", "type" => "int"],            
+            ["field" => "created_at", "type" => "from_date", "view_field" => "from_date"],
+            ["field" => "created_at", "type" => "to_date", "view_field" => "to_date"],
+        ]);
+
+        // if ($conditions)
+        // {
+        //     d($conditions);
+        // }
+
+        $builder = WhatsappLog::where($conditions);
+
+        $cache_key_for_sort = $cache_key_prefix . "-extra-params";
+
+        $clear_cache = request('is_sort_clear', false);
+
+        $sort_params = $this->getRequestData($cache_key_for_sort, [
+            ["key" => "sort_by", "default" => "created_at"],
+            ["key" => "sort_dir", "default" => "DESC"],
+        ], $clear_cache);
+
+        $builder->orderBy($sort_params['sort_by'], $sort_params['sort_dir']);
+
+        $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
+
+        //dd($records);
+
+        $this->setForView(compact("records"));
+
+        return $this->viewIndex(__FUNCTION__);
+    }
+
+    public function permission_change_logs()
+    {
+        $cache_key_prefix = Route::currentRouteName();
+
+        $conditions = $this->getConditions(Route::currentRouteName(), [
+            ["field" => "type", "type" => "string_equal"],
+            ["field" => "section_name", "type" => "string_equal"],
+            ["field" => "role_id", "type" => "string_equal"],
+            ["field" => "created_at", "type" => "from_date", "view_field" => "from_date"],
+            ["field" => "created_at", "type" => "to_date", "view_field" => "to_date"],
+        ]);
+
+        $builder = PermissionChangeLog::where($conditions);
+
+        $cache_key_for_sort = $cache_key_prefix . "-extra-params";
+
+        $clear_cache = request('is_sort_clear', false);
+
+        $sort_params = $this->getRequestData($cache_key_for_sort, [
+            ["key" => "sort_by", "default" => "created_at"],
+            ["key" => "sort_dir", "default" => "DESC"],
+        ], $clear_cache);
+
+        $builder->orderBy($sort_params['sort_by'], $sort_params['sort_dir']);
+
+        $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
+
+        $section_list = SectionRoutes::getList();
+
+        $role_list = Role::getList();
+
+        $type_list = [
+            "NEW" => "New",
+            "DELETE" => "Deleted",
+        ];
+
+        $this->setForView(compact("role_list", "section_list", "type_list", "records"));
+
+        return $this->viewIndex(__FUNCTION__);
+    }
+
+    public function import_logs()
+    {
+        $cache_key_prefix = Route::currentRouteName();
+
+        $conditions = $this->getConditions(Route::currentRouteName(), [
+            ["field" => "type", "type" => "string_equal"],
+            ["field" => "have_error", "type" => "int"],
+            ["field" => "created_at", "type" => "from_date", "view_field" => "from_date"],
+            ["field" => "created_at", "type" => "to_date", "view_field" => "to_date"],
+        ]);
+
+        $builder = ImportLog::where($conditions);
+
+        $cache_key_for_sort = $cache_key_prefix . "-extra-params";
+
+        $clear_cache = request('is_sort_clear', false);
+
+        $sort_params = $this->getRequestData($cache_key_for_sort, [
+            ["key" => "sort_by", "default" => "created_at"],
+            ["key" => "sort_dir", "default" => "DESC"],
+        ], $clear_cache);
+
+        $builder->orderBy($sort_params['sort_by'], $sort_params['sort_dir']);
+
+        $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
+
+        $this->setForView(compact("records"));
+
+        return $this->viewIndex(__FUNCTION__);
+    }
+
+    public function laravel_logs($file_name = "")
+    {
+        $path = storage_path("logs");
+
+        if (isset($file_name) && $file_name)
+        {
+            $file = $path . "/" . $file_name . ".log";
+            $log_content = file_get_contents($file);
+
+            $log_content = preg_replace('/\b[\w-]+\.ERROR\b/', '<span class="error-message">ERROR</span>', $log_content);
+            $log_content = preg_replace('/\b[\w-]+\.INFO\b/', '<span class="warning-message">INFO</span>', $log_content);
+            $log_content = preg_replace('/\b[\w-]+\.DEBUG\b/', '<span class="info-message">DEBUG</span>', $log_content);
+            // d($log_content, true);
+
+            $this->setForView(compact("log_content"));
+        }
+
+        $list = FileUtility::getFileList($path);
+
+        $file_list = [];
+
+        foreach($list as $k => $file)
+        {
+            $v = pathinfo($file, PATHINFO_FILENAME);
+            $file_list[$v] = $v;
+        }
+
+        $search['file_name'] = $file_name;
+
+        $current_route_name = Route::currentRouteName();
+
+        $this->setForView(compact("file_list", "search", "current_route_name"));
+
+        $this->layout = "frontend.layouts.main";
+
+        return $this->view(__FUNCTION__);
     }
 }

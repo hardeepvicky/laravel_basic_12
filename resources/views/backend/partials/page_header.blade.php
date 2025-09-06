@@ -1,21 +1,8 @@
 <div class="page-title" style="padding:10px;">
     <div class="row">
         <div class="col-sm-6 col-12">
-            <h2>{{ isset($page_title) ? $page_title : "Please set page_title variable"; }}</h2>
-        </div>
-        <div class="col-sm-6 col-12">
-            <?php if (isset($breadcums)): ?>
-                <ol class="breadcrumb">
-                    <?php foreach ($breadcums as $breadcum): ?>
-                        <li class="breadcrumb-item">
-                            <?= $breadcum['title']; ?>
-                        </li>
-                    <?php endforeach; ?>
-                </ol>
-            <?php endif; ?>
-
             <?php if (isset($page_header_links) && is_array($page_header_links)) : ?>
-                <div style="text-align:right; padding:5px;">
+                <div style="padding:5px;">
                     <?php
                     foreach ($page_header_links as $k => $link):
                         if (!is_array($link)) {
@@ -37,6 +24,17 @@
                         </a>
                     <?php endforeach; ?>
                 </div>
+            <?php endif; ?>
+        </div>
+        <div class="col-sm-6 col-12">
+            <?php if (isset($breadcums)): ?>
+                <ol class="breadcrumb">
+                    <?php foreach ($breadcums as $breadcum): ?>
+                        <li class="breadcrumb-item">
+                            <?= $breadcum['title']; ?>
+                        </li>
+                    <?php endforeach; ?>
+                </ol>
             <?php endif; ?>
         </div>
     </div>

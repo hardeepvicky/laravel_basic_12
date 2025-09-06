@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Backend;
 
 use App\Acl\AccessControl;
 use App\Exceptions\UserException;
+use App\Helpers\ArrayHelper;
 use App\Helpers\LaravelExtend;
+use App\Helpers\Menu;
 use App\Models\AppMenu;
 use App\Models\AppMenuRelatedLink;
 use App\Models\Department;
@@ -48,7 +50,9 @@ class AppMenuController extends BackendController
         $cache_key = $cache_key_prefix . "-index";
 
         $conditions = $this->getConditions($cache_key, [
+            ["field" => "id", "type" => "int", "cache" => false],
             ["field" => "parent_id", "type" => "int", "view_field" => "parent_id"],
+            ["field" => "is_find_nested_child", "type" => "bool", "view_field" => "is_find_nested_child"],
             ["field" => "name", "type" => "string"],
             ["field" => "route_name", "type" => "string"],
             ["field" => "is_link", "type" => "", "view_field" => "is_link"],
@@ -57,20 +61,29 @@ class AppMenuController extends BackendController
 
         $builder = $this->modelClass::query();
 
-        if (isset($conditions[0][0]) && $conditions[0][0] == "parent_id" && $conditions[0][2])
+        $array_helper =  new ArrayHelper($conditions);
+        $condition_list = $array_helper->convertModelSearchConditionToList();
+
+        if (
+            (isset($condition_list["parent_id"]) && $condition_list["parent_id"])
+            && (isset($condition_list["is_find_nested_child"]) && $condition_list["is_find_nested_child"])
+        )
         {
-            $child_id_list = AppMenu::getChildIdList([$conditions[0][2]]);
+            $child_id_list = AppMenu::getChildIdList([$condition_list["parent_id"]]);
 
             if ($child_id_list)
             {
                 $builder->whereIn("id", $child_id_list);
-                unset($conditions[0]);
+                $conditions = $array_helper->unsetValues($conditions, ["parent_id"], true, [ArrayHelper::UNSET_VALUE_REMOVE_PARENT_IF_FOUND_CHILD]);
             }
         }
+        
+        $conditions = $array_helper->unsetValues($conditions, ["is_find_nested_child"], true, [ArrayHelper::UNSET_VALUE_REMOVE_PARENT_IF_FOUND_CHILD]);
 
-        // d($conditions, true);
-
-        $builder = $builder->where($conditions);
+        if($conditions)
+        {
+            $builder = $builder->where($conditions);
+        }
 
         if ($apply_sort) {
             $cache_key_for_sort = $cache_key_prefix . "-index-extra-params";
@@ -115,12 +128,11 @@ class AppMenuController extends BackendController
             ["is_link", 0]
         ]);
 
-        // d($tree_list, true);
-
         $field_labels = $this->model->getFieldLabels();
 
+        $static_menu_list = Menu::getStaticMenuList();
 
-        $this->setForView(compact("field_labels", "dept_list", "route_list", "tree_list"));
+        $this->setForView(compact("field_labels", "dept_list", "route_list", "tree_list", "static_menu_list"));
 
         return parent::beforeViewRender();
     }
@@ -150,6 +162,7 @@ class AppMenuController extends BackendController
             "parent_id" => ["nullable"],
             "css_class" => ["nullable"],
             "icon_css_class" => ["nullable"],
+            "show_in_static_menu" => ["nullable"],
             "is_link" => "",
             "is_active" => "",
             "appMenuRelatedLink" => "",
@@ -194,8 +207,6 @@ class AppMenuController extends BackendController
 
             $accessControl = new AccessControl();
             $accessControl->clearMenuCache();
-
-            $this->saveSqlLog();
 
             return $this->afterSave($this->model);
         } catch (Exception $ex) {
@@ -252,7 +263,14 @@ class AppMenuController extends BackendController
 
             unset($save_data['appMenuRelatedLink']);
 
-            $this->model->fill($validatedData);
+            if (!isset($save_data['show_in_static_menu']))
+            {
+                $save_data['show_in_static_menu'] = [];
+            }
+
+            // d($save_data, true);
+
+            $this->model->fill($save_data);
 
             $this->model->save();
 
@@ -268,8 +286,6 @@ class AppMenuController extends BackendController
 
             $accessControl = new AccessControl();
             $accessControl->clearMenuCache();
-
-            $this->saveSqlLog();
 
             return $this->afterSave($this->model);
         } catch (Exception $ex) {

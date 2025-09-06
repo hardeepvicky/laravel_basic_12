@@ -567,16 +567,16 @@ jQuery.fn.extend({
     srParagraph: function () {
         var feature = "sr-paragraph";
 
-        var events = {
-            moreText: feature + ".moreText",
-            lessText: feature + ".lessText",
-        };
-
         return this.each(function () {
             var _this = $(this);
 
             if ($(this).applyOnce(feature)) {
-                max = parseInt(max);
+                max = parseInt(_this.data("max"));
+
+                if (!max)
+                {
+                    max = 45;
+                }
 
                 var content = _this.html();
 
@@ -584,55 +584,25 @@ jQuery.fn.extend({
                     var less_content = content.substr(0, max);
 
                     var html =
-                        '<span class="' +
-                        feature +
-                        '-less-text-block">' +
+                        '<span class="' + feature + '-less-text-block">' +
                         less_content +
-                        '<br/><a class="' +
-                        feature +
-                        '-more-text-opener">...More</a></span>';
+                        '<br/><a class="' + feature +'-more-text-opener">...More</a></span>';
                     html +=
-                        '<span class="' +
-                        feature +
-                        '-more-text-block hidden">' +
+                        '<span class="' + feature + '-more-text-block hidden">' +
                         content +
-                        '<br/><a class="' +
-                        feature +
-                        '-less-text-opener">...Less</a></span>';
+                        '<br/><a class="' + feature +'-less-text-opener">...Less</a></span>';
 
-                    $(this).html(html);
+                    _this.html(html);
 
-                    var _this = $(this);
-
-                    _this.on(events.lessText, function () {
-                        _this
-                            .find("." + feature + "-more-text-block")
-                            .addClass("hidden");
-                        _this
-                            .find("." + feature + "-less-text-block")
-                            .removeClass("hidden");
+                    _this.find("." + feature + "-more-text-opener").click(function () {
+                        _this.find("." + feature + "-less-text-block").addClass("hidden");
+                        _this.find("." + feature + "-more-text-block").removeClass("hidden");
                     });
 
-                    _this.on(events.moreText, function () {
-                        _this
-                            .find("." + feature + "-less-text-block")
-                            .addClass("hidden");
-                        _this
-                            .find("." + feature + "-more-text-block")
-                            .removeClass("hidden");
+                    _this.find("." + feature + "-less-text-opener").click(function () {
+                        _this.find("." + feature + "-more-text-block").addClass("hidden");
+                        _this.find("." + feature + "-less-text-block").removeClass("hidden");
                     });
-
-                    _this
-                        .find("." + feature + "-more-text-opener")
-                        .click(function () {
-                            $(this).trigger(events.toggle);
-                        });
-
-                    _this
-                        .find("." + feature + "-less-text-opener")
-                        .click(function () {
-                            $(this).trigger(events.lessText);
-                        });
                 }
             }
         });
@@ -1004,6 +974,7 @@ jQuery.fn.extend({
                 placeholder: "{v}",
                 key: "id",
                 text: "name",
+                default_data : [],
                 onError: function (title, msg) {
                     $.events.onError(title, msg);
                 },
@@ -1064,73 +1035,165 @@ jQuery.fn.extend({
                 });
 
                 _this.on(events.change, function (e, event_opt) {
-                    var v = $(this).val();
 
-                    if (v) {
-                        var new_url = settings.beforeGet(_this, url);
+                    if ((typeof event_opt != "undefined" && typeof event_opt.eventBubble == "boolean" && !event_opt.eventBubble))
+                    {
 
-                        if (new_url === false) {
-                            return false;
-                        }
+                    }
+                    else
+                    {
+                        var v = $(this).val();
 
-                        new_url = new_url.replaceAll(settings.placeholder, v);
+                        if (v) 
+                        {
+                            var new_url = settings.beforeGet(_this, url);
 
-                        console.log(feature + " : get : " + new_url);
-                        $.get(new_url, function (response) {
-                            try {
-                                if (typeof response == "string") {
-                                    response = JSON.parse(response);
+                            if (new_url === false) {
+                                return false;
+                            }
+
+                            new_url = new_url.replaceAll(settings.placeholder, v);
+
+                            console.log(feature + " : get : " + new_url);
+                            $.get(new_url, function (response) {
+                                try {
+                                    if (typeof response == "string") {
+                                        response = JSON.parse(response);
+                                    }
+                                } catch (e) {
+                                    settings.onError(
+                                        feature + " Error on get " + new_url,
+                                        response
+                                    );
+                                    return;
                                 }
-                            } catch (e) {
-                                settings.onError(
-                                    feature + " Error on get " + new_url,
+
+                                var new_response = settings.afterGet(
+                                    _this,
+                                    $(target),
                                     response
                                 );
-                                return;
-                            }
 
-                            var new_response = settings.afterGet(
-                                _this,
-                                $(target),
-                                response
-                            );
+                                if (typeof new_response != "object")
+                                {
+                                    settings.onError(
+                                        feature + " Error on get " + new_url,
+                                        "new_response should be object"
+                                    );
 
-                            if (new_response["status"] != "1") {
+                                    return;
+                                }
+
+                                if (typeof new_response['status'] == "undefined")
+                                {
+                                    settings.onError(
+                                        feature + " Error on get " + new_url,
+                                        "status is not found in new_response"
+                                    );
+
+                                    return;
+                                }
+
+                                if (typeof new_response['data'] != "object")
+                                {
+                                    settings.onError(
+                                        feature + " Error on get " + new_url,
+                                        "data is not onject in new_response"
+                                    );
+
+                                    return;
+                                }
+
+                                if (new_response["status"] != "1") {
+                                    settings.onError(
+                                        feature + " Error on get " + new_url,
+                                        new_response["msg"]
+                                    );
+                                    return;
+                                }
+
+                                var html = "";
+                                var multiple = $(target).attr("multiple");
+                                if (!multiple) {
+                                    var html = "<option value=''>Please Select</option>";
+                                }
+
+                                for (var i in new_response["data"]) {
+                                    var k = new_response["data"][i][settings.key];
+                                    var v = new_response["data"][i][settings.text];
+
+                                    var attr = 'value="' + k +'"';
+
+                                    if (typeof new_response["data"][i]["auto_select"] != "undefined")
+                                    {
+                                        if (new_response["data"][i]["auto_select"])
+                                        {
+                                            attr += ' selected="selected"';
+                                        }
+                                    }
+
+                                    html += '<option ' + attr +'>' + v +"</option>";
+                                }
+
+                                $(target).html(html);
+
+                                $(target).each(function () {
+                                    if (
+                                        typeof event_opt != "undefined" &&
+                                        typeof event_opt.pageLoad != "undefined" &&
+                                        event_opt.pageLoad
+                                    ) {
+                                        var value = $(this).data("value");
+
+                                        if (value) {
+                                            $(this).trigger(events.setValue, [
+                                                { value: value },
+                                            ]);
+                                        }
+                                    }
+
+                                    if (
+                                        typeof event_opt != "undefined" &&
+                                        typeof event_opt.onListFill == "function"
+                                    ) {
+                                        event_opt.onListFill();
+                                    }
+
+                                    $(this).trigger(events.change, event_opt);
+                                });
+                            }).fail(function (jqXHR, status, msg) {
                                 settings.onError(
                                     feature + " Error on get " + new_url,
-                                    new_response["msg"]
+                                    msg
                                 );
-                                return;
-                            }
-
-                            if (typeof new_response["data"] == "undefined") {
-                                settings.onError(
-                                    feature + " Error on get " + new_url,
-                                    "data not found in response"
-                                );
-                            }
-
+                            });
+                        } 
+                        else if (settings.default_data)
+                        {
                             var html = "";
                             var multiple = $(target).attr("multiple");
                             if (!multiple) {
-                                var html =
-                                    "<option value=''>Please Select</option>";
+                                var html = "<option value=''>Please Select</option>";
                             }
 
-                            for (var i in new_response["data"]) {
-                                var k = new_response["data"][i][settings.key];
-                                var v = new_response["data"][i][settings.text];
-                                html +=
-                                    '<option value="' +
-                                    k +
-                                    '">' +
-                                    v +
-                                    "</option>";
+                            for (var i in settings.default_data) {
+                                var k = settings.default_data[i][settings.key];
+                                var v = settings.default_data[i][settings.text];
+
+                                var attr = 'value="' + k +'"';
+
+                                if (typeof settings.default_data[i]["auto_select"] != "undefined")
+                                {
+                                    if (new_response["data"][i]["auto_select"])
+                                    {
+                                        attr += ' selected="selected"';
+                                    }
+                                }
+
+                                html += '<option ' + attr +'>' + v +"</option>";
                             }
 
                             $(target).html(html);
-
-                            console.log(event_opt);
 
                             $(target).each(function () {
                                 if (
@@ -1156,20 +1219,16 @@ jQuery.fn.extend({
 
                                 $(this).trigger(events.change, event_opt);
                             });
-                        }).fail(function (jqXHR, status, msg) {
-                            settings.onError(
-                                feature + " Error on get " + new_url,
-                                msg
-                            );
-                        });
-                    } else {
-                        $(target).html("");
+                        }
+                        else {
+                            $(target).html("");
 
-                        $(target).each(function () {
-                            if ($(this).hasEvent(events.change)) {
-                                $(this).trigger(events.change, event_opt);
-                            }
-                        });
+                            $(target).each(function () {
+                                if ($(this).hasEvent(events.change)) {
+                                    $(this).trigger(events.change, event_opt);
+                                }
+                            });
+                        }
                     }
                 });
 

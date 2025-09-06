@@ -14,6 +14,15 @@ var DateUtil = {
         "Jul", "Aug", "Sep",
         "Oct", "Nov", "Dec"
     ],
+    dayNames : [
+        "Sun",
+        "Mon",
+        "Tue",
+        "Wed",
+        "Thu",
+        "Fri",
+        "Sat"
+    ],
     day: "day",
     month: "month",
     year: "year",
@@ -33,6 +42,8 @@ var DateUtil = {
 
             'H:i',
             'h:i a',
+
+            'D H:i',
         ];
     },
     getFormattedDateTime: function(obj, format) {
@@ -62,6 +73,9 @@ var DateUtil = {
         var H = date.getHours();
         var i = date.getMinutes();
         var s = date.getSeconds();
+
+        var dayOfWeekNumber = date.getDay();
+        var dayName = this.dayNames[dayOfWeekNumber];
 
         var am_pm = "";
         var h = 0;
@@ -107,6 +121,8 @@ var DateUtil = {
 
         //month name can conflict with format
         date_str = date_str.replace("M", M);
+
+        date_str = date_str.replace("D", dayName);
 
         return date_str;
     },

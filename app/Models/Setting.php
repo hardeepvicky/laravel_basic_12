@@ -2,19 +2,16 @@
 
 namespace App\Models;
 
-use Exception;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-
-class Setting extends BaseModel
+class Setting extends BaseMongoModel
 {
-    use HasFactory;
-
     public const LABELS = [
         "company_name" => "Company Name",
+        "company_tag_line" => "Company Tag Line",
         "company_email" => "Company Email",
         "company_address" => "Company Address",
         "company_gst_no" => "Company GST No.",
         "export_csv_max_record_count" => "Export CSV Max Record Count",
+        "item_sku_pattern" => "Item SKU Pattern",
     ];
 
     /**
@@ -49,7 +46,7 @@ class Setting extends BaseModel
         return $value;
     }
 
-    public function getValueOfList(array $names)
+    public static function getValueOfList(array $names)
     {
         $list = self::whereIn("name", $names)->pluck("value", "name")->toArray();
 

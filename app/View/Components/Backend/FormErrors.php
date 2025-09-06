@@ -12,7 +12,9 @@ class FormErrors extends BackendComponent
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(
+        public array $customErrors = []
+    )
     {
         parent::__construct();
         

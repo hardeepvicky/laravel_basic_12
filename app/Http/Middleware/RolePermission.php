@@ -3,9 +3,11 @@
 namespace App\Http\Middleware;
 
 use App\Acl\AccessControl;
+use App\Helpers\LaravelExtend;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 class RolePermission
@@ -35,6 +37,10 @@ class RolePermission
         $accessControl = AccessControl::init();
 
         if (!$accessControl->isAllow($route_name, $role_id_list)) {
+            Log::info("RolePermission : isAllow : false");
+            $is_allow_all_routes = config("app.ACL_IS_SYSTEM_ADMIN_ALLOW_ALL_ROUTES");
+            Log::info("RolePermission : ACL_IS_SYSTEM_ADMIN_ALLOW_ALL_ROUTES : " . ($is_allow_all_routes ? "True" : "False"));
+            LaravelExtend::writeQueryLog(LaravelExtend::getQueryLog("", -5));
             abort(401);
         }
 

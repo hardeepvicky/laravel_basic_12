@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Console\Commands\ModelToJsonCommand;
 use App\Exceptions\UserException;
 use App\Helpers\ConsoleOutput;
 use App\Helpers\Util;
@@ -32,9 +33,9 @@ class FieldSettingSeeder extends Seeder
 
         $filename = $model_name . ".json";
 
-        $path = "files/command/ModelToJsonCommand/";
+        $path = ModelToJsonCommand::$path . "/";
 
-        $disk = Storage::disk(DEFAULT_DISK);
+        $disk = ModelToJsonCommand::getStorageDisk();
 
         $content = $disk->get($path . $filename);
 
@@ -45,8 +46,6 @@ class FieldSettingSeeder extends Seeder
         } else {
             $counts['total_count'] = count($records);
 
-            $model = new FieldSetting();
-
             $is_insert = false;
             $is_update = false;
 
@@ -56,7 +55,10 @@ class FieldSettingSeeder extends Seeder
 
                 try {
                     $record = Util::objToArray($record);
-                    $id = $model->insertOrUpdate($record, $is_insert, $is_update);
+                    unset($record['id']);
+                    unset($record['_id']);
+                    
+                    $model = FieldSetting::insertOrUpdate($record, $is_insert, $is_update);
 
                     if ($is_insert) {
                         $counts['insert_count']++;

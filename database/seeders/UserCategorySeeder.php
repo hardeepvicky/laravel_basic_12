@@ -53,10 +53,8 @@ class UserCategorySeeder extends Seeder
 
         $counts['total_count'] = count($records);
 
-        $user_category_model = new UserCategory();
-
         foreach ($records as $record) {
-            $user_category_model->insertOrUpdate($record, $is_insert, $is_update);
+            UserCategory::insertOrUpdate($record, $is_insert, $is_update);
 
             if ($is_insert) {
                 $counts['insert_count']++;

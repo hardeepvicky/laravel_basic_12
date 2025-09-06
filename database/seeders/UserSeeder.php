@@ -45,7 +45,7 @@ class UserSeeder extends Seeder
                 "user_category_id" => $user_category->id,
                 'name' => 'admin',
                 'email' => 'admin@celec.com',
-                'password' => bcrypt('admin'),
+                'password' => bcrypt('admin@423'),
                 'dont_send_email' => 1,
                 'is_active' => 1,
                 'is_pre_defined' => 0,
@@ -57,7 +57,13 @@ class UserSeeder extends Seeder
         $model = new User();
 
         foreach ($records as $record) {
-            $model = $model->insertOrUpdate($record, $is_insert, $is_update);
+
+            if (User::where("email", $record['email'])->count())
+            {
+                unset($record['password']);
+            }
+
+            $model = User::insertOrUpdate($record, $is_insert, $is_update);
 
             if  (!$model)
             {

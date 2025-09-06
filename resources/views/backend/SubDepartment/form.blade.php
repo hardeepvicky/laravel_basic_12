@@ -12,24 +12,21 @@
     <x-Form.start action="{{ $form['url'] }}" method="{{ $form['method'] }}" />
 
     <div class="row">
-        <div class="col-md-12 offset-lg-1 col-lg-10">
+        <div class="col-xxl-10">
             <div class="card">
                 <div class="card-header card-no-border pb-0">
-                    <h3>Basic</h3>
                 </div>
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-md-6 col-lg-4">
+                        <div class="col-md-12 col-xxl-6">
                             <div class="form-group mb-3">
                                 <?php
                                 $field = 'department_id';
                                 $label = get_value_from_list($field_labels, $field, $field);
                                 ?>
                                 <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$dept_list"
-                                    value="{{ $model->{$field} }}" class="select2"/>
+                                    value="{{ $model->{$field} }}" class="select2" mandatory="true" />
                             </div>
-                        </div>
-                        <div class="col-md-6 col-lg-4">
                             <div class="form-group mb-3">
                                 <?php
                                 $field = 'name';
@@ -38,8 +35,14 @@
                                 <x-Inputs.text-field :name="$field" :label="$label" value="{{ $model->{$field} }}"
                                     placeholder="Enter {{ $label }}" mandatory="true" autocomplete="off" />
                             </div>
-                        </div>
-                        <div class="col-md-6 col-lg-4">
+                            <div class="form-group mb-3">
+                                <?php
+                                $field = 'short_name';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <x-Inputs.text-field :name="$field" :label="$label" :value="$model->{$field}"
+                                    placeholder="Enter {{ $label }}" mandatory="true" autocomplete="off" />
+                            </div>
                             <div class="form-group mb-3">
                                 <?php
                                 $field = 'list_display_order';
@@ -48,10 +51,6 @@
                                 <x-Inputs.text-field type="number" :name="$field" :label="$label" value="{{ $model->{$field} }}"
                                     placeholder="Enter {{ $label }}" mandatory="true" autocomplete="off" />
                             </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6 col-lg-4">
                             <div class="form-group mb-3">
                                 <?php
                                 $field = 'is_active';

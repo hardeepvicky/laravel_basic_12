@@ -2,24 +2,34 @@
 
 namespace App\Models;
 
+use App\Events\ModelDelete;
+use App\Events\ModelInsert;
+use App\Events\ModelUpdate;
 use App\Exceptions\UserException;
-use App\Helpers\ArrayHelper;
+use App\Helpers\DateUtility;
+use App\Helpers\FileUtility;
 use App\Traits\CacheTrait;
+use App\Traits\CommonModelTrait;
+use App\Traits\CommonMysqlModelTrait;
 use App\Traits\ModelListTrait;
 use App\Traits\MysqlTableInfoTrait;
 use App\Traits\StorageTrait;
-use Exception;
+use DateTime;
+use DateTimeZone;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
-use ReflectionClass;
-use ReflectionMethod;
 
 class BaseModel extends Model implements BaseModelInterface
 {
-    use StorageTrait, CacheTrait, ModelListTrait, MysqlTableInfoTrait;
+    use StorageTrait, CacheTrait, ModelListTrait, CommonModelTrait, MysqlTableInfoTrait, CommonMysqlModelTrait;
+
+    /**
+     * set extra relationship array to overcome problem of accidential delete
+     * this variable used in Controller.php -> delete()
+     */
+    public static array $child_model_class = [];
 
     protected static array $unique_fields = [];
 
@@ -27,29 +37,11 @@ class BaseModel extends Model implements BaseModelInterface
 
     protected static array $list_fields = ["id", "name"];
 
+    protected static array $fields_containg_tags = [];
+
     public array $custom_errors = [];
 
-    /**
-     * set extra relationship array to overcome problem of accidential delete
-     * this variable used in Controller.php -> delete()
-     */
-    public array $child_model_class = [];
-
     protected $guarded = ["id"];
-
-    public static function classDisplayName(): string
-    {
-        $class_name = str_class_name_to_human_text(static::class);
-
-        return $class_name;
-    }
-
-    public static function getCacheKey(): string
-    {
-        $str = static::class;
-
-        return static::optimizeCacheKey($str);
-    }
 
     public static function boot()
     {
@@ -70,7 +62,8 @@ class BaseModel extends Model implements BaseModelInterface
         });
 
         self::created(function ($model) {
-            $model->forgotCache();
+            $model->afterSave();
+            event(new ModelInsert($model));
         });
 
         self::updating(function ($model) {
@@ -86,11 +79,13 @@ class BaseModel extends Model implements BaseModelInterface
         });
 
         self::updated(function ($model) {
-            $model->forgotCache();
+            $model->afterSave();
+            event(new ModelUpdate($model));
         });
 
         self::deleting(function ($model) {
             $model->beforeDelete();
+            event(new ModelDelete($model));
         });
 
         self::deleted(function ($model) {
@@ -98,69 +93,85 @@ class BaseModel extends Model implements BaseModelInterface
         });
     }
 
-    public function getFileFields()
-    {
-        return static::$file_fields;
-    }
-
     public function beforeSave()
     {
         if ($this->custom_errors) {
-            throw new UserException("Some errors in model while saving", UserException::ERROR_USER_DATA_WRONG, [
+            throw new UserException("Some errors occurs while saving", UserException::ERROR_USER_DATA_WRONG, [
                 "custom_errors" => $this->custom_errors
             ]);
         }
     }
 
-    public function beforeDelete() {}
-
-    public function afterFind() {}
-
-    public function getFieldLabels()
+    public function afterSave()
     {
-        $labels = [];
+        $this->forgotCache();
 
-        $table_info = $this->getTableInfo($this->getTable());
+        $this->saveAutoTags();
 
-        // d($table_info, true);
+        $this->saveModuleLinksFromString();
+    }
 
-        $eception_list = [
-            "code",
-            "can_edit",
-            "cannot_edit_reason_array",
-            "can_delete",
-            "cannot_delete_reason_array",
-        ];
+    public function saveModuleLinksFromString()
+    {
+        foreach(static::$fields_containg_tags as $field)
+        {
+            if ($this->{$field})
+            {
+                ModuleLink::saveLinksFromStringPattern($this, $field, $this->{$field});
+            }
+        }
+    }
 
-        foreach ($table_info['columns'] as $field => $field_attr) {
+    public function beforeDelete() {
+        if ($this->custom_errors) {
+            throw new UserException("Some errors in model while deleting", UserException::ERROR_USER_DATA_WRONG, [
+                "custom_errors" => $this->custom_errors
+            ]);
+        }
+    }
 
-            if (!in_array($field, $eception_list)) {
-                $text = str_replace(["_id", "is_"], "", $field);
+    public function afterFind()
+    {
+        $fileUtility = new FileUtility(static::getStorageDisk());
 
-                $labels[$field] = ucwords(str_function_name_to_human_text($text));
+        foreach ($this->getFileFields() as $field) {
+            if (isset($this->{$field}) && $this->{$field}) {
+                $field_url_field = $field . "_url";
+
+                $this->{$field_url_field} = $fileUtility->getUrl($this->{$field});
             }
         }
 
-        // d($labels, true);
-
-        return $labels;
+        $this->convertTimeZoneForDisplay();
     }
 
+    public function parseTagsForModuleLinking()
+    {
+        foreach(static::$fields_containg_tags as $field)
+        {
+            if ($this->{$field})
+            {
+                $this->{$field} = ModuleLink::parseStringToMakeLinks($this, $this->{$field});
+            }
+        }
+    }
 
     public static function fetchList(Builder $builder, String $key_field, String $value_field)
     {
         $model = new static();
         $table_name  = $model->getTable();
 
-        if (!in_array($key_field, self::$list_fields) && self::tableHaveField($table_name, $key_field)) {
-            self::$list_fields[] = $key_field;
+        $list_fields = static::getListFields();
+
+        if (!in_array($key_field, $list_fields) && static::tableHaveField($table_name, $key_field)) {
+            $list_fields[] = $key_field;
         }
 
-        if (!in_array($value_field, self::$list_fields) && self::tableHaveField($table_name, $value_field)) {
-            self::$list_fields[] = $value_field;
+        if (!in_array($value_field, $list_fields) && static::tableHaveField($table_name, $value_field)) {
+            $list_fields[] = $value_field;
         }
 
-        $builder->select(self::$list_fields);
+        $builder->select($list_fields);
 
         $records = $builder->get();
 
@@ -170,35 +181,42 @@ class BaseModel extends Model implements BaseModelInterface
 
         foreach ($records as $record) {
             $arr = $record->toArray();
-            $list[$arr[$key_field]] = $arr[$value_field];
+            if (isset($arr[$key_field]) && is_scalar($arr[$key_field]))
+            {
+                $list[$arr[$key_field]] = $arr[$value_field] ?? null;
+            }
         }
 
         return $list;
     }
 
-    public static function getAllRelations(Model $model): array
+    public static function classDisplayName(): string
     {
-        $class = new ReflectionClass($model);
-        $methods = $class->getMethods();
+        $class_name = str_class_name_to_human_text(static::class);
 
-        $relations = [];
-        foreach ($methods as $method) {
-            if ($method->class != get_class($model) || $method->getNumberOfParameters() > 0) continue;
+        return $class_name;
+    }
 
-            try {
-                $relation = $method->invoke($model);
-                if ($relation instanceof \Illuminate\Database\Eloquent\Relations\Relation) {
-                    $relations[$method->getName()] = [
-                        "model" => $method,
-                        "relation" => $relation,
-                    ];
-                }
-            } catch (\Throwable $e) {
-                continue;
-            }
-        }
+    public static function getCacheKey(): string
+    {
+        $str = static::class;
 
-        return $relations;
+        return static::optimizeCacheKey($str);
+    }
+
+    public static function getFileFields()
+    {
+        return static::$file_fields;
+    }
+
+    public static function getListFields()
+    {
+        return static::$list_fields;
+    }
+
+    public static function getUniqueFields()
+    {
+        return static::$unique_fields;
     }
 
     /*------------------------------------------------------------------*/
@@ -219,94 +237,6 @@ class BaseModel extends Model implements BaseModelInterface
         return $class_name;
     }
 
-    public function getNextId()
-    {
-        $table = $this->getTable();
-        $statement = DB::select("SHOW TABLE STATUS LIKE '" . $table . "'");
-        $nextId = $statement[0]->Auto_increment;
-
-        return $nextId;
-    }
-
-    public function insertOrUpdate(array $data, &$is_insert = null, &$is_update = null)
-    {
-        $model = $this->getUniqueId($data);
-
-        if ($model) {
-            $model->fill($data);
-            if ($model->isDirty()) {
-                if ($model->save()) {
-                    $is_update = true;
-                } else {
-                    $is_update = false;
-                    throw new \Exception("Fail To Save");
-                }
-            }
-        } else {
-            $model = static::create($data);
-
-            if ($model) {
-                $is_insert = true;
-            } else {
-                $is_insert = false;
-                return null;
-            }
-        }
-
-        return $model->id;
-    }
-
-    public function insertIgnoreIfExist(array $data, &$is_insert = null)
-    {
-        $record = $this->getUniqueId($data);
-
-        // dump($record);
-
-        if (!$record) {
-            $record = static::create($data);
-            if (!$record) {
-                throw new UserException("Fail To Save", UserException::ERROR_LARAVEL_FAIL);
-            }
-
-            $is_insert = true;
-        }
-
-        return $record->id;
-    }
-
-    public function getUniqueId(array $data)
-    {
-        if (!static::$unique_fields) {
-            throw new UserException("unique_fields is not set yet");
-        }
-
-        $conditions = [];
-        foreach (static::$unique_fields as $unique_field) {
-            if (!isset($data[$unique_field])) {
-                throw new UserException("field $unique_field missing in argument data");
-            }
-
-            if (isset($this->casts) && $this->casts) {
-            }
-
-            $conditions[] = [$unique_field, '=', $data[$unique_field]];
-        }
-
-        $count = static::where($conditions)->count();
-
-        if ($count == 0) {
-            return false;
-        }
-
-        if ($count > 1) {
-            throw new UserException("more than 1 records found");
-        }
-
-        $record = static::where($conditions)->first(["id"]);
-
-        return $record;
-    }
-
     public function activate()
     {
         $this->is_active = 1;
@@ -319,78 +249,76 @@ class BaseModel extends Model implements BaseModelInterface
         $this->save();
     }
 
-    public function addError($label, $messages, $group = null, $extra = [])
+    public function safeDelete(Model $model)
     {
-        if (!is_array($messages)) {
-            $messages = [$messages];
+        $class_name = get_class($model);
+
+        $class_display_name = "";
+        if (method_exists($model, 'getClassDisplayName')) {
+            $class_display_name = $model->getClassDisplayName();
+        } else {
+            throw new UserException("Please Declare getClassDisplayName() method in $class_name");
         }
 
-        if (!$group) {
-            $group = 0;
+        if (!property_exists($class_name, "child_model_class")) {
+            throw new UserException("child_model_class Array is not set in $class_name");
         }
 
-        if (!is_scalar($group)) {
-            throw new UserException("group should be scaler value");
-        }
+        foreach (static::$child_model_class as $childClass => $arr)
+        {
+            $child_class_display_name = $childClass::classDisplayName();
 
-        foreach ($messages as $msg) {
-            $this->custom_errors[$group][] = compact("label", "msg", "extra");
-        }
-    }
+            if (!$child_class_display_name) {
+                if (isset($arr['label']) && !empty($arr['label']) && is_string($arr['label'])) {
+                    $child_class_display_name = $arr['label'];
+                }
+            }
 
-    public function getDisplayFieldsToUser()
-    {
-        $attributes = $this->getAttributes();
+            if (!$child_class_display_name) {
+                throw_exception("Please Add label in child_model_class of $class_name");
+            }
+            array_check_key_and_throw_error($arr, ["preventDelete", "foreignKey"], "$class_name - child_model_class : {key} not found");
+            array_check_value_and_throw_error($arr, ["foreignKey"], "$class_name - child_model_class : {key} is empty");
 
-        if (!$attributes) {
-            $table_info = $this->getTableInfo($this->getTable());
+            if (is_array($arr['foreignKey'])) {
+                $foreign_fields = $arr['foreignKey'];
+            } else {
+                $foreign_fields = [$arr['foreignKey']];
+            }
 
-            if (isset($table_info['columns']) || $table_info['columns']) {
-                foreach ($table_info['columns'] as $field => $field_attr) {
-                    $attributes[] = $field;
+            if ($arr['preventDelete']) {
+                foreach ($foreign_fields as $foreign_field) {
+                    $count = $childClass::where($foreign_field, $model->id)->count();
+
+                    if ($count > 0) {
+                        return false;
+                    }
+                }
+            } else {
+                foreach ($foreign_fields as $foreign_field) {
+                    $child_records = $childClass::where($foreign_field, $model->id)->get();
+
+                    if ($child_records->count() > 0) {
+                        foreach ($child_records as $child_record) {
+                            $result = $model->safeDelete($child_record);
+
+                            if (!$result)
+                            {
+                                return false;
+                            }
+                        }
+                    }
                 }
             }
         }
 
-        $arrayHelper = new ArrayHelper($attributes);
-        $arrayHelper->unsetValues([
-            "is_pre_defined",
-            "can_edit",
-            "cannot_edit_reason_array",
-            "can_delete",
-            "cannot_delete_reason_array",
-        ]);
-
-        return $arrayHelper->getData();
-    }
-
-
-    public function loadAllRelations(&$relations = [])
-    {
-        $class = new ReflectionClass($this);
-        $methods = $class->getMethods(ReflectionMethod::IS_PUBLIC);
-
-        foreach ($methods as $method) {
-            // Skip inherited methods and methods with parameters
-            if (
-                $method->class !== get_class($this) ||
-                $method->getNumberOfParameters() > 0
-            ) {
-                continue;
-            }
-
-            try {
-                $return = $method->invoke($this);
-
-                if ($return instanceof \Illuminate\Database\Eloquent\Relations\Relation) {
-                    $relations[] = $method->getName();
-                }
-            } catch (\Throwable $e) {
-                // Skip methods that throw exceptions
-                continue;
-            }
+        if ($model->delete())
+        {
+            return true;
         }
 
-        return $this->load($relations);
+        return false;
     }
 }
+
+

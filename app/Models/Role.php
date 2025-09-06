@@ -18,6 +18,8 @@ class Role extends BaseModel
      */
     protected static array $unique_fields = ["name"];
 
+    protected static array $list_fields = ["id", "name", "code"];
+
     protected $appends = [
         'display_name',
     ];
@@ -26,7 +28,7 @@ class Role extends BaseModel
      * set extra relationship array to overcome problem of accidential delete
      * this variable used in Controller.php -> delete()
      */
-    public array $child_model_class = [
+    public static array $child_model_class = [
         UserRole::class => [
             "foreignKey" => "role_id",
             "preventDelete" => true,

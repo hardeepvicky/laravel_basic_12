@@ -16,7 +16,7 @@ class FormCommonFooterButtons extends BackendComponent
     ) {
         parent::__construct();
 
-        $buttonList = ["submit", "submit_and_redirect_to_summary", "reset"];
+        $buttonList = ["submit", "submit_and_redirect_to_summary", "submit_and_redirect_to_edit", "submit_and_add"];
 
         if ($buttons) {
             if (is_string($buttons)) {

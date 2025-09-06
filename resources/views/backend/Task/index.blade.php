@@ -15,51 +15,59 @@ $false = false;
     <div class="card-body">
         <form method="GET" class="summary_search" action="{{ route($routePrefix . '.index') }}">
             <input type="hidden" name="is_sort_clear" value="1" />
-            <div class="row mb-4">
-                <div class="col-md-1">
-                    <?php
-                    $field = 'pagination_limit';
-                    ?>
-                    <x-Inputs.drop-down :name="$field" label="Limit" :list="$paginationList" :value="$pagination_limit"
-                        :pleaseSelect="$false" class="pagination_limit" />
-                </div>
-                <div class="col-md-3">
-                    <?php
-                    $field = "name";
-                    $label = get_value_from_list($field_labels, $field, $field);
-                    ?>
-                    <x-Inputs.text-field :name="$field" :label="$label" :value="$search[$field]" />
-                </div>
-                <div class="col-md-3">
-                    <?php
-                    $field = "description";
-                    $label = get_value_from_list($field_labels, $field, $field);
-                    ?>
-                    <x-Inputs.text-field :name="$field" :label="$label" :value="$search[$field]" />
-                </div>
-                <div class="col-md-3">
-                    <?php
-                    $field = "type";
-                    $label = get_value_from_list($field_labels, $field, $field);
-                    ?>
-                    <x-Inputs.drop-down :name="$field" :label="$label" :value="$search[$field]" :list="$type_list"
-                        class="select2" />
-                </div>
-                <div class="col-md-3">
-                    <?php
-                    $field = "status";
-                    $label = get_value_from_list($field_labels, $field, $field);
-                    ?>
-                    <x-Inputs.drop-down :name="$field" :label="$label" :value="$search[$field]" :list="$status_list"
-                        class="select2" />
-                </div>
-                <div class="col-md-3">
-                    <?php
+            <?php 
+                $field = "name";
+            ?>
+            <div class="hidden">
+                <input type="text"  name="{{ $field }}" value="{{ $search[$field] }}" />
+                
+                <?php 
+                    $field = "dept_id";
+                ?>
+                <input type="text"  name="{{ $field }}" value="{{ $search[$field] }}" />
+
+                <?php 
                     $field = "assign_to_user_id";
+                ?>
+                <input type="text"  name="{{ $field }}" value="{{ $search[$field] }}" />
+
+                <?php 
+                    $field = "name";
+                ?>
+                <input type="text"  name="{{ $field }}" value="{{ $search[$field] }}" />
+                
+                <?php 
+                    $field = "priority";
+                ?>
+                <input type="text"  name="{{ $field }}" value="{{ $search[$field] }}" />
+                
+                <?php 
+                    $field = "status";
+                ?>
+                <input type="text"  name="{{ $field }}" value="{{ $search[$field] }}" />
+            </div>
+            
+            <div class="row mb-4">
+                <div class="col-md-4 col-lg-3 col-xxxl-2 mb-2">
+                    <?php
+                    $field = "tag_name";
                     $label = get_value_from_list($field_labels, $field, $field);
                     ?>
-                    <x-Inputs.drop-down :name="$field" :label="$label" :value="$search[$field]" :list="$user_list"
-                        class="select2" />
+                    <x-Inputs.text-field :name="$field" :label="$label" :value="$search[$field]" />
+                </div>
+                <div class="col-md-4 col-lg-3 col-xxxl-2 mb-2">
+                    <?php
+                    $field = "from_start_date";
+                    $label = get_value_from_list($field_labels, $field, $field);
+                    ?>
+                    <x-Inputs.text-field :name="$field" :label="$label" :value="$search[$field]" class="date-picker" />
+                </div>
+                <div class="col-md-4 col-lg-3 col-xxxl-2 mb-2">
+                    <?php
+                    $field = "to_start_date";
+                    $label = get_value_from_list($field_labels, $field, $field);
+                    ?>
+                    <x-Inputs.text-field :name="$field" :label="$label" :value="$search[$field]" class="date-picker" />
                 </div>
             </div>
             <x-Backend.summary-search-form-footer :showPaginationDropDown="$false" />

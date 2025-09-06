@@ -13,9 +13,9 @@
     position: absolute;
     width : 100%;
     height: 100%;
-    background-color: rgba(0,0,0,.5);    
+    background-color: rgba(0,0,0,.5);
     top : 0;
-    left : 0;    
+    left : 0;
     z-index: 2;
     display: flex;
     justify-content:center;
@@ -30,15 +30,15 @@ body > .loader-container
 }
 
 .loader-content
-{     
+{
     text-align: center;
     color: white;
     padding: 1em;
-    background-color: rgba(0,0,0,.1); 
+    background-color: rgba(0,0,0,.1);
     border-radius: 1em;
 }
 
-.loader-content .loader-icon 
+.loader-content .loader-icon
 {
     width: 4em;
     height: 4em;
@@ -48,11 +48,11 @@ body > .loader-container
 .loader-content .loader-info
 {
     font-weight: bold;
-    margin-top: 0.75em;    
+    margin-top: 0.75em;
 }
 
 .loader-content .loader-footer
-{ 
+{
     margin-top: 1em;
     border-top: 1px solid;
     width: 100%;
@@ -61,3 +61,32 @@ body > .loader-container
 }
 
 /*** ------------------------------------------------------------------------------ **/
+.indicator-loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    height: 20px;
+    width: 160px;    
+    z-index: 9999;
+    /* Initially hidden */
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility 0s, opacity 0.3s linear;
+    background: #CCC;
+    opacity: 0.5;
+}
+
+.indicator-loading-overlay.active {
+    visibility: visible;
+    opacity: 1;
+}
+
+.indicator-loading-overlay .indicator-loader-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.indicator-loading-overlay .indicator-loader-content i {
+    margin: 0 10px 0 0;
+}

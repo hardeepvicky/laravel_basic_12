@@ -7,16 +7,22 @@ use Symfony\Component\Console\Output\ConsoleOutput as OutputConsoleOutput;
 
 class ConsoleOutput extends OutputConsoleOutput
 {
+    public array $output_lines = [];
 
     private array $log_messages = [];
 
     private array $log_types = ["info", "error"];
 
-    public function addLog(string | array $data)
+    public function addLog(string | array $data, $depth = 0, string $label = "")
     {
+        if ($depth > 3)
+        {
+            return [];
+        }
+
         if (is_string($data)) {
             $this->addLogMessage($data);
-        } else {
+        } else if(is_array($data)) {
             $msg_list = [];
             foreach ($data as $k => $v) {
                 if (is_scalar($v)) {
@@ -27,12 +33,25 @@ class ConsoleOutput extends OutputConsoleOutput
 
                     $msg_list[] = $k . ":" . $v;
                 } else {
-                    $msg_list[] = $k . ":" . gettype($v);
+                    $this->addLog($v, $depth + 1, $k);
                 }
             }
 
-            $this->addLogMessage(implode(", ", $msg_list));
+            if ($msg_list)
+            {
+                $msg = "";
+                if ($label)
+                {
+                    $msg = $label . " : ";
+                }
+
+                $msg .= implode(", ", $msg_list);
+
+                $this->addLogMessage($msg);
+            }
         }
+
+        return [];
     }
 
     public function addLogMessage(string $msg, string $type = "info")
@@ -53,18 +72,31 @@ class ConsoleOutput extends OutputConsoleOutput
         $this->log_messages = [];
     }
 
-    public function writeLogToConsole()
+    public function writeLogToConsole($message = "")
     {
-        foreach ($this->log_messages as $arr) {
+        if ($message && is_scalar($message))
+        {
+            $this->output_lines[] = "info : " . $message;
+            $this->writeln('<info>' . $message. '</info>');
+        }
+        else
+        {
+            foreach ($this->log_messages as $arr) {
 
-            if (count($arr) < 2) {
-                continue;
-            }
+                if (count($arr) < 2) {
+                    continue;
+                }
 
-            if ($arr[1] == "info") {
-                $this->writeln('<info>' . ($arr[0]) . '</info>');
-            } else if ($arr[1] == "error") {
-                $this->writeln('<error>' . ($arr[0]) . '</error>');
+                if  (isset($arr[0]))
+                {
+                    $this->output_lines[] = $arr[1] . " : " . $arr[0];
+
+                    if ($arr[1] == "info") {
+                        $this->writeln('<info>' . ($arr[0]) . '</info>');
+                    } else if ($arr[1] == "error") {
+                        $this->writeln('<error>' . ($arr[0]) . '</error>');
+                    }
+                }
             }
         }
     }

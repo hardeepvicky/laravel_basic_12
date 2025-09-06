@@ -2,16 +2,14 @@
 
 namespace App\Console\Commands;
 
+use App\Exceptions\UserException;
 use App\Helpers\FileUtility;
 use App\Helpers\LaravelExtend;
-use App\Models\AppMenu;
-use App\Models\FieldSetting;
-use App\Models\Task;
-use App\Models\Type;
-use Illuminate\Console\Command;
+use App\Helpers\MyCommand;
+use App\Models\BaseModelInterface;
 use Illuminate\Support\Facades\Storage;
 
-class ModelToJsonCommand extends Command
+class ModelToJsonCommand extends MyCommand
 {
     /**
      * The name and signature of the console command.
@@ -25,7 +23,7 @@ class ModelToJsonCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'saving data to json files';
 
     public static string $path = "files/command/ModelToJsonCommand";
 
@@ -34,87 +32,73 @@ class ModelToJsonCommand extends Command
      */
     public function handle()
     {
-        $default_model_name_list = ['Type', 'AppMenu', 'FieldSetting', 'Role'];
+        $this->logCreate([
+            "command" => $this->signature,
+            "description" => $this->description
+        ]);
 
-        sort($default_model_name_list);
+        $options = [];
+        
+        $model_list = LaravelExtend::getListOfModels();
 
-        $options = ['Manully Enter', 'All'];
+        foreach($model_list as $model_name => $model_class)
+        {
+            $main_model = new $model_class();
 
-        $options = array_merge($options, $default_model_name_list);
+            if ($model_name == "User" || $main_model instanceof BaseModelInterface)
+            {
+                $options[] = $model_name;
+            }
+            else
+            {
+                continue;
+            }
+        }
 
         $choice = $this->choice(
             'Select Model :',
             $options,
-            0 // default index (optional)
         );
 
-        $model_list = [];
+        $model_name = $choice;
 
-        if ($choice == "Manully Enter") {
-            $model_name = $this->ask('Enter Model name');
-            $model_name = trim($model_name);
+        $model_class = $model_list[$choice];
 
-            if (strlen($model_name) <= 0)
-            {
+        $this->info("Working on $model_name");
+
+        $count = $model_class::count();
+
+        $main_counters[$model_name] = $count;
+
+        if ($count > 1000) {
+            $user_input = $this->ask('Records are more than 1000, Do You still want to proceed (Yes/NO) [Default:No]');
+
+            if (strtolower(trim($user_input)) != "yes") {
+                $this->info("User reply : $user_input");
                 return;
             }
-
-            $model_list = [$model_name];
-        }
-        else if ($choice == "All") {
-            $model_list = $default_model_name_list;
-        } else {
-            $model_list = [$choice];
         }
 
-        foreach ($model_list as $model_name) {
-            $ref_model_class = "App\\Models\\" . $model_name;
+        $records = $model_class::all();
 
-            $this->info("Working on $model_name");
+        foreach ($records as $k => $record) {
+            $child_records = [];
 
-            $count = $ref_model_class::count();
-
-            $this->info("Total Count : $count");
-
-            if ($count > 1000) {
-                $user_input = $this->ask('Records are more than 1000, Do You still want to proceed (Yes/NO) [Default:No]');
-
-                if (strtolower(trim($user_input)) != "yes") {
-                    $this->info("User reply : $user_input");
-                }
-            }
-
-            $records = $ref_model_class::all();
-
-            foreach($records as $k => $record)
+            if (property_exists($model_class, "child_model_class")) 
             {
-                $child_records = [];
-
-                $child_model = new $ref_model_class();
-
-                if (isset($child_model->child_model_class) && is_array($child_model->child_model_class))
-                {
-                    foreach($child_model->child_model_class as $child_model_class => $child_model_arr)
-                    {
-                        if ($child_model_class != $ref_model_class)
-                        {
+                if (isset($model_class::$child_model_class) && is_array($model_class::$child_model_class)) {
+                    foreach ($model_class::$child_model_class as $child_model_class => $child_model_arr) {
+                        if ($child_model_class != $model_class) {
                             $child_model_class_name = str_class_name_without_namespace($child_model_class);
 
-                            $this->info("Working on $child_model_class_name");
-
                             $conditions = [];
-                            if (isset($child_model_arr['foreignKey']) && is_array($child_model_arr['foreignKey']))
-                            {
-                                foreach($child_model_arr['foreignKey'] as $foreignKey)
-                                {
-                                    if (is_string($foreignKey))
-                                    {
+                            if (isset($child_model_arr['foreignKey']) && is_array($child_model_arr['foreignKey'])) {
+                                foreach ($child_model_arr['foreignKey'] as $foreignKey) {
+                                    if (is_string($foreignKey)) {
                                         $conditions[] = [$foreignKey, $record->id];
                                     }
                                 }
-                            }
-                            else
-                            {
+                            } else {
                                 $conditions[] = [$child_model_arr['foreignKey'], $record->id];
                             }
 
@@ -122,27 +106,24 @@ class ModelToJsonCommand extends Command
 
                             $count = $qb->count();
 
-                            $this->info("Total Count : $count");
+                            $main_counters[$child_model_class_name] = $count;
 
                             if ($count > 1000) {
-                                $user_input = $this->ask('Records are more than 1000, Do You still want to proceed (Yes/NO) [Default:No]');
-
-                                if (strtolower(trim($user_input)) != "yes") {
-                                    $this->info("User reply : $user_input");
-                                }
+                                $this->info("Working on $child_model_class_name");
                             }
 
-                            $child_model_class_name = str_class_name_without_namespace($child_model_class);
                             $child_records[$child_model_class_name] = $qb->get()->toArray();
                         }
                     }
                 }
-
-                $records[$k]->child_records = $child_records;
             }
-            
-            $this->writeJson($records->toArray(), $model_name);
+
+            $records[$k]->child_records = $child_records;
         }
+
+        $this->writeJson($records->toArray(), $model_name);
+
+        $this->logUpdate($main_counters);
     }
 
     public function writeJson(array $records, $filename)
@@ -157,7 +138,7 @@ class ModelToJsonCommand extends Command
 
             $filename = $filename . ".json";
 
-            $fileUtility->writeLog(self::$path, $filename, $json);
+            $fileUtility->writeContent(self::$path, $filename, $json);
 
             $this->info("$filename : Json Write Successfully");
             $this->newLine(1);

@@ -9,8 +9,10 @@ use App\Providers\RouteServiceProvider;
 use App\Rules\ReCaptcha;
 use Exception;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Request as FacadesRequest;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\ValidationException;
 
 class LoginController extends WebController
@@ -34,6 +36,8 @@ class LoginController extends WebController
      * @var string
      */
     protected $redirectTo = RouteServiceProvider::HOME;
+
+    protected $user;
 
     /**
      * Create a new controller instance.
@@ -70,48 +74,56 @@ class LoginController extends WebController
 
     protected function authenticated(Request $request, $user)
     {
+        $user->login_timezone = $request->get("timezone");
+        $user->save();
+
         return redirect($this->redirectTo);
     }
 
     public function auto_login(Request $request)
     {
-        if (LaravelExtend::isRequestFromLocal()) {
-            $ip = $request->ip();
+        $ip = $request->ip();
 
-            if ($ip) {
-                $user = User::whereHas("userAllowIP", function ($q) use ($ip) {
-                    $q->where("ip", $ip);
-                })->first();
+        if ($ip) 
+        {
+            $user = User::whereHas("userAllowIP", function ($q) use ($ip) {
+                $q->where("ip", $ip);
+            })->first();
 
-                if ($user) {
-                    $credentials =  [
-                        "email" => $user->email,
-                        "password" => $user->plain_password
-                    ];
+            if ($user) {
+                $credentials =  [
+                    "email" => $user->email,
+                    "password" => $user->plain_password
+                ];
 
-                    $result = $this->guard()->attempt(
-                        $credentials,
-                        false
-                    );
+                $result = $this->guard()->attempt(
+                    $credentials,
+                    false
+                );
 
-                    if ($result) {
-                        if ($request->hasSession()) {
-                            $request->session()->put('auth.password_confirmed_at', time());
-                        }
-
-                        return $this->sendLoginResponse($request);
+                if ($result) {
+                    if ($request->hasSession()) {
+                        $request->session()->put('auth.password_confirmed_at', time());
                     }
-                } else {
-                    return back()->with("fail", "You are not allow to auto login");
+
+                    return $this->sendLoginResponse($request);
                 }
+                else
+                {
+                    $this->incrementLoginAttempts($request);
+
+                    return $this->sendFailedLoginResponse($request);
+                }
+            } 
+            else 
+            {
+                return back()->with("fail", "You are not allow to auto login");
             }
-
-            $this->incrementLoginAttempts($request);
-
-            return $this->sendFailedLoginResponse($request);
         }
-
-        return back()->with("fail", "You can not auto login from external");
+        else
+        {
+            return back()->with("fail", "could not get ip address");
+        }
     }
 
     public function check_before_login(Request $request)
@@ -119,11 +131,16 @@ class LoginController extends WebController
         $guard = $this->guard();
 
         if ($request->get("user_type") == User::TYPE_EXTERNAL) {
-            // $request->validate([
-            //     'g-recaptcha-response' => ['required', new ReCaptcha]
-            // ], [
-            //     "g-recaptcha-response.required" => "Google Capcha verification required"
-            // ]);
+            $request->validate([
+                'g-recaptcha-response' => ['required', new ReCaptcha]
+            ], [
+                "g-recaptcha-response.required" => "Google Capcha verification required"
+            ]);
+        }
+
+        if (!$request->get("timezone"))
+        {
+            return back()->with("fail", "timezone is required");
         }
 
         $credentials = $this->credentials($request);
@@ -168,12 +185,55 @@ class LoginController extends WebController
         return [
             $field => $login,
             'password' => $request->input('password'),
-            "type" => $request->input("user_type")
+            "type" => $request->input("user_type"),
         ];
     }
 
     public function username()
     {
         return "login_field";
+    }
+
+    /**
+     * Log the user out of the application.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
+     */
+    public function logout(Request $request)
+    {
+        $this->user = $this->guard()->getUser();
+
+        $this->guard()->logout();
+
+        $request->session()->invalidate();
+
+        $request->session()->regenerateToken();
+
+        if ($response = $this->loggedOut($request)) {
+            return $response;
+        }
+
+        return $request->wantsJson()
+            ? new JsonResponse([], 204)
+            : redirect('/');
+    }
+
+    /**
+     * The user has logged out of the application.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return mixed
+     */
+    protected function loggedOut(Request $request)
+    {
+        if (isset($this->user->type) && $this->user->type == User::TYPE_INTERNAL)
+        {
+            return redirect('/login');
+        }
+        else
+        {
+            return redirect('/signin');
+        }
     }
 }

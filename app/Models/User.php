@@ -3,16 +3,22 @@
 namespace App\Models;
 
 use App\Acl\AccessControl;
+use App\Events\ModelDelete;
+use App\Events\ModelUpdate;
+use App\Events\UserInsert;
 use App\Exceptions\UserException;
 use App\Helpers\FileUtility;
 use App\Helpers\Util;
 use App\Traits\CacheTrait;
+use App\Traits\CommonModelTrait;
+use App\Traits\CommonMysqlModelTrait;
 use App\Traits\ModelListTrait;
 use App\Traits\MysqlTableInfoTrait;
 use App\Traits\StorageTrait;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Http\Request;
 use Illuminate\Notifications\Notifiable;
@@ -26,7 +32,7 @@ use ReflectionClass;
 
 class User extends Authenticatable implements BaseModelInterface
 {
-    use HasApiTokens, HasFactory, Notifiable, StorageTrait, CacheTrait, ModelListTrait, MysqlTableInfoTrait;
+    use HasApiTokens, HasFactory, Notifiable, StorageTrait, CacheTrait, CommonModelTrait, ModelListTrait, MysqlTableInfoTrait, CommonMysqlModelTrait;
 
     /**
      * The attributes that are mass assignable.
@@ -35,13 +41,20 @@ class User extends Authenticatable implements BaseModelInterface
      */
     protected $fillable = [
         'type',
+        'sub_type',
         'user_category_id',
+        'dept_id',
+        'sub_dept_id',
+        'desg_id',
         'country_id',
+        'branch_id',
         'name',
         'person_name',
+        'person_last_name',
         'email',
         'mobile',
         'whatsapp_mobile',
+        'office_landline_no',
         'password',
         'plain_password',
         'profile_image',
@@ -50,6 +63,8 @@ class User extends Authenticatable implements BaseModelInterface
         'is_active',
         'created_via',
         'is_secure_login',
+        'google_id',
+        'apple_id',
     ];
 
     /**
@@ -58,19 +73,56 @@ class User extends Authenticatable implements BaseModelInterface
      * @var array<int, string>
      */
     protected $hidden = [
+        'plain_password',
         'password',
         'remember_token',
     ];
 
     protected $appends = [
         'display_name',
+        'full_name'
+    ];
+
+
+    public string $field_for_create_tag = "display_name";
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'used_in_other_table_created_by' => 'array',
+        'used_in_other_table_updated_by' => 'array',
+    ];
+
+    public static array $child_model_class = [
+        UserRole::class => [
+            "foreignKey" => "user_id",
+            "preventDelete" => false,
+            "label" => "User's Role"
+        ],
+        UserAllowIp::class => [
+            "foreignKey" => "user_id",
+            "preventDelete" => false,
+            "label" => "User's Allow IP"
+        ],
+        Task::class => [
+            "foreignKey" => "assign_to_user_id",
+            "preventDelete" => true,
+        ],
+        TaskUser::class => [
+            "foreignKey" => "task_id",
+            "preventDelete" => true
+        ],
     ];
 
     protected static array $unique_fields = ["email"];
 
     protected static array $file_fields = ["profile_image"];
 
-    protected static array $list_fields = ["id", "name", "type", "person_name"];
+    protected static array $list_fields = ["id", "name", "type", "sub_type", "person_name", "dept_id", "desg_id"];
 
     public const TYPE_INTERNAL = "internal";
     public const TYPE_EXTERNAL = "external";
@@ -92,30 +144,16 @@ class User extends Authenticatable implements BaseModelInterface
         self::CREATED_VIA_APPLE => "Apple",
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-        'used_in_other_table_created_by' => 'array',
-        'used_in_other_table_updated_by' => 'array',
-    ];
+    public const SUB_TYPE_TEAM_MEMBER = "TEAM_MEMBER";
+    public const SUB_TYPE_DEMO = "DEMO";
+    public const SUB_TYPE_EXISTING_BUYER = "EXISTING_BUYER";
+    public const SUB_TYPE_RESELLER = "RESELLER";
+    public const SUB_TYPE_OEM = "OEM";
+    public const SUB_TYPE_VENDOR = "VENDOR";
+    public const SUB_TYPE_FEANCHISE = "FEANCHISE";
+    public const SUB_TYPE_SUPPLIER = "SUPPLIER";
 
-    public array $child_model_class = [
-        UserRole::class => [
-            "foreignKey" => "user_id",
-            "preventDelete" => false,
-            "label" => "User's Role"
-        ],
-        UserAllowIp::class => [
-            "foreignKey" => "user_id",
-            "preventDelete" => false,
-            "label" => "User's Allow IP"
-        ],
-    ];
-
+    public array $custom_errors = [];
 
     public static function boot()
     {
@@ -128,13 +166,15 @@ class User extends Authenticatable implements BaseModelInterface
                 if ($auth_user) {
                     $model->created_by = $auth_user->id;
                 }
-
-                $model->uid = self::generateUID();
             }
+            
+            $model->uid = self::generateUID();
         });
 
         self::created(function ($model) {
-            $model->forgotCache();
+            $model->afterSave();
+
+            event(new UserInsert($model));
         });
 
         self::updating(function ($model) {
@@ -152,10 +192,14 @@ class User extends Authenticatable implements BaseModelInterface
         });
 
         self::updated(function ($model) {
-            $model->forgotCache();
+            $model->afterSave();
+
+            event(new ModelUpdate($model));
         });
 
-        self::deleting(function ($model) {});
+        self::deleting(function ($model) {
+            event(new ModelDelete($model));
+        });
 
         self::deleted(function ($model) {
             $model->forgotCache();
@@ -164,35 +208,70 @@ class User extends Authenticatable implements BaseModelInterface
 
     public function beforeSave()
     {
-        foreach ($this->getAttributes() as $field => $value) {
-            if (is_null($value)) {
-                continue;
-            }
+        if ($this->custom_errors) {
+            throw new UserException("Some errors in model while saving", UserException::ERROR_USER_DATA_WRONG, [
+                "custom_errors" => $this->custom_errors
+            ]);
+        }
+    }
 
-            if (is_string($value) && strlen($value) > 0) {
-                $this->{$field} = utf8_encode($value);
+    public function afterSave()
+    {
+        $this->forgotCache();
+
+        $this->saveAutoTags();
+
+        foreach (Department::$child_model_class as $child_model_class => $arr) {
+            if (isset($arr['foreignKey'])) {
+                if (!is_array($arr['foreignKey'])) {
+                    $arr['foreignKey'] = [$arr['foreignKey']];
+                }
+
+                foreach ($arr['foreignKey'] as $foreign_field) {
+                    switch ($child_model_class) {
+                        case Task::class:
+                            $this->tasks()->update([
+                                $foreign_field => $this->dept_id
+                            ]);
+                            break;
+                        case RecurringTask::class:
+                            $this->recuringTasks()->update([
+                                $foreign_field => $this->dept_id
+                            ]);
+                            break;
+                    }
+                }
             }
         }
     }
 
-    public function beforeDelete() {}
+    public function beforeDelete()
+    {
+        if ($this->custom_errors) {
+            throw new UserException("Some errors in model while deleting", UserException::ERROR_USER_DATA_WRONG, [
+                "custom_errors" => $this->custom_errors
+            ]);
+        }
+    }
 
     public function afterFind()
     {
         $fileUtility = new FileUtility(static::getStorageDisk());
 
-        foreach ($this->getFileFields() as $field) {
+        foreach (self::getFileFields() as $field) {
             if (isset($this->{$field}) && $this->{$field}) {
                 $field_url_field = $field . "_url";
 
                 $this->{$field_url_field} = $fileUtility->getUrl($this->{$field});
             }
         }
+
+        $this->convertTimeZoneForDisplay();
     }
 
-    public function getFileFields()
+    protected function getFullNameAttribute()
     {
-        return static::$file_fields;
+        return trim($this->person_name . " " . ($this->person_last_name ?? ""));
     }
 
     protected function getDisplayNameAttribute()
@@ -202,21 +281,46 @@ class User extends Authenticatable implements BaseModelInterface
 
     public function getDisplayName()
     {
-        if ($this->type == self::TYPE_EXTERNAL) {
-            return $this->name;
+        $sub_type_list = Type::getCache("sub_type_list");
+
+        if (!$sub_type_list) {
+            $type_conditions = [
+                "type" => Type::getType($this, "sub_type")
+            ];
+
+            $sub_type_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
+
+            $cache_time = 60 * 60 * 24;
+
+            Type::addCache("sub_type_list", $sub_type_list, $cache_time);
         }
 
-        $name = $this->name;
-
         if ($this->type == self::TYPE_EXTERNAL) {
-            $name .= " (External)";
-        } else {
-            if ($this->person_name && strtolower($this->person_name) != strtolower($name)) {
-                $name .= " >> " . $this->person_name;
+
+            $sub_title = " >> External";
+
+            if (isset($sub_type_list[$this->sub_type])) {
+                $sub_title = " >> " . $sub_type_list[$this->sub_type];
             }
-        }
 
-        return $name;
+            return $this->full_name . $sub_title;
+        } else {
+
+            $name = $this->name;
+
+            if ($this->person_name && strtolower($this->person_name) != strtolower($name)) {
+
+                if (strpos($this->person_name, " ") !== false) {
+                    $sub_str = trim(substr($this->person_name, 0, strpos($this->person_name, " ")));
+                } else {
+                    $sub_str = $this->person_name;
+                }
+
+                $name = $sub_str . " >> " . $this->name;
+            }
+
+            return $name;
+        }
     }
 
     public function getFullMobileNo($field = "mobile")
@@ -230,14 +334,9 @@ class User extends Authenticatable implements BaseModelInterface
         return $this->{$field};
     }
 
-    public function userCategory()
+    public function roles()
     {
-        return $this->belongsTo(UserCategory::class);
-    }
-
-    public function country()
-    {
-        return $this->belongsTo(Country::class);
+        return $this->belongsToMany(Role::class, UserRole::class);
     }
 
     public function userRole()
@@ -245,14 +344,60 @@ class User extends Authenticatable implements BaseModelInterface
         return $this->hasMany(UserRole::class, 'user_id');
     }
 
+    public function userCategory()
+    {
+        return $this->belongsTo(DropDownValue::class);
+    }
+
+    public function country()
+    {
+        return $this->belongsTo(Country::class);
+    }
+
+    public function branch()
+    {
+        return $this->belongsTo(Branch::class);
+    }
+
+    public function department()
+    {
+        return $this->belongsTo(Department::class, "dept_id");
+    }
+
+    public function subDepartment()
+    {
+        return $this->belongsTo(SubDepartment::class, "sub_dept_id");
+    }
+
+    public function designation()
+    {
+        return $this->belongsTo(Designation::class, "desg_id");
+    }
+
     public function userAllowIp()
     {
         return $this->hasMany(UserAllowIp::class, 'user_id');
     }
 
-    public function roles()
+    public function tasks()
     {
-        return $this->belongsToMany(Role::class, UserRole::class);
+        return $this->hasMany(Task::class, 'assign_to_user_id');
+    }
+
+    public function recuringTasks()
+    {
+        return $this->hasMany(RecurringTask::class, 'assign_to_user_id');
+    }
+
+    /**
+     * Get the entity's notifications.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
+     */
+    public function notifications(): MorphMany
+    {
+        // Tell Laravel to use your custom Notification model for this relationship
+        return $this->morphMany(Notification::class, 'notifiable')->orderBy('created_at', 'desc'); // Optional: order them
     }
 
     public function getUniqueValidationRules(Request $request)
@@ -270,7 +415,8 @@ class User extends Authenticatable implements BaseModelInterface
 
         $field_rules['mobile'] = [$rule];
 
-        if ($request->get("type") == self::TYPE_INTERNAL) {
+        if ($request->has("name") && $request->get("type") == self::TYPE_INTERNAL)
+        {
             $rule = Rule::unique($this->connection . "." . $this->getTable(), "name")->where("type", self::TYPE_INTERNAL);
             $field_rules["name"] = [$rule];
         }
@@ -287,6 +433,32 @@ class User extends Authenticatable implements BaseModelInterface
         }
 
         return $field_rules;
+    }
+
+    public function getRequiredIfRules(Request $request)
+    {
+        $field_rules = [];
+
+        if ($request->get("type") == self::TYPE_INTERNAL) {
+            $field_rules["name"] = ["required"];
+            $field_rules["user_category_id"] = ["required"];
+            $field_rules["dept_id"] = ["required"];
+            $field_rules["sub_dept_id"] = ["nullable"];
+            $field_rules["desg_id"] = ["required"];
+        } else {
+        }
+
+        return $field_rules;
+    }
+
+    public static function getFileFields()
+    {
+        return static::$file_fields;
+    }
+
+    public static function getUniqueFields()
+    {
+        return static::$unique_fields;
     }
 
     public function isRquireOTPVerificationOnLogin()
@@ -335,90 +507,6 @@ class User extends Authenticatable implements BaseModelInterface
         return false;
     }
 
-    public function getNextId()
-    {
-        $table = $this->getTable();
-        $statement = DB::select("SHOW TABLE STATUS LIKE '" . $table . "'");
-        $nextId = $statement[0]->Auto_increment;
-
-        return $nextId;
-    }
-
-    public function insertOrUpdate(array $data, &$is_insert = null, &$is_update = null)
-    {
-        $model = $this->getUniqueId($data);
-
-        if ($model) {
-            $model->fill($data);
-            if ($model->isDirty()) {
-                if ($model->save()) {
-                    $is_update = true;
-                } else {
-                    $is_update = false;
-                    throw new \Exception("Fail To Save");
-                }
-            }
-        } else {
-            $model = static::create($data);
-
-            if ($model) {
-                $is_insert = true;
-            } else {
-                $is_insert = false;
-                return null;
-            }
-        }
-
-        return $model;
-    }
-
-    public function insertIgnoreIfExist(array $data, &$is_insert = null)
-    {
-        $record = $this->getUniqueId($data);
-
-        if (!$record) {
-            $record = static::create($data);
-
-            if (!$record) {
-                throw new UserException("Fail to save", UserException::ERROR_LARAVEL_FAIL);
-            }
-
-            $is_insert = true;
-        }
-
-        return $record->id;
-    }
-
-    public function getUniqueId(array $data)
-    {
-        if (!static::$unique_fields) {
-            throw_exception("unique_fields is not set yet");
-        }
-
-        $conditions = [];
-        foreach (static::$unique_fields as $unique_field) {
-            if (!isset($data[$unique_field])) {
-                throw_exception("field $unique_field missing in argument array");
-            }
-
-            $conditions[] = [$unique_field, '=', $data[$unique_field]];
-        }
-
-        $count = static::where($conditions)->count();
-
-        if ($count == 0) {
-            return false;
-        }
-
-        if ($count > 1) {
-            throw_exception("more than 1 records found");
-        }
-
-        $record = static::where($conditions)->first(["id"]);
-
-        return $record;
-    }
-
     public function activate()
     {
         $this->is_active = 1;
@@ -439,21 +527,19 @@ class User extends Authenticatable implements BaseModelInterface
 
     public function getClassDisplayName()
     {
-        $class_name = static::classDisplayName();
-
-        return $class_name;
+        return self::classDisplayName();
     }
 
     public static function getCacheKey(): string
     {
-        $str = static::class;
+        $str = "User";
 
         return static::optimizeCacheKey($str);
     }
 
     public static function classDisplayName(): string
     {
-        $class_name = str_class_name_to_human_text(static::class);
+        $class_name = "User";
 
         return $class_name;
     }
@@ -487,6 +573,156 @@ class User extends Authenticatable implements BaseModelInterface
         return $list;
     }
 
+
+    public function getProfileImage($defalut = "img/user.png")
+    {
+        if (isset($this->profile_image_url) && $this->profile_image_url) {
+            return $this->profile_image_url;
+        }
+
+        if ($this->profile_image) {
+            $fileUtility = new FileUtility($this->getStorageDisk());
+            $url = $fileUtility->getUrl($this->profile_image);
+
+            if ($url) {
+                return $url;
+            }
+
+            return "/" . NOT_FOUND_IMAGE_PATH;
+        }
+
+        if ($this->avatar) {
+            return $this->avatar;
+        }
+
+        return $defalut;
+    }
+
+    public static function generateUID()
+    {
+        return Util::getRandomString(10) . time();
+    }
+
+    public function setPassword($plain_password)
+    {
+        $this->plain_password = $plain_password;
+        $this->password = bcrypt($plain_password);
+    }
+
+    public function getFieldLabels()
+    {
+        $labels = [
+            'full_name' => "Full Name"
+        ];
+
+        $table_info = $this->getTableInfo($this->getTable());
+
+        // d($table_info, true);
+
+        $eception_list = [
+            "code",
+            "can_edit",
+            "cannot_edit_reason_array",
+            "can_delete",
+            "cannot_delete_reason_array",
+            "used_in_other_table_created_by",
+            "used_in_other_table_updated_by",
+            "uid",
+            "plain_password",
+            "password",
+            "remember_token",
+            "remember_token",
+        ];
+
+        foreach ($table_info['columns'] as $field => $field_attr) {
+
+            if (!in_array($field, $eception_list)) {
+                $text = str_replace(["_id", "is_"], "", $field);
+
+                $labels[$field] = ucwords(str_function_name_to_human_text($text));
+            }
+        }
+
+        // d($labels, true);
+
+        return $labels;
+    }
+
+    public function getRefDisplayName($field, $value)
+    {
+        $ret_array = [];
+
+        switch ($field) {
+            case "user_category_id":
+                $ret_array = [
+                    $field => $this->userCategory?->getDisplayName()
+                ];
+                break;
+            case "dept_id":
+                $ret_array = [
+                    $field => $this->department?->getDisplayName()
+                ];
+                break;
+            case "sub_dept_id":
+                $ret_array = [
+                    $field => $this->subDepartment?->getDisplayName()
+                ];
+                break;
+            case "desg_id":
+                $ret_array = [
+                    $field => $this->designation?->getDisplayName()
+                ];
+                break;
+            case "country_id":
+                $ret_array = [
+                    $field => $this->country?->getDisplayName()
+                ];
+                break;
+        }
+
+        // dd($ret_array);
+
+        return $ret_array;
+    }
+
+    public static function getCodeList(String $field)
+    {
+        $class_info = get_class_info(static::class);
+
+        switch ($field) {
+            case "sub_type":
+
+                $list = [];
+
+                foreach ($class_info['constants'] as $constant => $label) {
+                    if (strpos($constant, "SUB_TYPE_") !== false) {
+                        $list[] = $label;
+                    }
+                }
+
+                return $list;
+
+                break;
+
+            case "sub_type_for_signup_form":
+
+                $list = [];
+
+                foreach ($class_info['constants'] as $constant => $label) {
+                    if (strpos($constant, "SUB_TYPE_") !== false) {
+                        if (!in_array($constant, [self::SUB_TYPE_TEAM_MEMBER])) {
+                            $list[] = $label;
+                        }
+                    }
+                }
+
+                return $list;
+
+                break;
+        }
+    }
+
+    
     private function _updateUsageJson($json, $table, $label, $counter, $extra = [])
     {
         if (!is_array($json)) {
@@ -529,6 +765,8 @@ class User extends Authenticatable implements BaseModelInterface
 
     public function changeCreatedByUsage(BaseModel $model, $counter)
     {
+        return;
+
         $json = $this->used_in_other_table_created_by;
 
         $this->used_in_other_table_created_by = $this->_updateUsageJson($json, $model->getTable(), $model->getClassDisplayName(), $counter, [
@@ -540,6 +778,8 @@ class User extends Authenticatable implements BaseModelInterface
 
     public function changeCreatedByUsageBulk(array $models)
     {
+        return;
+
         $json = $this->used_in_other_table_created_by;
 
         foreach ($models as $model) {
@@ -555,6 +795,8 @@ class User extends Authenticatable implements BaseModelInterface
 
     public function changeUpdatedByUsage(BaseModel $model, $counter)
     {
+        return;
+
         $json = $this->_parseJsonBeforeUpdateByUsage($model, $this->used_in_other_table_updated_by);
 
         $this->used_in_other_table_updated_by = $this->_updateUsageJson($json, $model->getTable(), $model->getClassDisplayName(), $counter, [
@@ -587,6 +829,8 @@ class User extends Authenticatable implements BaseModelInterface
 
     public function changeUpdatedByUsageBulk(array $models)
     {
+        return;
+
         $json = $this->used_in_other_table_updated_by;
 
         foreach ($models as $model) {
@@ -599,103 +843,5 @@ class User extends Authenticatable implements BaseModelInterface
         }
 
         $this->save();
-    }
-
-    public function getProfileImage($defalut = "img/user.png")
-    {
-        if (isset($this->profile_image_url) && $this->profile_image_url) {
-            return $this->profile_image_url;
-        }
-
-        if ($this->profile_image) {
-            $fileUtility = new FileUtility($this->getStorageDisk());
-            $url = $fileUtility->getUrl($this->profile_image);
-
-            if ($url) {
-                return $url;
-            }
-
-            return "/" . NOT_FOUND_IMAGE_PATH;
-        }
-
-        if ($this->avatar) {
-            return $this->avatar;
-        }
-
-        return $defalut;
-    }
-
-    public static function generateUID()
-    {
-        return Util::getRandomString(10) . time();
-    }
-
-    public function setPassword($plain_password)
-    {
-        $this->plain_password = $plain_password;
-        $this->password = bcrypt($plain_password);
-    }
-
-    public static function getAllRelations(Model $model): array
-    {
-        $class = new ReflectionClass($model);
-        $methods = $class->getMethods();
-
-        $relations = [];
-        foreach ($methods as $method) {
-            if ($method->class != get_class($model) || $method->getNumberOfParameters() > 0) continue;
-
-            try {
-                $relation = $method->invoke($model);
-                if ($relation instanceof \Illuminate\Database\Eloquent\Relations\Relation) {
-                    $relations[$method->getName()] = [
-                        "model" => $method,
-                        "relation" => $relation,
-                    ];
-                }
-            } catch (\Throwable $e) {
-                continue;
-            }
-        }
-
-        return $relations;
-    }
-
-
-    public function getFieldLabels()
-    {
-        $labels = [];
-
-        $table_info = $this->getTableInfo($this->getTable());
-
-        // d($table_info, true);
-
-        $eception_list = [
-            "code",
-            "can_edit",
-            "cannot_edit_reason_array",
-            "can_delete",
-            "cannot_delete_reason_array",
-            "used_in_other_table_created_by",
-            "used_in_other_table_updated_by",
-            "uid",
-            "plain_password",
-            "password",
-            "remember_token",
-            "remember_token",
-        ];
-
-        foreach ($table_info['columns'] as $field => $field_attr) {
-
-            if (!in_array($field, $eception_list)) {
-                $text = str_replace(["_id", "is_"], "", $field);
-
-                $labels[$field] = ucwords(str_function_name_to_human_text($text));
-            }
-        }
-
-        // d($labels, true);
-
-        return $labels;
     }
 }

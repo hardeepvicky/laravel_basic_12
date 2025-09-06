@@ -1,3 +1,9 @@
+<?php
+if (!isset($partial_path))
+{
+    $partial_path = "frontend.partials";
+}
+?>
 <!doctype html>
 <html lang="en">
 
@@ -10,6 +16,7 @@
     <meta name="description" content="{{ $page_description ?? config('app.description') }}" />
     <meta name="description" content="{{ $page_author ?? config('app.author') }}" />
     <meta name="csrf-token" content="{{ csrf_token() }}" />
+    <meta name="user-id" content="{{ auth()->id() }}">
     <!-- App favicon -->
     <link rel="icon" href="{{ get_asset_url('assets/images/favicon.png') }}" type="image/x-icon" />
     <link rel="shortcut icon" href="{{ get_asset_url('assets/images/favicon.png') }}" type="image/x-icon" />
@@ -75,14 +82,7 @@
     <script src="{{ get_asset_url('js/common_funtions.js') }}"></script>
     <script src="{{ get_asset_url('js/common_script_for_all_non_ajax_layout.js') }}"></script>
     <script src="{{ get_asset_url('js/frontend/frontend_non_ajax.js') }}"></script>
-    <script>
-        $(function() {
-            $.loader.init();
-            $.events.lastCallbacks.map(function(cb) {
-                cb();
-            });
-        });
-    </script>
+    <script src="{{ get_asset_url('js/common.js') }}"></script>    
 </body>
 
 </html>

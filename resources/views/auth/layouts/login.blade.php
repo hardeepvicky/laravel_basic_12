@@ -10,52 +10,21 @@
     <meta name="keywords"
         content="admin template, Admiro admin template, best javascript admin, dashboard template, bootstrap admin template, responsive admin template, web app">
     <meta name="author" content="pixelstrap">
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
     <title>
         {{ $page_title ?? config('app.name') }}
     </title>
-    <!-- Favicon icon-->
-    <link rel="icon" href="/assets/images/favicon.png" type="image/x-icon">
-    <link rel="shortcut icon" href="/assets/images/favicon.png" type="image/x-icon">
-    <!-- Google font-->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-    <link
-        href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,200;6..12,300;6..12,400;6..12,500;6..12,600;6..12,700;6..12,800;6..12,900;6..12,1000&amp;display=swap"
-        rel="stylesheet">
-    <!-- Flag icon css -->
-    <link rel="stylesheet" href="/assets/css/vendors/flag-icon.css">
-    <!-- iconly-icon-->
-    <link rel="stylesheet" href="/assets/css/iconly-icon.css">
-    <link rel="stylesheet" href="/assets/css/bulk-style.css">
-    <!-- iconly-icon-->
-    <link rel="stylesheet" href="/assets/css/themify.css">
-    <!--fontawesome-->
-    <link rel="stylesheet" href="/assets/css/fontawesome-min.css">
-    <!-- Whether Icon css-->
-    <link rel="stylesheet" type="text/css" href="/assets/css/vendors/weather-icons/weather-icons.min.css">
-    <!-- App css -->
-    <link rel="stylesheet" href="/assets/css/style.css">
 
-    <link id="color" rel="stylesheet" href="/assets/css/color-1.css" media="screen">
-
-    <link rel="stylesheet" type="text/css" href="/libs/loader/loader.css?<?= CSS_VERSION ?>" />
-    <link rel="stylesheet" type="text/css" href="/libs/style-for-custom-lib.css?<?= CSS_VERSION ?>" />
-    <link rel="stylesheet" type="text/css" href="/css/common.css?<?= CSS_VERSION ?>" />
-    <link rel="stylesheet" type="text/css" href="/css/backend.css?<?= CSS_VERSION ?>" />
-
-    <script src="/assets/js/vendors/jquery/jquery.min.js"></script>
-    <script src="/libs/events.js?<?= JS_VERSION ?>"></script>
+    @include("partials.common_css_links");
+    
+    <link rel="stylesheet" type="text/css" href="/css/backend.css?<?= CSS_VERSION ?>" />    
     <script async src="https://www.google.com/recaptcha/api.js"></script>
 </head>
 
 <body>
     <!-- tap on top starts-->
     <div class="tap-top"><i class="iconly-Arrow-Up icli"></i></div>
-    <!-- tap on tap ends-->
-    <!-- loader-->
-    <div class="loader-wrapper">
-        <div class="loader"><span></span><span></span><span></span><span></span><span></span></div>
-    </div>
+    <!-- tap on tap ends-->    
     <!-- login page start-->
     <div class="container-fluid p-0">
         <div class="row m-0">
@@ -73,31 +42,11 @@
                 </div>
             </div>
         </div>
-        <!-- jquery-->
-        <!-- bootstrap js-->
-        <script src="/assets/js/vendors/bootstrap/dist/js/bootstrap.bundle.min.js" defer=""></script>
-        <script src="/assets/js/vendors/bootstrap/dist/js/popper.min.js" defer=""></script>
-        <!--fontawesome-->
-        <script src="/assets/js/vendors/font-awesome/fontawesome-min.js"></script>
-        <script src="/assets/js/sweetalert/sweetalert2.min.js"></script>
-        <!-- password_show-->
-        <script src="/assets/js/password.js"></script>
-        <!-- custom script -->
-        <script src="/assets/js/script.js"></script>
 
-        <script src="/libs/loader/loader.js?<?= JS_VERSION ?>"></script>
-        <script src="/libs/jquery_extend.js?<?= JS_VERSION ?>"></script>
-        <script src="/js/common_funtions.js?<?= JS_VERSION ?>"></script>
-        <script src="/js/common_script_for_all_non_ajax_layout.js?<?= JS_VERSION ?>"></script>
+        @include("partials.common_script_links");
 
-        <script>
-            $(function() {
-                $.loader.init();
-                $.events.lastCallbacks.map(function(cb) {
-                    cb();
-                });
-            });
-        </script>
+        <script src="{{ get_asset_url('assets/js/password.js') }}"></script>
+        <script src="{{ get_asset_url('js/backend/login_non_ajax.js') }}"></script>
     </div>
 </body>
 

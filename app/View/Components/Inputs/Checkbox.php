@@ -16,6 +16,7 @@ class Checkbox extends Component
         public String $label,        
         public $value = "",
         public $preventCssClassAddToInput = false,
+        public $hiddenField = true
     )
     {
         //

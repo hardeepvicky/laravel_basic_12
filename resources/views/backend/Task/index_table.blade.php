@@ -1,5 +1,7 @@
 <?php
+
 use App\Models\Task;
+$false = false;
 ?>
 <div class="card" id="page-summary">
     <div class="card-header">
@@ -7,127 +9,221 @@ use App\Models\Task;
     </div>
 
     <div class="card-body p-1">
+        <div class="m-2">
+            <a href="{{ route($routePrefix . ".export.csv") }}" class="btn btn-secondary">Export CSV</a>
+        </div>
+
         <div class="table-responsive">
-            <table class="table table-bordered summary-table">
+            <table class="table table-bordered summary-table summary_table_with_search">
                 <thead>
+                    <tr>
+                        <th style="width:15%">
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <span class="btn btn-light btn-sm text-dark border-primary clear_search_conditions mb-1">Clear</span>
+                                </div>
+                                <div class="col-sm-8">                                    
+                                    <?php
+                                    $field = "assign_to_user_id";
+                                    ?>
+                                    <x-Inputs.drop-down :name="$field" :label="$false" :value="$search[$field]" :list="$user_list" pleaseSelect="All" class="select2 form-select-sm" />
+                                </div>
+                            </div>
+                        </th>
+                        <th style="width:10%">
+                            <?php
+                            $field = "name";
+                            ?>
+                            <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]" class="form-control-sm" />
+                        </th>
+                        <th style="width:10%">
+                            <?php
+                            $field = "dept_id";
+                            ?>
+                            <x-Inputs.drop-down :name="$field" :label="$false" :value="$search[$field]" :list="$department_list" pleaseSelect="All" class="select2 form-select-sm" />
+                        </th>
+                        <th style="width:10%">
+                            <?php
+                            $field = "priority";
+                            ?>
+                            <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]" class="form-control-sm" />
+                        </th>
+                        <th style="width:10%">
+                            <?php
+                            $field = "status";
+                            ?>
+                            <x-Inputs.drop-down :name="$field" :label="$false" :value="$search[$field]" :list="$status_list" pleaseSelect="All" class="select2 form-select-sm" />
+                        </th>
+                    </tr>
                     <tr class="border-bottom-primary">
-                        <th><?= sortable_anchor('id', get_value_from_list($field_labels, 'id', 'id')) ?></th>
-                        <th><?= sortable_anchor('name', get_value_from_list($field_labels, 'name', 'name')) ?></th>
-                        <th><?= sortable_anchor('description', get_value_from_list($field_labels, 'description', 'description')) ?>
-                        </th>
-                        <th><?= sortable_anchor('type', get_value_from_list($field_labels, 'type', 'type')) ?></th>
-                        <th>Assign To</th>
-                        <th><?= sortable_anchor('priority', get_value_from_list($field_labels, 'priority', 'priority')) ?>
-                        </th>
-                        <th>Task Info</th>
                         <th>
-                            <?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?>
-                            |
-                            <?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?>
+                            <?= sortable_anchor('id', get_value_from_list($field_labels, 'id', 'id')) ?>
+                            | <?= sortable_anchor('assignToUser.name', get_value_from_list($field_labels, 'assign_to_user_id', 'assign_to_user_id')) ?>
                         </th>
-                        <th>Actions</th>
+                        <th><?= sortable_anchor('name', get_value_from_list($field_labels, 'name', 'name')) ?></th>
+                        <th><?= sortable_anchor('department.name', get_value_from_list($field_labels, 'dept_id', 'dept_id')) ?>
+                        <th><?= sortable_anchor('priority', get_value_from_list($field_labels, 'priority', 'priority')) ?> </th>
+                        <th><?= sortable_anchor('status', get_value_from_list($field_labels, 'status', 'status')) ?> </th>
+                        <th style="width:8%">Time & Duration</th>
+                        <th style="width:10%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
+                        <th style="width:10%"><?= sortable_anchor('created_by', get_value_from_list($field_labels, 'created_by', 'created_by')) ?></th>
+                        <th style="width:10%"><?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?></th>
+                        <th style="width:10%"><?= sortable_anchor('updated_by', get_value_from_list($field_labels, 'updated_by', 'updated_by')) ?></th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach ($records as $record)
-                        <tr>
-                            <th scope="row">{{ $record->id }}</th>
-                            <td>{{ $record->name }}</td>
-                            <td>{{ $record->description }}</td>
-                            <td>{{ get_value_from_list($type_list, $record->type) }}</td>
-                            <td>{{ $record->assignToUser?->getDisplayName() }}</td>
-                            <td>{{ $record->priority }}</td>
-                            <td>
-                                <div class="row" id="record-info-{{ $record->id }}">
-                                    <div class="col-sm-12">
+                    <?php
+                        $first_col_info = [
+                            $record->id . " | " . $record->assignToUser?->getDisplayName()
+                        ];
+                    ?>
+                    <tr>
+                        <th scope="row">
+                            <x-Backend.celec-summary-table-first-column :record="$record" :routePrefix="$routePrefix" buttons="history,edit,delete,tr_details" :labelInfo="$first_col_info"/>
+                        </th>
+                        <td>{{ $record->name }}</td>
+                        <td>{{ $record->department?->getDisplayName() }}</td>
+                        <td>{{ $record->priority }}</td>
+                        <td>{{ get_value_from_list($status_list, $record->status) }}</td>
+                        <td>
+                            <x-Backend.celec-date-time :value="$record->start_date_time"/>
+                            <label class="info">
+                                {{ get_value_from_list($field_labels, 'duration', 'duration') }} :
+                                <span>{{ $record->duration }} {{ get_value_from_list($duration_type_list, $record->duration_type) }}</span>
+                            </label>
+                        </td>
+                        <td>
+                            <x-Backend.celec-date-time :value="$record->created_at" />
+                        </td>
+                        <td>
+                            {{ get_value_from_list($userListCache, $record->created_by) }}
+                        </td>
+                        <td>
+                            <x-Backend.celec-date-time :value="$record->updated_at" :userId="$record->updated_by" />
+                        </td>
+                        <td>
+                            {{ get_value_from_list($userListCache, $record->updated_by) }}
+                        </td>
+                        
+                    </tr>
+                    <tr id="record-{{ $record->id }}" class="hidden">
+                        <td style="background-color: var(--body--bs-body-bg)"></td>
+                        <td colspan="8">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <label class="info">
+                                        {{ get_value_from_list($field_labels, 'description', 'description') }}
+                                        :
+                                        <span>{!! $record->description !!}</span>
+                                    </label>
+
+                                    <label class="info">
+                                        {{ get_value_from_list($field_labels, 'tag_name', 'tag_name') }}
+                                        :
+                                        <span>
+                                            {{ implode(", ", $record->tags->pluck("name")->toArray()) }}
+                                        </span>
+                                    </label>
+
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <h5>
+                                                {{ get_value_from_list($field_labels, 'taskUser', 'Link Users') }}
+                                            </h5>
+                                            <ol>
+                                                @foreach ($record->user as $user)
+                                                <li>{{ $user->getDisplayName() }}</li>
+                                                @endforeach
+                                            </ol>
+
+                                            <label class="info">
+                                                {{ get_value_from_list($field_labels, 'is_send_notification', 'is_send_notification') }}
+                                                :
+                                                <span>
+                                                    {{ get_value_from_list($yes_no_list, $record->is_send_notification) }}
+                                                </span>
+                                            </label>
+
+                                        </div>
+                                        <div class="col-md-2">
+                                            <h5>
+                                                {{ get_value_from_list($field_labels, 'taskLead') }}
+                                            </h5>
+                                            <ol>
+                                                @foreach ($record->lead as $lead)
+                                                <li>{{ $lead->getDisplayName() }}</li>
+                                                @endforeach
+                                            </ol>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <h5>
+                                                {{ get_value_from_list($field_labels, 'taskCustomer') }}
+                                            </h5>
+                                            <ol>
+                                                @foreach ($record->customer as $customer)
+                                                <li>{{ $customer->getDisplayName() }}</li>
+                                                @endforeach
+                                            </ol>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <h5>
+                                                {{ get_value_from_list($field_labels, 'taskDealer') }}
+                                            </h5>
+                                            <ol>
+                                                @foreach ($record->dealer as $dealer)
+                                                <li>{{ $dealer->getDisplayName() }}</li>
+                                                @endforeach
+                                            </ol>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <h5>
+                                                {{ get_value_from_list($field_labels, 'taskParty') }}
+                                            </h5>
+                                            <ol>
+                                                @foreach ($record->party as $party)
+                                                <li>{{ $party->getDisplayName() }}</li>
+                                                @endforeach
+                                            </ol>
+                                        </div>
+                                    </div>
+
+                                    @if($record->is_completed)
+                                        <x-Backend.celec-date-time :value="$record->complete_date_time"
+                                            label="Completed"
+                                            by="{{ get_value_from_list($userListCache, $record->complete_by) }}"
+                                        />
+                                    @endif
+
+                                    @if($record->is_verified)
+                                        <x-Backend.celec-date-time :value="$record->verified_date_time"
+                                            label="Verified"
+                                            by="{{ get_value_from_list($userListCache, $record->verified_by) }}"
+                                        />
+
                                         <label class="info">
-                                            {{ get_value_from_list($field_labels, 'status', 'status') }} :
-                                            <span>{{ get_value_from_list($status_list, $record->status) }}</span>
+                                            {{ get_value_from_list($field_labels, 'rating', 'rating') }}
+                                            :
+                                            <span>
+                                                {{ $record->rating }}
+                                            </span>
                                         </label>
 
-                                        @if ($record->type == Task::TYPE_ONE_TIME)
-                                            <label class="info">
-                                                {{ get_value_from_list($field_labels, 'one_time_type', 'one_time_type') }}
-                                                :
-                                                <span>{{ get_value_from_list($one_time_type_list, $record->one_time_type) }}</span>
-                                            </label>
-                                            <label class="info">
-                                                {{ get_value_from_list($field_labels, 'complete_time_in_days', 'complete_time_in_days') }} :
-                                                <span>{{ get_value_from_list($complete_in_days_list, $record->complete_time_in_days) }}</span>
-                                            </label>
-                                            <label class="info">
-                                                {{ get_value_from_list($field_labels, 'start_date_time', 'start_date_time') }}
-                                                :
-                                                <span>{{ if_date($record->start_date_time) }}</span>
-                                            </label>
-                                            <label class="info">
-                                                {{ get_value_from_list($field_labels, 'end_date_time', 'end_date_time') }}
-                                                :
-                                                <span>{{ if_date($record->end_date_time) }}</span>
-                                            </label>
-                                        @endif
+                                        <label class="info">
+                                            {{ get_value_from_list($field_labels, 'review_remarks', 'review_remarks') }}
+                                            :
+                                            <span>
+                                                {{ $record->review_remarks }}
+                                            </span>
+                                        </label>
+                                    @endif
 
-                                        @if ($record->type == Task::TYPE_RECURRING)
-                                            <label class="info">
-                                                {{ get_value_from_list($field_labels, 'recurring_type', 'recurring_type') }}
-                                                :
-                                                <span>{{ get_value_from_list($recurring_type_list, $record->recurring_type) }}</span>
-                                            </label>
-                                            <label class="info">
-                                                {{ get_value_from_list($field_labels, 'complete_time_in_days', 'complete_time_in_days') }} :
-                                                <span>{{ get_value_from_list($complete_in_days_list, $record->complete_time_in_days) }}</span>
-                                            </label>
-                                        @endif
-                                    </div>
+
+                                    <x-Backend.document-files :records="$record->documentFile" />
                                 </div>
-                            </td>
-                            <td>
-                                <x-Backend.index-table-info :record="$record" :userList="$userListCache" />
-                            </td>
-                            <td>
-                                <x-Backend.summary-comman-actions :id="$record->id" :routePrefix="$routePrefix" />
-                                <span class="btn btn-info btn-sm css-toggler mt-1 mb-1"
-                                    data-sr-css-class-toggle-target="#record-{{ $record->id }}"
-                                    data-sr-css-class-toggle-class="hidden" data-sr-css-class-toggle-applied-text="Show"
-                                    data-sr-css-class-toggle-not-applied-text="Hide">
-                                    Show
-                                </span>
-                            </td>
-                        </tr>
-                        <tr id="record-{{ $record->id }}" class="hidden">
-                            <td></td>
-                            <td colspan="7">
-                                <div class="row">
-                                    <div class="col-md-6 col-lg-4">
-                                        @if ($record->recurring_type == Task::RECURRING_CUSTOM)
-                                            <div class="card">
-                                                <div class="card-header border-l-primary card-no-border">
-                                                    <h3>Recurring Custom Dates</h3>
-                                                </div>
-                                                <div class="card-body">
-                                                    <table class="table table-sm summary-table table-bordered">
-                                                        <thead>
-                                                            <tr>
-                                                                <th>Sr. No.</th>
-                                                                <th>Date</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            @foreach ($record->taskRecurringDate as $i => $taskRecurringDate)
-                                                                <tr>
-                                                                    <td>{{ $i + 1 }}</td>
-                                                                    <td>{{ if_date($taskRecurringDate->date) }}</td>
-                                                                </tr>
-                                                            @endforeach
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
-                                        @endif
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
+                            </div>
+                        </td>
+                    </tr>
                     @endforeach
                 </tbody>
             </table>

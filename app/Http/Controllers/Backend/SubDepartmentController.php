@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Backend;
 use App\Exceptions\UserException;
 use App\Helpers\LaravelExtend;
 use App\Models\Department;
+use App\Models\FieldSetting;
 use App\Models\SubDepartment;
 use Illuminate\Http\Request;
 use Exception;
@@ -40,8 +41,10 @@ class SubDepartmentController extends BackendController
         $cache_key = $cache_key_prefix . "-index";
 
         $conditions = $this->getConditions($cache_key, [
+            ["field" => "id", "type" => "int", "cache" => false],
             ["field" => "department_id", "type" => "int"],
             ["field" => "name", "type" => "string"],
+            ["field" => "short_name", "type" => "string"],
             ["field" => "is_active", "type" => "int"],
         ]);
 
@@ -57,8 +60,8 @@ class SubDepartmentController extends BackendController
             $clear_cache = request('is_sort_clear', false);
 
             $sort_params = $this->getRequestData($cache_key_for_sort, [
-                ["key" => "sort_by", "default" => "id"],
-                ["key" => "sort_dir", "default" => "DESC"],
+                ["key" => "sort_by", "default" => "list_display_order"],
+                ["key" => "sort_dir", "default" => "ASC"],
             ], $clear_cache);
 
             $builder->orderBy($sort_params['sort_by'], $sort_params['sort_dir']);
@@ -81,7 +84,7 @@ class SubDepartmentController extends BackendController
 
         $dept_list = Department::getList("id", "display_name", $dept_conditions, "list_display_order");
 
-        $field_labels = $this->model->getFieldLabels();
+        $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
         $this->setForView(compact("field_labels", "dept_list"));
 
@@ -109,6 +112,7 @@ class SubDepartmentController extends BackendController
         return [
             "department_id" => ["required"],
             "name" => ["required"],       
+            "short_name" => ["required"],       
             "list_display_order" => "",     
             "is_active" => "",
         ];
@@ -150,17 +154,13 @@ class SubDepartmentController extends BackendController
 
             DB::commit();
 
-            $this->saveSqlLog();
-
             return $this->afterSave($this->model);
         } catch (Exception $ex) {
             DB::rollBack();
 
             $this->saveSqlLog();
 
-            $this->custom_errors = array_merge_recursive($this->custom_errors, $this->model->custom_errors);
-
-            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", $this->custom_errors);
+            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", LaravelExtend::$errors);
         }
     }
 
@@ -211,17 +211,13 @@ class SubDepartmentController extends BackendController
 
             DB::commit();
 
-            $this->saveSqlLog();
-
             return $this->afterSave($this->model);
         } catch (Exception $ex) {
             DB::rollBack();
 
             $this->saveSqlLog();
 
-            $this->custom_errors = array_merge_recursive($this->custom_errors, $this->model->custom_errors);
-
-            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", $this->custom_errors);
+            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", LaravelExtend::$errors);
         }
     }
 

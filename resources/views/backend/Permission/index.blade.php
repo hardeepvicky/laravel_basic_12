@@ -11,11 +11,21 @@
         <div class="card-body new-btn-showcase">
             <x-Form.start action="{{ route($routePrefix . '.index') }}" class="form-get-encode-before-submit" />
             <div class="row mb-4">
-                <div class="col-md-6">
-                    <x-Inputs.drop-down name="section_list_key" label="Sections" :list="$section_list" :value="$search['section_list_key']"
-                        class="select2" />
+                <div class="col-md-6 col-lg-4 col-xxxl-3 mb-2">
+                    <label class="form-label">
+                        Sections
+                    </label>
+                    <select name="section_list_key" class="form-select select2">
+                        <option value="">Please Select</option>
+                        @foreach ($section_list as $t => $k)
+                            @php
+                                $attr = $t == $search['section_list_key'] ? 'selected="selected"' : '';
+                            @endphp
+                            <option value="{{ $t }}" {!! $attr !!}>{{ $t }}</option>
+                        @endforeach
+                    </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-4 col-lg-3 col-xxxl-2 mb-2">
                     <x-Inputs.drop-down name="role_id" label="Roles" :list="$role_list" :value="$search['role_id']" class="select2" />
                 </div>
             </div>
@@ -49,11 +59,13 @@
                             <tr>
                                 <td class="text-center">{{ $i + 1 }}</td>
                                 <td>{{ $record['section'] }}</td>
-                                <td>{{ $record['role']['name'] }}</td>
-                                <td>{{ implode(', ', $record['routes']) }}</td>
+                                <td>{{ $record['role'] }}</td>
+                                <td>                                    
+                                    {!! implode("<br/>", $record['route_list']) !!}
+                                </td>
                                 <td>
                                     @if ($record['can_be_delete'])
-                                        <button class="btn btn-danger delete-btn" data-id="{{ $record['id'] }}">
+                                        <button class="btn btn-danger delete-btn" data-id="{{ implode(",", array_keys($record['route_list'])) }}">
                                             <i class="<?= ICON_SUMMARY_DELETE ?>"></i>
                                         </button>
                                         <div class="spinner-border text-primary m-1"

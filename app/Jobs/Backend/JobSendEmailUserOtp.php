@@ -2,18 +2,23 @@
 
 namespace App\Jobs\Backend;
 
+use App\Exceptions\UserException;
 use App\Helpers\EmailHelper;
+use App\Helpers\LaravelExtend;
+use App\Models\EmailTemplate;
 use App\Models\Setting;
+use App\Models\User;
 use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 
-class JobSendEmailUserOtp implements ShouldQueue
+class JobSendEmailUserOtp
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable, InteractsWithQueue, SerializesModels;
 
 
     /**
@@ -21,7 +26,7 @@ class JobSendEmailUserOtp implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(public String $name, public String $email, public String $otp, public String $verify_screen_link) {}
+    public function __construct(public User $user, public String $link) {}
 
     /**
      * Execute the job.
@@ -30,39 +35,40 @@ class JobSendEmailUserOtp implements ShouldQueue
      */
     public function handle()
     {
+        $template = EmailTemplate::where("name", "otp")->first();
+
+        if (!$template)
+        {
+            throw new UserException("Email Template not found : otp", UserException::ERROR_USER_DATA_WRONG);
+        }
+
+        if (!$template->is_active)
+        {
+            return;
+        }
+
         $emaiHelper = new EmailHelper();
 
-        $emaiHelper->setType(laravel_constant("msg_type.otp"));
+        $emaiHelper->setType($template->name);
 
-        $emaiHelper->setTo($this->email, $this->name);
+        $emaiHelper->addTo($this->user->email, $this->user->full_name, $this->user->id);
 
-        $company_name = Setting::getValue("company_name");
+        $ret = $template->getBodyAndSubject([
+            "link" => $this->link
+        ], $this->user);
 
-        if (!$company_name) {
-            throw new Exception("Setting : Company Name is not set yet");
+        $emaiHelper->setSubject($ret['subject']);
+
+        $emaiHelper->setBody($ret['body']);
+
+        $result = $emaiHelper->setSandbox(false)->send();
+
+        if ($result['fail'] > 0 || !empty($result['errors']))
+        {
+            $msg = "Total : " . $result['total'];
+            $msg = ", Success : " . $result['success'];
+            $msg .= ", Fail : " . $result['fail'];
+            Log::error($msg, $result['errors']);
         }
-
-        $company_email = Setting::getValue("company_email");
-
-        if (!$company_email) {
-            throw new Exception("Setting : Company Email is not set yet");
-        }
-
-        $emaiHelper->setSubject("Login OTP");
-
-        $html = view("mail.backend.login", [
-            "company_name" => $company_name,
-            "company_email" => $company_email,
-            "name" => $this->name,
-            "otp" => $this->otp,
-            "verify_link" => $this->verify_screen_link
-        ]);
-
-        // echo $html;
-        // exit;
-
-        $emaiHelper->setBody((string) $html);
-
-        $emaiHelper->send();
     }
 }

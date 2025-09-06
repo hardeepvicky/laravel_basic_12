@@ -7,10 +7,21 @@ use Illuminate\Validation\Rules\Unique;
 
 class Country extends BaseModel
 {
-    public array $child_model_class = [];
-
     protected $appends = [
         'display_name',
+    ];
+
+    protected static array $list_fields = ["id", "name", "short_name"];
+
+    public static array $child_model_class = [
+        State::class => [
+            "foreignKey" => ["country_id"],
+            "preventDelete" => true
+        ], 
+        DispatchOrder::class => [
+            "foreignKey" => ["country_id"],
+            "preventDelete" => true
+        ],        
     ];
 
     public function getUniqueValidationRules()
@@ -41,6 +52,16 @@ class Country extends BaseModel
     public function getDisplayName()
     {
         return $this->name . " (" . $this->short_name . ")";
+    }
+
+    public function getShortName()
+    {
+        if ($this->short_name)
+        {
+            return $this->short_name;
+        }
+        
+        return $this->name;
     }
 
     public static function getMyCountry()

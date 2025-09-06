@@ -12,20 +12,37 @@ class Department extends BaseModel
         'display_name',
     ];
 
-    public array $child_model_class = [
+    protected static array $unique_fields = ["name"];
+
+    protected static array $list_fields = ["id", "name", "short_name"];
+
+    public static array $child_model_class = [
         // Employee::class => [
         //     "foreignKey" => "department_id",
         //     "preventDelete" => true
         // ],
-        // User::class => [
-        //     "foreignKey" => "department_id",
-        //     "preventDelete" => true
-        // ],
+        User::class => [
+            "foreignKey" => "dept_id",
+            "preventDelete" => true
+        ],
         SubDepartment::class => [
             "foreignKey" => "department_id",
             "preventDelete" => true
         ],
+        Task::class => [
+            "foreignKey" => "dept_id",
+            "preventDelete" => true,
+        ],
+        RecurringTask::class => [
+            "foreignKey" => "dept_id",
+            "preventDelete" => true,
+        ],
     ];
+
+    public function headUser()
+    {
+        return $this->belongsTo(User::class, "dept_head_user_id");
+    }
 
     protected function getDisplayNameAttribute()
     {
@@ -34,7 +51,7 @@ class Department extends BaseModel
 
     public function getDisplayName()
     {
-        return $this->name;
+        return $this->short_name;
     }
 
     public function getUniqueValidationRules(Request $request)

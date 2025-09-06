@@ -2,26 +2,30 @@
 
 namespace App\Jobs\Backend;
 
+use App\Exceptions\UserException;
 use App\Helpers\EmailHelper;
+use App\Helpers\LaravelExtend;
+use App\Helpers\WhatsappHelper;
 use App\Models\Setting;
+use App\Models\WhatsappTemplate;
 use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 
-class JobSendEmailUserOtp implements ShouldQueue
+class JobSendWhatappUserOtp
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-
+    use Dispatchable, InteractsWithQueue, SerializesModels;
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct(public String $name, public String $mobile, public String $otp) {}
+    public function __construct(public String $name, public String $mobile, public String $country_code, public String $otp, public $user_id = null) {}
 
     /**
      * Execute the job.
@@ -30,39 +34,35 @@ class JobSendEmailUserOtp implements ShouldQueue
      */
     public function handle()
     {
-        $emaiHelper = new EmailHelper();
-
-        $emaiHelper->setType(laravel_constant("msg_type.otp"));
-
-        $emaiHelper->setTo($this->email, $this->name);
-
-        $company_name = Setting::getValue("company_name");
-
-        if (!$company_name) {
-            throw new Exception("Setting : Company Name is not set yet");
+        $template = WhatsappTemplate::where("name", WhatsappTemplate::TEMPLATE_OTP)->first();
+        if (!$template)
+        {
+            throw new UserException("Template not found : " . WhatsappTemplate::TEMPLATE_OTP, UserException::ERROR_USER_DATA_WRONG);
         }
 
-        $company_email = Setting::getValue("company_email");
-
-        if (!$company_email) {
-            throw new Exception("Setting : Company Email is not set yet");
+        if (!$template->is_active)
+        {
+            return;
         }
 
-        $emaiHelper->setSubject("Login OTP");
+        $whatsappHelper = new WhatsappHelper();
+        $whatsappHelper->setTemplate($template->template_name, $template->language)
+            ->setBodyValues([$this->otp])
+            ->setButtonValues(["1" => [$this->otp]])
+            ->setCountryCode("+" . $this->country_code)
+            ->setTo($this->mobile, $this->name, $this->user_id)
+        ;
 
-        $html = view("mail.backend.login", [
-            "company_name" => $company_name,
-            "company_email" => $company_email,
-            "name" => $this->name,
-            "otp" => $this->otp,
-            "verify_link" => $this->verify_screen_link
-        ]);
+        $result = $whatsappHelper->setSandbox(false)->send();
 
-        // echo $html;
-        // exit;
+        if ($result['fail'] > 0 || !empty($result['errors']))
+        {
+            $msg = "Total : " . $result['total'];
+            $msg = ", Success : " . $result['success'];
+            $msg .= ", Fail : " . $result['fail'];
+            Log::error($msg, $result['errors']);
+        }
 
-        $emaiHelper->setBody((string) $html);
-
-        $emaiHelper->send();
+        return $result;
     }
 }

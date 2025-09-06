@@ -3,11 +3,12 @@
 namespace App\Console\Commands;
 
 use App\Helpers\ConsoleOutput;
+use App\Helpers\DateUtility;
 use App\Helpers\MyCommand;
-use App\Models\AutomateTask;
-use App\Models\CommandLog;
+use App\Models\RecurringTask;
+use App\Models\SqlLog;
 use App\Models\Task;
-use Carbon\Carbon;
+use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
@@ -42,58 +43,89 @@ class TaskCommand extends MyCommand
         $logModel->save();
 
         try {
-            $counts = [
-                'task_created' => 0,
-                "task_status_change_to_assigned" => 0,
+            $counters = [
+                "found" => 0,
+                "insert" => 0,
+                "update" => 0,
+                "delete" => 0,
             ];
 
+            $main_counts = [
+                "recurring_task" => $counters,
+                "task" => $counters,
+            ];
+
+            $main_counts['task']['status_change'] = 0;
+
+            $now = DateUtility::getDate(null, DateUtility::DATETIME_FORMAT);
+            $last_one_hour = DateUtility::change($now, -1, DateUtility::HOURS, DateUtility::DATETIME_FORMAT);
             
-            $records = Task::where("type", TASK::TYPE_RECURRING)
-                ->where("status", Task::STATUS_CREATED)
-                ->get();
-
-            if ($records && $records->count() > 0)
-            {
-                foreach($records as $record)
-                {
-                    $counts['task_created'] += Task::createRecurringTask($record);
-                }
-            }
-
-            $records = Task::where("type", TASK::TYPE_ONE_TIME)
-                ->where("status", Task::STATUS_CREATED)
-                ->whereDate("start_date_time", "<=", Carbon::today())
-                ->get();
-
-            if ($records && $records->count() > 0)
-            {
-                foreach($records as $record)
-                {
-                    $record->changeStatus(Task::STATUS_ASSIGNED);
-                    $counts['task_status_change_to_assigned']++;
-                }
-            }
-
-
-            $this->logUpdate([
-                "counts" => $counts
+            $qb = RecurringTask::where("is_draft", 0)->where("is_active", 1)->where("start_date_time", ">=", $last_one_hour)
+            ->with([
+                "recurringTaskDate", "tags", "recurringTaskUser", "recurringTaskFile"
             ]);
+            
+            
+            SqlLog::addSelectQuery($qb);
+            
+            $records = $qb->get();
+
+            $main_counts['recurring_task']['found'] += $records->count();
+
+            if ($records && $records->count() > 0)
+            {
+                foreach($records as $record)
+                {
+                    $main_counts['task']['insert'] += RecurringTask::createTask($record);
+                }
+            }
+
+            $qb = Task::where("status", Task::STATUS_CREATED)
+                ->where("start_date_time", "<=", $now);
+
+            SqlLog::addSelectQuery($qb);
+
+            $records = $qb->get();
+
+            $main_counts['task']['found'] += $records->count();
+
+            if ($records && $records->count() > 0)
+            {
+                foreach($records as $record)
+                {
+                    if ($record->changeStatus(Task::STATUS_ASSIGNED))
+                    {
+                        $main_counts['task']['status_change']++;
+                    }
+                }
+            }
 
             $output = new ConsoleOutput();
 
-            $counts = array_human_keys($counts);
+            $counts = array_human_keys($main_counts);
 
             $output->addLog($counts);
 
             $output->writeLogToConsole();
 
+            $this->output_lines = $output->output_lines;
+
+            $this->logUpdate([
+                "counts" => $counts
+            ]);
+
             $msg = $this->description . " : Completed successfully!";
-            $this->info($msg); // Output to console
-            Log::info($msg);
+            $this->info($msg);
 
         } catch (\Exception $e) {
-            $msg = "Command Error : " . $this->description . " : " . $e->getMessage();
-            $this->error($msg); // Output to console
+            $msg = $e->getMessage();
+
+            $this->logUpdate([
+                "error" => $msg
+            ]);
+
+            $this->error($msg);
+            
             Log::error($msg, ['exception' => $e]);
         }
 

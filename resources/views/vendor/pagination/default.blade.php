@@ -7,7 +7,7 @@
         </li>
         @else
         <li class="page-item">
-            <a class="page-link" href="{{ \Request::url() }}" rel="prev">First</a>
+            <a class="page-link" href="{{ get_current_path_url(['page' => 1 ]) }}" rel="prev">First</a>
         </li>
         <li class="page-item">
             <a class="page-link" href="{{ $paginator->previousPageUrl() }}" rel="prev"
