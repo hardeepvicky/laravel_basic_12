@@ -26,7 +26,7 @@ return new class extends MyMigration
     {
         $this->dropColumnsWithIndex("exp_leads", [
             "action_type",
-            "last_followup_date_time",
+            "next_followup_date_time",
             "last_followup_date_time",
         ]);
     }

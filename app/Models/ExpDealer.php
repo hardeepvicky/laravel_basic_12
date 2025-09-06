@@ -69,7 +69,7 @@ class ExpDealer extends BaseModel
 
     public function afterSave()
     {
-        Contact::createContact("exp-dealer", $this->id);
+        Contact::createContact("dealer", $this->id);
 
         return parent::afterSave();
     }

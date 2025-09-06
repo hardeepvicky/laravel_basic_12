@@ -130,7 +130,7 @@ use App\Helpers\DateUtility;
                     <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body" style="height: 80vh; overflow-y:scroll">
-                    <x-form.start action="{{ route('export-lead.history_store', [$record->lead_id ?? $record->id]) }}" method="POST" />
+                    <x-form.start action="{{ route('export-lead.history_store', [$record->exp_lead_id ?? $record->id]) }}" method="POST" />
                         <x-Inputs.text-field type="hidden" name="entry_by" :label="$false" value="MANUAL" />
                         <x-Inputs.text-field type="hidden" name="action_type" :label="$false" value="" class="action_type" />
                         <div class="form-group mb-3">
@@ -197,7 +197,7 @@ use App\Helpers\DateUtility;
                     <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body" style="height: 40vh; overflow-y:scroll">
-                    <x-form.start action="{{ route('export-lead.transfer_lead', [$record->lead_id ?? $record->id]) }}" method="POST" />
+                    <x-form.start action="{{ route('export-lead.transfer_lead', [$record->exp_lead_id ?? $record->id]) }}" method="POST" />
                         <x-Inputs.text-field type="hidden" name="entry_by" :label="$false" value="MANUAL" />
                         <x-Inputs.text-field type="hidden" name="action_type" :label="$false" value="{{ LeadHistory::ACTION_TYPE_LEAD_TRANSFER }}" />
                         <div class="form-group mb-3">
@@ -257,7 +257,7 @@ use App\Helpers\DateUtility;
                     <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body" style="height: 80vh; overflow-y:scroll">
-                    <x-form.start action="{{ route('export-lead.dispatch', [$record->lead_id ?? $record->id]) }}" method="POST" />
+                    <x-form.start action="{{ route('export-lead.dispatch', [$record->exp_lead_id ?? $record->id]) }}" method="POST" />
                         <x-Inputs.text-field type="hidden" name="entry_by" :label="$false" value="MANUAL" />
                         <x-Inputs.text-field type="hidden" name="action_type" :label="$false" value="{{ LeadHistory::ACTION_TYPE_DISPATCH }}" />
                         <div class="row">

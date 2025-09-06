@@ -145,12 +145,12 @@ class ExportLeadController extends BackendController
             $this->model = new $this->modelClass();
         }
 
-        $exp_lead = new Lead();
+        $lead = new Lead();
 
         $address_type_list = ExpLeadAddress::getTypeList();
 
         $type_conditions = [
-            'type' => Type::getType($exp_lead, "source_type")
+            'type' => Type::getType($lead, "source_type")
         ];
 
         if ($this->model->source_type)
@@ -161,7 +161,7 @@ class ExportLeadController extends BackendController
         $source_type_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
 
         $type_conditions = [
-            'type' => Type::getType($exp_lead, "deal_type")
+            'type' => Type::getType($lead, "deal_type")
         ];
 
         if ($this->model->deal_type)
@@ -172,7 +172,7 @@ class ExportLeadController extends BackendController
         $deal_type_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
 
         $type_conditions = [
-            'type' => Type::getType($exp_lead, "status_type")
+            'type' => Type::getType($lead, "status_type")
         ];
 
         if ($this->model->status_type)
@@ -183,7 +183,7 @@ class ExportLeadController extends BackendController
         $status_type_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
 
         $type_conditions = [
-            'type' => Type::getType($exp_lead, "payment_method_type")
+            'type' => Type::getType($lead, "payment_method_type")
         ];
 
         if ($this->model->payment_method_type)

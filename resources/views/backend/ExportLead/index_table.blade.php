@@ -55,7 +55,7 @@
                             $field = 'state_id';
                             ?>
                             <x-Inputs.drop-down :id="$field" :name="$field" :label="$false"
-                                :value="$search[$field]" :list="$state_list" :value="$search[$field]" pleaseSelect="All" class="select2 form-select-sm" />
+                                :value="$search[$field]" :list="$state_list" :value="$search[$field]" pleaseSelect="All" class="select2 form-select-sm mb-2" />
                         
                             <?php
                             $field = 'city_id';
@@ -151,7 +151,7 @@
                             <td>{{ get_value_from_list($status_type_list, $record->status_type) }}</td>
                             <td>{{ get_value_from_list($lead_history_response_list, $record->response_type_id) }}</td>
                             <td>
-                                {{ $record->country?->getShortName() }}
+                                {{ $record->country?->emoji }} {{ $record->country?->getShortName() }}
                             </td>
                             <td>
                                 {{ $record->state?->getDisplayName() }}

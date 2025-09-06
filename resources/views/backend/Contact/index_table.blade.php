@@ -4,17 +4,11 @@
         <thead>
             <tr>
                 <th style="width:12%">
-                    <div class="row">
-                        <div class="col-sm-4">
-                            <span class="btn btn-light btn-sm text-dark border-primary clear_search_conditions mb-1">Clear</span>
-                        </div>
-                        <div class="col-sm-8">
-                            <?php
-                            $field = 'name';
-                            ?>
-                            <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]" class="form-control-sm" />
-                        </div>
-                    </div>
+                    <span class="btn btn-light btn-sm text-dark border-primary clear_search_conditions mb-1">Clear</span>
+                    <?php
+                    $field = 'name';
+                    ?>
+                    <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]" class="form-control-sm" />
                 </th>
                 <th style="width:8%">
                     <?php
@@ -142,7 +136,8 @@
                             @else
                                 <button class="btn btn-outline-info mb-0 me-0" type="button" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="{{ implode(', ', $product_list) }}">
                                     {{ count($product_list) }} Products
-                                </button>         
+                                </button>
+                            @endif
                         @endif               
                     </td>
                     <td>{{ $record->status_type }}</td>

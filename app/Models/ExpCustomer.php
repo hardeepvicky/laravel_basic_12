@@ -53,7 +53,7 @@ class ExpCustomer extends BaseModel
 
     public function afterSave()
     {
-        Contact::createContact("exp-customer", $this->id);
+        Contact::createContact("customer", $this->id);
 
         return parent::afterSave();
     }
@@ -95,7 +95,7 @@ class ExpCustomer extends BaseModel
 
     public function lead()
     {
-        return $this->belongsTo(Lead::class, "lead_id");
+        return $this->belongsTo(ExpLead::class, "exp_lead_id");
     }
 
     public function getRequiedIfRules(Request $request)

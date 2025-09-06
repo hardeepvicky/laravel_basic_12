@@ -8,7 +8,7 @@
 
     if ($model->id)
     {
-        $page_header_links[] = ['title' => 'History', 'url' => route($routePrefix . '.history', ["lead_id" => $model->id])];
+        $page_header_links[] = ['title' => 'History', 'url' => route($routePrefix . '.history', [$model->id])];
     }
 
     $page_header_links[] = ['title' => 'List', 'url' => route($routePrefix . '.index')];
@@ -635,7 +635,7 @@
                 datumTokenizer: Bloodhound.tokenizers.whitespace,
                 queryTokenizer: Bloodhound.tokenizers.whitespace,
                 remote: {
-                    url: '/lead-ajax_get_list?query=%QUERY',
+                    url: '/export-contact-ajax_get_list_for_mobile?query=%QUERY',
                     wildcard: '%QUERY',
                     transform: function(response) {
                         var result = $.map(response['data'], function(item) {

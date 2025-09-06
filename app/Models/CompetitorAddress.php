@@ -12,9 +12,9 @@ class CompetitorAddress extends BaseModel
     const TYPE_ADDR_HOME = "ADDR_HOME";
     const TYPE_ADDR_OFFICE = "ADDR_OFFICE";
 
-    public function dealer()
+    public function competitor()
     {
-        return $this->belongsTo(Dealer::class);
+        return $this->belongsTo(Competitor::class);
     }
 
     public function getRefDisplayName($field, $value)

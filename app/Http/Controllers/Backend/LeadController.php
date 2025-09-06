@@ -353,7 +353,7 @@ class LeadController extends BackendController
 
             $this->saveSqlLog();
 
-            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", LaravelExtend::$errors);
+            return back()->withInput()->with('fail', get_exception_display_message($ex))->with("custom_errors", LaravelExtend::$errors);
         }
     }
 
@@ -750,7 +750,7 @@ class LeadController extends BackendController
 
             $this->saveSqlLog();
 
-            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", LaravelExtend::$errors);
+            return back()->withInput()->with('fail', get_exception_display_message($ex))->with("custom_errors", LaravelExtend::$errors);
         }
     }
 
@@ -963,7 +963,7 @@ class LeadController extends BackendController
 
             $this->saveSqlLog();
 
-            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", LaravelExtend::$errors);
+            return back()->withInput()->with('fail', get_exception_display_message($ex))->with("custom_errors", LaravelExtend::$errors);
         }
         catch (Exception $ex) {
             DB::rollBack();
@@ -1054,7 +1054,7 @@ class LeadController extends BackendController
 
             $this->saveSqlLog();
 
-            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", LaravelExtend::$errors);
+            return back()->withInput()->with('fail', get_exception_display_message($ex))->with("custom_errors", LaravelExtend::$errors);
         }
         catch (Exception $ex) {
             DB::rollBack();
@@ -1305,7 +1305,7 @@ class LeadController extends BackendController
 
             $this->saveSqlLog();
 
-            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", LaravelExtend::$errors);
+            return back()->withInput()->with('fail', get_exception_display_message($ex))->with("custom_errors", LaravelExtend::$errors);
         }
         catch (Exception $ex) {
             DB::rollBack();
@@ -1381,7 +1381,7 @@ class LeadController extends BackendController
 
             $this->saveSqlLog();
 
-            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", LaravelExtend::$errors);
+            return back()->withInput()->with('fail', get_exception_display_message($ex))->with("custom_errors", LaravelExtend::$errors);
         }
         catch (Exception $ex) {
             DB::rollBack();
@@ -1460,7 +1460,7 @@ class LeadController extends BackendController
 
             $this->saveSqlLog();
 
-            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", LaravelExtend::$errors);
+            return back()->withInput()->with('fail', get_exception_display_message($ex))->with("custom_errors", LaravelExtend::$errors);
         }
         catch (Exception $ex) {
             DB::rollBack();
