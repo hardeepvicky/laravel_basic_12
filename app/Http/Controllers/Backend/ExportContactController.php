@@ -257,7 +257,7 @@ class ExportContactController extends BackendController
 
         $user_list = User::getList("id", "display_name", ["type" => User::TYPE_INTERNAL], "person_name");
 
-        $country_list = ExpCountry::getList();
+        $country_list = ExpCountry::getListCache();
 
         $type_conditions = [
             'type' => Type::getType(new ExpLeadHistory(), "action_type")

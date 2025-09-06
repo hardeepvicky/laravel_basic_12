@@ -1123,9 +1123,9 @@ class DealerController extends BackendController
     }
 
     
-    public function change_files($lead_id, Request $request)
+    public function change_files($dealer_id, Request $request)
     {
-        $lead = $this->modelClass::findOrFail($lead_id);
+        $dealer = $this->modelClass::findOrFail($dealer_id);
 
         $rules = [
             "dealerFile" => ["required"],
@@ -1143,7 +1143,7 @@ class DealerController extends BackendController
 
                 $document_files = DocumentFile::find($ids);
 
-                $lead->documentFile()->sync($document_files);
+                $dealer->documentFile()->sync($document_files);
             }
 
             if (LaravelExtend::$errors) {

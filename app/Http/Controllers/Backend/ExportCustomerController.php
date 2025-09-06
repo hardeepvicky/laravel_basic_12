@@ -154,7 +154,7 @@ class ExportCustomerController extends BackendController
 
         $address_type_list = LeadAddress::getTypeList();
 
-        $country_list = ExpCountry::getList();
+        $country_list = ExpCountry::getListCache();
 
         $type_conditions = [
             'type' => Type::getType($lead, "deal_type")

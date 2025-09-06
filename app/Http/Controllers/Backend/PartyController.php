@@ -667,8 +667,8 @@ class PartyController extends BackendController
                     "State Found" => 0,
                     "District Found" => 0,
                     "City Found" => 0,
-                    "Dealer Insert" => 0,
-                    "Dealer Update" => 0,
+                    "Party Insert" => 0,
+                    "Party Update" => 0,
                 ];
 
                 $my_country = Country::getMyCountry();
@@ -728,7 +728,7 @@ class PartyController extends BackendController
 
                             if ($city)
                             {
-                                $record['city_id'] = $district->id;
+                                $record['city_id'] = $city->id;
                                 $msg_list['City Found']++;
                             }
                             else
@@ -764,11 +764,11 @@ class PartyController extends BackendController
 
                             if ($is_insert)
                             {
-                                $msg_list['Dealer Insert']++;
+                                $msg_list['Party Insert']++;
                             }
                             else if ($is_update)
                             {
-                                $msg_list['Dealer Update']++;
+                                $msg_list['Party Update']++;
                             }
 
                             $percent = round(($i + 1) * 100 / $total_count, 1);

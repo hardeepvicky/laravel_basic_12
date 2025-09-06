@@ -23,22 +23,18 @@ class ExpDealer extends BaseModel
     const TYPE_TRADER = "TRADER";
 
     public static array $child_model_class = [
-        DealerAddress::class => [
-            "foreignKey" => ["dealer_id"],
+        ExpDealerAddress::class => [
+            "foreignKey" => ["exp_dealer_id"],
             "preventDelete" => false
         ],
-        DealerFile::class => [
-            "foreignKey" => ["dealer_id"],
+        ExpDealerFile::class => [
+            "foreignKey" => ["exp_dealer_id"],
             "preventDelete" => false
         ],
-        DealerTerm::class => [
-            "foreignKey" => ["dealer_id"],
+        ExpDealerTerm::class => [
+            "foreignKey" => ["exp_dealer_id"],
             "preventDelete" => false
         ],
-        TaskDealer::class => [
-            "foreignKey" => ["dealer_id"],
-            "preventDelete" => true
-        ], 
     ];
 
     protected static array $fields_containg_tags = ["description"];
@@ -88,42 +84,42 @@ class ExpDealer extends BaseModel
 
     public function documentFile()
     {
-        return $this->belongsToMany(DocumentFile::class, DealerFile::class);
+        return $this->belongsToMany(DocumentFile::class, ExpDealerFile::class);
     }
 
     public function dealerFile()
     {
-        return $this->hasMany(DealerFile::class, 'dealer_id');
+        return $this->hasMany(ExpDealerFile::class, 'exp_dealer_id');
     }
 
     public function terms()
     {
-        return $this->hasMany(DealerTerm::class, 'dealer_id');
+        return $this->hasMany(ExpDealerTerm::class, 'exp_dealer_id');
     }
 
     public function address()
     {
-        return $this->hasMany(DealerAddress::class, 'dealer_id');
+        return $this->hasMany(ExpDealerAddress::class, 'exp_dealer_id');
     }
 
     public function history()
     {
-        return $this->hasMany(DealerHistory::class, 'dealer_id');
+        return $this->hasMany(ExpDealerHistory::class, 'exp_dealer_id');
     }
 
     public function state()
     {
-        return $this->belongsTo(State::class);
+        return $this->belongsTo(ExpState::class);
     }
 
-    public function district()
+    public function country()
     {
-        return $this->belongsTo(District::class);
+        return $this->belongsTo(ExpCountry::class);
     }
 
     public function city()
     {
-        return $this->belongsTo(City::class);
+        return $this->belongsTo(ExpCity::class);
     }
 
     public function assignTo()

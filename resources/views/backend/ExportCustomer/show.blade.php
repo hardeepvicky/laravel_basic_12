@@ -75,14 +75,14 @@
                     </div>
                     <div class="col-md-6 col-xxl-3">
                         <label class="info">
+                            {{ get_value_from_list($field_labels, 'country_id', 'country_id') }}
+                            :
+                            <span>{{ $record->country?->getDisplayName() }}</span>
+                        </label>
+                        <label class="info">
                             {{ get_value_from_list($field_labels, 'state_id', 'state_id') }}
                             :
                             <span>{{ $record->state?->getDisplayName() }}</span>
-                        </label>
-                        <label class="info">
-                            {{ get_value_from_list($field_labels, 'district_id', 'district_id') }}
-                            :
-                            <span>{{ $record->district?->getDisplayName() }}</span>
                         </label>
                         <label class="info">
                             {{ get_value_from_list($field_labels, 'city_id', 'city_id') }}

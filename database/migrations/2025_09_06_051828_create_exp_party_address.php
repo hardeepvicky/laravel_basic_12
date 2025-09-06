@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('exp_party_address', function (Blueprint $table) {
+        Schema::create('exp_party_addresses', function (Blueprint $table) {
             $table->id();
             $table->foreignId("exp_party_id")->constrained("exp_parties")->onDelete("restrict");
             $table->string("type", 45);
@@ -31,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('exp_party_address');
+        Schema::dropIfExists('exp_party_addresses');
     }
 };
