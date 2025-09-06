@@ -375,3 +375,10 @@ function parseBool(value) {
     }
     return null;
 }
+
+function get_other_country_date_time(datetime, timezone, callback)
+{
+    $.post("/get_date_time_for_timezone", {datetime : DateUtil.getFormattedDateTime(datetime, 'Y-M-d H:i:s'), timezone}, function(response){
+        callback(response);
+    });
+}

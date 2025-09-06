@@ -101,6 +101,7 @@ Route::any("mailjet-webhook", function(Request $request){
 
 // Route::get('/', [FrontendController::class, "index"]);
 Route::get('/home', [HomeController::class, 'index'])->name('home');
+Route::post('/get_date_time_for_timezone', [HomeController::class, 'get_date_time_for_timezone'])->name('get_date_time_for_timezone');
 
 Auth::routes();
 

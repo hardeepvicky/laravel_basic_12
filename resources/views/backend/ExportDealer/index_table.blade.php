@@ -81,10 +81,10 @@
                         <th><?= sortable_anchor('alias', get_value_from_list($field_labels, 'alias', 'alias')) ?></th>
                         <th><?= sortable_anchor('type', get_value_from_list($field_labels, 'type', 'type')) ?></th>
                         <th>
-                            <?= sortable_anchor('state.name', get_value_from_list($field_labels, 'state_id', 'state_id')) ?>
+                            <?= sortable_anchor('country.name', get_value_from_list($field_labels, 'country_id', 'country_id')) ?>
                         </th>
                         <th>
-                            <?= sortable_anchor('district.name', get_value_from_list($field_labels, 'district_id', 'district_id')) ?>
+                            <?= sortable_anchor('state.name', get_value_from_list($field_labels, 'state_id', 'state_id')) ?>
                             | <?= sortable_anchor('city.name', get_value_from_list($field_labels, 'city_id', 'city_id')) ?>
                         </th>
                         <th><?= sortable_anchor('company_name', get_value_from_list($field_labels, 'company_name', 'company_name')) ?></th>

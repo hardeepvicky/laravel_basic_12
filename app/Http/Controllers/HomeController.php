@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\DateUtility;
 use App\Helpers\LaravelExtend;
 use App\Http\Controllers\WebController;
 use App\Models\ImportLog;
 use Exception;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 
@@ -59,5 +61,20 @@ class HomeController extends WebController
         }
 
         return $this->responseJson($response);
+    }
+
+    public function get_date_time_for_timezone(Request $request)
+    {
+        $datetime = $request->get("datetime");
+
+        $timezone = $request->get("timezone");
+
+        $dt = DateUtility::getDateObj($datetime, DateUtility::$login_user_time_zone);
+
+        $dt->setTimezone(new \DateTimeZone($timezone));
+
+        $new_datetime = $dt->format(DateUtility::DATETIME_OUT_FORMAT);
+        
+        return $new_datetime;
     }
 }

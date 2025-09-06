@@ -180,6 +180,8 @@ use App\Helpers\DateUtility;
                             $label = get_value_from_list($history_field_labels, $field, $field);
                             ?>
                             <x-Inputs.text-field :id="$field" :name="$field" :label="$label" class="next-date-time-picker"/>
+                            Other Country Time : 
+                            <span class="other_country_time" id="other_country_time"></span>
                         </div>
                     </form>
                 </div>
@@ -856,11 +858,20 @@ use App\Helpers\DateUtility;
                     });
                 }, 500);
 
-                modal.find(".next-date-time-picker").flatpickr({
+                next_date_time_picker = modal.find(".next-date-time-picker").flatpickr({
                     enableTime: true,
                     minDate: "today",
                     dateFormat: constants.dateTimeFormat,
-                    time_24hr: true
+                    time_24hr: true,
+                    onChange: function(selectedDates, dateStr, instance) {
+                        const selectedDate = selectedDates[0];
+                        if (selectedDate) 
+                        {
+                            get_other_country_date_time(selectedDate, '{{ $record->state->timezone }}', function(new_dt){
+                                $("#other_country_time").html(new_dt);
+                            });
+                        }
+                    }
                 });
 
                 modal.find(".template-table").srTableTemplate({
