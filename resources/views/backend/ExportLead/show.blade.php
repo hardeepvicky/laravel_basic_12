@@ -137,7 +137,7 @@
             <div class="tab-pane" id="tab_file_block" role="tabpanel"
                 aria-labelledby="tab_file">
 
-                <x-Form.start action="{{ route('lead.change_files', ['lead_id' => $record->id]) }}" method="POST" />
+                <x-Form.start action="{{ route('export-lead.change_files', [$record->id]) }}" method="POST" />
                     <div class="form-group mt-2 mb-3">
                         <?php
                         $field = 'leadFile';
