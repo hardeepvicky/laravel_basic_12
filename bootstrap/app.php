@@ -2,7 +2,9 @@
 
 use App\Exceptions\UserException;
 use App\Helpers\Menu;
+use App\Http\Middleware\AddLogContext;
 use App\Http\Middleware\Authenticate;
+use App\Http\Middleware\BackendViewRender;
 use App\Http\Middleware\RolePermission;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Application;
@@ -23,6 +25,12 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'check_auth' => Authenticate::class,
             'role_permission' => RolePermission::class,
+            'backend_view_render' => BackendViewRender::class
+        ]);
+
+        $middleware->validateCsrfTokens(except: [
+            'interakt-hook',
+            'mailjet-webhook',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
@@ -38,7 +46,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
             $current_route_name = Route::currentRouteName();
 
-            $contact_support_email = env("DEVELOPER_TEAM_EMAIL");
+            $contact_support_email = config("app.DEVELOPER_TEAM_EMAIL");
 
             $data = compact("error_code", "error_msg", "current_url", "current_route_name", "contact_support_email");
 
@@ -65,7 +73,16 @@ return Application::configure(basePath: dirname(__DIR__))
 
                     $menus = Menu::get(Auth::user()->id);
 
-                    $header_menu_list = Menu::getList($menus);
+                    $header_menus = Menu::getList($menus);
+                    $header_menu_list = [];
+
+                    foreach($header_menus as $header_menu)
+                    {
+                        if ($header_menu['url'] && $header_menu['url'] != "#")
+                        {
+                            $header_menu_list[$header_menu['url']] = $header_menu['title'];
+                        }
+                    }
 
                     $partial_path = "backend.partials";
 
@@ -120,7 +137,16 @@ return Application::configure(basePath: dirname(__DIR__))
 
                     $menus = Menu::get(Auth::user()->id);
 
-                    $header_menu_list = Menu::getList($menus);
+                    $header_menus = Menu::getList($menus);
+                    $header_menu_list = [];
+
+                    foreach($header_menus as $header_menu)
+                    {
+                        if ($header_menu['url'] && $header_menu['url'] != "#")
+                        {
+                            $header_menu_list[$header_menu['url']] = $header_menu['title'];
+                        }
+                    }
 
                     $partial_path = "backend.partials";
 
