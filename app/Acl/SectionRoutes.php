@@ -37,7 +37,7 @@ class SectionRoutes
 
         "export-country.ajax_get_by_phonecode",
 
-        "export-contact.ajax_get_list_for_mobile",
+        "export-lead.ajax_get_list_for_mobile",
 
         "*.ajax_get_list",
         "*.ajax_get_code_list",
