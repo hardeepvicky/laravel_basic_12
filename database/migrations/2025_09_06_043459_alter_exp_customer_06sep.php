@@ -13,8 +13,16 @@ return new class extends MyMigration
     public function up(): void
     {
         Schema::table('exp_customers', function (Blueprint $table) {
-            $table->string("action_type")->nullable()->after("snooze_datetime");
-            $table->dateTime("next_followup_date_time")->nullable()->after("action_type");
+            if (!Schema::hasColumn("exp_customers", "action_type"))
+            {
+                $table->string("action_type")->nullable()->after("snooze_datetime");
+            }
+            
+            if (!Schema::hasColumn("exp_customers", "next_followup_date_time"))
+            {
+                $table->dateTime("next_followup_date_time")->nullable()->after("action_type");
+            }
+
             $table->dateTime("last_followup_date_time")->nullable()->after("next_followup_date_time");
         });
     }
