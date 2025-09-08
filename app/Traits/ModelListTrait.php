@@ -86,7 +86,7 @@ trait ModelListTrait
 
             if (!App::isLocal())
             {
-                $cache_time = 60 * 60;
+                $cache_time = 20;
 
                 self::addCache($cache_key, $list, $cache_time);
             }
