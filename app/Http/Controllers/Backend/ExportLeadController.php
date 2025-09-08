@@ -228,7 +228,8 @@ class ExportLeadController extends BackendController
         $history_field_labels = FieldSetting::getDynamicFields(ExpLeadHistory::class);
 
         $this->setForView(compact(
-            "address_type_list", "source_type_list", "deal_type_list", "status_type_list", "source_list", "payment_method_type_list", "dealer_list", "product_list", 
+            "address_type_list", "source_type_list", "deal_type_list", "status_type_list", "status_type_list_for_form",
+             "source_list", "payment_method_type_list", "dealer_list", "product_list", 
             "item_list", "campaign_list", "user_list", "action_type_list", "lead_history_response_list", "country_list",
             "field_labels", "address_field_labels", "product_field_labels", "item_field_labels", "history_field_labels"
         ));

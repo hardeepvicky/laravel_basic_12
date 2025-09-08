@@ -159,6 +159,8 @@ class PartyController extends BackendController
 
         $status_type_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
 
+        $status_type_list_for_form = array_diff($status_type_list, ["Converted"]);
+
         $type_conditions = [
             'type' => Type::getType(new LeadHistory(), "action_type")
         ];
@@ -178,8 +180,8 @@ class PartyController extends BackendController
         $history_field_labels = FieldSetting::getDynamicFields(PartyHistory::class);
 
         $this->setForView(compact(
-            "type_list", "address_type_list", "state_list",
-            "status_type_list", "action_type_list", "history_response_list", "user_list",
+            "type_list", "address_type_list", "state_list", "status_type_list", "status_type_list_for_form",
+            "action_type_list", "history_response_list", "user_list",
             "field_labels", "term_field_labels", "address_field_labels", "history_field_labels"
         ));
 

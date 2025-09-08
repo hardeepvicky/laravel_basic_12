@@ -248,6 +248,8 @@ class ExportContactController extends BackendController
 
         $status_type_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
 
+        $status_type_list_for_form = array_diff($status_type_list, ["Converted"]);
+
         $source_list = DropDownValue::getList("id", "display_name", ["type" => DropDownValue::LEAD_SOURCE], "name");
 
         $dealer_list = ExpDealer::getList();
@@ -274,7 +276,8 @@ class ExportContactController extends BackendController
 
         $this->setForView(compact(
             "type_list",
-            "address_type_list", "source_type_list", "deal_type_list", "status_type_list", "source_list", "dealer_list", "product_list",
+            "address_type_list", "source_type_list", "deal_type_list", "status_type_list", "status_type_list_for_form",
+            "source_list", "dealer_list", "product_list",
             "user_list", "action_type_list", "history_response_list", "country_list",
             "field_labels", "address_field_labels", "product_field_labels"
         ));

@@ -186,6 +186,8 @@ class LeadController extends BackendController
 
         $status_type_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
 
+        $status_type_list_for_form = array_diff($status_type_list, ["Converted"]);
+
         $type_conditions = [
             'type' => Type::getType($this->model, "payment_method_type")
         ];
@@ -229,7 +231,8 @@ class LeadController extends BackendController
 
         $this->setForView(compact(
             "address_type_list", "state_list", 
-            "source_type_list", "deal_type_list", "status_type_list", "source_list", "payment_method_type_list", "dealer_list", "product_list", "item_list", "campaign_list",
+            "source_type_list", "deal_type_list", "status_type_list", "status_type_list_for_form",
+            "source_list", "payment_method_type_list", "dealer_list", "product_list", "item_list", "campaign_list",
             "user_list", "action_type_list", "lead_history_response_list",
             "field_labels", "address_field_labels", "product_field_labels", "item_field_labels", "history_field_labels"
         ));
