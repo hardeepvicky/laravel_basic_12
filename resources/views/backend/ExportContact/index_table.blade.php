@@ -106,13 +106,13 @@
                                     ?>
                                     @if (in_array($record->type, ["lead", "customer"]))
                                     <li>
-                                        <a class="btn btn-outline-info summary-action-button" href="{{ route($route_prefix_2 . '.history',[$record->id]) }}">
+                                        <a class="btn btn-outline-info summary-action-button" href="{{ route($route_prefix_2 . '.history',[$record->ref_id]) }}">
                                             <i class="fa-solid fa-clock-rotate-left"></i>
                                         </a>
                                     </li>
                                     @endif
                                     <li>
-                                        <a class="btn btn-outline-primary summary-action-button" href="{{ route($route_prefix_2 . '.edit',[$record->id]) }}">
+                                        <a class="btn btn-outline-primary summary-action-button" href="{{ route($route_prefix_2 . '.edit',[$record->ref_id]) }}">
                                             <i class="icon-pencil-alt"></i>
                                         </a>
                                     </li>
