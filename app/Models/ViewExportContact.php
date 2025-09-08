@@ -42,6 +42,32 @@ class ViewExportContact extends BaseModel
         return $this->belongsTo(ExpState::class, "state_id");
     }
 
+    
+    public function lead()
+    {
+        return $this->belongsTo(ExpLead::class, "ref_id")->where("type", "lead");
+    }
+
+    public function customer()
+    {
+        return $this->belongsTo(ExpCustomer::class, "ref_id")->where("type", "customer");
+    }
+
+    public function party()
+    {
+        return $this->belongsTo(ExpParty::class, "ref_id")->where("type", "party");
+    }
+
+    public function dealer()
+    {
+        return $this->belongsTo(ExpDealer::class, "ref_id")->where("type", "dealer");
+    }
+
+    public function competitor()
+    {
+        return $this->belongsTo(ExpCompetitor::class, "ref_id")->where("type", "competitor");
+    }
+
     public function product()
     {
         return $this->belongsToMany(Product::class, ExpLeadProduct::class, "exp_lead_id");

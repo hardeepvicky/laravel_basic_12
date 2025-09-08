@@ -37,6 +37,31 @@ class ViewContact extends BaseModel
         return $this->belongsTo(State::class, "state_id");
     }
 
+    public function lead()
+    {
+        return $this->belongsTo(Lead::class, "ref_id");
+    }
+
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class, "ref_id");
+    }
+
+    public function party()
+    {
+        return $this->belongsTo(Party::class, "ref_id");
+    }
+
+    public function dealer()
+    {
+        return $this->belongsTo(Dealer::class, "ref_id");
+    }
+
+    public function competitor()
+    {
+        return $this->belongsTo(Competitor::class, "ref_id");
+    }
+
     public function product()
     {
         return $this->belongsToMany(Product::class, LeadProduct::class, "lead_id");

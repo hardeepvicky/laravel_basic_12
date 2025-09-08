@@ -22,6 +22,7 @@ use App\Models\ExpLeadAddress;
 use App\Models\ExpLeadHistory;
 use App\Models\ExpLeadItem;
 use App\Models\ExpLeadProduct;
+use App\Models\ExportContact;
 use App\Models\ExpState;
 use App\Models\FieldSetting;
 use App\Models\Item;
@@ -1117,8 +1118,18 @@ class ExportLeadController extends BackendController
 
             $dispatch = new DispatchOrder();
             $dispatch->type = str_class_name_to_human_text($this->modelClass);
-            $dispatch->status_type = DispatchOrder::STATUS_PENDING;
             $dispatch->lead_id = $exp_lead_id;
+
+            $dispatch->type = "lead";
+
+            $contact = ExportContact::where("type", "lead")->where("ref_id", $exp_lead_id)->first();
+
+            if (!$contact)
+            {
+                throw new UserException("Contact of Lead not found");
+            }
+
+            $dispatch->export_contact_id = $contact->id;
 
             $dispatch->fill($dispatchData);
 

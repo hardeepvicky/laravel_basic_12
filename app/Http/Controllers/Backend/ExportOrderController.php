@@ -11,6 +11,7 @@ use App\Helpers\LaravelExtend;
 use App\Helpers\Util;
 use App\Models\AutoSerialPattern;
 use App\Models\Branch;
+use App\Models\Contact;
 use App\Models\ExpLead;
 use App\Models\ExportContact;
 use App\Models\ExportOrder;
@@ -357,7 +358,16 @@ class ExportOrderController extends BackendController
                 {
                     $cutomer = $lead->convertToCustomer();
                 }
+                
+                $contact = Contact::where("type", "customer")->where("ref_id", $cutomer->id)->first();
 
+                if (!$contact)
+                {
+                    $contact = Contact::createContact("customer", $cutomer->id);
+                }
+
+                $this->model->order_from_type = "customer";
+                $this->model->contact_id = $contact->id;
                 $this->model->exp_customer_id = $cutomer->id;
                 $this->model->save();
 

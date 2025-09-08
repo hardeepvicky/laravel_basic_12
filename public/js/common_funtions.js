@@ -257,7 +257,16 @@ function add_form_to_body(method, action, params) {
 
     // 2. Add input fields (hidden inputs for parameters)
     $.each(params, function (index, item) {
-        item.value = encodeURIComponent(item.value);
+        if (item.name == "_token")
+        {
+
+        }
+        else
+        {
+            item.value = encodeURIComponent(item.value);
+        }
+
+        console.log(item);
 
         $("<input>")
             .attr({
@@ -280,7 +289,6 @@ function add_form_to_body_and_submit(method, action, params) {
 
     setTimeout(function () {
         $form.remove();
-        $("#responseArea").removeClass("hidden"); // Show a message to the user
     }, 100);
 }
 

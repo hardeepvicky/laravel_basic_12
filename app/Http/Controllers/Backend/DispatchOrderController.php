@@ -11,10 +11,12 @@ use App\Helpers\LaravelExtend;
 use App\Models\City;
 use App\Models\Country;
 use App\Models\DispatchOrder;
+use App\Models\DispatchOrderProduct;
 use App\Models\DocumentFile;
 use App\Models\FieldSetting;
 use App\Models\Party;
 use App\Models\Product;
+use App\Models\SaleOrder;
 use App\Models\State;
 use App\Models\Type;
 use App\Models\User;
@@ -22,6 +24,7 @@ use App\Notifications\GeneralNotification;
 use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Notifications\Events\NotificationSent;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Validator;
 
@@ -255,4 +258,105 @@ class DispatchOrderController extends BackendController
 
         download_start($file, "application/octet-stream");
     }
+
+    public function create_from_sale_order(Request $request)
+    {
+        try
+        {
+            DB::beginTransaction();
+            foreach($request->sale_order_ids as $sale_order_id)
+            {
+                $sale_order = SaleOrder::with(["saleOrderProduct", "contact"])->findOrFail($sale_order_id);
+
+                if (!$sale_order->contact)
+                {
+                    continue;
+                }
+
+                $save_data = [
+                    "order_from_type" => $sale_order->order_from_type,
+                    "contact_id" => $sale_order->contact_id,
+                ];
+
+                switch($sale_order->order_from_type)
+                {
+                    case "lead":
+                        $sale_order->contact->load("lead");
+                        $address = $sale_order->contact->lead->address()->where("is_primary", 1)->first();
+                        $state_id = $sale_order->contact->lead->state_id;
+                        $district_id = $sale_order->contact->lead->district_id;
+                        $city_id = $sale_order->contact->lead->city_id;
+                        break;
+                    case "customer":
+                        $sale_order->contact->load("customer");
+                        $address = $sale_order->contact->customer->lead->address()->where("is_primary", 1)->first();
+                        $state_id = $sale_order->contact->customer->state_id;
+                        $district_id = $sale_order->contact->customer->district_id;
+                        $city_id = $sale_order->contact->customer->city_id;
+                        break;
+                    case "party":
+                        $sale_order->contact->load("party");
+                        $address = $sale_order->contact->party->address()->where("is_primary", 1)->first();
+                        $state_id = $sale_order->contact->party->state_id;
+                        $district_id = $sale_order->contact->party->district_id;
+                        $city_id = $sale_order->contact->party->city_id;
+                        break;
+                    case "dealer":
+                        $sale_order->contact->load("dealer");
+                        $address = $sale_order->contact->dealer->address()->where("is_primary", 1)->first();
+                        $state_id = $sale_order->contact->dealer->state_id;
+                        $district_id = $sale_order->contact->dealer->district_id;
+                        $city_id = $sale_order->contact->dealer->city_id;
+                        break;
+                    case "competitor":
+                        $sale_order->contact->load("competitor");
+                        $address = $sale_order->contact->competitor->address()->where("is_primary", 1)->first();
+                        $state_id = $sale_order->contact->competitor->state_id;
+                        $district_id = $sale_order->contact->competitor->district_id;
+                        $city_id = $sale_order->contact->competitor->city_id;
+                        break;
+                }
+
+                if (!isset($address) || empty($address))
+                {
+                    throw new UserException("Address not found of Order # $sale_order_id");
+                }
+
+                $save_data['addr1'] = $address->addr1;
+                $save_data['addr2'] = $address->addr2;
+                $save_data['pincode'] = $address->pincode;
+                $save_data['country_id'] = Country::getMyCountry()?->id;
+                $save_data['state_id'] = $state_id;
+                $save_data['district_id'] = $district_id;
+                $save_data['city_id'] = $city_id;
+                $save_data['status_type'] = DispatchOrder::STATUS_PENDING;
+
+                $model = DispatchOrder::create($save_data);
+
+                foreach($sale_order->saleOrderProduct as $saleOrderProduct)
+                {
+                    $child_model = new DispatchOrderProduct([
+                        "product_id" => $saleOrderProduct->product_id,
+                        "qty" => $saleOrderProduct->order_qty,
+                    ]);
+
+                    $model->products()->save($child_model);
+                }
+
+                $sale_order->status = SaleOrder::STATUS_DISPTACH;
+                $sale_order->save();
+            }
+
+            DB::commit();
+
+            return back()->with("success", "Dispatch Order successfully placed");
+        }
+        catch(Exception $ex)
+        {
+            DB::rollBack();
+
+            return back()->with("fail", get_exception_display_message($ex));
+        }
+    }
 }
+

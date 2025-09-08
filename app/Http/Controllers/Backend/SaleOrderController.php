@@ -14,6 +14,7 @@ use App\Models\Branch;
 use App\Models\Contact;
 use App\Models\Customer;
 use App\Models\Dealer;
+use App\Models\ExportContact;
 use App\Models\FieldSetting;
 use App\Models\Lead;
 use App\Models\Maker;
@@ -360,6 +361,15 @@ class SaleOrderController extends BackendController
                     $cutomer = $lead->convertToCustomer();
                 }
 
+                $contact = ExportContact::where("type", "customer")->where("ref_id", $cutomer->id)->first();
+
+                if (!$contact)
+                {
+                    $contact = ExportContact::createContact("customer", $cutomer->id);
+                }
+
+                $this->model->order_from_type = "customer";
+                $this->model->contact_id = $contact->id;
                 $this->model->customer_id = $cutomer->id;
                 $this->model->save();
 

@@ -76,6 +76,6 @@ class ExportContact extends BaseModel
             "ref_id" => $ref_id
         ];
 
-        static::insertOrUpdate($save, $is_insert, $is_update, true);
+        return static::insertOrUpdate($save, $is_insert, $is_update, true);
     }
 }

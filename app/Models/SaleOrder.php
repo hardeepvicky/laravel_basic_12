@@ -22,13 +22,15 @@ class SaleOrder extends BaseModel
 
     protected static array $list_fields = ["id", "order_no"];
 
-    const ORDER_FROM_TYPE_DEALER = "DEALER";
-    const ORDER_FROM_TYPE_CUSTOMER = "CUSTOMER";
-    const ORDER_FROM_TYPE_LEAD = "LEAD";
+    const ORDER_FROM_TYPE_DEALER = "dealer";
+    const ORDER_FROM_TYPE_CUSTOMER = "customer";
+    const ORDER_FROM_TYPE_LEAD = "lead";
 
     const STATUS_NEW = "NEW";
     const STATUS_PRODUCTION = "PRODUCTION";
     const STATUS_GODOWN = "GODOWN";
+    const STATUS_DISPTACH = "DISPTACH";
+    const STATUS_SENT = "SENT";
 
     public static array $child_model_class = [
         SaleOrderProduct::class => [

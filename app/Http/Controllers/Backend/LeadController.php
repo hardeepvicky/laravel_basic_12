@@ -10,6 +10,7 @@ use App\Helpers\FileUtility;
 use App\Helpers\LaravelExtend;
 use App\Models\Campaign;
 use App\Models\City;
+use App\Models\Contact;
 use App\Models\Country;
 use App\Models\Dealer;
 use App\Models\DispatchOrder;
@@ -1148,9 +1149,17 @@ class LeadController extends BackendController
             $this->_saveOthers($validatedData);
 
             $dispatch = new DispatchOrder();
-            $dispatch->type = str_class_name_to_human_text($this->modelClass);
             $dispatch->status_type = DispatchOrder::STATUS_PENDING;
-            $dispatch->lead_id = $lead_id;
+            $dispatch->type = "lead";
+
+            $contact = Contact::where("type", "lead")->where("ref_id", $lead_id)->first();
+
+            if (!$contact)
+            {
+                throw new UserException("Contact of Lead not found");
+            }
+
+            $dispatch->contact_id = $contact->id;
 
             $dispatch->fill($dispatchData);
 
