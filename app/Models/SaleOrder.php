@@ -46,6 +46,13 @@ class SaleOrder extends BaseModel
         parent::afterFind();
     }
 
+    public function afterSave()
+    {
+        Order::createOrder("sale", $this->id);
+
+        return parent::afterSave();
+    }
+
     public function branch()
     {
         return $this->belongsTo(Branch::class);

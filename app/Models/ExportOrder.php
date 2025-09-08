@@ -46,6 +46,13 @@ class ExportOrder extends BaseModel
         parent::afterFind();
     }
 
+    public function afterSave()
+    {
+        Order::createOrder("export", $this->id);
+
+        return parent::afterSave();
+    }
+
     public function branch()
     {
         return $this->belongsTo(Branch::class);
