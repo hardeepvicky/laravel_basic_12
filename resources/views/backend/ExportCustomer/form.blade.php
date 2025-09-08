@@ -144,7 +144,7 @@
                             $label = get_value_from_list($field_labels, $field, $field);
                             ?>
                             <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
-                                :list="$status_type_list" :value="$model->{$field}"
+                                :list="$status_type_list_for_form" :value="$model->{$field}"
                                 layout="horizontal"
                                 class="select2"
                                 mandatory="true" />

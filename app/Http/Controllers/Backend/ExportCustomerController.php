@@ -178,6 +178,10 @@ class ExportCustomerController extends BackendController
 
         $status_type_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
 
+        $status_type_list_for_form = array_diff($status_type_list, ["Converted", "Dead", "Fake", "Lost"]);
+
+        // dd($status_type_list_for_form);
+
         $type_conditions = [
             'type' => Type::getType($lead, "payment_method_type")
         ];
@@ -217,7 +221,7 @@ class ExportCustomerController extends BackendController
 
         $this->setForView(compact(
             "country_list", "address_type_list",
-            "deal_type_list", "status_type_list", "payment_method_type_list", "dealer_list", "product_list", "item_list",
+            "deal_type_list", "status_type_list", "status_type_list_for_form", "payment_method_type_list", "dealer_list", "product_list", "item_list",
             "user_list", "action_type_list", "lead_history_response_list",
             "field_labels", "address_field_labels", "product_field_labels", "item_field_labels", "history_field_labels"
         ));

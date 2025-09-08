@@ -164,7 +164,7 @@ use App\Helpers\DateUtility;
                             $label = get_value_from_list($history_field_labels, $field, $field);
                             ?>
                             <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
-                                :list="$status_type_list" :value="$record->{$field}" class="modal-select2" mandatory="true"
+                                :list="$status_type_list_for_form" :value="$record->{$field}" class="modal-select2" mandatory="true"
                                 />
                         </div>
                         <div class="form-group mb-3">
@@ -272,7 +272,7 @@ use App\Helpers\DateUtility;
                                     $label = get_value_from_list($history_field_labels, $field, $field);
                                     ?>
                                     <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
-                                        :list="$status_type_list" :value="$record->{$field}" class="modal-select2" mandatory="true"
+                                        :list="$status_type_list_for_form" :value="$record->{$field}" class="modal-select2" mandatory="true"
                                         />
                                 </div>
                             </div>

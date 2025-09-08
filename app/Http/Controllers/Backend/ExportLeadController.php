@@ -180,7 +180,9 @@ class ExportLeadController extends BackendController
             $type_conditions['or_id'] = Type::getIdFromCode("status_type", $this->model->status_type);
         }
 
-        $status_type_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
+        $status_type_list =  Type::getList("code", "display_name", $type_conditions, "list_display_order");
+
+        $status_type_list_for_form = array_diff($status_type_list, ["Converted"]);
 
         $type_conditions = [
             'type' => Type::getType($lead, "payment_method_type")
