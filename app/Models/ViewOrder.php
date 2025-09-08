@@ -1,0 +1,125 @@
+<?php
+
+namespace App\Models;
+
+use App\Exceptions\UserException;
+use Illuminate\Database\Eloquent\Builder;
+
+class ViewOrder extends BaseModel
+{
+    protected $appends = [
+        'display_name'
+    ];
+
+    protected static array $list_fields = ["id", "ref_id", "type", "order_no", "order_from_type"];
+
+    public static array $child_model_class = [
+        
+    ];
+
+    public static function getListCache(String $key_field = "id", String $value_field = "display_name", $order_by = "name", $order_dir = "ASC")
+    {
+        throw new UserException("Data Comes from multiple tables, no can not cache");
+    }
+
+    protected function getDisplayNameAttribute()
+    {
+        return $this->getDisplayName();
+    }
+
+    public function getDisplayName()
+    {
+        $name = $this->order_no . " >> " . ucfirst($this->order_from_type);
+
+        $name .= " >> ";
+
+        if (isset($this->lead->name))
+        {
+            $name .= $this->lead->getDisplayName();
+        }
+        else if (isset($this->customer->name))
+        {
+            $name .= $this->customer->getDisplayName();
+        }
+        else if (isset($this->party->name))
+        {
+            $name .= $this->party->getDisplayName();
+        }
+        else if (isset($this->dealer->name))
+        {
+            $name .= $this->dealer->getDisplayName();
+        }
+        else if (isset($this->competitor->name))
+        {
+            $name .= $this->competitor->getDisplayName();
+        }
+
+        return $name;
+    }
+
+    public function lead()
+    {
+        return $this->belongsTo(Lead::class, 'contact_ref_id');
+    }
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class, 'contact_ref_id');
+    }
+    public function party()
+    {
+        return $this->belongsTo(Party::class, 'contact_ref_id');
+    }
+    public function dealer()
+    {
+        return $this->belongsTo(Dealer::class, 'contact_ref_id');
+    }
+    public function competitor()
+    {
+        return $this->belongsTo(Competitor::class, 'contact_ref_id');
+    }
+
+    public static function fetchList(Builder $builder, string $key_field, string $value_field)
+    {
+        $builder->eagerLoadRelations(["lead", "customer", "party", "dealer", "competitor"]);
+        $builder->whereNotNull("ref_id");
+        $records = $builder->get();
+
+        // d($records->toArray()); exit;
+
+        $list = [];
+
+        foreach ($records as $record) {
+            $arr = $record->toArray();
+            if (isset($arr[$key_field]) && is_scalar($arr[$key_field]))
+            {
+                $list[$arr[$key_field]] = $arr[$value_field] ?? null;
+            }
+        }
+
+        return $list;
+    }
+
+    public static function getDetailList(Builder $builder, String $key_field, String $value_field)
+    {
+        $list_fields = static::getListFields();
+        
+        $builder->select($list_fields);
+        $records = $builder->get();
+
+        $list = [];
+
+        foreach ($records as $record) {
+            $arr = $record->toArray();
+
+            $list[$arr['type'] . "." . $arr[$key_field]] = [
+                "type" => $arr["type"],
+                "ref_id" => $arr["ref_id"],
+                "order_from_type" => $arr["order_from_type"],
+                "contact_ref_id" => $arr["contact_ref_id"],
+                "name" =>  $arr[$value_field] ?? null
+            ];
+        }
+
+        return $list;
+    }
+}

@@ -19,6 +19,7 @@ class AutoSerialPattern extends BaseModel
     public const TYPE_PRODUCT_SERIAL = "PRODUCT_SERIAL";
     public const TYPE_ITEM_SERIAL = "ITEM_SERIAL";
     public const TYPE_SALE_ORDER = "SALE_ORDER";
+    public const TYPE_EXPORT_ORDER = "EXPORT_ORDER";
     public const TYPE_BIN_CODE = "BIN_CODE";
 
     public function beforeSave()
@@ -64,6 +65,7 @@ class AutoSerialPattern extends BaseModel
             self::TYPE_PRODUCT_SERIAL => "Product Serial No.",
             self::TYPE_ITEM_SERIAL => "Item Seial No.",
             self::TYPE_SALE_ORDER => "Sale Order",
+            self::TYPE_EXPORT_ORDER => "Export Order",
             self::TYPE_BIN_CODE => "Bin Code",
         ];
     }

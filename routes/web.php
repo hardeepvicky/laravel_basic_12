@@ -35,6 +35,7 @@ use App\Http\Controllers\Backend\ExportCountryController;
 use App\Http\Controllers\Backend\ExportCustomerController;
 use App\Http\Controllers\Backend\ExportDealerController;
 use App\Http\Controllers\Backend\ExportLeadController;
+use App\Http\Controllers\Backend\ExportOrderController;
 use App\Http\Controllers\Backend\ExportPartyController;
 use App\Http\Controllers\Backend\ExportStateController;
 use App\Http\Controllers\Backend\HolidayController;
@@ -1572,6 +1573,28 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
 
         $name = "copy";
         Route::get("{id}/" . $name, [$controllerClass, $name])->name($name);
+    });
+
+    $route_prefix = "export-order";
+    $controllerClass = ExportOrderController::class;
+    Route::resource($route_prefix, $controllerClass);
+    $name="ajax_get_unlinked_list";
+    Route::get($route_prefix . "-" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
+    $name="ajax_get_available_qty_and_qty_to_manufacture";
+    Route::get($route_prefix . "-" . $name . "/{product_id}/{make_id?}/{order_qty?}", [$controllerClass, $name])->name($route_prefix . "." . $name);
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
+        $name = "copy";
+        Route::get("{id}/" . $name, [$controllerClass, $name])->name($name);
+
+        $name = "ajax_update_field";
+        Route::post($name, [$controllerClass, $name])->name($name);
+
+        $route_prefix = "export";
+        Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+            $name = "csv";
+            Route::get($name, [$controllerClass, "export_" . $name])->name($name);
+        });
     });
 
     $controller_prefix = "setting";

@@ -23,6 +23,10 @@ jQuery.fn.extend({
             return;
         }
 
+        if (typeof obj.baseUrl == "undefined") {
+            obj.baseUrl = "/contact-chooser";
+        }
+
         return this.each(function () {
             var _this = $(this);
 
@@ -97,7 +101,7 @@ jQuery.fn.extend({
 
                 var query_params = get_array_to_url(request_data);
 
-                var url = "/contact-chooser?" + query_params;
+                var url = obj.baseUrl + "?" + query_params;
 
                 console.log(url);
 

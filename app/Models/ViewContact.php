@@ -11,7 +11,7 @@ class ViewContact extends BaseModel
         'display_name'
     ];
 
-    protected static array $list_fields = ["id", "type", "name", "mobile", "city_name"];
+    protected static array $list_fields = ["id", "ref_id", "type", "name", "mobile", "city_name"];
 
     public static array $child_model_class = [
         
@@ -66,7 +66,7 @@ class ViewContact extends BaseModel
             }
 
             $list[$arr['type'] . "." . $arr[$key_field]] = [
-                "ref_id" => $arr["id"],
+                "ref_id" => $arr["ref_id"],
                 "type" => $arr["type"],
                 "name" =>  $arr[$value_field] ?? null
             ];

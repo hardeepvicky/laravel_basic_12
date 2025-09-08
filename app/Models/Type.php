@@ -118,6 +118,11 @@ class Type extends BaseModel
                     "status" => "Status",
                 ]
             ],
+            ExportOrder::class => [
+                "fields" => [
+                    "status" => "Status",
+                ]
+            ],
             ItemCategory::class => [
                 "fields" => [
                     "type" => "Type",

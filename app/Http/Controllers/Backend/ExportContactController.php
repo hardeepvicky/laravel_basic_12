@@ -16,16 +16,15 @@ use App\Models\ExpLead;
 use App\Models\ExpLeadAddress;
 use App\Models\ExpLeadHistory;
 use App\Models\ExpLeadProduct;
-use App\Models\ExportViewContact;
 use App\Models\ExpParty;
 use App\Models\ExpPartyAddress;
 use App\Models\ExpState;
 use App\Models\FieldSetting;
 use App\Models\Lead;
 use App\Models\Product;
-use App\Models\State;
 use App\Models\Type;
 use App\Models\User;
+use App\Models\ViewExportContact;
 use App\Rules\MobileNumber;
 use Exception;
 use Illuminate\Http\Request;
@@ -38,7 +37,7 @@ class ExportContactController extends BackendController
 {
     public String $routePrefix = "export-contact";
 
-    protected $modelClass = ExportViewContact::class;
+    protected $modelClass = ViewExportContact::class;
 
     protected $model = null;
 
@@ -312,8 +311,8 @@ class ExportContactController extends BackendController
         return [
             "type" => ["required"],
             "name" => ["required"],
-            "mobile" => ["required", new MobileNumber],
-            "mobile2" => ["nullable", new MobileNumber],
+            "mobile" => ["required"],
+            "mobile2" => ["nullable"],
             "country_id" => ["required"],
             "state_id" => ["required"],
             "city_id" => ["required"],

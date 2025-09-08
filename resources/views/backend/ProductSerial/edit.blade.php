@@ -80,7 +80,6 @@
                                     $model->{$field} = $default_maker->id;
                                 }
                             ?>
-
                             <x-Inputs.drop-down :id="$field" :name="$field"
                                 :label="$label"
                                 :list="$maker_list"
@@ -89,6 +88,18 @@
                                 horizontalSecondColumnLength="3"
                                 class="select2"
                                 mandatory="true"
+                            />
+
+                            <?php
+                                $field = 'order_id';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                            ?>
+                            <x-Inputs.drop-down :id="$field" :name="$field"
+                                :label="$label"
+                                :list="$order_list"
+                                :value="$model->{$field}"
+                                layout="horizontal"
+                                class="select2"
                             />
 
                             <?php

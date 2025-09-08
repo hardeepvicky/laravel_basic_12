@@ -129,10 +129,7 @@ class SaleOrderController extends BackendController
 
         $maker_list = Maker::getList("id", "display_name", [], "list_display_order");
         $branch_list = Branch::getList("id", "display_name", [], "list_display_order");
-        $dealer_list = Dealer::getList("id", "display_name", ["type" => Dealer::TYPE_DEALER], "list_display_order");
-        $customer_list = Customer::getList();
-        $lead_list = Lead::getList("id", "display_name", ["is_customer" => 0]);
-
+        
         $default_maker = Maker::where("is_default", 1)->first();
 
         $order_from_type_list = SaleOrder::getOrderFromTypeList();
@@ -156,7 +153,7 @@ class SaleOrderController extends BackendController
         $sale_order_product_field_labels = FieldSetting::getDynamicFields(SaleOrderProduct::class);
 
         $this->setForView(compact("maker_list", "branch_list", "contact_list",
-            "order_from_type_list", "dealer_list", "customer_list",  "lead_list", "status_list",
+            "order_from_type_list", "status_list",
             "default_maker",
             "field_labels", "sale_order_product_field_labels"
         ));
@@ -350,7 +347,9 @@ class SaleOrderController extends BackendController
         {
             try
             {
-                $lead = Lead::with(["customer"])->findOrFail($validatedData['contact_id']);
+                $contact = Contact::findOrFail($validatedData['contact_id']);
+                
+                $lead = Lead::with(["customer"])->findOrFail($contact->ref_id);
     
                 if ($lead->customer)
                 {

@@ -37,6 +37,38 @@ class ExportContact extends BaseModel
         return $this->belongsTo(Competitor::class, 'ref_id');
     }
 
+    public static function getRefListFromUnionOfTables()
+    {
+        $leads = ExpLead::select('id', DB::raw("'lead' as type"), 'name', 'mobile', 'city_id');
+        $customers = ExpCustomer::select('id', DB::raw("'customer' as type"), 'name', 'mobile', 'city_id');
+        $parties = ExpParty::select('id', DB::raw("'party' as type"), 'name', 'mobile', 'city_id')->where("is_active", 1);
+        $dealers = ExpDealer::select('id', DB::raw("'dealer' as type"), 'name', 'mobile', 'city_id')->where("is_active", 1);
+        $competitors = ExpCompetitor::select('id', DB::raw("'competitor' as type"), 'name', 'mobile', 'city_id')->where("is_active", 1);
+
+        $contacts = DB::query()->fromSub(
+            $leads->union($customers)->union($parties)->union($dealers)->union($competitors)
+            ,'contacts'
+        )->join('exp_cities', 'exp_cities.id', '=', 'contacts.city_id')
+        ->select('contacts.*', 'exp_cities.name as city_name')
+        ->orderBy('contacts.name', 'ASC')
+        ->get();
+
+        $list = [];
+
+        foreach($contacts->toArray() as $contact)
+        {
+            $name = ucfirst($contact->type) . " >> " . $contact->name . " >> " . $contact->mobile . " >> " . $contact->city_name;
+
+            $list[] = [
+                "ref_id" => $contact->id,
+                "name" => $name,
+                "type" => $contact->type,
+            ];
+        }
+
+        return $list;
+    }
+
     public static function createContact($type, $ref_id)
     {
         $save = [

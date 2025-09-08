@@ -36,7 +36,7 @@ class ProductSerial extends BaseModel
     {
         parent::beforeSave();
     }
-    
+
     public function afterFind()
     {
         parent::afterFind();

@@ -58,7 +58,7 @@
                                                 <option value="">Please Select</option>
                                                 @foreach ($contact_list as $k => $t)
                                                     @php
-                                                        $attr = $model->order_from_type == $t['type'] && $t['ref_id'] == $model->{$field} ? 'selected="selected"' : '';
+                                                        $attr = $k == $t['type'] . "." . $model->{$field} ? 'selected="selected"' : '';
                                                     @endphp
                                                     <option value="{{ $k }}" {!! $attr !!}>
                                                         {{ $t['name'] }}
@@ -703,6 +703,8 @@
             $.events.execAtLast(function() {
 
                 order_from_type_toggle();
+
+                cal_grand_amount();
             });
         });
     </script>

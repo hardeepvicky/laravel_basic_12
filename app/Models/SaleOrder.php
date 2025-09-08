@@ -35,6 +35,10 @@ class SaleOrder extends BaseModel
             "foreignKey" => "sale_order_id",
             "preventDelete" => false
         ],
+        SaleOrderFile::class => [
+            "foreignKey" => "sale_order_id",
+            "preventDelete" => false
+        ],
     ];
 
     public function afterFindForCsv()
@@ -113,9 +117,9 @@ class SaleOrder extends BaseModel
                     $field => $this->branch?->getDisplayName()
                 ];
                 break;
-            case "dealer_id":
+            case "contact_id":
                 $ret_array = [
-                    $field => $this->dealer?->getDisplayName()
+                    $field => $this->contact?->getDisplayName()
                 ];
                 break;
             case "customer_id":
