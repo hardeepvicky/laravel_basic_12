@@ -105,17 +105,6 @@ class StockProduct extends BaseModel
     {
         $avialable_qty = $this->opening_qty + $this->qty;
 
-        $so_available_qty = SaleOrderProduct::where("product_id", $this->product_id)->where("make_id", $this->make_id)->sum("available_qty");
-        $so_qty_to_manufacture = SaleOrderProduct::where("product_id", $this->product_id)->where("make_id", $this->make_id)->sum("qty_to_manufacture");
-        $so_sent_qty = SaleOrderProduct::where("product_id", $this->product_id)->where("make_id", $this->make_id)->sum("sent_qty");
-
-        $eo_available_qty = ExportOrderProduct::where("product_id", $this->product_id)->where("make_id", $this->make_id)->sum("available_qty");
-        $eo_qty_to_manufacture = ExportOrderProduct::where("product_id", $this->product_id)->where("make_id", $this->make_id)->sum("qty_to_manufacture");
-        $eo_sent_qty = ExportOrderProduct::where("product_id", $this->product_id)->where("make_id", $this->make_id)->sum("sent_qty");
-
-        $avialable_qty -= $so_available_qty + $so_qty_to_manufacture - $so_sent_qty;
-        $avialable_qty -= $eo_available_qty + $eo_qty_to_manufacture - $eo_sent_qty;
-
         if ($avialable_qty < 0)
         {
             $avialable_qty = 0;

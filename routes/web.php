@@ -43,6 +43,7 @@ use App\Http\Controllers\Backend\ItemCategoryController;
 use App\Http\Controllers\Backend\ItemController;
 use App\Http\Controllers\Backend\LeadController;
 use App\Http\Controllers\Backend\MakerController;
+use App\Http\Controllers\Backend\ManufactureOrderController;
 use App\Http\Controllers\Backend\NotificationController;
 use App\Http\Controllers\Backend\PartyController;
 use App\Http\Controllers\Backend\PermissionController;
@@ -1149,6 +1150,18 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
 
         $name = "create_from_sale_order";
         Route::post($name, [$controllerClass, $name])->name($name);
+
+        $route_prefix = "export";
+        Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+            $name = "csv";
+            Route::get($name, [$controllerClass, $name])->name($name);
+        });
+    });
+
+    $route_prefix = "manufacture-order";
+    $controllerClass = ManufactureOrderController::class;
+    Route::resource($route_prefix, $controllerClass)->except(["create", "store", "destroy"]);
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
 
         $route_prefix = "export";
         Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {

@@ -9,54 +9,85 @@
                 <thead>
                     <tr>
                         <th style="width:10%">
-                            <span class="btn btn-light text-dark border-primary clear_search_conditions mb-1">Clear</span>
+                            <span class="btn btn-light btn-sm text-dark border-primary clear_search_conditions mb-1">Clear</span>
+                        </th>
+                        <th>
+                            <?php
+                            $field = "sale_order_no";
+                            ?>
+                            <x-Inputs.text-field :id="$field" :name="$field" :label="$false"
+                                :value="$search[$field]" class="form-control-sm"/>
+                        </th> 
+                        <th style="width:10%">
+                            <?php
+                            $field = "contact_id";
+                            ?>
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$contact_list" :value="$search[$field]" 
+                                pleaseSelect="All" class="select2 form-select-sm"  />
                         </th>
                         <th style="width:10%">
                             <?php
                             $field = "status_type";
                             ?>
-                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$status_type_list" :value="$search[$field]" class="select2" />
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$status_type_list" :value="$search[$field]" 
+                                pleaseSelect="All" class="select2 form-select-sm" />
                         </th>
                         <th style="width:10%">
                             <?php
                             $field = "carrier_id";
                             ?>
-                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$carrier_list" :value="$search[$field]" class="select2" />
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$carrier_list" :value="$search[$field]" 
+                                pleaseSelect="All" class="select2 form-select-sm" />
                         </th>
                         <th style="width:12%">
                             <?php
                             $field = "country_id";
                             ?>
-                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$country_list" :value="$search[$field]" class="select2 mb-1"/>
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$country_list" :value="$search[$field]" 
+                                pleaseSelect="All" class="select2 form-select-sm"/>
                         </th>
                         <th style="width:12%">                            
                             <?php
                             $field = "state_id";
                             ?>
-                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$state_list" :value="$search[$field]" class="select2 mb-1"/>
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$state_list" :value="$search[$field]" 
+                                pleaseSelect="All" class="select2 form-select-sm mb-1" />
 
                             <?php
                             $field = "city_id";
                             ?>
-                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$district_city_list" :value="$search[$field]" class="select2" />
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$district_city_list" :value="$search[$field]" 
+                                pleaseSelect="All" class="select2 form-select-sm" />
                         </th>
                         <th style="width:10%">
                             <?php
                             $field = "docket_no";
                             ?>
-                            <x-Inputs.text-field :id="$field" :name="$field" :label="$false" :value="$search[$field]"/>
+                            <x-Inputs.text-field :id="$field" :name="$field" :label="$false" :value="$search[$field]" class="form-control-sm"/>
                         </th>               
                         <th style="width:10%">
                             <?php
                             $field = "tracking_no";
                             ?>
-                            <x-Inputs.text-field :id="$field" :name="$field" :label="$false" :value="$search[$field]"/>
-                        </th>               
+                            <x-Inputs.text-field :id="$field" :name="$field" :label="$false" :value="$search[$field]" class="form-control-sm"/>
+                        </th>      
+                        <th style="width:10%">
+                            <?php
+                            $field = 'from_date';
+                            ?>
+                            <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]" class="form-control-sm date-picker" />
+                            <?php
+                            $field = 'to_date';
+                            ?>
+                            <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]" class="form-control-sm date-picker" />
+                        </th>         
                     </tr>
                     <tr class="border-bottom-primary">
                         <th style="width:10%">
                             <?= sortable_anchor('id', get_value_from_list($field_labels, 'id', 'id')) ?>
                         </th>
+                        <th><?= get_value_from_list($field_labels, 'sale_order_id', 'sale_order_id') ?></th>
+                        <th><?= get_value_from_list($field_labels, 'contact_id', 'contact_id') ?></th>
                         <th><?= sortable_anchor('status_type', get_value_from_list($field_labels, 'status_type', 'status_type')) ?></th>
                         <th><?= sortable_anchor('carrier.name', get_value_from_list($field_labels, 'carrier_id', 'carrier_id')) ?></th>
                         <th><?= sortable_anchor('country.name', get_value_from_list($field_labels, 'country_id', 'country_id')) ?></th>
@@ -77,12 +108,14 @@
                     @foreach ($records as $record)
                         <tr>
                             <th scope="row">
-                                <x-Backend.celec-summary-table-first-column :record="$record" :routePrefix="$routePrefix" buttons="tr_details">
+                                <x-Backend.celec-summary-table-first-column :record="$record" :routePrefix="$routePrefix" buttons="edit,tr_details">
                                     <div class="label">
-                                        {{ $record->id . " | " . $record->type }}
+                                        {{ $record->id}}
                                     </div>
                                 </x-Backend.celec-summary-table-first-column>
                             </th>
+                            <td>{{ $record->saleOrder?->getDisplayName() }}</td>
+                            <td>{{ $record->contact?->getDisplayName() }}</td>
                             <td>{{ get_value_from_list($status_type_list, $record->status_type) }}</td>
                             <td>{{ $record->carrier?->getDisplayName() }}</td>
                             <td>
@@ -110,9 +143,9 @@
                         </tr>
                         <tr id="record-{{ $record->id }}" class="hidden">
                             <td style="background-color: var(--body--bs-body-bg)"></td>                            
-                            <td colspan="8">
+                            <td colspan="10">
                                 <div class="row">
-                                    <div class="col-md-6">
+                                    <div class="col-md-5">
                                         <label class="info">
                                             {{ get_value_from_list($field_labels, 'builty_no') }} :
                                             <span>
@@ -162,6 +195,63 @@
                                         <p class="mb-2">
                                             {!! $record->remarks !!}
                                         </p>
+                                    </div>
+                                    <div class="col-md-7">
+                                        <div class="card">
+                                            <div class="card-header border-l-secondary card-no-border">
+                                                <h3>Products</h3>
+                                            </div>
+                                            <div class="card-body">
+                                                <table class="table table-sm summary-table table-bordered">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Sr. No.</th>
+                                                            <th>Category</th>
+                                                            <th>Model No.</th>
+                                                            <th>Qty</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach ($record->products as $i => $dispatchOrderProduct)
+                                                            <tr>
+                                                                <td>{{ $i + 1 }}</td>
+                                                                <td>{{ $dispatchOrderProduct->product?->category->getDisplayName() }}</td>
+                                                                <td>{{ $dispatchOrderProduct->product?->getDisplayName() }}</td>     
+                                                                <td>{{ $dispatchOrderProduct->qty }}</td>                                                           
+                                                            </tr>
+                                                        @endforeach
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+
+                                        <div class="card">
+                                            <div class="card-header border-l-secondary card-no-border">
+                                                <h3>Items</h3>
+                                            </div>
+                                            <div class="card-body">
+                                                <table class="table table-sm summary-table table-bordered">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Sr. No.</th>
+                                                            <th>Category</th>
+                                                            <th>Item</th>
+                                                            <th>Qty</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach ($record->items as $i => $dispatchOrderItem)
+                                                            <tr>
+                                                                <td>{{ $i + 1 }}</td>
+                                                                <td>{{ $dispatchOrderItem->item?->category->getDisplayName() }}</td>
+                                                                <td>{{ $dispatchOrderItem->item?->getDisplayName() }}</td>
+                                                                <td>{{ $dispatchOrderItem->qty }}</td>
+                                                            </tr>
+                                                        @endforeach
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </td>

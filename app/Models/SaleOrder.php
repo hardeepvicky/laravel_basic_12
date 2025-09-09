@@ -80,6 +80,11 @@ class SaleOrder extends BaseModel
         return $this->hasMany(SaleOrderProduct::class, 'sale_order_id');
     }
 
+    public function dispatchOrder()
+    {
+        return $this->hasMany(DispatchOrder::class, 'sale_order_id');
+    }
+
     public function files()
     {
         return $this->belongsToMany(DocumentFile::class, SaleOrderFile::class);
@@ -181,5 +186,49 @@ class SaleOrder extends BaseModel
                 return $list;
                 break;
         }
+    }
+
+    public function checkForSent()
+    {
+        $sum_available_qty = $this->saleOrderProduct()->sum("available_qty");
+        $qty_to_manufacture = $this->saleOrderProduct()->sum("qty_to_manufacture");
+        $sum_sent_qty = $this->saleOrderProduct()->sum("sent_qty");
+
+        if ($sum_available_qty == $sum_sent_qty)
+        {
+            $this->status = self::STATUS_DISPTACH;
+        }
+        else
+        {
+            $so_id = $this->id;
+            $manufactured_qty = ManufactureOrder::whereHas("saleOrderProduct", function($q) use($so_id) {
+                $q->where("sale_order_id", $so_id);
+            })->sum("manufactured_qty");
+
+            if ($manufactured_qty >= $qty_to_manufacture)
+            {
+                $this->status = self::STATUS_GODOWN;
+            }
+            else
+            {        
+                $this->status = self::STATUS_PRODUCTION;
+            }
+        }
+
+        $this->save();
+    }
+
+    public function isFullySent()
+    {
+        $sum_available_qty = $this->saleOrderProduct()->sum("available_qty");
+        $qty_to_manufacture = $this->saleOrderProduct()->sum("qty_to_manufacture");
+        $sum_sent_qty = $this->saleOrderProduct()->sum("sent_qty");
+
+        if ($sum_available_qty == $sum_sent_qty && $qty_to_manufacture <= 0)
+        {
+            return true;
+        }
+        
+        return false;
     }
 }

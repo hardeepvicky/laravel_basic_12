@@ -56,7 +56,14 @@ class DispatchOrder extends BaseModel
 
     public function getDisplayName()
     {
-        $name = $this->docket_no;
+        if ($this->sale_order_id)
+        {
+            $name = $this->saleOrder->order_no;
+        }
+        else
+        {
+            $name = $this->docket_no;
+        }
         
         return $name;
     }
@@ -96,9 +103,14 @@ class DispatchOrder extends BaseModel
         return $this->belongsTo(Party::class);
     }
 
-    public function lead()
+    public function contact()
     {
-        return $this->belongsTo(Lead::class);
+        return $this->belongsTo(ViewContact::class);
+    }
+
+    public function saleOrder()
+    {
+        return $this->belongsTo(SaleOrder::class);
     }
 
     public function getUniqueValidationRules(Request $request)

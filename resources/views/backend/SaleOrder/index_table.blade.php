@@ -86,7 +86,7 @@ $formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, 0);
                                 <x-Backend.celec-summary-table-first-column :record="$record" :routePrefix="$routePrefix" buttons="copy,edit,delete,tr_details">
                                     <div class="label">
                                         <label class="form-check custom-checkbox-group">
-                                            @if(!in_array($record->status,[SaleOrder::STATUS_DISPTACH, SaleOrder::STATUS_SENT]))
+                                            @if(!$record->isFullySent())
                                                 <input type="checkbox" class="form-check-input sale_order" value={{ $record->id }}>
                                             @endif
                                             {{ $record->order_no }}

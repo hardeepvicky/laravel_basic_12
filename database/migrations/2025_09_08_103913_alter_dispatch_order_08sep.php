@@ -16,7 +16,7 @@ return new class extends MyMigration
         Schema::table('dispatch_orders', function (Blueprint $table) {
             $table->string("order_from_type", 45)->after("id")->nullable();
             $table->foreignId("contact_id")->nullable()->after("order_from_type")->constrained("contacts")->onDelete("restrict");
-            $table->foreignId("sale_order_id")->nullable()->after("remarks")->constrained("sale_orders")->onDelete("restrict");
+            $table->foreignId("sale_order_id")->nullable()->after("contact_id")->constrained("sale_orders")->onDelete("restrict");
         });
     }
 

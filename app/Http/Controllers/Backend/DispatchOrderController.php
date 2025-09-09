@@ -7,26 +7,21 @@ use App\Helpers\ArrayHelper;
 use App\Helpers\CsvUtility;
 use App\Helpers\DateUtility;
 use App\Helpers\FileUtility;
-use App\Helpers\LaravelExtend;
 use App\Models\City;
+use App\Models\Contact;
 use App\Models\Country;
 use App\Models\DispatchOrder;
 use App\Models\DispatchOrderProduct;
-use App\Models\DocumentFile;
 use App\Models\FieldSetting;
 use App\Models\Party;
-use App\Models\Product;
 use App\Models\SaleOrder;
 use App\Models\State;
 use App\Models\Type;
 use App\Models\User;
-use App\Notifications\GeneralNotification;
 use Illuminate\Http\Request;
 use Exception;
-use Illuminate\Notifications\Events\NotificationSent;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Validator;
 
 class DispatchOrderController extends BackendController
 {
@@ -42,6 +37,10 @@ class DispatchOrderController extends BackendController
 
         $builder = $this->_getBuildeForIndex($cache_key_prefix);
 
+        $builder->with([
+            "products", "items"
+        ]);
+
         $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
 
         $this->setForView(compact("records"));
@@ -53,12 +52,15 @@ class DispatchOrderController extends BackendController
     {
         $cache_key = $cache_key_prefix . "-index";
 
+        $sale_order_condition_list = $this->getConditions($cache_key, [
+            ["field" => "sale_order_no", "type" => ""],
+        ], true);
+
         $conditions = $this->getConditions($cache_key, [
             ["field" => "id", "type" => "int", "cache" => false],
-            ["field" => "lead_id", "type" => "int", "cache" => false],
+            ["field" => "contact_id", "type" => "int"],
             ["field" => "type", "type" => "string"],
             ["field" => "status_type", "type" => "string"],
-            ["field" => "carrier_id", "type" => "int"],
             ["field" => "tracking_no", "type" => "string"],
             ["field" => "builty_no", "type" => "string"],
             ["field" => "docket_no", "type" => "string"],
@@ -67,18 +69,44 @@ class DispatchOrderController extends BackendController
             ["field" => "state_id", "type" => "int"],
             ["field" => "district_id", "type" => "int"],
             ["field" => "city_id", "type" => "int"],
-            ["field" => "created_at", "type" => "from_date", "view_field" => "from_date"],
-            ["field" => "created_at", "type" => "to_date", "view_field" => "to_date"],
+            ["field" => "carrier_id", "type" => "int"],
+            ["field" => "from_date", "type" => "date", "view_field" => "from_date"],
+            ["field" => "to_date", "type" => "date", "view_field" => "to_date"],
         ]);
 
         $array_helper =  new ArrayHelper($conditions);
         $condition_list = $array_helper->convertModelSearchConditionToList();
 
-        $builder = $this->modelClass::where($conditions);
+        $builder = $this->modelClass::query();
+
+        if (isset($condition_list['from_date']))
+        {
+            $builder->whereDate('created_at', ">=", $condition_list['from_date']);
+        }
+
+        if (isset($condition_list['to_date']))
+        {
+            $builder->whereDate('created_at', "<=", $condition_list['to_date']);
+        }
+
+        $conditions = $array_helper->unsetValues($conditions, ["from_date", "to_date"], true, [ArrayHelper::UNSET_VALUE_REMOVE_PARENT_IF_FOUND_CHILD]);
+
+        $builder->where($conditions);
 
         $builder->with([
-            "country", "state", "district", "city",
+            "country", "state", "district", "city", 
+            "contact",
+            "saleOrder",
         ]);
+
+        if (isset($sale_order_condition_list['sale_order_no']))
+        {
+            $builder->whereHas("saleOrderProduct", function($q) use($sale_order_condition_list) {
+                $q->whereHas("saleOrder", function($q)  use($sale_order_condition_list) {
+                    $q->where("order_no", "like", "%" . $sale_order_condition_list['sale_order_no'] . "%");
+                });
+            });
+        }
 
         if ($apply_sort) {
             $cache_key_for_sort = $cache_key_prefix . "-index-extra-params";
@@ -153,10 +181,12 @@ class DispatchOrderController extends BackendController
 
         $carrier_list = Party::getList("id", "display_name", ["type" => Party::TYPE_CARRIER]);
 
+        $contact_list = Contact::getList("id", "display_name", [], "id", "DESC");
+
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
         $this->setForView(compact(
-            "country_list", "status_type_list", "carrier_list",
+            "country_list", "status_type_list", "carrier_list", "contact_list",
             "field_labels", 
         ));
 
@@ -264,18 +294,40 @@ class DispatchOrderController extends BackendController
         try
         {
             DB::beginTransaction();
+
+            $save_records = [];
+            
             foreach($request->sale_order_ids as $sale_order_id)
             {
-                $sale_order = SaleOrder::with(["saleOrderProduct", "contact"])->findOrFail($sale_order_id);
+                $sale_order = SaleOrder::with([
+                    "saleOrderProduct", 
+                    "saleOrderProduct.manufactureOrder", 
+                    "contact"
+                ])->findOrFail($sale_order_id);
 
                 if (!$sale_order->contact)
                 {
                     continue;
                 }
 
+                $total_sale_order_qty = 0;
+
+                foreach($sale_order->saleOrderProduct as $saleOrderProduct)
+                {
+                    $total_sale_order_qty += $saleOrderProduct->order_qty;
+                }
+
                 $save_data = [
+                    'dispatch_order' => [],
+                    'dispatch_order_products' => [],
+                    'saleOrder' => $sale_order,
+                    "total_sale_order_qty" => $total_sale_order_qty
+                ];
+
+                $save_data['dispatch_order'] = [
                     "order_from_type" => $sale_order->order_from_type,
                     "contact_id" => $sale_order->contact_id,
+                    "sale_order_id" => $sale_order->id,
                 ];
 
                 switch($sale_order->order_from_type)
@@ -319,37 +371,74 @@ class DispatchOrderController extends BackendController
 
                 if (!isset($address) || empty($address))
                 {
-                    throw new UserException("Address not found of Order # $sale_order_id");
+                    throw new UserException("Address not found of Order # " . $sale_order->getDisplayName());
                 }
 
-                $save_data['addr1'] = $address->addr1;
-                $save_data['addr2'] = $address->addr2;
-                $save_data['pincode'] = $address->pincode;
-                $save_data['country_id'] = Country::getMyCountry()?->id;
-                $save_data['state_id'] = $state_id;
-                $save_data['district_id'] = $district_id;
-                $save_data['city_id'] = $city_id;
-                $save_data['status_type'] = DispatchOrder::STATUS_PENDING;
-
-                $model = DispatchOrder::create($save_data);
+                $save_data['dispatch_order']['addr1'] = $address->addr1;
+                $save_data['dispatch_order']['addr2'] = $address->addr2;
+                $save_data['dispatch_order']['pincode'] = $address->pincode;
+                $save_data['dispatch_order']['country_id'] = Country::getMyCountry()?->id;
+                $save_data['dispatch_order']['state_id'] = $state_id;
+                $save_data['dispatch_order']['district_id'] = $district_id;
+                $save_data['dispatch_order']['city_id'] = $city_id;
+                $save_data['dispatch_order']['status_type'] = DispatchOrder::STATUS_PENDING;
 
                 foreach($sale_order->saleOrderProduct as $saleOrderProduct)
                 {
-                    $child_model = new DispatchOrderProduct([
-                        "product_id" => $saleOrderProduct->product_id,
-                        "qty" => $saleOrderProduct->order_qty,
-                    ]);
+                    $pendig_qty = $saleOrderProduct->pendingOrderQty();
 
-                    $model->products()->save($child_model);
+                    if ($pendig_qty)
+                    {
+                        $save_data['dispatch_order_products'][] = [
+                            "product_id" => $saleOrderProduct->product_id,
+                            "qty" => $pendig_qty,
+                        ];
+
+                        $saleOrderProduct->increment('sent_qty', $pendig_qty);
+                    }
                 }
 
-                $sale_order->status = SaleOrder::STATUS_DISPTACH;
-                $sale_order->save();
+                if ($save_data['dispatch_order_products'])
+                {
+                    $save_records[$sale_order->contact_id] = $save_data;
+                }
+            }
+
+            $save_DO_count = 0;
+            foreach($save_records as $save_record)
+            {
+                $old_dispatch_orders = DispatchOrder::with(["products"])->where("sale_order_id", $save_record['dispatch_order']['sale_order_id'])->get();
+
+                $dispatched_qty = 0;
+
+                foreach($old_dispatch_orders as $old_dispatch_order)
+                {
+                    foreach($old_dispatch_order->products as $product)
+                    {
+                        $dispatched_qty += $product->qty;
+                    }
+                }
+
+                if ($save_record['total_sale_order_qty'] > $dispatched_qty)
+                {
+                    $model = DispatchOrder::create($save_record['dispatch_order']);
+                    foreach($save_record['dispatch_order_products'] as $dispatch_product)
+                    {
+                        $child_model = new DispatchOrderProduct($dispatch_product);
+                        $model->products()->save($child_model);
+                    }
+
+                    $save_record['saleOrder']->status = SaleOrder::STATUS_GODOWN;
+                    $save_record['saleOrder']->save();
+                    $save_record['saleOrder']->checkForSent();
+
+                    $save_DO_count++;
+                }
             }
 
             DB::commit();
 
-            return back()->with("success", "Dispatch Order successfully placed");
+            return back()->with("success", "$save_DO_count Dispatch Orders successfully placed");
         }
         catch(Exception $ex)
         {

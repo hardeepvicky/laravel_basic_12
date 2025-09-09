@@ -17,6 +17,16 @@
 
                         <div class="hidden">
                             <?php
+                                $field = "sale_order_no";
+                            ?>
+                            <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
+
+                            <?php
+                                $field = "contact_id";
+                            ?>
+                            <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
+
+                            <?php
                                 $field = "status_type";
                             ?>
                             <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
@@ -62,6 +72,16 @@
 
                             <?php
                                 $field = "pincode";
+                            ?>
+                            <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
+
+                            <?php
+                                $field = "from_date";
+                            ?>
+                            <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
+
+                            <?php
+                                $field = "to_date";
                             ?>
                             <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
                         </div>

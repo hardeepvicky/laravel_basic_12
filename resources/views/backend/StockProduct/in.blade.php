@@ -19,16 +19,12 @@
                     <div class="row">
                         <div class="col-md-12 col-xxl-6">
                             <?php
-                                $field = 'bin_code';
-                                $label = "Bin Code";
+                            $field = 'branch_id';
+                            $label = get_value_from_list($field_labels, $field, $field);
                             ?>
-                            <x-Inputs.text-field :id="$field" :name="$field"
-                                :label="$label"
-                                placeholder="Enter {{ $label }}"
-                                layout="horizontal"
-                                horizontalSecondColumnLength="3"
-                                mandatory="true"
-                            />
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$branch_list"
+                                class="select2 " layout="horizontal" mandatory="true" />
+
 
                             <?php
                                 $field = 'product_serial_no';
@@ -40,6 +36,17 @@
                                 layout="horizontal"
                                 horizontalSecondColumnLength="3"
                                 mandatory="true"
+                            />
+
+                            <?php
+                                $field = 'bin_code';
+                                $label = "Bin Code";
+                            ?>
+                            <x-Inputs.text-field :id="$field" :name="$field"
+                                :label="$label"
+                                placeholder="Enter {{ $label }}"
+                                layout="horizontal"
+                                horizontalSecondColumnLength="3"
                             />
 
                             <div class="row mb-3">
@@ -56,15 +63,18 @@
 
         function ajax_in()
         {
+            var branch_id = $("#branch_id").val();
+            branch_id = branch_id ? branch_id.trim() : "";
+
             var bin_code = $("#bin_code").val();
             bin_code = bin_code ? bin_code.trim() : "";
 
             var product_serial_no = $("#product_serial_no").val();
             product_serial_no = product_serial_no ? product_serial_no.trim() : "";
 
-            if (!bin_code)
+            if (!branch_id)
             {
-                $("#bin_code").focus();
+                $("#branch_id").focus();
                 return;
             }
 
@@ -83,6 +93,7 @@
             $("#product_serial_no").val("").focus();
 
             $.post(url, {
+                branch_id : branch_id,
                 bin_code : bin_code,
                 product_serial_no : product_serial_no
             }, function(response){

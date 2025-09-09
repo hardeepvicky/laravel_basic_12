@@ -23,7 +23,7 @@ class ExportOrderProduct extends BaseModel
 
     public function manufactureOrders()
     {
-        return $this->belongsTo(Maker::class);
+        return $this->hasOne(ManufactureOrder::class);
     }
 
     public function getRefDisplayName($field, $value)

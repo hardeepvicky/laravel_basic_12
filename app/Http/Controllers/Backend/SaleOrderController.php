@@ -15,9 +15,11 @@ use App\Models\Contact;
 use App\Models\Customer;
 use App\Models\Dealer;
 use App\Models\ExportContact;
+use App\Models\ExportOrderProduct;
 use App\Models\FieldSetting;
 use App\Models\Lead;
 use App\Models\Maker;
+use App\Models\ManufactureOrder;
 use App\Models\ProductCategory;
 use App\Models\ProductSerial;
 use App\Models\SaleOrder;
@@ -329,7 +331,25 @@ class SaleOrderController extends BackendController
 
                     $child_model->fill($sale_order_product);
 
-                    $this->model->saleOrderProduct()->save($child_model);
+                    $child_model = $this->model->saleOrderProduct()->save($child_model);
+
+                    if ($sale_order_product['qty_to_manufacture'] > 0)
+                    {
+                        $save_arr = [
+                            "order_from" => "sale",
+                            "order_date_time" => DateUtility::getDate(null, DateUtility::DATETIME_FORMAT),
+                            "sale_order_product_id" => $child_model->id,
+                            "product_id" => $sale_order_product['product_id'],
+                            "make_id" => $sale_order_product['make_id'],
+                            "order_qty" => $sale_order_product['qty_to_manufacture'],
+                            "status" => ManufactureOrder::STATUS_PENDING,
+                            "remarks" => $sale_order_product['remarks'],
+                        ];
+
+                        $mo = new ManufactureOrder($save_arr);
+
+                        $child_model->manufactureOrder()->save($mo);
+                    }
                 }
 
                 if ($existing_id_list) {
@@ -361,11 +381,11 @@ class SaleOrderController extends BackendController
                     $cutomer = $lead->convertToCustomer();
                 }
 
-                $contact = ExportContact::where("type", "customer")->where("ref_id", $cutomer->id)->first();
+                $contact = Contact::where("type", "customer")->where("ref_id", $cutomer->id)->first();
 
                 if (!$contact)
                 {
-                    $contact = ExportContact::createContact("customer", $cutomer->id);
+                    $contact = Contact::createContact("customer", $cutomer->id);
                 }
 
                 $this->model->order_from_type = "customer";
@@ -604,7 +624,6 @@ class SaleOrderController extends BackendController
 
             $qb = SaleOrderProduct::where("product_id", $condition_list['product_id']);
 
-
             if (isset($condition_list['for']) && $condition_list['for'] == "ProductSerial")
             {
                 $qb->where(function ($q) use ($condition_list) {
@@ -653,11 +672,20 @@ class SaleOrderController extends BackendController
         $response = ["status" => 1, "available_qty" => 0, "qty_to_manufacture" => 0];
 
         $qb = StockProduct::where("make_id", $make_id)->where("product_id", $product_id);
-        $model = $qb->first();
+        $models = $qb->get();
 
-        if ($model)
+        if ($models)
         {
-            $response['available_qty'] = $model->getAvialiableQty();
+            foreach($models as $model)
+            {
+                $response['available_qty'] += $model->getAvialiableQty();
+            }
+
+            $so_order_qty = SaleOrderProduct::where("product_id", $product_id)->where("make_id", $make_id)->sum("order_qty");
+        
+            $eo_order_qty = ExportOrderProduct::where("product_id", $product_id)->where("make_id", $make_id)->sum("order_qty");
+
+            $response['available_qty'] -= ($so_order_qty + $eo_order_qty);
 
             $left_qty = $response['available_qty'] - $order_qty;
 

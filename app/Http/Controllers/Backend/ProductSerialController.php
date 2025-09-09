@@ -20,6 +20,7 @@ use App\Models\ProductCategory;
 use App\Models\ProductSerial;
 use App\Models\SaleOrderProduct;
 use App\Models\SqlLog;
+use App\Models\StockProduct;
 use App\Models\User;
 use App\Models\ViewOrder;
 use Illuminate\Http\Request;
@@ -282,6 +283,8 @@ class ProductSerialController extends BackendController
                 AutoSerialPattern::increaseCount(AutoSerialPattern::TYPE_PRODUCT_SERIAL);
             }
 
+            StockProduct::changeQty($this->model->branch_id, null, $this->model->product_id, $this->model->make_id, $save_data['no_of_serials']);
+
             if ($save_data['no_of_serials'] == 1)
             {
                 $this->_saveOthers($validatedData);
@@ -314,12 +317,15 @@ class ProductSerialController extends BackendController
                 $sale_order_product = SaleOrderProduct::where("sale_order_id", $order->ref_id)
                                         ->where("product_id", $this->model->product_id)
                                         ->where("make_id", $this->model->make_id)
+                                        ->with(["manufactureOrder"])
                                         ->first();
 
                 if (!$sale_order_product)
                 {
                     throw new UserException("Sale Order Product not found");
                 }
+
+                $sale_order_product->manufactureOrder->increaseManufactureQty();
 
                 $this->model->sale_order_product_id = $sale_order_product->id;
                 $this->model->save();
@@ -329,12 +335,15 @@ class ProductSerialController extends BackendController
                 $export_order_product = ExportOrderProduct::where("export_order_id", $order->ref_id)
                                         ->where("product_id", $this->model->product_id)
                                         ->where("make_id", $this->model->make_id)
+                                        ->with(["manufactureOrder"])
                                         ->first();
 
                 if (!$export_order_product)
                 {
                     throw new UserException("Export Order Product not found");
                 }
+
+                $export_order_product->manufactureOrder->increaseManufactureQty();
 
                 $this->model->export_order_product_id = $export_order_product->id;
                 $this->model->save();

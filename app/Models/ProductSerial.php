@@ -203,6 +203,15 @@ class ProductSerial extends BaseModel
         $this->save();
     }
 
+    public function markInBranch(Branch $branch)
+    {
+        $this->branch_id = $branch->id;
+        $this->bin_id = null;
+        $this->is_in = true;
+
+        $this->save();
+    }
+
     public function markOut()
     {
         $this->branch_id = null;

@@ -149,12 +149,14 @@ class CustomerController extends BackendController
             $this->model = new $this->modelClass();
         }
 
+        $lead = new Lead();
+
         $address_type_list = LeadAddress::getTypeList();
 
         $state_list = State::getIndianList();
 
         $type_conditions = [
-            'type' => Type::getType($this->model, "deal_type")
+            'type' => Type::getType($lead, "deal_type")
         ];
 
         if ($this->model->deal_type)
@@ -165,7 +167,7 @@ class CustomerController extends BackendController
         $deal_type_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
 
         $type_conditions = [
-            'type' => Type::getType($this->model, "status_type")
+            'type' => Type::getType($lead, "status_type")
         ];
 
         if ($this->model->status_type)
@@ -177,7 +179,7 @@ class CustomerController extends BackendController
         $status_type_list_for_form = array_diff($status_type_list, ["Converted", "Dead", "Fake", "Lost"]);
 
         $type_conditions = [
-            'type' => Type::getType(new Lead(), "payment_method_type")
+            'type' => Type::getType($lead, "payment_method_type")
         ];
 
         if ($this->model->payment_method_type)
