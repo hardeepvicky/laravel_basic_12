@@ -599,8 +599,6 @@
 
     <script>
         $(function() {
-            suggestion_list($("#remarks"), $("#remarks-suggestion-box"), [], "/tags/ajax_get_list");
-
             $(".template-table").srTableTemplate({
                 brace_type: "(",
                 afterRowAdd(_table, last_id, _tr) {
@@ -635,7 +633,7 @@
                 datumTokenizer: Bloodhound.tokenizers.whitespace,
                 queryTokenizer: Bloodhound.tokenizers.whitespace,
                 remote: {
-                    url: '/export-contact-ajax_get_list_for_mobile?query=%QUERY',
+                    url: '/export-lead-ajax_get_list?query=%QUERY',
                     wildcard: '%QUERY',
                     transform: function(response) {
                         var result = $.map(response['data'], function(item) {

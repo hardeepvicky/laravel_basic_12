@@ -569,8 +569,6 @@
 
     <script>
         $(function() {
-            suggestion_list($("#remarks"), $("#remarks-suggestion-box"), [], "/tags/ajax_get_list");
-
             $(".template-table").srTableTemplate({
                 brace_type: "(",
                 afterRowAdd(_table, last_id, _tr) {

@@ -600,7 +600,9 @@ class ExportContactController extends BackendController
                     $row['display'] = $record->getDisplayName();
                     $row['display'] .= " (" . $record->type . ")";
 
-                    $row['url'] = route("export-contact.edit", [$record]);
+                    $route_prefix = "export-" . $record->type;
+
+                    $row['url'] = route($route_prefix . ".edit", [$record->ref_id]);
 
                     $response['data'][] = $row;
                 }

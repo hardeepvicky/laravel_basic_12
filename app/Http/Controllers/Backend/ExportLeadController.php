@@ -1649,6 +1649,7 @@ class ExportLeadController extends BackendController
                 $records = $this->modelClass::
                             where("mobile", 'LIKE', '%' . $search_term . '%')
                             ->orWhere("mobile2", 'LIKE', '%' . $search_term . '%')
+                            ->with(["customer"])
                             ->orderBy("name", "ASC")
                             ->limit(20)
                             ->get();
@@ -1662,6 +1663,7 @@ class ExportLeadController extends BackendController
                 {
                     $records = $this->modelClass::orderBy("name", "ASC")
                                 ->limit($limit)
+                                ->with(["customer"])
                                 ->get();
                 }
             }
@@ -1672,22 +1674,24 @@ class ExportLeadController extends BackendController
                 {
                     $row = [];
 
-                    $row['display'] = $record->getDisplayName();
-
-                    $routePrefix = "lead";
                     if ($record->is_customer)
                     {   
-                        $row['display'] .= " (Customer)";
-                        $routePrefix = "customer";
+                        if (isset($record->customer->id))
+                        {
+                            $row['display'] = $record->getDisplayName() . " (Customer)";
+                            $row['url'] = route("export-customer.edit", [$record->customer->id]);
+                        }
                     }
                     else
                     {
-                        $row['display'] .= " (Lead)";
+                        $row['display'] = $record->getDisplayName() . " (Lead)";
+                        $row['url'] = route("export-lead.edit", [$record->id]);
                     }
 
-                    $row['url'] = route($routePrefix . ".edit", [$record]);
-
-                    $response['data'][] = $row;
+                    if ($row)
+                    {
+                        $response['data'][] = $row;
+                    }
                 }
             }    
         }
