@@ -48,7 +48,11 @@ class DispatchOrder extends BaseModel
         parent::beforeSave();
     }
 
-    
+    public function afterFindForCsv()
+    {
+        parent::afterFind();
+    }
+
     protected function getDisplayNameAttribute()
     {
         return $this->getDisplayName();
@@ -64,7 +68,7 @@ class DispatchOrder extends BaseModel
         {
             $name = $this->docket_no;
         }
-        
+
         return $name;
     }
 

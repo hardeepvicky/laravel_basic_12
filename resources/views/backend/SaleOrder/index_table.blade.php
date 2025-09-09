@@ -6,6 +6,7 @@ $formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, 0);
 <div class="card" id="page-summary">
     <div class="card-header">
         <a href="{{ route($routePrefix . '.export.csv') }}" class="btn btn-secondary">Export CSV</a>
+        <a href="{{ route($routePrefix . '.export.product_csv') }}" class="btn btn-secondary">Export Product CSV</a>
     </div>
 
     <div class="card-body p-1">

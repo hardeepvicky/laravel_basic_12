@@ -198,16 +198,27 @@ class DispatchOrderController extends BackendController
 
     public function export_csv()
     {
+        $this->model = new $this->modelClass();
+
         $cache_key_prefix = Route::currentRouteName();
 
         $builder = $this->_getBuildeForIndex($cache_key_prefix);
 
         $this->beforeCsvExport($builder);
 
+        $builder->with([
+            "saleOrder",
+            "saleOrder.branch",
+            "contact",
+            "country",
+            "state",
+            "district",
+            "city",
+        ]);
+
         $records = $builder->get();
 
-        foreach($records as $k => $record)
-        {
+        foreach ($records as $k => $record) {
             $record->afterFindForCsv();
         }
 
@@ -220,52 +231,46 @@ class DispatchOrderController extends BackendController
 
         $yes_no_list = laravel_constant('yes_no_list');
 
-        $type_list = Type::getListCache("code", "display_name");
+        $order_from_type_list = SaleOrder::getOrderFromTypeList();
+
+        $type_conditions = [
+            'type' => Type::getType($this->model, "status_type")
+        ];
+        
+        $status_type_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
 
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
-        foreach($records as $record)
-        {
-            $user_list = [];
+        $sale_order_field_labels = FieldSetting::getDynamicFields(SaleOrder::class);
 
-            foreach($record['user'] as $user)
-            {
-                $user_list[] = $user['display_name'];
-            }
-
-            $tag_list = [];
-
-            foreach($record['tags'] as $tag)
-            {
-                $tag_list[] = $tag['display_name'];
-            }
+        foreach ($records as $record) {
 
             $csv_records[] = [
                 'ID' => $record['id'],
+                $sale_order_field_labels['order_no'] => $record['sale_order']['order_no'] ?? "",
+                $sale_order_field_labels['party_order_ref_no'] => $record['sale_order']['party_order_ref_no'] ?? "",
+                $sale_order_field_labels['branch_id'] => $record['sale_order']['branch']['display_name'] ?? "",
 
-                $field_labels['assign_to_user_id'] => $record['assign_to_user']['display_name'],
-                $field_labels['dept_id'] => $record['department']['display_name'],
-                $field_labels['task_type'] => get_value_from_list($type_list, $record['task_type']),
-                $field_labels['name'] => $record['name'],
-                $field_labels['description'] => $record['description'] ?? "",
-                $field_labels['task_type'] => get_value_from_list($type_list, $record['task_type']),
-                $field_labels['start_date_time'] => if_date_time($record['start_date_time']),
-                $field_labels['duration'] => $record['duration'],
-                $field_labels['duration_type'] => get_value_from_list($type_list, $record['duration_type']),
-                $field_labels['end_date_time'] => if_date_time($record['end_date_time']),
-                $field_labels['priority'] => $record['priority'],
-                $field_labels['status'] => get_value_from_list($type_list, $record['status']),
-                $field_labels['is_draft'] => get_value_from_list($yes_no_list, $record['is_draft']),
-                $field_labels['is_completed'] => get_value_from_list($yes_no_list, $record['is_completed']),
-                $field_labels['complete_date_time'] => if_date_time($record['complete_date_time']),
-                $field_labels['complete_by'] => get_value_from_list($user_cache_list, $record['complete_by']),
-                $field_labels['is_verified'] => get_value_from_list($yes_no_list, $record['is_verified']),
-                $field_labels['verified_date_time'] => if_date_time($record['verified_date_time']),
-                $field_labels['verified_by'] => get_value_from_list($user_cache_list, $record['verified_by']),
-                $field_labels['rating'] => $record['rating'] ?? "",
-                $field_labels['review_remarks'] => $record['review_remarks'] ?? "",
-                $field_labels['taskUser'] => implode(", ", $user_list),
-                $field_labels['tag_name'] => implode(", ", $tag_list),
+                $field_labels['order_from_type'] => get_value_from_list($order_from_type_list, $record['order_from_type']),
+                $field_labels['contact_id'] => $record['contact']['name'] ?? "",
+                $field_labels['status_type'] => get_value_from_list($status_type_list, $record['status_type']),
+
+                $sale_order_field_labels['estimated_dispatch_date'] => $record['sale_order']['estimated_dispatch_date'] ?? "",
+
+                $field_labels['addr1'] => $record['addr1'] ?? "",
+                $field_labels['addr2'] => $record['addr2'] ?? "",
+                $field_labels['pincode'] => $record['pincode'] ?? "",
+                $field_labels['country_id'] => $record['country']['name'] ?? "",
+                $field_labels['state_id'] => $record['state']['name'] ?? "",
+                $field_labels['district_id'] => $record['district']['name'] ?? "",
+                $field_labels['city_id'] => $record['city']['name'] ?? "",
+
+                $field_labels['docket_no'] => $record['docket_no'] ?? "",
+                $field_labels['builty_no'] => $record['builty_no'] ?? "",
+                $field_labels['tracking_no'] => $record['tracking_no'] ?? "",
+                $field_labels['tracking_phone_no'] => $record['tracking_phone_no'] ?? "",
+                $field_labels['shipping_fee'] => $record['shipping_fee'] ?? "",
+                $field_labels['remarks'] => $record['remarks'] ?? "",
 
                 'Created' => if_date_time($record['created_at']),
                 'Created By' => $user_cache_list[$record['created_by']] ?? "",
@@ -284,7 +289,103 @@ class DispatchOrderController extends BackendController
         $current_dt = DateUtility::getDateObj(null);
         $current_dt->setTimezone(DateUtility::$login_user_time_zone);
         $datetime = DateUtility::getDate($current_dt, DateUtility::DATETIME_OUT_FORMAT_FILE);
-        $file = $path . $this->tableName . "_$datetime.csv";
+        $file_prefix = str_class_name_to_human_text($this->modelClass);
+        $file = $path . $file_prefix . "-$datetime.csv";
+
+        $csvUtility = new CsvUtility($file);
+        $csvUtility->write($csv_records);
+
+        download_start($file, "application/octet-stream");
+    }
+
+    public function export_product_csv()
+    {
+        $cache_key_prefix = Route::currentRouteName();
+
+        $builder = $this->_getBuildeForIndex($cache_key_prefix);
+
+        $this->beforeCsvExport($builder);
+
+        $builder->with([
+            "saleOrder",
+            "saleOrder.branch",
+            "contact",
+            "products"
+        ]);
+
+        $records = $builder->get();
+
+        foreach ($records as $k => $record) {
+            $record->afterFindForCsv();
+        }
+
+        // d($records, true);
+
+        $csv_records = [];
+        $user_cache_list = User::getListCache();
+
+        $yes_no_list = laravel_constant('yes_no_list');
+
+        $order_from_type_list = SaleOrder::getOrderFromTypeList();
+
+        $type_conditions = [
+            'type' => Type::getType($this->model, "status_type")
+        ];
+        
+        $status_type_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
+
+        $product_list = Product::getListCache();
+        $make_list = Maker::getListCache();
+
+        $field_labels = FieldSetting::getDynamicFields($this->modelClass);
+
+        $sale_order_field_labels = FieldSetting::getDynamicFields(SaleOrder::class);
+
+        $dispatch_order_product_field_labels = FieldSetting::getDynamicFields(DispatchOrderProduct::class);
+
+        foreach ($records as $model) {
+
+
+            $record = $model->toArray();
+            foreach($model->products as $dispatchOrderProduct)
+            {
+                $child_record = $dispatchOrderProduct->toArray();
+
+                $csv_records[] = [
+                    'ID' => $record['id'],
+                    $sale_order_field_labels['order_no'] => $record['sale_order']['order_no'] ?? "",
+                    $sale_order_field_labels['party_order_ref_no'] => $record['sale_order']['party_order_ref_no'] ?? "",
+                    $sale_order_field_labels['branch_id'] => $record['sale_order']['branch']['display_name'] ?? "",
+
+                    $field_labels['order_from_type'] => get_value_from_list($order_from_type_list, $record['order_from_type']),
+                    $field_labels['contact_id'] => $record['contact']['name'] ?? "",
+                    $field_labels['status_type'] => get_value_from_list($status_type_list, $record['status_type']),
+
+                    $dispatch_order_product_field_labels['product_id'] => get_value_from_list($product_list, $child_record['product_id']),
+                    $dispatch_order_product_field_labels['make_id'] => get_value_from_list($make_list, $child_record['make_id']),
+                    $dispatch_order_product_field_labels['qty'] => $child_record['qty'] ?? "",
+                    'Sent Qty' => $dispatchOrderProduct->dispatchOrderProductSerial->count() ?? "",
+
+                    'Created' => if_date_time($dispatchOrderProduct['created_at']),
+                    'Created By' => $user_cache_list[$dispatchOrderProduct['created_by']] ?? "",
+                    'Updated' => if_date_time($dispatchOrderProduct['updated_at']),
+                    'Updated By' => $user_cache_list[$dispatchOrderProduct['updated_by']] ?? "",
+                ];
+            }
+        }
+
+        // d($csv_records, true);
+
+        $this->saveSqlLog();
+
+        $path = laravel_constant('path.temp');
+        FileUtility::createFolder($path);
+
+        $current_dt = DateUtility::getDateObj(null);
+        $current_dt->setTimezone(DateUtility::$login_user_time_zone);
+        $datetime = DateUtility::getDate($current_dt, DateUtility::DATETIME_OUT_FORMAT_FILE);
+        $file_prefix = str_class_name_to_human_text(DispatchOrderProduct::class);
+        $file = $path . $file_prefix . "-$datetime.csv";
 
         $csvUtility = new CsvUtility($file);
         $csvUtility->write($csv_records);
@@ -434,7 +535,7 @@ class DispatchOrderController extends BackendController
                             $model->products()->save($child_model);
                         }
 
-                        $save_record['saleOrder']->status = SaleOrder::STATUS_GODOWN;
+                        $save_record['saleOrder']->status_type = SaleOrder::STATUS_GODOWN;
                         $save_record['saleOrder']->save();
                         $save_record['saleOrder']->checkForSent();
 
@@ -664,8 +765,14 @@ class DispatchOrderController extends BackendController
             }
             else
             {
-                $status_type_list = Type::getList("code", "display_name", [], "list_display_order");
+                $this->model = new $this->modelClass();
 
+                $type_conditions = [
+                    'type' => Type::getType($this->model, "status_type")
+                ];
+                
+                $status_type_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
+                
                 $msg = "Dispatch Order has Status of " . get_value_from_list($status_type_list, $model->dispatchOrderProduct->dispatchOrder->status_type);
                 $msg .= ", Can't Delete";
 

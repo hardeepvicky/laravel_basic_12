@@ -1,6 +1,7 @@
 <div class="card" id="page-summary">
     <div class="card-header">
-        <x-Backend.pagination-links :records="$records" />
+        <a href="{{ route($routePrefix . '.export.csv') }}" class="btn btn-secondary">Export CSV</a>
+        <a href="{{ route($routePrefix . '.export.product_csv') }}" class="btn btn-secondary">Export Product CSV</a>
     </div>
 
     <div class="card-body p-1">
@@ -110,7 +111,7 @@
                                 <x-Backend.celec-summary-table-first-column :record="$record" :routePrefix="$routePrefix" buttons="edit,tr_details">
                                     <div class="label">
                                         {{ $record->id}} 
-                                        | <a class="btn btn-sm btn-secondary" href="{{ route($routePrefix . '.send', [$record->id]) }}">Send</a>
+                                        | <a class="btn btn-sm btn-secondary" href="{{ route($routePrefix . '.send', [$record->id]) }}">Scan</a>
                                     </div>
                                 </x-Backend.celec-summary-table-first-column>
                             </th>
