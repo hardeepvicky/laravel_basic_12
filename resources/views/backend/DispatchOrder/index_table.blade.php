@@ -39,13 +39,6 @@
                             <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$carrier_list" :value="$search[$field]" 
                                 pleaseSelect="All" class="select2 form-select-sm" />
                         </th>
-                        <th style="width:12%">
-                            <?php
-                            $field = "country_id";
-                            ?>
-                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$country_list" :value="$search[$field]" 
-                                pleaseSelect="All" class="select2 form-select-sm"/>
-                        </th>
                         <th style="width:12%">                            
                             <?php
                             $field = "state_id";
@@ -59,6 +52,13 @@
                             <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$district_city_list" :value="$search[$field]" 
                                 pleaseSelect="All" class="select2 form-select-sm" />
                         </th>
+                        <th style="width:12%">
+                            <?php
+                            $field = "carrier_id";
+                            ?>
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$carrier_list" :value="$search[$field]" 
+                                pleaseSelect="All" class="select2 form-select-sm"/>
+                        </th>
                         <th style="width:10%">
                             <?php
                             $field = "docket_no";
@@ -68,6 +68,12 @@
                         <th style="width:10%">
                             <?php
                             $field = "tracking_no";
+                            ?>
+                            <x-Inputs.text-field :id="$field" :name="$field" :label="$false" :value="$search[$field]" class="form-control-sm"/>
+                        </th>      
+                        <th style="width:10%">
+                            <?php
+                            $field = "builty_no";
                             ?>
                             <x-Inputs.text-field :id="$field" :name="$field" :label="$false" :value="$search[$field]" class="form-control-sm"/>
                         </th>      
@@ -96,6 +102,7 @@
                             | <?= sortable_anchor('district.name', get_value_from_list($field_labels, 'district_id', 'district_id')) ?>                        
                             | <?= sortable_anchor('city.name', get_value_from_list($field_labels, 'city_id', 'city_id')) ?>
                         </th>
+                        <th><?= sortable_anchor('carrier.name', get_value_from_list($field_labels, 'carrier_id', 'carrier_id')) ?></th>
                         <th><?= sortable_anchor('docket_no', get_value_from_list($field_labels, 'docket_no', 'docket_no')) ?></th>
                         <th><?= sortable_anchor('tracking_no', get_value_from_list($field_labels, 'tracking_no', 'tracking_no')) ?></th>
                         <th style="width:10%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
@@ -110,24 +117,32 @@
                             <th scope="row">
                                 <x-Backend.celec-summary-table-first-column :record="$record" :routePrefix="$routePrefix" buttons="edit,tr_details">
                                     <div class="label">
-                                        {{ $record->id}}
+                                        {{ $record->id}} 
+                                        | <a class="btn btn-sm btn-secondary" href="{{ route($routePrefix . '.send', [$record->id]) }}">Send</a>
                                     </div>
                                 </x-Backend.celec-summary-table-first-column>
                             </th>
-                            <td>{{ $record->saleOrder?->getDisplayName() }}</td>
-                            <td>{{ $record->contact?->getDisplayName() }}</td>
+                            <td>
+                                <a href="{{ route('sale-order.index', ['id' => $record->sale_order_id]) }}" target="_blank">
+                                    {{ $record->saleOrder?->getDisplayName() }}
+                                </a>
+                            </td>
+                            <td>
+                                <a href="{{ route('contact.index', ['id' => $record->contact_id]) }}" target="_blank">
+                                    {{ $record->contact?->getDisplayName() }}
+                                </a>
+                            </td>
                             <td>{{ get_value_from_list($status_type_list, $record->status_type) }}</td>
                             <td>{{ $record->carrier?->getDisplayName() }}</td>
-                            <td>
-                                {{ $record->country?->getShortName() }}
-                            </td>
                             <td>
                                 {{ $record->state?->getShortName() }}
                                 >> {{ $record->district?->getDisplayName() }}
                                 >> {{ $record->city?->getDisplayName() }}
                             </td>
+                            <td>{{ $record->carrier?->getDisplayName() }}</td>
                             <td>{{ $record->docket_no }}</td>
                             <td>{{ $record->tracking_no }}</td>
+                            <td>{{ $record->builty_no }}</td>
                              <td>
                                 <x-Backend.celec-date-time :value="$record->created_at" />
                             </td>
@@ -143,7 +158,7 @@
                         </tr>
                         <tr id="record-{{ $record->id }}" class="hidden">
                             <td style="background-color: var(--body--bs-body-bg)"></td>                            
-                            <td colspan="10">
+                            <td colspan="11">
                                 <div class="row">
                                     <div class="col-md-5">
                                         <label class="info">

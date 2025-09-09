@@ -7,15 +7,22 @@ use App\Helpers\ArrayHelper;
 use App\Helpers\CsvUtility;
 use App\Helpers\DateUtility;
 use App\Helpers\FileUtility;
+use App\Helpers\LaravelExtend;
 use App\Models\City;
 use App\Models\Contact;
 use App\Models\Country;
 use App\Models\DispatchOrder;
 use App\Models\DispatchOrderProduct;
+use App\Models\DispatchOrderProductSerial;
 use App\Models\FieldSetting;
+use App\Models\Maker;
 use App\Models\Party;
+use App\Models\Product;
+use App\Models\ProductSerial;
 use App\Models\SaleOrder;
+use App\Models\SaleOrderProduct;
 use App\Models\State;
+use App\Models\StockProduct;
 use App\Models\Type;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -94,7 +101,7 @@ class DispatchOrderController extends BackendController
         $builder->where($conditions);
 
         $builder->with([
-            "country", "state", "district", "city", 
+            "country", "state", "district", "city",
             "contact",
             "saleOrder",
         ]);
@@ -143,9 +150,9 @@ class DispatchOrderController extends BackendController
                 $state_conditions[] = ["id", $condition_list['state_id']];
                 $district_conditions[] = ["state_id", $condition_list['state_id']];
             }
-            
+
             $district_cities = City::getWithDistrict($state_conditions, $district_conditions, [["is_active", 1]]);
-        
+
             $district_city_collection = collect($district_cities);
 
             $district_city_list = $district_city_collection->pluck('name', 'id')->toArray();
@@ -187,7 +194,7 @@ class DispatchOrderController extends BackendController
 
         $this->setForView(compact(
             "country_list", "status_type_list", "carrier_list", "contact_list",
-            "field_labels", 
+            "field_labels",
         ));
 
         return parent::beforeViewRender();
@@ -296,12 +303,12 @@ class DispatchOrderController extends BackendController
             DB::beginTransaction();
 
             $save_records = [];
-            
+
             foreach($request->sale_order_ids as $sale_order_id)
             {
                 $sale_order = SaleOrder::with([
-                    "saleOrderProduct", 
-                    "saleOrderProduct.manufactureOrder", 
+                    "saleOrderProduct",
+                    "saleOrderProduct.manufactureOrder",
                     "contact"
                 ])->findOrFail($sale_order_id);
 
@@ -391,6 +398,7 @@ class DispatchOrderController extends BackendController
                     {
                         $save_data['dispatch_order_products'][] = [
                             "product_id" => $saleOrderProduct->product_id,
+                            "make_id" => $saleOrderProduct->make_id,
                             "qty" => $pendig_qty,
                         ];
 
@@ -400,39 +408,42 @@ class DispatchOrderController extends BackendController
 
                 if ($save_data['dispatch_order_products'])
                 {
-                    $save_records[$sale_order->contact_id] = $save_data;
+                    $save_records[$sale_order->contact_id][] = $save_data;
                 }
             }
 
             $save_DO_count = 0;
-            foreach($save_records as $save_record)
+            foreach($save_records as $sale_records)
             {
-                $old_dispatch_orders = DispatchOrder::with(["products"])->where("sale_order_id", $save_record['dispatch_order']['sale_order_id'])->get();
-
-                $dispatched_qty = 0;
-
-                foreach($old_dispatch_orders as $old_dispatch_order)
+                foreach($sale_records as $save_record)
                 {
-                    foreach($old_dispatch_order->products as $product)
-                    {
-                        $dispatched_qty += $product->qty;
-                    }
-                }
+                    $old_dispatch_orders = DispatchOrder::with(["products"])->where("sale_order_id", $save_record['dispatch_order']['sale_order_id'])->get();
 
-                if ($save_record['total_sale_order_qty'] > $dispatched_qty)
-                {
-                    $model = DispatchOrder::create($save_record['dispatch_order']);
-                    foreach($save_record['dispatch_order_products'] as $dispatch_product)
+                    $dispatched_qty = 0;
+
+                    foreach($old_dispatch_orders as $old_dispatch_order)
                     {
-                        $child_model = new DispatchOrderProduct($dispatch_product);
-                        $model->products()->save($child_model);
+                        foreach($old_dispatch_order->products as $product)
+                        {
+                            $dispatched_qty += $product->qty;
+                        }
                     }
 
-                    $save_record['saleOrder']->status = SaleOrder::STATUS_GODOWN;
-                    $save_record['saleOrder']->save();
-                    $save_record['saleOrder']->checkForSent();
+                    if ($save_record['total_sale_order_qty'] > $dispatched_qty)
+                    {
+                        $model = DispatchOrder::create($save_record['dispatch_order']);
+                        foreach($save_record['dispatch_order_products'] as $dispatch_product)
+                        {
+                            $child_model = new DispatchOrderProduct($dispatch_product);
+                            $model->products()->save($child_model);
+                        }
 
-                    $save_DO_count++;
+                        $save_record['saleOrder']->status = SaleOrder::STATUS_GODOWN;
+                        $save_record['saleOrder']->save();
+                        $save_record['saleOrder']->checkForSent();
+
+                        $save_DO_count++;
+                    }
                 }
             }
 
@@ -446,6 +457,247 @@ class DispatchOrderController extends BackendController
 
             return back()->with("fail", get_exception_display_message($ex));
         }
+    }
+
+    private function _common_validation_rules()
+    {
+        return [
+            'status_type' => ["required"],
+            'docket_no' => ["required"],
+            'builty_no' => ["nullable"],
+            'tracking_no' => ["nullable"],
+            'tracking_phone_no' => [],
+            'carrier_id' => [],
+            "remarks" => []
+        ];
+    }
+
+    private function _common_validation_messages()
+    {
+        return [
+        ];
+    }
+
+    public function edit($id)
+    {
+        $this->model = $model = $this->modelClass::findOrFail($id);
+
+        $this->beforeEdit($this->model);
+
+        $form = [
+            'url' => route($this->routePrefix . '.update', $id),
+            'method' => 'PUT',
+        ];
+
+        $this->setForView(compact("model", "form"));
+
+        return $this->view("form");
+    }
+
+    public function update($id, Request $request)
+    {
+        $this->model = $model = $this->modelClass::findOrFail($id);
+
+        $this->beforeEdit($model);
+
+        $rules = $this->_common_validation_rules();
+
+        $rules = LaravelExtend::merge_validation_rules($rules, $this->model->getUniqueValidationRules($request));
+        $rules = LaravelExtend::merge_validation_rules($rules, $this->model->getRequiedIfRules($request));
+
+        $messages = $this->_common_validation_messages();
+
+        $validatedData = $request->validate($rules, $messages);
+
+        DB::beginTransaction();
+
+        try
+        {
+            // dd($validatedData);
+            $validatedData = $this->model->convertTimeZoneBeforeQueryToDatabase($validatedData);
+
+            if ($validatedData['status_type'] != DispatchOrder::STATUS_PENDING)
+            {
+                if (!$this->model->canMarkSent())
+                {
+                    throw new UserException("Can not Mark Sent before scan all serials");
+                }
+            }
+
+            $model->fill($validatedData);
+
+            $model->save();
+
+            DB::commit();
+
+            return $this->afterSave($model);
+        }
+        catch(Exception $ex)
+        {
+            DB::rollBack();
+
+            $this->saveSqlLog();
+
+            return back()->withInput()->with('fail', get_exception_display_message($ex));
+        }
+    }
+
+    public function send($id, Request $request)
+    {
+        if ($request->isMethod("post"))
+        {
+            $response = ["status" => 0];
+            $data = $request->all();
+
+            try
+            {
+                $required_fields = ["product_serial_no"];
+
+                foreach($required_fields as $field)
+                {
+                    if (!isset($data[$field]) || empty($data[$field]))
+                    {
+                        throw new UserException("Missing or empty $field", UserException::ERROR_USER_DATA_WRONG);
+                    }
+                }
+
+                $product_serial_no = ProductSerial::where("serial_no", $data['product_serial_no'])->first();
+
+                if (!$product_serial_no)
+                {
+                    throw new UserException("Wrong Serial No.", UserException::ERROR_USER_DATA_WRONG);
+                }
+
+                if (!$product_serial_no->make_id)
+                {
+                    throw new UserException("Serial No. have no make", UserException::ERROR_USER_DATA_WRONG);
+                }
+
+                $dispatchOrderProduct = DispatchOrderProduct::where("dispatch_order_id", $id)->where("product_id", $product_serial_no->product_id)->where("make_id", $product_serial_no->make_id)->with([
+                    "dispatchOrder"
+                ])->first();
+
+                if (!$dispatchOrderProduct)
+                {
+                    $product = Product::findOrFail($product_serial_no->product_id);
+                    $make = Maker::findOrFail($product_serial_no->make_id);
+
+                    $msg = "Product " . $product->getDisplayName();
+                    $msg .= " with Make " . $make->getDisplayName();
+                    $msg .= " not included in Order";
+
+                    throw new UserException($msg);
+                }
+
+                if ($dispatchOrderProduct->qty == $dispatchOrderProduct->dispatchOrderProductSerial->count())
+                {
+                    throw new UserException("All Quantity has sent of this product");
+                }
+
+                DB::beginTransaction();
+
+                if ($product_serial_no->is_in)
+                {
+                    StockProduct::changeQty($product_serial_no->branch_id, $product_serial_no->bin_id, $product_serial_no->product_id, $product_serial_no->make_id, -1);
+
+                    $product_serial_no->markOut();
+                }
+
+                $product_serial_no->is_sold = 1;
+                $product_serial_no->save();
+
+                $dispatchOrderProductSerial = new DispatchOrderProductSerial([
+                    "product_serial_id" => $product_serial_no->id
+                ]);
+
+                $dispatchOrderProductSerial = $dispatchOrderProduct->dispatchOrderProductSerial()->save($dispatchOrderProductSerial);
+
+                DB::commit();
+
+                $response['product_serial_no'] = $data['product_serial_no'];
+                $response['status'] = 1;
+                $response['delete_url'] = route($this->routePrefix . ".ajax_delete_product_serial", [$dispatchOrderProductSerial->id]);
+                $response['dispatchOrderProduct'] = [
+                    "id" => $dispatchOrderProduct->id,
+                    "sent_qty" => $dispatchOrderProduct->dispatchOrderProductSerial()->count()
+                ];
+
+            }
+            catch(Exception $ex)
+            {
+                DB::rollBack();
+
+                $response['status'] = 0;
+                $response['msg'] = $ex->getMessage();
+            }
+
+            return $this->responseJson($response);
+        }
+
+        $model = $this->model = $this->modelClass::with([
+            "products.dispatchOrderProductSerial.productSerial"
+        ])->findOrFail($id);
+
+        $this->setForView(compact("model"));
+
+        return $this->view(__FUNCTION__);
+    }
+
+    public function ajax_delete_product_serial($id, Request $request)
+    {
+        $response = ["status" => 0];
+
+        try
+        {
+            DB::beginTransaction();
+
+            $model = DispatchOrderProductSerial::with([
+                "productSerial",
+                "dispatchOrderProduct.dispatchOrder"
+            ])->find($id);
+          
+            if (!$model)
+            {
+                throw new UserException("Wrong ID");
+            }
+
+            if (empty($model->dispatchOrderProduct->dispatchOrder->status_type) || $model->dispatchOrderProduct->dispatchOrder->status_type == DispatchOrder::STATUS_PENDING)
+            {
+                $model->delete();
+            }
+            else
+            {
+                $status_type_list = Type::getList("code", "display_name", [], "list_display_order");
+
+                $msg = "Dispatch Order has Status of " . get_value_from_list($status_type_list, $model->dispatchOrderProduct->dispatchOrder->status_type);
+                $msg .= ", Can't Delete";
+
+                throw new UserException($msg);
+            }
+
+            $model->productSerial->is_sold = 1;
+            $model->productSerial->save();
+
+            DB::commit();
+
+            $response['product_serial_no'] = $model->productSerial->serial_no;
+            $response['status'] = 1;            
+            $response['dispatchOrderProduct'] = [
+                "id" => $model->dispatchOrderProduct->id,
+                "sent_qty" => $model->dispatchOrderProduct->dispatchOrderProductSerial()->count()
+            ];
+
+        }
+        catch(Exception $ex)
+        {
+            DB::rollBack();
+
+            $response['status'] = 0;
+            $response['msg'] = $ex->getMessage();
+        }
+
+        return $this->responseJson($response);
+       
     }
 }
 

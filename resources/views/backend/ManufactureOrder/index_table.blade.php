@@ -106,8 +106,16 @@
                                     </div>
                                 </x-Backend.celec-summary-table-first-column>
                             </th>
-                            <td>{{ $record->saleOrderProduct->saleOrder->getDisplayName() }}</td>
-                            <td>{{ $record->product->getDisplayName() }}</td>
+                            <td>
+                                <a href="{{ route('sale-order.index', ['id' => $record->saleOrderProduct?->sale_order_id]) }}" target="_blank">
+                                    {{ $record->saleOrderProduct?->saleOrder->getDisplayName() }}
+                                </a>
+                            </td>
+                            <td>
+                                <a href="{{ route('product.index', ['id' => $record->product_id]) }}" target="_blank">
+                                    {{ $record->product->getDisplayName() }}
+                                </a>
+                            </td>
                             <td>{{ $record->make->getDisplayName() }}</td>
                             <td>{{ get_value_from_list($userListCache, $record->assign_to_user_id) }}</td>
                             

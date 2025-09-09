@@ -1142,11 +1142,12 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
 
     $route_prefix = "dispatch-order";
     $controllerClass = DispatchOrderController::class;
-    Route::resource($route_prefix, $controllerClass);
+    Route::resource($route_prefix, $controllerClass)->except(["create", "store", "destroy"]);
+    $name = "send";
+    Route::any($route_prefix . "-" . $name . "/{id}", [$controllerClass, $name])->name($route_prefix . "." .$name);
+    $name = "ajax_delete_product_serial";
+    Route::get($route_prefix . "-" . $name . "/{id}", [$controllerClass, $name])->name($route_prefix . "." .$name);
     Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
-
-        $name = "ajax_update_field";
-        Route::post($name, [$controllerClass, $name])->name($name);
 
         $name = "create_from_sale_order";
         Route::post($name, [$controllerClass, $name])->name($name);
@@ -1160,7 +1161,7 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
 
     $route_prefix = "manufacture-order";
     $controllerClass = ManufactureOrderController::class;
-    Route::resource($route_prefix, $controllerClass)->except(["create", "store", "destroy"]);
+    Route::resource($route_prefix, $controllerClass)->except(["create", "store", "destroy"]);    
     Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
 
         $route_prefix = "export";

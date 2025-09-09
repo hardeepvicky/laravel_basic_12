@@ -19,6 +19,11 @@ class DispatchOrderProduct extends BaseModel
         return $this->belongsTo(Product::class);
     }
 
+    public function dispatchOrderProductSerial()
+    {
+        return $this->hasMany(DispatchOrderProductSerial::class);
+    }
+
     public function getRefDisplayName($field, $value)
     {
         $ret_array = [];
