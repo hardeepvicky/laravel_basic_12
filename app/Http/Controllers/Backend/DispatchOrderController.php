@@ -20,7 +20,6 @@ use App\Models\Party;
 use App\Models\Product;
 use App\Models\ProductSerial;
 use App\Models\SaleOrder;
-use App\Models\SaleOrderProduct;
 use App\Models\State;
 use App\Models\StockProduct;
 use App\Models\Type;
@@ -72,7 +71,6 @@ class DispatchOrderController extends BackendController
             ["field" => "builty_no", "type" => "string"],
             ["field" => "docket_no", "type" => "string"],
             ["field" => "pincode", "type" => "string"],
-            ["field" => "country_id", "type" => "int"],
             ["field" => "state_id", "type" => "int"],
             ["field" => "district_id", "type" => "int"],
             ["field" => "city_id", "type" => "int"],
@@ -101,7 +99,7 @@ class DispatchOrderController extends BackendController
         $builder->where($conditions);
 
         $builder->with([
-            "country", "state", "district", "city",
+            "state", "district", "city",
             "contact",
             "saleOrder",
         ]);
@@ -130,14 +128,15 @@ class DispatchOrderController extends BackendController
             $builder->orderBy($sort_params['sort_by'], $sort_params['sort_dir']);
         }
 
-        if (isset($condition_list['country_id']))
+        $my_country = Country::getMyCountry();
+
+        $state_list = State::getList("id", "display_name", ["country_id" => $my_country->id]);
+        $district_city_list = [];
+
+        if (isset($condition_list['state_id']))
         {
-            $country_id = $condition_list['country_id'];
-
-            $state_list = State::getList("id", "display_name", ["country_id" => $country_id]);
-
             $state_conditions = [
-                ["country_id", $country_id],
+                ["country_id", $my_country->id],
                 ["is_active", 1]
             ];
 
@@ -157,10 +156,7 @@ class DispatchOrderController extends BackendController
 
             $district_city_list = $district_city_collection->pluck('name', 'id')->toArray();
         }
-        else
-        {
-            $state_list = $district_city_list = [];
-        }
+        
 
         $this->setForView(compact("state_list", "district_city_list"));
 

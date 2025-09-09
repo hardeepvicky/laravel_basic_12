@@ -32,13 +32,6 @@
                             <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$status_type_list" :value="$search[$field]" 
                                 pleaseSelect="All" class="select2 form-select-sm" />
                         </th>
-                        <th style="width:10%">
-                            <?php
-                            $field = "carrier_id";
-                            ?>
-                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$carrier_list" :value="$search[$field]" 
-                                pleaseSelect="All" class="select2 form-select-sm" />
-                        </th>
                         <th style="width:12%">                            
                             <?php
                             $field = "state_id";
@@ -95,8 +88,6 @@
                         <th><?= get_value_from_list($field_labels, 'sale_order_id', 'sale_order_id') ?></th>
                         <th><?= get_value_from_list($field_labels, 'contact_id', 'contact_id') ?></th>
                         <th><?= sortable_anchor('status_type', get_value_from_list($field_labels, 'status_type', 'status_type')) ?></th>
-                        <th><?= sortable_anchor('carrier.name', get_value_from_list($field_labels, 'carrier_id', 'carrier_id')) ?></th>
-                        <th><?= sortable_anchor('country.name', get_value_from_list($field_labels, 'country_id', 'country_id')) ?></th>
                         <th>
                             <?= sortable_anchor('state.name', get_value_from_list($field_labels, 'state_id', 'state_id')) ?>
                             | <?= sortable_anchor('district.name', get_value_from_list($field_labels, 'district_id', 'district_id')) ?>                        
@@ -105,6 +96,7 @@
                         <th><?= sortable_anchor('carrier.name', get_value_from_list($field_labels, 'carrier_id', 'carrier_id')) ?></th>
                         <th><?= sortable_anchor('docket_no', get_value_from_list($field_labels, 'docket_no', 'docket_no')) ?></th>
                         <th><?= sortable_anchor('tracking_no', get_value_from_list($field_labels, 'tracking_no', 'tracking_no')) ?></th>
+                        <th><?= sortable_anchor('builty_no', get_value_from_list($field_labels, 'builty_no', 'builty_no')) ?></th>
                         <th style="width:10%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
                         <th style="width:10%"><?= sortable_anchor('created_by', get_value_from_list($field_labels, 'created_by', 'created_by')) ?></th>
                         <th style="width:10%"><?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?></th>
@@ -133,7 +125,6 @@
                                 </a>
                             </td>
                             <td>{{ get_value_from_list($status_type_list, $record->status_type) }}</td>
-                            <td>{{ $record->carrier?->getDisplayName() }}</td>
                             <td>
                                 {{ $record->state?->getShortName() }}
                                 >> {{ $record->district?->getDisplayName() }}

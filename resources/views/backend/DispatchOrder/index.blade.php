@@ -44,13 +44,9 @@
                             $field = "tracking_no";
                         ?>
                         <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
+                        
                         <?php
                             $field = "builty_no";
-                        ?>
-                        <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
-
-                        <?php
-                            $field = "country_id";
                         ?>
                         <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
 
