@@ -141,6 +141,8 @@ class DealerController extends BackendController
             $this->model = new $this->modelClass();
         }
 
+        $lead = new Lead();
+
         $type_list = Dealer::getTypeList();
 
         $address_type_list = DealerAddress::getTypeList();
@@ -148,7 +150,7 @@ class DealerController extends BackendController
         $state_list = State::getIndianList();
 
         $type_conditions = [
-            'type' => Type::getType(new Lead(), "status_type")
+            'type' => Type::getType($lead, "status_type")
         ];
 
         if ($this->model->status_type)

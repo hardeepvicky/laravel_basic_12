@@ -26,7 +26,8 @@
                                 ?>
                                 <x-Inputs.text-field :name="$field" :label="$label" :value="$model->{$field}"
                                     layout="horizontal"
-                                    placeholder="Enter {{ $label }}" 
+                                    placeholder="Enter {{ $label }}"
+                                    mandatory="true" 
                                     />
 
                                 <?php
