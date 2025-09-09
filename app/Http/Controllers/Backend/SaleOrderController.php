@@ -687,6 +687,11 @@ class SaleOrderController extends BackendController
 
             $response['available_qty'] -= ($so_order_qty + $eo_order_qty);
 
+            if ($response['available_qty'] < 0)
+            {
+                $response['available_qty'] = 0;
+            }
+
             $left_qty = $response['available_qty'] - $order_qty;
 
             if ($left_qty < 0)

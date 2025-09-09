@@ -462,7 +462,8 @@ class DispatchOrderController extends BackendController
             'docket_no' => ["required"],
             'builty_no' => ["nullable"],
             'tracking_no' => ["nullable"],
-            'tracking_phone_no' => [],
+            'tracking_phone_no' => ["nullable"],
+            'shipping_fee' => ["required", "numeric"],
             'carrier_id' => [],
             "remarks" => []
         ];
