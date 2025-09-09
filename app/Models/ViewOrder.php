@@ -33,25 +33,23 @@ class ViewOrder extends BaseModel
 
         $name .= " >> ";
 
-        if (isset($this->lead->name))
+        switch($this->order_from_type)
         {
-            $name .= $this->lead->getDisplayName();
-        }
-        else if (isset($this->customer->name))
-        {
-            $name .= $this->customer->getDisplayName();
-        }
-        else if (isset($this->party->name))
-        {
-            $name .= $this->party->getDisplayName();
-        }
-        else if (isset($this->dealer->name))
-        {
-            $name .= $this->dealer->getDisplayName();
-        }
-        else if (isset($this->competitor->name))
-        {
-            $name .= $this->competitor->getDisplayName();
+            case "lead":
+                $name .= $this->lead->getDisplayName();
+                break;
+            case "customer":
+                $name .= $this->customer->getDisplayName();
+                break;
+            case "party":
+                $name .= $this->party->getDisplayName();
+                break;
+            case "dealer":
+                $name .= $this->dealer->getDisplayName();
+                break;
+            case "competitor":
+                $name .= $this->competitor->getDisplayName();
+                break;
         }
 
         return $name;
