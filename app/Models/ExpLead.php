@@ -423,7 +423,7 @@ class ExpLead extends BaseModel
             }
         }
 
-        $save_data['lead_id'] = $data['id'];
+        $save_data['exp_lead_id'] = $data['id'];
         $save_data['name'] = $data['name'];
         $save_data['mobile'] = $data['mobile'];
         $save_data['mobile2'] = $data['mobile2'];
