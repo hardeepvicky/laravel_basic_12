@@ -100,6 +100,15 @@
                                     layout="horizontal"
                                     placeholder="Enter {{ $label }}" 
                                     />
+
+                                <?php
+                                $field = 'emoji';
+                                $label = "Flag";
+                                ?>
+                                <x-Inputs.text-field :name="$field" :label="$label" :value="$model->{$field}"
+                                    layout="horizontal"
+                                    placeholder="Enter {{ $label }}" 
+                                    />
                             </div>
                         </div>
                     </div>
