@@ -17,10 +17,14 @@ class Holiday extends BaseModel
     protected static array $list_fields = ["id", "name", "short_name"];
 
     public static array $child_model_class = [
-        // User::class => [
-        //     "foreignKey" => ["sub_department_id"],
-        //     "preventDelete" => true
-        // ]
+        HolidayBranch::class => [
+            "foreignKey" => ["holiday_id"],
+            "preventDelete" => false
+        ],
+        HolidayDate::class => [
+            "foreignKey" => ["holiday_id"],
+            "preventDelete" => false
+        ],
     ];
 
     protected function getDisplayNameAttribute()

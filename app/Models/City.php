@@ -19,15 +19,27 @@ class City extends BaseModel
         Lead::class => [
             "foreignKey" => ["city_id"],
             "preventDelete" => true
-        ], 
+        ],
+        Customer::class => [
+            "foreignKey" => ["city_id"],
+            "preventDelete" => true
+        ],
         Dealer::class => [
             "foreignKey" => ["city_id"],
             "preventDelete" => true
-        ], 
+        ],
+        Party::class => [
+            "foreignKey" => ["city_id"],
+            "preventDelete" => true
+        ],
+        Competitor::class => [
+            "foreignKey" => ["city_id"],
+            "preventDelete" => true
+        ],
         DispatchOrder::class => [
             "foreignKey" => ["city_id"],
             "preventDelete" => true
-        ], 
+        ],
     ];
 
     public function state()
@@ -120,7 +132,7 @@ class City extends BaseModel
                         $q->orderBy("name", "ASC");
                     }
                 ])->orderBy("name", "ASC")->get();
-            
+
             foreach($records as $record)
             {
                 $prefix = $record->getDisplayName();

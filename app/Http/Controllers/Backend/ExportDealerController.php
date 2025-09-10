@@ -10,6 +10,7 @@ use App\Helpers\FileUtility;
 use App\Helpers\ImportUtility;
 use App\Helpers\LaravelExtend;
 use App\Helpers\Util;
+use App\Models\BaseModelInterface;
 use App\Models\DocumentFile;
 use App\Models\DropDownValue;
 use App\Models\ExpCity;
@@ -18,6 +19,7 @@ use App\Models\ExpDealer;
 use App\Models\ExpDealerAddress;
 use App\Models\ExpDealerHistory;
 use App\Models\ExpDealerTerm;
+use App\Models\ExportContact;
 use App\Models\ExpState;
 use App\Models\FieldSetting;
 use App\Models\ImportLog;
@@ -1284,6 +1286,30 @@ class ExportDealerController extends BackendController
             }
 
             return back()->withInput()->with('fail', get_exception_display_message($ex))->with("custom_errors", LaravelExtend::$errors);
+        }
+    }
+
+    protected function delete(BaseModelInterface $model)
+    {
+        try {
+            DB::beginTransaction();
+
+            $contact = ExportContact::where("type", "dealer")->where("ref_id", $model->id)->first();
+
+            if (!$contact->safeDelete($contact))
+            {
+                throw new \Exception("Record has associated data. can't delete");
+            }
+            
+            $this->deleteCascade($model);
+
+            DB::commit();
+
+            return true;
+        } catch (\Exception $ex) {
+            DB::rollBack();
+
+            throw $ex;
         }
     }
 }

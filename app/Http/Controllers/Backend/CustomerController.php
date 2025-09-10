@@ -8,6 +8,7 @@ use App\Helpers\CsvUtility;
 use App\Helpers\DateUtility;
 use App\Helpers\FileUtility;
 use App\Helpers\LaravelExtend;
+use App\Models\BaseModelInterface;
 use App\Models\City;
 use App\Models\Contact;
 use App\Models\Country;
@@ -1122,5 +1123,29 @@ class CustomerController extends BackendController
         $csvUtility->write($csv_records);
 
         download_start($file, "application/octet-stream");
+    }
+    
+    protected function delete(BaseModelInterface $model)
+    {
+        try {
+            DB::beginTransaction();
+
+            $contact = Contact::where("type", "customer")->where("ref_id", $model->id)->first();
+
+            if (!$contact->safeDelete($contact))
+            {
+                throw new \Exception("Record has associated data. can't delete");
+            }
+            
+            $this->deleteCascade($model);
+
+            DB::commit();
+
+            return true;
+        } catch (\Exception $ex) {
+            DB::rollBack();
+
+            throw $ex;
+        }
     }
 }

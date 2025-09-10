@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Exceptions\UserException;
-use App\Helpers\LaravelExtend;
 use Illuminate\Support\Facades\DB;
 
 class Contact extends BaseModel
@@ -13,7 +12,14 @@ class Contact extends BaseModel
     protected static array $list_fields = ["id", "type", "ref_id"];
 
     public static array $child_model_class = [
-        
+        DispatchOrder::class => [
+            "foreignKey" => ["contact_id"],
+            "preventDelete" => true
+        ],
+        SaleOrder::class => [
+            "foreignKey" => ["contact_id"],
+            "preventDelete" => true
+        ],
     ];
 
     public function lead()

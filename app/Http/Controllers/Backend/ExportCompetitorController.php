@@ -10,12 +10,14 @@ use App\Helpers\FileUtility;
 use App\Helpers\ImportUtility;
 use App\Helpers\LaravelExtend;
 use App\Helpers\Util;
+use App\Models\BaseModelInterface;
 use App\Models\DocumentFile;
 use App\Models\ExpCity;
 use App\Models\ExpCompetitor;
 use App\Models\ExpCompetitorAddress;
 use App\Models\ExpCompetitorLink;
 use App\Models\ExpCountry;
+use App\Models\ExportContact;
 use App\Models\ExpState;
 use App\Models\FieldSetting;
 use App\Models\ImportLog;
@@ -854,5 +856,29 @@ class ExportCompetitorController extends BackendController
         $csvUtility->write($csv_records);
 
         download_start($file, "application/octet-stream");
+    }
+
+    protected function delete(BaseModelInterface $model)
+    {
+        try {
+            DB::beginTransaction();
+
+            $contact = ExportContact::where("type", "competitor")->where("ref_id", $model->id)->first();
+
+            if (!$contact->safeDelete($contact))
+            {
+                throw new \Exception("Record has associated data. can't delete");
+            }
+            
+            $this->deleteCascade($model);
+
+            DB::commit();
+
+            return true;
+        } catch (\Exception $ex) {
+            DB::rollBack();
+
+            throw $ex;
+        }
     }
 }

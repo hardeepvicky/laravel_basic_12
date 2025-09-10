@@ -16,18 +16,30 @@ class ExpCity extends BaseModel
     ];
 
     public static array $child_model_class = [
-        // Lead::class => [
-        //     "foreignKey" => ["city_id"],
-        //     "preventDelete" => true
-        // ], 
-        // Dealer::class => [
-        //     "foreignKey" => ["city_id"],
-        //     "preventDelete" => true
-        // ], 
-        // DispatchOrder::class => [
-        //     "foreignKey" => ["city_id"],
-        //     "preventDelete" => true
-        // ], 
+        ExpLead::class => [
+            "foreignKey" => ["city_id"],
+            "preventDelete" => true
+        ],
+        ExpCustomer::class => [
+            "foreignKey" => ["city_id"],
+            "preventDelete" => true
+        ],
+        ExpDealer::class => [
+            "foreignKey" => ["city_id"],
+            "preventDelete" => true
+        ],
+        ExpParty::class => [
+            "foreignKey" => ["city_id"],
+            "preventDelete" => true
+        ],
+        ExpCompetitor::class => [
+            "foreignKey" => ["city_id"],
+            "preventDelete" => true
+        ],
+        ShipOrder::class => [
+            "foreignKey" => ["city_id"],
+            "preventDelete" => true
+        ],
     ];
 
     public function country()

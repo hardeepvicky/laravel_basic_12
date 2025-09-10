@@ -42,7 +42,7 @@ class ExpLead extends BaseModel
         ExpLeadItem::class => [
             "foreignKey" => ["exp_lead_id"],
             "preventDelete" => false
-        ],
+        ],        
         ExpLeadHistory::class => [
             "foreignKey" => ["exp_lead_id"],
             "preventDelete" => true

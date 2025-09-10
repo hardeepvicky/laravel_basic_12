@@ -13,7 +13,14 @@ class ExportContact extends BaseModel
     protected static array $list_fields = ["id", "type", "ref_id"];
 
     public static array $child_model_class = [
-        
+        ShipOrder::class => [
+            "foreignKey" => ["export_contact_id"],
+            "preventDelete" => true
+        ],
+        ExportOrder::class => [
+            "foreignKey" => ["export_contact_id"],
+            "preventDelete" => true
+        ],
     ];
 
     public function lead()

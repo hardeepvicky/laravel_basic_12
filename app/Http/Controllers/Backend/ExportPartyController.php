@@ -10,10 +10,12 @@ use App\Helpers\FileUtility;
 use App\Helpers\ImportUtility;
 use App\Helpers\LaravelExtend;
 use App\Helpers\Util;
+use App\Models\BaseModelInterface;
 use App\Models\DocumentFile;
 use App\Models\DropDownValue;
 use App\Models\ExpCity;
 use App\Models\ExpCountry;
+use App\Models\ExportContact;
 use App\Models\ExpParty;
 use App\Models\ExpPartyAddress;
 use App\Models\ExpPartyHistory;
@@ -1281,6 +1283,30 @@ class ExportPartyController extends BackendController
             }
 
             return back()->withInput()->with('fail', get_exception_display_message($ex))->with("custom_errors", LaravelExtend::$errors);
+        }
+    }
+
+    protected function delete(BaseModelInterface $model)
+    {
+        try {
+            DB::beginTransaction();
+
+            $contact = ExportContact::where("type", "party")->where("ref_id", $model->id)->first();
+
+            if (!$contact->safeDelete($contact))
+            {
+                throw new \Exception("Record has associated data. can't delete");
+            }
+            
+            $this->deleteCascade($model);
+
+            DB::commit();
+
+            return true;
+        } catch (\Exception $ex) {
+            DB::rollBack();
+
+            throw $ex;
         }
     }
 }

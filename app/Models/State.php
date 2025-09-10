@@ -29,11 +29,23 @@ class State extends BaseModel
         Lead::class => [
             "foreignKey" => ["state_id"],
             "preventDelete" => true
-        ], 
+        ],
+        Customer::class => [
+            "foreignKey" => ["state_id"],
+            "preventDelete" => true
+        ],
         Dealer::class => [
             "foreignKey" => ["state_id"],
             "preventDelete" => true
-        ], 
+        ],
+        Party::class => [
+            "foreignKey" => ["state_id"],
+            "preventDelete" => true
+        ],
+        Competitor::class => [
+            "foreignKey" => ["state_id"],
+            "preventDelete" => true
+        ],
         DispatchOrder::class => [
             "foreignKey" => ["state_id"],
             "preventDelete" => true

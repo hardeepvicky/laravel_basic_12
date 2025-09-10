@@ -12,12 +12,16 @@ class Branch extends BaseModel
         'display_name',
     ];
 
+    public static array $child_model_class = [
+        StockProduct::class => [
+            "foreignKey" => ["branch_id"],
+            "preventDelete" => true
+        ],        
+    ];
+
     protected static array $unique_fields = ["company_id", "name"];
 
     protected static array $list_fields = ["id", "name"];
-
-    public static array $child_model_class = [        
-    ];
 
     protected static array $fields_containg_tags = ["description"];
 

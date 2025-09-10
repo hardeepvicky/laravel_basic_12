@@ -43,6 +43,10 @@ class ExportOrder extends BaseModel
             "foreignKey" => "export_order_id",
             "preventDelete" => false
         ],
+        ShipOrder::class => [
+            "foreignKey" => ["export_order_id"],
+            "preventDelete" => true
+        ],
     ];
 
     public function afterFindForCsv()

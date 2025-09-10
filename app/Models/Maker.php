@@ -26,6 +26,22 @@ class Maker extends BaseModel
             "foreignKey" => ["make_id"],
             "preventDelete" => true
         ],        
+        ShipOrderProduct::class => [
+            "foreignKey" => ["make_id"],
+            "preventDelete" => true
+        ],        
+        DispatchOrderProduct::class => [
+            "foreignKey" => ["make_id"],
+            "preventDelete" => true
+        ],        
+        SaleOrderProduct::class => [
+            "foreignKey" => ["make_id"],
+            "preventDelete" => true
+        ],        
+        ExportOrderProduct::class => [
+            "foreignKey" => ["make_id"],
+            "preventDelete" => true
+        ],        
     ];
 
     public function afterFind()

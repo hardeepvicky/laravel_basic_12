@@ -140,11 +140,6 @@ class DispatchOrder extends BaseModel
         {
             $rules["builty_no"] = ["required_without_all:tracking_no"];
             $rules["tracking_no"] = ["required_without_all:builty_no"];
-
-            $rules["shipping_fee"] = ["required"];
-            $rules["shipping_fee_gst_per"] = ["required"];
-            $rules["shipping_fee_gst"] = ["required"];
-            $rules["total_fee"] = ["required"];
         }
 
         return $rules;

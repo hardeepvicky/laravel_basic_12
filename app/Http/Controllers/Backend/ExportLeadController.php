@@ -8,6 +8,7 @@ use App\Helpers\CsvUtility;
 use App\Helpers\DateUtility;
 use App\Helpers\FileUtility;
 use App\Helpers\LaravelExtend;
+use App\Models\BaseModelInterface;
 use App\Models\Campaign;
 use App\Models\DispatchOrderProduct;
 use App\Models\DocumentFile;
@@ -1699,6 +1700,30 @@ class ExportLeadController extends BackendController
         }
 
         return $this->responseJson($response);
+    }
+
+    protected function delete(BaseModelInterface $model)
+    {
+        try {
+            DB::beginTransaction();
+
+            $contact = ExportContact::where("type", "lead")->where("ref_id", $model->id)->first();
+
+            if (!$contact->safeDelete($contact))
+            {
+                throw new \Exception("Record has associated data. can't delete");
+            }
+            
+            $this->deleteCascade($model);
+
+            DB::commit();
+
+            return true;
+        } catch (\Exception $ex) {
+            DB::rollBack();
+
+            throw $ex;
+        }
     }
 }
 

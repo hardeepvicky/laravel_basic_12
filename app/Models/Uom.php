@@ -24,6 +24,14 @@ class Uom extends BaseModel
             "foreignKey" => "uom_id",
             "preventDelete" => true
         ],
+        LeadItem::class => [
+            "foreignKey" => "uom_id",
+            "preventDelete" => true
+        ],
+        ExpLeadItem::class => [
+            "foreignKey" => "uom_id",
+            "preventDelete" => true
+        ],
     ];
 
     public function parent()

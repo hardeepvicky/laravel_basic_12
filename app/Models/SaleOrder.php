@@ -43,6 +43,10 @@ class SaleOrder extends BaseModel
             "foreignKey" => "sale_order_id",
             "preventDelete" => false
         ],
+        DispatchOrder::class => [
+            "foreignKey" => ["sale_order_id"],
+            "preventDelete" => true
+        ],
     ];
 
     public function afterFindForCsv()
