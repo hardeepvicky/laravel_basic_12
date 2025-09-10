@@ -1047,6 +1047,9 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
 
         $name = "history";
         Route::get($name . "/{customer_id}", [$controllerClass, $name])->name($name);
+        
+        $name = "history_store";
+        Route::post($name . "/{exp_lead_id}", [$controllerClass, $name])->name($name);
 
         $name = "dispatch";
         Route::post($name . "/{customer_id}", [$controllerClass, $name])->name($name);
