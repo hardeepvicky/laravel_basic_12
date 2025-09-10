@@ -386,7 +386,7 @@ class ExportOrderController extends BackendController
                     $cutomer = $lead->convertToCustomer();
                 }
                 
-                $contact = Contact::where("type", "customer")->where("ref_id", $cutomer->id)->first();
+                $contact = ExportContact::where("type", "customer")->where("ref_id", $cutomer->id)->first();
 
                 if (!$contact)
                 {
