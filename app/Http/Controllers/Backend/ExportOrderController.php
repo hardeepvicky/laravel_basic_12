@@ -390,7 +390,7 @@ class ExportOrderController extends BackendController
 
                 if (!$contact)
                 {
-                    $contact = Contact::createContact("customer", $cutomer->id);
+                    $contact = ExportContact::createContact("customer", $cutomer->id);
                 }
 
                 $this->model->order_from_type = "customer";
