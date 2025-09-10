@@ -30,7 +30,7 @@ $formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, 0);
                             <?php
                             $field = 'export_contact_id';
                             ?>
-                            <select id="{{ $field }}" name="{{ $field }}" class="form-select select2">
+                            <select id="{{ $field }}" name="{{ $field }}" class="form-select select2 form-select-sm">
                                 <option value="">Please Select</option>
                                 @foreach ($contact_list as $k => $t)
                                     @php

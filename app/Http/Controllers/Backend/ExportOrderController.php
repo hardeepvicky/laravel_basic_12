@@ -19,6 +19,7 @@ use App\Models\ExportOrderProduct;
 use App\Models\ViewExportContact;
 use App\Models\FieldSetting;
 use App\Models\Maker;
+use App\Models\ManufactureOrder;
 use App\Models\ProductCategory;
 use App\Models\ProductSerial;
 use App\Models\SqlLog;
@@ -328,6 +329,32 @@ class ExportOrderController extends BackendController
                     $child_model->fill($export_order_product);
 
                     $this->model->exportOrderProduct()->save($child_model);
+
+                    if ($export_order_product['qty_to_manufacture'] > 0)
+                    {
+                        $save_arr = [
+                            "order_from" => "sale",
+                            "order_date_time" => DateUtility::getDate(null, DateUtility::DATETIME_FORMAT),
+                            "product_id" => $export_order_product['product_id'],
+                            "make_id" => $export_order_product['make_id'],
+                            "order_qty" => $export_order_product['qty_to_manufacture'],
+                            "status" => ManufactureOrder::STATUS_PENDING,
+                            "remarks" => $export_order_product['remarks'],
+                        ];
+
+                        $old_mo = $child_model->manufactureOrder()->first();
+
+                        if ($old_mo)
+                        {
+                            $old_mo->fill($save_arr);
+                            $old_mo->save();
+                        }
+                        else
+                        {
+                            $mo = new ManufactureOrder($save_arr);
+                            $child_model->manufactureOrder()->save($mo);
+                        }
+                    }
                 }
 
                 if ($existing_id_list) {
@@ -382,7 +409,7 @@ class ExportOrderController extends BackendController
 
     public function edit($id)
     {
-        $model = $this->model = $this->modelClass::findOrFail($id);
+        $model = $this->model = $this->modelClass::with(["exportOrderProduct"])->findOrFail($id);
 
         $this->beforeEdit($this->model);
 
@@ -512,7 +539,7 @@ class ExportOrderController extends BackendController
 
         $records = $records->toArray();
 
-        // d($records, true);
+        d($records, true);
 
         $csv_records = [];
         $user_cache_list = User::getListCache();
@@ -545,7 +572,7 @@ class ExportOrderController extends BackendController
                 $field_labels['party_order_ref_no'] => $record['party_order_ref_no'] ?? "",
                 $field_labels['branch_id'] => $record['branch']['display_name'] ?? "",
                 $field_labels['order_from_type'] => get_value_from_list($order_from_type_list, $record['order_from_type']),
-                $field_labels['export_contact_id'] => $record['contact']['display_name'] ?? "",                
+                $field_labels['contact_id'] => $record['contact']['name'] ?? "",
                 $field_labels['status'] => get_value_from_list($status_list, $record['status']),
                 $field_labels['estimated_dispatch_date'] => $record['estimated_dispatch_date'] ?? "",
                 $field_labels['total_amount'] => $record['total_amount'] ?? "",
@@ -573,6 +600,109 @@ class ExportOrderController extends BackendController
         $current_dt->setTimezone(DateUtility::$login_user_time_zone);
         $datetime = DateUtility::getDate($current_dt, DateUtility::DATETIME_OUT_FORMAT_FILE);
         $file_prefix = str_class_name_to_human_text($this->modelClass);
+        $file = $path . $file_prefix . "-$datetime.csv";
+
+        $csvUtility = new CsvUtility($file);
+        $csvUtility->write($csv_records);
+
+        download_start($file, "application/octet-stream");
+    }
+
+    public function export_product_csv()
+    {
+        $cache_key_prefix = Route::currentRouteName();
+
+        $builder = $this->_getBuildeForIndex($cache_key_prefix);
+
+        $this->beforeCsvExport($builder);
+
+        $builder->with([
+            "branch",
+            "contact",
+            "saleOrderProduct" => function($q){
+                $q->orderBy("display_order");
+            },
+            "saleOrderProduct.product",
+            "saleOrderProduct.make",
+        ]);
+
+        $records = $builder->get();
+
+        foreach ($records as $k => $record) {
+            $record->afterFindForCsv();
+        }
+
+        $records = $records->toArray();
+
+        // d($records, true);
+
+        $csv_records = [];
+        $user_cache_list = User::getListCache();
+
+        $yes_no_list = laravel_constant('yes_no_list');
+
+        $order_from_type_list = ExportOrder::getOrderFromTypeList();
+
+        $type_conditions = [
+            'type' => Type::getType($this->model, "status")
+        ];
+        if ($this->model->status)
+        {
+            $type_id_list = Type::getIdFromCode($this->model, $this->model->status);
+
+            if ($type_id_list)
+            {
+                $type_conditions['or_id'] = $type_id_list;
+            }
+        }
+        $status_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
+
+        $field_labels = FieldSetting::getDynamicFields($this->modelClass);
+
+        $sale_order_product_field_labels = FieldSetting::getDynamicFields(SaleOrderProduct::class);
+
+        foreach ($records as $record) {
+
+            foreach($record['sale_order_product'] as $saleOrderProduct)
+            {
+                $csv_records[] = [
+                    'ID' => $record['id'],
+                    $field_labels['order_no'] => $record['order_no'] ?? "",
+                    $field_labels['party_order_ref_no'] => $record['party_order_ref_no'] ?? "",
+                    $field_labels['branch_id'] => $record['branch']['display_name'] ?? "",
+                    $field_labels['order_from_type'] => get_value_from_list($order_from_type_list, $record['order_from_type']),
+                    $field_labels['contact_id'] => $record['contact']['name'] ?? "",
+                    $field_labels['status'] => get_value_from_list($status_list, $record['status']),
+
+                    $sale_order_product_field_labels['product_id'] => $saleOrderProduct['product']['display_name'] ?? "",
+                    $sale_order_product_field_labels['make_id'] => $saleOrderProduct['make']['display_name'] ?? "",
+                    $sale_order_product_field_labels['order_qty'] => $saleOrderProduct['order_qty'] ?? "",
+                    $sale_order_product_field_labels['rate'] => $saleOrderProduct['rate'] ?? "",
+                    $sale_order_product_field_labels['amount'] => $saleOrderProduct['amount'] ?? "",
+                    $sale_order_product_field_labels['available_qty'] => $saleOrderProduct['available_qty'] ?? "",
+                    $sale_order_product_field_labels['qty_to_manufacture'] => $saleOrderProduct['qty_to_manufacture'] ?? "",
+                    $sale_order_product_field_labels['sent_qty'] => $saleOrderProduct['sent_qty'] ?? "",
+                    $sale_order_product_field_labels['remarks'] => $saleOrderProduct['remarks'] ?? "",
+
+                    'Created' => if_date_time($saleOrderProduct['created_at']),
+                    'Created By' => $user_cache_list[$saleOrderProduct['created_by']] ?? "",
+                    'Updated' => if_date_time($saleOrderProduct['updated_at']),
+                    'Updated By' => $user_cache_list[$saleOrderProduct['updated_by']] ?? "",
+                ];
+            }
+        }
+
+        // d($csv_records, true);
+
+        $this->saveSqlLog();
+
+        $path = laravel_constant('path.temp');
+        FileUtility::createFolder($path);
+
+        $current_dt = DateUtility::getDateObj(null);
+        $current_dt->setTimezone(DateUtility::$login_user_time_zone);
+        $datetime = DateUtility::getDate($current_dt, DateUtility::DATETIME_OUT_FORMAT_FILE);
+        $file_prefix = str_class_name_to_human_text(SaleOrderProduct::class);
         $file = $path . $file_prefix . "-$datetime.csv";
 
         $csvUtility = new CsvUtility($file);

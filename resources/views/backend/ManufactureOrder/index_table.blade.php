@@ -1,6 +1,6 @@
 <div class="card" id="page-summary">
     <div class="card-header">
-        <x-Backend.pagination-links :records="$records" />
+        <a href="{{ route($routePrefix . '.export.csv') }}" class="btn btn-secondary">Export CSV</a>
     </div>
 
     <div class="card-body p-1">
@@ -14,6 +14,13 @@
                         <th>
                             <?php
                             $field = "sale_order_no";
+                            ?>
+                            <x-Inputs.text-field :id="$field" :name="$field" :label="$false"
+                                :value="$search[$field]" class="form-control-sm"/>
+                        </th>        
+                        <th>
+                            <?php
+                            $field = "export_order_no";
                             ?>
                             <x-Inputs.text-field :id="$field" :name="$field" :label="$false"
                                 :value="$search[$field]" class="form-control-sm"/>
@@ -77,6 +84,9 @@
                             Sale Order No.
                         </th>
                         <th style="width:10%">
+                            Export Order No.
+                        </th>
+                        <th style="width:10%">
                             <?= sortable_anchor('product.model_name', get_value_from_list($field_labels, 'product_id', 'product_id')) ?>
                         </th>
                         <th style="width:10%">
@@ -109,6 +119,11 @@
                             <td>
                                 <a href="{{ route('sale-order.index', ['id' => $record->saleOrderProduct?->sale_order_id]) }}" target="_blank">
                                     {{ $record->saleOrderProduct?->saleOrder->getDisplayName() }}
+                                </a>
+                            </td>
+                            <td>
+                                <a href="{{ route('export-order.index', ['id' => $record->exportOrderProduct?->export_order_id]) }}" target="_blank">
+                                    {{ $record->exportOrderProduct?->exportOrder->getDisplayName() }}
                                 </a>
                             </td>
                             <td>

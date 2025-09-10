@@ -346,9 +346,18 @@ class SaleOrderController extends BackendController
                             "remarks" => $sale_order_product['remarks'],
                         ];
 
-                        $mo = new ManufactureOrder($save_arr);
+                        $old_mo = $child_model->manufactureOrder()->first();
 
-                        $child_model->manufactureOrder()->save($mo);
+                        if ($old_mo)
+                        {
+                            $old_mo->fill($save_arr);
+                            $old_mo->save();
+                        }
+                        else
+                        {
+                            $mo = new ManufactureOrder($save_arr);
+                            $child_model->manufactureOrder()->save($mo);
+                        }
                     }
                 }
 

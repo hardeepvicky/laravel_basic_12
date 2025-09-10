@@ -6,6 +6,13 @@ class SaleOrderProduct extends BaseModel
 {
     protected static Array $unique_fields = ["sale_order_id", "product_id", "make_id"];
 
+    public static array $child_model_class = [
+        ManufactureOrder::class => [
+            "foreignKey" => "sale_order_product_id",
+            "preventDelete" => false
+        ],
+    ];
+
     public function saleOrder()
     {
         return $this->belongsTo(SaleOrder::class);

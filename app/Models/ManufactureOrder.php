@@ -56,6 +56,11 @@ class ManufactureOrder extends BaseModel
         return $this->belongsTo(SaleOrderProduct::class);
     }
 
+    public function exportOrderProduct()
+    {
+        return $this->belongsTo(ExportOrderProduct::class);
+    }
+
     public function product()
     {
         return $this->belongsTo(Product::class);

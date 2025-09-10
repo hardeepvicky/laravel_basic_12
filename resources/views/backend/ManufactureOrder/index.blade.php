@@ -19,6 +19,11 @@
                         <input type="text"  name="{{ $field }}" value="{{ $search[$field] }}" />
 
                         <?php 
+                            $field = "export_order_no";
+                        ?>
+                        <input type="text"  name="{{ $field }}" value="{{ $search[$field] }}" />
+
+                        <?php 
                             $field = "product_id";
                         ?>
                         <input type="text"  name="{{ $field }}" value="{{ $search[$field] }}" />

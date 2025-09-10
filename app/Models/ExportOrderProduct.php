@@ -6,6 +6,13 @@ class ExportOrderProduct extends BaseModel
 {
     protected static Array $unique_fields = ["export_order_id", "product_id", "make_id"];
 
+    public static array $child_model_class = [
+        ManufactureOrder::class => [
+            "foreignKey" => "export_order_product_id",
+            "preventDelete" => false
+        ],
+    ];
+
     public function exportOrder()
     {
         return $this->belongsTo(ExportOrder::class);
@@ -21,7 +28,7 @@ class ExportOrderProduct extends BaseModel
         return $this->belongsTo(Maker::class);
     }
 
-    public function manufactureOrders()
+    public function manufactureOrder()
     {
         return $this->hasOne(ManufactureOrder::class);
     }

@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Backend;
 
 use App\Exceptions\UserException;
 use App\Helpers\ArrayHelper;
+use App\Helpers\CsvUtility;
+use App\Helpers\DateUtility;
+use App\Helpers\FileUtility;
 use App\Helpers\ImportUtility;
 use App\Helpers\LaravelExtend;
 use App\Helpers\Util;
@@ -49,8 +52,12 @@ class ManufactureOrderController extends BackendController
     {
         $cache_key = $cache_key_prefix . "-index";
 
-        $sale_order_condition_list = $this->getConditions($cache_key, [
-            ["field" => "sale_order_no", "type" => ""],
+        $export_order_condition_list = $this->getConditions($cache_key . ".1", [
+            ["field" => "export_order_no", "type" => "string"],
+        ], true);
+
+        $sale_order_condition_list = $this->getConditions($cache_key . ".2", [
+            ["field" => "sale_order_no", "type" => "string"],
         ], true);
 
         $conditions = $this->getConditions($cache_key, [
@@ -98,7 +105,8 @@ class ManufactureOrderController extends BackendController
         $builder->with([
             "product", 
             "make",
-            "saleOrderProduct.saleOrder"
+            "saleOrderProduct.saleOrder",
+            "exportOrderProduct.exportOrder"
         ]);
 
         if (isset($sale_order_condition_list['sale_order_no']))
@@ -106,6 +114,15 @@ class ManufactureOrderController extends BackendController
             $builder->whereHas("saleOrderProduct", function($q) use($sale_order_condition_list) {
                 $q->whereHas("saleOrder", function($q)  use($sale_order_condition_list) {
                     $q->where("order_no", "like", "%" . $sale_order_condition_list['sale_order_no'] . "%");
+                });
+            });
+        }
+
+        if (isset($export_order_condition_list['export_order_no']))
+        {
+            $builder->whereHas("exportOrderProduct", function($q) use($export_order_condition_list) {
+                $q->whereHas("exportOrder", function($q)  use($export_order_condition_list) {
+                    $q->where("order_no", $export_order_condition_list['export_order_no']['op'], "%" . $export_order_condition_list['export_order_no']['value'] . "%");
                 });
             });
         }
@@ -222,5 +239,78 @@ class ManufactureOrderController extends BackendController
 
             return back()->withInput()->with('fail', $ex->getMessage());
         }
+    }
+
+    public function export_csv()
+    {
+        $cache_key_prefix = Route::currentRouteName();
+
+        $builder = $this->_getBuildeForIndex($cache_key_prefix);
+
+        $this->beforeCsvExport($builder);
+
+        $builder->with([
+            "product", 
+            "make",
+            "saleOrderProduct.saleOrder",
+            "exportOrderProduct.exportOrder"
+        ]);
+
+        $records = $builder->get();
+
+        foreach ($records as $k => $record) {
+            $record->afterFindForCsv();
+        }
+
+        $csv_records = [];
+        $user_cache_list = User::getListCache();
+
+        $yes_no_list = laravel_constant('yes_no_list');
+
+        $status_list = ManufactureOrder::getStatusList();
+
+        $field_labels = FieldSetting::getDynamicFields($this->modelClass);
+
+        foreach ($records as $record) {
+
+            $csv_records[] = [
+                'ID' => $record['id'],
+                "Sale Order No." => $record->saleOrderProduct?->saleOrder->getDisplayName() ?? "",
+                "Sale Order No." => $record->exportOrderProduct?->exportOrder->getDisplayName() ?? "",
+                $field_labels['product_id'] => $record->product->getDisplayName(),
+                $field_labels['make_id'] => $record->make->getDisplayName(),
+                $field_labels['assign_to_user_id'] => get_value_from_list($user_cache_list, $record->assign_to_user_id),
+                $field_labels['order_qty'] => $record->order_qty ?? "",
+                $field_labels['manufactured_qty'] => $record->manufactured_qty ?? "",
+                $field_labels['status'] => get_value_from_list($status_list, $record->status),
+                $field_labels['order_date_time'] => if_date_time($record->order_date_time),
+                $field_labels['manufacture_complete_date_time'] => if_date_time($record->manufacture_complete_date_time),
+                $field_labels['manufacture_complete_by'] => get_value_from_list($user_cache_list, $record->manufacture_complete_by),
+                $field_labels['remarks'] => $record->remarks ?? "",
+
+                'Created' => if_date_time($record->created_at),
+                'Created By' => $user_cache_list[$record->created_by] ?? "",
+                'Updated' => if_date_time($record->updated_at),
+                'Updated By' => $user_cache_list[$record->updated_by] ?? "",
+            ];
+        }
+
+        // d($csv_records, true);
+
+        $this->saveSqlLog();
+
+        $path = laravel_constant('path.temp');
+        FileUtility::createFolder($path);
+
+        $current_dt = DateUtility::getDateObj(null);
+        $current_dt->setTimezone(DateUtility::$login_user_time_zone);
+        $datetime = DateUtility::getDate($current_dt, DateUtility::DATETIME_OUT_FORMAT_FILE);
+        $file_prefix = str_class_name_to_human_text($this->modelClass);
+        $file = $path . $file_prefix . "-$datetime.csv";
+
+        $csvUtility = new CsvUtility($file);
+        $csvUtility->write($csv_records);
+
+        download_start($file, "application/octet-stream");
     }
 }

@@ -232,7 +232,7 @@
                                         </td>
                                     </tr>
                                     @php
-                                        $export_order_products = old('export_order_products', $model->saleOrderProduct?->toArray() ?? []);
+                                        $export_order_products = old('export_order_products', $model->exportOrderProduct?->toArray() ?? []);
                                         unset($export_order_products['(sr-id)']);
                                     @endphp
                                     @if (isset($export_order_products))
