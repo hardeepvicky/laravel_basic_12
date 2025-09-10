@@ -1,6 +1,7 @@
 <?php
 
 use App\Helpers\EmailHelper;
+use App\Helpers\Util;
 use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\OtpVerifyController;
@@ -1782,7 +1783,7 @@ Route::get("/test/sms/viop", function () {
 
     if ($response) {
         d($response);
-        $data = json_decode($response);
+        $data = Util::objToArray(json_decode($response));
         d($data);
 
         if ($data['error_code'] >= 200 && $data['error_code'] < 300) {
