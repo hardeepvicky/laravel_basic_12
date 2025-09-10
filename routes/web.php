@@ -58,6 +58,7 @@ use App\Http\Controllers\Backend\RoleController;
 use App\Http\Controllers\Backend\SaleOrderController;
 use App\Http\Controllers\Backend\SampleController;
 use App\Http\Controllers\Backend\SettingsController;
+use App\Http\Controllers\Backend\ShipOrderController;
 use App\Http\Controllers\Backend\StateController;
 use App\Http\Controllers\Backend\StockProductController;
 use App\Http\Controllers\Backend\SubDepartmentController;
@@ -1046,6 +1047,9 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
         $name = "history";
         Route::get($name . "/{customer_id}", [$controllerClass, $name])->name($name);
 
+        $name = "dispatch";
+        Route::post($name . "/{customer_id}", [$controllerClass, $name])->name($name);
+
         $name = "snooze";
         Route::post($name . "/{customer_id}", [$controllerClass, $name])->name($name);
 
@@ -1435,6 +1439,9 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
         $name = "history";
         Route::get($name . "/{exp_customer_id}", [$controllerClass, $name])->name($name);
 
+        $name = "dispatch";
+        Route::post($name . "/{exp_customer_id}", [$controllerClass, $name])->name($name);
+
         $name = "snooze";
         Route::post($name . "/{exp_customer_id}", [$controllerClass, $name])->name($name);
 
@@ -1617,6 +1624,28 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
         $route_prefix = "export";
         Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
             $name = "csv";
+            Route::get($name, [$controllerClass, "export_" . $name])->name($name);
+        });
+    });
+
+    $route_prefix = "ship-order";
+    $controllerClass = ShipOrderController::class;
+    Route::resource($route_prefix, $controllerClass)->except(["create", "store", "destroy"]);
+    $name = "send";
+    Route::any($route_prefix . "-" . $name . "/{id}", [$controllerClass, $name])->name($route_prefix . "." .$name);
+    $name = "ajax_delete_product_serial";
+    Route::get($route_prefix . "-" . $name . "/{id}", [$controllerClass, $name])->name($route_prefix . "." .$name);
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
+        $name = "create_from_export_order";
+        Route::post($name, [$controllerClass, $name])->name($name);
+
+        $route_prefix = "export";
+        Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+            $name = "csv";
+            Route::get($name, [$controllerClass, "export_" . $name])->name($name);
+
+            $name = "product_csv";
             Route::get($name, [$controllerClass, "export_" . $name])->name($name);
         });
     });

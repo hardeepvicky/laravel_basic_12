@@ -25,6 +25,7 @@ use App\Models\LeadAddress;
 use App\Models\LeadHistory;
 use App\Models\LeadItem;
 use App\Models\LeadProduct;
+use App\Models\Maker;
 use App\Models\Notification;
 use App\Models\NotificationSetting;
 use App\Models\Party;
@@ -810,9 +811,11 @@ class LeadController extends BackendController
 
         $carrier_list = Party::getList("id", "display_name", ["type" => Party::TYPE_CARRIER]);
 
+        $make_list = Maker::getList("id", "display_name", [], "list_display_order");
+
         $model = new LeadHistory();
 
-        $this->setForView(compact("record", "form", "model", "histories", "products", "items", "addresses", "carrier_list"));
+        $this->setForView(compact("record", "form", "model", "histories", "products", "items", "addresses", "carrier_list", "make_list"));
 
         return $this->view(__FUNCTION__);
     }
@@ -1087,8 +1090,9 @@ class LeadController extends BackendController
             "entry_by" => ["required"],
             "action_type" => ["required"],
             "status_type" => ["required"],
+            "purpose_price" => ["required"],
             "payable_amount" => ["required"],
-            "payable_amount" => ["required"],
+            "payment_method_type" => ["required"],
             "next_meeting_date_time" => "",
             "remarks" => "",
             "products" => [],
@@ -1099,13 +1103,7 @@ class LeadController extends BackendController
         $validatedData = $request->validate($rules);
 
         $rules = [
-            "carrier_id" => ["required"],
-            "docket_no" => ["required"],
-            "builty_no" => "",
-            "tracking_no" => "",
-            "tracking_phone_no" => "",
             "shipping_fee" => ["required"],
-            "shipping_fee_gst_per" => ["required"],
             "remarks" => "",
         ];
 
@@ -1146,11 +1144,12 @@ class LeadController extends BackendController
                 $lead->changeNextFollowupDateTime($validatedData['next_meeting_date_time']);
             }
 
-            $this->_saveOthers($validatedData);
+            $lead->purpose_price = $validatedData['purpose_price'];
+            $lead->payable_amount = $validatedData['payable_amount'];
+            $lead->payment_method_type = $validatedData['payment_method_type'];
+            $lead->save();
 
-            $dispatch = new DispatchOrder();
-            $dispatch->status_type = DispatchOrder::STATUS_PENDING;
-            $dispatch->type = "lead";
+            $this->_saveOthers($validatedData);
 
             $contact = Contact::where("type", "lead")->where("ref_id", $lead_id)->first();
 
@@ -1159,9 +1158,11 @@ class LeadController extends BackendController
                 throw new UserException("Contact of Lead not found");
             }
 
-            $dispatch->contact_id = $contact->id;
-
+            $dispatch = new DispatchOrder();
             $dispatch->fill($dispatchData);
+            $dispatch->contact_id = $contact->id;
+            $dispatch->order_from_type = "lead";
+            $dispatch->status_type = DispatchOrder::STATUS_PENDING;
 
             $my_country = Country::getMyCountry();
 
@@ -1205,13 +1206,12 @@ class LeadController extends BackendController
                 throw new UserException("Fail To Save Dispatch", UserException::ERROR_LARAVEL_FAIL);
             }
 
-            $existing_id_list = $this->model->products()->pluck("id", "id")->toArray();
+            $existing_id_list = $dispatch->products()->pluck("id", "id")->toArray();
 
             foreach($lead->products as $product)
             {
                 $save = $product->toArray();
                 unset($save['id']);
-                unset($save['lead_id']);
                 $save['dispatch_order_id'] = $dispatch->id;
 
                 $child_model = new DispatchOrderProduct($save);
@@ -1234,13 +1234,12 @@ class LeadController extends BackendController
                 }
             }
 
-            $existing_id_list = $this->model->items()->pluck("id", "id")->toArray();
+            $existing_id_list = $dispatch->items()->pluck("id", "id")->toArray();
 
             foreach($lead->items as $item)
             {
                 $save = $item->toArray();
                 unset($save['id']);
-                unset($save['lead_id']);
                 $save['dispatch_order_id'] = $dispatch->id;
 
                 $child_model = new DispatchOrderItem($save);
@@ -1297,10 +1296,9 @@ class LeadController extends BackendController
                 ]);
             }
 
-
             $this->saveSqlLog();
 
-            return back()->with('success', "History Saved successfully");
+            return back()->with('success', "Dispatch Order placed successfully");
         } 
         catch (UserException $ex) {
             DB::rollBack();

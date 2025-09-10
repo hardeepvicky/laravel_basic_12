@@ -9,8 +9,6 @@ use App\Helpers\DateUtility;
 use App\Helpers\FileUtility;
 use App\Helpers\LaravelExtend;
 use App\Models\Campaign;
-use App\Models\DispatchOrder;
-use App\Models\DispatchOrderItem;
 use App\Models\DispatchOrderProduct;
 use App\Models\DocumentFile;
 use App\Models\DropDownValue;
@@ -23,14 +21,18 @@ use App\Models\ExpLeadHistory;
 use App\Models\ExpLeadItem;
 use App\Models\ExpLeadProduct;
 use App\Models\ExportContact;
+use App\Models\ExpParty;
 use App\Models\ExpState;
 use App\Models\FieldSetting;
 use App\Models\Item;
 use App\Models\Lead;
+use App\Models\Maker;
 use App\Models\Notification;
 use App\Models\NotificationSetting;
-use App\Models\Party;
 use App\Models\Product;
+use App\Models\ShipOrder;
+use App\Models\ShipOrderItem;
+use App\Models\ShipOrderProduct;
 use App\Models\Type;
 use App\Models\User;
 use App\Notifications\GeneralNotification;
@@ -126,7 +128,7 @@ class ExportLeadController extends BackendController
             $state_conditions["country_id"] = $condition_list['country_id'];
             $state_list = ExpState::getList("id", "display_name", $state_conditions, "name");
         }
-        
+
         $city_conditions = ["is_active" => 1];
 
         if (isset($condition_list['state_id']))
@@ -134,7 +136,7 @@ class ExportLeadController extends BackendController
             $city_conditions["state_id"] = $condition_list['state_id'];
             $city_list = ExpCity::getList("id", "display_name", $city_conditions, "name");
         }
-    
+
         $this->setForView(compact("state_list", "city_list"));
 
         return $builder;
@@ -230,7 +232,7 @@ class ExportLeadController extends BackendController
 
         $this->setForView(compact(
             "address_type_list", "source_type_list", "deal_type_list", "status_type_list", "status_type_list_for_form",
-             "source_list", "payment_method_type_list", "dealer_list", "product_list", 
+             "source_list", "payment_method_type_list", "dealer_list", "product_list",
             "item_list", "campaign_list", "user_list", "action_type_list", "lead_history_response_list", "country_list",
             "field_labels", "address_field_labels", "product_field_labels", "item_field_labels", "history_field_labels"
         ));
@@ -447,6 +449,7 @@ class ExportLeadController extends BackendController
         {
             $base_rules = [
                 "product_id" => ["required"],
+                "make_id" => ["required"],
                 "qty" => ["required"],
             ];
 
@@ -517,7 +520,7 @@ class ExportLeadController extends BackendController
         if (isset($validatedData['items']))
         {
             $base_rules = [
-                "lead_id" => ["required"],
+                "item_id" => ["required"],
                 "uom_id" => ["required"],
                 "qty" => ["required"],
             ];
@@ -612,19 +615,19 @@ class ExportLeadController extends BackendController
                     $save_data['name'] = "Unkown";
                 }
 
-                if ($request->hasFile('image')) 
+                if ($request->hasFile('image'))
                 {
                     $path = rtrim(Lead::getStoragePath(), "/");
                     $filepath = $request->file('image')->store($path, DEFAULT_DISK);
                     $save_data['image'] = $filepath;
-                } 
+                }
 
-                if ($request->hasFile('video')) 
+                if ($request->hasFile('video'))
                 {
                     $path = rtrim(Lead::getStoragePath(), "/");
                     $filepath = $request->file('video')->store($path, DEFAULT_DISK);
                     $save_data['video'] = $filepath;
-                } 
+                }
 
                 $this->model = $this->modelClass::create($save_data);
 
@@ -776,11 +779,13 @@ class ExportLeadController extends BackendController
         $items = $record->items?->toArray() ?? [];
         $addresses = $record->address?->toArray() ?? [];
 
-        $carrier_list = Party::getList("id", "display_name", ["type" => Party::TYPE_CARRIER]);
+        $carrier_list = ExpParty::getList("id", "display_name", ["type" => ExpParty::TYPE_CARRIER]);
+
+        $make_list = Maker::getList("id", "display_name", [], "list_display_order");
 
         $model = new ExpLeadHistory();
 
-        $this->setForView(compact("record", "form", "model", "histories", "products", "items", "addresses", "carrier_list"));
+        $this->setForView(compact("record", "form", "model", "histories", "products", "items", "addresses", "carrier_list", "make_list"));
 
         return $this->view(__FUNCTION__);
     }
@@ -804,7 +809,7 @@ class ExportLeadController extends BackendController
         {
             case ExpLeadHistory::ACTION_TYPE_CALL:
                 $rules['action'] = ["required"];
-                $rules['response_type_id'] = ["required"];                                
+                $rules['response_type_id'] = ["required"];
                 break;
             case ExpLeadHistory::ACTION_TYPE_SEND_SMS:
             case ExpLeadHistory::ACTION_TYPE_SEND_EMAIL:
@@ -823,9 +828,9 @@ class ExportLeadController extends BackendController
         {
             case Lead::STATUS_COLD:
             case Lead::STATUS_HOT:
-            case Lead::STATUS_WARM:    
+            case Lead::STATUS_WARM:
                 $rules['next_followup_date_time'] = ["required"];
-                break;        
+                break;
         }
 
         $validatedData = $request->validate($rules);
@@ -919,7 +924,7 @@ class ExportLeadController extends BackendController
             $this->saveSqlLog();
 
             return back()->with('success', "History Saved successfully");
-        } 
+        }
         catch (UserException $ex) {
             DB::rollBack();
 
@@ -1010,7 +1015,7 @@ class ExportLeadController extends BackendController
             $this->saveSqlLog();
 
             return back()->with('success', "History Saved successfully");
-        } 
+        }
         catch (UserException $ex) {
             DB::rollBack();
 
@@ -1055,8 +1060,9 @@ class ExportLeadController extends BackendController
             "entry_by" => ["required"],
             "action_type" => ["required"],
             "status_type" => ["required"],
+            "purpose_price" => ["required"],
             "payable_amount" => ["required"],
-            "payable_amount" => ["required"],
+            "payment_method_type" => ["required"],
             "next_followup_date_time" => "",
             "remarks" => "",
             "products" => [],
@@ -1067,17 +1073,11 @@ class ExportLeadController extends BackendController
         $validatedData = $request->validate($rules);
 
         $rules = [
-            "carrier_id" => ["required"],
-            "docket_no" => ["required"],
-            "builty_no" => "",
-            "tracking_no" => "",
-            "tracking_phone_no" => "",
             "shipping_fee" => ["required"],
-            "shipping_fee_gst_per" => ["required"],
             "remarks" => "",
         ];
 
-        $dispatchData = $request->validate($rules);
+        $shipOrderData = $request->validate($rules);
 
         DB::beginTransaction();
 
@@ -1114,13 +1114,14 @@ class ExportLeadController extends BackendController
                 $exp_lead->changeNextFollowupDateTime($validatedData['next_followup_date_time']);
             }
 
+            $exp_lead->purpose_price = $validatedData['purpose_price'];
+            $exp_lead->payable_amount = $validatedData['payable_amount'];
+            $exp_lead->payment_method_type = $validatedData['payment_method_type'];
+            $exp_lead->save();
+
             $this->_saveOthers($validatedData);
 
-            $dispatch = new DispatchOrder();
-            $dispatch->type = str_class_name_to_human_text($this->modelClass);
-            $dispatch->lead_id = $exp_lead_id;
-
-            $dispatch->type = "lead";
+            $shipOrder = new ShipOrder();
 
             $contact = ExportContact::where("type", "lead")->where("ref_id", $exp_lead_id)->first();
 
@@ -1129,9 +1130,10 @@ class ExportLeadController extends BackendController
                 throw new UserException("Contact of Lead not found");
             }
 
-            $dispatch->export_contact_id = $contact->id;
-
-            $dispatch->fill($dispatchData);
+            $shipOrder->fill($shipOrderData);
+            $shipOrder->order_from_type = "lead";
+            $shipOrder->export_contact_id = $contact->id;
+            $shipOrder->status_type = ShipOrder::STATUS_PENDING;
 
             if ($exp_lead->deal_type == Lead::DEAL_TYPE_THROGH_DEALER)
             {
@@ -1142,13 +1144,12 @@ class ExportLeadController extends BackendController
                     throw new UserException("Dealer have no Primary Address", UserException::ERROR_USER_DATA_WRONG);
                 }
 
-                $dispatch->addr1 = $primary_address->addr1;
-                $dispatch->addr2 = $primary_address->addr2;
-                $dispatch->pincode = $primary_address->pincode;
-                $dispatch->country_id = $exp_lead->expDealer->country_id;
-                $dispatch->state_id = $exp_lead->expDealer->state_id;
-                $dispatch->district_id = $exp_lead->expDealer->district_id;
-                $dispatch->city_id = $exp_lead->expDealer->city_id;
+                $shipOrder->addr1 = $primary_address->addr1;
+                $shipOrder->addr2 = $primary_address->addr2;
+                $shipOrder->zipcode = $primary_address->pincode;
+                $shipOrder->country_id = $exp_lead->expDealer->country_id;
+                $shipOrder->state_id = $exp_lead->expDealer->state_id;
+                $shipOrder->city_id = $exp_lead->expDealer->city_id;
             }
             else
             {
@@ -1158,75 +1159,71 @@ class ExportLeadController extends BackendController
                 {
                     throw new UserException("No Primary Address Found", UserException::ERROR_USER_DATA_WRONG);
                 }
-                
-                $dispatch->addr1 = $primary_address->addr1;
-                $dispatch->addr2 = $primary_address->addr2;
-                $dispatch->pincode = $primary_address->pincode;
-                $dispatch->country_id = $exp_lead->country_id;
-                $dispatch->state_id = $exp_lead->state_id;
-                $dispatch->district_id = $exp_lead->district_id;
-                $dispatch->city_id = $exp_lead->city_id;
+
+                $shipOrder->addr1 = $primary_address->addr1;
+                $shipOrder->addr2 = $primary_address->addr2;
+                $shipOrder->zipcode = $primary_address->pincode;
+                $shipOrder->country_id = $exp_lead->country_id;
+                $shipOrder->state_id = $exp_lead->state_id;
+                $shipOrder->city_id = $exp_lead->city_id;
             }
 
-            if (!$dispatch->save())
+            if (!$shipOrder->save())
             {
                 throw new UserException("Fail To Save Dispatch", UserException::ERROR_LARAVEL_FAIL);
             }
 
-            $existing_id_list = $this->model->products()->pluck("id", "id")->toArray();
+            $existing_id_list = $shipOrder->shipOrderProduct()->pluck("id", "id")->toArray();
 
             foreach($exp_lead->products as $product)
             {
                 $save = $product->toArray();
                 unset($save['id']);
-                unset($save['lead_id']);
-                $save['dispatch_order_id'] = $dispatch->id;
+                $save['ship_order_id'] = $shipOrder->id;
 
-                $child_model = new DispatchOrderProduct($save);
+                $child_model = new ShipOrderProduct($save);
 
-                $child_model = DispatchOrderProduct::insertOrUpdate($save, $is_insert, $is_update);
+                $child_model = ShipOrderProduct::insertOrUpdate($save, $is_insert, $is_update);
 
                 unset($existing_id_list[$child_model->id]);
             }
 
             if ($existing_id_list)
             {
-                $existing_records = $dispatch->products()->where("id", $existing_id_list)->get();
+                $existing_records = $shipOrder->shipOrderProduct()->where("id", $existing_id_list)->get();
 
                 foreach($existing_records as $existing_record)
                 {
                     if (!$existing_record->safeDelete($existing_record))
                     {
-                        LaravelExtend::addError($existing_record->name, "Can not delete, bcoz it is asscoicated with other modules.", "Term");
+                        LaravelExtend::addError($existing_record->getDisplayName(), "Can not delete, bcoz it is asscoicated with other modules.", "Term");
                     }
                 }
             }
 
-            $existing_id_list = $this->model->items()->pluck("id", "id")->toArray();
+            $existing_id_list = $shipOrder->shipOrderItem()->pluck("id", "id")->toArray();
 
             foreach($exp_lead->items as $item)
             {
                 $save = $item->toArray();
                 unset($save['id']);
-                unset($save['lead_id']);
-                $save['dispatch_order_id'] = $dispatch->id;
+                $save['ship_order_id'] = $shipOrder->id;
+                $child_model = new ShipOrderItem($save);
 
-                $child_model = new DispatchOrderItem($save);
-
-                $child_model = DispatchOrderItem::insertOrUpdate($save, $is_insert, $is_update);
+                $child_model = ShipOrderItem::insertOrUpdate($save, $is_insert, $is_update);
 
                 unset($existing_id_list[$child_model->id]);
             }
 
             if ($existing_id_list)
             {
-                $existing_records = $dispatch->items()->where("id", $existing_id_list)->get();
+                $existing_records = $shipOrder->shipOrderItem()->where("id", $existing_id_list)->get();
 
                 foreach($existing_records as $existing_record)
                 {
                     if (!$existing_record->safeDelete($existing_record))
                     {
-                        LaravelExtend::addError($existing_record->name, "Can not delete, bcoz it is asscoicated with other modules.", "Term");
+                        LaravelExtend::addError($existing_record->getDisplayName(), "Can not delete, bcoz it is asscoicated with other modules.", "Term");
                     }
                 }
             }
@@ -1234,12 +1231,12 @@ class ExportLeadController extends BackendController
             $notification_data = [
                 'from_user_id' => LaravelExtend::getAuthUserId(),
                 "sub_type" => Notification::SUB_TYPE_INFO,
-                "msg" => "New Dispatch Order of Lead from Exports"
+                "msg" => "New Ship Order of Lead from Exports"
             ];
 
             $notifyObj = new GeneralNotification($notification_data);
 
-            $user_id_list = NotificationSetting::getUserIdList("on_dispatch_order_from_sales_lead");
+            $user_id_list = NotificationSetting::getUserIdList("on_ship_order_from_export_lead");
 
             if ($user_id_list)
             {
@@ -1268,8 +1265,8 @@ class ExportLeadController extends BackendController
 
             $this->saveSqlLog();
 
-            return back()->with('success', "History Saved successfully");
-        } 
+            return back()->with('success', "Ship Order placed successfully");
+        }
         catch (UserException $ex) {
             DB::rollBack();
 
@@ -1345,7 +1342,7 @@ class ExportLeadController extends BackendController
             $this->saveSqlLog();
 
             return back()->with('success', "Files Saved successfully");
-        } 
+        }
         catch (UserException $ex) {
             DB::rollBack();
 
@@ -1424,7 +1421,7 @@ class ExportLeadController extends BackendController
             $this->saveSqlLog();
 
             return back()->with('success', "Snoozed successfully");
-        } 
+        }
         catch (UserException $ex) {
             DB::rollBack();
 
@@ -1633,7 +1630,7 @@ class ExportLeadController extends BackendController
         download_start($file, "application/octet-stream");
     }
 
-    
+
     public function ajax_get_list(Request $request)
     {
         $response = ["status" => 1, "data" => []];
@@ -1645,7 +1642,7 @@ class ExportLeadController extends BackendController
             if ($search_term && strlen(trim($search_term)) > 0)
             {
                 $search_term = urldecode(trim($search_term));
-                
+
                 $records = $this->modelClass::
                             where("mobile", 'LIKE', '%' . $search_term . '%')
                             ->orWhere("mobile2", 'LIKE', '%' . $search_term . '%')
@@ -1653,9 +1650,9 @@ class ExportLeadController extends BackendController
                             ->orderBy("name", "ASC")
                             ->limit(20)
                             ->get();
-                 
+
             }
-            else 
+            else
             {
                 $limit = $request->get("limit");
 
@@ -1675,7 +1672,7 @@ class ExportLeadController extends BackendController
                     $row = [];
 
                     if ($record->is_customer)
-                    {   
+                    {
                         if (isset($record->customer->id))
                         {
                             $row['display'] = $record->getDisplayName() . " (Customer)";
@@ -1693,7 +1690,7 @@ class ExportLeadController extends BackendController
                         $response['data'][] = $row;
                     }
                 }
-            }    
+            }
         }
         catch(Exception $ex)
         {

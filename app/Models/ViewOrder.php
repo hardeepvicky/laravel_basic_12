@@ -56,24 +56,24 @@ class ViewOrder extends BaseModel
     }
 
     public function lead()
-    {
-        return $this->belongsTo(Lead::class, 'contact_ref_id');
+    {        
+        return $this->belongsTo($this->type == "sale" ? Lead::class : ExpLead::class, 'contact_ref_id');
     }
     public function customer()
     {
-        return $this->belongsTo(Customer::class, 'contact_ref_id');
+        return $this->belongsTo($this->type == "sale" ? Customer::class : ExpCustomer::class, 'contact_ref_id');
     }
     public function party()
     {
-        return $this->belongsTo(Party::class, 'contact_ref_id');
+        return $this->belongsTo($this->type == "sale" ? Party::class : ExpParty::class, 'contact_ref_id');
     }
     public function dealer()
     {
-        return $this->belongsTo(Dealer::class, 'contact_ref_id');
+        return $this->belongsTo($this->type == "sale" ? Dealer::class : ExpDealer::class, 'contact_ref_id');
     }
     public function competitor()
     {
-        return $this->belongsTo(Competitor::class, 'contact_ref_id');
+        return $this->belongsTo($this->type == "sale" ? Competitor::class : ExpCompetitor::class, 'contact_ref_id');
     }
 
     public static function fetchList(Builder $builder, string $key_field, string $value_field)

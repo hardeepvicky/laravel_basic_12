@@ -183,7 +183,7 @@ use App\Helpers\DateUtility;
                         </div>
                     </form>
                 </div>
-                <div class="modal-footer">
+                <div class="modal-footer d-flex justify-content-start">
                     <button class="btn btn-secondary closed" type="button" data-bs-dismiss="modal">Close</button>
                     <button class="btn btn-primary submit" type="button">Submit</button>
                 </div>
@@ -213,7 +213,7 @@ use App\Helpers\DateUtility;
                         </div>
                     </form>
                 </div>
-                <div class="modal-footer">
+                <div class="modal-footer d-flex justify-content-start">
                     <button class="btn btn-secondary closed" type="button" data-bs-dismiss="modal">Close</button>
                     <button class="btn btn-primary submit" type="button">Submit</button>
                 </div>
@@ -243,7 +243,7 @@ use App\Helpers\DateUtility;
                         </div>
                     </form>
                 </div>
-                <div class="modal-footer">
+                <div class="modal-footer d-flex justify-content-start">
                     <button class="btn btn-secondary closed" type="button" data-bs-dismiss="modal">Close</button>
                     <button class="btn btn-primary submit" type="button">Submit</button>
                 </div>
@@ -259,7 +259,7 @@ use App\Helpers\DateUtility;
                     <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body" style="height: 80vh; overflow-y:scroll">
-                    <x-form.start action="{{ route('lead.dispatch', ['lead_id' => $record->lead_id ?? $record->id]) }}" method="POST" />
+                    <x-form.start action="{{ route($routePrefix . '.dispatch', [$record->id]) }}" method="POST" />
                         <x-Inputs.text-field type="hidden" name="entry_by" :label="$false" value="MANUAL" />
                         <x-Inputs.text-field type="hidden" name="action_type" :label="$false" value="{{ LeadHistory::ACTION_TYPE_DISPATCH }}" />
                         <div class="row">
@@ -286,28 +286,6 @@ use App\Helpers\DateUtility;
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
                                     <?php
-                                    $field = 'carrier_id';
-                                    $label = "Carrier";
-                                    ?>
-                                    <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
-                                        :list="$carrier_list" class="modal-select2" mandatory="true"
-                                        />
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <?php
-                                    $field = 'docket_no';
-                                    $label = "Docket Number";
-                                    ?>
-                                    <x-Inputs.text-field :id="$field" :name="$field" :label="$label"
-                                        mandatory="true"
-                                        />
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <?php
                                     $field = 'purpose_price';
                                     $label = get_value_from_list($field_labels, $field, $field);
                                     ?>
@@ -319,15 +297,6 @@ use App\Helpers\DateUtility;
                                     <?php
                                     $field = 'shipping_fee';
                                     $label = "Shipping Fee";
-                                    ?>
-                                    <x-Inputs.text-field :id="$field" :name="$field" :label="$label" class="validate-float"  mandatory="true"/>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <?php
-                                    $field = 'shipping_fee_gst_per';
-                                    $label = "Shipping Fee GST (%)";
                                     ?>
                                     <x-Inputs.text-field :id="$field" :name="$field" :label="$label" class="validate-float"  mandatory="true"/>
                                 </div>
@@ -377,8 +346,11 @@ use App\Helpers\DateUtility;
                                                     <i class="fas fa-plus-circle text-success icon"></i>
                                                 </span>
                                             </th>
-                                            <th style="width:70%">
+                                            <th style="width:40%">
                                                 {{ get_value_from_list($product_field_labels, 'product_id') }}
+                                            </th>
+                                            <th style="width:30%">
+                                                {{ get_value_from_list($product_field_labels, 'make_id') }}
                                             </th>
                                             <th style="width:20%">
                                                 {{ get_value_from_list($product_field_labels, 'qty') }}
@@ -412,6 +384,14 @@ use App\Helpers\DateUtility;
                                                 ?>
                                                 <x-inputs.drop-down name="products[(sr-id)][{{ $field }}]"
                                                     label="" :list="$product_list" class="will-required will-select2"
+                                                    />
+                                            </td>
+                                            <td>
+                                                <?php
+                                                $field = 'make_id';
+                                                ?>
+                                                <x-inputs.drop-down name="products[(sr-id)][{{ $field }}]"
+                                                    label="" :list="$make_list" class="will-required will-select2"
                                                     />
                                             </td>
                                             <td>
@@ -457,6 +437,15 @@ use App\Helpers\DateUtility;
                                                         ?>
                                                         <x-inputs.drop-down name="products[{{ $k }}][{{ $field }}]"
                                                             label="" :list="$product_list" :value="$value" class="will-required will-select2"
+                                                            />
+                                                    </td>
+                                                    <td>
+                                                        <?php
+                                                        $field = 'make_id';
+                                                        $value = $child_arr[$field] ?? '';
+                                                        ?>
+                                                        <x-inputs.drop-down name="products[{{ $k }}][{{ $field }}]"
+                                                            label="" :list="$make_list" :value="$value" class="will-required will-select2"
                                                             />
                                                     </td>
                                                     <td>
@@ -818,7 +807,7 @@ use App\Helpers\DateUtility;
                         @endif
                     </form>
                 </div>
-                <div class="modal-footer">
+                <div class="modal-footer d-flex justify-content-start">
                     <button class="btn btn-secondary closed" type="button" data-bs-dismiss="modal">Close</button>
                     <button class="btn btn-primary submit" type="button">Submit</button>
                 </div>
@@ -837,12 +826,7 @@ use App\Helpers\DateUtility;
                 var shipping_fee = $("#shipping_fee").val();
                 shipping_fee = shipping_fee ? parseFloat(shipping_fee): 0;
 
-                var shipping_fee_gst_per = $("#shipping_fee_gst_per").val();
-                shipping_fee_gst_per = shipping_fee_gst_per ? parseFloat(shipping_fee_gst_per): 0;
-
-                var shipping_fee_gst = shipping_fee * shipping_fee_gst_per  / 100;
-
-                var payable_amount = purpose_price + shipping_fee + shipping_fee_gst;
+                var payable_amount = purpose_price + shipping_fee;
 
                 $("#payable_amount").val(payable_amount.toFixed(2));
             }

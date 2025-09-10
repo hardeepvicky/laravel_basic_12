@@ -26,7 +26,7 @@ class ExportContact extends BaseModel
     }
     public function party()
     {
-        return $this->belongsTo(Party::class, 'ref_id');
+        return $this->belongsTo(ExpParty::class, 'ref_id');
     }
     public function dealer()
     {
@@ -34,7 +34,7 @@ class ExportContact extends BaseModel
     }
     public function competitor()
     {
-        return $this->belongsTo(Competitor::class, 'ref_id');
+        return $this->belongsTo(ExpCompetitor::class, 'ref_id');
     }
 
     public static function getRefListFromUnionOfTables()

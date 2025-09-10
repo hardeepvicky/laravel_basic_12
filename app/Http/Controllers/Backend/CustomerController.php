@@ -9,9 +9,13 @@ use App\Helpers\DateUtility;
 use App\Helpers\FileUtility;
 use App\Helpers\LaravelExtend;
 use App\Models\City;
+use App\Models\Contact;
 use App\Models\Country;
 use App\Models\Customer;
 use App\Models\Dealer;
+use App\Models\DispatchOrder;
+use App\Models\DispatchOrderItem;
+use App\Models\DispatchOrderProduct;
 use App\Models\DocumentFile;
 use App\Models\DropDownValue;
 use App\Models\FieldSetting;
@@ -21,11 +25,15 @@ use App\Models\LeadAddress;
 use App\Models\LeadHistory;
 use App\Models\LeadItem;
 use App\Models\LeadProduct;
+use App\Models\Maker;
+use App\Models\Notification;
+use App\Models\NotificationSetting;
 use App\Models\Party;
 use App\Models\Product;
 use App\Models\State;
 use App\Models\Type;
 use App\Models\User;
+use App\Notifications\GeneralNotification;
 use App\Rules\MobileNumber;
 use Exception;
 use Illuminate\Http\Request;
@@ -725,11 +733,267 @@ class CustomerController extends BackendController
 
         $carrier_list = Party::getList("id", "display_name", ["type" => Party::TYPE_CARRIER]);
 
+        $make_list = Maker::getList("id", "display_name", [], "list_display_order");
+
         $model = new LeadHistory();
 
-        $this->setForView(compact("record", "form", "model", "histories", "products", "items", "addresses", "carrier_list"));
+        $this->setForView(compact("record", "form", "model", "histories", "products", "items", "addresses", "carrier_list", "make_list"));
 
         return $this->view(__FUNCTION__);
+    }
+
+    
+    public function dispatch($customer_id, Request $request)
+    {
+        $this->model = $customer = $this->modelClass::with("lead")->findOrFail($customer_id);
+
+        $rules = [
+            "entry_by" => ["required"],
+            "action_type" => ["required"],
+            "status_type" => ["required"],
+            "purpose_price" => ["required"],
+            "payable_amount" => ["required"],
+            "payment_method_type" => ["required"],
+            "next_meeting_date_time" => "",
+            "remarks" => "",
+            "products" => [],
+            "items" => [],
+            "addresses" => [],
+        ];
+
+        $validatedData = $request->validate($rules);
+
+        $rules = [
+            "shipping_fee" => ["required"],
+            "remarks" => "",
+        ];
+
+        $dispatchData = $request->validate($rules);
+
+        DB::beginTransaction();
+
+        try {
+            // d($validatedData, true);
+
+            if ($customer->status_type == Lead::STATUS_DEAD)
+            {
+                throw new UserException("Customer is dead", UserException::ERROR_USER_ACTION_RESTRICT);
+            }
+
+            if ($customer->status_type == Lead::STATUS_FAKE)
+            {
+                throw new UserException("Customer is Fake", UserException::ERROR_USER_ACTION_RESTRICT);
+            }
+
+            $customer->canChangeHistory();
+
+            $model = new LeadHistory();
+
+            $validatedData['lead_id'] = $customer->lead_id;
+            $validatedData = $model->convertTimeZoneBeforeQueryToDatabase($validatedData);
+            $validatedData['assing_to_user_id'] = $customer->assign_to_user_id;
+
+            $model = LeadHistory::create($validatedData);
+
+            if ($validatedData['status_type'] != $customer->status_type)
+            {
+                $customer->changeStatus($validatedData['status_type']);
+            }
+
+            if ($validatedData['next_meeting_date_time'])
+            {
+                $customer->changeNextFollowupDateTime($validatedData['next_meeting_date_time']);
+            }
+
+            $customer->purpose_price = $validatedData['purpose_price'];
+            $customer->payable_amount = $validatedData['payable_amount'];
+            $customer->payment_method_type = $validatedData['payment_method_type'];
+            $customer->save();
+
+            $this->_saveOthers($validatedData);
+
+            $contact = Contact::where("type", "customer")->where("ref_id", $customer_id)->first();
+
+            if (!$contact)
+            {
+                throw new UserException("Contact of Lead not found");
+            }
+
+            $dispatch = new DispatchOrder();
+            $dispatch->fill($dispatchData);
+            $dispatch->contact_id = $contact->id;
+            $dispatch->order_from_type = "customer";
+            $dispatch->status_type = DispatchOrder::STATUS_PENDING;
+
+            $my_country = Country::getMyCountry();
+
+            if ($customer->deal_type == Lead::DEAL_TYPE_THROGH_DEALER)
+            {
+                $primary_address = $customer->dealer->address()->where("is_primary", 1)->first();
+
+                if (!$primary_address)
+                {
+                    throw new UserException("Dealer have no Primary Address", UserException::ERROR_USER_DATA_WRONG);
+                }
+
+                $dispatch->addr1 = $primary_address->addr1;
+                $dispatch->addr2 = $primary_address->addr2;
+                $dispatch->pincode = $primary_address->pincode;
+                $dispatch->country_id = $my_country->id;
+                $dispatch->state_id = $customer->dealer->state_id;
+                $dispatch->district_id = $customer->dealer->district_id;
+                $dispatch->city_id = $customer->dealer->city_id;
+            }
+            else
+            {
+                $primary_address = $customer->lead->address()->where("is_primary", 1)->first();
+
+                if (!$primary_address)
+                {
+                    throw new UserException("No Primary Address Found", UserException::ERROR_USER_DATA_WRONG);
+                }
+                
+                $dispatch->addr1 = $primary_address->addr1;
+                $dispatch->addr2 = $primary_address->addr2;
+                $dispatch->pincode = $primary_address->pincode;
+                $dispatch->country_id = $my_country->id;
+                $dispatch->state_id = $customer->state_id;
+                $dispatch->district_id = $customer->district_id;
+                $dispatch->city_id = $customer->city_id;
+            }
+
+            if (!$dispatch->save())
+            {
+                throw new UserException("Fail To Save Dispatch", UserException::ERROR_LARAVEL_FAIL);
+            }
+
+            $existing_id_list = $dispatch->products()->pluck("id", "id")->toArray();
+
+            foreach($customer->lead->products as $product)
+            {
+                $save = $product->toArray();
+                unset($save['id']);
+                $save['dispatch_order_id'] = $dispatch->id;
+
+                $child_model = new DispatchOrderProduct($save);
+
+                $child_model = DispatchOrderProduct::insertOrUpdate($save, $is_insert, $is_update);
+
+                unset($existing_id_list[$child_model->id]);
+            }
+
+            if ($existing_id_list)
+            {
+                $existing_records = $dispatch->products()->where("id", $existing_id_list)->get();
+
+                foreach($existing_records as $existing_record)
+                {
+                    if (!$existing_record->safeDelete($existing_record))
+                    {
+                        LaravelExtend::addError($existing_record->name, "Can not delete, bcoz it is asscoicated with other modules.", "Term");
+                    }
+                }
+            }
+
+            $existing_id_list = $dispatch->items()->pluck("id", "id")->toArray();
+
+            foreach($customer->lead->items as $item)
+            {
+                $save = $item->toArray();
+                unset($save['id']);
+                $save['dispatch_order_id'] = $dispatch->id;
+
+                $child_model = new DispatchOrderItem($save);
+
+                $child_model = DispatchOrderItem::insertOrUpdate($save, $is_insert, $is_update);
+
+                unset($existing_id_list[$child_model->id]);
+            }
+
+            if ($existing_id_list)
+            {
+                $existing_records = $dispatch->items()->where("id", $existing_id_list)->get();
+
+                foreach($existing_records as $existing_record)
+                {
+                    if (!$existing_record->safeDelete($existing_record))
+                    {
+                        LaravelExtend::addError($existing_record->name, "Can not delete, bcoz it is asscoicated with other modules.", "Term");
+                    }
+                }
+            }
+
+            $notification_data = [
+                'from_user_id' => LaravelExtend::getAuthUserId(),
+                "sub_type" => Notification::SUB_TYPE_INFO,
+                "msg" => "New Dispatch Order of Customer from Sales"
+            ];
+
+            $notifyObj = new GeneralNotification($notification_data);
+
+            $user_id_list = NotificationSetting::getUserIdList("on_dispatch_order_from_sales_lead");
+
+            if ($user_id_list)
+            {
+                $users = User::find($user_id_list);
+
+                foreach($users as $user)
+                {
+                    $user->notify($notifyObj);
+                }
+            }
+
+            if (LaravelExtend::$errors) {
+                throw new UserException("There are some errors", UserException::ERROR_USER_DATA_WRONG);
+            }
+
+            DB::commit();
+
+            $request = request();
+
+            if ($request->ajax()) {
+                return $this->responseJson([
+                    'status' => 1,
+                ]);
+            }
+
+            $this->saveSqlLog();
+
+            return back()->with('success', "Dispatch Order placed successfully");
+        } 
+        catch (UserException $ex) {
+            DB::rollBack();
+
+            $request = request();
+
+            if ($request->ajax()) {
+                return $this->responseJson([
+                    'status' => 0,
+                    'msg' => $ex->getMessage(),
+                    "custom_errors" => LaravelExtend::$errors
+                ]);
+            }
+
+            $this->saveSqlLog();
+
+            return back()->withInput()->with('fail', get_exception_display_message($ex))->with("custom_errors", LaravelExtend::$errors);
+        }
+        catch (Exception $ex) {
+            DB::rollBack();
+
+            $request = request();
+
+            if ($request->ajax()) {
+                return $this->responseJson([
+                    'status' => 0,
+                    'msg' => get_exception_display_message($ex),
+                ]);
+            }
+
+            $this->saveSqlLog();
+
+            return back()->withInput()->with('fail', get_exception_display_message($ex))->with("custom_errors", LaravelExtend::$errors);
+        }
     }
 
     public function ajax_get_list(Request $request)

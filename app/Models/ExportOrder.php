@@ -25,10 +25,14 @@ class ExportOrder extends BaseModel
     const ORDER_FROM_TYPE_DEALER = "dealer";
     const ORDER_FROM_TYPE_CUSTOMER = "customer";
     const ORDER_FROM_TYPE_LEAD = "lead";
+    const ORDER_FROM_TYPE_PARTY = "party";
+    const ORDER_FROM_TYPE_COMPETITOR = "competitor";
 
     const STATUS_NEW = "NEW";
     const STATUS_PRODUCTION = "PRODUCTION";
     const STATUS_GODOWN = "GODOWN";
+    const STATUS_DISPTACH = "DISPTACH";
+    const STATUS_SENT = "SENT";
 
     public static array $child_model_class = [
         ExportOrderProduct::class => [
@@ -154,9 +158,11 @@ class ExportOrder extends BaseModel
     public static function getOrderFromTypeList()
     {
         return [
-            self::ORDER_FROM_TYPE_DEALER => "Dealer",
-            self::ORDER_FROM_TYPE_CUSTOMER => "Customer",
             self::ORDER_FROM_TYPE_LEAD => "New  Customer (Lead)",
+            self::ORDER_FROM_TYPE_CUSTOMER => "Customer",
+            self::ORDER_FROM_TYPE_DEALER => "Dealer",
+            self::ORDER_FROM_TYPE_PARTY => "Party",
+            self::ORDER_FROM_TYPE_COMPETITOR => "Competitor",
         ];
     }
 
@@ -179,5 +185,50 @@ class ExportOrder extends BaseModel
                 return $list;
                 break;
         }
+    }
+
+    
+    public function isFullySent()
+    {
+        $sum_order_qty = $this->exportOrderProduct()->sum("order_qty");
+        $sum_sent_qty = $this->exportOrderProduct()->sum("sent_qty");
+
+        if ($sum_order_qty == $sum_sent_qty)
+        {
+            return true;
+        }
+        
+        return false;
+    }
+
+    
+    public function checkForSent()
+    {
+        $sum_available_qty = $this->exportOrderProduct()->sum("available_qty");
+        $qty_to_manufacture = $this->exportOrderProduct()->sum("qty_to_manufacture");
+        $sum_sent_qty = $this->exportOrderProduct()->sum("sent_qty");
+
+        if ($sum_available_qty == $sum_sent_qty)
+        {
+            $this->status = self::STATUS_DISPTACH;
+        }
+        else
+        {
+            $eo_id = $this->id;
+            $manufactured_qty = ManufactureOrder::whereHas("exportOrderProduct", function($q) use($eo_id) {
+                $q->where("export_order_id", $eo_id);
+            })->sum("manufactured_qty");
+
+            if ($manufactured_qty >= $qty_to_manufacture)
+            {
+                $this->status = self::STATUS_GODOWN;
+            }
+            else
+            {        
+                $this->status = self::STATUS_PRODUCTION;
+            }
+        }
+
+        $this->save();
     }
 }

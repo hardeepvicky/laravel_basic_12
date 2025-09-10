@@ -12,6 +12,7 @@
                         <th style="width:10%">
                             <span class="btn btn-light btn-sm text-dark border-primary clear_search_conditions mb-1">Clear</span>
                         </th>
+                        <th></th>
                         <th>
                             <?php
                             $field = "sale_order_no";
@@ -86,6 +87,7 @@
                         <th style="width:10%">
                             <?= sortable_anchor('id', get_value_from_list($field_labels, 'id', 'id')) ?>
                         </th>
+                        <th><?= get_value_from_list($field_labels, 'order_from_type', 'order_from_type') ?></th>
                         <th><?= get_value_from_list($field_labels, 'sale_order_id', 'sale_order_id') ?></th>
                         <th><?= get_value_from_list($field_labels, 'contact_id', 'contact_id') ?></th>
                         <th><?= sortable_anchor('status_type', get_value_from_list($field_labels, 'status_type', 'status_type')) ?></th>
@@ -116,9 +118,14 @@
                                 </x-Backend.celec-summary-table-first-column>
                             </th>
                             <td>
+                                {{ $record->orderFrom() }}
+                            </td>
+                            <td>
+                                @if($record->sale_order_id)
                                 <a href="{{ route('sale-order.index', ['id' => $record->sale_order_id]) }}" target="_blank">
                                     {{ $record->saleOrder?->getDisplayName() }}
                                 </a>
+                                @endif
                             </td>
                             <td>
                                 <a href="{{ route('contact.index', ['id' => $record->contact_id]) }}" target="_blank">
@@ -154,13 +161,6 @@
                                 <div class="row">
                                     <div class="col-md-5">
                                         <label class="info">
-                                            {{ get_value_from_list($field_labels, 'builty_no') }} :
-                                            <span>
-                                                {{ $record->builty_no }}
-                                            </span>
-                                        </label>
-
-                                        <label class="info">
                                             {{ get_value_from_list($field_labels, 'tracking_phone_no') }} :
                                             <span>
                                                 {{ $record->tracking_phone_no }}
@@ -171,27 +171,6 @@
                                             {{ get_value_from_list($field_labels, 'shipping_fee') }} :
                                             <span>
                                                 {{ $record->shipping_fee }}
-                                            </span>
-                                        </label>
-
-                                        <label class="info">
-                                            {{ get_value_from_list($field_labels, 'shipping_fee_gst') }} :
-                                            <span>
-                                                {{ $record->shipping_fee_gst }} ({{ $record->shipping_fee_gst_per }} % )
-                                            </span>
-                                        </label>
-
-                                        <label class="info">
-                                            {{ get_value_from_list($field_labels, 'total_fee') }} :
-                                            <span>
-                                                {{ $record->total_fee }}
-                                            </span>
-                                        </label>
-
-                                        <label class="info">
-                                            {{ get_value_from_list($field_labels, 'campaign_id') }} :
-                                            <span>
-                                                {{ $record->campaign?->getDisplayName() }}
                                             </span>
                                         </label>
 

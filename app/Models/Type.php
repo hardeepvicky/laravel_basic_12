@@ -108,6 +108,11 @@ class Type extends BaseModel
                     "status_type" => "Status",
                 ]
             ],
+            ShipOrder::class => [
+                "fields" => [
+                    "status_type" => "Status",
+                ]
+            ],
             Branch::class => [
                 "fields" => [
                     "type" => "Type",

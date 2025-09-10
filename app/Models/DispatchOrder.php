@@ -18,11 +18,11 @@ class DispatchOrder extends BaseModel
     protected static array $unique_fields = [];
 
     public static array $child_model_class = [
-        LeadProduct::class => [
+        DispatchOrderProduct::class => [
             "foreignKey" => ["dispatch_order_id"],
             "preventDelete" => false
         ],
-        LeadItem::class => [
+        DispatchOrderItem::class => [
             "foreignKey" => ["dispatch_order_id"],
             "preventDelete" => false
         ],
@@ -32,21 +32,6 @@ class DispatchOrder extends BaseModel
     public const STATUS_SENT = "SENT";
     public const STATUS_INTRANSIT = "INTRANSIT";
     public const STATUS_DELIVERED = "DELIVERED";
-
-
-    public function beforeSave()
-    {
-        if ($this->shipping_fee && $this->shipping_fee_gst_per)
-        {
-            $this->shipping_fee_gst = round($this->shipping_fee * $this->shipping_fee_gst_per / 100, 2);
-        }
-
-        if ($this->shipping_fee && $this->shipping_fee_gst) {
-            $this->total_fee = $this->shipping_fee + $this->shipping_fee_gst;
-        }
-
-        parent::beforeSave();
-    }
 
     public function afterFindForCsv()
     {
@@ -70,6 +55,16 @@ class DispatchOrder extends BaseModel
         }
 
         return $name;
+    }
+
+    public function orderFrom()
+    {
+        if ($this->sale_order_id)
+        {
+            return "Sale";
+        }
+
+        return ucfirst($this->order_from_type);
     }
 
     public function products()

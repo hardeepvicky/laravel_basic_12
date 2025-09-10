@@ -25,6 +25,8 @@ class SaleOrder extends BaseModel
     const ORDER_FROM_TYPE_DEALER = "dealer";
     const ORDER_FROM_TYPE_CUSTOMER = "customer";
     const ORDER_FROM_TYPE_LEAD = "lead";
+    const ORDER_FROM_TYPE_PARTY = "party";
+    const ORDER_FROM_TYPE_COMPETITOR = "competitor";
 
     const STATUS_NEW = "NEW";
     const STATUS_PRODUCTION = "PRODUCTION";
@@ -220,11 +222,10 @@ class SaleOrder extends BaseModel
 
     public function isFullySent()
     {
-        $sum_available_qty = $this->saleOrderProduct()->sum("available_qty");
-        $qty_to_manufacture = $this->saleOrderProduct()->sum("qty_to_manufacture");
+        $sum_order_qty = $this->saleOrderProduct()->sum("order_qty");
         $sum_sent_qty = $this->saleOrderProduct()->sum("sent_qty");
 
-        if ($sum_available_qty == $sum_sent_qty && $qty_to_manufacture <= 0)
+        if ($sum_order_qty == $sum_sent_qty)
         {
             return true;
         }

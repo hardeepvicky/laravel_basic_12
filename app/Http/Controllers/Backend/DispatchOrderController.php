@@ -24,6 +24,7 @@ use App\Models\State;
 use App\Models\StockProduct;
 use App\Models\Type;
 use App\Models\User;
+use App\Models\ViewContact;
 use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Support\Facades\DB;
@@ -108,7 +109,7 @@ class DispatchOrderController extends BackendController
         {
             $builder->whereHas("saleOrderProduct", function($q) use($sale_order_condition_list) {
                 $q->whereHas("saleOrder", function($q)  use($sale_order_condition_list) {
-                    $q->where("order_no", "like", "%" . $sale_order_condition_list['sale_order_no'] . "%");
+                    $q->where("order_no", "like", "%" . $sale_order_condition_list['sale_order_no']['value'] . "%");
                 });
             });
         }
@@ -184,7 +185,14 @@ class DispatchOrderController extends BackendController
 
         $carrier_list = Party::getList("id", "display_name", ["type" => Party::TYPE_CARRIER]);
 
-        $contact_list = Contact::getList("id", "display_name", [], "id", "DESC");
+        $contacts = ViewContact::getList("id", "display_name", [], "id", "DESC");
+
+        $contact_list = [];
+
+        foreach($contacts as $k => $arr)
+        {
+            $contact_list[$k] = $arr['name'];
+        }
 
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
@@ -222,16 +230,10 @@ class DispatchOrderController extends BackendController
             $record->afterFindForCsv();
         }
 
-        $records = $records->toArray();
-
         // d($records, true);
 
         $csv_records = [];
         $user_cache_list = User::getListCache();
-
-        $yes_no_list = laravel_constant('yes_no_list');
-
-        $order_from_type_list = SaleOrder::getOrderFromTypeList();
 
         $type_conditions = [
             'type' => Type::getType($this->model, "status_type")
@@ -243,7 +245,9 @@ class DispatchOrderController extends BackendController
 
         $sale_order_field_labels = FieldSetting::getDynamicFields(SaleOrder::class);
 
-        foreach ($records as $record) {
+        foreach ($records as $model) {
+
+            $record = $model->toArray();
 
             $csv_records[] = [
                 'ID' => $record['id'],
@@ -251,7 +255,7 @@ class DispatchOrderController extends BackendController
                 $sale_order_field_labels['party_order_ref_no'] => $record['sale_order']['party_order_ref_no'] ?? "",
                 $sale_order_field_labels['branch_id'] => $record['sale_order']['branch']['display_name'] ?? "",
 
-                $field_labels['order_from_type'] => get_value_from_list($order_from_type_list, $record['order_from_type']),
+                $field_labels['order_from_type'] => $model->orderFrom(),
                 $field_labels['contact_id'] => $record['contact']['name'] ?? "",
                 $field_labels['status_type'] => get_value_from_list($status_type_list, $record['status_type']),
 
@@ -324,10 +328,6 @@ class DispatchOrderController extends BackendController
         $csv_records = [];
         $user_cache_list = User::getListCache();
 
-        $yes_no_list = laravel_constant('yes_no_list');
-
-        $order_from_type_list = SaleOrder::getOrderFromTypeList();
-
         $type_conditions = [
             'type' => Type::getType($this->model, "status_type")
         ];
@@ -345,8 +345,8 @@ class DispatchOrderController extends BackendController
 
         foreach ($records as $model) {
 
-
             $record = $model->toArray();
+            
             foreach($model->products as $dispatchOrderProduct)
             {
                 $child_record = $dispatchOrderProduct->toArray();
@@ -357,7 +357,7 @@ class DispatchOrderController extends BackendController
                     $sale_order_field_labels['party_order_ref_no'] => $record['sale_order']['party_order_ref_no'] ?? "",
                     $sale_order_field_labels['branch_id'] => $record['sale_order']['branch']['display_name'] ?? "",
 
-                    $field_labels['order_from_type'] => get_value_from_list($order_from_type_list, $record['order_from_type']),
+                    $field_labels['order_from_type'] => $model->orderFrom(),
                     $field_labels['contact_id'] => $record['contact']['name'] ?? "",
                     $field_labels['status_type'] => get_value_from_list($status_type_list, $record['status_type']),
 
@@ -535,7 +535,7 @@ class DispatchOrderController extends BackendController
                             $model->products()->save($child_model);
                         }
 
-                        $save_record['saleOrder']->status_type = SaleOrder::STATUS_GODOWN;
+                        $save_record['saleOrder']->status = SaleOrder::STATUS_GODOWN;
                         $save_record['saleOrder']->save();
                         $save_record['saleOrder']->checkForSent();
 
