@@ -40,7 +40,7 @@
 
                             <?php
                                 $field = 'bin_code';
-                                $label = "Bin Code";
+                                $label = "Location Code";
                             ?>
                             <x-Inputs.text-field :id="$field" :name="$field"
                                 :label="$label"
