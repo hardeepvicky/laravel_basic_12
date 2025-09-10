@@ -394,7 +394,7 @@ class ExportOrderController extends BackendController
                 }
 
                 $this->model->order_from_type = "customer";
-                $this->model->contact_id = $contact->id;
+                $this->model->export_contact_id = $contact->id;
                 $this->model->exp_customer_id = $cutomer->id;
                 $this->model->save();
 
