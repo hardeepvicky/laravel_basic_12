@@ -319,14 +319,14 @@ class StockProductController extends BackendController
 
                     if (!$bin)
                     {
-                        throw new UserException("Wrong Bin Code", UserException::ERROR_USER_DATA_WRONG);
+                        throw new UserException("Wrong Location Code", UserException::ERROR_USER_DATA_WRONG);
                     }
 
                     if ($bin->branch_id != $branch->id)
                     {
                         $bin->load("branch");
 
-                        $msg = "Bin's branch is " . $bin->branch->getDisplayName();
+                        $msg = "Location's branch is " . $bin->branch->getDisplayName();
                         $msg = ", wheres selected branch is " . $branch->getDisplayName();
                         throw new UserException($msg, UserException::ERROR_USER_DATA_WRONG);
                     }
