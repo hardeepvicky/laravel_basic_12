@@ -227,7 +227,7 @@ class SmsHelper
             "text" => $this->msg,
             "param" => [
                 [
-                    "number" => $this->mobile_no,
+                    "number" => $this->country_code . $this->mobile_no,
                     "user_id" => $this->user_id
                 ]
             ],
@@ -261,6 +261,11 @@ class SmsHelper
 
         if ($api_response) {
             $response = Util::objToArray(json_decode($api_response));
+
+            if (!isset($response['error_code']))
+			{
+				throw new UserException('No Response', UserException::ERROR_API_FAIL);
+			}
 
             $this->updateLog([
                 "api_response" => $response
