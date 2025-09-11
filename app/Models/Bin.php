@@ -17,10 +17,10 @@ class Bin extends BaseModel
     protected static array $list_fields = ["id", "branch_id", "name", "code"];
 
     public static array $child_model_class = [
-        // User::class => [
-        //     "foreignKey" => ["sub_dept_id"],
-        //     "preventDelete" => true
-        // ]
+        StockProduct::class => [
+            "foreignKey" => ["bin_id"],
+            "preventDelete" => true
+        ],        
     ];
 
     public function afterFindForCsv()

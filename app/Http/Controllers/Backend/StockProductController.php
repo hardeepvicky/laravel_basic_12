@@ -291,7 +291,7 @@ class StockProductController extends BackendController
 
             try
             {
-                $required_fields = ["bin_code", "product_serial_no"];
+                $required_fields = ["branch_id", "product_serial_no"];
 
                 foreach($required_fields as $field)
                 {
@@ -301,22 +301,42 @@ class StockProductController extends BackendController
                     }
                 }
 
-                $bin = Bin::where("code", $data['bin_code'])->first();
+                $branch = Branch::find($data['branch_id']);
 
-                if (!$bin)
+                if (!$branch)
                 {
-                    throw new UserException("Wrong Bin Code", UserException::ERROR_USER_DATA_WRONG);
+                    throw new UserException("Wrong Branch", UserException::ERROR_USER_DATA_WRONG);
+                }
+
+                if (!$branch->is_active)
+                {
+                    throw new UserException("Branch is de-active", UserException::ERROR_USER_DATA_WRONG);
+                }
+
+                if (isset($data['bin_code']) && !empty($data['bin_code']))
+                {
+                    $bin = Bin::where("code", $data['bin_code'])->first();
+
+                    if (!$bin)
+                    {
+                        throw new UserException("Wrong Location Code", UserException::ERROR_USER_DATA_WRONG);
+                    }
+
+                    if ($bin->branch_id != $branch->id)
+                    {
+                        $bin->load("branch");
+
+                        $msg = "Location's branch is " . $bin->branch->getDisplayName();
+                        $msg = ", wheres selected branch is " . $branch->getDisplayName();
+                        throw new UserException($msg, UserException::ERROR_USER_DATA_WRONG);
+                    }
                 }
 
                 $auth_user = Auth::user();
 
-                if ($bin->branch_id != $auth_user->branch_id)
+                if ($branch->id != $auth_user->branch_id)
                 {
-                    $bin->load("branch");
-                    $auth_user->load("branch");
-
-                    $msg = "Bin's branch is " . $bin->branch->getDisplayName();
-                    $msg = ", wheres you have branch " . $auth_user->branch->getDisplayName();
+                    $msg = $branch->getDisplayName() ." is not assign to you";
                     throw new UserException($msg, UserException::ERROR_USER_DATA_WRONG);
                 }
 
@@ -336,19 +356,47 @@ class StockProductController extends BackendController
 
                 if ($product_serial_no->is_in)
                 {
-                    if ($product_serial_no->bin_id == $bin->id)
+                    if (isset($bin))
                     {
-                        throw new UserException("Serial No. is already In", UserException::ERROR_USER_DATA_WRONG);
+                        if ($product_serial_no->bin_id == $bin->id)
+                        {
+                            throw new UserException("Serial No. is already In", UserException::ERROR_USER_DATA_WRONG);
+                        }
+                        else
+                        {
+                            StockProduct::changeQty($product_serial_no->branch_id, $product_serial_no->bin_id, $product_serial_no->product_id, $product_serial_no->make_id, -1);
+                        }
                     }
                     else
                     {
-                        StockProduct::changeQty($product_serial_no->branch_id, $product_serial_no->bin_id, $product_serial_no->product_id, $product_serial_no->make_id, -1);
+                        if ($product_serial_no->branch_id == $branch->id)
+                        {
+                            throw new UserException("Serial No. is already In", UserException::ERROR_USER_DATA_WRONG);
+                        }
+                        else
+                        {
+                            StockProduct::changeQty($product_serial_no->branch_id, null, $product_serial_no->product_id, $product_serial_no->make_id, -1);
+                        }
                     }
                 }
 
-                StockProduct::changeQty($bin->branch_id, $bin->id, $product_serial_no->product_id, $product_serial_no->make_id, 1);
+                if (isset($bin))
+                {
+                    StockProduct::changeQty($bin->branch_id, $bin->id, $product_serial_no->product_id, $product_serial_no->make_id, 1);
+                }
+                else
+                {
+                    StockProduct::changeQty($branch->id, null, $product_serial_no->product_id, $product_serial_no->make_id, 1);
+                }
 
-                $product_serial_no->markIn($bin);
+                if (isset($bin))
+                {
+                    $product_serial_no->markIn($bin);
+                }
+                else
+                {
+                    $product_serial_no->markInBranch($branch);
+                }
 
                 DB::commit();
 

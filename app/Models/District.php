@@ -22,11 +22,23 @@ class District extends BaseModel
         Lead::class => [
             "foreignKey" => ["district_id"],
             "preventDelete" => true
-        ], 
+        ],
+        Customer::class => [
+            "foreignKey" => ["district_id"],
+            "preventDelete" => true
+        ],
         Dealer::class => [
             "foreignKey" => ["district_id"],
             "preventDelete" => true
-        ], 
+        ],
+        Party::class => [
+            "foreignKey" => ["district_id"],
+            "preventDelete" => true
+        ],
+        Competitor::class => [
+            "foreignKey" => ["district_id"],
+            "preventDelete" => true
+        ],
         DispatchOrder::class => [
             "foreignKey" => ["district_id"],
             "preventDelete" => true

@@ -13,13 +13,6 @@
                         </th>
                         <th style="width:15%">
                             <?php
-                            $field = 'product_category_id';
-                            ?>
-                            <x-Inputs.drop-down :name="$field" :label="$false" :value="$search[$field]" :list="$product_category_list"
-                                class="select2 form-select-sm" />
-                        </th>
-                        <th style="width:15%">
-                            <?php
                             $field = 'product_id';
                             ?>
                             <x-Inputs.drop-down :id="$field" :name="$field" :label="$false"
@@ -49,7 +42,6 @@
                     </tr>
                     <tr class="border-bottom-primary">
                         <th>Actions</th>
-                        <th>Category</th>
                         <th><?= get_value_from_list($field_labels, 'product_id', 'product_id') ?></th>
                         <th><?= get_value_from_list($field_labels, 'make_id', 'make_id') ?></th>
                         <th><?= get_value_from_list($field_labels, 'branch_id', 'branch_id') ?></th>
@@ -72,7 +64,6 @@
                                 <x-Backend.celec-summary-table-first-column :record="$record" :routePrefix="$routePrefix" buttons="delete">
                                 </x-Backend.celec-summary-table-first-column>
                             </th>
-                            <td>{{ get_value_from_list($product_category_list, $record->stockProduct->product->product_category_id) }}</td>
                             <td>{{ $record->stockProduct->product?->getDisplayName() }}</td>
                             <td>{{ $record->stockProduct->maker?->getDisplayName() }}</td>
                             <td>{{ $record->stockProduct->branch?->getDisplayName() }}</td>

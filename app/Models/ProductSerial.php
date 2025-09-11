@@ -36,7 +36,7 @@ class ProductSerial extends BaseModel
     {
         parent::beforeSave();
     }
-    
+
     public function afterFind()
     {
         parent::afterFind();
@@ -198,6 +198,15 @@ class ProductSerial extends BaseModel
     {
         $this->branch_id = $bin->branch_id;
         $this->bin_id = $bin->id;
+        $this->is_in = true;
+
+        $this->save();
+    }
+
+    public function markInBranch(Branch $branch)
+    {
+        $this->branch_id = $branch->id;
+        $this->bin_id = null;
         $this->is_in = true;
 
         $this->save();

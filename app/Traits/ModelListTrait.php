@@ -37,10 +37,7 @@ trait ModelListTrait
 
         $list = [];
 
-        if (!App::isLocal())
-        {
-            $list = static::getCache($cache_key);
-        }
+        $list = static::getCache($cache_key);
 
         if (!$list)
         {
@@ -84,12 +81,9 @@ trait ModelListTrait
 
             $list = static::fetchList($builder, $key_field, $value_field);
 
-            if (!App::isLocal())
-            {
-                $cache_time = 60 * 60;
+            $cache_time = 10;
 
-                self::addCache($cache_key, $list, $cache_time);
-            }
+            self::addCache($cache_key, $list, $cache_time);
         }
 
         return $list;

@@ -28,8 +28,9 @@ class ExpCustomer extends BaseModel
         
     ];
 
-    public const STATUS_CONVERTED = "CONVERTED";
-    public const STATUS_FAKE = "FAKE";
+    public const STATUS_HOT = "HOT";
+    public const STATUS_WARM = "WARM";
+    public const STATUS_COLD = "COLD";
 
     public const DEAL_TYPE_DIRECT = "DIRECT";
     public const DEAL_TYPE_THROGH_DEALER = "THROGH_DEALER";
@@ -53,7 +54,7 @@ class ExpCustomer extends BaseModel
 
     public function afterSave()
     {
-        Contact::createContact("customer", $this->id);
+        ExportContact::createContact("customer", $this->id);
 
         return parent::afterSave();
     }

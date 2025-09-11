@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Helpers\ConsoleOutput;
 use App\Helpers\MyCommand;
 use App\Models\Contact;
+use App\Models\ExportContact;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
@@ -98,8 +99,73 @@ class ContactFillCommand extends MyCommand
 
         $this->output_lines = $output->output_lines;
 
+        /*-----------------------------------------------------------------*/
+
+        $list = ExportContact::getRefListFromUnionOfTables();
+
+        $counts2 = [
+            "total" => count($list),
+            "insert" => 0,
+            "update" => 0,
+            "delete" => 0,
+        ];
+
+        $records = ExportContact::get();
+
+        $existing_list = [];
+
+        foreach($records as $record)
+        {
+            $existing_list[$record->type][$record->ref_id] = $record;
+        }
+
+        DB::beginTransaction();
+
+        foreach($list as $record)
+        {
+            unset($record['name']);
+
+            $is_insert = $is_update = false;
+            $contact = ExportContact::insertOrUpdate($record, $is_insert, $is_update, true);
+
+            if($is_insert)
+            {
+                $counts2['insert']++;
+            }
+            else if($is_update)
+            {
+                $counts2['update']++;
+            }
+
+            unset($existing_list[$record['type']][$record['ref_id']]);
+        }
+
+        $id_list = [];
+        foreach($existing_list as $type => $arr)
+        {
+            foreach($arr as $inner_obj)
+            {
+                $id_list[] = $inner_obj->id;
+            }
+        }
+
+        ExportContact::destroy($id_list);
+
+        DB::commit();
+
+        $counts = array_human_keys($counts);
+
+        $output->addLog($counts, 0, "Export");
+
+        $output->writeLogToConsole();
+
+        $output->clearLogs();
+
+        $this->output_lines = $output->output_lines;
+
         $this->logUpdate([
-            "counts" => $counts
+            "counts" => $counts,
+            "export-counts" => $counts2,
         ]);
     }
 }

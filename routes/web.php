@@ -1,6 +1,7 @@
 <?php
 
 use App\Helpers\EmailHelper;
+use App\Helpers\Util;
 use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\OtpVerifyController;
@@ -35,6 +36,7 @@ use App\Http\Controllers\Backend\ExportCountryController;
 use App\Http\Controllers\Backend\ExportCustomerController;
 use App\Http\Controllers\Backend\ExportDealerController;
 use App\Http\Controllers\Backend\ExportLeadController;
+use App\Http\Controllers\Backend\ExportOrderController;
 use App\Http\Controllers\Backend\ExportPartyController;
 use App\Http\Controllers\Backend\ExportStateController;
 use App\Http\Controllers\Backend\HolidayController;
@@ -42,6 +44,7 @@ use App\Http\Controllers\Backend\ItemCategoryController;
 use App\Http\Controllers\Backend\ItemController;
 use App\Http\Controllers\Backend\LeadController;
 use App\Http\Controllers\Backend\MakerController;
+use App\Http\Controllers\Backend\ManufactureOrderController;
 use App\Http\Controllers\Backend\NotificationController;
 use App\Http\Controllers\Backend\PartyController;
 use App\Http\Controllers\Backend\PermissionController;
@@ -56,6 +59,8 @@ use App\Http\Controllers\Backend\RoleController;
 use App\Http\Controllers\Backend\SaleOrderController;
 use App\Http\Controllers\Backend\SampleController;
 use App\Http\Controllers\Backend\SettingsController;
+use App\Http\Controllers\Backend\ShipOrderController;
+use App\Http\Controllers\Backend\SmsTemplateController;
 use App\Http\Controllers\Backend\StateController;
 use App\Http\Controllers\Backend\StockProductController;
 use App\Http\Controllers\Backend\SubDepartmentController;
@@ -69,6 +74,7 @@ use App\Http\Controllers\Backend\WhatsappTemplateController;
 use App\Http\Controllers\Frontend\EnquiryController;
 use App\Http\Controllers\Frontend\PublicController as FrontendPublicController;
 use App\Http\Controllers\HomeController;
+use App\Jobs\Backend\JobSendSmsWelcome;
 use App\Models\EmailLog;
 use App\Models\MailjetWebhook;
 use Illuminate\Http\Request;
@@ -835,6 +841,21 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
     });
 
+    $route_prefix = "sms-template";
+    $controllerClass = SmsTemplateController::class;
+    Route::resource($route_prefix, $controllerClass);
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
+        $name = "copy";
+        Route::get("{id}/" . $name, [$controllerClass, $name])->name($name);
+
+        $name = "activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "de_activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+    });
+
     $route_prefix = "party";
     $controllerClass = PartyController::class;
     Route::resource($route_prefix, $controllerClass);
@@ -964,7 +985,7 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
     Route::resource($route_prefix, $controllerClass);
 
     $name = "ajax_get_list";
-    Route::get($route_prefix . "-" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
+    Route::get($route_prefix . "-" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);    
 
     $name = "add_draft";
     Route::any($route_prefix . "-" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
@@ -1043,6 +1064,12 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
 
         $name = "history";
         Route::get($name . "/{customer_id}", [$controllerClass, $name])->name($name);
+        
+        $name = "history_store";
+        Route::post($name . "/{exp_lead_id}", [$controllerClass, $name])->name($name);
+
+        $name = "dispatch";
+        Route::post($name . "/{customer_id}", [$controllerClass, $name])->name($name);
 
         $name = "snooze";
         Route::post($name . "/{customer_id}", [$controllerClass, $name])->name($name);
@@ -1140,16 +1167,35 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
 
     $route_prefix = "dispatch-order";
     $controllerClass = DispatchOrderController::class;
-    Route::resource($route_prefix, $controllerClass);
+    Route::resource($route_prefix, $controllerClass)->except(["create", "store", "destroy"]);
+    $name = "send";
+    Route::any($route_prefix . "-" . $name . "/{id}", [$controllerClass, $name])->name($route_prefix . "." .$name);
+    $name = "ajax_delete_product_serial";
+    Route::get($route_prefix . "-" . $name . "/{id}", [$controllerClass, $name])->name($route_prefix . "." .$name);
     Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
 
-        $name = "ajax_update_field";
+        $name = "create_from_sale_order";
         Route::post($name, [$controllerClass, $name])->name($name);
 
         $route_prefix = "export";
         Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
             $name = "csv";
-            Route::get($name, [$controllerClass, $name])->name($name);
+            Route::get($name, [$controllerClass, "export_" . $name])->name($name);
+
+            $name = "product_csv";
+            Route::get($name, [$controllerClass, "export_" . $name])->name($name);
+        });
+    });
+
+    $route_prefix = "manufacture-order";
+    $controllerClass = ManufactureOrderController::class;
+    Route::resource($route_prefix, $controllerClass)->except(["create", "store", "destroy"]);    
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
+        $route_prefix = "export";
+        Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+            $name = "csv";
+            Route::get($name, [$controllerClass, "export_" . $name])->name($name);
         });
     });
 
@@ -1284,6 +1330,9 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
         Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
             $name = "csv";
             Route::get($name, [$controllerClass, "export_" . $name])->name($name);
+
+            $name = "product_csv";
+            Route::get($name, [$controllerClass, "export_" . $name])->name($name);
         });
     });
 
@@ -1334,9 +1383,6 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
     Route::resource($route_prefix, $controllerClass);
 
     $name = "ajax_get_list";
-    Route::get($route_prefix . "-" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
-
-    $name = "ajax_get_list_for_mobile";
     Route::get($route_prefix . "-" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
 
     Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
@@ -1413,6 +1459,9 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
 
         $name = "history";
         Route::get($name . "/{exp_customer_id}", [$controllerClass, $name])->name($name);
+
+        $name = "dispatch";
+        Route::post($name . "/{exp_customer_id}", [$controllerClass, $name])->name($name);
 
         $name = "snooze";
         Route::post($name . "/{exp_customer_id}", [$controllerClass, $name])->name($name);
@@ -1559,6 +1608,8 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
     Route::get($route_prefix . "-" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
     $name = "ajax_get_list";
     Route::get($route_prefix . "-" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
+    $name = "ajax_get_list_for_mobile";
+    Route::get($route_prefix . "-" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
 
     $route_prefix = "export-contact";
     $controllerClass = ExportContactController::class;
@@ -1567,11 +1618,57 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
     Route::get($route_prefix . "-" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
     $name = "ajax_get_list";
     Route::get($route_prefix . "-" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
+    $name = "ajax_get_list_for_mobile";
+    Route::get($route_prefix . "-" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
 
     Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
 
         $name = "copy";
         Route::get("{id}/" . $name, [$controllerClass, $name])->name($name);
+    });
+
+    $route_prefix = "export-order";
+    $controllerClass = ExportOrderController::class;
+    Route::resource($route_prefix, $controllerClass);
+    $name="ajax_get_unlinked_list";
+    Route::get($route_prefix . "-" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
+    $name="ajax_get_available_qty_and_qty_to_manufacture";
+    Route::get($route_prefix . "-" . $name . "/{product_id}/{make_id?}/{order_qty?}", [$controllerClass, $name])->name($route_prefix . "." . $name);
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
+        $name = "copy";
+        Route::get("{id}/" . $name, [$controllerClass, $name])->name($name);
+
+        $name = "ajax_update_field";
+        Route::post($name, [$controllerClass, $name])->name($name);
+
+        $route_prefix = "export";
+        Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+            $name = "csv";
+            Route::get($name, [$controllerClass, "export_" . $name])->name($name);
+        });
+    });
+
+    $route_prefix = "ship-order";
+    $controllerClass = ShipOrderController::class;
+    Route::resource($route_prefix, $controllerClass)->except(["create", "store", "destroy"]);
+    $name = "send";
+    Route::any($route_prefix . "-" . $name . "/{id}", [$controllerClass, $name])->name($route_prefix . "." .$name);
+    $name = "ajax_delete_product_serial";
+    Route::get($route_prefix . "-" . $name . "/{id}", [$controllerClass, $name])->name($route_prefix . "." .$name);
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
+        $name = "create_from_export_order";
+        Route::post($name, [$controllerClass, $name])->name($name);
+
+        $route_prefix = "export";
+        Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+            $name = "csv";
+            Route::get($name, [$controllerClass, "export_" . $name])->name($name);
+
+            $name = "product_csv";
+            Route::get($name, [$controllerClass, "export_" . $name])->name($name);
+        });
     });
 
     $controller_prefix = "setting";
@@ -1591,6 +1688,9 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
         Route::get($name, [DeveloperController::class, $name])->name($name);
 
         $name = "whatsapp_logs";
+        Route::get($name, [DeveloperController::class, $name])->name($name);
+
+        $name = "sms_logs";
         Route::get($name, [DeveloperController::class, $name])->name($name);
 
         $name = "permission_change_logs";
@@ -1706,7 +1806,7 @@ Route::get("/test/sms/viop", function () {
 
     if ($response) {
         d($response);
-        $data = json_decode($response);
+        $data = Util::objToArray(json_decode($response));
         d($data);
 
         if ($data['error_code'] >= 200 && $data['error_code'] < 300) {
@@ -1785,4 +1885,10 @@ Route::get("/test/external_drive/get", function () {
 
 Route::get('/phpinfo', function () {
     phpinfo();
+});
+
+Route::get("/test/sms/dinstar", function () 
+{
+    $job = new JobSendSmsWelcome("Hardeep Singh", "9814040490", "91", "https://google.com", 75);
+    dispatch($job);
 });

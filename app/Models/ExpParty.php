@@ -38,6 +38,10 @@ class ExpParty extends BaseModel
             "foreignKey" => ["exp_party_id"],
             "preventDelete" => false
         ],        
+        ExpPartyHistory::class => [
+            "foreignKey" => ["exp_party_id"],
+            "preventDelete" => true
+        ],        
     ];
 
     protected static array $fields_containg_tags = ["description"];

@@ -14,7 +14,9 @@ use App\Models\Product;
 use App\Models\State;
 use App\Models\Type;
 use App\Models\ViewContact;
+use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 
 class ContactController extends BackendController
@@ -256,6 +258,62 @@ class ContactController extends BackendController
                 'key' => $k,
                 "name" => $arr['name']
             ];
+        }
+
+        return $this->responseJson($response);
+    }
+
+    public function ajax_get_list_for_mobile(Request $request)
+    {
+        $response = ["status" => 1, "data" => []];
+
+        try
+        {
+            $search_term = $request->get("query");
+
+            if ($search_term && strlen(trim($search_term)) > 0)
+            {
+                $search_term = urldecode(trim($search_term));
+
+                $records = $this->modelClass::
+                            where("mobile", 'LIKE', '%' . $search_term . '%')
+                            ->orWhere("mobile2", 'LIKE', '%' . $search_term . '%')
+                            ->orderBy("name", "ASC")
+                            ->limit(20)
+                            ->get();
+
+            }
+            else
+            {
+                $limit = $request->get("limit");
+
+                if ($limit)
+                {
+                    $records = $this->modelClass::orderBy("name", "ASC")
+                                ->limit($limit)
+                                ->get();
+                }
+            }
+
+            if  (isset($records) && $records->count() > 0)
+            {
+                foreach($records as $record)
+                {
+                    $row = [];
+
+                    $row['display'] = $record->getDisplayName();
+                    $row['display'] .= " (" . $record->type . ")";
+
+                    $row['url'] = route("contact.edit", [$record]);
+
+                    $response['data'][] = $row;
+                }
+            }
+        }
+        catch(Exception $ex)
+        {
+            Log::error($ex->getMessage());
+            throw $ex;
         }
 
         return $this->responseJson($response);

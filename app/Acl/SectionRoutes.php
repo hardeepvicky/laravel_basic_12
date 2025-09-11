@@ -38,6 +38,7 @@ class SectionRoutes
         "export-country.ajax_get_by_phonecode",
 
         "export-lead.ajax_get_list_for_mobile",
+        "export-contact.ajax_get_list_for_mobile",
 
         "*.ajax_get_list",
         "*.ajax_get_code_list",
@@ -424,6 +425,11 @@ class SectionRoutes
         $section['children'][] = [
             "text" => "Whatsapp",
             "route_list" => [$routePrefix . ".whatsapp_logs"]
+        ];
+
+        $section['children'][] = [
+            "text" => "SMS",
+            "route_list" => [$routePrefix . ".sms_logs"]
         ];
 
         $section['children'][] = [

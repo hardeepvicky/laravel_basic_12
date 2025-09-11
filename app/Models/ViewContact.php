@@ -11,7 +11,7 @@ class ViewContact extends BaseModel
         'display_name'
     ];
 
-    protected static array $list_fields = ["id", "type", "name", "mobile", "city_name"];
+    protected static array $list_fields = ["id", "ref_id", "type", "name", "mobile", "city_name"];
 
     public static array $child_model_class = [
         
@@ -35,6 +35,31 @@ class ViewContact extends BaseModel
     public function state()
     {
         return $this->belongsTo(State::class, "state_id");
+    }
+
+    public function lead()
+    {
+        return $this->belongsTo(Lead::class, "ref_id");
+    }
+
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class, "ref_id");
+    }
+
+    public function party()
+    {
+        return $this->belongsTo(Party::class, "ref_id");
+    }
+
+    public function dealer()
+    {
+        return $this->belongsTo(Dealer::class, "ref_id");
+    }
+
+    public function competitor()
+    {
+        return $this->belongsTo(Competitor::class, "ref_id");
     }
 
     public function product()
@@ -66,7 +91,7 @@ class ViewContact extends BaseModel
             }
 
             $list[$arr['type'] . "." . $arr[$key_field]] = [
-                "ref_id" => $arr["id"],
+                "ref_id" => $arr["ref_id"],
                 "type" => $arr["type"],
                 "name" =>  $arr[$value_field] ?? null
             ];

@@ -22,18 +22,10 @@ class ExpState extends BaseModel
             "foreignKey" => ["state_id"],
             "preventDelete" => true
         ], 
-        // Lead::class => [
-        //     "foreignKey" => ["state_id"],
-        //     "preventDelete" => true
-        // ], 
-        // Dealer::class => [
-        //     "foreignKey" => ["state_id"],
-        //     "preventDelete" => true
-        // ], 
-        // DispatchOrder::class => [
-        //     "foreignKey" => ["state_id"],
-        //     "preventDelete" => true
-        // ], 
+        ShipOrder::class => [
+            "foreignKey" => ["state_id"],
+            "preventDelete" => true
+        ],
     ];
 
     public function country()

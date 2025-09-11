@@ -91,7 +91,15 @@ class ExportCountryController extends BackendController
     {
         return [
             "name" => ["required"],
-            "short_name" => ["nullable"],
+            "iso3" => ["required"],
+            "numeric_code" => ["required"],
+            "iso2" => ["required"],
+            "phonecode" => ["required"],
+            "capital" => ["nullable"],
+            "currency" => ["nullable"],
+            "currency_name" => ["nullable"],
+            "currency_symbol" => ["nullable"],
+            "emoji" => ["nullable"],
         ];
     }
 

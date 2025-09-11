@@ -50,12 +50,22 @@
                         <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
                         
                         <?php 
-                            $field = "last_followup_date_time";
+                            $field = "from_last_followup_date_time";
                         ?>
                         <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
                         
                         <?php 
-                            $field = "next_followup_date_time";
+                            $field = "to_last_followup_date_time";
+                        ?>
+                        <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
+                        
+                        <?php 
+                            $field = "from_next_followup_date_time";
+                        ?>
+                        <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
+                        
+                        <?php 
+                            $field = "to_next_followup_date_time";
                         ?>
                         <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
                     </form>

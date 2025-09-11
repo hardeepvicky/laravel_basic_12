@@ -27,10 +27,19 @@ class Item extends BaseModel
             "preventDelete" => false
         ],
         LeadItem::class => [
+            "foreignKey" => "item_id",
+            "preventDelete" => true
+        ],
+        ExpLeadItem::class => [
+            "foreignKey" => "item_id",
+            "preventDelete" => true
+        ],
+        
+        DispatchOrderItem::class => [
             "foreignKey" => ["item_id"],
             "preventDelete" => true
         ],
-        DispatchOrderItem::class => [
+        ShipOrderItem::class => [
             "foreignKey" => ["item_id"],
             "preventDelete" => true
         ],
@@ -99,7 +108,7 @@ class Item extends BaseModel
     {
         $name = $this->name;
 
-        if ($this->sku)
+        if ($this->sku && strlen($name) <= 30 && strlen($this->sku) <= 30)
         {
             $name .= " (" . $this->sku . ")";
         }

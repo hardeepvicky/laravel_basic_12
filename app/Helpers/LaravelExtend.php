@@ -6,6 +6,7 @@ use App\Exceptions\UserException;
 use App\Jobs\Backend\JobForgotPassword;
 use App\Jobs\Backend\JobSendEmailUserOtp;
 use App\Jobs\Backend\JobSendEmailOnRegisration;
+use App\Jobs\Backend\JobSendSmsWelcome;
 use App\Jobs\Backend\JobSendWhatappUserOtp;
 use App\Models\BaseModelInterface;
 use App\Models\Role;
@@ -74,7 +75,7 @@ class LaravelExtend
             return;
         }
 
-        $link = url()->query(config("url") . "/otp_verify/" . $user->uid, ["otp_sent" => true]);
+        $link = url()->query(config('app.url') . "/otp_verify/" . $user->uid, ["otp_sent" => true]);
 
         $job = new JobSendEmailUserOtp($user, $link);
 
@@ -115,7 +116,7 @@ class LaravelExtend
             throw new Exception("UId is not generated");
         }
 
-        $link =  config("url") . "/create_password/" . $user->uid;
+        $link = config('app.url') . "/create_password/" . $user->uid;
 
         $job = new JobForgotPassword($user, $link);
 

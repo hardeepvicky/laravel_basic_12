@@ -18,11 +18,11 @@ class DispatchOrder extends BaseModel
     protected static array $unique_fields = [];
 
     public static array $child_model_class = [
-        LeadProduct::class => [
+        DispatchOrderProduct::class => [
             "foreignKey" => ["dispatch_order_id"],
             "preventDelete" => false
         ],
-        LeadItem::class => [
+        DispatchOrderItem::class => [
             "foreignKey" => ["dispatch_order_id"],
             "preventDelete" => false
         ],
@@ -33,22 +33,11 @@ class DispatchOrder extends BaseModel
     public const STATUS_INTRANSIT = "INTRANSIT";
     public const STATUS_DELIVERED = "DELIVERED";
 
-
-    public function beforeSave()
+    public function afterFindForCsv()
     {
-        if ($this->shipping_fee && $this->shipping_fee_gst_per)
-        {
-            $this->shipping_fee_gst = round($this->shipping_fee * $this->shipping_fee_gst_per / 100, 2);
-        }
-
-        if ($this->shipping_fee && $this->shipping_fee_gst) {
-            $this->total_fee = $this->shipping_fee + $this->shipping_fee_gst;
-        }
-
-        parent::beforeSave();
+        parent::afterFind();
     }
 
-    
     protected function getDisplayNameAttribute()
     {
         return $this->getDisplayName();
@@ -56,9 +45,26 @@ class DispatchOrder extends BaseModel
 
     public function getDisplayName()
     {
-        $name = $this->docket_no;
-        
+        if ($this->sale_order_id)
+        {
+            $name = $this->saleOrder->order_no;
+        }
+        else
+        {
+            $name = $this->docket_no;
+        }
+
         return $name;
+    }
+
+    public function orderFrom()
+    {
+        if ($this->sale_order_id)
+        {
+            return "Sale";
+        }
+
+        return ucfirst($this->order_from_type);
     }
 
     public function products()
@@ -96,15 +102,20 @@ class DispatchOrder extends BaseModel
         return $this->belongsTo(Party::class);
     }
 
-    public function lead()
+    public function contact()
     {
-        return $this->belongsTo(Lead::class);
+        return $this->belongsTo(ViewContact::class);
+    }
+
+    public function saleOrder()
+    {
+        return $this->belongsTo(SaleOrder::class);
     }
 
     public function getUniqueValidationRules(Request $request)
     {
         $field_rules = [
-            "tracking_no" => [Rule::unique($this->connection . "." . $this->getTable(), "tracking_no")],
+            "tracking_no" => [Rule::unique($this->connection . "." . $this->getTable(), "tracking_no")->where("carrier_id", $request->get("carrier_id"))],
         ];
 
         if ($this->id) {
@@ -119,6 +130,19 @@ class DispatchOrder extends BaseModel
         }
 
         return $field_rules;
+    }
+
+    public function getRequiedIfRules(Request $request)
+    {
+        $rules = [];
+
+        if ($this->carrier_id)
+        {
+            $rules["builty_no"] = ["required_without_all:tracking_no"];
+            $rules["tracking_no"] = ["required_without_all:builty_no"];
+        }
+
+        return $rules;
     }
 
     public static function getCodeList(String $field)
@@ -164,5 +188,20 @@ class DispatchOrder extends BaseModel
         }
 
         return $ret_array;
+    }
+
+    public function canMarkSent()
+    {
+        $this->load("products.dispatchOrderProductSerial");
+
+        foreach($this->products as $dispatchOrderProduct)
+        {
+            if ($dispatchOrderProduct->qty != $dispatchOrderProduct->dispatchOrderProductSerial->count())
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

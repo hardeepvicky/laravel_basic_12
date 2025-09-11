@@ -9,6 +9,13 @@ class DispatchOrderProduct extends BaseModel
 {
     protected static Array $unique_fields = ["dispatch_order_id", "product_id"];
 
+    public static array $child_model_class = [
+        DispatchOrderProductSerial::class => [
+            "foreignKey" => ["dispatch_order_product_id"],
+            "preventDelete" => true
+        ],
+    ];
+
     public function dispatchOrder()
     {
         return $this->belongsTo(DispatchOrder::class);
@@ -17,6 +24,11 @@ class DispatchOrderProduct extends BaseModel
     public function product()
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function dispatchOrderProductSerial()
+    {
+        return $this->hasMany(DispatchOrderProductSerial::class);
     }
 
     public function getRefDisplayName($field, $value)

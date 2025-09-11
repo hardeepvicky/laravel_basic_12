@@ -133,7 +133,7 @@ $false = false;
                                             </h5>
                                             <ol>
                                                 @foreach ($record->user as $user)
-                                                <li>{{ $user->getDisplayName() }}</li>
+                                                <li>{!! $user->getDisplayName() !!}</li>
                                                 @endforeach
                                             </ol>
 
@@ -188,35 +188,56 @@ $false = false;
                                         </div>
                                     </div>
 
-                                    @if($record->is_completed)
-                                        <x-Backend.celec-date-time :value="$record->complete_date_time"
-                                            label="Completed"
-                                            by="{{ get_value_from_list($userListCache, $record->complete_by) }}"
-                                        />
-                                    @endif
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            @if($record->is_completed)
+                                                <x-Backend.celec-date-time :value="$record->complete_date_time"
+                                                    label="Completed"
+                                                    by="{!! get_value_from_list($userListCache, $record->complete_by) !!}"
+                                                />
+                                            @endif
 
-                                    @if($record->is_verified)
-                                        <x-Backend.celec-date-time :value="$record->verified_date_time"
-                                            label="Verified"
-                                            by="{{ get_value_from_list($userListCache, $record->verified_by) }}"
-                                        />
+                                    
+                                        </div>
 
-                                        <label class="info">
-                                            {{ get_value_from_list($field_labels, 'rating', 'rating') }}
-                                            :
-                                            <span>
-                                                {{ $record->rating }}
-                                            </span>
-                                        </label>
+                                        <div class="col-md-2">
+                                            @if($record->is_verified)
+                                                <x-Backend.celec-date-time :value="$record->verified_date_time"
+                                                    label="Verified"
+                                                    by="{!! get_value_from_list($userListCache, $record->verified_by) !!}"
+                                                />
+                                            @endif
+                                        </div>
 
-                                        <label class="info">
-                                            {{ get_value_from_list($field_labels, 'review_remarks', 'review_remarks') }}
-                                            :
-                                            <span>
-                                                {{ $record->review_remarks }}
-                                            </span>
-                                        </label>
-                                    @endif
+                                        <div class="col-md-3">
+                                            @if($record->is_verified)
+                                                <label class="info">
+                                                    {{ get_value_from_list($field_labels, 'rating', 'rating') }}
+                                                    :
+                                                    <span>
+                                                        <div class="stars">
+                                                            <?php for($i = 1; $i <= $record->rating; $i++): ?>
+                                                                <label class="star-<?= $i ?> fas fa-star" for="star-<?= $i ?>"></label>
+                                                            <?php endfor; ?>
+                                                            ({{ $record->rating }})
+                                                        </div>
+                                                    </span>
+                                                </label>
+
+                                                <label class="info">
+                                                    {{ get_value_from_list($field_labels, 'review_remarks', 'review_remarks') }}
+                                                    :
+                                                    <span>
+                                                        {{ $record->review_remarks }}
+                                                    </span>
+                                                </label>
+                                            @endif
+                                        </div>
+
+                                    </div>
+
+
+                                    
 
 
                                     <x-Backend.document-files :records="$record->documentFile" />

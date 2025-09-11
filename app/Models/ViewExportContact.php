@@ -5,13 +5,13 @@ namespace App\Models;
 use App\Exceptions\UserException;
 use Illuminate\Database\Eloquent\Builder;
 
-class ExportViewContact extends BaseModel
+class ViewExportContact extends BaseModel
 {
     protected $appends = [
         'display_name'
     ];
 
-    protected static array $list_fields = ["id", "type", "name", "mobile", "city_name"];
+    protected static array $list_fields = ["id", "ref_id", "type", "name", "mobile", "city_name"];
 
     public static array $child_model_class = [
         
@@ -40,6 +40,31 @@ class ExportViewContact extends BaseModel
     public function state()
     {
         return $this->belongsTo(ExpState::class, "state_id");
+    }
+    
+    public function lead()
+    {
+        return $this->belongsTo(ExpLead::class, "ref_id");
+    }
+
+    public function customer()
+    {
+        return $this->belongsTo(ExpCustomer::class, "ref_id");
+    }
+
+    public function party()
+    {
+        return $this->belongsTo(ExpParty::class, "ref_id");
+    }
+
+    public function dealer()
+    {
+        return $this->belongsTo(ExpDealer::class, "ref_id");
+    }
+
+    public function competitor()
+    {
+        return $this->belongsTo(ExpCompetitor::class, "ref_id");
     }
 
     public function product()
@@ -71,7 +96,7 @@ class ExportViewContact extends BaseModel
             }
 
             $list[$arr['type'] . "." . $arr[$key_field]] = [
-                "ref_id" => $arr["id"],
+                "ref_id" => $arr["ref_id"],
                 "type" => $arr["type"],
                 "name" =>  $arr[$value_field] ?? null
             ];

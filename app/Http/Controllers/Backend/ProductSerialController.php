@@ -11,13 +11,18 @@ use App\Helpers\LaravelExtend;
 use App\Helpers\Util;
 use App\Models\AutoSerialPattern;
 use App\Models\Branch;
+use App\Models\ExportOrderProduct;
 use App\Models\FieldSetting;
 use App\Models\Maker;
+use App\Models\Order;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Models\ProductSerial;
+use App\Models\SaleOrderProduct;
 use App\Models\SqlLog;
+use App\Models\StockProduct;
 use App\Models\User;
+use App\Models\ViewOrder;
 use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Support\Facades\Auth;
@@ -148,9 +153,13 @@ class ProductSerialController extends BackendController
 
         $type_list = ProductSerial::getTypeList();
 
+        $order_list = ViewOrder::getList("id", "display_name", [], "id", "DESC");
+
+        // d($order_list, true);
+
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
-        $this->setForView(compact("maker_list", "default_maker", "branch_list", "type_list", "field_labels"));
+        $this->setForView(compact("maker_list", "default_maker", "branch_list", "type_list", "order_list", "field_labels"));
 
         return parent::beforeViewRender();
     }
@@ -180,6 +189,7 @@ class ProductSerialController extends BackendController
         return [
             "product_id" => ["required"],
             "make_id" => ["required"],
+            "order_id" => ["nullable"],
             "serial_no" => ["required"],
             "manufacture_date_time" => ["required"],
             "children" => []
@@ -267,9 +277,13 @@ class ProductSerialController extends BackendController
                     throw new UserException("Fail To save", UserException::ERROR_LARAVEL_FAIL);
                 }
 
+                $this->_afterSave();
+
                 $save_data['serial_no'] = ProductSerial::getNextSerialNo($save_data['serial_no']);
                 AutoSerialPattern::increaseCount(AutoSerialPattern::TYPE_PRODUCT_SERIAL);
             }
+
+            StockProduct::changeQty($this->model->branch_id, null, $this->model->product_id, $this->model->make_id, $save_data['no_of_serials']);
 
             if ($save_data['no_of_serials'] == 1)
             {
@@ -289,6 +303,56 @@ class ProductSerialController extends BackendController
             $this->saveSqlLog();
 
             return back()->withInput()->with('fail', get_exception_display_message($ex))->with("custom_errors", LaravelExtend::$errors);
+        }
+    }
+
+    private function _afterSave()
+    {
+        if ($this->model->order_id)
+        {
+            $order = Order::findOrFail($this->model->order_id);
+
+            if ($order->type == "sale")
+            {
+                $sale_order_product = SaleOrderProduct::where("sale_order_id", $order->ref_id)
+                                        ->where("product_id", $this->model->product_id)
+                                        ->where("make_id", $this->model->make_id)
+                                        ->with(["manufactureOrder"])
+                                        ->first();
+
+                if (!$sale_order_product)
+                {
+                    throw new UserException("Sale Order Product not found");
+                }
+
+                $sale_order_product->manufactureOrder->increaseManufactureQty();
+
+                $this->model->sale_order_product_id = $sale_order_product->id;
+                $this->model->save();
+            }
+            else if ($order->type == "export")
+            {
+                $export_order_product = ExportOrderProduct::where("export_order_id", $order->ref_id)
+                                        ->where("product_id", $this->model->product_id)
+                                        ->where("make_id", $this->model->make_id)
+                                        ->with(["manufactureOrder"])
+                                        ->first();
+
+                if (!$export_order_product)
+                {
+                    throw new UserException("Export Order Product not found");
+                }
+
+                $export_order_product->manufactureOrder->increaseManufactureQty();
+
+                $this->model->export_order_product_id = $export_order_product->id;
+                $this->model->save();
+            }
+            
+            if ($this->model->parent_id)
+            {
+                //todo
+            }
         }
     }
 
@@ -429,6 +493,8 @@ class ProductSerialController extends BackendController
             if (!$this->model->save()) {
                 throw new UserException("Fail To save", UserException::ERROR_LARAVEL_FAIL);
             }
+
+            $this->_afterSave();
 
             $this->_saveOthers($validatedData);
 

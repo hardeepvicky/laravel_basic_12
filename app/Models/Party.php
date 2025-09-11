@@ -26,10 +26,34 @@ class Party extends BaseModel
     const TYPE_CARRIER = "CARRIER";
 
     public static array $child_model_class = [
+        PartyAddress::class => [
+            "foreignKey" => ["party_id"],
+            "preventDelete" => false
+        ],
+        PartyFile::class => [
+            "foreignKey" => ["party_id"],
+            "preventDelete" => false
+        ],
+        PartyTerm::class => [
+            "foreignKey" => ["party_id"],
+            "preventDelete" => false
+        ],        
+        PartyHistory::class => [
+            "foreignKey" => ["party_id"],
+            "preventDelete" => true
+        ],
         TaskParty::class => [
             "foreignKey" => ["party_id"],
             "preventDelete" => true
-        ],        
+        ],
+        DispatchOrder::class => [
+            "foreignKey" => ["carrier_id"],
+            "preventDelete" => true
+        ],
+        ShipOrder::class => [
+            "foreignKey" => ["carrier_id"],
+            "preventDelete" => true
+        ],
     ];
 
     protected static array $fields_containg_tags = ["description"];

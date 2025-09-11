@@ -249,7 +249,7 @@
     <script>
         $(function() {
             $.events.execAtLast(function() {
-                $("a.status_verified").click(function(e) {
+                $(document).on("click", "a.status_verified", function(e) {
 
                     var _tr = $(this).closest("tr");
 

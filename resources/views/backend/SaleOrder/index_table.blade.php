@@ -1,11 +1,12 @@
 <?php
-
+use App\Models\SaleOrder;
 $formatter = new NumberFormatter('en_IN', NumberFormatter::CURRENCY);
 $formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, 0);
 ?>
 <div class="card" id="page-summary">
     <div class="card-header">
         <a href="{{ route($routePrefix . '.export.csv') }}" class="btn btn-secondary">Export CSV</a>
+        <a href="{{ route($routePrefix . '.export.product_csv') }}" class="btn btn-secondary">Export Product CSV</a>
     </div>
 
     <div class="card-body p-1">
@@ -45,6 +46,9 @@ $formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, 0);
                     </tr>
                     <tr class="border-bottom-primary">
                         <th>
+                            <label class="form-check custom-checkbox-group">
+                                <input type="checkbox" class="form-check-input chk-select-all" data-sr-chkselect-children="input.sale_order">
+                            </label>
                             <?= sortable_anchor('id', get_value_from_list($field_labels, 'id', 'id')) ?>
                             |
                             <?= sortable_anchor('order_no', get_value_from_list($field_labels, 'order_no', 'order_no')) ?>
@@ -82,7 +86,12 @@ $formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, 0);
                             <th scope="row">
                                 <x-Backend.celec-summary-table-first-column :record="$record" :routePrefix="$routePrefix" buttons="copy,edit,delete,tr_details">
                                     <div class="label">
-                                        {{ $record->order_no }}
+                                        <label class="form-check custom-checkbox-group">
+                                            @if(!$record->isFullySent())
+                                                <input type="checkbox" class="form-check-input sale_order" value={{ $record->id }}>
+                                            @endif
+                                            {{ $record->order_no }}
+                                        </label>
                                     </div>
                                 </x-Backend.celec-summary-table-first-column>
                             </th>
@@ -176,6 +185,13 @@ $formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, 0);
                         </tr>
                     @endforeach
                 </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="2">
+                            <span id="create_disptach_order" class="btn btn-secondary btn-sm mb-1">Create Dispatch Order</span>
+                        </td>
+                    </tr>
+                </tfoot>
             </table>
         </div>
     </div>
@@ -183,3 +199,44 @@ $formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, 0);
         <x-Backend.pagination-links :records="$records" />
     </div>
 </div>
+
+<script>
+    $(function(){
+        $("#create_disptach_order").click(function(){
+            var id_list = [];
+
+            $("input.sale_order:checked").each(function(){
+                var v = $(this).val();
+
+                id_list.push(v);
+            });
+
+            if (id_list.length <= 0)
+            {
+                $.events.onUserError("Please Select at least one Order");
+                return false;
+            }
+
+            var params = [
+                {
+                    name : "_token", 
+                    value : '{{ csrf_token() }}'
+                },
+                {
+                    name : "_method", 
+                    value : 'POST'
+                },
+            ];
+
+            for(var i in id_list)
+            {
+                params.push({
+                    name : "sale_order_ids[]",
+                    value : id_list[i]
+                });
+            }
+
+            add_form_to_body_and_submit("post", "/dispatch-order/create_from_sale_order", params);
+        });
+    });
+</script>

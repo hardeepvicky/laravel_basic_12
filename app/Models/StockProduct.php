@@ -105,6 +105,11 @@ class StockProduct extends BaseModel
     {
         $avialable_qty = $this->opening_qty + $this->qty;
 
+        if ($avialable_qty < 0)
+        {
+            $avialable_qty = 0;
+        }
+
         return round($avialable_qty, 3);
     }
 }

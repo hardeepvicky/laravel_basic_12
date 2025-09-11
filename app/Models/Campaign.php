@@ -30,6 +30,10 @@ class Campaign extends BaseModel
             "foreignKey" => ["campaign_id"],
             "preventDelete" => true
         ],
+        ExpLead::class => [
+            "foreignKey" => ["campaign_id"],
+            "preventDelete" => true
+        ],
     ];
 
     protected static array $fields_containg_tags = ["description"];

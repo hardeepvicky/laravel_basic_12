@@ -35,6 +35,10 @@ class ExpDealer extends BaseModel
             "foreignKey" => ["exp_dealer_id"],
             "preventDelete" => false
         ],
+        ExpDealerHistory::class => [
+            "foreignKey" => ["exp_dealer_id"],
+            "preventDelete" => true
+        ],
     ];
 
     protected static array $fields_containg_tags = ["description"];
@@ -65,7 +69,7 @@ class ExpDealer extends BaseModel
 
     public function afterSave()
     {
-        Contact::createContact("dealer", $this->id);
+        ExportContact::createContact("dealer", $this->id);
 
         return parent::afterSave();
     }

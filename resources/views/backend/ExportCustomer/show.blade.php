@@ -90,6 +90,10 @@
                             <span>{{ $record->city?->getDisplayName() }}</span>
                         </label>
                         <label class="info">
+                            {{ get_value_from_list($field_labels, 'purpose_price', 'purpose_price') }} :
+                            <span>{{ $record->purpose_price }}</span>
+                        </label>
+                        <label class="info">
                             {{ get_value_from_list($field_labels, 'payment_method_type', 'payment_method_type') }} :
                             <span>{{ get_value_from_list($payment_method_type_list, $record->payment_method_type) }}</span>
                         </label>

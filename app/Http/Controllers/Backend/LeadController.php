@@ -8,8 +8,11 @@ use App\Helpers\CsvUtility;
 use App\Helpers\DateUtility;
 use App\Helpers\FileUtility;
 use App\Helpers\LaravelExtend;
+use App\Jobs\Backend\JobSendSmsGeneral;
+use App\Models\BaseModelInterface;
 use App\Models\Campaign;
 use App\Models\City;
+use App\Models\Contact;
 use App\Models\Country;
 use App\Models\Dealer;
 use App\Models\DispatchOrder;
@@ -24,6 +27,7 @@ use App\Models\LeadAddress;
 use App\Models\LeadHistory;
 use App\Models\LeadItem;
 use App\Models\LeadProduct;
+use App\Models\Maker;
 use App\Models\Notification;
 use App\Models\NotificationSetting;
 use App\Models\Party;
@@ -186,6 +190,8 @@ class LeadController extends BackendController
 
         $status_type_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
 
+        $status_type_list_for_form = array_diff($status_type_list, ["Converted"]);
+
         $type_conditions = [
             'type' => Type::getType($this->model, "payment_method_type")
         ];
@@ -229,7 +235,8 @@ class LeadController extends BackendController
 
         $this->setForView(compact(
             "address_type_list", "state_list", 
-            "source_type_list", "deal_type_list", "status_type_list", "source_list", "payment_method_type_list", "dealer_list", "product_list", "item_list", "campaign_list",
+            "source_type_list", "deal_type_list", "status_type_list", "status_type_list_for_form",
+            "source_list", "payment_method_type_list", "dealer_list", "product_list", "item_list", "campaign_list",
             "user_list", "action_type_list", "lead_history_response_list",
             "field_labels", "address_field_labels", "product_field_labels", "item_field_labels", "history_field_labels"
         ));
@@ -806,9 +813,11 @@ class LeadController extends BackendController
 
         $carrier_list = Party::getList("id", "display_name", ["type" => Party::TYPE_CARRIER]);
 
+        $make_list = Maker::getList("id", "display_name", [], "list_display_order");
+
         $model = new LeadHistory();
 
-        $this->setForView(compact("record", "form", "model", "histories", "products", "items", "addresses", "carrier_list"));
+        $this->setForView(compact("record", "form", "model", "histories", "products", "items", "addresses", "carrier_list", "make_list"));
 
         return $this->view(__FUNCTION__);
     }
@@ -928,6 +937,23 @@ class LeadController extends BackendController
 
                 $model->recording_file = $storage_path . "/" . $datetime . ".wav";
                 $model->save();
+            }
+
+            if ($validatedData['action_type'] == LeadHistory::ACTION_TYPE_SEND_SMS) 
+            {
+
+                if (!$lead->name)
+                {
+                    throw new UserException("Lead's name is not saved yet");
+                }
+                
+                if (!$lead->mobile)
+                {
+                    throw new UserException("Mobile No. not found");
+                }
+
+                $job = new JobSendSmsGeneral($lead->name, $lead->mobile, "91", $validatedData['action']);
+                dispatch($job);
             }
 
             if (LaravelExtend::$errors) {
@@ -1083,8 +1109,9 @@ class LeadController extends BackendController
             "entry_by" => ["required"],
             "action_type" => ["required"],
             "status_type" => ["required"],
+            "purpose_price" => ["required"],
             "payable_amount" => ["required"],
-            "payable_amount" => ["required"],
+            "payment_method_type" => ["required"],
             "next_meeting_date_time" => "",
             "remarks" => "",
             "products" => [],
@@ -1095,13 +1122,7 @@ class LeadController extends BackendController
         $validatedData = $request->validate($rules);
 
         $rules = [
-            "carrier_id" => ["required"],
-            "docket_no" => ["required"],
-            "builty_no" => "",
-            "tracking_no" => "",
-            "tracking_phone_no" => "",
             "shipping_fee" => ["required"],
-            "shipping_fee_gst_per" => ["required"],
             "remarks" => "",
         ];
 
@@ -1142,14 +1163,25 @@ class LeadController extends BackendController
                 $lead->changeNextFollowupDateTime($validatedData['next_meeting_date_time']);
             }
 
+            $lead->purpose_price = $validatedData['purpose_price'];
+            $lead->payable_amount = $validatedData['payable_amount'];
+            $lead->payment_method_type = $validatedData['payment_method_type'];
+            $lead->save();
+
             $this->_saveOthers($validatedData);
 
-            $dispatch = new DispatchOrder();
-            $dispatch->type = str_class_name_to_human_text($this->modelClass);
-            $dispatch->status_type = DispatchOrder::STATUS_PENDING;
-            $dispatch->lead_id = $lead_id;
+            $contact = Contact::where("type", "lead")->where("ref_id", $lead_id)->first();
 
+            if (!$contact)
+            {
+                throw new UserException("Contact of Lead not found");
+            }
+
+            $dispatch = new DispatchOrder();
             $dispatch->fill($dispatchData);
+            $dispatch->contact_id = $contact->id;
+            $dispatch->order_from_type = "lead";
+            $dispatch->status_type = DispatchOrder::STATUS_PENDING;
 
             $my_country = Country::getMyCountry();
 
@@ -1193,13 +1225,12 @@ class LeadController extends BackendController
                 throw new UserException("Fail To Save Dispatch", UserException::ERROR_LARAVEL_FAIL);
             }
 
-            $existing_id_list = $this->model->products()->pluck("id", "id")->toArray();
+            $existing_id_list = $dispatch->products()->pluck("id", "id")->toArray();
 
             foreach($lead->products as $product)
             {
                 $save = $product->toArray();
                 unset($save['id']);
-                unset($save['lead_id']);
                 $save['dispatch_order_id'] = $dispatch->id;
 
                 $child_model = new DispatchOrderProduct($save);
@@ -1222,13 +1253,12 @@ class LeadController extends BackendController
                 }
             }
 
-            $existing_id_list = $this->model->items()->pluck("id", "id")->toArray();
+            $existing_id_list = $dispatch->items()->pluck("id", "id")->toArray();
 
             foreach($lead->items as $item)
             {
                 $save = $item->toArray();
                 unset($save['id']);
-                unset($save['lead_id']);
                 $save['dispatch_order_id'] = $dispatch->id;
 
                 $child_model = new DispatchOrderItem($save);
@@ -1285,10 +1315,9 @@ class LeadController extends BackendController
                 ]);
             }
 
-
             $this->saveSqlLog();
 
-            return back()->with('success', "History Saved successfully");
+            return back()->with('success', "Dispatch Order placed successfully");
         } 
         catch (UserException $ex) {
             DB::rollBack();
@@ -1718,6 +1747,30 @@ class LeadController extends BackendController
         }
 
         return $this->responseJson($response);
+    }
+
+    protected function delete(BaseModelInterface $model)
+    {
+        try {
+            DB::beginTransaction();
+
+            $contact = Contact::where("type", "lead")->where("ref_id", $model->id)->first();
+
+            if (!$contact->safeDelete($contact))
+            {
+                throw new \Exception("Record has associated data. can't delete");
+            }
+            
+            $this->deleteCascade($model);
+
+            DB::commit();
+
+            return true;
+        } catch (\Exception $ex) {
+            DB::rollBack();
+
+            throw $ex;
+        }
     }
 }
 

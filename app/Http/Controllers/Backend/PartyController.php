@@ -10,7 +10,9 @@ use App\Helpers\FileUtility;
 use App\Helpers\ImportUtility;
 use App\Helpers\LaravelExtend;
 use App\Helpers\Util;
+use App\Models\BaseModelInterface;
 use App\Models\City;
+use App\Models\Contact;
 use App\Models\Country;
 use App\Models\District;
 use App\Models\DocumentFile;
@@ -159,6 +161,8 @@ class PartyController extends BackendController
 
         $status_type_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
 
+        $status_type_list_for_form = array_diff($status_type_list, ["Converted"]);
+
         $type_conditions = [
             'type' => Type::getType(new LeadHistory(), "action_type")
         ];
@@ -178,8 +182,8 @@ class PartyController extends BackendController
         $history_field_labels = FieldSetting::getDynamicFields(PartyHistory::class);
 
         $this->setForView(compact(
-            "type_list", "address_type_list", "state_list",
-            "status_type_list", "action_type_list", "history_response_list", "user_list",
+            "type_list", "address_type_list", "state_list", "status_type_list", "status_type_list_for_form",
+            "action_type_list", "history_response_list", "user_list",
             "field_labels", "term_field_labels", "address_field_labels", "history_field_labels"
         ));
 
@@ -1288,6 +1292,30 @@ class PartyController extends BackendController
             }
 
             return back()->withInput()->with('fail', get_exception_display_message($ex))->with("custom_errors", LaravelExtend::$errors);
+        }
+    }
+
+    protected function delete(BaseModelInterface $model)
+    {
+        try {
+            DB::beginTransaction();
+
+            $contact = Contact::where("type", "party")->where("ref_id", $model->id)->first();
+
+            if (!$contact->safeDelete($contact))
+            {
+                throw new \Exception("Record has associated data. can't delete");
+            }
+            
+            $this->deleteCascade($model);
+
+            DB::commit();
+
+            return true;
+        } catch (\Exception $ex) {
+            DB::rollBack();
+
+            throw $ex;
         }
     }
 }

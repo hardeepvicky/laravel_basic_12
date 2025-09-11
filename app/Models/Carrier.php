@@ -25,6 +25,10 @@ class Carrier extends BaseModel
             "foreignKey" => ["carrier_id"],
             "preventDelete" => false
         ],
+        DispatchOrder::class => [
+            "foreignKey" => ["carrier_id"],
+            "preventDelete" => true
+        ],
     ];
 
     protected static array $fields_containg_tags = ["description"];

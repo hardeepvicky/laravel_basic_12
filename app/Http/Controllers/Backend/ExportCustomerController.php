@@ -8,17 +8,20 @@ use App\Helpers\CsvUtility;
 use App\Helpers\DateUtility;
 use App\Helpers\FileUtility;
 use App\Helpers\LaravelExtend;
-use App\Models\Dealer;
+use App\Models\BaseModelInterface;
 use App\Models\DocumentFile;
 use App\Models\DropDownValue;
 use App\Models\ExpCity;
 use App\Models\ExpCountry;
 use App\Models\ExpCustomer;
+use App\Models\ExpDealer;
 use App\Models\ExpLead;
 use App\Models\ExpLeadAddress;
 use App\Models\ExpLeadHistory;
 use App\Models\ExpLeadItem;
 use App\Models\ExpLeadProduct;
+use App\Models\ExportContact;
+use App\Models\ExpParty;
 use App\Models\ExpState;
 use App\Models\FieldSetting;
 use App\Models\Item;
@@ -27,10 +30,16 @@ use App\Models\LeadAddress;
 use App\Models\LeadHistory;
 use App\Models\LeadItem;
 use App\Models\LeadProduct;
-use App\Models\Party;
+use App\Models\Maker;
+use App\Models\Notification;
+use App\Models\NotificationSetting;
 use App\Models\Product;
+use App\Models\ShipOrder;
+use App\Models\ShipOrderItem;
+use App\Models\ShipOrderProduct;
 use App\Models\Type;
 use App\Models\User;
+use App\Notifications\GeneralNotification;
 use App\Rules\MobileNumber;
 use Exception;
 use Illuminate\Http\Request;
@@ -178,6 +187,10 @@ class ExportCustomerController extends BackendController
 
         $status_type_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
 
+        $status_type_list_for_form = array_diff($status_type_list, ["Converted", "Dead", "Fake", "Lost"]);
+
+        // dd($status_type_list_for_form);
+
         $type_conditions = [
             'type' => Type::getType($lead, "payment_method_type")
         ];
@@ -189,7 +202,7 @@ class ExportCustomerController extends BackendController
 
         $payment_method_type_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
 
-        $dealer_list = Dealer::getList();
+        $dealer_list = ExpDealer::getList();
 
         $product_list = Product::getList();
 
@@ -217,7 +230,7 @@ class ExportCustomerController extends BackendController
 
         $this->setForView(compact(
             "country_list", "address_type_list",
-            "deal_type_list", "status_type_list", "payment_method_type_list", "dealer_list", "product_list", "item_list",
+            "deal_type_list", "status_type_list", "status_type_list_for_form", "payment_method_type_list", "dealer_list", "product_list", "item_list",
             "user_list", "action_type_list", "lead_history_response_list",
             "field_labels", "address_field_labels", "product_field_labels", "item_field_labels", "history_field_labels"
         ));
@@ -505,7 +518,7 @@ class ExportCustomerController extends BackendController
         if (isset($validatedData['items']))
         {
             $base_rules = [
-                "lead_id" => ["required"],
+                "item_id" => ["required"],
                 "uom_id" => ["required"],
                 "qty" => ["required"],
             ];
@@ -700,14 +713,268 @@ class ExportCustomerController extends BackendController
         $items = $record->lead->items?->toArray() ?? [];
         $addresses = $record->lead->address?->toArray() ?? [];
 
-        $carrier_list = Party::getList("id", "display_name", ["type" => Party::TYPE_CARRIER]);
+        $carrier_list = ExpParty::getList("id", "display_name", ["type" => ExpParty::TYPE_CARRIER]);
 
-        $model = new LeadHistory();
+        $make_list = Maker::getList("id", "display_name", [], "list_display_order");
 
-        $this->setForView(compact("record", "form", "model", "histories", "products", "items", "addresses", "carrier_list"));
+        $model = new ExpLeadHistory();
+
+        $this->setForView(compact("record", "form", "model", "histories", "products", "items", "addresses", "carrier_list", "make_list"));
 
         return $this->view(__FUNCTION__);
     }
+
+    
+    public function dispatch($exp_customer_id, Request $request)
+    {
+        $this->model = $exp_customer = $this->modelClass::findOrFail($exp_customer_id);
+
+        $rules = [
+            "entry_by" => ["required"],
+            "action_type" => ["required"],
+            "status_type" => ["required"],
+            "purpose_price" => ["required"],
+            "payable_amount" => ["required"],
+            "payment_method_type" => ["required"],
+            "next_followup_date_time" => "",
+            "remarks" => "",
+            "products" => [],
+            "items" => [],
+            "addresses" => [],
+        ];
+
+        $validatedData = $request->validate($rules);
+
+        $rules = [
+            "shipping_fee" => ["required"],
+            "remarks" => "",
+        ];
+
+        $shipOrderData = $request->validate($rules);
+
+        DB::beginTransaction();
+
+        try {
+            // d($validatedData, true);
+
+            if ($exp_customer->status_type == ExpLead::STATUS_DEAD)
+            {
+                throw new UserException("Customer is dead", UserException::ERROR_USER_ACTION_RESTRICT);
+            }
+
+            if ($exp_customer->status_type == ExpLead::STATUS_FAKE)
+            {
+                throw new UserException("Customer is Fake", UserException::ERROR_USER_ACTION_RESTRICT);
+            }
+
+            $exp_customer->canChangeHistory();
+
+            $model = new ExpLeadHistory();
+
+            $validatedData['exp_lead_id'] = $exp_customer->exp_lead_id;
+            $validatedData = $model->convertTimeZoneBeforeQueryToDatabase($validatedData);
+            $validatedData['assing_to_user_id'] = $exp_customer->assign_to_user_id;
+
+            $model = ExpLeadHistory::create($validatedData);
+
+            if ($validatedData['status_type'] != $exp_customer->status_type)
+            {
+                $exp_customer->changeStatus($validatedData['status_type']);
+            }
+
+            if ($validatedData['next_followup_date_time'])
+            {
+                $exp_customer->changeNextFollowupDateTime($validatedData['next_followup_date_time']);
+            }
+
+            $exp_customer->purpose_price = $validatedData['purpose_price'];
+            $exp_customer->payable_amount = $validatedData['payable_amount'];
+            $exp_customer->payment_method_type = $validatedData['payment_method_type'];
+            $exp_customer->save();
+
+            $this->_saveOthers($validatedData);
+
+            $shipOrder = new ShipOrder();
+
+            $contact = ExportContact::where("type", "customer")->where("ref_id", $exp_customer_id)->first();
+
+            if (!$contact)
+            {
+                throw new UserException("Contact of Lead not found");
+            }
+
+            $shipOrder->fill($shipOrderData);
+            $shipOrder->order_from_type = "customer";
+            $shipOrder->export_contact_id = $contact->id;
+            $shipOrder->status_type = ShipOrder::STATUS_PENDING;
+
+            if ($exp_customer->deal_type == Lead::DEAL_TYPE_THROGH_DEALER)
+            {
+                $primary_address = $exp_customer->expDealer->address()->where("is_primary", 1)->first();
+
+                if (!$primary_address)
+                {
+                    throw new UserException("Dealer have no Primary Address", UserException::ERROR_USER_DATA_WRONG);
+                }
+
+                $shipOrder->addr1 = $primary_address->addr1;
+                $shipOrder->addr2 = $primary_address->addr2;
+                $shipOrder->zipcode = $primary_address->pincode;
+                $shipOrder->country_id = $exp_customer->expDealer->country_id;
+                $shipOrder->state_id = $exp_customer->expDealer->state_id;
+                $shipOrder->city_id = $exp_customer->expDealer->city_id;
+            }
+            else
+            {
+                $primary_address = $exp_customer->lead->address()->where("is_primary", 1)->first();
+
+                if (!$primary_address)
+                {
+                    throw new UserException("No Primary Address Found", UserException::ERROR_USER_DATA_WRONG);
+                }
+
+                $shipOrder->addr1 = $primary_address->addr1;
+                $shipOrder->addr2 = $primary_address->addr2;
+                $shipOrder->zipcode = $primary_address->pincode;
+                $shipOrder->country_id = $exp_customer->country_id;
+                $shipOrder->state_id = $exp_customer->state_id;
+                $shipOrder->city_id = $exp_customer->city_id;
+            }
+
+            if (!$shipOrder->save())
+            {
+                throw new UserException("Fail To Save Dispatch", UserException::ERROR_LARAVEL_FAIL);
+            }
+
+            $existing_id_list = $shipOrder->shipOrderProduct()->pluck("id", "id")->toArray();
+
+            foreach($exp_customer->lead->products as $product)
+            {
+                $save = $product->toArray();
+                unset($save['id']);
+                $save['ship_order_id'] = $shipOrder->id;
+
+                $child_model = new ShipOrderProduct($save);
+
+                $child_model = ShipOrderProduct::insertOrUpdate($save, $is_insert, $is_update);
+
+                unset($existing_id_list[$child_model->id]);
+            }
+
+            if ($existing_id_list)
+            {
+                $existing_records = $shipOrder->shipOrderProduct()->where("id", $existing_id_list)->get();
+
+                foreach($existing_records as $existing_record)
+                {
+                    if (!$existing_record->safeDelete($existing_record))
+                    {
+                        LaravelExtend::addError($existing_record->getDisplayName(), "Can not delete, bcoz it is asscoicated with other modules.", "Term");
+                    }
+                }
+            }
+
+            $existing_id_list = $shipOrder->shipOrderItem()->pluck("id", "id")->toArray();
+
+            foreach($exp_customer->lead->items as $item)
+            {
+                $save = $item->toArray();
+                unset($save['id']);
+                $save['ship_order_id'] = $shipOrder->id;
+                $child_model = new ShipOrderItem($save);
+
+                $child_model = ShipOrderItem::insertOrUpdate($save, $is_insert, $is_update);
+
+                unset($existing_id_list[$child_model->id]);
+            }
+
+            if ($existing_id_list)
+            {
+                $existing_records = $shipOrder->shipOrderItem()->where("id", $existing_id_list)->get();
+
+                foreach($existing_records as $existing_record)
+                {
+                    if (!$existing_record->safeDelete($existing_record))
+                    {
+                        LaravelExtend::addError($existing_record->getDisplayName(), "Can not delete, bcoz it is asscoicated with other modules.", "Term");
+                    }
+                }
+            }
+
+            $notification_data = [
+                'from_user_id' => LaravelExtend::getAuthUserId(),
+                "sub_type" => Notification::SUB_TYPE_INFO,
+                "msg" => "New Ship Order of Customer from Exports"
+            ];
+
+            $notifyObj = new GeneralNotification($notification_data);
+
+            $user_id_list = NotificationSetting::getUserIdList("on_ship_order_from_export_lead");
+
+            if ($user_id_list)
+            {
+                $users = User::find($user_id_list);
+
+                foreach($users as $user)
+                {
+                    $user->notify($notifyObj);
+                }
+            }
+
+            if (LaravelExtend::$errors) {
+                throw new UserException("There are some errors", UserException::ERROR_USER_DATA_WRONG);
+            }
+
+            DB::commit();
+
+            $request = request();
+
+            if ($request->ajax()) {
+                return $this->responseJson([
+                    'status' => 1,
+                ]);
+            }
+
+
+            $this->saveSqlLog();
+
+            return back()->with('success', "Ship Order placed successfully");
+        }
+        catch (UserException $ex) {
+            DB::rollBack();
+
+            $request = request();
+
+            if ($request->ajax()) {
+                return $this->responseJson([
+                    'status' => 0,
+                    'msg' => $ex->getMessage(),
+                    "custom_errors" => LaravelExtend::$errors
+                ]);
+            }
+
+            $this->saveSqlLog();
+
+            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", LaravelExtend::$errors);
+        }
+        catch (Exception $ex) {
+            DB::rollBack();
+
+            $request = request();
+
+            if ($request->ajax()) {
+                return $this->responseJson([
+                    'status' => 0,
+                    'msg' => get_exception_display_message($ex),
+                ]);
+            }
+
+            $this->saveSqlLog();
+
+            return back()->withInput()->with('fail', get_exception_display_message($ex))->with("custom_errors", LaravelExtend::$errors);
+        }
+    }
+
 
     public function ajax_get_list(Request $request)
     {
@@ -835,5 +1102,29 @@ class ExportCustomerController extends BackendController
         $csvUtility->write($csv_records);
 
         download_start($file, "application/octet-stream");
+    }
+
+    protected function delete(BaseModelInterface $model)
+    {
+        try {
+            DB::beginTransaction();
+
+            $contact = ExportContact::where("type", "customer")->where("ref_id", $model->id)->first();
+
+            if (!$contact->safeDelete($contact))
+            {
+                throw new \Exception("Record has associated data. can't delete");
+            }
+            
+            $this->deleteCascade($model);
+
+            DB::commit();
+
+            return true;
+        } catch (\Exception $ex) {
+            DB::rollBack();
+
+            throw $ex;
+        }
     }
 }

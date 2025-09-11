@@ -22,24 +22,43 @@ class SaleOrder extends BaseModel
 
     protected static array $list_fields = ["id", "order_no"];
 
-    const ORDER_FROM_TYPE_DEALER = "DEALER";
-    const ORDER_FROM_TYPE_CUSTOMER = "CUSTOMER";
-    const ORDER_FROM_TYPE_LEAD = "LEAD";
+    const ORDER_FROM_TYPE_DEALER = "dealer";
+    const ORDER_FROM_TYPE_CUSTOMER = "customer";
+    const ORDER_FROM_TYPE_LEAD = "lead";
+    const ORDER_FROM_TYPE_PARTY = "party";
+    const ORDER_FROM_TYPE_COMPETITOR = "competitor";
 
     const STATUS_NEW = "NEW";
     const STATUS_PRODUCTION = "PRODUCTION";
     const STATUS_GODOWN = "GODOWN";
+    const STATUS_DISPTACH = "DISPTACH";
+    const STATUS_SENT = "SENT";
 
     public static array $child_model_class = [
         SaleOrderProduct::class => [
             "foreignKey" => "sale_order_id",
             "preventDelete" => false
         ],
+        SaleOrderFile::class => [
+            "foreignKey" => "sale_order_id",
+            "preventDelete" => false
+        ],
+        DispatchOrder::class => [
+            "foreignKey" => ["sale_order_id"],
+            "preventDelete" => true
+        ],
     ];
 
     public function afterFindForCsv()
     {
         parent::afterFind();
+    }
+
+    public function afterSave()
+    {
+        Order::createOrder("sale", $this->id);
+
+        return parent::afterSave();
     }
 
     public function branch()
@@ -65,6 +84,11 @@ class SaleOrder extends BaseModel
     public function saleOrderProduct()
     {
         return $this->hasMany(SaleOrderProduct::class, 'sale_order_id');
+    }
+
+    public function dispatchOrder()
+    {
+        return $this->hasMany(DispatchOrder::class, 'sale_order_id');
     }
 
     public function files()
@@ -113,9 +137,9 @@ class SaleOrder extends BaseModel
                     $field => $this->branch?->getDisplayName()
                 ];
                 break;
-            case "dealer_id":
+            case "contact_id":
                 $ret_array = [
-                    $field => $this->dealer?->getDisplayName()
+                    $field => $this->contact?->getDisplayName()
                 ];
                 break;
             case "customer_id":
@@ -168,5 +192,48 @@ class SaleOrder extends BaseModel
                 return $list;
                 break;
         }
+    }
+
+    public function checkForSent()
+    {
+        $sum_available_qty = $this->saleOrderProduct()->sum("available_qty");
+        $qty_to_manufacture = $this->saleOrderProduct()->sum("qty_to_manufacture");
+        $sum_sent_qty = $this->saleOrderProduct()->sum("sent_qty");
+
+        if ($sum_available_qty == $sum_sent_qty)
+        {
+            $this->status = self::STATUS_DISPTACH;
+        }
+        else
+        {
+            $so_id = $this->id;
+            $manufactured_qty = ManufactureOrder::whereHas("saleOrderProduct", function($q) use($so_id) {
+                $q->where("sale_order_id", $so_id);
+            })->sum("manufactured_qty");
+
+            if ($manufactured_qty >= $qty_to_manufacture)
+            {
+                $this->status = self::STATUS_GODOWN;
+            }
+            else
+            {        
+                $this->status = self::STATUS_PRODUCTION;
+            }
+        }
+
+        $this->save();
+    }
+
+    public function isFullySent()
+    {
+        $sum_order_qty = $this->saleOrderProduct()->sum("order_qty");
+        $sum_sent_qty = $this->saleOrderProduct()->sum("sent_qty");
+
+        if ($sum_order_qty == $sum_sent_qty)
+        {
+            return true;
+        }
+        
+        return false;
     }
 }

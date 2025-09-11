@@ -5,7 +5,8 @@ namespace App\Models;
 class NotificationSetting extends BaseMongoModel
 {
     public const LABELS = [
-        "on_dispatch_order_from_sales_lead" => "On Dispatch Order From Sales -> Lead",
+        "on_dispatch_order_from_sales_lead" => "On Dispatch Order From Sales -> Lead, Customer",
+        "on_ship_order_from_export_lead" => "On Ship Order From Exports -> Lead,Customer",
     ];
 
     const TYPE_ROLE = "ROLE";

@@ -87,6 +87,7 @@ class RecordHistory extends BaseMongoModel
     {
         $ignore_models = [
             AppMenu::class,
+            AppMenuRelatedLink::class,
             Notification::class,
             RecordHistory::class,
             Tag::class,
@@ -95,7 +96,10 @@ class RecordHistory extends BaseMongoModel
             RoleRouteName::class,
             StockProduct::class,
             StockProductTransaction::class,
-            Contact::class
+            Contact::class,
+            ExportContact::class,
+            ShipOrderProductSerial::class,
+            DispatchOrderProductSerial::class
         ];
 
         $model_class = get_class($model);
