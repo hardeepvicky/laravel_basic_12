@@ -131,7 +131,7 @@ class RegisterController extends WebController
 
             $user->assignRoles([$role->id]);
 
-            $url = url()->query(config("url") . "/otp_verify/" . $user->uid, ["otp_sent" => true]);
+            $url = url()->query(config('app.url') . "/otp_verify/" . $user->uid, ["otp_sent" => true]);
 
             DB::commit();
             
