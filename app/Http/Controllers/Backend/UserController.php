@@ -204,7 +204,7 @@ class UserController extends BackendController
             'email' => ['required'],
             'type' => ['required'],
             'country_id' => ['required'],
-            'branch_id' => ['required'],
+            'branch_id' => ['nullable'],
             'sub_type' => ["required"],
             'user_category_id' => [],
             'mobile' => ['required', new MobileNumber],
