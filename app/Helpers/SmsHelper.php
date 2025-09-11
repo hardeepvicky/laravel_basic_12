@@ -30,7 +30,7 @@ class SmsHelper
         $via = config("app.SMS_API_PLATFORM");
 
         if (!$via) {
-            throw new UserException("app.WHATSAPP_API_PLATFORM not set");
+            throw new UserException("app.SMS_API_PLATFORM not set");
         }
 
         $this->via = $via;
