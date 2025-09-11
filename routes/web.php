@@ -1317,7 +1317,7 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
     $name="ajax_get_unlinked_list";
     Route::get($route_prefix . "-" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
     $name="ajax_get_available_qty_and_qty_to_manufacture";
-    Route::get($route_prefix . "-" . $name . "/{product_id}/{make_id?}/{order_qty?}", [$controllerClass, $name])->name($route_prefix . "." . $name);
+    Route::get($route_prefix . "-" . $name . "/{product_id}/{make_id?}/{order_qty?}/{sale_order_id?}", [$controllerClass, $name])->name($route_prefix . "." . $name);
     Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
 
         $name = "copy";
@@ -1633,7 +1633,7 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
     $name="ajax_get_unlinked_list";
     Route::get($route_prefix . "-" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
     $name="ajax_get_available_qty_and_qty_to_manufacture";
-    Route::get($route_prefix . "-" . $name . "/{product_id}/{make_id?}/{order_qty?}", [$controllerClass, $name])->name($route_prefix . "." . $name);
+    Route::get($route_prefix . "-" . $name . "/{product_id}/{make_id?}/{order_qty?}/{export_order_id?}", [$controllerClass, $name])->name($route_prefix . "." . $name);
     Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
 
         $name = "copy";

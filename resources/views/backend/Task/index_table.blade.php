@@ -22,7 +22,7 @@ $false = false;
                                 <div class="col-sm-4">
                                     <span class="btn btn-light btn-sm text-dark border-primary clear_search_conditions mb-1">Clear</span>
                                 </div>
-                                <div class="col-sm-8">                                    
+                                <div class="col-sm-8">
                                     <?php
                                     $field = "assign_to_user_id";
                                     ?>
@@ -105,7 +105,7 @@ $false = false;
                         <td>
                             {{ get_value_from_list($userListCache, $record->updated_by) }}
                         </td>
-                        
+
                     </tr>
                     <tr id="record-{{ $record->id }}" class="hidden">
                         <td style="background-color: var(--body--bs-body-bg)"></td>
@@ -197,7 +197,7 @@ $false = false;
                                                 />
                                             @endif
 
-                                    
+
                                         </div>
 
                                         <div class="col-md-2">
@@ -237,7 +237,7 @@ $false = false;
                                     </div>
 
 
-                                    
+
 
 
                                     <x-Backend.document-files :records="$record->documentFile" />

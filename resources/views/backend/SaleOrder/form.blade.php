@@ -75,24 +75,6 @@
                             </div>
 
                             <?php
-                            $field = 'estimated_dispatch_date';
-                            $label = get_value_from_list($field_labels, $field, $field);
-                            ?>
-                            <x-Inputs.text-field layout="horizontal" :id="$field" :name="$field" :label="$label"
-                                :value="$model->{$field}" placeholder="Enter {{ $label }}"
-                                class="custom-date-picker"
-                                mandatory="true" 
-                            />
-                            
-                            <?php
-                            $field = 'party_order_ref_no';
-                            $label = get_value_from_list($field_labels, $field, $field);
-                            ?>
-                            <x-Inputs.text-field layout="horizontal" :id="$field" :name="$field" :label="$label"
-                                :value="$model->{$field}" placeholder="Enter {{ $label }}"
-                            />
-
-                            <?php
                             $field = 'remarks';
                             $label = get_value_from_list($field_labels, $field, $field);
                             ?>
@@ -363,56 +345,7 @@
                                 </div>                                
                                 <div class="col-sm-3">
                                     <input type="hidden" name="{{ $field }}" value="{{ $model->{$field} }}" class="{{ $field }}"/>
-                                    <span class="{{ $field }}">{{ $model->{$field} }}</span>
-                                </div>
-                            </div>
-
-                            <?php
-                            $field = 'discount_per';
-                            $label = get_value_from_list($field_labels, $field, $field);
-                            ?>
-                            <x-Inputs.text-field layout="horizontal" :id="$field" :name="$field" :label="$label"
-                                :value="$model->{$field}" 
-                                class="validate-float validate-less-than"
-                                data-less-than-from="99"
-                                horizontalSecondColumnLength="3"
-                                placeholder="Enter {{ $label }}"
-                                mandatory="true" 
-                            />
-
-                            <?php
-                                $field = 'discount';
-                                $label = get_value_from_list($field_labels, $field, $field);
-                            ?>
-                            <div class="row mb-3">
-                                <div class="col-sm-3">
-                                    @if (isset($label) && $label)
-                                        <label class="form-label">
-                                            {{ $label }}
-                                        </label>
-                                    @endif
-                                </div>                                
-                                <div class="col-sm-3">
-                                    <input type="hidden" id="{{ $field }}" name="{{ $field }}" value="{{ $model->{$field} }}" class="{{ $field }}"/>
-                                    <span class="{{ $field }}">{{ $model->{$field} }}</span>
-                                </div>
-                            </div>
-
-                            <?php
-                                $field = 'payable_amount';
-                                $label = get_value_from_list($field_labels, $field, $field);
-                            ?>
-                            <div class="row mb-3">
-                                <div class="col-sm-3">
-                                    @if (isset($label) && $label)
-                                        <label class="form-label">
-                                            {{ $label }}
-                                        </label>
-                                    @endif
-                                </div>                                
-                                <div class="col-sm-3">
-                                    <input type="hidden" id="{{ $field }}" name="{{ $field }}" value="{{ $model->{$field} }}" class="{{ $field }}"/>
-                                    <span class="big_amount {{ $field }}">{{ $model->{$field} }}</span>
+                                    <span class="{{ $field }} big_amount">{{ $model->{$field} }}</span>
                                 </div>
                             </div>
 
@@ -442,7 +375,8 @@
             var model_id = '<?= $model->id ?? 0 ?>';
             var currency_formatter = new Intl.NumberFormat('en-IN', { 
                 style: 'currency', 
-                currency: 'INR' 
+                currency: 'INR',
+                maximumFractionDigits: 0
             });
 
             function order_from_type_toggle()
@@ -474,7 +408,7 @@
 
                 if (product_id && make_id && order_qty)
                 {
-                    var url = `/sale-order-ajax_get_available_qty_and_qty_to_manufacture/${product_id}/${make_id}/${order_qty}`;
+                    var url = `/sale-order-ajax_get_available_qty_and_qty_to_manufacture/${product_id}/${make_id}/${order_qty}/{{ $model->id ?? 0 }}`;
                     ajaxGetJson(url, function(response){
                         console.log(response);
 
@@ -616,25 +550,6 @@
 
                 $("input.total_amount").val(total_amount);
                 $("span.total_amount").html(currency_formatter.format(total_amount));
-
-                var discount_per = $("#discount_per").val();
-                discount_per = discount_per ? parseFloat(discount_per) : 0;
-                var discount = 0;
-
-                if (discount_per > 0)
-                {
-                    discount = total_amount * discount_per / 100;
-                    discount = Math.round(discount);
-                }
-
-                $("input.discount").val(discount);
-                $("span.discount").html(currency_formatter.format(discount));
-
-                var payable_amount = total_amount - discount;
-
-                $("input.payable_amount").val(payable_amount);
-                $("span.payable_amount").html(currency_formatter.format(payable_amount));
-
             }
 
             $(document).on("input keyup", ".order_qty, .rate", function(){

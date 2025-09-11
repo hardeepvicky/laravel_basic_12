@@ -54,14 +54,11 @@ $formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, 0);
                             <?= sortable_anchor('order_no', get_value_from_list($field_labels, 'order_no', 'order_no')) ?>
                         </th>
                         <th><?= sortable_anchor('contact.name', get_value_from_list($field_labels, 'contact_id', 'contact_id')) ?></th>
-                        <th style="width:10%">
-                            <?= sortable_anchor('estimated_dispatch_date', get_value_from_list($field_labels, 'estimated_dispatch_date', 'estimated_dispatch_date')) ?>
-                        </th>
                         <th style="width:8%">
                             <?= sortable_anchor('status', get_value_from_list($field_labels, 'status', 'status')) ?>
                         </th>
                         <th style="width:8%">
-                            <?= sortable_anchor('payable_amount', get_value_from_list($field_labels, 'payable_amount', 'payable_amount')) ?>
+                            <?= sortable_anchor('total_amount', get_value_from_list($field_labels, 'total_amount', 'total_amount')) ?>
                         </th>
                         <th style="width:8%">
                             <?= sortable_anchor('paid_amount', get_value_from_list($field_labels, 'paid_amount', 'paid_amount')) ?>
@@ -103,13 +100,10 @@ $formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, 0);
                                 @endif
                             </td>
                             <td>
-                                {{ if_date($record->estimated_dispatch_date) }}
-                            </td>
-                            <td>
                                 {{ get_value_from_list($status_list, $record->status) }}
                             </td>
                             <td>
-                                {{ $formatter->formatCurrency($record->payable_amount, "INR");  }}
+                                {{ $formatter->formatCurrency($record->total_amount, "INR");  }}
                             </td>
                             <td>
                                 {{ $formatter->formatCurrency($record->paid_amount, "INR");  }}
@@ -133,9 +127,9 @@ $formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, 0);
                                 <div class="row">
                                     <div class="col-md-2">
                                         <label class="info">
-                                            {{ get_value_from_list($field_labels, 'party_order_ref_no') }} :
+                                            {{ get_value_from_list($field_labels, 'remarks') }} :
                                             <span>
-                                                {{ $record->party_order_ref_no }}
+                                                {{ $record->remarks }}
                                             </span>
                                         </label>
                                     </div>

@@ -189,11 +189,7 @@ class SaleOrderController extends BackendController
         return [
             "party_order_ref_no" => ["nullable"],
             "contact_id" => ["required"],
-            "estimated_dispatch_date" => ["required"],
             "total_amount" => ["required"],
-            "discount_per" => ["nullable"],
-            "discount" => ["nullable"],
-            "payable_amount" => ["required"],
             "paid_amount" => ["nullable"],
             "remarks" => "",
             "sale_order_products" => []
@@ -779,7 +775,7 @@ class SaleOrderController extends BackendController
         return $this->responseJson($response);
     }
 
-    public function ajax_get_available_qty_and_qty_to_manufacture($product_id, $make_id, $order_qty)
+    public function ajax_get_available_qty_and_qty_to_manufacture($product_id, $make_id, $order_qty, $sale_order_id = 0)
     {
         $response = ["status" => 1, "available_qty" => 0, "qty_to_manufacture" => 0];
 
@@ -793,7 +789,14 @@ class SaleOrderController extends BackendController
                 $response['available_qty'] += $model->getAvialiableQty();
             }
 
-            $so_order_qty = SaleOrderProduct::where("product_id", $product_id)->where("make_id", $make_id)->sum("order_qty");
+            $builder = SaleOrderProduct::where("product_id", $product_id)->where("make_id", $make_id);
+
+            if ($sale_order_id)
+            {
+                $builder->whereNot("sale_order_id", $sale_order_id);
+            }
+
+            $so_order_qty = $builder->sum("order_qty");
 
             $eo_order_qty = ExportOrderProduct::where("product_id", $product_id)->where("make_id", $make_id)->sum("order_qty");
 

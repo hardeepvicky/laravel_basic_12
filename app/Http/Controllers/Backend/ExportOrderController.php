@@ -22,6 +22,7 @@ use App\Models\Maker;
 use App\Models\ManufactureOrder;
 use App\Models\ProductCategory;
 use App\Models\ProductSerial;
+use App\Models\SaleOrderProduct;
 use App\Models\SqlLog;
 use App\Models\StockProduct;
 use App\Models\Type;
@@ -186,11 +187,7 @@ class ExportOrderController extends BackendController
         return [            
             "party_order_ref_no" => ["nullable"],
             "export_contact_id" => ["required"],
-            "estimated_dispatch_date" => ["required"],
             "total_amount" => ["required"],
-            "discount_per" => ["nullable"],
-            "discount" => ["nullable"],
-            "payable_amount" => ["required"],
             "paid_amount" => ["nullable"],
             "remarks" => "",
             "export_order_products" => []
@@ -776,16 +773,38 @@ class ExportOrderController extends BackendController
         return $this->responseJson($response);
     }
 
-    public function ajax_get_available_qty_and_qty_to_manufacture($product_id, $make_id, $order_qty)
+    public function ajax_get_available_qty_and_qty_to_manufacture($product_id, $make_id, $order_qty, $export_order_id = 0)
     {
         $response = ["status" => 1, "available_qty" => 0, "qty_to_manufacture" => 0];
 
         $qb = StockProduct::where("make_id", $make_id)->where("product_id", $product_id);
-        $model = $qb->first();
+        $models = $qb->get();
 
-        if ($model)
+        if ($models)
         {
-            $response['available_qty'] = $model->getAvialiableQty();
+            foreach($models as $model)
+            {
+                $response['available_qty'] += $model->getAvialiableQty();
+            }
+
+            $builder = SaleOrderProduct::where("product_id", $product_id)->where("make_id", $make_id);
+            $so_order_qty = $builder->sum("order_qty");
+
+            $builder = ExportOrderProduct::where("product_id", $product_id)->where("make_id", $make_id);
+
+            if ($export_order_id)
+            {
+                $builder->whereNot("export_order_id", $export_order_id);
+            }
+
+            $eo_order_qty = $builder->sum("order_qty");
+            
+            $response['available_qty'] -= ($so_order_qty + $eo_order_qty);
+
+            if ($response['available_qty'] < 0)
+            {
+                $response['available_qty'] = 0;
+            }
 
             $left_qty = $response['available_qty'] - $order_qty;
 
