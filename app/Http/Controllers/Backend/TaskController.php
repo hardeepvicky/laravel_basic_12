@@ -584,6 +584,15 @@ class TaskController extends BackendController
 
         $not_editable_status_codes = [Task::STATUS_COMPLETED, Task::STATUS_VERIFIED];
 
+        $user_id_list = $model->assignToUser->designation->getParentUserIdListBasedOnDesignationLevel();
+        $user_id_list[] = $model->created_by;
+
+        if (!in_array(LaravelExtend::getAuthUserId(), $user_id_list))
+        {
+            throw new UserException("Only Task Creator or Parent Designation User of " . $model->assignToUser->full_name . " can edit", UserException::ERROR_USER_ACTION_RESTRICT);
+        }
+
+
         if (in_array($model->status, $not_editable_status_codes)) {
             $type_conditions = [];
             $type_conditions['type'] = Type::getType($model, "status");
