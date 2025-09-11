@@ -6,6 +6,7 @@ use App\Exceptions\UserException;
 use App\Jobs\Backend\JobForgotPassword;
 use App\Jobs\Backend\JobSendEmailUserOtp;
 use App\Jobs\Backend\JobSendEmailOnRegisration;
+use App\Jobs\Backend\JobSendSmsWelcome;
 use App\Jobs\Backend\JobSendWhatappUserOtp;
 use App\Models\BaseModelInterface;
 use App\Models\Role;

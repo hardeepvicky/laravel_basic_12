@@ -428,6 +428,11 @@ class SectionRoutes
         ];
 
         $section['children'][] = [
+            "text" => "SMS",
+            "route_list" => [$routePrefix . ".sms_logs"]
+        ];
+
+        $section['children'][] = [
             "text" => "Permission Change",
             "route_list" => [$routePrefix . ".permission_change_logs"]
         ];

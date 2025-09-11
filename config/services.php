@@ -55,4 +55,11 @@ return [
     'interakt' => [
         'api_token' => env('INTERAKT_API_TOKEN'),
     ],
+
+    'dinstar' => [
+        'api_url' => env('DINSTAR_API_URL'),
+        'port' => env('DINSTAR_DEFAULT_PORT'),
+        'user' => env('DINSTAR_USER'),
+        'password' => env('DINSTAR_PASSWORD'),
+    ],
 ];

@@ -26,55 +26,64 @@ $false = false;
         <div class="card-body">
             <div class="row">
                 <div class="col-md-12 col-xxl-6">
-                    <div class="form-group mb-3">
                         <?php
                         $field = 'name';
                         $label = get_value_from_list($field_labels, $field, $field);
                         ?>
                         <x-Inputs.text-field :name="$field" :label="$label" value="{{ $model->{$field} }}" :isDisabled="$is_disabled"
-                            placeholder="Enter {{ $label }}" mandatory="true" autocomplete="off" />
-                    </div>
-                    <div class="form-group mb-3">
+                            placeholder="Enter {{ $label }}" 
+                            layout="horizontal"
+                            mandatory="true" 
+                            autocomplete="off" />
+
                         <?php
                         $field = 'subject';
                         $label = get_value_from_list($field_labels, $field, $field);
                         ?>
                         <x-Inputs.text-field :id="$field" :name="$field" :label="$label" :value="$model->{$field}"
+                            layout="horizontal"                            
                             mandatory="true" />
-                    </div>
-                </div>
-            </div>
-             <div class="row">
-                <div class="col-sm-12">
-                    <div class="form-group mb-3">
+
                         <?php
                         $field = 'placeholders';
                         $label = get_value_from_list($field_labels, $field);
                         $value = is_array($model->placeholders) ? implode(',', $model->placeholders) : "";
                         ?>
                         <x-Inputs.choice :id="$field" :name="$field" :label="$label" :value="$value" :isDisabled="$is_disabled"
-                            class="choice" placeholder="Enter {{ $label }}" />
-                    </div>
-                    <div class="form-group mb-3">
+                            class="choice" 
+                            placeholder="Enter {{ $label }}" 
+                            layout="horizontal"
+                            />
+
                         <?php
                         $field = 'body';
                         $label = get_value_from_list($field_labels, $field, $field);
                         ?>
-                        <x-Inputs.text-area :id="$field" :name="$field" :label="$label" :value="$model->{$field}" />
-                    </div>
-                    <div class="form-group mb-3">
+                        <x-Inputs.text-area :id="$field" :name="$field" :label="$label" :value="$model->{$field}" layout="horizontal"/>
+                            
                         <?php
                         $field = 'emailTemplateFile';
                         $label = get_value_from_list($field_labels, $field, $field);
                         $value = $model->emailTemplateFile ? implode(',', $model->emailTemplateFile?->pluck('document_file_id')->toArray()) : "";
                         ?>
-                        <x-Inputs.text-field :id="$field" :name="$field" :label="$label" :value="$value"
-                            multiple="multiple" />
-                        <span id="files-choose" class="btn btn-secondary">Choose Files</span>
-                    </div>
-                    <div class="form-group mb-3">
-                        <x-Inputs.checkbox name="is_active" label="Active" :value="$model->is_active" />
-                    </div>
+                        <div class="row">
+                            <div class="col-sm-3">
+                                {{ $label }}
+                            </div>
+                            <div class="col-sm-9">
+                                <x-Inputs.text-field :id="$field" :name="$field" :label="$false" :value="$value"
+                                    multiple="multiple" />
+                                <span id="files-choose" class="btn btn-secondary">Choose Files</span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-3">
+                                
+                            </div>
+                            <div class="col-sm-9">
+                                <x-Inputs.checkbox name="is_active" label="Active" :value="$model->is_active" />
+                            </div>
+                        </div>
                 </div>
              </div>
             <div class="row">

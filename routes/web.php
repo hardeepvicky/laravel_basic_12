@@ -60,6 +60,7 @@ use App\Http\Controllers\Backend\SaleOrderController;
 use App\Http\Controllers\Backend\SampleController;
 use App\Http\Controllers\Backend\SettingsController;
 use App\Http\Controllers\Backend\ShipOrderController;
+use App\Http\Controllers\Backend\SmsTemplateController;
 use App\Http\Controllers\Backend\StateController;
 use App\Http\Controllers\Backend\StockProductController;
 use App\Http\Controllers\Backend\SubDepartmentController;
@@ -73,6 +74,7 @@ use App\Http\Controllers\Backend\WhatsappTemplateController;
 use App\Http\Controllers\Frontend\EnquiryController;
 use App\Http\Controllers\Frontend\PublicController as FrontendPublicController;
 use App\Http\Controllers\HomeController;
+use App\Jobs\Backend\JobSendSmsWelcome;
 use App\Models\EmailLog;
 use App\Models\MailjetWebhook;
 use Illuminate\Http\Request;
@@ -826,6 +828,21 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
 
     $route_prefix = "email-template";
     $controllerClass = EmailTemplateController::class;
+    Route::resource($route_prefix, $controllerClass);
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
+        $name = "copy";
+        Route::get("{id}/" . $name, [$controllerClass, $name])->name($name);
+
+        $name = "activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "de_activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+    });
+
+    $route_prefix = "sms-template";
+    $controllerClass = SmsTemplateController::class;
     Route::resource($route_prefix, $controllerClass);
     Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
 
@@ -1673,6 +1690,9 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
         $name = "whatsapp_logs";
         Route::get($name, [DeveloperController::class, $name])->name($name);
 
+        $name = "sms_logs";
+        Route::get($name, [DeveloperController::class, $name])->name($name);
+
         $name = "permission_change_logs";
         Route::get($name, [DeveloperController::class, $name])->name($name);
 
@@ -1865,4 +1885,10 @@ Route::get("/test/external_drive/get", function () {
 
 Route::get('/phpinfo', function () {
     phpinfo();
+});
+
+Route::get("/test/sms/dinstar", function () 
+{
+    $job = new JobSendSmsWelcome("Hardeep Singh", "9814040490", "91", "https://google.com", 75);
+    dispatch($job);
 });

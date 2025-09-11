@@ -426,19 +426,21 @@ function suggestion_list(textarea, suggestionBox, suggestion_data, url) {
                 return []; // Return empty array on error
             });
         }
+        else
+        {
+            $.loader.indicator("Filtering Data...", textarea.parent(), {
+                target : {
+                    position : "top right",
+                }
+            });
 
-        $.loader.indicator("Filtering Data...", textarea.parent(), {
-            target : {
-                position : "top right",
-            }
-        });
-
-        return new $.Deferred().resolve(
-            suggestion_data.filter(s =>
-                s.name.toLowerCase().includes(term.toLowerCase()) ||
-                s.display.toLowerCase().includes(term.toLowerCase())
-            )
-        ).promise();
+            return new $.Deferred().resolve(
+                suggestion_data.filter(s =>
+                    s.name.toLowerCase().includes(term.toLowerCase()) ||
+                    s.display.toLowerCase().includes(term.toLowerCase())
+                )
+            ).promise();
+        }
     };
 
     // Function to display suggestions
@@ -533,19 +535,26 @@ function suggestion_list(textarea, suggestionBox, suggestion_data, url) {
                 clearTimeout(inputTimeout);
                 inputTimeout = setTimeout(function () {
                     currentSearchTerm = encodeURIComponent(currentSearchTerm);
-                    fetchSuggestions(currentSearchTerm).done(
-                        function (data) {
-
-                            if (url)
-                            {
+                    if (url)
+                    {
+                        fetchSuggestions(currentSearchTerm).done(function (data) {
                                 data = ajaxHandleResponse(url, data);
                                 suggestions = data['data'];
-                            }
 
                             $.loader.indicator(false, textarea.parent());
 
                             displaySuggestions(suggestions);
                         });
+                    }
+                    else
+                    {
+                        fetchSuggestions(currentSearchTerm).then(function (suggestions) {
+                               
+                            $.loader.indicator(false, textarea.parent());
+
+                            displaySuggestions(suggestions);
+                        });
+                    }
                 }, 250); // Wait 250ms after last input
             } else {
                 hideSuggestions();
@@ -602,4 +611,229 @@ function suggestion_list(textarea, suggestionBox, suggestion_data, url) {
             $items.eq(activeSuggestionIndex).addClass('selected');
         }
     }
+}
+
+function placeholder_suggestion(textarea, suggestionBox, suggestion_data, url)
+{
+    textarea = $(textarea);
+    if (textarea.length <= 0) {
+        console.error("textarea not found");
+        return;
+    }
+
+    suggestionBox = $(suggestionBox);
+
+    if (suggestionBox.length <= 0) {
+        console.error("suggestionBox not found");
+        return;
+    }
+
+    if (url || suggestion_data) {
+
+    }
+    else {
+        console.error("either data-url or data-suggestions is required");
+        return;
+    }
+
+    let currentSearchTerm = '';
+    let currentTriggerIndex = -1; // Position of the '#' character
+    let activeSuggestionIndex = -1; // For keyboard navigation
+
+    // Function to fetch suggestions (simulated or via AJAX)
+    const fetchSuggestions = function (term) {
+        if (url) {
+
+            $.loader.indicator("Fetching Data...", textarea.parent(), {
+                target : {
+                    position : "top right",
+                }
+            });
+
+            return $.get(url, { query: term }).fail(function (jqXHR, textStatus, errorThrown) {
+                $.events.onAjaxError("Error fetching suggestions : " + textStatus, errorThrown);
+                return []; // Return empty array on error
+            });
+        }
+        else
+        {
+            $.loader.indicator("Filtering Data...", textarea.parent(), {
+                target : {
+                    position : "top right",
+                }
+            });
+
+            return new $.Deferred().resolve(
+                suggestion_data.filter(s =>
+                    s.name.toLowerCase().includes(term.toLowerCase()) ||
+                    s.display.toLowerCase().includes(term.toLowerCase())
+                )
+            ).promise();
+        }
+    };
+
+    // Function to display suggestions
+    const displaySuggestions = function (suggestions) {
+        suggestionBox.empty().removeClass('hidden');
+        activeSuggestionIndex = -1; // Reset active index
+
+        if (suggestions.length === 0) {
+            suggestionBox.addClass('hidden');
+            return;
+        }
+
+        console.log(suggestions);
+
+        $.each(suggestions, function (index, suggestion) {
+            const $item = $('<div>')
+                .addClass('suggestion-item')
+                .text(suggestion.display)
+                .data('value', suggestion.name) // Store the #model.id:X part
+                .data('index', index); // For keyboard navigation
+
+            console.log($item.html());
+
+            $item.on('click', function () {
+                insertSuggestion($(this).data('value'));
+            });
+            suggestionBox.append($item);
+        });
+    };
+
+    // Function to insert selected suggestion into textarea
+    const insertSuggestion = function (value) {
+        const text = textarea.val();
+        const textBefore = text.substring(0, currentTriggerIndex);
+        const textAfter = text.substring(currentTriggerIndex + currentSearchTerm.length + 1); // +1 for the #
+
+        textarea.val(textBefore + value + ' ' + textAfter); // Add a space after insertion
+
+        hideSuggestions();
+
+        // Put cursor after the inserted text
+        const newCursorPos = (textBefore + value + ' ').length;
+
+        textarea[0].setSelectionRange(newCursorPos, newCursorPos);
+
+        textarea.focus();
+    };
+
+    // Function to hide suggestions
+    const hideSuggestions = function () {
+        suggestionBox.addClass('hidden').empty();
+        currentSearchTerm = '';
+        currentTriggerIndex = -1;
+        activeSuggestionIndex = -1;
+        suggestionData = [];
+    };
+
+    // --- Event Handlers ---
+
+    let inputTimeout = null; // For debouncing AJAX calls
+
+    textarea.on('input', function (e) {
+        const cursorPosition = this.selectionStart;
+        const text = textarea.val();
+
+        // Find the most recent '#' before the cursor that's not preceded by a space/newline
+        let lastHashIndex = -1;
+        for (let i = cursorPosition - 1; i >= 0; i--) {
+            if (text[i] === '@') {
+                lastHashIndex = i;
+                break;
+            }
+
+            if (/\s/.test(text[i])) 
+            { 
+                // If space/newline found before '#', it's not a direct hash trigger
+                lastHashIndex = -1;
+                break;
+            }
+        }
+
+        if (lastHashIndex !== -1 && lastHashIndex < cursorPosition) {
+            currentTriggerIndex = lastHashIndex;
+            // Extract the term after '#' up to the cursor or a space/newline
+            const partialTerm = text.substring(lastHashIndex + 1, cursorPosition);
+            currentSearchTerm = partialTerm;
+            console.log("search term", currentSearchTerm);
+
+            if (currentSearchTerm.length > 0) {
+                // Debounce the fetch request
+                clearTimeout(inputTimeout);
+                inputTimeout = setTimeout(function () {
+                    currentSearchTerm = encodeURIComponent(currentSearchTerm);
+                    if (url)
+                    {
+                        fetchSuggestions(currentSearchTerm).done(function (data) {
+                                data = ajaxHandleResponse(url, data);
+                                suggestions = data['data'];
+
+                            $.loader.indicator(false, textarea.parent());
+
+                            displaySuggestions(suggestions);
+                        });
+                    }
+                    else
+                    {
+                        fetchSuggestions(currentSearchTerm).then(function (suggestions) {
+                               
+                            $.loader.indicator(false, textarea.parent());
+
+                            displaySuggestions(suggestions);
+                        });
+                    }
+                }, 250); // Wait 250ms after last input
+            } else {
+                hideSuggestions();
+            }
+        } else {
+            hideSuggestions();
+        }
+    });
+
+    textarea.on('keydown', function (e) {
+        if (suggestionBox.hasClass('hidden')) return;
+
+        const $items = suggestionBox.children('.suggestion-item');
+        if ($items.length === 0) return;
+
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            activeSuggestionIndex = (activeSuggestionIndex + 1) % $items.length;
+            updateActiveSuggestion($items);
+            $items.eq(activeSuggestionIndex)[0].scrollIntoView({
+                block: 'nearest'
+            });
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            activeSuggestionIndex = (activeSuggestionIndex - 1 + $items.length) % $items.length;
+            updateActiveSuggestion($items);
+            $items.eq(activeSuggestionIndex)[0].scrollIntoView({
+                block: 'nearest'
+            });
+        } else if (e.key === 'Enter') {
+            if (activeSuggestionIndex !== -1) {
+                e.preventDefault(); // Prevent newline in textarea
+                insertSuggestion($items.eq(activeSuggestionIndex).data('value'));
+            }
+        } else if (e.key === 'Escape') {
+            hideSuggestions();
+        }
+    });
+
+    // Handle clicks outside the suggestion box to hide it
+    $(document).on('click', function (e) {
+        if (!textarea.is(e.target) && !suggestionBox.has(e.target)
+            .length) {
+            hideSuggestions();
+        }
+    });
+
+    function updateActiveSuggestion($items) {
+        $items.removeClass('selected');
+        if (activeSuggestionIndex !== -1) {
+            $items.eq(activeSuggestionIndex).addClass('selected');
+        }
+    }   
 }

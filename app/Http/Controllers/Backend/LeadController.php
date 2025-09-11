@@ -8,6 +8,7 @@ use App\Helpers\CsvUtility;
 use App\Helpers\DateUtility;
 use App\Helpers\FileUtility;
 use App\Helpers\LaravelExtend;
+use App\Jobs\Backend\JobSendSmsGeneral;
 use App\Models\BaseModelInterface;
 use App\Models\Campaign;
 use App\Models\City;
@@ -936,6 +937,12 @@ class LeadController extends BackendController
 
                 $model->recording_file = $storage_path . "/" . $datetime . ".wav";
                 $model->save();
+            }
+
+            if ($validatedData['action_type'] == LeadHistory::ACTION_TYPE_SEND_SMS) 
+            {
+                $job = new JobSendSmsGeneral($lead->name, $lead->mobile, "91", $validatedData['action']);
+                dispatch($job);
             }
 
             if (LaravelExtend::$errors) {

@@ -540,6 +540,7 @@ class DeveloperMenu extends BaseMenu
 
         $links[] = self::getLink($routePrefix . ".email_logs", null, self::ICON_MENU_LIST, [], self::LINK_TYPE_SUMMARY);
         $links[] = self::getLink($routePrefix . ".whatsapp_logs", null, self::ICON_MENU_LIST, [], self::LINK_TYPE_SUMMARY);
+        $links[] = self::getLink($routePrefix . ".sms_logs", null, self::ICON_MENU_LIST, [], self::LINK_TYPE_SUMMARY);
         $links[] = self::getLink($routePrefix . ".permission_change_logs", "Permission Change", self::ICON_MENU_LIST, [], self::LINK_TYPE_SUMMARY);
         $links[] = self::getLink($routePrefix . ".import_logs", null, self::ICON_MENU_LIST, [], self::LINK_TYPE_SUMMARY);
         $links[] = self::getLink($routePrefix . ".sql_logs", null, self::ICON_MENU_LIST, [], self::LINK_TYPE_SUMMARY);

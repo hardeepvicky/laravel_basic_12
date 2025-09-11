@@ -12,6 +12,7 @@ use App\Models\EmailLog;
 use App\Models\ImportLog;
 use App\Models\PermissionChangeLog;
 use App\Models\Role;
+use App\Models\SmsLog;
 use App\Models\SqlLog;
 use App\Models\WhatsappLog;
 use Illuminate\Support\Facades\Route;
@@ -225,11 +226,6 @@ class DeveloperController extends BackendController
             ["field" => "created_at", "type" => "to_date", "view_field" => "to_date"],
         ]);
 
-        // if ($conditions)
-        // {
-        //     d($conditions);
-        // }
-
         $builder = WhatsappLog::where($conditions);
 
         $cache_key_for_sort = $cache_key_prefix . "-extra-params";
@@ -298,7 +294,7 @@ class DeveloperController extends BackendController
         $cache_key_prefix = Route::currentRouteName();
 
         $conditions = $this->getConditions(Route::currentRouteName(), [
-            ["field" => "type", "type" => "string_equal"],
+            ["field" => "type", "type" => "string"],
             ["field" => "have_error", "type" => "int"],
             ["field" => "created_at", "type" => "from_date", "view_field" => "from_date"],
             ["field" => "created_at", "type" => "to_date", "view_field" => "to_date"],
@@ -360,5 +356,46 @@ class DeveloperController extends BackendController
         $this->layout = "frontend.layouts.main";
 
         return $this->view(__FUNCTION__);
+    }
+
+    
+    public function sms_logs()
+    {
+        $cache_key_prefix = Route::currentRouteName();
+
+        $conditions = $this->getConditions(Route::currentRouteName(), [
+            ["field" => "api_platform", "type" => "string"],
+            ["field" => "template_name", "type" => "string"],
+            ["field" => "template_lanugage", "type" => "string"],
+            ["field" => "country_code", "type" => "string"],
+            ["field" => "to_name", "type" => "string"],
+            ["field" => "to_mobile", "type" => "string"],
+            ["field" => "to_user_id", "type" => "int"],
+            ["field" => "is_sent", "type" => "int"],
+            ["field" => "is_sandbox", "type" => "int"],            
+            ["field" => "created_at", "type" => "from_date", "view_field" => "from_date"],
+            ["field" => "created_at", "type" => "to_date", "view_field" => "to_date"],
+        ]);
+        
+        $builder = SmsLog::where($conditions);
+
+        $cache_key_for_sort = $cache_key_prefix . "-extra-params";
+
+        $clear_cache = request('is_sort_clear', false);
+
+        $sort_params = $this->getRequestData($cache_key_for_sort, [
+            ["key" => "sort_by", "default" => "created_at"],
+            ["key" => "sort_dir", "default" => "DESC"],
+        ], $clear_cache);
+
+        $builder->orderBy($sort_params['sort_by'], $sort_params['sort_dir']);
+
+        $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
+
+        //dd($records);
+
+        $this->setForView(compact("records"));
+
+        return $this->viewIndex(__FUNCTION__);
     }
 }
