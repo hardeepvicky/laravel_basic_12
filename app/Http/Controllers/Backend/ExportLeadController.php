@@ -911,6 +911,21 @@ class ExportLeadController extends BackendController
 
             if ($validatedData['action_type'] == ExpLeadHistory::ACTION_TYPE_SEND_SMS) 
             {
+                if (!$exp_lead->name)
+                {
+                    throw new UserException("Lead's name is not saved yet");
+                }
+                
+                if (!$exp_lead->mobile)
+                {
+                    throw new UserException("Mobile No. not found");
+                }
+
+                if (!$exp_lead->country?->phonecode)
+                {
+                    throw new UserException("Country Phonecode not found");
+                }
+
                 $job = new JobSendSmsGeneral($exp_lead->name, $exp_lead->mobile, $exp_lead->country->phonecode, $validatedData['action']);
                 dispatch($job);
             }

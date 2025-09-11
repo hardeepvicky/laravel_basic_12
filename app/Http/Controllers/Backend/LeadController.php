@@ -941,6 +941,17 @@ class LeadController extends BackendController
 
             if ($validatedData['action_type'] == LeadHistory::ACTION_TYPE_SEND_SMS) 
             {
+
+                if (!$lead->name)
+                {
+                    throw new UserException("Lead's name is not saved yet");
+                }
+                
+                if (!$lead->mobile)
+                {
+                    throw new UserException("Mobile No. not found");
+                }
+
                 $job = new JobSendSmsGeneral($lead->name, $lead->mobile, "91", $validatedData['action']);
                 dispatch($job);
             }
