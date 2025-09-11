@@ -209,7 +209,7 @@ use App\Models\User;
                                 $label = get_value_from_list($field_labels, $field, $field);
                                 ?>
                                 <x-Inputs.text-field :id="$field" :name="$field" :label="$label"
-                                    :value="$model->{$field}" class="validate-mobile" placeholder="Enter {{ $label }}" />
+                                    :value="$model->{$field}" placeholder="Enter {{ $label }}" />
                             </div>
                         </div>
                     </div>

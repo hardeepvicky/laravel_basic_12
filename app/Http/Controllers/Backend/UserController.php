@@ -212,6 +212,7 @@ class UserController extends BackendController
             'roles' => ["required"],
             'allow_ip' => [],
             'office_landline_no' => "",
+            'voip_mobile' => "",
             "dont_send_email" => "",
             "profile_image" => "",
             "is_active" => "",

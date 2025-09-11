@@ -192,6 +192,7 @@
                                                             <th>Category</th>
                                                             <th>Model No.</th>
                                                             <th>Qty</th>
+                                                            <th>Scan Qty</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -200,7 +201,8 @@
                                                                 <td>{{ $i + 1 }}</td>
                                                                 <td>{{ $shipOrderProduct->product?->category->getDisplayName() }}</td>
                                                                 <td>{{ $shipOrderProduct->product?->getDisplayName() }}</td>     
-                                                                <td>{{ $shipOrderProduct->qty }}</td>                                                           
+                                                                <td>{{ $shipOrderProduct->qty }}</td>  
+                                                                <td>{{ $shipOrderProduct->shipOrderProductSerial->count() }}</td>                                                         
                                                             </tr>
                                                         @endforeach
                                                     </tbody>

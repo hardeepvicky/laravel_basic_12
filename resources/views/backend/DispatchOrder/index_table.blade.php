@@ -19,39 +19,39 @@
                             ?>
                             <x-Inputs.text-field :id="$field" :name="$field" :label="$false"
                                 :value="$search[$field]" class="form-control-sm"/>
-                        </th> 
+                        </th>
                         <th style="width:10%">
                             <?php
                             $field = "contact_id";
                             ?>
-                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$contact_list" :value="$search[$field]" 
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$contact_list" :value="$search[$field]"
                                 pleaseSelect="All" class="select2 form-select-sm"  />
                         </th>
                         <th style="width:10%">
                             <?php
                             $field = "status_type";
                             ?>
-                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$status_type_list" :value="$search[$field]" 
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$status_type_list" :value="$search[$field]"
                                 pleaseSelect="All" class="select2 form-select-sm" />
                         </th>
-                        <th style="width:12%">                            
+                        <th style="width:12%">
                             <?php
                             $field = "state_id";
                             ?>
-                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$state_list" :value="$search[$field]" 
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$state_list" :value="$search[$field]"
                                 pleaseSelect="All" class="select2 form-select-sm mb-1" />
 
                             <?php
                             $field = "city_id";
                             ?>
-                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$district_city_list" :value="$search[$field]" 
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$district_city_list" :value="$search[$field]"
                                 pleaseSelect="All" class="select2 form-select-sm" />
                         </th>
                         <th style="width:12%">
                             <?php
                             $field = "carrier_id";
                             ?>
-                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$carrier_list" :value="$search[$field]" 
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$carrier_list" :value="$search[$field]"
                                 pleaseSelect="All" class="select2 form-select-sm"/>
                         </th>
                         <th style="width:10%">
@@ -59,19 +59,19 @@
                             $field = "docket_no";
                             ?>
                             <x-Inputs.text-field :id="$field" :name="$field" :label="$false" :value="$search[$field]" class="form-control-sm"/>
-                        </th>               
+                        </th>
                         <th style="width:10%">
                             <?php
                             $field = "tracking_no";
                             ?>
                             <x-Inputs.text-field :id="$field" :name="$field" :label="$false" :value="$search[$field]" class="form-control-sm"/>
-                        </th>      
+                        </th>
                         <th style="width:10%">
                             <?php
                             $field = "builty_no";
                             ?>
                             <x-Inputs.text-field :id="$field" :name="$field" :label="$false" :value="$search[$field]" class="form-control-sm"/>
-                        </th>      
+                        </th>
                         <th style="width:10%">
                             <?php
                             $field = 'from_date';
@@ -81,7 +81,7 @@
                             $field = 'to_date';
                             ?>
                             <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]" class="form-control-sm date-picker" />
-                        </th>         
+                        </th>
                     </tr>
                     <tr class="border-bottom-primary">
                         <th style="width:10%">
@@ -93,7 +93,7 @@
                         <th><?= sortable_anchor('status_type', get_value_from_list($field_labels, 'status_type', 'status_type')) ?></th>
                         <th>
                             <?= sortable_anchor('state.name', get_value_from_list($field_labels, 'state_id', 'state_id')) ?>
-                            | <?= sortable_anchor('district.name', get_value_from_list($field_labels, 'district_id', 'district_id')) ?>                        
+                            | <?= sortable_anchor('district.name', get_value_from_list($field_labels, 'district_id', 'district_id')) ?>
                             | <?= sortable_anchor('city.name', get_value_from_list($field_labels, 'city_id', 'city_id')) ?>
                         </th>
                         <th><?= sortable_anchor('carrier.name', get_value_from_list($field_labels, 'carrier_id', 'carrier_id')) ?></th>
@@ -112,7 +112,7 @@
                             <th scope="row">
                                 <x-Backend.celec-summary-table-first-column :record="$record" :routePrefix="$routePrefix" buttons="edit,tr_details">
                                     <div class="label">
-                                        {{ $record->id}} 
+                                        {{ $record->id}}
                                         | <a class="btn btn-sm btn-secondary" href="{{ route($routePrefix . '.send', [$record->id]) }}">Scan</a>
                                     </div>
                                 </x-Backend.celec-summary-table-first-column>
@@ -156,7 +156,7 @@
                             </td>
                         </tr>
                         <tr id="record-{{ $record->id }}" class="hidden">
-                            <td style="background-color: var(--body--bs-body-bg)"></td>                            
+                            <td style="background-color: var(--body--bs-body-bg)"></td>
                             <td colspan="11">
                                 <div class="row">
                                     <div class="col-md-5">
@@ -195,6 +195,7 @@
                                                             <th>Category</th>
                                                             <th>Model No.</th>
                                                             <th>Qty</th>
+                                                            <th>Scan Qty</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -202,8 +203,9 @@
                                                             <tr>
                                                                 <td>{{ $i + 1 }}</td>
                                                                 <td>{{ $dispatchOrderProduct->product?->category->getDisplayName() }}</td>
-                                                                <td>{{ $dispatchOrderProduct->product?->getDisplayName() }}</td>     
-                                                                <td>{{ $dispatchOrderProduct->qty }}</td>                                                           
+                                                                <td>{{ $dispatchOrderProduct->product?->getDisplayName() }}</td>
+                                                                <td>{{ $dispatchOrderProduct->qty }}</td>
+                                                                <td>{{ $dispatchOrderProduct->dispatchOrderProductSerial->count() }}</td>
                                                             </tr>
                                                         @endforeach
                                                     </tbody>

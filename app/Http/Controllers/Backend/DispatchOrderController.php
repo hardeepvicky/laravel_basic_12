@@ -45,7 +45,11 @@ class DispatchOrderController extends BackendController
         $builder = $this->_getBuildeForIndex($cache_key_prefix);
 
         $builder->with([
-            "products", "items"
+            "products", 
+            "products.product",
+            "products.product.category",
+            "products.dispatchOrderProductSerial",
+            "items"
         ]);
 
         $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
@@ -314,7 +318,10 @@ class DispatchOrderController extends BackendController
             "saleOrder",
             "saleOrder.branch",
             "contact",
-            "products"
+            "products", 
+            "products.product",
+            "products.product.category",
+            "products.dispatchOrderProductSerial",
         ]);
 
         $records = $builder->get();
