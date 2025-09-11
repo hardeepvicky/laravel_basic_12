@@ -53,6 +53,7 @@ class User extends Authenticatable implements BaseModelInterface
         'person_last_name',
         'email',
         'mobile',
+        'voip_mobile',
         'whatsapp_mobile',
         'office_landline_no',
         'password',
