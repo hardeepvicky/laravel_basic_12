@@ -350,7 +350,7 @@
                             </div>
 
                             <?php
-                            $field = 'paid_amount';
+                            $field = 'advance_amount';
                             $label = get_value_from_list($field_labels, $field, $field);
                             ?>
                             <x-Inputs.text-field layout="horizontal" :id="$field" :name="$field" :label="$label"
@@ -360,6 +360,33 @@
                                 placeholder="Enter {{ $label }}"
                                 mandatory="true" 
                             />
+
+                            <?php
+                                $field = 'balance';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                            ?>
+                            <div class="row mb-3">
+                                <div class="col-sm-3">
+                                    @if (isset($label) && $label)
+                                        <label class="form-label">
+                                            {{ $label }}
+                                        </label>
+                                    @endif
+                                </div>                                
+                                <div class="col-sm-3">
+                                    <input type="hidden" name="{{ $field }}" value="{{ $model->{$field} }}" class="{{ $field }}"/>
+                                    <span class="{{ $field }} big_amount">{{ $model->{$field} }}</span>
+                                </div>
+                            </div>
+
+                            <?php
+                            $field = 'terms';
+                            $label = get_value_from_list($field_labels, $field, $field);
+                            ?>
+                            <x-Inputs.text-area layout="horizontal" :id="$field" :name="$field" :label="$label"
+                                :value="$model->{$field}" 
+                                rows="3"
+                                placeholder="Enter {{ $label }}" />
                         </div>
                     </div>
                 </div>
@@ -550,6 +577,14 @@
 
                 $("input.total_amount").val(total_amount);
                 $("span.total_amount").html(currency_formatter.format(total_amount));
+
+                var advance = $("#advance_amount").val();
+                advance_amount = advance_amount ? parseFloat(advance_amount) : 0;
+
+                var balance = total_amount - advance_amount;
+
+                $("input.balance").val(balance);
+                $("span.balance").html(currency_formatter.format(balance));
             }
 
             $(document).on("input keyup", ".order_qty, .rate", function(){

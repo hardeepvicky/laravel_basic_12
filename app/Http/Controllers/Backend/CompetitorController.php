@@ -103,6 +103,11 @@ class CompetitorController extends BackendController
 
         $my_country = Country::getMyCountry();
 
+        if (!$my_country)
+        {
+            throw new UserException("Country India not found");
+        }
+
         $state_conditions = [
             ["country_id", $my_country->id],
             ["is_active", 1]

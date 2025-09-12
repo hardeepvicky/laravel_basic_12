@@ -117,6 +117,11 @@ class CustomerController extends BackendController
 
         $my_country = Country::getMyCountry();
 
+        if (!$my_country)
+        {
+            throw new UserException("Country India not found");
+        }
+
         $state_conditions = [
             ["country_id", $my_country->id],
             ["is_active", 1]
@@ -258,6 +263,11 @@ class CustomerController extends BackendController
     private function _set_date_for_add_and_edit()
     {
         $my_country = Country::getMyCountry();
+
+        if (!$my_country)
+        {
+            throw new UserException("Country India not found");
+        }
 
         $district_cities = City::getWithDistrict([["country_id", $my_country->id]], [["is_active", 1]], [["is_active", 1]]);
         
@@ -827,6 +837,11 @@ class CustomerController extends BackendController
             $dispatch->status_type = DispatchOrder::STATUS_PENDING;
 
             $my_country = Country::getMyCountry();
+
+            if (!$my_country)
+            {
+                throw new UserException("Country India not found");
+            }
 
             if ($customer->deal_type == Lead::DEAL_TYPE_THROGH_DEALER)
             {

@@ -188,8 +188,9 @@ class ExportOrderController extends BackendController
             "party_order_ref_no" => ["nullable"],
             "export_contact_id" => ["required"],
             "total_amount" => ["required"],
-            "paid_amount" => ["nullable"],
+            "advance_amount" => ["nullable"],
             "remarks" => "",
+            "terms" => "",
             "export_order_products" => []
         ];
     }
