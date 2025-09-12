@@ -121,6 +121,11 @@ class LeadController extends BackendController
 
         $my_country = Country::getMyCountry();
 
+        if (!$my_country)
+        {
+            throw new UserException("Country India not found");
+        }
+
         $state_conditions = [
             ["country_id", $my_country->id],
             ["is_active", 1]
@@ -268,6 +273,11 @@ class LeadController extends BackendController
     {
         $my_country = Country::getMyCountry();
 
+        if (!$my_country)
+        {
+            throw new UserException("Country India not found");
+        }
+
         $district_cities = City::getWithDistrict([["country_id", $my_country->id]], [["is_active", 1]], [["is_active", 1]]);
         
         $district_city_collection = collect($district_cities);
@@ -369,6 +379,11 @@ class LeadController extends BackendController
         if (isset($validatedData['city_id']) && $validatedData['city_id'])
         {
             $my_country = Country::getMyCountry();
+
+            if (!$my_country)
+            {
+                throw new UserException("Country India not found");
+            }
 
             $district_cities = City::getWithDistrict([["country_id", $my_country->id]], [["is_active", 1]], [["is_active", 1]]);
 
@@ -1184,6 +1199,11 @@ class LeadController extends BackendController
             $dispatch->status_type = DispatchOrder::STATUS_PENDING;
 
             $my_country = Country::getMyCountry();
+
+            if (!$my_country)
+            {
+                throw new UserException("Country India not found");
+            }
 
             if ($lead->deal_type == Lead::DEAL_TYPE_THROGH_DEALER)
             {

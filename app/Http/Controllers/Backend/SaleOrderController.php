@@ -190,8 +190,9 @@ class SaleOrderController extends BackendController
             "party_order_ref_no" => ["nullable"],
             "contact_id" => ["required"],
             "total_amount" => ["required"],
-            "paid_amount" => ["nullable"],
+            "advance_amount" => ["nullable"],
             "remarks" => "",
+            "terms" => "",
             "sale_order_products" => []
         ];
     }

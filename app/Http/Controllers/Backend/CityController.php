@@ -77,6 +77,11 @@ class CityController extends BackendController
 
         $my_country = Country::getMyCountry();
 
+        if (!$my_country)
+        {
+            throw new UserException("Country India not found");
+        }
+
         $district_conditions = [];
 
         if (isset($condition_list['state_id']))

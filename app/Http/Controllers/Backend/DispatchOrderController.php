@@ -135,6 +135,11 @@ class DispatchOrderController extends BackendController
 
         $my_country = Country::getMyCountry();
 
+        if (!$my_country)
+        {
+            throw new UserException("Country India not found");
+        }
+
         $state_list = State::getList("id", "display_name", ["country_id" => $my_country->id]);
         $district_city_list = [];
 

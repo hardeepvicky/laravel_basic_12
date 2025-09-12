@@ -324,6 +324,11 @@ class DistrictController extends BackendController
 
                 $my_country = Country::getMyCountry();
 
+                if (!$my_country)
+                {
+                    throw new UserException("Country India not found");
+                }
+
                 $state_list = array_flip(Util::applyAll(State::getList("id", "name", ["country_id" => $my_country->id]), ["strtolower"]));
                 
                 foreach($csv_records as $i => $record)

@@ -88,6 +88,11 @@ class RegisterController extends WebController
 
         $my_country = Country::getMyCountry();
 
+        if (!$my_country)
+        {
+            throw new UserException("Country India not found");
+        }
+
         $model = new User();
         if ($my_country)
         {
