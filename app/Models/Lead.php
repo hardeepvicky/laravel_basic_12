@@ -293,6 +293,8 @@ class Lead extends BaseModel
 
             $data['lead_id'] = $this->id;
             $data['is_lead_transfered'] = 1;
+            $data['status_type'] = $this->status_type;
+            
             LeadHistory::create($data);
 
             $notification_data = [
