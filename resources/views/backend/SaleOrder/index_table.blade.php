@@ -61,7 +61,7 @@ $formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, 0);
                             <?= sortable_anchor('total_amount', get_value_from_list($field_labels, 'total_amount', 'total_amount')) ?>
                         </th>
                         <th style="width:8%">
-                            <?= sortable_anchor('paid_amount', get_value_from_list($field_labels, 'paid_amount', 'paid_amount')) ?>
+                            <?= sortable_anchor('advance_amount', get_value_from_list($field_labels, 'advance_amount', 'advance_amount')) ?>
                         </th>
                         <th style="width:8%">
                             <?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?>
@@ -88,6 +88,8 @@ $formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, 0);
                                                 <input type="checkbox" class="form-check-input sale_order" value={{ $record->id }}>
                                             @endif
                                             {{ $record->order_no }}
+
+                                            | <a class="btn btn-sm btn-secondary" href="{{ route('payment.create', ["sale_order_id" => $record->id]) }}">Pay Now</a>
                                         </label>
                                     </div>
                                 </x-Backend.celec-summary-table-first-column>
@@ -106,7 +108,7 @@ $formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, 0);
                                 {{ $formatter->formatCurrency($record->total_amount, "INR");  }}
                             </td>
                             <td>
-                                {{ $formatter->formatCurrency($record->paid_amount, "INR");  }}
+                                {{ $formatter->formatCurrency($record->advance_amount, "INR");  }}
                             </td>
                             <td>
                                 <x-Backend.celec-date-time :value="$record->created_at" />

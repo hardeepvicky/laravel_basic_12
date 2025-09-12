@@ -96,6 +96,11 @@ class SaleOrder extends BaseModel
         return $this->belongsToMany(DocumentFile::class, SaleOrderFile::class);
     }
 
+    public function payment()
+    {
+        return $this->hasMany(Payment::class, 'sale_order_id');
+    }
+
     protected function getDisplayNameAttribute()
     {
         return $this->getDisplayName();

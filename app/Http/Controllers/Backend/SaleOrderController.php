@@ -712,6 +712,32 @@ class SaleOrderController extends BackendController
         download_start($file, "application/octet-stream");
     }
 
+    public function ajax_get_list($contact_id = 0)
+    {
+        $response = ["status" => 1, "data" => []];
+
+        $conditions = [];
+
+        if ($contact_id)
+        {
+            $conditions["contact_id"] = $contact_id;
+        }
+
+        $list = $this->modelClass::getList("id", "display_name", $conditions, "id", "DESC");
+
+        $response['data'] = [];
+
+        foreach($list as $k => $v)
+        {
+            $response['data'][] = [
+                'id' => $k,
+                'name' => $v,
+            ];
+        }
+
+        return $this->responseJson($response);
+    }
+
     public function ajax_get_unlinked_list()
     {
         $response = ["status" => 1];
@@ -819,6 +845,26 @@ class SaleOrderController extends BackendController
         {
             $response['qty_to_manufacture'] = $order_qty;
         }
+
+        return $this->responseJson($response);
+    }
+
+    public function ajax_get_pending_payable_amount($id, $payment_id = 0)
+    {
+        $response = ["status" => "1", "pending_amount" => 0];
+
+        $so = $this->modelClass::findOrFail($id);
+
+        if ($payment_id)
+        {
+            $payment_sum = $so->payment()->whereNot("id", $payment_id)->sum("amount");
+        }
+        else
+        {
+            $payment_sum = $so->payment->sum("amount");
+        }
+
+        $response['pending_amount'] = $so->total_amount - $so->advance_amount - $payment_sum;
 
         return $this->responseJson($response);
     }

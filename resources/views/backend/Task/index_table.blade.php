@@ -237,9 +237,6 @@ $false = false;
                                     </div>
 
 
-
-
-
                                     <x-Backend.document-files :records="$record->documentFile" />
                                 </div>
                             </div>

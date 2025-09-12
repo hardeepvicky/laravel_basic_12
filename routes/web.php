@@ -47,6 +47,7 @@ use App\Http\Controllers\Backend\MakerController;
 use App\Http\Controllers\Backend\ManufactureOrderController;
 use App\Http\Controllers\Backend\NotificationController;
 use App\Http\Controllers\Backend\PartyController;
+use App\Http\Controllers\Backend\PaymentController;
 use App\Http\Controllers\Backend\PermissionController;
 use App\Http\Controllers\Backend\ProductCategoryController;
 use App\Http\Controllers\Backend\ProductController;
@@ -1323,6 +1324,12 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
         $name = "copy";
         Route::get("{id}/" . $name, [$controllerClass, $name])->name($name);
 
+        $name = "ajax_get_list";
+        Route::get($name . "/{contact_id}", [$controllerClass, $name])->name($name);
+
+        $name = "ajax_get_pending_payable_amount";
+        Route::get($name . "/{id}/{payment_id?}", [$controllerClass, $name])->name($name);
+
         $name = "ajax_update_field";
         Route::post($name, [$controllerClass, $name])->name($name);
 
@@ -1332,6 +1339,21 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
             Route::get($name, [$controllerClass, "export_" . $name])->name($name);
 
             $name = "product_csv";
+            Route::get($name, [$controllerClass, "export_" . $name])->name($name);
+        });
+    });
+
+    $route_prefix = "payment";
+    $controllerClass = PaymentController::class;
+    Route::resource($route_prefix, $controllerClass);    
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
+        $name = "ajax_update_field";
+        Route::post($name, [$controllerClass, $name])->name($name);
+
+        $route_prefix = "export";
+        Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+            $name = "csv";
             Route::get($name, [$controllerClass, "export_" . $name])->name($name);
         });
     });
