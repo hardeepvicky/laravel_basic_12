@@ -1235,7 +1235,14 @@ function get_and_save_file_from_url($url, $savePath)
         mkdir(dirname($savePath), 0777, true);
     }
 
-    $fileContent = file_get_contents($url);
+    $arrContextOptions=array(
+            "ssl"=>array(
+            "verify_peer"=>false,
+            "verify_peer_name"=>false,
+        ),
+    );  
+
+    $fileContent = file_get_contents($url, false, stream_context_create($arrContextOptions));
 
     if ($fileContent === false) {
         throw new UserException("Failed to download from: $url");
