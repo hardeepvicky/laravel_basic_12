@@ -273,22 +273,6 @@ class PaymentController extends BackendController
         }
     }
 
-    public function copy($id)
-    {
-        $model = $this->modelClass::findOrFail($id);
-
-        $this->beforeEdit($model);
-
-        $form = [
-            'url' => route($this->routePrefix . '.store', $id),
-            'method' => 'POST',
-        ];
-
-        $this->setForView(compact("model", "form"));
-
-        return $this->view("form");
-    }
-
     public function ajax_get_list($sale_order_id = 0, $contact_id = 0)
     {
         $response = ["status" => 1, "data" => []];

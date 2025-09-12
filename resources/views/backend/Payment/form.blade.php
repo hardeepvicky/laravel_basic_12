@@ -99,7 +99,7 @@
                                         </label>
                                     @endif
                                 </div>                                
-                                <div class="col-sm-6">
+                                <div class="col-sm-8">
                                     <div class="d-flex align-items-start">                                        
                                         <div class="flex-grow-1">
                                             <x-Inputs.text-field :id="$field" :name="$field" :label="$false"
@@ -244,7 +244,8 @@
             });
 
             $("#files").browseGallery({
-                opener : "#files-choose"
+                opener : "#files-choose",
+                multiple : true
             });
 
             $.events.execAtLast(function(){

@@ -89,7 +89,6 @@ $formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, 0);
                                 <x-Backend.celec-summary-table-first-column :record="$record" :routePrefix="$routePrefix" buttons="edit,delete,tr_details">
                                     <div class="label">
                                         <label class="form-check custom-checkbox-group">                                            
-                                            <input type="checkbox" class="form-check-input sale_order" value={{ $record->id }}>
                                             {{ $record->voucher_no }}
                                         </label>
                                     </div>

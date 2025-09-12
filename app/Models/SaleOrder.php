@@ -47,6 +47,10 @@ class SaleOrder extends BaseModel
             "foreignKey" => ["sale_order_id"],
             "preventDelete" => true
         ],
+        Payment::class => [
+            "foreignKey" => ["sale_order_id"],
+            "preventDelete" => true
+        ],
     ];
 
     public function afterFindForCsv()

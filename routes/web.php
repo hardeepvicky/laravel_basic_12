@@ -38,6 +38,7 @@ use App\Http\Controllers\Backend\ExportDealerController;
 use App\Http\Controllers\Backend\ExportLeadController;
 use App\Http\Controllers\Backend\ExportOrderController;
 use App\Http\Controllers\Backend\ExportPartyController;
+use App\Http\Controllers\Backend\ExportPaymentController;
 use App\Http\Controllers\Backend\ExportStateController;
 use App\Http\Controllers\Backend\HolidayController;
 use App\Http\Controllers\Backend\ItemCategoryController;
@@ -81,6 +82,7 @@ use App\Models\MailjetWebhook;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Exporter;
 use Mailjet\Resources;
 
 
@@ -1370,27 +1372,6 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
     $name = "out";
     Route::any($route_prefix . "/" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
 
-    Route::group(['prefix' => 'permissions', 'as' => 'permissions.'], function () {
-
-        $name = "index";
-        Route::get($name, [PermissionController::class, $name])->name($name);
-
-        $name = "assign";
-        Route::any($name, [PermissionController::class, $name])->name($name);
-
-        $name = "assign_to_many";
-        Route::any($name, [PermissionController::class, $name])->name($name);
-
-        $name = "ajax_get_permissions";
-        Route::post($name, [PermissionController::class, $name])->name($name);
-
-        $name = "ajax_delete";
-        Route::post($name, [PermissionController::class, $name])->name($name);
-
-        $name = "ajax_request_access";
-        Route::any($name . "/{route_name}", [PermissionController::class, $name])->name($name);
-    });
-
     $route_prefix = "holiday";
     $controllerClass = HolidayController::class;
     Route::resource($route_prefix, $controllerClass);
@@ -1545,7 +1526,7 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
 
     
     $route_prefix = "export-party";
-    $controllerClass = ExportPartyController::class;
+    $controllerClass = ExportPaymentController::class;
     Route::resource($route_prefix, $controllerClass);
     Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
 
@@ -1664,12 +1645,34 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
         $name = "ajax_update_field";
         Route::post($name, [$controllerClass, $name])->name($name);
 
+        $name = "ajax_get_list";
+        Route::get($name . "/{export_contact_id}", [$controllerClass, $name])->name($name);
+
+        $name = "ajax_get_pending_payable_amount";
+        Route::get($name . "/{id}/{export_payment_id?}", [$controllerClass, $name])->name($name);
+
         $route_prefix = "export";
         Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
             $name = "csv";
             Route::get($name, [$controllerClass, "export_" . $name])->name($name);
         });
     });
+
+    $route_prefix = "export-payment";
+    $controllerClass = ExportPaymentController::class;
+    Route::resource($route_prefix, $controllerClass);    
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
+        $name = "ajax_update_field";
+        Route::post($name, [$controllerClass, $name])->name($name);
+
+        $route_prefix = "export";
+        Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+            $name = "csv";
+            Route::get($name, [$controllerClass, "export_" . $name])->name($name);
+        });
+    });
+
 
     $route_prefix = "ship-order";
     $controllerClass = ShipOrderController::class;
@@ -1691,6 +1694,28 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
             $name = "product_csv";
             Route::get($name, [$controllerClass, "export_" . $name])->name($name);
         });
+    });
+
+
+    Route::group(['prefix' => 'permissions', 'as' => 'permissions.'], function () {
+
+        $name = "index";
+        Route::get($name, [PermissionController::class, $name])->name($name);
+
+        $name = "assign";
+        Route::any($name, [PermissionController::class, $name])->name($name);
+
+        $name = "assign_to_many";
+        Route::any($name, [PermissionController::class, $name])->name($name);
+
+        $name = "ajax_get_permissions";
+        Route::post($name, [PermissionController::class, $name])->name($name);
+
+        $name = "ajax_delete";
+        Route::post($name, [PermissionController::class, $name])->name($name);
+
+        $name = "ajax_request_access";
+        Route::any($name . "/{route_name}", [PermissionController::class, $name])->name($name);
     });
 
     $controller_prefix = "setting";

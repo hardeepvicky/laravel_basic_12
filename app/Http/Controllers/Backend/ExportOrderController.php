@@ -709,6 +709,32 @@ class ExportOrderController extends BackendController
         download_start($file, "application/octet-stream");
     }
 
+    public function ajax_get_list($export_contact_id = 0)
+    {
+        $response = ["status" => 1, "data" => []];
+
+        $conditions = [];
+
+        if ($export_contact_id)
+        {
+            $conditions["export_contact_id"] = $export_contact_id;
+        }
+
+        $list = $this->modelClass::getList("id", "display_name", $conditions, "id", "DESC");
+
+        $response['data'] = [];
+
+        foreach($list as $k => $v)
+        {
+            $response['data'][] = [
+                'id' => $k,
+                'name' => $v,
+            ];
+        }
+
+        return $this->responseJson($response);
+    }
+
     public function ajax_get_unlinked_list()
     {
         $response = ["status" => 1];
@@ -818,6 +844,26 @@ class ExportOrderController extends BackendController
         {
             $response['qty_to_manufacture'] = $order_qty;
         }
+
+        return $this->responseJson($response);
+    }
+
+    public function ajax_get_pending_payable_amount($id, $export_payment_id = 0)
+    {
+        $response = ["status" => "1", "pending_amount" => 0];
+
+        $eo = $this->modelClass::findOrFail($id);
+
+        if ($export_payment_id)
+        {
+            $payment_sum = $eo->payment()->whereNot("id", $export_payment_id)->sum("amount");
+        }
+        else
+        {
+            $payment_sum = $eo->payment->sum("amount");
+        }
+
+        $response['pending_amount'] = $eo->total_amount - $eo->advance_amount - $payment_sum;
 
         return $this->responseJson($response);
     }

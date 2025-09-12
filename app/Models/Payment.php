@@ -2,9 +2,6 @@
 
 namespace App\Models;
 
-use App\Exceptions\UserException;
-use App\Helpers\LaravelExtend;
-use App\Notifications\GeneralNotification;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Unique;
@@ -25,10 +22,6 @@ class Payment extends BaseModel
             "preventDelete" => false
         ],        
     ];
-
-    protected static array $fields_containg_tags = ["description"];
-
-    public string $field_for_create_tag = "display_name";
 
     protected function getDisplayNameAttribute()
     {

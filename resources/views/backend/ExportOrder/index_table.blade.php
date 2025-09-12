@@ -86,6 +86,8 @@ $formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, 0);
                                                 <input type="checkbox" class="form-check-input export_order" value={{ $record->id }}>
                                             @endif
                                         {{ $record->order_no }}
+
+                                        | <a class="btn btn-sm btn-secondary" href="{{ route('export-payment.create', ["export_order_id" => $record->id]) }}">Pay Now</a>
                                     </div>
                                 </x-Backend.celec-summary-table-first-column>
                             </th>
