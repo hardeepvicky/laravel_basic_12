@@ -63,12 +63,37 @@
                 <tbody>
                     @foreach ($records as $record)
                         <tr>
-                            <th scope="row">
-                                <x-Backend.celec-summary-table-first-column :record="$record" :routePrefix="$routePrefix" buttons="edit,delete">
-                                    <div class="label">
-                                        {{ $record->id . " | " . $record->name }}
+                            <th scope="row">                               
+                                <div class="celec_info">
+                                    <label class="form-check custom-checkbox-group">
+                                        <input type="checkbox" class="form-check-input contact" data-type="{{ $record->type }}" value={{ $record->id }}>
+                                        <span>{{ $record->name }}</span>
+                                    </label>
+
+                                    <div class="divider"></div>
+                                    <div class="p-1">
+                                        <ul class="action">
+                                            <?php
+                                            $route_prefix_2 = "export-" . $record->type;
+                                            ?>
+                                            @if (in_array($record->type, ["lead", "customer", "party", "dealer"]))
+                                            <li>Party
+                                                <a class="btn btn-outline-info summary-action-button" href="{{ route($route_prefix_2 . '.history',[$record->ref_id]) }}">
+                                                    <i class="fa-solid fa-clock-rotate-left"></i>
+                                                </a>
+                                            </li>
+                                            @endif
+                                            <li>
+                                                <a class="btn btn-outline-primary summary-action-button" href="{{ route($route_prefix_2 . '.edit',[$record->ref_id]) }}">
+                                                    <i class="icon-pencil-alt"></i>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <x-Backend.summary-delete-button url="{{ route($route_prefix_2 . '.destroy', [$record->ref_id]) }}" />
+                                            </li>
+                                        </ul>
                                     </div>
-                                </x-Backend.celec-summary-table-first-column>
+                                </div>
                             </th>
                             <td>{{ $record->iso3 }}</td>
                             <td>{{ $record->numeric_code }}</td>
