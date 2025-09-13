@@ -81,6 +81,14 @@ class SmsHelper
         return $this;
     }
 
+
+    public function setPort($arg)
+    {
+        $this->api_port = $arg;
+
+        return $this;
+    }
+
     public function setTo(String $mobile_no, String $name, $user_id = null)
     {
         $this->mobile_no = $mobile_no;

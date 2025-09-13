@@ -94,6 +94,12 @@ use App\Models\User;
                                                 </span>
                                             </label>
                                             <label class="info">
+                                                {{ get_value_from_list($field_labels, 'dinstar_port') }} :
+                                                <span>
+                                                    {{ $record->dinstar_port }}
+                                                </span>
+                                            </label>
+                                            <label class="info">
                                                 {{ get_value_from_list($field_labels, 'office_landline_no') }} :
                                                 <span>
                                                     {{ $record->office_landline_no }}

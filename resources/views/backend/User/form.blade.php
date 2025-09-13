@@ -205,6 +205,18 @@ use App\Models\User;
                         <div class="col-md-6">
                             <div class="form-group mb-3">
                                 <?php
+                                $field = 'dinstar_port';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <x-Inputs.text-field :id="$field" :name="$field" :label="$label"
+                                    :value="$model->{$field}"                                      
+                                    placeholder="Enter {{ $label }}"
+                                    />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <?php
                                 $field = 'office_landline_no';
                                 $label = get_value_from_list($field_labels, $field, $field);
                                 ?>

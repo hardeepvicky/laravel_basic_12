@@ -884,6 +884,11 @@ class ExportLeadController extends BackendController
 
             if ($validatedData['action_type'] == ExpLeadHistory::ACTION_TYPE_CALL && $exp_lead->assignTo?->name)
             {
+                if (!$exp_lead->assignTo?->name)
+                {
+                    throw new UserException("Please Assign Lead to user", UserException::ERROR_USER_DATA_WRONG);
+                }
+
                 $voip_no = $exp_lead->assignTo->name;
                 if (!is_numeric($voip_no))
                 {
@@ -911,6 +916,11 @@ class ExportLeadController extends BackendController
 
             if ($validatedData['action_type'] == ExpLeadHistory::ACTION_TYPE_SEND_SMS) 
             {
+                if (!$exp_lead->assignTo?->name)
+                {
+                    throw new UserException("Please Assign Lead to user", UserException::ERROR_USER_DATA_WRONG);
+                }
+                
                 if (!$exp_lead->name)
                 {
                     throw new UserException("Lead's name is not saved yet");
@@ -926,7 +936,7 @@ class ExportLeadController extends BackendController
                     throw new UserException("Country Phonecode not found");
                 }
 
-                $job = new JobSendSmsGeneral($exp_lead->name, $exp_lead->mobile, $exp_lead->country->phonecode, $validatedData['action']);
+                $job = new JobSendSmsGeneral($exp_lead->assignTo->dinstar_port, $exp_lead->name, $exp_lead->mobile, $exp_lead->country->phonecode, $validatedData['action']);
                 dispatch($job);
             }
 

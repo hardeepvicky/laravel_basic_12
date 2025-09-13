@@ -927,8 +927,13 @@ class LeadController extends BackendController
                 $lead->changeNextFollowupDateTime($validatedData['next_meeting_date_time']);
             }
 
-            if ($validatedData['action_type'] == LeadHistory::ACTION_TYPE_CALL && $lead->assignTo?->name)
+            if ($validatedData['action_type'] == LeadHistory::ACTION_TYPE_CALL)
             {
+                if (!$lead->assignTo?->name)
+                {
+                    throw new UserException("Please Assign Lead to user", UserException::ERROR_USER_DATA_WRONG);
+                }
+
                 $voip_no = $lead->assignTo->name;
                 if (!is_numeric($voip_no))
                 {
@@ -956,6 +961,10 @@ class LeadController extends BackendController
 
             if ($validatedData['action_type'] == LeadHistory::ACTION_TYPE_SEND_SMS) 
             {
+                if (!$lead->assignTo?->name)
+                {
+                    throw new UserException("Please Assign Lead to user", UserException::ERROR_USER_DATA_WRONG);
+                }
 
                 if (!$lead->name)
                 {
@@ -967,7 +976,7 @@ class LeadController extends BackendController
                     throw new UserException("Mobile No. not found");
                 }
 
-                $job = new JobSendSmsGeneral($lead->name, $lead->mobile, "91", $validatedData['action']);
+                $job = new JobSendSmsGeneral($lead->assignTo->dinstar_port, $lead->name, $lead->mobile, "91", $validatedData['action']);
                 dispatch($job);
             }
 

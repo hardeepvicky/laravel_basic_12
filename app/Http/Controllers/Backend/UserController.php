@@ -223,6 +223,7 @@ class UserController extends BackendController
             'allow_ip' => [],
             'office_landline_no' => "",
             'voip_mobile' => "",
+            'dinstar_port' => "",
             "dont_send_email" => "",
             "profile_image" => "",
             "is_active" => "",
