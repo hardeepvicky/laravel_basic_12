@@ -814,7 +814,7 @@ class LeadController extends BackendController
             "documentFile"
         ])->findOrFail($lead_id);
 
-        $record->convertTimeZoneForDisplay();
+        $record->afterFind();
 
         $form = [
             'url' => route($this->routePrefix . '.history_store', $lead_id),
