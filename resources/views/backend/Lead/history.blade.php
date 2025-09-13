@@ -93,6 +93,7 @@ use App\Helpers\DateUtility;
                                 <div class="more-less-text">{{ $history->response }}</div>
                             </td>
                             <td>
+                                <?php d($history->recording_file_url); ?>
                                 @if($history->recording_file_url)
                                 <?php
                                     $mime_type = get_mime_type_from_extension($history->recording_file);
