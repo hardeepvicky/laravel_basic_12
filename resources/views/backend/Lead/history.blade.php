@@ -96,7 +96,7 @@ use App\Helpers\DateUtility;
                                 <?php d($history->recording_file_url); ?>
                                 @if($history->recording_file_url)
                                 <?php
-                                    $mime_type = get_mime_type_from_extension($history->recording_file);
+                                    $mime_type = get_mime_type_from_extension(pathinfo($history->recording_file, PATHINFO_EXTENSION));
                                 ?>
                                 <audio controls class="full-audio">
                                     <source src="{{ $history->recording_file_url }}" type="{{ $mime_type }}">
