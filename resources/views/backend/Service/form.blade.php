@@ -148,6 +148,36 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <?php
+                            $field = 'charge_fee';
+                            $label = get_value_from_list($field_labels, $field, $field);
+                            ?>
+                            <x-Inputs.text-field layout="horizontal" :id="$field" :name="$field" :label="$label"
+                                :value="$model->{$field}"                                 
+                                class="validate-float"
+                                placeholder="Enter {{ $label }}" />
+
+                            <?php
+                            $field = 'remarks';
+                            $label = get_value_from_list($field_labels, $field, $field);
+                            ?>
+                            <x-Inputs.text-area layout="horizontal" :id="$field" :name="$field" :label="$label"
+                                :value="$model->{$field}" 
+                                rows="3"
+                                placeholder="Enter {{ $label }}" />
+
+                            <div class="row mb-4">
+                                <div class="col-sm-3"></div>
+                                <div class="col-sm-3">
+                                    <?php
+                                    $field = 'is_fixed';
+                                    $label = get_value_from_list($field_labels, $field, $field);
+                                    ?>
+                                    <x-Inputs.checkbox :id="$field" :name="$field" :label="$label"
+                                        value="{{ $model->{$field} }}" />
+                                </div>
+                            </div>
                         </div>
 
                         <table class="table table-bordered order-column template-table mb-4"

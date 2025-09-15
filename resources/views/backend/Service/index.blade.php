@@ -14,8 +14,25 @@
                 <div class="card-body">
                     <form method="GET" class="summary_search" action="{{ route($routePrefix . '.index') }}">
                         <input type="hidden" name="is_sort_clear" value="1" />
+
                         <?php
                             $field = "ticket_no";
+                        ?>
+                        <input type="text"  name="{{ $field }}" value="{{ $search[$field] }}" />
+                       
+                        <?php
+                            $field = "contact_id";
+                        ?>
+                        <input type="text"  name="{{ $field }}" value="{{ $search[$field] }}" />
+                       
+                        <?php
+                            $field = "export_contact_id";
+                        ?>
+                        <input type="text"  name="{{ $field }}" value="{{ $search[$field] }}" />
+                       
+                       
+                        <?php
+                            $field = "is_fixed";
                         ?>
                         <input type="text"  name="{{ $field }}" value="{{ $search[$field] }}" />
                        

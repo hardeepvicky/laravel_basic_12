@@ -3,12 +3,16 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Exceptions\UserException;
+use App\Helpers\CsvUtility;
+use App\Helpers\DateUtility;
+use App\Helpers\FileUtility;
 use App\Helpers\LaravelExtend;
 use App\Models\AutoSerialPattern;
 use App\Models\FieldSetting;
 use App\Models\ProductSerial;
 use App\Models\Service;
 use App\Models\ServiceIssue;
+use App\Models\User;
 use App\Models\ViewContact;
 use App\Models\ViewExportContact;
 use Illuminate\Http\Request;
@@ -44,6 +48,9 @@ class ServiceController extends BackendController
         $conditions = $this->getConditions($cache_key, [
             ["field" => "id", "type" => "int", "cache" => false],
             ["field" => "ticket_no", "type" => "string"],
+            ["field" => "contact_id", "type" => "int"],
+            ["field" => "export_contact_id", "type" => "int"],
+            ["field" => "is_fixed", "type" => "int"],
         ]);
 
         $builder = $this->modelClass::where($conditions);
@@ -104,7 +111,7 @@ class ServiceController extends BackendController
 
         $product_serial_list = [];
 
-        foreach ($product_serials as $record) 
+        foreach ($product_serials as $record)
         {
             $display = $record->serial_no;
 
@@ -146,10 +153,13 @@ class ServiceController extends BackendController
     private function _common_validation_rules()
     {
         return [
-            "product_serial_id" => ["required"],            
+            "product_serial_id" => ["required"],
             "contact_type" => ["required"],
             "contact_id" => [],
-            "export_contact_id" => [],            
+            "export_contact_id" => [],
+            "charge_fee" => "",
+            "remarks" => "",
+            "is_fixed" => "",
             "service_issues" => [],
         ];
     }
@@ -349,19 +359,180 @@ class ServiceController extends BackendController
         }
     }
 
-    public function copy($id)
+    public function export_csv()
     {
-        $model = $this->model = $this->modelClass::with(["issueSolution"])->findOrFail($id);
+        $cache_key_prefix = Route::currentRouteName();
 
-        $this->beforeEdit($model);
+        $builder = $this->_getBuildeForIndex($cache_key_prefix);
 
-        $form = [
-            'url' => route($this->routePrefix . '.store', $id),
-            'method' => 'POST',
+        $this->beforeCsvExport($builder);
+
+        $builder->with([
+            "productSerial",
+            "productSerial.product",
+            "productSerial.maker",
+            "contact",
+            "exportContact",
+        ]);
+
+        $records = $builder->get();
+
+        foreach($records as $k => $record)
+        {
+            $record->afterFindForCsv();
+        }
+
+        $records = $records->toArray();
+
+        // d($records, true);
+
+        $csv_records = [];
+        $user_cache_list = User::getListCache();
+
+        $yes_no_list = laravel_constant('yes_no_list');
+
+        $contact_type_list = [
+            "sale" => "Sale Contact",
+            "export" => "Export Contact",
         ];
 
-        $this->setForView(compact("model", "form"));
+        $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
-        return $this->view("form");
+        foreach($records as $record)
+        {
+            $csv_records[] = [
+                'ID' => $record['id'],
+                $field_labels['ticket_no'] => $record['ticket_no'],
+                $field_labels['product_serial_id'] => "`" . $record['product_serial']['serial_no'] ?? "",
+                'Serial Manufacture Date Time' => $record['product_serial']['manufacture_date_time'] ?? "",
+                'Model Name' => $record['product_serial']['product']['model_name'] ?? "",
+                'Brand' => $record['product_serial']['maker']['name'] ?? "",
+                $field_labels['contact_type'] => get_value_from_list($contact_type_list, $record['contact_type']),
+                $field_labels['contact_id'] => $record['contact']['display_name'],
+                $field_labels['export_contact_id'] => $record['export_contact']['display_name'],
+                $field_labels['remarks'] => $record['remarks'] ?? "",
+                $field_labels['charge_fee'] => $record['charge_fee'] ?? "",
+                $field_labels['is_fixed'] => get_value_from_list($yes_no_list, $record['is_fixed']),
+
+                'Created' => if_date_time($record['created_at']),
+                'Created By' => $user_cache_list[$record['created_by']] ?? "",
+                'Updated' => if_date_time($record['updated_at']),
+                'Updated By' => $user_cache_list[$record['updated_by']] ?? "",
+            ];
+        }
+
+        // d($csv_records, true);
+
+        $this->saveSqlLog();
+
+        $path = laravel_constant('path.temp');
+        FileUtility::createFolder($path);
+
+        $current_dt = DateUtility::getDateObj(null);
+        $current_dt->setTimezone(DateUtility::$login_user_time_zone);
+        $datetime = DateUtility::getDate($current_dt, DateUtility::DATETIME_OUT_FORMAT_FILE);
+        $file_prefix = str_class_name_to_human_text($this->modelClass);
+        $file = $path . $file_prefix . "-$datetime.csv";
+
+        $csvUtility = new CsvUtility($file);
+        $csvUtility->write($csv_records);
+
+        download_start($file, "application/octet-stream");
+    }
+
+    public function export_detail_csv()
+    {
+        $cache_key_prefix = Route::currentRouteName();
+
+        $builder = $this->_getBuildeForIndex($cache_key_prefix);
+
+        $this->beforeCsvExport($builder);
+
+        $builder->with([
+            "productSerial",
+            "productSerial.product",
+            "productSerial.maker",
+            "contact",
+            "exportContact",
+            "serviceIssue",
+            "serviceIssue.issue",
+            "serviceIssue.issueSolution",
+        ]);
+
+        $records = $builder->get();
+
+        foreach($records as $k => $record)
+        {
+            $record->afterFindForCsv();
+        }
+
+        $records = $records->toArray();
+
+        // d($records, true);
+
+        $csv_records = [];
+        $user_cache_list = User::getListCache();
+
+        $yes_no_list = laravel_constant('yes_no_list');
+
+        $issue_type_list = Service::getTypeList();
+
+        $contact_type_list = [
+            "sale" => "Sale Contact",
+            "export" => "Export Contact",
+        ];
+
+        $field_labels = FieldSetting::getDynamicFields($this->modelClass);
+
+        $service_issue_field_labels = FieldSetting::getDynamicFields(ServiceIssue::class);
+
+        foreach($records as $record)
+        {
+            foreach($record['service_issue'] as $serviceIssue)
+            {
+                $csv_records[] = [
+                    'ID' => $record['id'],
+                    $field_labels['ticket_no'] => $record['ticket_no'],
+                    $field_labels['product_serial_id'] => "`" . $record['product_serial']['serial_no'] ?? "",
+                    'Serial Manufacture Date Time' => $record['product_serial']['manufacture_date_time'] ?? "",
+                    'Model Name' => $record['product_serial']['product']['model_name'] ?? "",
+                    'Brand' => $record['product_serial']['maker']['name'] ?? "",
+                    $field_labels['contact_type'] => get_value_from_list($contact_type_list, $record['contact_type']),
+                    $field_labels['contact_id'] => $record['contact']['display_name'],
+                    $field_labels['export_contact_id'] => $record['export_contact']['display_name'],
+                    $field_labels['remarks'] => $record['remarks'] ?? "",
+                    $field_labels['charge_fee'] => $record['charge_fee'] ?? "",
+                    $field_labels['is_fixed'] => get_value_from_list($yes_no_list, $record['is_fixed']),
+
+                    $service_issue_field_labels['issue_type'] => get_value_from_list($issue_type_list, $serviceIssue['issue_type']),
+                    $service_issue_field_labels['issue_id'] => $serviceIssue['issue']['name'] ?? $serviceIssue['issue'],
+                    $service_issue_field_labels['solution_type'] => get_value_from_list($issue_type_list, $serviceIssue['solution_type']),
+                    $service_issue_field_labels['issue_solution_id'] => $serviceIssue['issue_solution']['name'] ?? $serviceIssue['solution'],
+
+                    'Created' => if_date_time($serviceIssue['created_at']),
+                    'Created By' => $user_cache_list[$serviceIssue['created_by']] ?? "",
+                    'Updated' => if_date_time($serviceIssue['updated_at']),
+                    'Updated By' => $user_cache_list[$serviceIssue['updated_by']] ?? "",
+                ];
+            }
+        }
+
+        // d($csv_records, true);
+
+        $this->saveSqlLog();
+
+        $path = laravel_constant('path.temp');
+        FileUtility::createFolder($path);
+
+        $current_dt = DateUtility::getDateObj(null);
+        $current_dt->setTimezone(DateUtility::$login_user_time_zone);
+        $datetime = DateUtility::getDate($current_dt, DateUtility::DATETIME_OUT_FORMAT_FILE);
+        $file_prefix = str_class_name_to_human_text(ServiceIssue::class);
+        $file = $path . $file_prefix . "-$datetime.csv";
+
+        $csvUtility = new CsvUtility($file);
+        $csvUtility->write($csv_records);
+
+        download_start($file, "application/octet-stream");
     }
 }

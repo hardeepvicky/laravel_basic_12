@@ -1,6 +1,7 @@
 <div class="card" id="page-summary">
     <div class="card-header">
-        <x-Backend.pagination-links :records="$records" />
+        <a href="{{ route($routePrefix . '.export.csv') }}" class="btn btn-secondary">Export CSV</a>
+        <a href="{{ route($routePrefix . '.export.detail_csv') }}" class="btn btn-secondary">Export Detail CSV</a>
     </div>
 
     <div class="card-body p-1">
@@ -21,6 +22,35 @@
                                 </div>
                             </div>
                         </th>
+                        <th style="width:15%">
+                        <th style="width:8%">
+                        <th style="width:15%">
+                            <?php
+                            $field = 'contact_id';
+                            $label = get_value_from_list($field_labels, $field, $field);
+                            ?>
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$contact_list"
+                                class="select2 form-select-sm"
+                                />
+                        </th>
+                        <th style="width:15%">
+                            <?php
+                            $field = 'export_contact_id';
+                            $label = get_value_from_list($field_labels, $field, $field);
+                            ?>
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$export_contact_list"
+                                class="select2 form-select-sm"
+                                />
+                        </th>
+                        <th style="width:8%">
+                            <?php
+                            $field = 'is_fixed';
+                            $label = get_value_from_list($field_labels, $field, $field);
+                            ?>
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$yes_no_list"
+                                class="select2 form-select-sm"
+                                />
+                        </th>
                     </tr>
                     <tr class="border-bottom-primary">
                         <th>
@@ -31,6 +61,7 @@
                         <th><?= get_value_from_list($field_labels, 'contact_type', 'contact_type') ?></th>
                         <th><?= get_value_from_list($field_labels, 'contact_id', 'contact_id') ?></th>
                         <th><?= get_value_from_list($field_labels, 'export_contact_id', 'export_contact_id') ?></th>
+                        <th><?= get_value_from_list($field_labels, 'is_fixed', 'is_fixed') ?></th>
                         <th style="width:10%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
                         <th style="width:10%"><?= sortable_anchor('created_by', get_value_from_list($field_labels, 'created_by', 'created_by')) ?></th>
                         <th style="width:10%"><?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?></th>
@@ -50,7 +81,8 @@
                             <td>{{ get_value_from_list($product_serial_list, $record->product_serial_id) }}</td>
                             <td>{{ get_value_from_list($contact_type_list, $record->contact_type) }}</td>
                             <td>{{ $record->contact?->getDisplayName() }}</td>
-                            <td>{{ $record->exportContact?->getDisplayName() }}</td>                            
+                            <td>{{ $record->exportContact?->getDisplayName() }}</td>
+                            <td>{{ get_value_from_list($yes_no_list, $record->is_fixed) }}</td>
                             <td>
                                 <x-Backend.celec-date-time :value="$record->created_at" />
                             </td>
