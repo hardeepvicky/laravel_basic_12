@@ -157,7 +157,7 @@ class ServiceController extends BackendController
             "contact_type" => ["required"],
             "contact_id" => [],
             "export_contact_id" => [],
-            "charge_fee" => "",
+            "charge_fee" => ["required"],
             "remarks" => "",
             "is_fixed" => "",
             "service_issues" => [],
