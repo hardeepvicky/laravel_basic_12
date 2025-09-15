@@ -350,7 +350,13 @@
                 </div>
             </div>
 
-            <x-Backend.form-common-footer-buttons />
+            @if(request()->has('refer_from'))
+            <div class="form-buttons mb-4">
+                <button type="submit" class="btn btn-primary" name="save_and_close" value="1">Submit & Close</button>
+            </div>
+            @else
+                <x-Backend.form-common-footer-buttons />
+            @endif
         </div>
     </div>
     </form>

@@ -22,6 +22,7 @@ class AutoSerialPattern extends BaseModel
     public const TYPE_EXPORT_ORDER = "EXPORT_ORDER";
     public const TYPE_BIN_CODE = "BIN_CODE";
     public const TYPE_PAYMENT_VOUCHER = "PAYMENT_VOUCHER";
+    public const TYPE_SERVICE_TICKET = "SERVICE_TICKET";
 
     public function beforeSave()
     {
@@ -69,6 +70,7 @@ class AutoSerialPattern extends BaseModel
             self::TYPE_EXPORT_ORDER => "Export Order",
             self::TYPE_BIN_CODE => "Bin Code",
             self::TYPE_PAYMENT_VOUCHER => "Payment Voucher No.",
+            self::TYPE_SERVICE_TICKET => "Service Ticket No.",
         ];
     }
 

@@ -52,6 +52,7 @@ use App\Http\Controllers\Backend\PaymentController;
 use App\Http\Controllers\Backend\PermissionController;
 use App\Http\Controllers\Backend\ProductCategoryController;
 use App\Http\Controllers\Backend\ProductController;
+use App\Http\Controllers\Backend\ProductIssueController;
 use App\Http\Controllers\Backend\ProductSerialController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Backend\PublicController;
@@ -60,6 +61,7 @@ use App\Http\Controllers\Backend\RecurringTaskController;
 use App\Http\Controllers\Backend\RoleController;
 use App\Http\Controllers\Backend\SaleOrderController;
 use App\Http\Controllers\Backend\SampleController;
+use App\Http\Controllers\Backend\ServiceController;
 use App\Http\Controllers\Backend\SettingsController;
 use App\Http\Controllers\Backend\ShipOrderController;
 use App\Http\Controllers\Backend\SmsTemplateController;
@@ -1302,6 +1304,8 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
     Route::get($route_prefix . "-" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
     $name="ajax_get_unlinked_child_list";
     Route::get($route_prefix . "-" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
+    $name="ajax_get_list";
+    Route::get($route_prefix . "-" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
     Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
 
         $name = "ajax_update_field";
@@ -1696,6 +1700,43 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
         });
     });
 
+    $route_prefix = "product-issue";
+    $controllerClass = ProductIssueController::class;
+    Route::resource($route_prefix, $controllerClass);
+    $name="ajax_get_list";
+    Route::get($route_prefix . "-" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
+    $name="ajax_get_solution_list";
+    Route::get($route_prefix . "-" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
+        $name = "copy";
+        Route::get("{id}/" . $name, [$controllerClass, $name])->name($name);
+
+        $name = "activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "de_activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "ajax_update_field";
+        Route::post($name, [$controllerClass, $name])->name($name);
+    });
+
+
+    $route_prefix = "service";
+    $controllerClass = ServiceController::class;
+    Route::resource($route_prefix, $controllerClass);    
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
+        $route_prefix = "export";
+        Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+            $name = "csv";
+            Route::get($name, [$controllerClass, "export_" . $name])->name($name);
+
+            $name = "detail_csv";
+            Route::get($name, [$controllerClass, "export_" . $name])->name($name);
+        });
+    });
 
     Route::group(['prefix' => 'permissions', 'as' => 'permissions.'], function () {
 
