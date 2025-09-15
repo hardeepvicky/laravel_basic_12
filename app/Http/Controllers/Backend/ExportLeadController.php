@@ -269,12 +269,12 @@ class ExportLeadController extends BackendController
     private function _common_validation_rules()
     {
         return [
-            "name" => ["required"],
+            "name" => ["nullable"],
             "mobile" => ["required", new MobileNumber],
             "mobile2" => ["nullable", new MobileNumber],
             "country_id" => ["required"],
-            "state_id" => ["required"],
-            "city_id" => ["required"],
+            "state_id" => ["nullable"],
+            "city_id" => ["nullable"],
             "assign_to_user_id" => ["required"],
             "status_type" => ["required"],
             "company_name" => ["nullable"],
@@ -1536,8 +1536,8 @@ class ExportLeadController extends BackendController
                 $field_labels['deal_type'] => get_value_from_list($type_group_list['deal_type'], $record['deal_type']),
                 $field_labels['dealer_id'] => $record['dealer']['name'] ?? "",
                 $field_labels['campaign_id'] => $record['campaign']['name'] ?? "",
+                $field_labels['country_id'] => $record['country']['name'] ?? "",
                 $field_labels['state_id'] => $record['state']['name'] ?? "",
-                $field_labels['district_id'] => $record['district']['name'] ?? "",
                 $field_labels['city_id'] => $record['city']['name'] ?? "",
                 $field_labels['next_followup_date_time'] => $record['next_followup_date_time'] ? if_date_time($record['next_followup_date_time']) : "",
                 $field_labels['company_name'] => $record['company_name'] ?? "",
