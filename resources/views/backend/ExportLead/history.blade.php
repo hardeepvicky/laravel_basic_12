@@ -100,7 +100,6 @@ use App\Helpers\DateUtility;
                                     <source src="{{ $history->recording_file_url }}" type="{{ $mime_type }}">
                                     Your browser does not support the audio element.
                                 </audio>
-                                @endif
                             </td>
                             <td>
                                 <div class="more-less-text">{{ $history->remarks }}</div>
@@ -112,7 +111,7 @@ use App\Helpers\DateUtility;
                                 {{ get_value_from_list($userListCache, $history->assign_to_user_id) }}
                             </td>
                             <td>
-                                <x-Backend.celec-date-time :value="$history->next_followup_date_time" :utcDate="$history->next_followup_date_time_original" :timezone="$record->state->timezone"/>
+                                <x-Backend.celec-date-time :value="$history->next_followup_date_time" :utcDate="$history->next_followup_date_time_original" :timezone="$record->state?->timezone"/>
                             </td>
                         </tr>
 
@@ -850,7 +849,7 @@ use App\Helpers\DateUtility;
                         const selectedDate = selectedDates[0];
                         if (selectedDate) 
                         {
-                            get_other_country_date_time(selectedDate, '{{ $record->state->timezone }}', function(new_dt){
+                            get_other_country_date_time(selectedDate, '{{ $record->state?->timezone }}', function(new_dt){
                                 $("#other_country_time").html(new_dt);
                             });
                         }
