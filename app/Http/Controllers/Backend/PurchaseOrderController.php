@@ -329,6 +329,8 @@ class PurchaseOrderController extends BackendController
                 {
                     $requirement->status = Requirement::STATUS_PO_CREATED;
                     $requirement->save();
+
+                    $this->model->requirements()->sync($requirement);
                 }
             }
         }

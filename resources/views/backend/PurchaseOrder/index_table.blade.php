@@ -96,7 +96,7 @@ $formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, 0);
                                 <x-Backend.celec-summary-table-first-column :record="$record" :routePrefix="$routePrefix" buttons="copy,edit,delete,tr_details">
                                     <div class="label">
                                         {{ $record->order_no }}
-                                        | <a class="btn btn-sm btn-secondary" href="{{ route('payment.create', ["purchase_order_id" => $record->id]) }}">Pay Now</a>
+                                        | <a class="btn btn-sm btn-secondary" href="{{ route('purchase-order-payment.create', ["purchase_order_id" => $record->id]) }}">Pay Now</a>
                                     </div>
                                 </x-Backend.celec-summary-table-first-column>
                             </th>

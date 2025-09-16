@@ -56,6 +56,7 @@ use App\Http\Controllers\Backend\ProductSerialController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Backend\PublicController;
 use App\Http\Controllers\Backend\PurchaseOrderController;
+use App\Http\Controllers\Backend\PurchaseOrderPaymentController;
 use App\Http\Controllers\Backend\RecordHistoryController;
 use App\Http\Controllers\Backend\RecurringTaskController;
 use App\Http\Controllers\Backend\RequirementController;
@@ -1766,6 +1767,9 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
 
         $name="create_from_requirements";
         Route::post($name, [$controllerClass, $name])->name($name);
+
+        $name = "ajax_get_pending_payable_amount";
+        Route::get($name . "/{id}/{payment_id?}", [$controllerClass, $name])->name($name);
         
         $route_prefix = "export";
         Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
@@ -1773,6 +1777,21 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
             Route::get($name, [$controllerClass, "export_" . $name])->name($name);
 
             $name = "item_csv";
+            Route::get($name, [$controllerClass, "export_" . $name])->name($name);
+        });
+    });
+
+    $route_prefix = "purchase-order-payment";
+    $controllerClass = PurchaseOrderPaymentController::class;
+    Route::resource($route_prefix, $controllerClass);    
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
+        $name = "ajax_update_field";
+        Route::post($name, [$controllerClass, $name])->name($name);
+
+        $route_prefix = "export";
+        Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+            $name = "csv";
             Route::get($name, [$controllerClass, "export_" . $name])->name($name);
         });
     });

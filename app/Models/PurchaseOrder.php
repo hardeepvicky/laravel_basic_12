@@ -14,6 +14,9 @@ class PurchaseOrder extends BaseModel
 
     protected $casts = [
     ];
+    
+    protected static array $list_fields = ["id", "order_no"];
+
 
     protected static array $unique_fields = [];
 
@@ -21,6 +24,14 @@ class PurchaseOrder extends BaseModel
         PurchaseOrderItem::class => [
             "foreignKey" => ["purchase_order_id"],
             "preventDelete" => false
+        ],
+        PurchaseOrderRequirement::class => [
+            "foreignKey" => ["purchase_order_id"],
+            "preventDelete" => false
+        ],
+        PurchaseOrderPayment::class => [
+            "foreignKey" => ["purchase_order_id"],
+            "preventDelete" => true
         ],
     ];
 
@@ -57,6 +68,16 @@ class PurchaseOrder extends BaseModel
     public function party()
     {
         return $this->belongsTo(Party::class);
+    }
+
+    public function requirements()
+    {
+        return $this->belongsToMany(Requirement::class, PurchaseOrderRequirement::class);
+    }
+
+    public function payment()
+    {
+        return $this->hasMany(PurchaseOrderPayment::class, 'purchase_order_id');
     }
 
     public function getUniqueValidationRules(Request $request)
