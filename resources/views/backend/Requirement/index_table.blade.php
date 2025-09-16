@@ -1,5 +1,5 @@
 <?php
-use App\Models\SaleOrder;
+use App\Models\Requirement;
 $formatter = new NumberFormatter('en_IN', NumberFormatter::CURRENCY);
 $formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, 0);
 ?>
@@ -97,7 +97,7 @@ $formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, 0);
                     <tr class="border-bottom-primary">
                         <th>
                             <label class="form-check custom-checkbox-group">
-                                <input type="checkbox" class="form-check-input chk-select-all" data-sr-chkselect-children="input.sale_order">
+                                <input type="checkbox" class="form-check-input chk-select-all" data-sr-chkselect-children="input.requirement">
                             </label>
                             <?= sortable_anchor('id', get_value_from_list($field_labels, 'id', 'id')) ?>
                             |
@@ -135,6 +135,10 @@ $formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, 0);
                                 <x-Backend.celec-summary-table-first-column :record="$record" :routePrefix="$routePrefix" buttons="edit,copy,delete">
                                     <div class="label">
                                         <label class="form-check custom-checkbox-group">
+                                            @if($record->status == Requirement::STATUS_PENDING)
+                                                <input type="checkbox" class="form-check-input requirement" value={{ $record->id }}>
+                                            @endif
+
                                             {{ $record->order_no }}
                                         </label>
                                     </div>
@@ -182,6 +186,13 @@ $formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, 0);
                         </tr>
                     @endforeach
                 </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="2">
+                            <span id="create_purchase_order" class="btn btn-secondary btn-sm mb-1">Create Purchase Order</span>
+                        </td>
+                    </tr>
+                </tfoot>
             </table>
         </div>
     </div>
@@ -190,8 +201,44 @@ $formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, 0);
     </div>
 </div>
 
+
 <script>
     $(function(){
+        $("#create_purchase_order").click(function(){
+            var id_list = [];
 
+            $("input.requirement:checked").each(function(){
+                var v = $(this).val();
+
+                id_list.push(v);
+            });
+
+            if (id_list.length <= 0)
+            {
+                $.events.onUserError("Please Select at least one Requirement");
+                return false;
+            }
+
+            var params = [
+                {
+                    name : "_token",
+                    value : '{{ csrf_token() }}'
+                },
+                {
+                    name : "_method",
+                    value : 'POST'
+                },
+            ];
+
+            for(var i in id_list)
+            {
+                params.push({
+                    name : "requirement_ids[]",
+                    value : id_list[i]
+                });
+            }
+
+            add_form_to_body_and_submit("post", "/purchase-order/create_from_requirements", params);
+        });
     });
 </script>

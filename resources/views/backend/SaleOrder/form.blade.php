@@ -312,7 +312,7 @@
                                                     $value = $child_arr[$field] ?? '';
                                                     ?>
                                                     <x-Inputs.text-field name="sale_order_products[{{ $k }}][{{ $field }}]" class="{{ $field }}"
-                                                        :label="$false" />
+                                                        :label="$false" :value="$value"/>
                                                 </td>
                                             </tr>
                                         @endforeach
@@ -578,7 +578,7 @@
                 $("input.total_amount").val(total_amount);
                 $("span.total_amount").html(currency_formatter.format(total_amount));
 
-                var advance = $("#advance_amount").val();
+                var advance_amount = $("#advance_amount").val();
                 advance_amount = advance_amount ? parseFloat(advance_amount) : 0;
 
                 var balance = total_amount - advance_amount;
@@ -591,9 +591,7 @@
                 cal_amount($(this).closest("tr"));
             });
 
-            $(document).on("input keyup", "#discount_per", function(){
-                cal_grand_amount();
-            });
+            $(document).on("input keyup", "#advance_amount", cal_grand_amount);
 
             function load_contact_list()
             {
