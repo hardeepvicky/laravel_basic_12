@@ -37,7 +37,6 @@ use App\Http\Controllers\Backend\ExportCustomerController;
 use App\Http\Controllers\Backend\ExportDealerController;
 use App\Http\Controllers\Backend\ExportLeadController;
 use App\Http\Controllers\Backend\ExportOrderController;
-use App\Http\Controllers\Backend\ExportPartyController;
 use App\Http\Controllers\Backend\ExportPaymentController;
 use App\Http\Controllers\Backend\ExportStateController;
 use App\Http\Controllers\Backend\HolidayController;
@@ -58,6 +57,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Backend\PublicController;
 use App\Http\Controllers\Backend\RecordHistoryController;
 use App\Http\Controllers\Backend\RecurringTaskController;
+use App\Http\Controllers\Backend\RequirementController;
 use App\Http\Controllers\Backend\RoleController;
 use App\Http\Controllers\Backend\SaleOrderController;
 use App\Http\Controllers\Backend\SampleController;
@@ -1734,6 +1734,21 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
             Route::get($name, [$controllerClass, "export_" . $name])->name($name);
 
             $name = "detail_csv";
+            Route::get($name, [$controllerClass, "export_" . $name])->name($name);
+        });
+    });
+
+    $route_prefix = "store-requirement";
+    $controllerClass = RequirementController::class;
+    Route::resource($route_prefix, $controllerClass);    
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
+        $name = "copy";
+        Route::get("{id}/" . $name, [$controllerClass, $name])->name($name);
+        
+        $route_prefix = "export";
+        Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+            $name = "csv";
             Route::get($name, [$controllerClass, "export_" . $name])->name($name);
         });
     });
