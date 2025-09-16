@@ -40,6 +40,40 @@
                                 placeholder="Enter {{ $label }}"
                                 autocomplete="off"
                                 mandatory="true" />
+                            
+                            <?php
+                            $field = 'name';
+                            $label = get_value_from_list($field_labels, $field, $field);
+                            ?>
+                            <x-Inputs.text-field :name="$field" :label="$label"
+                                :value="$model->{$field}"
+                                layout="horizontal"
+                                placeholder="Enter {{ $label }}"
+                                />
+                            
+                            <?php
+                            $field = 'state_id';
+                            $label = get_value_from_list($field_labels, $field, $field);
+                            ?>
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
+                                :list="$state_list"
+                                :value="$model->{$field}"
+                                layout="horizontal"
+                                class="select2"
+                                data-sr-cascade-target="#city_id"
+                                data-sr-cascade-url="/city/ajax_get_list_with_district/{v}"
+                                />
+
+                            <?php
+                            $field = 'city_id';
+                            $label = get_value_from_list($field_labels, $field, $field);
+                            ?>
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
+                                :list="$district_city_list"
+                                :value="$model->{$field}"
+                                layout="horizontal"
+                                class="select2"
+                                />
 
                             <?php
                             $field = 'mobile2';
@@ -53,17 +87,6 @@
                             />
 
                             <?php
-                            $field = 'name';
-                            $label = get_value_from_list($field_labels, $field, $field);
-                            ?>
-                            <x-Inputs.text-field :name="$field" :label="$label"
-                                :value="$model->{$field}"
-                                layout="horizontal"
-                                placeholder="Enter {{ $label }}"
-                                mandatory="true"
-                                />
-
-                            <?php
                             $field = 'email';
                             $label = get_value_from_list($field_labels, $field, $field);
                             ?>
@@ -75,31 +98,6 @@
                             />
 
                             <?php
-                            $field = 'state_id';
-                            $label = get_value_from_list($field_labels, $field, $field);
-                            ?>
-                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
-                                :list="$state_list"
-                                :value="$model->{$field}"
-                                layout="horizontal"
-                                class="select2"
-                                data-sr-cascade-target="#city_id"
-                                data-sr-cascade-url="/city/ajax_get_list_with_district/{v}"
-                                mandatory="true"
-                                />
-
-                            <?php
-                            $field = 'city_id';
-                            $label = get_value_from_list($field_labels, $field, $field);
-                            ?>
-                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
-                                :list="$district_city_list"
-                                :value="$model->{$field}"
-                                layout="horizontal"
-                                class="select2"
-                                mandatory="true" />
-
-                            <?php
                             $field = 'assign_to_user_id';
                             $label = get_value_from_list($field_labels, $field, $field);
                             ?>
@@ -107,7 +105,7 @@
                                 :list="$user_list" :value="$model->{$field}"
                                 layout="horizontal"
                                 class="select2"
-                                mandatory="true" />
+                                />
 
                             <?php
                             $field = 'status_type';
@@ -127,7 +125,7 @@
                                 :list="$deal_type_list" :value="$model->{$field}"
                                 layout="horizontal"
                                 class="select2"
-                                mandatory="true"/>
+                                />
 
 
                             <?php

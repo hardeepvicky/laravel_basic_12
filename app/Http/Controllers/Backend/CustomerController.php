@@ -281,17 +281,17 @@ class CustomerController extends BackendController
     private function _common_validation_rules()
     {
         return [
-            "name" => ["required"],
             "mobile" => ["required", new MobileNumber],
+            "name" => ["nullable"],
             "mobile2" => ["nullable", new MobileNumber],
-            "state_id" => ["required"],
-            "city_id" => ["required"],
-            "assign_to_user_id" => ["required"],
+            "state_id" => ["nullable"],
+            "city_id" => ["nullable"],
+            "assign_to_user_id" => ["nullable"],
             "status_type" => ["required"],
             "company_name" => ["nullable"],
             "brand_name" => ["nullable"],
             "company_gst_no" => ["nullable"],
-            "deal_type" => ["required"],
+            "deal_type" => ["nullable"],
             "dealer_id" => [],
             "payment_method_type" => ["nullable"],
             "profile_img" => ["nullable"],
@@ -330,6 +330,14 @@ class CustomerController extends BackendController
             unset($save_data['leadFile']);
             unset($save_data['addresses']);
             unset($save_data['products']);
+
+            if (empty($save_data['name']))
+            {
+                $save_data['name'] = "Unknown";
+            }
+
+            $lead = Lead::create($save_data);
+            $save_data['lead_id'] = $lead->id;
 
             $this->model = $this->modelClass::create($save_data);
 
