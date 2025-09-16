@@ -11,7 +11,7 @@
         <?php endif; ?>
 
         <?php if (isset($page_header_links) && is_array($page_header_links)) : ?>
-            <div style="padding:5px;">
+            <div style="padding:5px; margin-left:20px;">
                 <?php
                 foreach ($page_header_links as $k => $link):
                     if (!is_array($link)) {
