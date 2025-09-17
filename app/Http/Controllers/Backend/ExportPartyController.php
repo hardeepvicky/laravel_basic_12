@@ -247,6 +247,7 @@ class ExportPartyController extends BackendController
         DB::beginTransaction();
 
         try {
+            $validatedData['assign_to_user_id'] = LaravelExtend::getAuthUserId();
             $this->model = $this->modelClass::create($validatedData);
 
             $this->_saveOthers($validatedData);

@@ -379,6 +379,8 @@ class ExportContactController extends BackendController
             unset($save_data['type']);
             unset($save_data['addresses']);
 
+            $save_data['assign_to_user_id'] = LaravelExtend::getAuthUserId();
+
             $this->model = $model_class::create($save_data);
 
             switch($request->get('type'))

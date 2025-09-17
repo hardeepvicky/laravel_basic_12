@@ -324,6 +324,8 @@ class ExportLeadController extends BackendController
             unset($save_data['addresses']);
             unset($save_data['products']);
 
+            $save_data['assign_to_user_id'] = LaravelExtend::getAuthUserId();
+            
             $this->model = $this->modelClass::create($save_data);
 
             $this->_saveOthers($validatedData);

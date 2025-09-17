@@ -344,6 +344,8 @@ class LeadController extends BackendController
             unset($save_data['addresses']);
             unset($save_data['products']);
 
+            $save_data['assign_to_user_id'] = LaravelExtend::getAuthUserId();
+
             $this->model = $this->modelClass::create($save_data);
 
             $this->_saveOthers($validatedData);
@@ -1751,19 +1753,20 @@ class LeadController extends BackendController
                     $row = [];
 
                     $row['display'] = $record->getDisplayName();
-
-                    $routePrefix = "lead";
+                    
                     if ($record->is_customer)
                     {   
-                        $row['display'] .= " (Customer)";
-                        $routePrefix = "customer";
+                        $row['display'] .= " (Customer)";                        
+                        $row['url'] = route("customer.edit", [$record->customer->id]);
                     }
                     else
                     {
                         $row['display'] .= " (Lead)";
+                        $routePrefix = "lead";
+                        $row['url'] = route("lead.edit", [$record->id]);
                     }
 
-                    $row['url'] = route($routePrefix . ".edit", [$record]);
+                    
 
                     $response['data'][] = $row;
                 }
