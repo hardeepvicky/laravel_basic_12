@@ -11,18 +11,15 @@ use App\Helpers\LaravelExtend;
 use App\Helpers\Util;
 use App\Models\AutoSerialPattern;
 use App\Models\Branch;
-use App\Models\ExportOrderProduct;
 use App\Models\FieldSetting;
 use App\Models\Item;
 use App\Models\Maker;
 use App\Models\Party;
 use App\Models\ProductCategory;
-use App\Models\ProductSerial;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderItem;
+use App\Models\PurchaseOrderReceiveItem;
 use App\Models\Requirement;
-use App\Models\SqlLog;
-use App\Models\Type;
 use App\Models\User;
 use App\Models\ViewContact;
 use Illuminate\Http\Request;
@@ -50,6 +47,7 @@ class PurchaseOrderController extends BackendController
             "purchaseOrderItem.item.category",
             "purchaseOrderItem.item.category.uom",
             "purchaseOrderItem.make",
+            "purchaseOrderItem.purchaseOrderReceiveItem",
         ]);
 
         $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
@@ -466,10 +464,7 @@ class PurchaseOrderController extends BackendController
 
         $this->beforeCsvExport($builder);
 
-        $builder->with([
-            "branch",
-            "contact"
-        ]);
+        $builder->with(["payment"]);
 
         $records = $builder->get();
 
@@ -479,47 +474,34 @@ class PurchaseOrderController extends BackendController
 
         $records = $records->toArray();
 
-        d($records, true);
+        // d($records, true);
 
         $csv_records = [];
         $user_cache_list = User::getListCache();
 
-        $yes_no_list = laravel_constant('yes_no_list');
-
-        $order_from_type_list = SaleOrder::getOrderFromTypeList();
-
-        $type_conditions = [
-            'type' => Type::getType($this->model, "status")
-        ];
-        if ($this->model->status)
-        {
-            $type_id_list = Type::getIdFromCode($this->model, $this->model->status);
-
-            if ($type_id_list)
-            {
-                $type_conditions['or_id'] = $type_id_list;
-            }
-        }
-        $status_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
+        $status_list = PurchaseOrder::getStatusTypeList();
 
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
         foreach ($records as $record) {
 
+            $paid_amount = 0;
+
+            foreach($record['payment'] as $payment)
+            {
+                $paid_amount += $payment['amount'];
+            }
+
             $csv_records[] = [
                 'ID' => $record['id'],
                 $field_labels['order_no'] => $record['order_no'] ?? "",
-                $field_labels['party_order_ref_no'] => $record['party_order_ref_no'] ?? "",
                 $field_labels['branch_id'] => $record['branch']['display_name'] ?? "",
-                $field_labels['order_from_type'] => get_value_from_list($order_from_type_list, $record['order_from_type']),
-                $field_labels['contact_id'] => $record['contact']['name'] ?? "",
-                $field_labels['status'] => get_value_from_list($status_list, $record['status']),
-                $field_labels['estimated_dispatch_date'] => $record['estimated_dispatch_date'] ?? "",
+                $field_labels['party_id'] => $record['party']['display_name'] ?? "",
+                $field_labels['status'] => get_value_from_list($status_list, $record['status']),                
                 $field_labels['total_amount'] => $record['total_amount'] ?? "",
-                $field_labels['discount_per'] => $record['discount_per'] ?? "",
-                $field_labels['discount'] => $record['discount'] ?? "",
-                $field_labels['payable_amount'] => $record['payable_amount'] ?? "",
-                $field_labels['paid_amount'] => $record['paid_amount'] ?? "",
+                $field_labels['advance_amount'] => $record['advance_amount'] ?? "",
+                "Paid Amount" => $paid_amount,
+                "Balance" => $record['total_amount'] - $record['advance_amount'] - $paid_amount,
                 $field_labels['remarks'] => $record['remarks'] ?? "",
 
                 'Created' => if_date_time($record['created_at']),
@@ -548,7 +530,7 @@ class PurchaseOrderController extends BackendController
         download_start($file, "application/octet-stream");
     }
 
-    public function export_product_csv()
+    public function export_item_csv()
     {
         $cache_key_prefix = Route::currentRouteName();
 
@@ -557,13 +539,10 @@ class PurchaseOrderController extends BackendController
         $this->beforeCsvExport($builder);
 
         $builder->with([
-            "branch",
-            "contact",
-            "saleOrderProduct" => function($q){
-                $q->orderBy("display_order");
-            },
-            "saleOrderProduct.product",
-            "saleOrderProduct.make",
+            "purchaseOrderItem.item",
+            "purchaseOrderItem.item.category",
+            "purchaseOrderItem.item.category.uom",
+            "purchaseOrderItem.make",
         ]);
 
         $records = $builder->get();
@@ -581,53 +560,39 @@ class PurchaseOrderController extends BackendController
 
         $yes_no_list = laravel_constant('yes_no_list');
 
-        $order_from_type_list = SaleOrder::getOrderFromTypeList();
-
-        $type_conditions = [
-            'type' => Type::getType($this->model, "status")
-        ];
-        if ($this->model->status)
-        {
-            $type_id_list = Type::getIdFromCode($this->model, $this->model->status);
-
-            if ($type_id_list)
-            {
-                $type_conditions['or_id'] = $type_id_list;
-            }
-        }
-        $status_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
+        $status_list = PurchaseOrder::getStatusTypeList();
 
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
-        $purchase_order_item_field_labels = FieldSetting::getDynamicFields(SaleOrderProduct::class);
+        $purchase_order_item_field_labels = FieldSetting::getDynamicFields(PurchaseOrderItem::class);
 
         foreach ($records as $record) {
 
-            foreach($record['sale_order_product'] as $saleOrderProduct)
+            foreach($record['purchase_order_item'] as $purchaseOrderItem)
             {
                 $csv_records[] = [
                     'ID' => $record['id'],
                     $field_labels['order_no'] => $record['order_no'] ?? "",
-                    $field_labels['party_order_ref_no'] => $record['party_order_ref_no'] ?? "",
                     $field_labels['branch_id'] => $record['branch']['display_name'] ?? "",
-                    $field_labels['order_from_type'] => get_value_from_list($order_from_type_list, $record['order_from_type']),
-                    $field_labels['contact_id'] => $record['contact']['name'] ?? "",
+                    $field_labels['party_id'] => $record['party']['display_name'] ?? "",
                     $field_labels['status'] => get_value_from_list($status_list, $record['status']),
 
-                    $purchase_order_item_field_labels['product_id'] => $saleOrderProduct['product']['display_name'] ?? "",
-                    $purchase_order_item_field_labels['make_id'] => $saleOrderProduct['make']['display_name'] ?? "",
-                    $purchase_order_item_field_labels['order_qty'] => $saleOrderProduct['order_qty'] ?? "",
-                    $purchase_order_item_field_labels['rate'] => $saleOrderProduct['rate'] ?? "",
-                    $purchase_order_item_field_labels['amount'] => $saleOrderProduct['amount'] ?? "",
-                    $purchase_order_item_field_labels['available_qty'] => $saleOrderProduct['available_qty'] ?? "",
-                    $purchase_order_item_field_labels['qty_to_manufacture'] => $saleOrderProduct['qty_to_manufacture'] ?? "",
-                    $purchase_order_item_field_labels['sent_qty'] => $saleOrderProduct['sent_qty'] ?? "",
-                    $purchase_order_item_field_labels['remarks'] => $saleOrderProduct['remarks'] ?? "",
+                    'Item Category'  => $purchaseOrderItem['item']['category']['name'] ?? "",
+                    $purchase_order_item_field_labels['item_id'] => $purchaseOrderItem['item']['name'] ?? "",
+                    'Item Sku' => $purchaseOrderItem['item']['sku'] ?? "",
+                    $purchase_order_item_field_labels['make_id'] => $purchaseOrderItem['make']['display_name'] ?? "",
+                    $purchase_order_item_field_labels['part_no'] => $purchaseOrderItem['part_no'] ?? "",
+                    $purchase_order_item_field_labels['qty'] => $purchaseOrderItem['qty'] ?? "",
+                    $purchase_order_item_field_labels['receive_qty'] => $purchaseOrderItem['receive_qty'] ?? "",
+                    $purchase_order_item_field_labels['uom_id'] => $purchaseOrderItem['item']['category']['uom']['display_name'] ?? "",
+                    $purchase_order_item_field_labels['rate'] => $purchaseOrderItem['rate'] ?? "",
+                    $purchase_order_item_field_labels['amount'] => $purchaseOrderItem['amount'] ?? "",
+                    $purchase_order_item_field_labels['remarks'] => $purchaseOrderItem['remarks'] ?? "",
 
-                    'Created' => if_date_time($saleOrderProduct['created_at']),
-                    'Created By' => $user_cache_list[$saleOrderProduct['created_by']] ?? "",
-                    'Updated' => if_date_time($saleOrderProduct['updated_at']),
-                    'Updated By' => $user_cache_list[$saleOrderProduct['updated_by']] ?? "",
+                    'Created' => if_date_time($purchaseOrderItem['created_at']),
+                    'Created By' => $user_cache_list[$purchaseOrderItem['created_by']] ?? "",
+                    'Updated' => if_date_time($purchaseOrderItem['updated_at']),
+                    'Updated By' => $user_cache_list[$purchaseOrderItem['updated_by']] ?? "",
                 ];
             }
         }
@@ -642,7 +607,7 @@ class PurchaseOrderController extends BackendController
         $current_dt = DateUtility::getDateObj(null);
         $current_dt->setTimezone(DateUtility::$login_user_time_zone);
         $datetime = DateUtility::getDate($current_dt, DateUtility::DATETIME_OUT_FORMAT_FILE);
-        $file_prefix = str_class_name_to_human_text(SaleOrderProduct::class);
+        $file_prefix = str_class_name_to_human_text(PurchaseOrderItem::class);
         $file = $path . $file_prefix . "-$datetime.csv";
 
         $csvUtility = new CsvUtility($file);
@@ -677,117 +642,6 @@ class PurchaseOrderController extends BackendController
         return $this->responseJson($response);
     }
 
-    public function ajax_get_unlinked_list()
-    {
-        $response = ["status" => 1];
-
-        try {
-
-            $pattern_array = [
-                ["field" => "id", "type" => "int"],
-                ["field" => "product_id", "type" => "int"],
-                ["field" => "make_id", "type" => "int"],
-                ["field" => "for", "type" => ""],
-            ];
-
-            $condition_list = $this->getConditions(null, $pattern_array, true);
-
-            if (empty($condition_list)) {
-                throw new UserException("No any condition applied");
-            }
-
-            $qb = SaleOrderProduct::where("product_id", $condition_list['product_id']);
-
-            if (isset($condition_list['for']) && $condition_list['for'] == "ProductSerial")
-            {
-                $qb->where(function ($q) use ($condition_list) {
-
-                    $exist_sale_order_products_id_list = ProductSerial::whereNotNull('sale_order_product_id')->pluck("sale_order_product_id")->toArray();
-
-                    if ($exist_sale_order_products_id_list)
-                    {
-                        $q->whereNotIn('id', $exist_sale_order_products_id_list);
-                    }
-
-                    if (isset($condition_list['id']) && $condition_list['id']) {
-                        $q->orWhere("id", $condition_list['id']);
-                    }
-                });
-            }
-
-            $qb->with([
-                "saleOrder"
-            ]);
-
-            SqlLog::addSelectQuery($qb);
-
-            $records = $qb->get();
-
-            $response['data'] = [];
-
-            foreach ($records as $record) {
-                $row = [
-                    "id" => $record->id,
-                    "name" => $record->saleOrder->getDisplayName(),
-                ];
-
-                $response['data'][] = $row;
-            }
-        } catch (Exception $ex) {
-            $response['status'] = 0;
-            $response['msg'] = $ex->getMessage();
-        }
-
-        return $this->responseJson($response);
-    }
-
-    public function ajax_get_available_qty_and_qty_to_manufacture($product_id, $make_id, $order_qty, $sale_order_id = 0)
-    {
-        $response = ["status" => 1, "available_qty" => 0, "qty_to_manufacture" => 0];
-
-        $qb = StockProduct::where("make_id", $make_id)->where("product_id", $product_id);
-        $models = $qb->get();
-
-        if ($models)
-        {
-            foreach($models as $model)
-            {
-                $response['available_qty'] += $model->getAvialiableQty();
-            }
-
-            $builder = SaleOrderProduct::where("product_id", $product_id)->where("make_id", $make_id);
-
-            if ($sale_order_id)
-            {
-                $builder->whereNot("sale_order_id", $sale_order_id);
-            }
-
-            $so_order_qty = $builder->sum("order_qty");
-
-            $eo_order_qty = ExportOrderProduct::where("product_id", $product_id)->where("make_id", $make_id)->sum("order_qty");
-
-            $response['available_qty'] -= ($so_order_qty + $eo_order_qty);
-
-            if ($response['available_qty'] < 0)
-            {
-                $response['available_qty'] = 0;
-            }
-
-            $left_qty = $response['available_qty'] - $order_qty;
-
-            if ($left_qty < 0)
-            {
-                $response['qty_to_manufacture'] = abs($left_qty);
-            }
-        }
-        else
-        {
-            $response['qty_to_manufacture'] = $order_qty;
-        }
-
-        return $this->responseJson($response);
-    }
-
     public function ajax_get_pending_payable_amount($id, $payment_id = 0)
     {
         $response = ["status" => "1", "pending_amount" => 0];
@@ -806,5 +660,100 @@ class PurchaseOrderController extends BackendController
         $response['pending_amount'] = $so->total_amount - $so->advance_amount - $payment_sum;
 
         return $this->responseJson($response);
+    }
+
+    public function approve($id)
+    {
+        $this->model = $this->modelClass::findOrFail($id);
+
+        $this->model->status = PurchaseOrder::STATUS_APPROVE;
+        $this->model->save();
+
+        return back()->with("success", $this->model->getDisplayName() . " approved successfully");
+    }
+
+
+    public function decline($id)
+    {
+        $this->model = $this->modelClass::findOrFail($id);
+
+        $this->model->status = PurchaseOrder::STATUS_DECLINE;
+        $this->model->save();
+
+        return back()->with("success", $this->model->getDisplayName() . " declined successfully");
+    }
+
+    public function receive_items($id, Request $request)
+    {
+        $model = $this->model = $this->modelClass::with([
+            "purchaseOrderItem.item",
+            "purchaseOrderItem.item.category",
+            "purchaseOrderItem.item.category.uom",
+            "purchaseOrderItem.make",            
+        ])->findOrFail($id);
+
+        if ($request->isMethod("post"))
+        {
+            // dd($request->all());
+            
+            $rules = [
+                "purchase_order_receive_items.*.purchase_order_item_id" => ["required"],
+                "purchase_order_receive_items.*.receive_qty" => ["required"],
+                "purchase_order_receive_items.*.remarks" => ["nullable"],
+            ];
+            
+            $validatedData = $request->validate($rules);
+
+            DB::beginTransaction();
+
+            $count = 0;
+
+            foreach($validatedData['purchase_order_receive_items'] as $record)
+            {
+                // dd($record);
+                $child_model = PurchaseOrderReceiveItem::create($record);
+
+                if ($child_model)
+                {
+                    $count++;
+                }
+            }
+
+            DB::commit();
+
+            return redirect()->route($this->routePrefix . ".index")->with("success", "Purchase Order's $count items received successfully");
+        }
+
+        $form = [
+            'url' => route(Route::currentRouteName(), [$id]),
+            'method' => 'POST',
+        ];
+
+        $this->setForView(compact("model", "form"));
+
+        return $this->view(__FUNCTION__);
+    }
+
+    public function purchase_order_receive_item_destroy($id, Request $request)
+    {
+        $model = PurchaseOrderReceiveItem::findOrFail($id);
+
+        try {
+            $this->beforeDelete($model);
+
+            if (!$this->delete($model)) {
+                throw new Exception("Fail to Delete");
+            }
+
+            return $this->afterDestroy($model);
+        } catch (\Exception $ex) {
+            if ($request->ajax()) {
+                return $this->responseJson(['status' => 0, 'msg' => $ex->getMessage()]);
+            }
+
+            $this->saveSqlLog();
+
+            return back()->with('fail', $ex->getMessage());
+        }
     }
 }

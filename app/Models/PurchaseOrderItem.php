@@ -6,7 +6,11 @@ class PurchaseOrderItem extends BaseModel
 {
     protected static Array $unique_fields = ["purchase_order_id", "item_id", "make_id"];
 
-    public static array $child_model_class = [        
+    public static array $child_model_class = [
+        PurchaseOrderReceiveItem::class => [
+            "foreignKey" => ["purchase_order_item_id"],
+            "preventDelete" => true
+        ],
     ];
 
     public function purchaseOrder()
@@ -22,6 +26,11 @@ class PurchaseOrderItem extends BaseModel
     public function make()
     {
         return $this->belongsTo(Maker::class);
+    }
+
+    public function purchaseOrderReceiveItem()
+    {
+        return $this->hasMany(PurchaseOrderReceiveItem::class);
     }
 
     public function getRefDisplayName($field, $value)

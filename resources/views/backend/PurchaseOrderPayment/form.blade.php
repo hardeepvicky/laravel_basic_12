@@ -158,6 +158,8 @@
             });
 
             $.events.execAtLast(function(){
+
+                $("#purchase_order_id").trigger("change", {pageLoad : true});
             });
         });
     </script>

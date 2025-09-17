@@ -117,6 +117,16 @@ class PurchaseOrderPaymentController extends BackendController
 
         $model = new $this->modelClass();
 
+        if ($request->get("purchase_order_id"))
+        {
+            $po = PurchaseOrder::find($request->get("purchase_order_id"));
+
+            if ($po)
+            {
+                $model->purchase_order_id = $po->id;
+            }
+        }
+
         $form = [
             'url' => route($this->routePrefix . '.store'),
             'method' => 'POST',

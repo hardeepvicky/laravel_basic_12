@@ -105,8 +105,7 @@
                                                     </span>
                                                 </div>
                                             </div>
-                                            <x-inputs.text-field type="hidden" name="purchase_order_items[(sr-id)][id]"
-                                                label="" />
+                                            <x-inputs.text-field type="hidden" name="purchase_order_items[(sr-id)][id]" label="" />
                                         </td>
                                         <td>
                                             <?php

@@ -1,5 +1,5 @@
 <?php
-use App\Models\SaleOrder;
+use App\Models\PurchaseOrder;
 $formatter = new NumberFormatter('en_IN', NumberFormatter::CURRENCY);
 $formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, 0);
 ?>
@@ -27,6 +27,7 @@ $formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, 0);
                                 </div>
                             </div>
                         </th>
+                        <th></th>
                         <th style="width:10%">
                             <?php
                             $field = 'branch_id';
@@ -64,6 +65,7 @@ $formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, 0);
                             |
                             <?= sortable_anchor('order_no', get_value_from_list($field_labels, 'order_no', 'order_no')) ?>
                         </th>
+                        <th style="width:8%"> Actions </th>
                         <th><?= sortable_anchor('branch.name', get_value_from_list($field_labels, 'branch_id', 'branch_id')) ?></th>
                         <th><?= sortable_anchor('party.name', get_value_from_list($field_labels, 'party_id', 'party_id')) ?></th>
                         <th style="width:8%">
@@ -96,10 +98,17 @@ $formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, 0);
                                 <x-Backend.celec-summary-table-first-column :record="$record" :routePrefix="$routePrefix" buttons="copy,edit,delete,tr_details">
                                     <div class="label">
                                         {{ $record->order_no }}
-                                        | <a class="btn btn-sm btn-secondary" href="{{ route('purchase-order-payment.create', ["purchase_order_id" => $record->id]) }}">Pay Now</a>
                                     </div>
                                 </x-Backend.celec-summary-table-first-column>
                             </th>
+                            <td>
+                                @if(in_array($record->status, [PurchaseOrder::STATUS_APPROVE, PurchaseOrder::STATUS_RECEIVED]))
+                                    <a class="btn btn-sm btn-secondary mb-2" href="{{ route('purchase-order-payment.create', ["purchase_order_id" => $record->id]) }}">Pay Now</a>
+                                @endif
+                                @if($record->status == PurchaseOrder::STATUS_APPROVE)
+                                    <a class="btn btn-sm btn-secondary mb-2" href="{{ route($routePrefix . '.receive_items', [$record->id]) }}">Receive Items</a>
+                                @endif
+                            </td>
                             <td>
                                 {{ $record->branch?->getDisplayName() }}
                             </td>
@@ -108,6 +117,14 @@ $formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, 0);
                             </td>
                             <td>
                                 {{ get_value_from_list($status_list, $record->status) }}
+
+                                <div class="mt-1">
+                                    @if($record->status == PurchaseOrder::STATUS_PENDING || $record->status == PurchaseOrder::STATUS_DECLINE)
+                                        <a class="btn btn-sm btn-secondary confirm" href="{{ route($routePrefix . '.approve', [$record->id]) }}">Approve</a>
+                                    @elseif($record->status == PurchaseOrder::STATUS_APPROVE)
+                                        <a class="btn btn-sm btn-danger confirm" href="{{ route($routePrefix . '.decline', [$record->id]) }}">Decline</a>
+                                    @endif
+                                </div>
                             </td>
                             <td>
                                 {{ $formatter->formatCurrency($record->total_amount, "INR");  }}
@@ -154,9 +171,13 @@ $formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, 0);
                                                             <th>{{ get_value_from_list($purchase_order_item_field_labels, 'item_id') }}</th>
                                                             <th>{{ get_value_from_list($purchase_order_item_field_labels, 'make_id') }}</th>
                                                             <th>{{ get_value_from_list($purchase_order_item_field_labels, 'qty') }}</th>
+                                                            <th>{{ get_value_from_list($purchase_order_item_field_labels, 'receive_qty') }}</th>
                                                             <th>{{ get_value_from_list($purchase_order_item_field_labels, 'rate') }}</th>
                                                             <th>{{ get_value_from_list($purchase_order_item_field_labels, 'amount') }}</th>
                                                             <th>{{ get_value_from_list($purchase_order_item_field_labels, 'remarks') }}</th>
+                                                            <th>
+                                                                Actions
+                                                            </th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -171,9 +192,50 @@ $formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, 0);
 
                                                                     {{ $purchaseOrderItem->item?->category?->uom?->getDisplayName() }}
                                                                 </td>
+                                                                <td>
+                                                                    {{ $purchaseOrderItem->receive_qty }}
+
+                                                                    {{ $purchaseOrderItem->item?->category?->uom?->getDisplayName() }}
+                                                                </td>
                                                                 <td>{{ $purchaseOrderItem->rate }}</td>
                                                                 <td>{{ $formatter->formatCurrency($purchaseOrderItem->amount, "INR")  }}</td>
                                                                 <td>{{ $purchaseOrderItem->remarks }}</td>
+                                                                <td>
+                                                                    <span class="btn btn-outline-light text-dark summary-action-button css-toggler"
+                                                                        data-sr-css-class-toggle-target="#poi-{{ $purchaseOrderItem->id }}"
+                                                                        data-sr-css-class-toggle-class="hidden">
+                                                                        <i class="fa-solid fa-circle-info"></i>
+                                                                    </span>
+                                                                </td>
+                                                            </tr>
+                                                            <tr id="poi-{{ $purchaseOrderItem->id }}" class="hidden">
+                                                                <td style="background-color: var(--body--bs-body-bg)"></td>
+                                                                <td colspan="8">
+                                                                    <table class="table table-sm summary-table table-bordered">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th>Sr. No.</th>
+                                                                                <th>{{ get_value_from_list($purchase_order_item_field_labels, 'receive_qty') }}</th>
+                                                                                <th>{{ get_value_from_list($purchase_order_item_field_labels, 'remarks') }}</th>
+                                                                                <th>
+                                                                                    Actions
+                                                                                </th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            @foreach ($purchaseOrderItem->purchaseOrderReceiveItem as $a => $purchaseOrderReceiveItem)
+                                                                            <tr>
+                                                                                <td>{{ $a + 1 }}</td>
+                                                                                <td>{{ $purchaseOrderReceiveItem->receive_qty }}</td>
+                                                                                <td>{{ $purchaseOrderReceiveItem->remarks }}</td>
+                                                                                <td>
+                                                                                    <x-Backend.summary-delete-button url="{{ route($routePrefix . '.purchase_order_receive_item_destroy', [$purchaseOrderReceiveItem->id]) }}" />
+                                                                                </td>
+                                                                            </tr>
+                                                                        @endforeach
+                                                                        </tbody>
+                                                                    </table>
+                                                                </td>
                                                             </tr>
                                                         @endforeach
                                                     </tbody>

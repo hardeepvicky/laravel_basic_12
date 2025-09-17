@@ -1765,6 +1765,21 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
         $name = "copy";
         Route::get("{id}/" . $name, [$controllerClass, $name])->name($name);
 
+        $name = "approve";
+        Route::get("{id}/" . $name, [$controllerClass, $name])->name($name);
+
+        $name = "decline";
+        Route::get("{id}/" . $name, [$controllerClass, $name])->name($name);
+
+        $name = "receive_items";
+        Route::any("{id}/" . $name, [$controllerClass, $name])->name($name);
+        
+        $name = "receive_items";
+        Route::any("{id}/" . $name, [$controllerClass, $name])->name($name);
+
+        $name = "purchase_order_receive_item_destroy";
+        Route::delete("{id}/" . $name, [$controllerClass, $name])->name($name);
+
         $name="create_from_requirements";
         Route::post($name, [$controllerClass, $name])->name($name);
 
