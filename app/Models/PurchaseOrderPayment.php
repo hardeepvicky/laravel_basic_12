@@ -18,7 +18,7 @@ class PurchaseOrderPayment extends BaseModel
 
     public static array $child_model_class = [
         PurchaseOrderPaymentFile::class => [
-            "foreignKey" => ["payment_id"],
+            "foreignKey" => ["purchase_order_payment_id"],
             "preventDelete" => false
         ],
     ];

@@ -361,3 +361,8 @@ label.form-label {
     font-size: 20px;
     font-weight: bold;
 }
+
+.alert
+{
+    margin-top: var(--bs-alert-margin-bottom);
+}
