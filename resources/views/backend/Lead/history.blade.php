@@ -28,7 +28,7 @@ use App\Helpers\DateUtility;
 
             <a class="btn btn-secondary call_link" href="tel:+91{{ $record->mobile }}">Call</a>
             <div class="btn btn-secondary sms_link">SMS</div>
-            <a class="btn btn-secondary whatsapp_link" href="https://wa.me/{{ $record->mobile }}" target="_blank" rel="noopener noreferrer">
+            <a class="btn btn-secondary whatsapp_link" href="https://wa.me/91{{ $record->mobile }}" target="_blank" rel="noopener noreferrer">
                 Whatsapp
             </a>
             <div class="btn btn-secondary email_link">Email</div>
