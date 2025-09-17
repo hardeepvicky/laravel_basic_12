@@ -147,7 +147,7 @@
                     var qty = _tr.find(".qty").text();
                     qty = qty ? parseFloat(qty) : 0;
 
-                    var receive_qty = _tr.find(".qty").text();
+                    var receive_qty = _tr.find(".receive_qty").text();
                     receive_qty = receive_qty ? parseFloat(qty) : 0;
 
                     if (input_qty > qty - receive_qty)
