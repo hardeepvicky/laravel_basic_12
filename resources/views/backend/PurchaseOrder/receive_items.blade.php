@@ -65,8 +65,7 @@
                                         <th>Category</th>
                                         <th>{{ get_value_from_list($purchase_order_item_field_labels, 'item_id') }}</th>
                                         <th>{{ get_value_from_list($purchase_order_item_field_labels, 'make_id') }}</th>
-                                        <th>{{ get_value_from_list($purchase_order_item_field_labels, 'qty') }}</th>
-                                        <th>{{ get_value_from_list($purchase_order_item_field_labels, 'rate') }}</th>
+                                        <th>{{ get_value_from_list($purchase_order_item_field_labels, 'qty') }}</th>                                        
                                         <th>Received Till Now</th>
                                         <th>{{ get_value_from_list($purchase_order_item_field_labels, 'receive_qty') }}</th>
                                         <th>{{ get_value_from_list($purchase_order_item_field_labels, 'remarks') }}</th>
@@ -78,12 +77,7 @@
                                             <td>{{ $i + 1 }}</td>
                                             <td>{{ $purchaseOrderItem->item?->category->getDisplayName() }}</td>
                                             <td>{{ $purchaseOrderItem->item?->getDisplayName() }}</td>
-                                            <td>{{ $purchaseOrderItem->make?->getDisplayName() }}</td>
-                                            <td>
-                                                {{ $purchaseOrderItem->qty }}
-
-                                                {{ $purchaseOrderItem->item?->category?->uom?->getDisplayName() }}
-                                            </td>
+                                            <td>{{ $purchaseOrderItem->make?->getDisplayName() }}</td>                                            
                                             <td>
                                                 <span class="qty">
                                                     {{ $purchaseOrderItem->qty }}
@@ -144,11 +138,11 @@
                     var input_qty = $(this).val();
                     input_qty = input_qty ? parseFloat(input_qty) : 0;
 
-                    var qty = _tr.find(".qty").text();
+                    var qty = _tr.find("span.qty").text();
                     qty = qty ? parseFloat(qty) : 0;
 
-                    var receive_qty = _tr.find(".receive_qty").text();
-                    receive_qty = receive_qty ? parseFloat(qty) : 0;
+                    var receive_qty = _tr.find("span.receive_qty").text();
+                    receive_qty = receive_qty ? parseFloat(receive_qty) : 0;
 
                     if (input_qty > qty - receive_qty)
                     {
