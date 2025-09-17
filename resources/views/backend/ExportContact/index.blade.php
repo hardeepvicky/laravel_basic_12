@@ -84,6 +84,11 @@
                     $field = "product_id";
                 ?>
                 <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
+
+                <?php 
+                    $field = "status_type";
+                ?>
+                <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
             </form>
         </div>
         <div class="card-body">

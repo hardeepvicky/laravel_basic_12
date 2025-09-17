@@ -28,7 +28,7 @@
             <div class="tab-pane active show fade" id="tab_basic_block" role="tabpanel"
                 aria-labelledby="tab_basic">
                 <div class="row mt-2">
-                    <div class="col-md-6 col-xxl-4">
+                    <div class="col-md-6 col-xxl-3">
                         <label class="info">
                             {{ get_value_from_list($field_labels, 'id', 'id') }}
                             :
@@ -55,7 +55,7 @@
                             <span>{{ $record->email }}</span>
                         </label>
                     </div>
-                    <div class="col-md-6 col-xxl-4">
+                    <div class="col-md-6 col-xxl-3">
                         <label class="info">
                             Location
                             :
@@ -73,7 +73,7 @@
                             <span class="more-less" data-max="100">{!! $record->remarks !!}</span>
                         </label>
                     </div>
-                    <div class="col-md-6 col-xxl-4">
+                    <div class="col-md-6 col-xxl-3">
                         <label class="info">
                             {{ get_value_from_list($field_labels, 'assign_to_user_id', 'assign_to_user_id') }} :
                             <span>{{ $record->assignTo?->getDisplayName() }}</span>
@@ -83,7 +83,7 @@
                             <x-Backend.celec-date-time :value="$record->next_followup_date_time"/>
                         </label>
                     </div>
-                    <div class="col-md-6 col-xxl-4">
+                    <div class="col-md-6 col-xxl-3">
                         <label class="info">
                             {{ get_value_from_list($field_labels, 'status_type', 'status_type') }} :
                             <span>{{ get_value_from_list($status_type_list, $record->status_type) }}</span>

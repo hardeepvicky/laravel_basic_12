@@ -65,6 +65,12 @@
                     ?>
                     <x-Inputs.drop-down :name="$field" :label="$false" :value="$search[$field]" :list="$product_list" pleaseSelect="All" class="select2 form-select-sm" />
                 </th>
+                <th style="width:8%">
+                    <?php
+                    $field = 'status_type';
+                    ?>
+                    <x-Inputs.drop-down :name="$field" :label="$false" :value="$search[$field]" :list="$status_type_list" pleaseSelect="All" class="select2 form-select-sm" />
+                </th>
             </tr>
             <tr class="border-bottom-primary">
                 <th>
