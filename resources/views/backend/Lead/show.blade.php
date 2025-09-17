@@ -64,11 +64,6 @@
                             :
                             <span>{{ $record->company_gst_no }}</span>
                         </label>
-                        <label class="info">
-                            {{ get_value_from_list($field_labels, 'remarks', 'remarks') }}
-                            :
-                            <span class="more-less" data-max="100">{!! $record->remarks !!}</span>
-                        </label>
                     </div>
                     <div class="col-md-6 col-xxl-3">
                         <label class="info">
