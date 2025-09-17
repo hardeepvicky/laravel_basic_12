@@ -54,7 +54,7 @@
                                 :value="$model->{$field}" class="validate-mobile"
                                 placeholder="Enter {{ $label }}" 
                                 layout="horizontal"
-                                mandatory="true" />
+                                />
 
                             <?php
                             $field = 'mobile2';
@@ -102,7 +102,7 @@
                                 class="select2 cascade-drop-down"
                                 layout="horizontal"
                                 data-sr-cascade-target="#district_id"
-                                data-sr-cascade-url="/district/ajax_get_list/{v}" mandatory="true" />
+                                data-sr-cascade-url="/district/ajax_get_list/{v}"/>
 
                             <?php
                             $field = 'district_id';
@@ -113,7 +113,7 @@
                                 class="select2 cascade-drop-down" 
                                 layout="horizontal"
                                 data-sr-cascade-target="#city_id"
-                                data-sr-cascade-url="/city/ajax_get_list/0/{v}" mandatory="true" />
+                                data-sr-cascade-url="/city/ajax_get_list/0/{v}" />
 
                             <?php
                             $field = 'city_id';
@@ -123,8 +123,7 @@
                                 :list="$empty_list" :value="$model->{$field}" 
                                 class="select2"
                                 layout="horizontal"
-                                mandatory="true" />
-
+                                />
 
                             <?php
                             $field = 'status_type';

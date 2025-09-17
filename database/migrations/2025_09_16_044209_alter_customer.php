@@ -15,7 +15,6 @@ return new class extends Migration
             $table->unsignedBigInteger("state_id")->nullable()->change();
             $table->unsignedBigInteger("district_id")->nullable()->change();
             $table->unsignedBigInteger("city_id")->nullable()->change();
-            $table->unsignedBigInteger("city_id")->nullable()->change();
         });
     }
 
