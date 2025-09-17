@@ -40,6 +40,7 @@ use App\Http\Controllers\Backend\ExportOrderController;
 use App\Http\Controllers\Backend\ExportPaymentController;
 use App\Http\Controllers\Backend\ExportStateController;
 use App\Http\Controllers\Backend\HolidayController;
+use App\Http\Controllers\Backend\ItemBrandController;
 use App\Http\Controllers\Backend\ItemCategoryController;
 use App\Http\Controllers\Backend\ItemController;
 use App\Http\Controllers\Backend\LeadController;
@@ -1277,6 +1278,30 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
 
     $route_prefix = "make";
     $controllerClass = MakerController::class;
+    Route::resource($route_prefix, $controllerClass);
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
+        $name = "copy";
+        Route::get("{id}/" . $name, [$controllerClass, $name])->name($name);
+
+        $name = "activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "de_activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "ajax_update_field";
+        Route::post($name, [$controllerClass, $name])->name($name);
+
+        $route_prefix = "export";
+        Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+            $name = "csv";
+            Route::get($name, [$controllerClass, "export_" . $name])->name($name);
+        });
+    });
+
+    $route_prefix = "item-brand";
+    $controllerClass = ItemBrandController::class;
     Route::resource($route_prefix, $controllerClass);
     Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
 
