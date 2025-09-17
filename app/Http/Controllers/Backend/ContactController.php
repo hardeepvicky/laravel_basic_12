@@ -49,6 +49,7 @@ class ContactController extends BackendController
         $conditions = $this->getConditions($cache_key, [
             ["field" => "id", "type" => "int", "cache" => false],
             ["field" => "type", "type" => "string_equal"],
+            ["field" => "status_type", "type" => "string_equal"],
             ["field" => "from_last_followup_date_time", "type" => "date"],
             ["field" => "to_last_followup_date_time", "type" => "date"],
             ["field" => "from_next_followup_date_time", "type" => "date"],
