@@ -35,7 +35,7 @@
                 $label = get_value_from_list($field_labels, $field, $field);
                 ?>
                 <x-Inputs.text-field :id="$field" :name="$field" :label="$label" :value="$model->{$field}"
-                    placeholder="Enter {{ $label }}" mandatory="true" />
+                    placeholder="Enter {{ $label }}" mandatory="true" class="document_file_name"/>
             </div>
         </div>
     </div>
@@ -54,7 +54,7 @@
                 },
             }).change(function (){
                 var fileName = $(this).val();
-                $("#name").val(getFilenameFromPath(fileName));
+                $(".document_file_name").val(getFilenameFromPath(fileName));
             });
         })
     </script>
