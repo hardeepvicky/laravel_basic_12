@@ -45,6 +45,13 @@ class ItemController extends BackendController
         $builder = $this->_getBuildeForIndex($cache_key_prefix);
 
         $builder->with([
+            "rootItemCategory",
+            "parentItemCategory",
+            "childItemCategory",
+            "itemBrand",
+            "department",
+            "origin",
+            "certification",
             "tags",
             "mainImage",
             "images",
@@ -74,8 +81,8 @@ class ItemController extends BackendController
 
         $conditions = $this->getConditions($cache_key, [
             ["field" => "id", "type" => "int", "cache" => false],
-            ["field" => "root_item_category_id", "type" => "int"],            
-            ["field" => "name", "type" => "string"],            
+            ["field" => "root_item_category_id", "type" => "int"],
+            ["field" => "name", "type" => "string"],
             ["field" => "item_brand_id", "type" => "int"],
             ["field" => "size", "type" => "string"],
             ["field" => "specification", "type" => "string"],
@@ -105,16 +112,7 @@ class ItemController extends BackendController
         // d($conditions, true);
 
         $builder = $builder->where($conditions);
-        $builder->with([
-            "rootItemcategory",
-            "parentItemcategory",
-            "childItemcategory",
-            "itemBrand",
-            "department",
-            "origin",
-            "certification",
-        ]);
-
+       
         $tag_conditions = $this->getConditions($cache_key . "-2", [
             ["field" => "name", "type" => "string", "view_field" => "tag_name"],
         ]);
@@ -168,7 +166,7 @@ class ItemController extends BackendController
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
         $this->setForView(compact(
-            "root_item_category_list", "dept_list", "origin_list", "certification_list", "sku_pattern", 
+            "root_item_category_list", "dept_list", "origin_list", "certification_list", "sku_pattern",
             "field_labels"
         ));
 
@@ -490,7 +488,7 @@ class ItemController extends BackendController
         try {
 
             $model = $this->modelClass::where("id", $item_id)->with(["category"])->first();
-            
+
             if (!$model)
             {
                 throw new UserException("Invalid Item ID : $item_id");
@@ -589,7 +587,7 @@ class ItemController extends BackendController
             $this->setForView(compact("import_log_id"));
             $rules = [
                 "file" => [
-                    "required", 
+                    "required",
                     "file",
                     "max:5200",
                     "mimes:xlsx"
@@ -615,7 +613,7 @@ class ItemController extends BackendController
                 if (!$importUtility->checkHeaders())
                 {
                     $this->setForView(array('errors' => $importUtility->errors));
-                    
+
                     foreach($importUtility->errors as $error_msg)
                     {
                         LaravelExtend::addError("", $error_msg);
@@ -667,7 +665,7 @@ class ItemController extends BackendController
                 $item_category_list = array_flip(Util::applyAll($item_category_list, ["strtolower"]));
 
                 $brand_list = array_flip(Util::applyAll(DropDownValue::getList("id", "name", ["type" => DropDownValue::BRAND]), ["strtolower"]));
-                
+
                 $color_list = array_flip(Util::applyAll(DropDownValue::getList("id", "name", ["type" => DropDownValue::COLOR]), ["strtolower"]));
 
                 $sku_pattern = Setting::getValue("item_sku_pattern");
@@ -677,7 +675,7 @@ class ItemController extends BackendController
                     $label = Setting::LABELS['item_sku_pattern'];
                     throw new UserException("Setting : $label is not set yet", UserException::ERROR_USER_DATA_WRONG);
                 }
-                
+
                 foreach($csv_records as $i => $record)
                 {
                     $record = Util::applyAll($record, array("trim"));
@@ -718,14 +716,14 @@ class ItemController extends BackendController
                         LaravelExtend::addError($header_flip['brand_id'], $record['brand_id'] . " is not found", "Row #" . ($i + 2));
                         $validate = false;
                     }
-                    
+
                     if ($validate)
-                    {   
+                    {
                         $model = new $this->modelClass();
                         $record['sku'] = Item::getSkuFromPattern($sku_pattern, $record);
 
                         // d($record, true);
-                        
+
                         $is_insert = $is_update = null;
                         if ($model->insertOrUpdate($record, $is_insert, $is_update))
                         {
@@ -793,15 +791,15 @@ class ItemController extends BackendController
 
                     if (LaravelExtend::$errors)
                     {
-                        $importLogModel->errors = LaravelExtend::$errors;                    
+                        $importLogModel->errors = LaravelExtend::$errors;
                     }
 
                     $importLogModel->save();
                 }
-                
+
                 return back()->With("fail", $msg)->with("custom_errors", LaravelExtend::$errors);
             }
-            
+
             catch(\Exception $ex)
             {
                 $msg = get_exception_display_message($ex);
@@ -812,9 +810,9 @@ class ItemController extends BackendController
                     $importLogModel->have_error = 1;
                     $importLogModel->save();
                 }
-                
-                Session::flash('fail', $msg);  
-                
+
+                Session::flash('fail', $msg);
+
                 return back()->With("fail", $msg);
             }
         }
@@ -829,9 +827,17 @@ class ItemController extends BackendController
         $builder = $this->_getBuildeForIndex($cache_key_prefix);
 
         $this->beforeCsvExport($builder);
-        
+
         $builder->with([
+            "rootItemCategory",
+            "parentItemCategory",
+            "childItemCategory",
+            "itemBrand",
+            "department",
+            "origin",
+            "certification",
             "tags",
+            "subDepartment",
             "mainImage",
         ]);
 
@@ -840,7 +846,7 @@ class ItemController extends BackendController
         foreach($records as $k => $record)
         {
             $record->afterFindForCsv();
-            $record->mainImage->afterFind();
+            $record->mainImage?->afterFind();
         }
 
         $records = $records->toArray();
@@ -851,10 +857,6 @@ class ItemController extends BackendController
         $user_cache_list = User::getListCache();
 
         $yes_no_list = laravel_constant('yes_no_list');
-
-        $item_category_records = ItemCategory::getTreeRecords(ItemCategory::query());
-
-        $item_category_list = Util::getTreeListArray($item_category_records, "id", "name", false, false);
 
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
@@ -867,18 +869,33 @@ class ItemController extends BackendController
                 $tag_list[] = $tag['display_name'];
             }
 
+            $sd_list = [];
+
+            foreach($record['sub_department'] as $sd)
+            {
+                $sd_list[] = $sd['display_name'];
+            }
+
             $csv_records[] = [
                 'ID' => $record['id'],
-                $field_labels['root_item_category_id'] => $record['root_item_category']['name'] ?? "",
-                $field_labels['parent_item_category_id'] => $record['parent_item_category']['name'] ?? "",
-                $field_labels['child_item_category_id'] => $record['child_item_category']['name'] ?? "",
                 $field_labels['name'] => $record['name'],
                 $field_labels['specification'] => $record['specification'] ?? "",
                 $field_labels['size'] => $record['size'] ?? "",
-                $field_labels['brand_id'] => $record['item_brand']['name'] ?? "",
+                $field_labels['item_brand_id'] => $record['item_brand']['name'] ?? "",
                 $field_labels['sku'] => $record['sku'] ?? "",
+                $field_labels['dept_id'] => $record['department']['name'] ?? "",
+                $field_labels['is_for_all_sub_dept'] => get_value_from_list($yes_no_list, $record['is_for_all_sub_dept']),
+                "Sub Department" => implode(", ", $sd_list),
+                $field_labels['root_item_category_id'] => $record['root_item_category']['name'] ?? "",
+                $field_labels['parent_item_category_id'] => $record['parent_item_category']['name'] ?? "",
+                $field_labels['child_item_category_id'] => $record['child_item_category']['name'] ?? "",
+                $field_labels['origin_id'] => $record['origin']['name'] ?? "",
+                $field_labels['certification_id'] => $record['certification']['name'] ?? "",
+                $field_labels['part_no'] => $record['part_no'] ?? "",
+                $field_labels['weight'] => $record['weight'] ?? "",
+                $field_labels['minimum_order_qty'] => $record['minimum_order_qty'] ?? "",
                 $field_labels['description'] => $record['description'] ?? "",
-                $field_labels['main_image_id'] => $record['main_image']['file_url'] ? url($record['main_image']['file_url']) : "",
+                $field_labels['main_image_id'] => isset($record['main_image']['file_url']) ? url($record['main_image']['file_url']) : "",
                 'Main Image Name' => $record['main_image']['display_name'] ?? "",
 
                 $field_labels['tag_name'] => implode(", ", $tag_list),
