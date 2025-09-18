@@ -71,7 +71,6 @@ $false = false;
                                         @if (isset($label) && $label)
                                             <label class="form-label">
                                                 {{ $label }}
-                                                <span class="mandatory">*</span>
                                             </label>
                                         @endif
                                     </div>                                
@@ -101,7 +100,6 @@ $false = false;
                                         @if (isset($label) && $label)
                                             <label class="form-label">
                                                 {{ $label }}
-                                                <span class="mandatory">*</span>
                                             </label>
                                         @endif
                                     </div>                                
@@ -185,7 +183,6 @@ $false = false;
                                 />
 
                                 
-
                                 <?php
                                 $field = 'weight';
                                 $label = get_value_from_list($field_labels, $field, $field);
