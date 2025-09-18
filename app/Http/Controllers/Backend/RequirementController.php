@@ -43,11 +43,7 @@ class RequirementController extends BackendController
 
         // d($records->toArray(), true);
 
-        $item_category_records = ItemCategory::getTreeRecords(ItemCategory::query());
-
-        $item_category_list = Util::getTreeListArray($item_category_records, "id", "name", false, false);
-
-        $this->setForView(compact("records", "item_category_list"));
+        $this->setForView(compact("records"));
 
         return $this->viewIndex(__FUNCTION__);
     }
@@ -123,8 +119,8 @@ class RequirementController extends BackendController
 
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
-        $this->setForView(compact("maker_list", "branch_list", "dept_list",
-            "item_list", "status_list",
+        $this->setForView(compact(
+            "branch_list", "dept_list", "item_list", "status_list",
             "field_labels"
         ));
 

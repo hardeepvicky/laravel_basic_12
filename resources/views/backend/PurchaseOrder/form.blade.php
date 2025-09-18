@@ -72,9 +72,6 @@
                                         <th style="width:20%">
                                             {{ get_value_from_list($purchase_order_item_field_labels, 'item_id') }}
                                         </th>
-                                        <th style="width:10%">
-                                            {{ get_value_from_list($purchase_order_item_field_labels, 'make_id') }}
-                                        </th>
                                         <th style="width:8%">
                                             {{ get_value_from_list($purchase_order_item_field_labels, 'qty') }}
                                         </th>
@@ -116,18 +113,6 @@
                                                 data-sr-cascade-target="#uom_id-(sr-id)"
                                                 data-sr-cascade-url="/item/ajax_get_child_uom_list/{v}"
                                             />
-                                        </td>
-                                        <td>
-                                            <?php
-                                            $field = 'make_id';
-                                            if ($default_maker)
-                                            {
-                                                $model->{$field} = $default_maker->id;
-                                            }
-                                            ?>
-                                            <x-Inputs.drop-down id="{{ $field }}-(sr-id)"
-                                                name="purchase_order_items[(sr-id)][{{ $field }}]" :label="$false"
-                                                :list="$maker_list" class="will-required will-select2 make_id" />
                                         </td>
                                         <td>
                                             <?php
@@ -202,15 +187,6 @@
                                                         data-sr-cascade-target="#uom_id-{{ $k }}"
                                                         data-sr-cascade-url="/item/ajax_get_child_uom_list/{v}"
                                                     />
-                                                </td>
-                                                <td>
-                                                    <?php
-                                                    $field = 'make_id';
-                                                    $value = $child_arr[$field] ?? '';
-                                                    ?>
-                                                    <x-Inputs.drop-down id="{{ $field }}-{{ $k }}"
-                                                        name="purchase_order_items[{{ $k }}][{{ $field }}]" :label="$false" :value="$value"
-                                                        :list="$maker_list" class="will-required will-select2 make_id" />
                                                 </td>
                                                 <td>
                                                     <?php

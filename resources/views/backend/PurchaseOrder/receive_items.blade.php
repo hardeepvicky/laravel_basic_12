@@ -64,7 +64,6 @@
                                         <th>Sr. No.</th>
                                         <th>Category</th>
                                         <th>{{ get_value_from_list($purchase_order_item_field_labels, 'item_id') }}</th>
-                                        <th>{{ get_value_from_list($purchase_order_item_field_labels, 'make_id') }}</th>
                                         <th>{{ get_value_from_list($purchase_order_item_field_labels, 'qty') }}</th>                                        
                                         <th>Received Till Now</th>
                                         <th>{{ get_value_from_list($purchase_order_item_field_labels, 'receive_qty') }}</th>
@@ -77,7 +76,6 @@
                                             <td>{{ $i + 1 }}</td>
                                             <td>{{ $purchaseOrderItem->item?->category->getDisplayName() }}</td>
                                             <td>{{ $purchaseOrderItem->item?->getDisplayName() }}</td>
-                                            <td>{{ $purchaseOrderItem->make?->getDisplayName() }}</td>                                            
                                             <td>
                                                 <span class="qty">
                                                     {{ $purchaseOrderItem->qty }}
