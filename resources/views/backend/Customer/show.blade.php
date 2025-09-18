@@ -33,6 +33,11 @@
                 <div class="row mt-2">
                     <div class="col-md-6 col-xxl-3">
                         <label class="info">
+                            {{ get_value_from_list($field_labels, 'id', 'id') }}
+                            :
+                            <span>{{ $record->id }}</span>
+                        </label>
+                        <label class="info">
                             {{ get_value_from_list($field_labels, 'name', 'name') }}
                             :
                             <span>{{ $record->name }}</span>
@@ -52,6 +57,56 @@
                             :
                             <span>{{ $record->email }}</span>
                         </label>
+                    </div>
+                    <div class="col-md-6 col-xxl-3">
+                        <label class="info">
+                            Location
+                            :
+                            <span>
+                                {{ $record->state?->getShortName() }}
+                                >>
+                                {{ $record->district?->getDisplayName() }}
+                                >>
+                                {{ $record->city?->getDisplayName() }}
+                            </span>
+                        </label>
+                        <label class="info">
+                            {{ get_value_from_list($field_labels, 'purpose_price', 'purpose_price') }} :
+                            <span>{{ $record->purpose_price }}</span>
+                        </label>
+                        <label class="info">
+                            {{ get_value_from_list($field_labels, 'payment_method_type', 'payment_method_type') }} :
+                            <span>{{ get_value_from_list($payment_method_type_list, $record->payment_method_type) }}</span>
+                        </label>
+                    </div>
+                    <div class="col-md-6 col-xxl-3">
+                        <label class="info">
+                            {{ get_value_from_list($field_labels, 'assign_to_user_id', 'assign_to_user_id') }} :
+                            <span>{{ $record->assignTo?->getDisplayName() }}</span>
+                        </label>
+                        <label class="info">
+                            {{ get_value_from_list($field_labels, 'next_meeting_date_time', 'next_meeting_date_time') }} :
+                            <span>{{ if_date_time($record->next_meeting_date_time) }}</span>
+                        </label>
+                        <label class="info">
+                            {{ get_value_from_list($field_labels, 'remarks', 'remarks') }} :
+                            <span class="more-less" data-max="100">{!! $record->remarks !!}</span>
+                        </label>
+                    </div>
+                    <div class="col-md-6 col-xxl-3">
+                        <label class="info">
+                            {{ get_value_from_list($field_labels, 'status_type', 'status_type') }} :
+                            <span>{{ get_value_from_list($status_type_list, $record->status_type) }}</span>
+                        </label>
+                        <label class="info">
+                            {{ get_value_from_list($field_labels, 'dealer_id', 'dealer_id') }} :
+                            <span>
+                                {{ $record->dealer?->getDisplayName() }}
+                                @if($record->deal_type)
+                                    ( {{ get_value_from_list($deal_type_list, $record->deal_type) }} )
+                                @endif
+                            </span>
+                        </label>
                         <label class="info">
                             {{ get_value_from_list($field_labels, 'company_name', 'company_name') }}
                             :
@@ -66,60 +121,6 @@
                             {{ get_value_from_list($field_labels, 'company_gst_no', 'company_gst_no') }}
                             :
                             <span>{{ $record->company_gst_no }}</span>
-                        </label>
-                        <label class="info">
-                            {{ get_value_from_list($field_labels, 'remarks', 'remarks') }}
-                            :
-                            <span class="more-less" data-max="100">{!! $record->remarks !!}</span>
-                        </label>
-                    </div>
-                    <div class="col-md-6 col-xxl-3">
-                        <label class="info">
-                            {{ get_value_from_list($field_labels, 'state_id', 'state_id') }}
-                            :
-                            <span>{{ $record->state?->getDisplayName() }}</span>
-                        </label>
-                        <label class="info">
-                            {{ get_value_from_list($field_labels, 'district_id', 'district_id') }}
-                            :
-                            <span>{{ $record->district?->getDisplayName() }}</span>
-                        </label>
-                        <label class="info">
-                            {{ get_value_from_list($field_labels, 'city_id', 'city_id') }}
-                            :
-                            <span>{{ $record->city?->getDisplayName() }}</span>
-                        </label>
-                        <label class="info">
-                            {{ get_value_from_list($field_labels, 'payment_method_type', 'payment_method_type') }} :
-                            <span>{{ get_value_from_list($payment_method_type_list, $record->payment_method_type) }}</span>
-                        </label>
-                    </div>
-                    <div class="col-md-6 col-xxl-3">
-                        <label class="info">
-                            {{ get_value_from_list($field_labels, 'assign_to_user_id', 'assign_to_user_id') }} :
-                            <span>{{ $record->assignTo?->getDisplayName() }}</span>
-                        </label>
-                        <label class="info">
-                            {{ get_value_from_list($field_labels, 'next_meeting_date_time', 'next_meeting_date_time') }} :
-                            <x-Backend.celec-date-time :value="$record->next_meeting_date_time"/>
-                        </label>
-                        <label class="info">
-                            {{ get_value_from_list($field_labels, 'remarks', 'remarks') }} :
-                            <span class="more-less" data-max="100">{!! $record->remarks !!}</span>
-                        </label>
-                    </div>
-                    <div class="col-md-6 col-xxl-3">
-                        <label class="info">
-                            {{ get_value_from_list($field_labels, 'status_type', 'status_type') }} :
-                            <span>{{ get_value_from_list($status_type_list, $record->status_type) }}</span>
-                        </label>
-                        <label class="info">
-                            {{ get_value_from_list($field_labels, 'deal_type', 'deal_type') }} :
-                            <span>{{ get_value_from_list($deal_type_list, $record->deal_type) }}</span>
-                        </label>
-                        <label class="info">
-                            {{ get_value_from_list($field_labels, 'dealer_id', 'dealer_id') }} :
-                            <span>{{ $record->dealer?->getDisplayName() }}</span>
                         </label>
                     </div>
                 </div>

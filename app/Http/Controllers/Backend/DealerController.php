@@ -111,6 +111,11 @@ class DealerController extends BackendController
 
         $my_country = Country::getMyCountry();
 
+        if (!$my_country)
+        {
+            throw new UserException("Country India not found");
+        }
+
         $state_conditions = [
             ["country_id", $my_country->id],
             ["is_active", 1]
@@ -212,14 +217,14 @@ class DealerController extends BackendController
             "type" => ["required"],
             "name" => ["required"],
             "alias" => ["nullable"],
-            "mobile" => ["required", new MobileNumber],
+            "mobile" => ["nullable", new MobileNumber],
             "mobile2" => ["nullable", new MobileNumber],
             "phone_no" => ["nullable"],
             "company_name" => ["nullable"],
             "gst_no" => ["nullable"],
-            "state_id" => ["required"],
-            "district_id" => ["required"],
-            "city_id" => ["required"],
+            "state_id" => ["nullable"],
+            "district_id" => ["nullable"],
+            "city_id" => ["nullable"],
             "description" => ["nullable"],
             "terms" => [],
             "dealerFile" => [],
@@ -251,6 +256,7 @@ class DealerController extends BackendController
         DB::beginTransaction();
 
         try {
+            $validatedData['assign_to_user_id'] = LaravelExtend::getAuthUserId();
             $this->model = $this->modelClass::create($validatedData);
 
             $this->_saveOthers($validatedData);
@@ -680,6 +686,11 @@ class DealerController extends BackendController
                 ];
 
                 $my_country = Country::getMyCountry();
+
+                if (!$my_country)
+                {
+                    throw new UserException("Country India not found");
+                }
 
                 $state_list = array_flip(Util::applyAll(State::getList("id", "name", ["country_id" => $my_country->id]), ["strtolower"]));
 

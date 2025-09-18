@@ -53,4 +53,13 @@
             });
         });
     </script>
+
+    @if( request()->has('last_insert_id') )
+    <script>
+        $(function(){
+            localStorage.setItem("last_product_serial_insert_id", "{!! request('last_insert_id') !!}");
+            window.close();
+        });
+    </script>
+    @endif
 @endsection

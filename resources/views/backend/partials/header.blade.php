@@ -212,7 +212,7 @@ use App\Models\Notification;
     }
 
     .twitter-typeahead{
-        width: 95%;
+        width: 90%;
     }
 
     .twitter-typeahead .tt-menu{

@@ -269,12 +269,12 @@ class ExportLeadController extends BackendController
     private function _common_validation_rules()
     {
         return [
-            "name" => ["required"],
+            "name" => ["nullable"],
             "mobile" => ["required", new MobileNumber],
             "mobile2" => ["nullable", new MobileNumber],
             "country_id" => ["required"],
-            "state_id" => ["required"],
-            "city_id" => ["required"],
+            "state_id" => ["nullable"],
+            "city_id" => ["nullable"],
             "assign_to_user_id" => ["required"],
             "status_type" => ["required"],
             "company_name" => ["nullable"],
@@ -324,6 +324,8 @@ class ExportLeadController extends BackendController
             unset($save_data['addresses']);
             unset($save_data['products']);
 
+            $save_data['assign_to_user_id'] = LaravelExtend::getAuthUserId();
+            
             $this->model = $this->modelClass::create($save_data);
 
             $this->_saveOthers($validatedData);
@@ -884,6 +886,11 @@ class ExportLeadController extends BackendController
 
             if ($validatedData['action_type'] == ExpLeadHistory::ACTION_TYPE_CALL && $exp_lead->assignTo?->name)
             {
+                if (!$exp_lead->assignTo?->name)
+                {
+                    throw new UserException("Please Assign Lead to user", UserException::ERROR_USER_DATA_WRONG);
+                }
+
                 $voip_no = $exp_lead->assignTo->name;
                 if (!is_numeric($voip_no))
                 {
@@ -911,6 +918,11 @@ class ExportLeadController extends BackendController
 
             if ($validatedData['action_type'] == ExpLeadHistory::ACTION_TYPE_SEND_SMS) 
             {
+                if (!$exp_lead->assignTo?->name)
+                {
+                    throw new UserException("Please Assign Lead to user", UserException::ERROR_USER_DATA_WRONG);
+                }
+                
                 if (!$exp_lead->name)
                 {
                     throw new UserException("Lead's name is not saved yet");
@@ -926,7 +938,7 @@ class ExportLeadController extends BackendController
                     throw new UserException("Country Phonecode not found");
                 }
 
-                $job = new JobSendSmsGeneral($exp_lead->name, $exp_lead->mobile, $exp_lead->country->phonecode, $validatedData['action']);
+                $job = new JobSendSmsGeneral($exp_lead->assignTo->dinstar_port, $exp_lead->name, $exp_lead->mobile, $exp_lead->country->phonecode, $validatedData['action']);
                 dispatch($job);
             }
 
@@ -1526,8 +1538,8 @@ class ExportLeadController extends BackendController
                 $field_labels['deal_type'] => get_value_from_list($type_group_list['deal_type'], $record['deal_type']),
                 $field_labels['dealer_id'] => $record['dealer']['name'] ?? "",
                 $field_labels['campaign_id'] => $record['campaign']['name'] ?? "",
+                $field_labels['country_id'] => $record['country']['name'] ?? "",
                 $field_labels['state_id'] => $record['state']['name'] ?? "",
-                $field_labels['district_id'] => $record['district']['name'] ?? "",
                 $field_labels['city_id'] => $record['city']['name'] ?? "",
                 $field_labels['next_followup_date_time'] => $record['next_followup_date_time'] ? if_date_time($record['next_followup_date_time']) : "",
                 $field_labels['company_name'] => $record['company_name'] ?? "",

@@ -39,6 +39,7 @@ class SectionRoutes
 
         "export-lead.ajax_get_list_for_mobile",
         "export-contact.ajax_get_list_for_mobile",
+        "product-issue.ajax_get_solution_list",
 
         "*.ajax_get_list",
         "*.ajax_get_code_list",

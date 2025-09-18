@@ -47,6 +47,10 @@ class SaleOrder extends BaseModel
             "foreignKey" => ["sale_order_id"],
             "preventDelete" => true
         ],
+        Payment::class => [
+            "foreignKey" => ["sale_order_id"],
+            "preventDelete" => true
+        ],
     ];
 
     public function afterFindForCsv()
@@ -94,6 +98,11 @@ class SaleOrder extends BaseModel
     public function files()
     {
         return $this->belongsToMany(DocumentFile::class, SaleOrderFile::class);
+    }
+
+    public function payment()
+    {
+        return $this->hasMany(Payment::class, 'sale_order_id');
     }
 
     protected function getDisplayNameAttribute()

@@ -71,7 +71,10 @@ class HomeController extends WebController
 
         $dt = DateUtility::getDateObj($datetime, DateUtility::$login_user_time_zone);
 
-        $dt->setTimezone(new \DateTimeZone($timezone));
+        if ($timezone)
+        {
+            $dt->setTimezone(new \DateTimeZone($timezone));
+        }
 
         $new_datetime = $dt->format(DateUtility::DATETIME_OUT_FORMAT);
         

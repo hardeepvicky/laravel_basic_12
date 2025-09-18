@@ -96,6 +96,7 @@ class ViewExportContact extends BaseModel
             }
 
             $list[$arr['type'] . "." . $arr[$key_field]] = [
+                "id" => $arr["id"],
                 "ref_id" => $arr["ref_id"],
                 "type" => $arr["type"],
                 "name" =>  $arr[$value_field] ?? null

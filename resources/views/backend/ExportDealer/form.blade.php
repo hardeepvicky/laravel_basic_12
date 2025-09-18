@@ -54,7 +54,7 @@
                                 :value="$model->{$field}" class=""
                                 placeholder="Enter {{ $label }}" 
                                 layout="horizontal"
-                                mandatory="true" />
+                                />
 
                             <?php
                             $field = 'mobile2';
@@ -134,7 +134,6 @@
                                 class="select2 cascade-drop-down" 
                                 data-sr-cascade-target="#city_id"
                                 data-sr-cascade-url="/export-city/ajax_get_list/0/{v}"
-                                mandatory="true" 
                             />
 
                             <?php
@@ -146,7 +145,7 @@
                                 :value="$model->{$field}" 
                                 layout="horizontal"
                                 class="select2"
-                                mandatory="true" />
+                                />
 
 
                             <?php

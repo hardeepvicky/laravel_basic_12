@@ -205,14 +205,14 @@ class ExportDealerController extends BackendController
             "type" => ["required"],
             "name" => ["required"],
             "alias" => ["nullable"],
-            "mobile" => ["required", new MobileNumber],
+            "mobile" => ["nullable", new MobileNumber],
             "mobile2" => ["nullable", new MobileNumber],
             "phone_no" => ["nullable"],
             "company_name" => ["nullable"],
             "gst_no" => ["nullable"],
-            "state_id" => ["required"],
             "country_id" => ["required"],
-            "city_id" => ["required"],
+            "state_id" => ["nullable"],
+            "city_id" => ["nullable"],
             "status_type" => ["required"],
             "description" => ["nullable"],
             "terms" => [],
@@ -245,6 +245,7 @@ class ExportDealerController extends BackendController
         DB::beginTransaction();
 
         try {
+            $validatedData['assign_to_user_id'] = LaravelExtend::getAuthUserId();
             $this->model = $this->modelClass::create($validatedData);
 
             $this->_saveOthers($validatedData);

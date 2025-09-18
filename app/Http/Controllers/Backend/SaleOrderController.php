@@ -189,13 +189,10 @@ class SaleOrderController extends BackendController
         return [
             "party_order_ref_no" => ["nullable"],
             "contact_id" => ["required"],
-            "estimated_dispatch_date" => ["required"],
             "total_amount" => ["required"],
-            "discount_per" => ["nullable"],
-            "discount" => ["nullable"],
-            "payable_amount" => ["required"],
-            "paid_amount" => ["nullable"],
+            "advance_amount" => ["nullable"],
             "remarks" => "",
+            "terms" => "",
             "sale_order_products" => []
         ];
     }
@@ -715,6 +712,32 @@ class SaleOrderController extends BackendController
         download_start($file, "application/octet-stream");
     }
 
+    public function ajax_get_list($contact_id = 0)
+    {
+        $response = ["status" => 1, "data" => []];
+
+        $conditions = [];
+
+        if ($contact_id)
+        {
+            $conditions["contact_id"] = $contact_id;
+        }
+
+        $list = $this->modelClass::getList("id", "display_name", $conditions, "id", "DESC");
+
+        $response['data'] = [];
+
+        foreach($list as $k => $v)
+        {
+            $response['data'][] = [
+                'id' => $k,
+                'name' => $v,
+            ];
+        }
+
+        return $this->responseJson($response);
+    }
+
     public function ajax_get_unlinked_list()
     {
         $response = ["status" => 1];
@@ -779,7 +802,7 @@ class SaleOrderController extends BackendController
         return $this->responseJson($response);
     }
 
-    public function ajax_get_available_qty_and_qty_to_manufacture($product_id, $make_id, $order_qty)
+    public function ajax_get_available_qty_and_qty_to_manufacture($product_id, $make_id, $order_qty, $sale_order_id = 0)
     {
         $response = ["status" => 1, "available_qty" => 0, "qty_to_manufacture" => 0];
 
@@ -793,7 +816,14 @@ class SaleOrderController extends BackendController
                 $response['available_qty'] += $model->getAvialiableQty();
             }
 
-            $so_order_qty = SaleOrderProduct::where("product_id", $product_id)->where("make_id", $make_id)->sum("order_qty");
+            $builder = SaleOrderProduct::where("product_id", $product_id)->where("make_id", $make_id);
+
+            if ($sale_order_id)
+            {
+                $builder->whereNot("sale_order_id", $sale_order_id);
+            }
+
+            $so_order_qty = $builder->sum("order_qty");
 
             $eo_order_qty = ExportOrderProduct::where("product_id", $product_id)->where("make_id", $make_id)->sum("order_qty");
 
@@ -815,6 +845,26 @@ class SaleOrderController extends BackendController
         {
             $response['qty_to_manufacture'] = $order_qty;
         }
+
+        return $this->responseJson($response);
+    }
+
+    public function ajax_get_pending_payable_amount($id, $payment_id = 0)
+    {
+        $response = ["status" => "1", "pending_amount" => 0];
+
+        $so = $this->modelClass::findOrFail($id);
+
+        if ($payment_id)
+        {
+            $payment_sum = $so->payment()->whereNot("id", $payment_id)->sum("amount");
+        }
+        else
+        {
+            $payment_sum = $so->payment->sum("amount");
+        }
+
+        $response['pending_amount'] = $so->total_amount - $so->advance_amount - $payment_sum;
 
         return $this->responseJson($response);
     }

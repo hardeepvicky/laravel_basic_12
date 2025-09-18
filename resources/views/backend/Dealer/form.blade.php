@@ -50,21 +50,47 @@
                             $field = 'mobile';
                             $label = get_value_from_list($field_labels, $field, $field);
                             ?>
-                            <x-Inputs.text-field :name="$field" :label="$label"
-                                :value="$model->{$field}" class="validate-mobile"
-                                placeholder="Enter {{ $label }}" 
-                                layout="horizontal"
-                                mandatory="true" />
-
+                            <div class="row mb-3">
+                                <div class="col-sm-3">
+                                    <label class="form-label">
+                                        {{ $label }}
+                                    </label>
+                                </div>
+                                <div class="col-sm-9">
+                                    <x-Inputs.group-text-field :id="$field" :name="$field" :label="$false" value="{{ $model->{$field} }}"
+                                        placeholder="Enter {{ $label }}" 
+                                        layout="horizontal"
+                                        placeholder="Enter {{ $label }}" 
+                                        autocomplete="off"
+                                        secondaryTextPosition="first"
+                                        secondaryText='<span class="input-group-text">+91</span>'
+                                        mandatory="true" 
+                                        />
+                                </div>
+                            </div>
+                                       
                             <?php
                             $field = 'mobile2';
                             $label = get_value_from_list($field_labels, $field, $field);
                             ?>
-                            <x-Inputs.text-field :name="$field" :label="$label"
-                                :value="$model->{$field}" class="validate-mobile"
-                                placeholder="Enter {{ $label }}"
-                                layout="horizontal"
-                                />
+                            <div class="row mb-3">
+                                <div class="col-sm-3">
+                                    <label class="form-label">
+                                        {{ $label }}
+                                    </label>
+                                </div>
+                                <div class="col-sm-9">
+                                    <x-Inputs.group-text-field :id="$field" :name="$field" :label="$false" value="{{ $model->{$field} }}"
+                                        placeholder="Enter {{ $label }}" 
+                                        layout="horizontal"
+                                        placeholder="Enter {{ $label }}" 
+                                        autocomplete="off"
+                                        secondaryTextPosition="first"
+                                        secondaryText='<span class="input-group-text">+91</span>'
+                                        mandatory="true" 
+                                        />
+                                </div>
+                            </div>
 
                             <?php
                             $field = 'phone_no';
@@ -102,7 +128,7 @@
                                 class="select2 cascade-drop-down"
                                 layout="horizontal"
                                 data-sr-cascade-target="#district_id"
-                                data-sr-cascade-url="/district/ajax_get_list/{v}" mandatory="true" />
+                                data-sr-cascade-url="/district/ajax_get_list/{v}"/>
 
                             <?php
                             $field = 'district_id';
@@ -113,7 +139,7 @@
                                 class="select2 cascade-drop-down" 
                                 layout="horizontal"
                                 data-sr-cascade-target="#city_id"
-                                data-sr-cascade-url="/city/ajax_get_list/0/{v}" mandatory="true" />
+                                data-sr-cascade-url="/city/ajax_get_list/0/{v}" />
 
                             <?php
                             $field = 'city_id';
@@ -123,8 +149,7 @@
                                 :list="$empty_list" :value="$model->{$field}" 
                                 class="select2"
                                 layout="horizontal"
-                                mandatory="true" />
-
+                                />
 
                             <?php
                             $field = 'status_type';
