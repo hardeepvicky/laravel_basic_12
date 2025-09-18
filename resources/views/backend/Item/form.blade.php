@@ -406,7 +406,7 @@ $false = false;
                 return sku;
             }
 
-            $("#parent_item_category_id").change(function(){
+            $("#root_item_category_id").change(function(){
                 var v = $(this).val();
 
                 if (v)
