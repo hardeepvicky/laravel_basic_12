@@ -37,6 +37,7 @@ use App\Http\Controllers\Backend\ExportCustomerController;
 use App\Http\Controllers\Backend\ExportDealerController;
 use App\Http\Controllers\Backend\ExportLeadController;
 use App\Http\Controllers\Backend\ExportOrderController;
+use App\Http\Controllers\Backend\ExportPartyController;
 use App\Http\Controllers\Backend\ExportPaymentController;
 use App\Http\Controllers\Backend\ExportStateController;
 use App\Http\Controllers\Backend\HolidayController;
@@ -1566,7 +1567,7 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
 
     
     $route_prefix = "export-party";
-    $controllerClass = ExportPaymentController::class;
+    $controllerClass = ExportPartyController::class;
     Route::resource($route_prefix, $controllerClass);
     Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
 
