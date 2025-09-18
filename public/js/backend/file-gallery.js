@@ -91,9 +91,18 @@ jQuery.fn.extend({
                 .find(".modal-footer button.de-select")
                 .click(function () {
                     $(".file-block").removeClass("active");
-                    gallery_modal
-                        .find(".modal-footer button.select")
-                        .trigger("click");
+                    
+                    file_info.html("0 files Selected");
+
+                    _this.val("");
+
+                    gallery_modal.modal("hide");
+
+                    $(".modal-backdrop").remove();
+
+                    if (typeof obj.onSelect == "function") {
+                        obj.onSelect([]);
+                    }
                 });
 
             $(obj.opener).click(function () {
