@@ -55,7 +55,7 @@
                         </th>
                         <th><?= sortable_anchor('rootItemCategory.name', get_value_from_list($field_labels, 'root_item_category_id', 'root_item_category_id')) ?></th>
                         <th><?= sortable_anchor('parentItemCategory.name', get_value_from_list($field_labels, 'parent_item_category_id', 'parent_item_category_id')) ?></th>
-                        <th><?= sortable_anchor('childItemCategory.name', get_value_from_list($field_labels, 'child_item_category_id', 'child_item_category_id')) ?></th>
+                        <th><?= sortable_anchor('department.name', get_value_from_list($field_labels, 'dept_id', 'dept_id')) ?></th>
                         <th>{{ get_value_from_list($field_labels, 'item_brand_id', 'item_brand_id') }}</th>
                         <th>{{ get_value_from_list($field_labels, 'size', 'size') }}</th>
                         <th>{{ get_value_from_list($field_labels, 'specification', 'specification') }}</th>
@@ -83,7 +83,7 @@
                             </th>
                             <td>{{ $record->rootItemCategory?->getDisplayName() }}</td>
                             <td>{{ $record->parentItemCategory?->getDisplayName() }}</td>
-                            <td>{{ $record->childItemCategory?->getDisplayName() }}</td>
+                            <td>{{ $record->department?->getDisplayName() }}</td>
                             <td>{{ $record->itemBrand?->getDisplayName() }}</td>
                             <td>{{ $record->size }}</td>
                             <td>{{ $record->specification }}</td>
@@ -91,8 +91,7 @@
                                 @if ($record->mainImage?->file_url)
                                     <a class="fancybox"
                                         href="{{ $record->mainImage->file_url }}">
-                                        <img class="img-thumbnail small-img"
-                                            src="{{ $record->mainImage->file_url }}" />
+                                        <img class="img-thumbnail small-img" src="{{ $record->mainImage->file_url }}" />
                                     </a>
                                 @endif
                             </td>
@@ -126,9 +125,44 @@
                                 <div class="row">
                                     <div class="col-md-12 col-xl-5">
                                         <label class="info">
+                                            {{ get_value_from_list($field_labels, 'part_no') }} :
+                                            <span>
+                                                {{ $record->part_no }}
+                                            </span>
+                                        </label>
+
+                                        <label class="info">
                                             {{ get_value_from_list($field_labels, 'sku') }} :
                                             <span>
                                                 {{ $record->sku }}
+                                            </span>
+                                        </label>
+
+                                        <label class="info">
+                                            {{ get_value_from_list($field_labels, 'weight') }} :
+                                            <span>
+                                                {{ $record->weight }} K.g.
+                                            </span>
+                                        </label>
+
+                                        <label class="info">
+                                            {{ get_value_from_list($field_labels, 'minimum_order_qty') }} :
+                                            <span>
+                                                {{ $record->minimum_order_qty }}
+                                            </span>
+                                        </label>
+
+                                        <label class="info">
+                                            {{ get_value_from_list($field_labels, 'origin_id') }} :
+                                            <span>
+                                                {{ $record->origin?->getDisplayName() }}
+                                            </span>
+                                        </label>
+
+                                        <label class="info">
+                                            {{ get_value_from_list($field_labels, 'certification_id') }} :
+                                            <span>
+                                                {{ $record->certification?->getDisplayName() }}
                                             </span>
                                         </label>
 

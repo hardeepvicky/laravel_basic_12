@@ -1,4 +1,4 @@
-<div style="padding:10px; position: sticky; top: 82px; z-index: 4; background-color:var(--white); border:3px solid var(--light-color); border-radius:20px;">    
+<div style="padding:10px; position: sticky; top: 82px; z-index: 2; background-color:var(--white); border:3px solid var(--light-color); border-radius:20px;">    
     <div class="d-flex  align-items-center">
         <?php if (isset($breadcums)): ?>
             <ol class="breadcrumb d-flex-grow-1" style="margin-bottom: 0;">

@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('item_departments', function (Blueprint $table) {
+        Schema::create('item_sub_departments', function (Blueprint $table) {
             $table->id();
             $table->foreignId("item_id")->constrained("items")->onDelete('restrict');
-            $table->foreignId("sub_dept_id")->constrained("sub_departments")->onDelete('restrict');
+            $table->foreignId("sub_department_id")->constrained("sub_departments")->onDelete('restrict');
             $table->timestamps();
         });
     }
@@ -24,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('item_departments');
+        Schema::dropIfExists('item_sub_departments');
     }
 };
