@@ -15,6 +15,7 @@ use App\Models\DropDownValue;
 use App\Models\FieldSetting;
 use App\Models\ImportLog;
 use App\Models\Item;
+use App\Models\ItemBrand;
 use App\Models\ItemCategory;
 use App\Models\ItemFile;
 use App\Models\Setting;
@@ -42,8 +43,6 @@ class ItemController extends BackendController
 
         $builder->with([
             "tags",
-            "color",
-            "brand",
             "mainImage",
             "images",
             "otherFiles",
@@ -59,11 +58,9 @@ class ItemController extends BackendController
             }
         }
 
-        $item_category_records = ItemCategory::getTreeRecords(ItemCategory::query());
+        $item_brand_list = ItemBrand::getList("id", "display_name", [], "list_display_order");
 
-        $item_category_list = Util::getTreeListArray($item_category_records, "id", "name", false, false);
-
-        $this->setForView(compact("records", "item_category_list"));
+        $this->setForView(compact("records", "item_brand_list"));
 
         return $this->viewIndex(__FUNCTION__);
     }
@@ -74,14 +71,11 @@ class ItemController extends BackendController
 
         $conditions = $this->getConditions($cache_key, [
             ["field" => "id", "type" => "int", "cache" => false],
-            ["field" => "item_category_id", "type" => "int"],
-            ["field" => "is_find_nested_child", "type" => "bool"],
-            ["field" => "name", "type" => "string"],
-            ["field" => "color_id", "type" => "int"],
-            ["field" => "brand_id", "type" => "int"],
+            ["field" => "root_item_category_id", "type" => "int"],            
+            ["field" => "name", "type" => "string"],            
+            ["field" => "item_brand_id", "type" => "int"],
             ["field" => "size", "type" => "string"],
             ["field" => "specification", "type" => "string"],
-            ["field" => "is_active", "type" => "int"],
         ]);
 
         $builder = $this->modelClass::query();
@@ -108,6 +102,12 @@ class ItemController extends BackendController
         // d($conditions, true);
 
         $builder = $builder->where($conditions);
+        $builder->with([
+            "rootItemcategory",
+            "parentItemcategory",
+            "childItemcategory",
+            "itemBrand"
+        ]);
 
         $tag_conditions = $this->getConditions($cache_key . "-2", [
             ["field" => "name", "type" => "string", "view_field" => "tag_name"],
@@ -145,8 +145,7 @@ class ItemController extends BackendController
             $this->model = new $this->modelClass();
         }
 
-        $color_list = DropDownValue::getList("id", "display_name", ["type" => DropDownValue::COLOR], "name");
-        $brand_list = DropDownValue::getList("id", "display_name", ["type" => DropDownValue::BRAND], "name");
+        $root_item_category_list = ItemCategory::getList("id", "display_name", ["parent_id" => 0], "list_display_order");
 
         $sku_pattern = Setting::getValue("item_sku_pattern");
 
@@ -158,7 +157,7 @@ class ItemController extends BackendController
 
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
-        $this->setForView(compact("color_list", "brand_list", "sku_pattern", "field_labels"));
+        $this->setForView(compact("root_item_category_list", "sku_pattern", "field_labels"));
 
         return parent::beforeViewRender();
     }
@@ -174,29 +173,9 @@ class ItemController extends BackendController
             'method' => 'POST',
         ];
 
-        $this->set_data_for_add_edit($model);
-
         $this->setForView(compact("model", 'form'));
 
         return $this->view("form");
-    }
-
-    private function set_data_for_add_edit($model)
-    {
-        $qb = ItemCategory::where("is_active", 1);
-
-        $conditions = ["is_active" => 1];
-
-        if ($model->item_category_id)
-        {
-            $qb->orWhere("id", $model->item_category_id);
-        }
-
-        $item_category_records = ItemCategory::getTreeRecords($qb);
-
-        $item_category_list = Util::getTreeListArray($item_category_records, "id", "name");
-
-        $this->setForView(compact("item_category_list"));
     }
 
     private function _common_validation_rules()
@@ -204,9 +183,10 @@ class ItemController extends BackendController
         return [
             "name" => ["required"],
             "description" => ["nullable"],
-            "item_category_id" => ["required"],
-            "color_id" => ["nullable"],
-            "brand_id" => ["nullable"],
+            "root_item_category_id" => ["required"],
+            "parent_item_category_id" => ["required"],
+            "child_item_category_id" => ["nullable"],
+            "item_brand_id" => ["nullable"],
             "size" => ["nullable"],
             "specification" => ["nullable"],
             "sku" => ["required"],
@@ -365,8 +345,6 @@ class ItemController extends BackendController
             'method' => 'PUT',
         ];
 
-        $this->set_data_for_add_edit($model);
-
         $this->setForView(compact("model", "form"));
 
         return $this->view("form");
@@ -444,8 +422,6 @@ class ItemController extends BackendController
         ];
 
         $this->setForView(compact("model", "form"));
-
-        $this->set_data_for_add_edit($model);
 
         return $this->view("form");
     }
@@ -825,8 +801,6 @@ class ItemController extends BackendController
         
         $builder->with([
             "tags",
-            "color",
-            "brand",
             "mainImage",
         ]);
 
@@ -864,11 +838,13 @@ class ItemController extends BackendController
 
             $csv_records[] = [
                 'ID' => $record['id'],
-                $field_labels['item_category_id'] => get_value_from_list($item_category_list, $record['item_category_id']),
+                $field_labels['root_item_category_id'] => $record['root_item_category']['name'] ?? "",
+                $field_labels['parent_item_category_id'] => $record['parent_item_category']['name'] ?? "",
+                $field_labels['child_item_category_id'] => $record['child_item_category']['name'] ?? "",
                 $field_labels['name'] => $record['name'],
-                $field_labels['color_id'] => $record['color']['name'] ?? "",
-                $field_labels['brand_id'] => $record['brand']['name'] ?? "",
                 $field_labels['specification'] => $record['specification'] ?? "",
+                $field_labels['size'] => $record['size'] ?? "",
+                $field_labels['brand_id'] => $record['item_brand']['name'] ?? "",
                 $field_labels['sku'] => $record['sku'] ?? "",
                 $field_labels['description'] => $record['description'] ?? "",
                 $field_labels['main_image_id'] => $record['main_image']['file_url'] ? url($record['main_image']['file_url']) : "",

@@ -7,8 +7,10 @@ use App\Helpers\CsvUtility;
 use App\Helpers\DateUtility;
 use App\Helpers\FileUtility;
 use App\Helpers\LaravelExtend;
+use App\Helpers\Util;
 use App\Models\FieldSetting;
 use App\Models\ItemBrand;
+use App\Models\ItemCategory;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Exception;
@@ -69,10 +71,23 @@ class ItemBrandController extends BackendController
         if (is_null($this->model)) {
             $this->model = new $this->modelClass();
         }
-        
+
+        $qb = ItemCategory::where("is_active", 1);
+
+        $conditions = ["is_active" => 1];
+
+        if ($this->model->item_category_id)
+        {
+            $qb->orWhere("id", $this->model->item_category_id);
+        }
+
+        $item_category_records = ItemCategory::getTreeRecords($qb);
+
+        $item_category_list = Util::getTreeListArray($item_category_records, "id", "name", false, false);
+
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
-        $this->setForView(compact("field_labels"));
+        $this->setForView(compact("field_labels", "item_category_list"));
 
         return parent::beforeViewRender();
     }
@@ -96,7 +111,9 @@ class ItemBrandController extends BackendController
     private function _common_validation_rules()
     {
         return [
+            "item_category_id" => ["required"],
             "name" => ["required"],
+            "short_name" => ["required"],
             "list_display_order" => "",
             "is_active" => "",
         ];
@@ -220,6 +237,8 @@ class ItemBrandController extends BackendController
             'method' => 'POST',
         ];
 
+        $this->set_data_for_add_edit($model);
+
         $this->setForView(compact("model", "form"));
 
         return $this->view("form");
@@ -286,4 +305,29 @@ class ItemBrandController extends BackendController
         download_start($file, "application/octet-stream");
     }
 
+    public function ajax_get_list($category_id)
+    {
+        $response = ["status" => 1];
+
+        try {
+
+            $records = $this->modelClass::where("item_category_id", $category_id)->get();
+
+            $response['data'] = [];
+
+            foreach ($records as $record) {
+                $row = [
+                    "id" => $record->id,
+                    "name" => $record->getDisplayName(),
+                ];
+
+                $response['data'][] = $row;
+            }
+        } catch (Exception $ex) {
+            $response['status'] = 0;
+            $response['msg'] = $ex->getMessage();
+        }
+
+        return $this->responseJson($response);
+    }
 }

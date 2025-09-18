@@ -1,13 +1,9 @@
 <div class="card" id="page-summary">
     <div class="card-header">
-        <x-Backend.pagination-links :records="$records" />
+        <a href="{{ route($routePrefix . '.export.csv') }}" class="btn btn-secondary">Export CSV</a>
     </div>
 
-    <div class="card-body p-1">
-        <div class="m-2">
-            <a href="{{ route($routePrefix . '.export.csv') }}" class="btn btn-secondary">Export CSV</a>
-        </div>
-
+    <div class="card-body p-1">        
         <div class="table-responsive">
             <table class="table table-bordered summary_table_with_search">
                 <thead>
@@ -27,15 +23,17 @@
                         </th>
                         <th style="width:15%">
                             <?php
-                            $field = "item_category_id";
+                            $field = "root_item_category_id";
                             ?>
-                            <x-Inputs.drop-down :name="$field" :label="$false" :value="$search[$field]" :list="$item_category_list" class="select2" pleaseSelect="All" class="select2 form-select-sm"/>
-                        </th>                        
+                            <x-Inputs.drop-down :name="$field" :label="$false" :value="$search[$field]" :list="$root_item_category_list" class="select2" pleaseSelect="All" class="select2 form-select-sm"/>
+                        </th>
+                        <th></th>
+                        <th></th>
                         <th style="width:8%">
                             <?php
-                            $field = "brand_id";
+                            $field = "item_brand_id";
                             ?>
-                            <x-Inputs.drop-down :name="$field" :label="$false" :value="$search[$field]" :list="$brand_list" class="select2" pleaseSelect="All" class="select2 form-select-sm"/>
+                            <x-Inputs.drop-down :name="$field" :label="$false" :value="$search[$field]" :list="$item_brand_list" class="select2" pleaseSelect="All" class="select2 form-select-sm"/>
                         </th>
                         <th style="width:8%">
                             <?php
@@ -55,8 +53,10 @@
                             <?= sortable_anchor('id', get_value_from_list($field_labels, 'id', 'id')) ?>
                             | <?= sortable_anchor('name', get_value_from_list($field_labels, 'name', 'name')) ?>
                         </th>
-                        <th><?= sortable_anchor('category.name', get_value_from_list($field_labels, 'item_category_id', 'item_category_id')) ?></th>
-                        <th>{{ get_value_from_list($field_labels, 'brand_id', 'brand_id') }}</th>
+                        <th><?= sortable_anchor('rootItemCategory.name', get_value_from_list($field_labels, 'root_item_category_id', 'root_item_category_id')) ?></th>
+                        <th><?= sortable_anchor('parentItemCategory.name', get_value_from_list($field_labels, 'parent_item_category_id', 'parent_item_category_id')) ?></th>
+                        <th><?= sortable_anchor('childItemCategory.name', get_value_from_list($field_labels, 'child_item_category_id', 'child_item_category_id')) ?></th>
+                        <th>{{ get_value_from_list($field_labels, 'item_brand_id', 'item_brand_id') }}</th>
                         <th>{{ get_value_from_list($field_labels, 'size', 'size') }}</th>
                         <th>{{ get_value_from_list($field_labels, 'specification', 'specification') }}</th>
                         <th style="width:10%">{{ get_value_from_list($field_labels, 'main_image_id', 'main_image_id') }}</th>
@@ -81,8 +81,10 @@
                                     </div>
                                 </x-Backend.celec-summary-table-first-column>
                             </th>
-                            <td>{{ get_value_from_list($item_category_list, $record->item_category_id) }}</td>
-                            <td>{{ $record->brand?->getDisplayName() }}</td>
+                            <td>{{ $record->rootItemCategory?->getDisplayName() }}</td>
+                            <td>{{ $record->parentItemCategory?->getDisplayName() }}</td>
+                            <td>{{ $record->childItemCategory?->getDisplayName() }}</td>
+                            <td>{{ $record->itemBrand?->getDisplayName() }}</td>
                             <td>{{ $record->size }}</td>
                             <td>{{ $record->specification }}</td>
                             <td id="main_image-{{ $record->id }}">
@@ -120,7 +122,7 @@
                         </tr>
                         <tr id="record-{{ $record->id }}" class="hidden">
                             <td style="background-color: var(--body--bs-body-bg)"></td>
-                            <td colspan="9">
+                            <td colspan="11">
                                 <div class="row">
                                     <div class="col-md-12 col-xl-5">
                                         <label class="info">

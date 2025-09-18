@@ -16,27 +16,27 @@ $false = false;
         <form method="GET" class="summary_search" action="{{ route($routePrefix . '.index') }}">
             <input type="hidden" name="is_sort_clear" value="1" />
             <?php
-                $field = "item_category_id";
+                $field = "root_item_category_id";
             ?>
             <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
             
-            <?php
-                $field = "is_find_nested_child";
-            ?>
-            <input type="text"  name="{{ $field }}" value="{{ $search[$field] }}" />
-
             <?php
                 $field = "name";
             ?>
             <input type="text"  name="{{ $field }}" value="{{ $search[$field] }}" />
 
             <?php
-                $field = "color_id";
+                $field = "size";
             ?>
-            <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
+            <input type="text"  name="{{ $field }}" value="{{ $search[$field] }}" />
 
             <?php
-                $field = "brand_id";
+                $field = "specification";
+            ?>
+            <input type="text"  name="{{ $field }}" value="{{ $search[$field] }}" />
+
+            <?php
+                $field = "item_brand_id";
             ?>
             <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
 

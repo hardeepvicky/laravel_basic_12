@@ -15,7 +15,6 @@ return new class extends MyMigration
         $this->dropColumnsWithIndex("purchase_order_items", ["make_id"]);
 
         Schema::table('purchase_order_items', function (Blueprint $table) {
-            $table->foreignId("item_category_id")->after("purchase_order_id")->constrained("item_categories")->onDelete("restrict");
             $table->foreignId("item_brand_id")->after("item_id")->nullable()->constrained("item_brands")->onDelete("restrict");
         });
     }
