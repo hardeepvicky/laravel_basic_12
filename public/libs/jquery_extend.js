@@ -1098,7 +1098,7 @@ jQuery.fn.extend({
                                 {
                                     settings.onError(
                                         feature + " Error on get " + new_url,
-                                        "data is not onject in new_response"
+                                        "data is not object in new_response"
                                     );
 
                                     return;

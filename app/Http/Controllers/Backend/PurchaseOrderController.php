@@ -43,10 +43,11 @@ class PurchaseOrderController extends BackendController
         $builder = $this->_getBuildeForIndex($cache_key_prefix);
 
         $builder->with([
+            "branch",
+            "party",
             "purchaseOrderItem.item",
             "purchaseOrderItem.item.category",
             "purchaseOrderItem.item.category.uom",
-            "purchaseOrderItem.make",
             "purchaseOrderItem.purchaseOrderReceiveItem",
         ]);
 
@@ -54,11 +55,7 @@ class PurchaseOrderController extends BackendController
 
         // d($records->toArray(), true);
 
-        $product_category_records = ProductCategory::getTreeRecords(ProductCategory::query());
-
-        $product_category_list = Util::getTreeListArray($product_category_records, "id", "name", false, false);
-
-        $this->setForView(compact("records", "product_category_list"));
+        $this->setForView(compact("records"));
 
         return $this->viewIndex(__FUNCTION__);
     }
@@ -94,11 +91,6 @@ class PurchaseOrderController extends BackendController
 
         $builder = $builder->where($conditions);
 
-        $builder->with([
-            "branch",
-            "party",
-        ]);
-
         if ($apply_sort) {
             $cache_key_for_sort = $cache_key_prefix . "-index-extra-params";
 
@@ -127,12 +119,9 @@ class PurchaseOrderController extends BackendController
 
         // d($contact_list, true);
 
-        $maker_list = Maker::getList("id", "display_name", [], "list_display_order");
         $branch_list = Branch::getList("id", "display_name", [], "list_display_order");
         $party_list = Party::getList("id", "display_name", ["type" => [Party::TYPE_OEM, Party::TYPE_SUPPLIER, Party::TYPE_VENDOR]], "list_display_order");
         $item_list = Item::getList("id", "display_name", [], "list_display_order");
-
-        $default_maker = Maker::where("is_default", 1)->first();
 
         $status_list = PurchaseOrder::getStatusTypeList();
 
@@ -140,7 +129,8 @@ class PurchaseOrderController extends BackendController
 
         $purchase_order_item_field_labels = FieldSetting::getDynamicFields(PurchaseOrderItem::class);
 
-        $this->setForView(compact("maker_list", "branch_list", "party_list", "default_maker", "item_list", "status_list",
+        $this->setForView(compact(
+            "branch_list", "party_list", "item_list", "status_list",
             "field_labels", "purchase_order_item_field_labels"
         ));
 
@@ -257,7 +247,6 @@ class PurchaseOrderController extends BackendController
             if (isset($validatedData['purchase_order_items'])) {
                 $base_rules = [
                     "item_id" => ["required"],
-                    "make_id" => ["required"],
                     "part_no" => ["nullable"],
                     "qty" => ["required"],
                     "uom_id" => ["required"],
@@ -686,6 +675,8 @@ class PurchaseOrderController extends BackendController
     public function receive_items($id, Request $request)
     {
         $model = $this->model = $this->modelClass::with([
+            "branch",
+            "party",
             "purchaseOrderItem.item",
             "purchaseOrderItem.item.category",
             "purchaseOrderItem.item.category.uom",

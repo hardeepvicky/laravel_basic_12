@@ -483,7 +483,7 @@ class ItemController extends BackendController
 
     public function ajax_get_child_uom_list($item_id)
     {
-        $response = ["status" => 1];
+        $response = ["status" => 1, "data" => []];
 
         try {
 

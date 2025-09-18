@@ -72,16 +72,6 @@ $formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, 0);
                             ?>
                             <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]" class="form-control-sm" />
                         </th>
-                        <th style="width:10%">
-                            <?php
-                            $field = 'make_id';
-                            ?>
-                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false"
-                                :value="$search[$field]" 
-                                :list="$maker_list"
-                                class="select2 form-select-sm"
-                            />
-                        </th>
                         <th></th>
                         <th style="width:10%">
                             <?php
@@ -108,7 +98,6 @@ $formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, 0);
                         <th><?= sortable_anchor('subDepartment.name', get_value_from_list($field_labels, 'sub_dept_id', 'sub_dept_id')) ?></th>
                         <th><?= sortable_anchor('item.name', get_value_from_list($field_labels, 'item_id', 'item_id')) ?></th>
                         <th><?= sortable_anchor('part_no', get_value_from_list($field_labels, 'part_no', 'part_no')) ?></th>
-                        <th><?= sortable_anchor('make.name', get_value_from_list($field_labels, 'make_id', 'make_id')) ?></th>
                         <th style="width:8%"><?= sortable_anchor('qty', get_value_from_list($field_labels, 'qty', 'qty')) ?></th>
                         <th><?= sortable_anchor('status', get_value_from_list($field_labels, 'status', 'status')) ?></th>
                         <th style="width:8%">
@@ -158,9 +147,6 @@ $formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, 0);
                             </td>
                             <td>
                                 {{ $record->part_no }}
-                            </td>
-                            <td>
-                                {{ $record->make?->getDisplayName() }}
                             </td>
                             <td>
                                 {{ $record->qty }} {{ $record->uom?->getDisplayName() }}

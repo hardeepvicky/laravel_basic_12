@@ -44,11 +44,6 @@
                 <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
                 
                 <?php 
-                    $field = "make_id";
-                ?>
-                <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
-                
-                <?php 
                     $field = "status";
                 ?>
                 <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
