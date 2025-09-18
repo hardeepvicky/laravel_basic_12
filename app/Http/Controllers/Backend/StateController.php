@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Backend;
 
+use App\Exceptions\UserException;
 use App\Models\Country;
 use App\Models\FieldSetting;
 use App\Models\State;
@@ -64,6 +65,11 @@ class StateController extends BackendController
         $country_list = Country::getListCache();
 
         $my_country = Country::getMyCountry();
+
+        if (!$my_country)
+        {
+            throw new UserException("Country India not found");
+        }
 
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 

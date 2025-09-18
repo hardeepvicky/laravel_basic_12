@@ -22,7 +22,7 @@ class JobSendSmsGeneral implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(public String $name, public String $mobile, public String $country_code, public string $msg, public $user_id = null) {}
+    public function __construct(public int $port, public String $name, public String $mobile, public String $country_code, public string $msg, public $user_id = null) {}
 
     /**
      * Execute the job.
@@ -43,7 +43,8 @@ class JobSendSmsGeneral implements ShouldQueue
         }
 
         $smsHelper = new SmsHelper();
-        $smsHelper->setTemplate($template->template_name, $template->language)
+        $smsHelper->setPort($this->port)
+            ->setTemplate($template->template_name, $template->language)
             ->setCountryCode("+" . $this->country_code)
             ->setTo($this->mobile, $this->name, $this->user_id)
             ->setMessage($this->msg)

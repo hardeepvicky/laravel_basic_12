@@ -320,6 +320,7 @@ class ExportCustomerController extends BackendController
             $lead = ExpLead::create($save_data);
 
             $save_data['exp_lead_id'] = $lead->id;
+            $save_data['assign_to_user_id'] = LaravelExtend::getAuthUserId();
 
             $this->model = $this->modelClass::create($save_data);
 

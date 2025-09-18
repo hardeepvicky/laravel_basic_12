@@ -17,8 +17,6 @@ class Item extends BaseModel
 
     protected static array $list_fields = ["id", "name", "sku"];
 
-    protected static array $fields_containg_tags = ["description"];
-
     public string $field_for_create_tag = "sku";
 
     public static array $child_model_class = [
@@ -34,7 +32,6 @@ class Item extends BaseModel
             "foreignKey" => "item_id",
             "preventDelete" => true
         ],
-        
         DispatchOrderItem::class => [
             "foreignKey" => ["item_id"],
             "preventDelete" => true
@@ -59,7 +56,47 @@ class Item extends BaseModel
 
     public function category()
     {
-        return $this->belongsTo(ItemCategory::class, "item_category_id");
+        return $this->belongsTo(ItemCategory::class, "root_item_category_id");
+    }
+
+    public function rootItemCategory()
+    {
+        return $this->belongsTo(ItemCategory::class, "root_item_category_id");
+    }
+
+    public function parentItemCategory()
+    {
+        return $this->belongsTo(ItemCategory::class, "parent_item_category_id");
+    }
+
+    public function childItemCategory()
+    {
+        return $this->belongsTo(ItemCategory::class, "child_item_category_id");
+    }
+
+    public function itemBrand()
+    {
+        return $this->belongsTo(ItemBrand::class);
+    }
+
+    public function department()
+    {
+        return $this->belongsTo(Department::class, "dept_id");
+    }
+
+    public function origin()
+    {
+        return $this->belongsTo(DropDownValue::class, "origin_id");
+    }
+
+    public function certification()
+    {
+        return $this->belongsTo(DropDownValue::class, "certification_id");
+    }
+
+    public function subDepartment()
+    {
+        return $this->belongsToMany(SubDepartment::class, ItemSubDepartment::class);
     }
 
     public function itemFile()
@@ -80,16 +117,6 @@ class Item extends BaseModel
     public function mainImage()
     {
         return $this->belongsTo(DocumentFile::class);
-    }
-
-    public function color()
-    {
-        return $this->belongsTo(DropDownValue::class);
-    }
-
-    public function brand()
-    {
-        return $this->belongsTo(DropDownValue::class);
     }
 
     public function tags()
@@ -142,9 +169,9 @@ class Item extends BaseModel
 
         switch($field)
         {
-            case "item_category_id":
+            case "root_item_category_id":
                 $ret_array = [
-                    $field => $this->item?->getDisplayName()
+                    $field => $this->rootItemcategory?->getDisplayName()
                 ];
                 break;
         }

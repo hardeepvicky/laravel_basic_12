@@ -65,6 +65,12 @@
                     ?>
                     <x-Inputs.drop-down :name="$field" :label="$false" :value="$search[$field]" :list="$product_list" pleaseSelect="All" class="select2 form-select-sm" />
                 </th>
+                <th style="width:8%">
+                    <?php
+                    $field = 'status_type';
+                    ?>
+                    <x-Inputs.drop-down :name="$field" :label="$false" :value="$search[$field]" :list="$status_type_list" pleaseSelect="All" class="select2 form-select-sm" />
+                </th>
             </tr>
             <tr class="border-bottom-primary">
                 <th>
@@ -104,20 +110,20 @@
                                     <?php
                                     $route_prefix_2 = $record->type;
                                     ?>
-                                    @if (in_array($record->type, ["lead", "customer"]))
+                                    @if (in_array($record->type, ["lead", "customer", "party", "dealer"]))
                                     <li>
-                                        <a class="btn btn-outline-info summary-action-button" href="{{ route($route_prefix_2 . '.history',[$record->id]) }}">
+                                        <a class="btn btn-outline-info summary-action-button" href="{{ route($route_prefix_2 . '.history',[$record->ref_id]) }}">
                                             <i class="fa-solid fa-clock-rotate-left"></i>
                                         </a>
                                     </li>
                                     @endif
                                     <li>
-                                        <a class="btn btn-outline-primary summary-action-button" href="{{ route($route_prefix_2 . '.edit',[$record->id]) }}">
+                                        <a class="btn btn-outline-primary summary-action-button" href="{{ route($route_prefix_2 . '.edit',[$record->ref_id]) }}">
                                             <i class="icon-pencil-alt"></i>
                                         </a>
                                     </li>
                                     <li>
-                                        <x-Backend.summary-delete-button url="{{ route($route_prefix_2 . '.destroy', [$record->id]) }}" />
+                                        <x-Backend.summary-delete-button url="{{ route($route_prefix_2 . '.destroy', [$record->ref_id]) }}" />
                                     </li>
                                 </ul>
                             </div>

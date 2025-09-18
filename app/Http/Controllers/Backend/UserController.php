@@ -124,6 +124,11 @@ class UserController extends BackendController
 
         $my_country = Country::getMyCountry();
 
+        if (!$my_country)
+        {
+            throw new UserException("Country India not found");
+        }
+
         $type_conditions = [
             "type" => Type::getType($this->model, "sub_type")
         ];
@@ -159,6 +164,11 @@ class UserController extends BackendController
         $is_add_form = true;
 
         $my_country = Country::getMyCountry();
+
+        if (!$my_country)
+        {
+            throw new UserException("Country India not found");
+        }
 
         $model->country_id = $my_country->id;
 
@@ -213,6 +223,7 @@ class UserController extends BackendController
             'allow_ip' => [],
             'office_landline_no' => "",
             'voip_mobile' => "",
+            'dinstar_port' => "",
             "dont_send_email" => "",
             "profile_image" => "",
             "is_active" => "",
@@ -301,6 +312,12 @@ class UserController extends BackendController
 
         if (!$model->country_id) {
             $my_country = Country::getMyCountry();
+
+            if (!$my_country)
+            {
+                throw new UserException("Country India not found");
+            }
+            
             $model->country_id = $my_country->id;
         }
 

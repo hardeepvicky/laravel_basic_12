@@ -77,6 +77,11 @@ class CityController extends BackendController
 
         $my_country = Country::getMyCountry();
 
+        if (!$my_country)
+        {
+            throw new UserException("Country India not found");
+        }
+
         $district_conditions = [];
 
         if (isset($condition_list['state_id']))
@@ -172,7 +177,7 @@ class CityController extends BackendController
             
             $this->saveSqlLog();
 
-            return back()->withInput()->with('fail', $ex->getMessage());
+            return back()->withInput()->with('fail', get_exception_display_message($ex))->with("custom_errors", LaravelExtend::$errors);;
         }
     }
 
@@ -224,7 +229,7 @@ class CityController extends BackendController
 
             $this->saveSqlLog();
 
-            return back()->withInput()->with('fail', $ex->getMessage());
+            return back()->withInput()->with('fail', get_exception_display_message($ex))->with("custom_errors", LaravelExtend::$errors);;
         }
     }
 

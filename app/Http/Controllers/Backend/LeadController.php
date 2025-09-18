@@ -121,6 +121,11 @@ class LeadController extends BackendController
 
         $my_country = Country::getMyCountry();
 
+        if (!$my_country)
+        {
+            throw new UserException("Country India not found");
+        }
+
         $state_conditions = [
             ["country_id", $my_country->id],
             ["is_active", 1]
@@ -268,6 +273,11 @@ class LeadController extends BackendController
     {
         $my_country = Country::getMyCountry();
 
+        if (!$my_country)
+        {
+            throw new UserException("Country India not found");
+        }
+
         $district_cities = City::getWithDistrict([["country_id", $my_country->id]], [["is_active", 1]], [["is_active", 1]]);
         
         $district_city_collection = collect($district_cities);
@@ -334,6 +344,8 @@ class LeadController extends BackendController
             unset($save_data['addresses']);
             unset($save_data['products']);
 
+            $save_data['assign_to_user_id'] = LaravelExtend::getAuthUserId();
+
             $this->model = $this->modelClass::create($save_data);
 
             $this->_saveOthers($validatedData);
@@ -369,6 +381,11 @@ class LeadController extends BackendController
         if (isset($validatedData['city_id']) && $validatedData['city_id'])
         {
             $my_country = Country::getMyCountry();
+
+            if (!$my_country)
+            {
+                throw new UserException("Country India not found");
+            }
 
             $district_cities = City::getWithDistrict([["country_id", $my_country->id]], [["is_active", 1]], [["is_active", 1]]);
 
@@ -799,7 +816,7 @@ class LeadController extends BackendController
             "documentFile"
         ])->findOrFail($lead_id);
 
-        $record->convertTimeZoneForDisplay();
+        $record->afterFind();
 
         $form = [
             'url' => route($this->routePrefix . '.history_store', $lead_id),
@@ -912,8 +929,13 @@ class LeadController extends BackendController
                 $lead->changeNextFollowupDateTime($validatedData['next_meeting_date_time']);
             }
 
-            if ($validatedData['action_type'] == LeadHistory::ACTION_TYPE_CALL && $lead->assignTo?->name)
+            if ($validatedData['action_type'] == LeadHistory::ACTION_TYPE_CALL)
             {
+                if (!$lead->assignTo?->name)
+                {
+                    throw new UserException("Please Assign Lead to user", UserException::ERROR_USER_DATA_WRONG);
+                }
+
                 $voip_no = $lead->assignTo->name;
                 if (!is_numeric($voip_no))
                 {
@@ -941,6 +963,10 @@ class LeadController extends BackendController
 
             if ($validatedData['action_type'] == LeadHistory::ACTION_TYPE_SEND_SMS) 
             {
+                if (!$lead->assignTo?->name)
+                {
+                    throw new UserException("Please Assign Lead to user", UserException::ERROR_USER_DATA_WRONG);
+                }
 
                 if (!$lead->name)
                 {
@@ -952,7 +978,7 @@ class LeadController extends BackendController
                     throw new UserException("Mobile No. not found");
                 }
 
-                $job = new JobSendSmsGeneral($lead->name, $lead->mobile, "91", $validatedData['action']);
+                $job = new JobSendSmsGeneral($lead->assignTo->dinstar_port, $lead->name, $lead->mobile, "91", $validatedData['action']);
                 dispatch($job);
             }
 
@@ -1184,6 +1210,11 @@ class LeadController extends BackendController
             $dispatch->status_type = DispatchOrder::STATUS_PENDING;
 
             $my_country = Country::getMyCountry();
+
+            if (!$my_country)
+            {
+                throw new UserException("Country India not found");
+            }
 
             if ($lead->deal_type == Lead::DEAL_TYPE_THROGH_DEALER)
             {
@@ -1722,19 +1753,20 @@ class LeadController extends BackendController
                     $row = [];
 
                     $row['display'] = $record->getDisplayName();
-
-                    $routePrefix = "lead";
+                    
                     if ($record->is_customer)
                     {   
-                        $row['display'] .= " (Customer)";
-                        $routePrefix = "customer";
+                        $row['display'] .= " (Customer)";                        
+                        $row['url'] = route("customer.edit", [$record->customer->id]);
                     }
                     else
                     {
                         $row['display'] .= " (Lead)";
+                        $routePrefix = "lead";
+                        $row['url'] = route("lead.edit", [$record->id]);
                     }
 
-                    $row['url'] = route($routePrefix . ".edit", [$record]);
+                    
 
                     $response['data'][] = $row;
                 }

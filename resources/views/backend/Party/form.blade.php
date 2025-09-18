@@ -43,21 +43,48 @@
                             $field = 'mobile';
                             $label = get_value_from_list($field_labels, $field, $field);
                             ?>
-                            <x-Inputs.text-field :name="$field" :label="$label"
-                                :value="$model->{$field}" 
-                                class="validate-mobile"
-                                layout="horizontal"
-                                placeholder="Enter {{ $label }}" 
-                                mandatory="true" />
+                            <div class="row mb-3">
+                                <div class="col-sm-3">
+                                    <label class="form-label">
+                                        {{ $label }}
+                                    </label>
+                                </div>
+                                <div class="col-sm-9">
+                                    <x-Inputs.group-text-field :id="$field" :name="$field" :label="$false" value="{{ $model->{$field} }}"
+                                        placeholder="Enter {{ $label }}" 
+                                        layout="horizontal"
+                                        placeholder="Enter {{ $label }}" 
+                                        autocomplete="off"
+                                        secondaryTextPosition="first"
+                                        secondaryText='<span class="input-group-text">+91</span>'
+                                        mandatory="true" 
+                                        />
+                                </div>
+                            </div>
+                                       
                             <?php
                             $field = 'mobile2';
                             $label = get_value_from_list($field_labels, $field, $field);
                             ?>
-                            <x-Inputs.text-field :name="$field" :label="$label"
-                                :value="$model->{$field}" 
-                                layout="horizontal"
-                                class="validate-mobile"
-                                placeholder="Enter {{ $label }}" />
+                            <div class="row mb-3">
+                                <div class="col-sm-3">
+                                    <label class="form-label">
+                                        {{ $label }}
+                                    </label>
+                                </div>
+                                <div class="col-sm-9">
+                                    <x-Inputs.group-text-field :id="$field" :name="$field" :label="$false" value="{{ $model->{$field} }}"
+                                        placeholder="Enter {{ $label }}" 
+                                        layout="horizontal"
+                                        placeholder="Enter {{ $label }}" 
+                                        autocomplete="off"
+                                        secondaryTextPosition="first"
+                                        secondaryText='<span class="input-group-text">+91</span>'
+                                        mandatory="true" 
+                                        />
+                                </div>
+                            </div>
+                            
                             <?php
                             $field = 'phone_no';
                             $label = get_value_from_list($field_labels, $field, $field);

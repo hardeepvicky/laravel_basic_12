@@ -37,9 +37,10 @@ use App\Http\Controllers\Backend\ExportCustomerController;
 use App\Http\Controllers\Backend\ExportDealerController;
 use App\Http\Controllers\Backend\ExportLeadController;
 use App\Http\Controllers\Backend\ExportOrderController;
-use App\Http\Controllers\Backend\ExportPartyController;
+use App\Http\Controllers\Backend\ExportPaymentController;
 use App\Http\Controllers\Backend\ExportStateController;
 use App\Http\Controllers\Backend\HolidayController;
+use App\Http\Controllers\Backend\ItemBrandController;
 use App\Http\Controllers\Backend\ItemCategoryController;
 use App\Http\Controllers\Backend\ItemController;
 use App\Http\Controllers\Backend\LeadController;
@@ -47,17 +48,23 @@ use App\Http\Controllers\Backend\MakerController;
 use App\Http\Controllers\Backend\ManufactureOrderController;
 use App\Http\Controllers\Backend\NotificationController;
 use App\Http\Controllers\Backend\PartyController;
+use App\Http\Controllers\Backend\PaymentController;
 use App\Http\Controllers\Backend\PermissionController;
 use App\Http\Controllers\Backend\ProductCategoryController;
 use App\Http\Controllers\Backend\ProductController;
+use App\Http\Controllers\Backend\ProductIssueController;
 use App\Http\Controllers\Backend\ProductSerialController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Backend\PublicController;
+use App\Http\Controllers\Backend\PurchaseOrderController;
+use App\Http\Controllers\Backend\PurchaseOrderPaymentController;
 use App\Http\Controllers\Backend\RecordHistoryController;
 use App\Http\Controllers\Backend\RecurringTaskController;
+use App\Http\Controllers\Backend\RequirementController;
 use App\Http\Controllers\Backend\RoleController;
 use App\Http\Controllers\Backend\SaleOrderController;
 use App\Http\Controllers\Backend\SampleController;
+use App\Http\Controllers\Backend\ServiceController;
 use App\Http\Controllers\Backend\SettingsController;
 use App\Http\Controllers\Backend\ShipOrderController;
 use App\Http\Controllers\Backend\SmsTemplateController;
@@ -80,6 +87,7 @@ use App\Models\MailjetWebhook;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Exporter;
 use Mailjet\Resources;
 
 
@@ -1098,6 +1106,9 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
         $name = "ajax_get";
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
 
+        $name = "ajax_get_list";
+        Route::get($name . "/{category_id}", [$controllerClass, $name])->name($name);
+
         $name = "ajax_update_field";
         Route::post($name, [$controllerClass, $name])->name($name);
     });
@@ -1292,12 +1303,44 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
         });
     });
 
+    $route_prefix = "item-brand";
+    $controllerClass = ItemBrandController::class;
+    Route::resource($route_prefix, $controllerClass);
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
+        $name = "copy";
+        Route::get("{id}/" . $name, [$controllerClass, $name])->name($name);
+
+        $name = "activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "de_activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "ajax_update_field";
+        Route::post($name, [$controllerClass, $name])->name($name);
+
+        $name = "ajax_get";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+        
+        $name = "ajax_get_list";
+        Route::get($name . "/{category_id}", [$controllerClass, $name])->name($name);
+
+        $route_prefix = "export";
+        Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+            $name = "csv";
+            Route::get($name, [$controllerClass, "export_" . $name])->name($name);
+        });
+    });
+
     $route_prefix = "product-serial";
     $controllerClass = ProductSerialController::class;
     Route::resource($route_prefix, $controllerClass);
     $name="ajax_get_unlinked_list";
     Route::get($route_prefix . "-" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
     $name="ajax_get_unlinked_child_list";
+    Route::get($route_prefix . "-" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
+    $name="ajax_get_list";
     Route::get($route_prefix . "-" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
     Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
 
@@ -1317,11 +1360,17 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
     $name="ajax_get_unlinked_list";
     Route::get($route_prefix . "-" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
     $name="ajax_get_available_qty_and_qty_to_manufacture";
-    Route::get($route_prefix . "-" . $name . "/{product_id}/{make_id?}/{order_qty?}", [$controllerClass, $name])->name($route_prefix . "." . $name);
+    Route::get($route_prefix . "-" . $name . "/{product_id}/{make_id?}/{order_qty?}/{sale_order_id?}", [$controllerClass, $name])->name($route_prefix . "." . $name);
     Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
 
         $name = "copy";
         Route::get("{id}/" . $name, [$controllerClass, $name])->name($name);
+
+        $name = "ajax_get_list";
+        Route::get($name . "/{contact_id}", [$controllerClass, $name])->name($name);
+
+        $name = "ajax_get_pending_payable_amount";
+        Route::get($name . "/{id}/{payment_id?}", [$controllerClass, $name])->name($name);
 
         $name = "ajax_update_field";
         Route::post($name, [$controllerClass, $name])->name($name);
@@ -1332,6 +1381,21 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
             Route::get($name, [$controllerClass, "export_" . $name])->name($name);
 
             $name = "product_csv";
+            Route::get($name, [$controllerClass, "export_" . $name])->name($name);
+        });
+    });
+
+    $route_prefix = "payment";
+    $controllerClass = PaymentController::class;
+    Route::resource($route_prefix, $controllerClass);    
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
+        $name = "ajax_update_field";
+        Route::post($name, [$controllerClass, $name])->name($name);
+
+        $route_prefix = "export";
+        Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+            $name = "csv";
             Route::get($name, [$controllerClass, "export_" . $name])->name($name);
         });
     });
@@ -1347,27 +1411,6 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
     Route::any($route_prefix . "/" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
     $name = "out";
     Route::any($route_prefix . "/" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
-
-    Route::group(['prefix' => 'permissions', 'as' => 'permissions.'], function () {
-
-        $name = "index";
-        Route::get($name, [PermissionController::class, $name])->name($name);
-
-        $name = "assign";
-        Route::any($name, [PermissionController::class, $name])->name($name);
-
-        $name = "assign_to_many";
-        Route::any($name, [PermissionController::class, $name])->name($name);
-
-        $name = "ajax_get_permissions";
-        Route::post($name, [PermissionController::class, $name])->name($name);
-
-        $name = "ajax_delete";
-        Route::post($name, [PermissionController::class, $name])->name($name);
-
-        $name = "ajax_request_access";
-        Route::any($name . "/{route_name}", [PermissionController::class, $name])->name($name);
-    });
 
     $route_prefix = "holiday";
     $controllerClass = HolidayController::class;
@@ -1523,7 +1566,7 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
 
     
     $route_prefix = "export-party";
-    $controllerClass = ExportPartyController::class;
+    $controllerClass = ExportPaymentController::class;
     Route::resource($route_prefix, $controllerClass);
     Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
 
@@ -1633,11 +1676,32 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
     $name="ajax_get_unlinked_list";
     Route::get($route_prefix . "-" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
     $name="ajax_get_available_qty_and_qty_to_manufacture";
-    Route::get($route_prefix . "-" . $name . "/{product_id}/{make_id?}/{order_qty?}", [$controllerClass, $name])->name($route_prefix . "." . $name);
+    Route::get($route_prefix . "-" . $name . "/{product_id}/{make_id?}/{order_qty?}/{export_order_id?}", [$controllerClass, $name])->name($route_prefix . "." . $name);
     Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
 
         $name = "copy";
         Route::get("{id}/" . $name, [$controllerClass, $name])->name($name);
+
+        $name = "ajax_update_field";
+        Route::post($name, [$controllerClass, $name])->name($name);
+
+        $name = "ajax_get_list";
+        Route::get($name . "/{export_contact_id}", [$controllerClass, $name])->name($name);
+
+        $name = "ajax_get_pending_payable_amount";
+        Route::get($name . "/{id}/{export_payment_id?}", [$controllerClass, $name])->name($name);
+
+        $route_prefix = "export";
+        Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+            $name = "csv";
+            Route::get($name, [$controllerClass, "export_" . $name])->name($name);
+        });
+    });
+
+    $route_prefix = "export-payment";
+    $controllerClass = ExportPaymentController::class;
+    Route::resource($route_prefix, $controllerClass);    
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
 
         $name = "ajax_update_field";
         Route::post($name, [$controllerClass, $name])->name($name);
@@ -1648,6 +1712,7 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
             Route::get($name, [$controllerClass, "export_" . $name])->name($name);
         });
     });
+
 
     $route_prefix = "ship-order";
     $controllerClass = ShipOrderController::class;
@@ -1669,6 +1734,136 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
             $name = "product_csv";
             Route::get($name, [$controllerClass, "export_" . $name])->name($name);
         });
+    });
+
+    $route_prefix = "product-issue";
+    $controllerClass = ProductIssueController::class;
+    Route::resource($route_prefix, $controllerClass);
+    $name="ajax_get_list";
+    Route::get($route_prefix . "-" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
+    $name="ajax_get_solution_list";
+    Route::get($route_prefix . "-" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
+        $name = "copy";
+        Route::get("{id}/" . $name, [$controllerClass, $name])->name($name);
+
+        $name = "activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "de_activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "ajax_update_field";
+        Route::post($name, [$controllerClass, $name])->name($name);
+    });
+
+
+    $route_prefix = "service";
+    $controllerClass = ServiceController::class;
+    Route::resource($route_prefix, $controllerClass);    
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
+        $route_prefix = "export";
+        Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+            $name = "csv";
+            Route::get($name, [$controllerClass, "export_" . $name])->name($name);
+
+            $name = "detail_csv";
+            Route::get($name, [$controllerClass, "export_" . $name])->name($name);
+        });
+    });
+
+    $route_prefix = "store-requirement";
+    $controllerClass = RequirementController::class;
+    Route::resource($route_prefix, $controllerClass);        
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
+        $name = "copy";
+        Route::get("{id}/" . $name, [$controllerClass, $name])->name($name);
+        
+        $route_prefix = "export";
+        Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+            $name = "csv";
+            Route::get($name, [$controllerClass, "export_" . $name])->name($name);
+        });
+    });
+
+
+    $route_prefix = "purchase-order";
+    $controllerClass = PurchaseOrderController::class;
+    Route::resource($route_prefix, $controllerClass);    
+    
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
+        $name = "copy";
+        Route::get("{id}/" . $name, [$controllerClass, $name])->name($name);
+
+        $name = "approve";
+        Route::get("{id}/" . $name, [$controllerClass, $name])->name($name);
+
+        $name = "decline";
+        Route::get("{id}/" . $name, [$controllerClass, $name])->name($name);
+
+        $name = "receive_items";
+        Route::any("{id}/" . $name, [$controllerClass, $name])->name($name);
+        
+        $name = "receive_items";
+        Route::any("{id}/" . $name, [$controllerClass, $name])->name($name);
+
+        $name = "purchase_order_receive_item_destroy";
+        Route::delete("{id}/" . $name, [$controllerClass, $name])->name($name);
+
+        $name="create_from_requirements";
+        Route::post($name, [$controllerClass, $name])->name($name);
+
+        $name = "ajax_get_pending_payable_amount";
+        Route::get($name . "/{id}/{payment_id?}", [$controllerClass, $name])->name($name);
+        
+        $route_prefix = "export";
+        Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+            $name = "csv";
+            Route::get($name, [$controllerClass, "export_" . $name])->name($name);
+
+            $name = "item_csv";
+            Route::get($name, [$controllerClass, "export_" . $name])->name($name);
+        });
+    });
+
+    $route_prefix = "purchase-order-payment";
+    $controllerClass = PurchaseOrderPaymentController::class;
+    Route::resource($route_prefix, $controllerClass);    
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
+        $name = "ajax_update_field";
+        Route::post($name, [$controllerClass, $name])->name($name);
+
+        $route_prefix = "export";
+        Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+            $name = "csv";
+            Route::get($name, [$controllerClass, "export_" . $name])->name($name);
+        });
+    });
+
+    Route::group(['prefix' => 'permissions', 'as' => 'permissions.'], function () {
+
+        $name = "index";
+        Route::get($name, [PermissionController::class, $name])->name($name);
+
+        $name = "assign";
+        Route::any($name, [PermissionController::class, $name])->name($name);
+
+        $name = "assign_to_many";
+        Route::any($name, [PermissionController::class, $name])->name($name);
+
+        $name = "ajax_get_permissions";
+        Route::post($name, [PermissionController::class, $name])->name($name);
+
+        $name = "ajax_delete";
+        Route::post($name, [PermissionController::class, $name])->name($name);
+
+        $name = "ajax_request_access";
+        Route::any($name . "/{route_name}", [PermissionController::class, $name])->name($name);
     });
 
     $controller_prefix = "setting";

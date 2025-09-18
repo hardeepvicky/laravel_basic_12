@@ -296,6 +296,15 @@ class ProductSerialController extends BackendController
 
             DB::commit();
 
+            $save_and_close = (bool) request("save_and_close", false);
+
+            if ($save_and_close)
+            {
+                return redirect()->to(get_current_path_url([
+                    'last_insert_id' => $this->model->id,
+                ]));
+            }
+
             return $this->afterSave($this->model);
         } catch (Exception $ex) {
             DB::rollBack();
@@ -693,7 +702,7 @@ class ProductSerialController extends BackendController
                 $display = $record->serial_no;
 
                 $display .= " (" . ($record->product?->model_name ?? "-") . ")";
-                $display .= " (" . ($record->maker?->model_name ?? "-") . ")";
+                $display .= " (" . ($record->maker?->name ?? "-") . ")";
 
                 $row = [
                     "id" => $record->id,
@@ -706,6 +715,35 @@ class ProductSerialController extends BackendController
         } catch (Exception $ex) {
             $response['status'] = 0;
             $response['msg'] = $ex->getMessage();
+        }
+
+        return $this->responseJson($response);
+    }
+
+    public function ajax_get_list()
+    {
+        $response = ["status" => 1];
+
+        $records = $this->modelClass::with([
+            "product",
+            "maker",
+        ])->get();
+
+        $response['data'] = [];
+
+        foreach ($records as $record) {
+            
+            $display = $record->serial_no;
+
+                $display .= " (" . ($record->product?->model_name ?? "-") . ")";
+                $display .= " (" . ($record->maker?->name ?? "-") . ")";
+
+                $row = [
+                    "id" => $record->id,
+                    "name" => $display,                    
+                ];
+
+            $response['data'][] = $row;
         }
 
         return $this->responseJson($response);

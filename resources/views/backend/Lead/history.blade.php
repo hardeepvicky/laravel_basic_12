@@ -28,7 +28,7 @@ use App\Helpers\DateUtility;
 
             <a class="btn btn-secondary call_link" href="tel:+91{{ $record->mobile }}">Call</a>
             <div class="btn btn-secondary sms_link">SMS</div>
-            <a class="btn btn-secondary whatsapp_link" href="https://web.whatsapp.com/" target="_blank" rel="noopener noreferrer">
+            <a class="btn btn-secondary whatsapp_link" href="https://wa.me/91{{ $record->mobile }}" target="_blank" rel="noopener noreferrer">
                 Whatsapp
             </a>
             <div class="btn btn-secondary email_link">Email</div>
@@ -95,9 +95,9 @@ use App\Helpers\DateUtility;
                             <td>
                                 @if($history->recording_file_url)
                                 <?php
-                                    $mime_type = get_mime_type_from_extension($history->recording_file);
+                                    $mime_type = get_mime_type_from_extension(pathinfo($history->recording_file, PATHINFO_EXTENSION));
                                 ?>
-                                <audio controls class="full-audio">
+                                <audio controls>
                                     <source src="{{ $history->recording_file_url }}" type="{{ $mime_type }}">
                                     Your browser does not support the audio element.
                                 </audio>

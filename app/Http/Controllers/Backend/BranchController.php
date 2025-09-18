@@ -83,9 +83,12 @@ class BranchController extends BackendController
             $builder->orderBy($sort_params['sort_by'], $sort_params['sort_dir']);
         }
 
-        
-
         $my_country = Country::getMyCountry();
+
+        if (!$my_country)
+        {
+            throw new UserException("Country India not found");
+        }
 
         $state_conditions = [
             ["country_id", $my_country->id],
