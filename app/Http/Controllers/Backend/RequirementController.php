@@ -8,11 +8,13 @@ use App\Helpers\CsvUtility;
 use App\Helpers\DateUtility;
 use App\Helpers\FileUtility;
 use App\Helpers\LaravelExtend;
+use App\Helpers\Util;
 use App\Models\AutoSerialPattern;
 use App\Models\Branch;
 use App\Models\Department;
 use App\Models\FieldSetting;
 use App\Models\Item;
+use App\Models\ItemCategory;
 use App\Models\Maker;
 use App\Models\Requirement;
 use App\Models\SubDepartment;
@@ -41,7 +43,11 @@ class RequirementController extends BackendController
 
         // d($records->toArray(), true);
 
-        $this->setForView(compact("records"));
+        $item_category_records = ItemCategory::getTreeRecords(ItemCategory::query());
+
+        $item_category_list = Util::getTreeListArray($item_category_records, "id", "name", false, false);
+
+        $this->setForView(compact("records", "item_category_list"));
 
         return $this->viewIndex(__FUNCTION__);
     }

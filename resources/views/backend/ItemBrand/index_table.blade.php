@@ -27,6 +27,7 @@
                             <?= sortable_anchor('id', get_value_from_list($field_labels, 'id', 'id')) ?>
                             | <?= sortable_anchor('name', get_value_from_list($field_labels, 'name', 'name')) ?>
                         </th>
+                        <th style="width:8%"><?= sortable_anchor('short_name', get_value_from_list($field_labels, 'short_name', 'short_name')) ?></th>
                         <th style="width:8%"><?= sortable_anchor('list_display_order', get_value_from_list($field_labels, 'list_display_order', 'list_display_order')) ?></th>
                         <th style="width:8%"><?= sortable_anchor('is_active', 'Activate / De-Active') ?></th>
                         <th style="width:10%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
@@ -45,6 +46,9 @@
                                     </div>
                                 </x-Backend.celec-summary-table-first-column>
                             </th>
+                            <td>
+                                {{ $record->short_name }}
+                            </td>
                             <td class="text-center">
                                 <a class="x-editable" href="javascript:void();"id="list_display_order" data-type="number"
                                     data-name="list_display_order"

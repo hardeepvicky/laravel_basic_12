@@ -49,7 +49,7 @@ class ItemBrand extends BaseModel
     public function getUniqueValidationRules(Request $request)
     {
         $field_rules = [
-            "name" => [Rule::unique($this->connection . "." . $this->getTable(), "name")],
+            "name" => [Rule::unique($this->connection . "." . $this->getTable(), "name")->where("item_category_id", $request->get("item_category_id"))],
         ];
 
         if ($this->id) {

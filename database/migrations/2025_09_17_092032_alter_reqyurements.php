@@ -15,7 +15,6 @@ return new class extends MyMigration
         $this->dropColumnsWithIndex("requirements", ["make_id"]);
 
         Schema::table('requirements', function (Blueprint $table) {
-            $table->foreignId("item_category_id")->after("sub_dept_id")->constrained("item_categories")->onDelete("restrict");
             $table->foreignId("item_brand_id")->after("item_id")->nullable()->constrained("item_brands")->onDelete("restrict");
         });
     }

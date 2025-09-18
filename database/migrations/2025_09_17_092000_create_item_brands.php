@@ -13,7 +13,9 @@ return new class extends Migration
     {
         Schema::create('item_brands', function (Blueprint $table) {
             $table->id();
-            $table->string("name", 45);
+            $table->foreignId("item_category_id")->constrained("item_categories")->onDelete("restrict");
+            $table->string("name", 80);
+            $table->string("short_name", 45);
             $table->integer("list_display_order")->default(0);
             $table->boolean("is_active");
             $table->timestamps();

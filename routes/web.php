@@ -1106,6 +1106,9 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
         $name = "ajax_get";
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
 
+        $name = "ajax_get_list";
+        Route::get($name . "/{category_id}", [$controllerClass, $name])->name($name);
+
         $name = "ajax_update_field";
         Route::post($name, [$controllerClass, $name])->name($name);
     });
@@ -1316,6 +1319,12 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
 
         $name = "ajax_update_field";
         Route::post($name, [$controllerClass, $name])->name($name);
+
+        $name = "ajax_get";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+        
+        $name = "ajax_get_list";
+        Route::get($name . "/{category_id}", [$controllerClass, $name])->name($name);
 
         $route_prefix = "export";
         Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
