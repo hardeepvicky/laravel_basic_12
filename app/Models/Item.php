@@ -183,7 +183,6 @@ class Item extends BaseModel
     {
         $labels = parent::getFieldLabels();
 
-        $labels['capture_image'] = "Capture Image";
         $labels['tag_name'] = "Tags";
         $labels['itemFile'] = "Files";
         $labels['images'] = "Images";
