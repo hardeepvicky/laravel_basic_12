@@ -49,6 +49,82 @@ $false = false;
                                     placeholder="Enter {{ $label }}" layout="horizontal" />
 
                                 <?php
+                                $field = 'root_item_category_id';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" 
+                                    :list="$root_item_category_list"
+                                    :value="$model->{$field}"
+                                    layout="horizontal"
+                                    class="select2 cascade-drop-down"
+                                    data-sr-cascade-target="#parent_item_category_id"
+                                    data-sr-cascade-url="/item-category/ajax_get_list/{v}"
+                                    mandatory="true" 
+                                    />
+                                    
+                                <?php
+                                $field = 'parent_item_category_id';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <div class="row mb-3">
+                                    <div class="col-sm-3">
+                                        @if (isset($label) && $label)
+                                            <label class="form-label">
+                                                {{ $label }}
+                                                <span class="mandatory">*</span>
+                                            </label>
+                                        @endif
+                                    </div>                                
+                                    <div class="col-sm-9">
+                                        <div class="d-flex align-items-start">
+                                            <span class="btn btn-outline-info summary-action-button open_parent_category_add_form" style="padding: 9px 12px;">
+                                                <i class="fa-solid fa-plus"></i>
+                                            </span>
+                                            <div class="flex-grow-1">
+                                                <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :list="$empty_list"
+                                                    :value="$model->{$field}" 
+                                                    class="select2 cascade-drop-down"
+                                                    data-sr-cascade-target="#child_item_category_id"
+                                                    data-sr-cascade-url="/item-category/ajax_get_list/{v}"
+                                                    />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <?php
+                                $field = 'child_item_category_id';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <div class="row mb-3">
+                                    <div class="col-sm-3">
+                                        @if (isset($label) && $label)
+                                            <label class="form-label">
+                                                {{ $label }}
+                                                <span class="mandatory">*</span>
+                                            </label>
+                                        @endif
+                                    </div>                                
+                                    <div class="col-sm-9">
+                                        <div class="d-flex align-items-start">
+                                            <span class="btn btn-outline-info summary-action-button open_child_category_add_form" style="padding: 9px 12px;">
+                                                <i class="fa-solid fa-plus"></i>
+                                            </span>
+                                            <div class="flex-grow-1">
+                                                <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :list="$empty_list"
+                                                    :value="$model->{$field}" class="select2" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                        
+                                <?php
+                                $field = 'child_item_category_id';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                
+
+                                <?php
                                 $field = 'item_brand_id';
                                 $label = get_value_from_list($field_labels, $field, $field);
                                 ?>
@@ -108,37 +184,7 @@ $false = false;
                                     multiple="true"
                                 />
 
-                                <?php
-                                $field = 'root_item_category_id';
-                                $label = get_value_from_list($field_labels, $field, $field);
-                                ?>
-                                <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" 
-                                    :list="$root_item_category_list"
-                                    :value="$model->{$field}"
-                                    layout="horizontal"
-                                    class="select2 cascade-drop-down"
-                                    data-sr-cascade-target="#parent_item_category_id"
-                                    data-sr-cascade-url="/item-category/ajax_get_list/{v}"
-                                    mandatory="true" 
-                                    />
-                                    
-                                <?php
-                                $field = 'parent_item_category_id';
-                                $label = get_value_from_list($field_labels, $field, $field);
-                                ?>
-                                <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$empty_list"
-                                    :value="$model->{$field}" 
-                                    class="select2 cascade-drop-down"
-                                    data-sr-cascade-target="#child_item_category_id"
-                                    data-sr-cascade-url="/item-category/ajax_get_list/{v}"
-                                    layout="horizontal"  />
-                                    
-                                <?php
-                                $field = 'child_item_category_id';
-                                $label = get_value_from_list($field_labels, $field, $field);
-                                ?>
-                                <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$empty_list"
-                                    :value="$model->{$field}" class="select2" layout="horizontal"  />
+                                
 
                                 <?php
                                 $field = 'weight';
@@ -459,6 +505,34 @@ $false = false;
                     $("#sub_dept_ids").removeAttr("disabled");
                 }
             }).trigger("change", {pageLoad : true});
+
+            $(".open_parent_category_add_form").click(function(){
+                var cat_id = $("#root_item_category_id").val();
+
+                if (!cat_id)
+                {
+                    $.events.onUserError("Please Select Root Category");
+                    return false;
+                }
+
+                $.loader.setInfo("Redirecting..").show();
+
+                window.location.href = "/item-category/create?parent_id=" + cat_id;
+            });
+
+            $(".open_child_category_add_form").click(function(){
+                var cat_id = $("#parent_item_category_id").val();
+
+                if (!cat_id)
+                {
+                    $.events.onUserError("Please Select Parent Category");
+                    return false;
+                }
+
+                $.loader.setInfo("Redirecting..").show();
+
+                window.location.href = "/item-category/create?parent_id=" + cat_id;
+            });
 
             $.events.execAtLast(function() {
                 $("#name, #size, #specification").on("input keyup", create_sku);

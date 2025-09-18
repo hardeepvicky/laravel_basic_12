@@ -132,11 +132,16 @@ class ItemCategoryController extends BackendController
         return parent::beforeViewRender();
     }
 
-    public function create()
+    public function create(Request $request)
     {
         $this->beforeCreate();
 
         $model = new $this->modelClass();
+
+        if ($request->get("parent_id"))
+        {
+            $model->parent_id = $request->get("parent_id");
+        }
 
         $form = [
             'url' => route($this->routePrefix . '.store'),
