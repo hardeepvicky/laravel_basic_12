@@ -54,6 +54,11 @@ class Item extends BaseModel
         parent::afterFind();
     }
 
+    public function category()
+    {
+        return $this->belongsTo(ItemCategory::class, "root_item_category_id");
+    }
+
     public function rootItemCategory()
     {
         return $this->belongsTo(ItemCategory::class, "root_item_category_id");
@@ -67,6 +72,31 @@ class Item extends BaseModel
     public function childItemCategory()
     {
         return $this->belongsTo(ItemCategory::class, "child_item_category_id");
+    }
+
+    public function itemBrand()
+    {
+        return $this->belongsTo(ItemBrand::class);
+    }
+
+    public function department()
+    {
+        return $this->belongsTo(Department::class, "dept_id");
+    }
+
+    public function origin()
+    {
+        return $this->belongsTo(DropDownValue::class, "origin_id");
+    }
+
+    public function certification()
+    {
+        return $this->belongsTo(DropDownValue::class, "certification_id");
+    }
+
+    public function subDepartment()
+    {
+        return $this->belongsToMany(SubDepartment::class, ItemSubDepartment::class);
     }
 
     public function itemFile()
@@ -87,11 +117,6 @@ class Item extends BaseModel
     public function mainImage()
     {
         return $this->belongsTo(DocumentFile::class);
-    }
-
-    public function itemBrand()
-    {
-        return $this->belongsTo(ItemBrand::class);
     }
 
     public function tags()

@@ -76,17 +76,6 @@
                             />
 
                             <?php
-                            $field = 'make_id';
-                            $label = get_value_from_list($field_labels, $field, $field);
-                            ?>
-                            <x-Inputs.drop-down field layout="horizontal" :id="$field" :name="$field" :label="$label"
-                                :value="$model->{$field}"
-                                :list="$maker_list"
-                                class="select2"
-                                mandatory="true"
-                            />
-
-                            <?php
                             $field = 'qty';
                             $label = get_value_from_list($field_labels, $field, $field);
                             ?>

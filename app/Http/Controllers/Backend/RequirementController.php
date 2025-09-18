@@ -65,7 +65,6 @@ class RequirementController extends BackendController
             ["field" => "dept_id", "type" => "int"],
             ["field" => "sub_dept_id", "type" => "int"],
             ["field" => "item_id", "type" => "int"],
-            ["field" => "make_id", "type" => "int"],
         ]);
 
         $array_helper =  new ArrayHelper($conditions);
@@ -81,7 +80,6 @@ class RequirementController extends BackendController
             "department",
             "subDepartment",
             "item",
-            "make",
             "uom"
         ]);
 
@@ -119,7 +117,6 @@ class RequirementController extends BackendController
 
         $dept_list = Department::getList("id", "display_name", [], "list_display_order");        
         $item_list = Item::getList("id", "display_name", [], "list_display_order");
-        $maker_list = Maker::getList("id", "display_name", [], "list_display_order");
         $branch_list = Branch::getList("id", "display_name", [], "list_display_order");        
 
         $status_list = Requirement::getStatusTypeList();
@@ -160,7 +157,6 @@ class RequirementController extends BackendController
             "dept_id" => ["required"],
             "sub_dept_id" => ["nullable"],
             "item_id" => ["required"],
-            "make_id" => ["required"],
             "qty" => ["required", "numeric", "min:1"],
             "uom_id" => ["required"],
             "part_no" => ["nullable"],
@@ -361,7 +357,6 @@ class RequirementController extends BackendController
                 $field_labels['dept_id'] => $record['department']['name'] ?? "",
                 $field_labels['sub_dept_id'] => $record['sub_department']['name'] ?? "",
                 $field_labels['item_id'] => $record['item']['name'] ?? "",
-                $field_labels['make_id'] => $record['make']['name'] ?? "",
                 $field_labels['part_no'] => $record['part_no'] ?? "",
                 $field_labels['qty'] => $record['qty'] ?? "",
                 $field_labels['uom_id'] => $record['uom']['name'] ?? "",

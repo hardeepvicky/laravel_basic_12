@@ -49,6 +49,66 @@ $false = false;
                                     placeholder="Enter {{ $label }}" layout="horizontal" />
 
                                 <?php
+                                $field = 'item_brand_id';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$empty_list"
+                                    :value="$model->{$field}" class="select2" layout="horizontal" />
+
+                                <?php
+                                $field = 'sku';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <x-Inputs.text-field :id="$field" :name="$field" :label="$label" value="{{ $model->{$field} }}"
+                                    placeholder="Enter {{ $label }}" layout="horizontal"  mandatory="true" readonly="readonly" />
+
+                                <?php
+                                $field = 'part_no';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <x-Inputs.text-field :id="$field" :name="$field" :label="$label" value="{{ $model->{$field} }}"
+                                    placeholder="Enter {{ $label }}" layout="horizontal" />
+
+                                <?php
+                                $field = 'dept_id';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$dept_list"
+                                    :value="$model->{$field}" 
+                                    class="select2" 
+                                    layout="horizontal" 
+                                    class="select2 cascade-drop-down"
+                                    data-sr-cascade-target="#sub_dept_ids"
+                                    data-sr-cascade-url="/sub-department/ajax_get_list/{v}"
+                                    mandatory="true" 
+                                    />
+
+                                <?php
+                                $field = 'is_for_all_sub_dept';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <x-Inputs.checkbox :id="$field" :name="$field" :label="$label" :value="$model->{$field}" />
+                                    </div>
+                                </div>
+
+                                <?php
+                                $field = 'sub_dept_ids';
+                                $label = "Sub Department";
+                                $value = implode(',', $model->subDepartment?->pluck('id')->toArray());
+                                ?>
+                                <x-Inputs.drop-down :id="$field" name="sub_dept_ids[]" :label="$label"
+                                    :list="$empty_list" 
+                                    :value="$value"
+                                    layout="horizontal"
+                                    class="select2"
+                                    multiple="true"
+                                />
+
+                                <?php
                                 $field = 'root_item_category_id';
                                 $label = get_value_from_list($field_labels, $field, $field);
                                 ?>
@@ -79,22 +139,59 @@ $false = false;
                                 ?>
                                 <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$empty_list"
                                     :value="$model->{$field}" class="select2" layout="horizontal"  />
-                                    
-                                <?php
-                                $field = 'item_brand_id';
-                                $label = get_value_from_list($field_labels, $field, $field);
-                                ?>
-                                <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$empty_list"
-                                    :value="$model->{$field}" class="select2" layout="horizontal" />
 
                                 <?php
-                                $field = 'sku';
+                                $field = 'weight';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <div class="row mb-3">
+                                    <div class="col-sm-3">
+                                        <label class="form-label">
+                                            {{ $label }}
+                                        </label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <x-Inputs.group-text-field :id="$field" :name="$field" :label="$false" value="{{ $model->{$field} }}"
+                                            placeholder="Enter {{ $label }}" 
+                                            class="validate-float"
+                                            layout="horizontal"
+                                            secondaryTextPosition="last"
+                                            secondaryText='<span class="input-group-text">kg.</span>'
+                                            />
+                                    </div>
+                                </div>
+
+                                <?php
+                                $field = 'minimum_order_qty';
                                 $label = get_value_from_list($field_labels, $field, $field);
                                 ?>
                                 <x-Inputs.text-field :id="$field" :name="$field" :label="$label" value="{{ $model->{$field} }}"
-                                    placeholder="Enter {{ $label }}" layout="horizontal"  mandatory="true" readonly="readonly" />
-                                    
-                                    
+                                    placeholder="Enter {{ $label }}" 
+                                    class="validate-float"
+                                    layout="horizontal" />
+
+                                <?php
+                                $field = 'origin_id';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$origin_list"
+                                    :value="$model->{$field}" 
+                                    :pleaseSelect="$false"
+                                    class="select2" 
+                                    layout="horizontal" 
+                                    />
+
+                                <?php
+                                $field = 'certification_id';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$certification_list"
+                                    :value="$model->{$field}" 
+                                    :pleaseSelect="$false"
+                                    class="select2" 
+                                    layout="horizontal"  
+                                    />
+
                                 <?php
                                 $field = 'images';
                                 $label = get_value_from_list($field_labels, $field, $field);
@@ -352,10 +449,21 @@ $false = false;
                 index_table_id : "document_file_others"
             });
 
+            $("#is_for_all_sub_dept").change(function(){
+                if(this.checked)
+                {
+                    $("#sub_dept_ids").attr("disabled", "true");
+                }
+                else
+                {
+                    $("#sub_dept_ids").removeAttr("disabled");
+                }
+            }).trigger("change", {pageLoad : true});
+
             $.events.execAtLast(function() {
                 $("#name, #size, #specification").on("input keyup", create_sku);
 
-                $("#root_item_category_id").trigger("change", {pageLoad : true});
+                $("#root_item_category_id, #dept_id").trigger("change", {pageLoad : true});
             });
         })
     </script>
