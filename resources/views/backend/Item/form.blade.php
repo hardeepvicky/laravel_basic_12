@@ -445,10 +445,10 @@ $false = false;
                 {
                     create_sku();
                 }
-            }).trigger("change", {pageLoad : true});
+            });
 
 
-            $("#item_category_id").change(function(){
+            $("#parent_item_category_id").change(function(){
                 var v = $(this).val();
                 category = undefined;
 
