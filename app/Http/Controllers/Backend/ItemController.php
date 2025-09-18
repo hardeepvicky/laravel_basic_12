@@ -295,16 +295,19 @@ class ItemController extends BackendController
 
             $ids = explode(",", $validatedData['images']);
 
-            $document_files = DocumentFile::find($ids);
-
-            foreach($document_files as $document_file)
+            if ($ids)
             {
-                $itemFile = new ItemFile([
-                    "file_type" => "image",
-                    "document_file_id" => $document_file->id
-                ]);
+                $document_files = DocumentFile::find($ids);
 
-                $this->model->itemFile()->save($itemFile);
+                foreach($document_files as $document_file)
+                {
+                    $itemFile = new ItemFile([
+                        "file_type" => "image",
+                        "document_file_id" => $document_file->id
+                    ]);
+
+                    $this->model->itemFile()->save($itemFile);
+                }
             }
         }
 
@@ -312,16 +315,19 @@ class ItemController extends BackendController
 
             $ids = explode(",", $validatedData['other_files']);
 
-            $document_files = DocumentFile::find($ids);
-
-            foreach($document_files as $document_file)
+            if ($ids)
             {
-                $itemFile = new ItemFile([
-                    "file_type" => "",
-                    "document_file_id" => $document_file->id
-                ]);
+                $document_files = DocumentFile::find($ids);
 
-                $this->model->itemFile()->save($itemFile);
+                foreach($document_files as $document_file)
+                {
+                    $itemFile = new ItemFile([
+                        "file_type" => "",
+                        "document_file_id" => $document_file->id
+                    ]);
+
+                    $this->model->itemFile()->save($itemFile);
+                }
             }
         }
 
