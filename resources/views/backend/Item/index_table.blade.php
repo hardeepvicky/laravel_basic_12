@@ -21,14 +21,14 @@
                                 </div>
                             </div>
                         </th>
-                        <th style="width:15%">
+                        <th style="width:10%">
                             <?php
                             $field = "root_item_category_id";
                             ?>
                             <x-Inputs.drop-down :name="$field" :label="$false" :value="$search[$field]" :list="$root_item_category_list" class="select2" pleaseSelect="All" class="select2 form-select-sm"/>
                         </th>
-                        <th></th>
-                        <th></th>
+                        <th style="width:8%"></th>
+                        <th style="width:8%"></th>
                         <th style="width:8%">
                             <?php
                             $field = "item_brand_id";
