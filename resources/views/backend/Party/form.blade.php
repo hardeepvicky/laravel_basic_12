@@ -80,7 +80,6 @@
                                         autocomplete="off"
                                         secondaryTextPosition="first"
                                         secondaryText='<span class="input-group-text">+91</span>'
-                                        mandatory="true" 
                                         />
                                 </div>
                             </div>
