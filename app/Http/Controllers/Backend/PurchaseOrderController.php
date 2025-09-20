@@ -325,7 +325,7 @@ class PurchaseOrderController extends BackendController
 
     public function edit($id)
     {
-        $model = $this->model = $this->modelClass::findOrFail($id);
+        $model = $this->model = $this->modelClass::with(["purchaseOrderItem", "requirements", "payment"])->findOrFail($id);
 
         $this->beforeEdit($this->model);
 
