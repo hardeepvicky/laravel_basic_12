@@ -184,7 +184,7 @@ $formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, 0);
                                                         @foreach ($record->purchaseOrderItem as $i => $purchaseOrderItem)
                                                             <tr>
                                                                 <td>{{ $i + 1 }}</td>
-                                                                <td>{{ $purchaseOrderItem->item?->category->getDisplayName() }}</td>
+                                                                <td>{{ $purchaseOrderItem->item?->category?->getDisplayName() }}</td>
                                                                 <td>{{ $purchaseOrderItem->item?->getDisplayName() }}</td>
                                                                 <td>{{ $purchaseOrderItem->make?->getDisplayName() }}</td>
                                                                 <td>
@@ -223,7 +223,7 @@ $formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, 0);
                                                                             </tr>
                                                                         </thead>
                                                                         <tbody>
-                                                                            @foreach ($purchaseOrderItem->purchaseOrderReceiveItem as $a => $purchaseOrderReceiveItem)
+                                                                            @foreach ($purchaseOrderItem?->purchaseOrderReceiveItem as $a => $purchaseOrderReceiveItem)
                                                                             <tr>
                                                                                 <td>{{ $a + 1 }}</td>
                                                                                 <td>{{ $purchaseOrderReceiveItem->receive_qty }}</td>
