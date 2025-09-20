@@ -192,12 +192,10 @@ $formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, 0);
                                                                 <td>{{ $purchaseOrderItem->make?->getDisplayName() }}</td>
                                                                 <td>
                                                                     {{ $purchaseOrderItem->qty }}
-
                                                                     {{ $purchaseOrderItem->item?->category?->uom?->getDisplayName() }}
                                                                 </td>
                                                                 <td>
                                                                     {{ $purchaseOrderItem->receive_qty }}
-
                                                                     {{ $purchaseOrderItem->item?->category?->uom?->getDisplayName() }}
                                                                 </td>
                                                                 <td>{{ $purchaseOrderItem->rate }}</td>
