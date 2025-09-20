@@ -151,7 +151,7 @@ class ItemController extends BackendController
 
         $root_item_category_list = ItemCategory::getList("id", "display_name", ["parent_id" => 0], "list_display_order");
 
-        $dept_list = Department::getList("id", "display_name", [], "list_display_order");
+        
         $origin_list = DropDownValue::getList("id", "display_name", ["type" => DropDownValue::ORIGIN], "list_display_order");
         $certification_list = DropDownValue::getList("id", "display_name", ["type" => DropDownValue::CERTIFICATION], "list_display_order");
 
@@ -163,10 +163,20 @@ class ItemController extends BackendController
             throw new UserException("Setting : $label is not set yet", UserException::ERROR_USER_DATA_WRONG);
         }
 
+        $selected_department_ids = Setting::getValue("item_module_department_ids");
+
+        if (!$selected_department_ids)
+        {
+            $label = Setting::LABELS['item_module_department_ids'];
+            throw new UserException("Setting : $label is not set yet", UserException::ERROR_USER_DATA_WRONG);
+        }
+
+        $dept_list = Department::getList("id", "display_name", ["id" => $selected_department_ids], "list_display_order");
+
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
         $this->setForView(compact(
-            "root_item_category_list", "dept_list", "origin_list", "certification_list", "sku_pattern",
+            "root_item_category_list", "dept_list", "origin_list", "certification_list", "sku_pattern", "selected_department_ids",
             "field_labels"
         ));
 

@@ -2,12 +2,12 @@
 
 @section('content')
     <?php
-    
+
     use App\Models\Setting;
-    
+
     $page_header_links = [];
     $false = false;
-    
+
     function get_value($record_list, $field)
     {
         return isset($record_list[$field]) ? $record_list[$field] : '';
@@ -80,6 +80,16 @@
                             <x-inputs.text-field name="data[text][{{ $field }}]" :label="$label" :value="$value"
                                 class="form-control validate-int" />
                         </div>
+                        <div class="form-group mb-3">
+                            <?php $field = 'item_module_department_ids';
+                            $value = get_value($record_list, $field);
+                            $label = Setting::LABELS[$field]; ?>
+                            <x-Inputs.drop-down name="data[array][{{ $field }}][]" :label="$label"
+                                :list="$dept_list" :value="$value"
+                                class="select2"
+                                multiple="true"
+                            />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -102,7 +112,7 @@
                                     <li>Color : {color}</li>
                                     <li>Brand : {brand}</li>
                                     <li>Size : {size}</li>
-                                    <li>Specification : {specification}</li>                                    
+                                    <li>Specification : {specification}</li>
                                 </ul>
                             </div>
                         </div>

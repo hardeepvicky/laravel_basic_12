@@ -55,6 +55,18 @@ class SettingsController extends BackendController
                 ]);
             }
 
+            foreach ($data["data"]['array'] as $key => $value) {
+
+                if (is_null($value)) {
+                    $value = [];
+                }
+
+                $settingModel = Setting::insertOrUpdate([
+                    "name" => $key,
+                    "value" => $value,
+                ]);
+            }
+
             Session::flash('success', 'Settings has been saved');
         }
 
@@ -67,7 +79,9 @@ class SettingsController extends BackendController
 
         //d($record_list); exit;
 
-        $this->setForView(compact('form', 'record_list'));
+        $dept_list = Department::getList("id", "display_name", [], "list_display_order");
+
+        $this->setForView(compact('form', 'record_list', 'dept_list'));
 
         return $this->view(__FUNCTION__);
     }

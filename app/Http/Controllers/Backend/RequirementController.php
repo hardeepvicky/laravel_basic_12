@@ -17,6 +17,7 @@ use App\Models\Item;
 use App\Models\ItemCategory;
 use App\Models\Maker;
 use App\Models\Requirement;
+use App\Models\Setting;
 use App\Models\SubDepartment;
 use App\Models\Type;
 use App\Models\User;
@@ -111,16 +112,25 @@ class RequirementController extends BackendController
             $this->model = new $this->modelClass();
         }
 
-        $dept_list = Department::getList("id", "display_name", [], "list_display_order");        
         $item_list = Item::getList("id", "display_name", [], "list_display_order");
-        $branch_list = Branch::getList("id", "display_name", [], "list_display_order");        
+        $branch_list = Branch::getList("id", "display_name", [], "list_display_order");  
+        
+        $selected_department_ids = Setting::getValue("item_module_department_ids");
+
+        if (!$selected_department_ids)
+        {
+            $label = Setting::LABELS['item_module_department_ids'];
+            throw new UserException("Setting : $label is not set yet", UserException::ERROR_USER_DATA_WRONG);
+        }
+
+        $dept_list = Department::getList("id", "display_name", ["id" => $selected_department_ids], "list_display_order");
 
         $status_list = Requirement::getStatusTypeList();
 
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
         $this->setForView(compact(
-            "branch_list", "dept_list", "item_list", "status_list",
+            "branch_list", "dept_list", "item_list", "status_list", "selected_department_ids",
             "field_labels"
         ));
 

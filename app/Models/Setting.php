@@ -12,6 +12,7 @@ class Setting extends BaseMongoModel
         "company_gst_no" => "Company GST No.",
         "export_csv_max_record_count" => "Export CSV Max Record Count",
         "item_sku_pattern" => "Item SKU Pattern",
+        "item_module_department_ids" => "Item Module Department",
     ];
 
     /**
@@ -27,7 +28,7 @@ class Setting extends BaseMongoModel
     {
         $record = self::where("name", $name)->first();
 
-        if ($record && strlen($record->value) > 0) {
+        if ($record) {
             return $record->value;
         }
 
