@@ -153,7 +153,7 @@
                                         </td>
                                     </tr>
                                     @php
-                                        $purchase_order_items = old('purchase_order_items', isset($requirements) ? $requirements : ( $model->saleOrderProduct?->toArray() ?? []));
+                                        $purchase_order_items = old('purchase_order_items', isset($requirements) ? $requirements : ( $model->purchaseOrderItem?->toArray() ?? []));
                                         unset($purchase_order_items['(sr-id)']);
                                     @endphp
                                     @if (isset($purchase_order_items))
