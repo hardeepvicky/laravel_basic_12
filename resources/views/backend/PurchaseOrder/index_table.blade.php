@@ -119,7 +119,10 @@ $formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, 0);
                                 {{ get_value_from_list($status_list, $record->status) }}
 
                                 <div class="mt-1">
-                                    @if($record->status == PurchaseOrder::STATUS_PENDING || $record->status == PurchaseOrder::STATUS_DECLINE)
+                                    @if($record->status == PurchaseOrder::STATUS_PENDING)
+                                        <a class="btn btn-sm btn-secondary confirm" href="{{ route($routePrefix . '.approve', [$record->id]) }}">Approve</a>
+                                        <a class="btn btn-sm btn-danger confirm" href="{{ route($routePrefix . '.decline', [$record->id]) }}">Decline</a>
+                                    @elseif($record->status == PurchaseOrder::STATUS_DECLINE)
                                         <a class="btn btn-sm btn-secondary confirm" href="{{ route($routePrefix . '.approve', [$record->id]) }}">Approve</a>
                                     @elseif($record->status == PurchaseOrder::STATUS_APPROVE)
                                         <a class="btn btn-sm btn-danger confirm" href="{{ route($routePrefix . '.decline', [$record->id]) }}">Decline</a>
