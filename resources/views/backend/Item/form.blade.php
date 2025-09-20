@@ -146,9 +146,10 @@ $false = false;
                                 <?php
                                 $field = 'dept_id';
                                 $label = get_value_from_list($field_labels, $field, $field);
+                                $value = $model->{$field} ?? $selected_department_ids[0];
                                 ?>
                                 <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$dept_list"
-                                    :value="$model->{$field}" 
+                                    :value="$value" 
                                     class="select2" 
                                     layout="horizontal" 
                                     class="select2 cascade-drop-down"

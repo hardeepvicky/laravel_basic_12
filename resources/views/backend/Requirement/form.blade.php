@@ -32,9 +32,10 @@
                             <?php
                             $field = 'dept_id';
                             $label = get_value_from_list($field_labels, $field, $field);
+                            $value = $model->{$field} ?? $selected_department_ids[0];
                             ?>
                             <x-Inputs.drop-down layout="horizontal" :id="$field" :name="$field" :label="$label"
-                                :value="$model->{$field}"
+                                :value="$value"
                                 :list="$dept_list"
                                 class="select2 cascade-drop-down"
                                 data-sr-cascade-target="#sub_dept_id"
@@ -54,9 +55,10 @@
                             <?php
                             $field = 'item_id';
                             $label = get_value_from_list($field_labels, $field, $field);
+                            $value = $model->{$field};
                             ?>
                             <x-Inputs.drop-down layout="horizontal" :id="$field" :name="$field" :label="$label"
-                                :value="$model->{$field}"
+                                :value="$value"
                                 :list="$item_list"
                                 class="select2"
                                 class="select2 cascade-drop-down"
