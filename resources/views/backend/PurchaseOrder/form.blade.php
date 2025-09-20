@@ -338,7 +338,7 @@
 
                 if (_tr.find(".item_id").val())
                 {
-                    _tr.find(".item_id").trigger("change");
+                    _tr.find(".item_id").trigger("change", {pageLoad : true});
                 }
             }
 
