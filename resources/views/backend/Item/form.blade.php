@@ -61,29 +61,29 @@ $false = false;
                             $value = $model->{$field} ?? $selected_department_ids[0];
                             ?>
                             <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$dept_list"
-                                :value="$value" 
-                                class="select2" 
-                                layout="horizontal" 
+                                :value="$value"
+                                class="select2"
+                                layout="horizontal"
                                 class="select2 cascade-drop-down"
                                 data-sr-cascade-target="#sub_dept_ids"
                                 data-sr-cascade-url="/sub-department/ajax_get_list/{v}"
-                                mandatory="true" 
+                                mandatory="true"
                                 />
 
                             <?php
                             $field = 'root_item_category_id';
                             $label = get_value_from_list($field_labels, $field, $field);
                             ?>
-                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" 
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
                                 :list="$root_item_category_list"
                                 :value="$model->{$field}"
                                 layout="horizontal"
                                 class="select2 cascade-drop-down"
                                 data-sr-cascade-target="#parent_item_category_id"
                                 data-sr-cascade-url="/item-category/ajax_get_list/{v}"
-                                mandatory="true" 
+                                mandatory="true"
                                 />
-                                
+
                             <?php
                             $field = 'parent_item_category_id';
                             $label = get_value_from_list($field_labels, $field, $field);
@@ -95,7 +95,7 @@ $false = false;
                                             {{ $label }}
                                         </label>
                                     @endif
-                                </div>                                
+                                </div>
                                 <div class="col-sm-9">
                                     <div class="d-flex align-items-start">
                                         <span class="btn btn-outline-info summary-action-button open_parent_category_add_form" style="padding: 9px 12px;">
@@ -103,7 +103,7 @@ $false = false;
                                         </span>
                                         <div class="flex-grow-1">
                                             <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :list="$empty_list"
-                                                :value="$model->{$field}" 
+                                                :value="$model->{$field}"
                                                 class="select2 cascade-drop-down"
                                                 data-sr-cascade-target="#child_item_category_id"
                                                 data-sr-cascade-url="/item-category/ajax_get_list/{v}"
@@ -124,7 +124,7 @@ $false = false;
                                             {{ $label }}
                                         </label>
                                     @endif
-                                </div>                                
+                                </div>
                                 <div class="col-sm-9">
                                     <div class="d-flex align-items-start">
                                         <span class="btn btn-outline-info summary-action-button open_child_category_add_form" style="padding: 9px 12px;">
@@ -170,7 +170,7 @@ $false = false;
                             $value = implode(',', $model->subDepartment?->pluck('id')->toArray());
                             ?>
                             <x-Inputs.drop-down :id="$field" name="sub_dept_ids[]" :label="$label"
-                                :list="$empty_list" 
+                                :list="$empty_list"
                                 :value="$value"
                                 layout="horizontal"
                                 class="select2"
@@ -189,7 +189,7 @@ $false = false;
                                 </div>
                                 <div class="col-sm-9">
                                     <x-Inputs.group-text-field :id="$field" :name="$field" :label="$false" value="{{ $model->{$field} }}"
-                                        placeholder="Enter {{ $label }}" 
+                                        placeholder="Enter {{ $label }}"
                                         class="validate-float"
                                         layout="horizontal"
                                         secondaryTextPosition="last"
@@ -203,7 +203,7 @@ $false = false;
                             $label = get_value_from_list($field_labels, $field, $field);
                             ?>
                             <x-Inputs.text-field :id="$field" :name="$field" :label="$label" value="{{ $model->{$field} }}"
-                                placeholder="Enter {{ $label }}" 
+                                placeholder="Enter {{ $label }}"
                                 class="validate-float"
                                 layout="horizontal" />
 
@@ -212,10 +212,10 @@ $false = false;
                             $label = get_value_from_list($field_labels, $field, $field);
                             ?>
                             <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$origin_list"
-                                :value="$model->{$field}" 
+                                :value="$model->{$field}"
                                 :pleaseSelect="$false"
-                                class="select2" 
-                                layout="horizontal" 
+                                class="select2"
+                                layout="horizontal"
                                 />
 
                             <?php
@@ -223,10 +223,10 @@ $false = false;
                             $label = get_value_from_list($field_labels, $field, $field);
                             ?>
                             <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$certification_list"
-                                :value="$model->{$field}" 
+                                :value="$model->{$field}"
                                 :pleaseSelect="$false"
-                                class="select2" 
-                                layout="horizontal"  
+                                class="select2"
+                                layout="horizontal"
                                 />
 
                             <?php
@@ -280,7 +280,7 @@ $false = false;
                             <x-Inputs.text-area :id="$field" :name="$field" :label="$label" rows="3"
                                 value="{{ $model->{$field} }}" placeholder="Enter {{ $label }}" layout="horizontal" />
 
-                                
+
                             <?php
                             $field = 'list_display_order';
                             $label = get_value_from_list($field_labels, $field, $field);
@@ -356,14 +356,7 @@ $false = false;
 
                 var name = $("#name").val();
 
-                if (name)
-                {
-                    sku = sku.replace("{name}", name);
-                }
-                else
-                {
-                    sku = sku.replace("{name}", "");
-                }
+                
 
                 var size = $("#size").val();
 
@@ -387,9 +380,20 @@ $false = false;
                     sku = sku.replace("{specification}", "");
                 }
 
-                //replace char except hyphine and underscore and remove hyphine from start and end of string
-                sku = sku.replace(/[^a-zA-Z0-9-_.]/g, '-').replace(/-+/g, '-').replace(/^-+|-+$/g, "");
                 sku = sku.toLowerCase();
+
+                if (name)
+                {
+                    name = name.charAt(0).toUpperCase() + name.slice(1);
+                    sku = sku.replace("{name}", name);
+                }
+                else
+                {
+                    sku = sku.replace("{name}", "");
+                }
+
+                //replace char except hyphine and underscore and remove hyphine from start and end of string
+                sku = sku.replace(/[^a-zA-Z0-9-_.*/]/g, '-').replace(/-+/g, '-').replace(/^-+|-+$/g, "");
 
                 $("#sku").val(sku);
 
