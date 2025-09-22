@@ -171,7 +171,7 @@ class ItemController extends BackendController
             throw new UserException("Setting : $label is not set yet", UserException::ERROR_USER_DATA_WRONG);
         }
 
-        $dept_list = Department::getList("id", "display_name", ["id" => $selected_department_ids], "list_display_order");
+        $dept_list = Department::getList("id", "display_name", [], "list_display_order");
 
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
