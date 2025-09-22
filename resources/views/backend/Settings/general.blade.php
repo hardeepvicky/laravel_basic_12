@@ -106,10 +106,10 @@
                             $label = Setting::LABELS[$field]; ?>
                             <x-inputs.text-field name="data[text][{{ $field }}]" :label="$label" :value="$value"/>
                             <div class="help-block">
-                                {category}-{brand}-{color}-{size}-{specification}
+                                {category}-{name}-{brand}-{size}-{specification}
                                 <ul class="b-t-dark">
                                     <li>Category : {category}</li>
-                                    <li>Color : {color}</li>
+                                    <li>Name : {name}</li>
                                     <li>Brand : {brand}</li>
                                     <li>Size : {size}</li>
                                     <li>Specification : {specification}</li>
