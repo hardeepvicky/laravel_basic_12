@@ -16,7 +16,35 @@ class Branch extends BaseModel
         StockProduct::class => [
             "foreignKey" => ["branch_id"],
             "preventDelete" => true
-        ],        
+        ],
+        User::class => [
+            "foreignKey" => ["branch_id"],
+            "preventDelete" => true
+        ],
+        Employee::class => [
+            "foreignKey" => ["branch_id"],
+            "preventDelete" => true
+        ],
+        Bin::class => [
+            "foreignKey" => ["branch_id"],
+            "preventDelete" => true
+        ],
+        SaleOrder::class => [
+            "foreignKey" => ["branch_id"],
+            "preventDelete" => true
+        ],
+        ExportOrder::class => [
+            "foreignKey" => ["branch_id"],
+            "preventDelete" => true
+        ],
+        Requirement::class => [
+            "foreignKey" => ["branch_id"],
+            "preventDelete" => true
+        ],
+        PurchaseOrder::class => [
+            "foreignKey" => ["branch_id"],
+            "preventDelete" => true
+        ],
     ];
 
     protected static array $unique_fields = ["company_id", "name"];
@@ -51,7 +79,7 @@ class Branch extends BaseModel
 
         $this->parseTagsForModuleLinking();
     }
-    
+
     public function afterFindForCsv()
     {
         parent::afterFind();

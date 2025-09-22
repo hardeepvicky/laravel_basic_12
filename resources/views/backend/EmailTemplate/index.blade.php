@@ -15,6 +15,7 @@ $false = false;
     <div class="card-body">
         <form method="GET" class="summary_search" action="{{ route($routePrefix . '.index') }}">
             <input type="hidden" name="is_sort_clear" value="1" />
+            
             <?php 
                 $field = "name";
             ?>
