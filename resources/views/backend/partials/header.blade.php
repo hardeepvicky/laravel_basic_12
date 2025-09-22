@@ -7,7 +7,7 @@ use App\Models\Notification;
 ?>
 <header class="page-header row">
     <div class="logo-wrapper d-flex align-items-center col-auto">
-        <a class="close-btn toggle-sidebar" href="javascript:void(0)">
+        <a class="close-btn toggle-sidebar" href="javascript:void(0)" style="border:3px solid;">
             <svg class="svg-color">
                 <use href="/assets/svg/iconly-sprite.svg#Category"></use>
             </svg>

@@ -36,11 +36,7 @@ class EmployeeController extends BackendController
 
         // d($records->toArray(), true);
 
-        $department_list = Department::getListCache();
-
-        $designation_list = Designation::getListCache();
-
-        $this->setForView(compact("records", "department_list", "designation_list"));
+        $this->setForView(compact("records"));
 
         return $this->viewIndex(__FUNCTION__);
     }
@@ -201,7 +197,7 @@ class EmployeeController extends BackendController
 
     public function edit($id)
     {
-        $model = $this->modelClass::with(["userRole", "userAllowIp", "department", "subDepartment", "designation"])->findOrFail($id);
+        $model = $this->modelClass::with([])->findOrFail($id);
         $model->afterFind();
 
         $this->beforeEdit($model);
@@ -219,14 +215,13 @@ class EmployeeController extends BackendController
     public function update($id, Request $request)
     {
         // dd($request->all());
-        $this->model = $this->modelClass::with(["userRole", "userAllowIp"])->findOrFail($id);
+        $this->model = $this->modelClass::with([])->findOrFail($id);
 
         $this->beforeEdit($this->model);
 
         $rules = $this->_common_validation_rules();
         $messages = $this->_common_validation_messages();
 
-        $rules = LaravelExtend::merge_validation_rules($rules, $this->model->getRequiredIfRules($request));
         $rules = LaravelExtend::merge_validation_rules($rules, $this->model->getUniqueValidationRules($request));
 
         $validatedData = $request->validate($rules, $messages);
@@ -236,8 +231,7 @@ class EmployeeController extends BackendController
         try {
             $validatedData = $this->_saveProfilePhoto($validatedData);
 
-            $save_data = $validatedData;
-            unset($save_data['roles']);
+            $save_data = $this->model->convertTimeZoneBeforeQueryToDatabase($validatedData);
 
             $this->model->fill($save_data);
             if (!$this->model->save()) {

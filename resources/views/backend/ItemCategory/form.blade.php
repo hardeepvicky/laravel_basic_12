@@ -56,7 +56,7 @@ use App\Models\ProductCategoryAttribute;
                             $label = get_value_from_list($field_labels, $field, $field);
                             ?>
                             <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$base_uom_list"
-                                value="{{ $model->{$field} }}" class="select2" layout="horizontal"/>
+                                value="{{ $model->{$field} }}" class="select2" layout="horizontal" mandatory="true" />
                             <?php
                             $field = 'list_display_order';
                             $label = get_value_from_list($field_labels, $field, $field);

@@ -3,8 +3,7 @@
 @section('content')
     <div class="card">
         <div class="card-header card-no-border p-1">
-            <div class="d-md-flex d-sm-block align-items-center">
-                <div class="flex-grow-1">
+                <div>
                     <?php
                     $paginationList = [
                         10 => 10,
@@ -67,14 +66,11 @@
                         </div>
                         <x-Backend.summary-search-form-footer :showPaginationDropDown="$false" />
                     </form>
-
                 </div>
-                <div class="flex-shrink-0 text-end">
-                    <div class="d-inline-flex m-1">
-                        <a target="_blank" href="{{ route($routePrefix . ".create") }}" class="btn btn-outline-secondary" >
-                            Add
-                        </a>
-                    </div>
+                <div class="d-inline-flex m-1">
+                    <a target="_blank" href="{{ route($routePrefix . ".create") }}" class="btn btn-outline-secondary" >
+                        Add
+                    </a>
                 </div>
             </div>
         </div>

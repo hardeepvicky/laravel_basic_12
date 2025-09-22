@@ -511,6 +511,7 @@ class UserController extends BackendController
                 ["field" => "dept_id", "type" => "int"],
                 ["field" => "sub_dept_id", "type" => "int"],
                 ["field" => "desg_id", "type" => "int"],
+                ["field" => "branch_id", "type" => "int"],
             ];
 
             $conditions = $this->getConditions(null, $pattern_array);
