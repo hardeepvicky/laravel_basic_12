@@ -33,7 +33,6 @@ use App\Models\User;
     <x-Backend.form-errors />
 
     <x-Form.start action="{{ $form['url'] }}" method="{{ $form['method'] }}" class="i-validate" />
-    <x-Inputs.text-field type="hidden" name="country_id" :value="$model->country_id" />
 
     <div class="card">
         <div class="card-header card-no-border pb-0">

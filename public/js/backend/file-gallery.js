@@ -41,7 +41,7 @@ jQuery.fn.extend({
                             html += "</button>";
                         html += "</div>";
                     html += '<div class="modal-body"> </div>';
-                        html += '<div class="modal-footer">';
+                        html += '<div class="modal-footer justify-content-start">';
                             html += '<button class="btn btn-danger de-select">De-Select All</button>';
                             html += '<button class="btn btn-info select">Select</button>';
                         html += "</div>";

@@ -13,11 +13,12 @@ return new class extends Migration
     {
         Schema::create('production_targets', function (Blueprint $table) {
             $table->id();
+            $table->foreignId("branch_id")->constrained("branches")->onDelete('restrict');
             $table->foreignId("responsible_user_id")->constrained("users")->onDelete('restrict');
             $table->foreignId("product_id")->constrained("products")->onDelete('restrict');
             $table->date("target_date");
             $table->float("qty");
-            $table->float("complete_qty");
+            $table->float("complete_qty")->default(0);
             $table->text("remarks")->nullable();
             $table->timestamps();
             $table->bigInteger("created_by")->nullable();

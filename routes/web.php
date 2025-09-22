@@ -53,6 +53,7 @@ use App\Http\Controllers\Backend\PaymentController;
 use App\Http\Controllers\Backend\PermissionController;
 use App\Http\Controllers\Backend\ProductCategoryController;
 use App\Http\Controllers\Backend\ProductController;
+use App\Http\Controllers\Backend\ProductionTargetController;
 use App\Http\Controllers\Backend\ProductIssueController;
 use App\Http\Controllers\Backend\ProductSerialController;
 use Illuminate\Support\Facades\Route;
@@ -1850,6 +1851,24 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
 
         $name = "ajax_update_field";
         Route::post($name, [$controllerClass, $name])->name($name);
+
+        $route_prefix = "export";
+        Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+            $name = "csv";
+            Route::get($name, [$controllerClass, "export_" . $name])->name($name);
+        });
+    });
+
+    $route_prefix = "production-target";
+    $controllerClass = ProductionTargetController::class;
+    Route::resource($route_prefix, $controllerClass);    
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
+        $name = "completion";
+        Route::any("{id}/" . $name, [$controllerClass, $name])->name($name);
+
+        $name = "completion_destroy";
+        Route::delete("{id}/" . $name, [$controllerClass, $name])->name($name);
 
         $route_prefix = "export";
         Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
