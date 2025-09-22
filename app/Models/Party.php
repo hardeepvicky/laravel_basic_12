@@ -47,11 +47,15 @@ class Party extends BaseModel
             "preventDelete" => true
         ],
         DispatchOrder::class => [
-            "foreignKey" => ["carrier_id"],
+            "foreignKey" => ["party_id"],
             "preventDelete" => true
         ],
         ShipOrder::class => [
-            "foreignKey" => ["carrier_id"],
+            "foreignKey" => ["party_id"],
+            "preventDelete" => true
+        ],
+        PurchaseOrder::class => [
+            "foreignKey" => ["party_id"],
             "preventDelete" => true
         ],
     ];

@@ -15,8 +15,8 @@ class CreateEmployeeDocumentFilesTable extends Migration
     {
         Schema::create('employee_document_files', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger("employee_id");
-            $table->unsignedBigInteger("document_file_id");
+            $table->foreignId("employee_id")->constrained("employees")->onDelete('restrict');;
+            $table->unsignedBigInteger("document_file_id")->constrained("document_files")->onDelete('restrict');;
             $table->timestamps();
         });
     }

@@ -1,46 +1,59 @@
+<?php
+
+use App\Models\User;
+?>
+
 @extends($layout)
 
 @section('content')
+    <?php
+    $page_header_links = [['title' => 'Create', 'url' => route($routePrefix . '.create')]];
+    ?>
 
-<?php
-$page_header_links = [
-    ["title" => "Create", "url" => route($routePrefix . ".create")]
-];
+    @include($partial_path . '.page_header')
 
-?>
+    <div class="card hidden">
+        <div class="card-body">
+            <form method="GET" class="summary_search" action="{{ route($routePrefix . '.index') }}">
+                <input type="hidden" name="is_sort_clear" value="1" />
+                
+                <?php 
+                $field = "name";
+                ?>
+                <input type="text"  name="{{ $field }}" value="{{ $search[$field] }}" />
 
-@include($partial_path . ".page_header")
+                <?php 
+                $field = "type";
+                ?>
+                <input type="text"  name="{{ $field }}" value="{{ $search[$field] }}" />
 
-<div class="card">
-    <div class="card-body">
-        <form method="GET" class="summary_search" action="{{ route($routePrefix . '.index') }}">
-            <input type="hidden" name="is_sort_clear" value="1" />
-            <div class="row mb-4">
-                <div class="col-md-3">
-                    <x-Inputs.text-field name="name" label="Name" :value="$search['name']" autocomplete="off" />
-                </div>
+                <?php
+                $field = "branch_id";
+                ?>
+                <input type="text"  name="{{ $field }}" value="{{ $search[$field] }}" />
 
-                <div class="col-md-3 mb-2">
-                    <x-Inputs.drop-down name="department_id" label="Department" :list="$department_list"
-                        :value="$search['department_id']" class="select2" />
-                </div>
-                <div class="col-md-3 mb-2">
-                    <x-Inputs.drop-down name="designation_id" label="Designation" :list="$designation_list"
-                        :value="$search['designation_id']" class="select2" />
-                </div>
+                <?php
+                $field = "department_id";
+                ?>
+                <input type="text"  name="{{ $field }}" value="{{ $search[$field] }}" />
 
-                <div class="col-md-3 mb-2">
-                    <x-Inputs.drop-down name="is_active" label="Active" :list="$yes_no_list"
-                        :value="$search['is_active']" class="select2" />
-                </div>
-            </div>
-            <x-Backend.summary-search-form-footer :selectedPaginationLimit="$pagination_limit" />
-        </form>
+                <?php
+                $field = "designation_id";
+                ?>
+                <input type="text"  name="{{ $field }}" value="{{ $search[$field] }}" />
+                
+                <?php 
+                    $field = "mobile";
+                ?>
+                <input type="text"  name="{{ $field }}" value="{{ $search[$field] }}" /> 
+                
+                <x-Backend.summary-search-form-footer :selectedPaginationLimit="$pagination_limit" />
+            </form>
+        </div>
     </div>
-</div>
 
-<div id="index_table">
-    @include($viewPrefix . ".index_table")
-</div>
+    <div id="index_table">
+        @include($viewPrefix . '.index_table')
+    </div>
 
 @endsection

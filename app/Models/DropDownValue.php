@@ -27,6 +27,7 @@ class DropDownValue extends BaseModel
     const AUTO_SERIAL_PATTERN = "AUTO_SERIAL_PATTERN";
     const ORIGIN = "ORIGIN";
     const CERTIFICATION = "CERTIFICATION";
+    const EMPLOYEE = "EMPLOYEE";
 
     public static array $child_model_class = [
         // User::class => [
@@ -86,6 +87,7 @@ class DropDownValue extends BaseModel
             self::AUTO_SERIAL_PATTERN => "Auto Serial Pattern",
             self::ORIGIN => "Origin",
             self::CERTIFICATION => "Certification",
+            self::EMPLOYEE => "Employee",
         ];
 
         return $list;
