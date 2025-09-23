@@ -2,7 +2,10 @@
  * @created 07-Oct-2023
  * @author Hardeep Singh
  */
+<<<<<<< HEAD
 
+=======
+>>>>>>> base_v3
 $.blackdrop = {
     obj: null,
     events: [],
@@ -11,7 +14,12 @@ $.blackdrop = {
         _this.obj = $("body").find(".black_drop_container:first");
 
         if (this.obj.length == 0) {
+<<<<<<< HEAD
             var html = '<div class="black_drop_container" style="display:none;"></div>';
+=======
+            var html =
+                '<div class="black_drop_container" style="display:none;"></div>';
+>>>>>>> base_v3
             $("body").prepend(html);
             _this.obj = $("body").find(".black_drop_container:first");
         }
@@ -22,7 +30,13 @@ $.blackdrop = {
     },
     onClick: function (fn) {
         if (typeof fn != "function") {
+<<<<<<< HEAD
             console.error("blackDrop -> onClick() : argument should be function type");
+=======
+            console.error(
+                "blackDrop -> onClick() : argument should be function type"
+            );
+>>>>>>> base_v3
         }
 
         this.obj.click(fn);
@@ -32,7 +46,11 @@ $.blackdrop = {
     },
     hide: function () {
         this.obj.hide();
+<<<<<<< HEAD
     }
+=======
+    },
+>>>>>>> base_v3
 };
 
 $.sr = {
@@ -43,6 +61,7 @@ $.sr = {
      */
     wait: function (seconds, callback, onStopCallback) {
         var inverval_wait = setInterval(function () {
+<<<<<<< HEAD
 
             if (seconds >= 0)
             {
@@ -54,11 +73,22 @@ $.sr = {
                 clearInterval(inverval_wait);
                 if (typeof(onStopCallback) == "function")
                 {
+=======
+            if (seconds >= 0) {
+                callback(seconds);
+                seconds = seconds - 1;
+            } else {
+                clearInterval(inverval_wait);
+                if (typeof onStopCallback == "function") {
+>>>>>>> base_v3
                     onStopCallback();
                 }
                 return;
             }
+<<<<<<< HEAD
 
+=======
+>>>>>>> base_v3
         }, 1000);
 
         return inverval_wait;
@@ -248,9 +278,60 @@ jQuery.fn.extend({
             }
         });
     },
+<<<<<<< HEAD
     chkSelectAll: function () {
         var feature = "sr-chkselect";
 
+=======
+    chkSelectAll: function (opt) {
+        var feature = "sr-chkselect";
+
+        var default_opt = {
+            onChildChange: function () {},
+            onParentChange: function () {},
+        };
+
+        function check_nested_child(grant_parent, parents, checked) {
+            $(parents).each(function () {
+                $(this).prop("checked", checked);
+                opt.onChildChange(grant_parent, $(this));
+                var children = $(this).attr("data-sr-chkselect-children");
+                if (children) {
+                    check_nested_child($(this), $(children), checked);
+                }
+            });
+        }
+
+        function check_nested_parent(target, parent, checked) {
+            var t_c = $(target).length;
+            var c_c = $(target).filter(":checked").length;
+            var checked = t_c == c_c;
+            parent.prop("checked", checked);
+
+            opt.onParentChange(target, parent);
+
+            var target = $(target).attr("data-sr-chkselect-parent");
+            if (target) {
+                var target = $(this).attr("data-sr-chkselect-children");
+                check_nested_parent(target);
+            }
+
+            $(parents).each(function () {
+                $(this).prop("checked", checked);
+
+                if (children) {
+                    check_nested($(this), $(children), checked);
+                }
+            });
+        }
+
+        if (typeof opt == "undefined") {
+            opt = {};
+        }
+
+        opt = { ...default_opt, ...opt };
+
+>>>>>>> base_v3
         var events = {
             childCheck: feature + ".childcheck",
             parentCheck: feature + ".parentcheck",
@@ -270,6 +351,7 @@ jQuery.fn.extend({
 
             if (_this.applyOnce(feature)) {
                 _this.on(events.childCheck, function () {
+<<<<<<< HEAD
                     $(target).prop("checked", _this.prop("checked"));
 
                     $(target).each(function () {
@@ -277,6 +359,13 @@ jQuery.fn.extend({
                             $(this).trigger(events.childCheck);
                         }
                     });
+=======
+                    check_nested_child(
+                        $(this),
+                        $(target),
+                        _this.prop("checked")
+                    );
+>>>>>>> base_v3
                 });
 
                 $(target).on(events.parentCheck, function () {
@@ -284,10 +373,16 @@ jQuery.fn.extend({
                     var c_c = $(target).filter(":checked").length;
                     var checked = t_c == c_c;
                     _this.prop("checked", checked);
+<<<<<<< HEAD
 
                     if (_this.hasEvent(events.parentCheck)) {
                         _this.trigger(events.parentCheck);
                     }
+=======
+                    opt.onParentChange($(this), target);
+
+                    //check_nested_parent();
+>>>>>>> base_v3
                 });
 
                 _this.change(function () {
@@ -312,12 +407,21 @@ jQuery.fn.extend({
         return this.each(function () {
             var target = $(this).data(feature + "-target");
             if (!target) {
+<<<<<<< HEAD
                 console.error(
                     "data-" + feature + "-target is not defined in html"
                 );
                 return;
             }
 
+=======
+                $.events.onError("html attr is not found", "data-" + feature + "-target");
+                return;
+            }
+
+            var _this = $(this);
+
+>>>>>>> base_v3
             var tag = $(this).tagName();
 
             if (tag == "select") {
@@ -343,14 +447,19 @@ jQuery.fn.extend({
                 var class_name = $(this).data(feature + "-class");
 
                 if (!class_name) {
+<<<<<<< HEAD
                     console.error(
                         "data-" + feature + "-class is not defined in html"
                     );
+=======
+                    $.events.onError("html attr is not found", "data-" + feature + "-class");
+>>>>>>> base_v3
                     return;
                 }
 
                 if ($(this).applyOnce(feature)) {
                     if (tag == "input") {
+<<<<<<< HEAD
                         if ($(this).is(":checkbox"))
                         {
                             $(this).on(events.toggleClass, function ()
@@ -361,6 +470,13 @@ jQuery.fn.extend({
                                 }
                                 else
                                 {
+=======
+                        if ($(this).is(":checkbox")) {
+                            $(this).on(events.toggleClass, function () {
+                                if ($(this).prop("checked")) {
+                                    $(target).addClass(class_name);
+                                } else {
+>>>>>>> base_v3
                                     $(target).removeClass(class_name);
                                 }
                             });
@@ -373,8 +489,28 @@ jQuery.fn.extend({
                         $(this).on(events.toggleClass, function () {
                             if (!$(target).hasClass(class_name)) {
                                 $(target).addClass(class_name);
+<<<<<<< HEAD
                             } else {
                                 $(target).removeClass(class_name);
+=======
+
+                                var text = $(this).data(feature + "-applied-text");
+
+                                if (text)
+                                {
+                                    _this.text(text)
+                                }
+
+                            } else {
+                                $(target).removeClass(class_name);
+
+                                var text = $(this).data(feature + "-not-applied-text");
+
+                                if (text)
+                                {
+                                    _this.text(text)
+                                }
+>>>>>>> base_v3
                             }
                         });
 
@@ -521,6 +657,7 @@ jQuery.fn.extend({
     srParagraph: function () {
         var feature = "sr-paragraph";
 
+<<<<<<< HEAD
         var events = {
             moreText: feature + ".moreText",
             lessText: feature + ".lessText",
@@ -540,6 +677,18 @@ jQuery.fn.extend({
 
             if ($(this).applyOnce(feature)) {
                 max = parseInt(max);
+=======
+        return this.each(function () {
+            var _this = $(this);
+
+            if ($(this).applyOnce(feature)) {
+                max = parseInt(_this.data("max"));
+
+                if (!max)
+                {
+                    max = 45;
+                }
+>>>>>>> base_v3
 
                 var content = _this.html();
 
@@ -547,6 +696,7 @@ jQuery.fn.extend({
                     var less_content = content.substr(0, max);
 
                     var html =
+<<<<<<< HEAD
                         '<span class="' +
                         feature +
                         '-less-text-block">' +
@@ -596,6 +746,27 @@ jQuery.fn.extend({
                         .click(function () {
                             $(this).trigger(events.lessText);
                         });
+=======
+                        '<span class="' + feature + '-less-text-block">' +
+                        less_content +
+                        '<br/><a class="' + feature +'-more-text-opener">...More</a></span>';
+                    html +=
+                        '<span class="' + feature + '-more-text-block hidden">' +
+                        content +
+                        '<br/><a class="' + feature +'-less-text-opener">...Less</a></span>';
+
+                    _this.html(html);
+
+                    _this.find("." + feature + "-more-text-opener").click(function () {
+                        _this.find("." + feature + "-less-text-block").addClass("hidden");
+                        _this.find("." + feature + "-more-text-block").removeClass("hidden");
+                    });
+
+                    _this.find("." + feature + "-less-text-opener").click(function () {
+                        _this.find("." + feature + "-more-text-block").addClass("hidden");
+                        _this.find("." + feature + "-less-text-block").removeClass("hidden");
+                    });
+>>>>>>> base_v3
                 }
             }
         });
@@ -729,7 +900,11 @@ jQuery.fn.extend({
         };
 
         var dataKeys = {
+<<<<<<< HEAD
             last_id : "data-sr-last-id",
+=======
+            last_id: "data-sr-last-id",
+>>>>>>> base_v3
         };
 
         var placeholder = {
@@ -740,9 +915,15 @@ jQuery.fn.extend({
         var settings = $.extend(
             {
                 brace_type: "(",
+<<<<<<< HEAD
                 highlightTrClass : "highlight",                
                 highlightDangerTrClass : "highlight-danger",                
                 highlightSeconds : 1,
+=======
+                highlightTrClass: "highlight",
+                highlightDangerTrClass: "highlight-danger",
+                highlightSeconds: 0.5,
+>>>>>>> base_v3
                 beforeRowAdd: function () {
                     return true;
                 },
@@ -828,6 +1009,11 @@ jQuery.fn.extend({
                 var _tr = _table.find(selector.row).last();
 
                 settings.afterRowAdd(_table, last_id, _tr);
+<<<<<<< HEAD
+=======
+
+                console.log(feature, "row added", last_id);
+>>>>>>> base_v3
             });
 
             _table.on(events.delRow, function (e, opt) {
@@ -849,6 +1035,7 @@ jQuery.fn.extend({
                 _table.attr(dataKeys.last_id, last_id);
 
                 settings.afterRowDel(_table, last_id);
+<<<<<<< HEAD
             });
 
             function perform_up_down (_tr, callback)
@@ -856,6 +1043,16 @@ jQuery.fn.extend({
                 _tr.addClass(settings.highlightTrClass);
 
                 var ms = settings.highlightSeconds * 1000 / 2;
+=======
+
+                console.log(feature, "row deleted", last_id);
+            });
+
+            function perform_up_down(_tr, callback) {
+                _tr.addClass(settings.highlightTrClass);
+
+                var ms = (settings.highlightSeconds * 1000) / 2;
+>>>>>>> base_v3
 
                 _tr.fadeOut(ms, "swing", () => {
                     callback();
@@ -867,8 +1064,12 @@ jQuery.fn.extend({
                 });
             }
 
+<<<<<<< HEAD
             function perform_delete (_tr, callback)
             {
+=======
+            function perform_delete(_tr, callback) {
+>>>>>>> base_v3
                 _tr.addClass(settings.highlightDangerTrClass);
 
                 var ms = settings.highlightSeconds * 1000;
@@ -886,7 +1087,11 @@ jQuery.fn.extend({
 
                     selected_tr = _table.find("> tbody > tr:eq(" + index + ")");
 
+<<<<<<< HEAD
                     perform_up_down(_tr,  () => {
+=======
+                    perform_up_down(_tr, () => {
+>>>>>>> base_v3
                         _tr.insertBefore(selected_tr);
                     });
                 }
@@ -935,6 +1140,7 @@ jQuery.fn.extend({
 
             var last_id = 0;
 
+<<<<<<< HEAD
             _table.find(selector.row).each(function(){
                 var id = $(this).attr(placeholder.id);
 
@@ -944,6 +1150,15 @@ jQuery.fn.extend({
 
                     if (id > last_id)
                     {
+=======
+            _table.find(selector.row).each(function () {
+                var id = $(this).attr(placeholder.id);
+
+                if (id) {
+                    id = parseInt(id);
+
+                    if (id > last_id) {
+>>>>>>> base_v3
                         last_id = id;
                     }
                 }
@@ -965,10 +1180,18 @@ jQuery.fn.extend({
         var settings = $.extend(
             {
                 placeholder: "{v}",
+<<<<<<< HEAD
                 key : 'id',
                 text : 'name',
                 onError: function (title, msg) {
                     $.sr.error.detail(title, msg);
+=======
+                key: "id",
+                text: "name",
+                default_data : [],
+                onError: function (title, msg) {
+                    $.events.onError(title, msg);
+>>>>>>> base_v3
                 },
                 beforeGet: function (src, url) {
                     return url;
@@ -1018,7 +1241,10 @@ jQuery.fn.extend({
             }
 
             if (_this.applyOnce(feature)) {
+<<<<<<< HEAD
 
+=======
+>>>>>>> base_v3
                 $(target).on(events.setValue, function (e, args) {
                     var v = settings.beforeValueSet(_this, $(this), args.value);
                     if (v) {
@@ -1028,6 +1254,7 @@ jQuery.fn.extend({
                 });
 
                 _this.on(events.change, function (e, event_opt) {
+<<<<<<< HEAD
                     var v = $(this).val();
 
                     if (v)
@@ -1088,12 +1315,173 @@ jQuery.fn.extend({
                                 var k = new_response["data"][i][settings.key];
                                 var v = new_response["data"][i][settings.text];
                                 html += '<option value="' + k + '">' + v + "</option>";
+=======
+
+                    if ((typeof event_opt != "undefined" && typeof event_opt.eventBubble == "boolean" && !event_opt.eventBubble))
+                    {
+
+                    }
+                    else
+                    {
+                        var v = $(this).val();
+
+                        if (v) 
+                        {
+                            var new_url = settings.beforeGet(_this, url);
+
+                            if (new_url === false) {
+                                return false;
+                            }
+
+                            new_url = new_url.replaceAll(settings.placeholder, v);
+
+                            console.log(feature + " : get : " + new_url);
+                            $.get(new_url, function (response) {
+                                try {
+                                    if (typeof response == "string") {
+                                        response = JSON.parse(response);
+                                    }
+                                } catch (e) {
+                                    settings.onError(
+                                        feature + " Error on get " + new_url,
+                                        response
+                                    );
+                                    return;
+                                }
+
+                                var new_response = settings.afterGet(
+                                    _this,
+                                    $(target),
+                                    response
+                                );
+
+                                if (typeof new_response != "object")
+                                {
+                                    settings.onError(
+                                        feature + " Error on get " + new_url,
+                                        "new_response should be object"
+                                    );
+
+                                    return;
+                                }
+
+                                if (typeof new_response['status'] == "undefined")
+                                {
+                                    settings.onError(
+                                        feature + " Error on get " + new_url,
+                                        "status is not found in new_response"
+                                    );
+
+                                    return;
+                                }
+
+                                if (typeof new_response['data'] != "object")
+                                {
+                                    settings.onError(
+                                        feature + " Error on get " + new_url,
+                                        "data is not onject in new_response"
+                                    );
+
+                                    return;
+                                }
+
+                                if (new_response["status"] != "1") {
+                                    settings.onError(
+                                        feature + " Error on get " + new_url,
+                                        new_response["msg"]
+                                    );
+                                    return;
+                                }
+
+                                var html = "";
+                                var multiple = $(target).attr("multiple");
+                                if (!multiple) {
+                                    var html = "<option value=''>Please Select</option>";
+                                }
+
+                                for (var i in new_response["data"]) {
+                                    var k = new_response["data"][i][settings.key];
+                                    var v = new_response["data"][i][settings.text];
+
+                                    var attr = 'value="' + k +'"';
+
+                                    if (typeof new_response["data"][i]["auto_select"] != "undefined")
+                                    {
+                                        if (new_response["data"][i]["auto_select"])
+                                        {
+                                            attr += ' selected="selected"';
+                                        }
+                                    }
+
+                                    html += '<option ' + attr +'>' + v +"</option>";
+                                }
+
+                                $(target).html(html);
+
+                                $(target).each(function () {
+                                    if (
+                                        typeof event_opt != "undefined" &&
+                                        typeof event_opt.pageLoad != "undefined" &&
+                                        event_opt.pageLoad
+                                    ) {
+                                        var value = $(this).data("value");
+
+                                        if (value) {
+                                            $(this).trigger(events.setValue, [
+                                                { value: value },
+                                            ]);
+                                        }
+                                    }
+
+                                    if (
+                                        typeof event_opt != "undefined" &&
+                                        typeof event_opt.onListFill == "function"
+                                    ) {
+                                        event_opt.onListFill();
+                                    }
+
+                                    $(this).trigger(events.change, event_opt);
+                                });
+                            }).fail(function (jqXHR, status, msg) {
+                                settings.onError(
+                                    feature + " Error on get " + new_url,
+                                    msg
+                                );
+                            });
+                        } 
+                        else if (settings.default_data)
+                        {
+                            var html = "";
+                            var multiple = $(target).attr("multiple");
+                            if (!multiple) {
+                                var html = "<option value=''>Please Select</option>";
+                            }
+
+                            for (var i in settings.default_data) {
+                                var k = settings.default_data[i][settings.key];
+                                var v = settings.default_data[i][settings.text];
+
+                                var attr = 'value="' + k +'"';
+
+                                if (typeof settings.default_data[i]["auto_select"] != "undefined")
+                                {
+                                    if (new_response["data"][i]["auto_select"])
+                                    {
+                                        attr += ' selected="selected"';
+                                    }
+                                }
+
+                                html += '<option ' + attr +'>' + v +"</option>";
+>>>>>>> base_v3
                             }
 
                             $(target).html(html);
 
+<<<<<<< HEAD
                             console.log(event_opt);
 
+=======
+>>>>>>> base_v3
                             $(target).each(function () {
                                 if (
                                     typeof event_opt != "undefined" &&
@@ -1118,6 +1506,7 @@ jQuery.fn.extend({
 
                                 $(this).trigger(events.change, event_opt);
                             });
+<<<<<<< HEAD
                         }).fail(function (jqXHR, status, msg) {
                             settings.onError(
                                 feature + " Error on get " + new_url,
@@ -1132,6 +1521,18 @@ jQuery.fn.extend({
                                 $(this).trigger(events.change, event_opt);
                             }
                         });
+=======
+                        }
+                        else {
+                            $(target).html("");
+
+                            $(target).each(function () {
+                                if ($(this).hasEvent(events.change)) {
+                                    $(this).trigger(events.change, event_opt);
+                                }
+                            });
+                        }
+>>>>>>> base_v3
                     }
                 });
 
@@ -1241,7 +1642,11 @@ jQuery.fn.extend({
             {
                 onRead: function (data) {},
                 onError: function (msg) {
+<<<<<<< HEAD
                     $.sr.error.msg(msg);
+=======
+                    $.events.onError("srReadCSV", msg);
+>>>>>>> base_v3
                 },
             },
             opt

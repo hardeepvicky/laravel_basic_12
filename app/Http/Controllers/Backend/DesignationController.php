@@ -2,7 +2,13 @@
 
 namespace App\Http\Controllers\Backend;
 
+<<<<<<< HEAD
 use App\Models\Designation;
+=======
+use App\Helpers\LaravelExtend;
+use App\Models\Designation;
+use App\Models\FieldSetting;
+>>>>>>> base_v3
 use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Support\Facades\DB;
@@ -14,6 +20,11 @@ class DesignationController extends BackendController
 
     protected $modelClass = Designation::class;
 
+<<<<<<< HEAD
+=======
+    protected Designation | null $model = null;
+
+>>>>>>> base_v3
     public function index()
     {
         $cache_key_prefix = Route::currentRouteName();
@@ -32,8 +43,16 @@ class DesignationController extends BackendController
         $cache_key = $cache_key_prefix . "-index";
 
         $conditions = $this->getConditions($cache_key, [
+<<<<<<< HEAD
             ["field" => "name", "type" => "string", "view_field" => "name"],
             ["field" => "is_active", "type" => "", "view_field" => "is_active"],
+=======
+            ["field" => "id", "type" => "int", "cache" => false],
+            ["field" => "name", "type" => "string"],
+            ["field" => "short_name", "type" => "string"],
+            ["field" => "level", "type" => "int"],
+            ["field" => "is_active", "type" => "int"],
+>>>>>>> base_v3
         ]);
 
         $builder = $this->modelClass::where($conditions);
@@ -45,8 +64,13 @@ class DesignationController extends BackendController
             $clear_cache = request('is_sort_clear', false);
 
             $sort_params = $this->getRequestData($cache_key_for_sort, [
+<<<<<<< HEAD
                 ["key" => "sort_by", "default" => "id"],
                 ["key" => "sort_dir", "default" => "DESC"],
+=======
+                ["key" => "sort_by", "default" => "list_display_order"],
+                ["key" => "sort_dir", "default" => "ASC"],
+>>>>>>> base_v3
             ], $clear_cache);
 
             $builder->orderBy($sort_params['sort_by'], $sort_params['sort_dir']);
@@ -55,6 +79,22 @@ class DesignationController extends BackendController
         return $builder;
     }
 
+<<<<<<< HEAD
+=======
+    protected function beforeViewRender()
+    {
+        if (is_null($this->model)) {
+            $this->model = new $this->modelClass();
+        }
+
+        $field_labels = FieldSetting::getDynamicFields($this->modelClass);
+
+        $this->setForView(compact("field_labels"));
+
+        return parent::beforeViewRender();
+    }
+
+>>>>>>> base_v3
     public function create()
     {
         $this->beforeCreate();
@@ -74,6 +114,13 @@ class DesignationController extends BackendController
     private function _common_validation_rules()
     {
         return [
+<<<<<<< HEAD
+=======
+            "name" => ["required"],
+            "short_name" => ["required"],
+            "level" => ["required"],
+            "list_display_order" => "",
+>>>>>>> base_v3
             "is_active" => ""
         ];
     }
@@ -88,10 +135,16 @@ class DesignationController extends BackendController
 
     public function store(Request $request)
     {
+<<<<<<< HEAD
+=======
+        $this->model = new $this->modelClass();
+
+>>>>>>> base_v3
         $this->beforeCreate();
 
         $rules = $this->_common_validation_rules();
 
+<<<<<<< HEAD
         $messages = $this->_common_validation_messages();
 
         $rules = array_merge($rules, [
@@ -102,6 +155,12 @@ class DesignationController extends BackendController
 
         ]);
 
+=======
+        $rules = LaravelExtend::merge_validation_rules($rules, $this->model->getUniqueValidationRules($request));
+
+        $messages = $this->_common_validation_messages();
+
+>>>>>>> base_v3
         $validatedData = $request->validate($rules, $messages);
 
         DB::beginTransaction();
@@ -109,13 +168,23 @@ class DesignationController extends BackendController
         try
         {
             $model = $this->modelClass::create($validatedData);
+<<<<<<< HEAD
+=======
+
+            if ($this->custom_errors) { 
+                throw new Exception("Fail to Save");
+            }
+>>>>>>> base_v3
             
             $this->updateUserInfoAfterSave($model);
             
             DB::commit();
 
+<<<<<<< HEAD
             $this->saveSqlLog();
 
+=======
+>>>>>>> base_v3
             return $this->afterSave($model);
         }
         catch(Exception $ex)
@@ -124,13 +193,21 @@ class DesignationController extends BackendController
             
             $this->saveSqlLog();
 
+<<<<<<< HEAD
             return back()->withInput()->with('fail', $ex->getMessage());
+=======
+            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", LaravelExtend::$errors);
+>>>>>>> base_v3
         }
     }
 
     public function edit($id)
     {
+<<<<<<< HEAD
         $model = $this->modelClass::findOrFail($id);
+=======
+        $model = $this->model = $this->modelClass::findOrFail($id);
+>>>>>>> base_v3
 
         $this->beforeEdit($model);
 
@@ -146,12 +223,17 @@ class DesignationController extends BackendController
 
     public function update($id, Request $request)
     {
+<<<<<<< HEAD
         $model = $this->modelClass::findOrFail($id);
+=======
+        $model = $this->model = $this->modelClass::findOrFail($id);
+>>>>>>> base_v3
 
         $this->beforeEdit($model);
 
         $rules = $this->_common_validation_rules();
 
+<<<<<<< HEAD
         $messages = $this->_common_validation_messages();
 
         $messages = array_merge($messages, [
@@ -164,10 +246,17 @@ class DesignationController extends BackendController
             'name' => "required|min:3|unique:$table_name,name,$model->id",
         ]);
 
+=======
+        $rules = LaravelExtend::merge_validation_rules($rules, $this->model->getUniqueValidationRules($request));
+
+        $messages = $this->_common_validation_messages();
+
+>>>>>>> base_v3
         $validatedData = $request->validate($rules, $messages);
 
         DB::beginTransaction();
 
+<<<<<<< HEAD
         try
         {
             $model = $this->modelClass::findOrFail($id);
@@ -186,11 +275,34 @@ class DesignationController extends BackendController
         }
         catch(Exception $ex)
         {
+=======
+        try {
+            $save_data = $validatedData;
+
+            $this->model->fill($save_data);
+
+            $this->model->save();
+
+            if ($this->custom_errors) { 
+                throw new Exception("Fail to Save");
+            }
+
+            $this->updateUserInfoAfterSave($this->model);
+
+            DB::commit();
+
+            return $this->afterSave($this->model);
+        } catch (Exception $ex) {
+>>>>>>> base_v3
             DB::rollBack();
 
             $this->saveSqlLog();
 
+<<<<<<< HEAD
             return back()->withInput()->with('fail', $ex->getMessage());
+=======
+            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", LaravelExtend::$errors);
+>>>>>>> base_v3
         }
     }
 }

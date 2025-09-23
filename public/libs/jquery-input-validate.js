@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 /* 
+=======
+/*
+>>>>>>> base_v3
  * @author     Hardeep
  */
 
@@ -10,6 +14,7 @@
 var regex = {
     int: {
         exact: /^-?[\d]*$/,
+<<<<<<< HEAD
         partial: /-?[\d]/
     },
     float: {
@@ -48,12 +53,59 @@ var regex = {
         exact: /^[A-Za-z0-9-_]*$/g,
         partial: /[A-Za-z0-9-_]/g
     }
+=======
+        partial: /-?[\d]/,
+    },
+    float: {
+        exact: /^-?\d+\.?\d{0,9}$/,
+        partial: /-?\d+\.?\d{0,9}/,
+    },
+    alpha: {
+        exact: /^[A-Za-z]*$/g,
+        partial: /[A-Za-z]/g,
+    },
+    alphaWithSpace: {
+        exact: /^[A-Za-z\s]*$/g,
+        partial: /[A-Za-z\s]/g,
+    },
+    alphaNumeric: {
+        exact: /^[A-Za-z0-9]*$/g,
+        partial: /[A-Za-z0-9]/g,
+    },
+    alphaNumericWithSpace: {
+        exact: /^[A-Za-z0-9\s]*$/g,
+        partial: /[A-Za-z0-9\s]/g,
+    },
+    mobile: {
+        exact: /^[0-9]{10}$/g,
+        partial: /[0-9]/g,
+    },
+    phone: {
+        exact: /^[0-9]{4}[0-9]{7}$/g,
+        partial: /[0-9]{4}[0-9]{7}/,
+    },
+    barcode: {
+        exact: /^[A-Za-z0-9-_]*$/g,
+        partial: /[A-Za-z0-9-_]/g,
+    },
+    box: {
+        exact: /^[A-Za-z0-9-_]*$/g,
+        partial: /[A-Za-z0-9-_]/g,
+    },
+>>>>>>> base_v3
 };
 
 jQuery.fn.extend({
     iValidate: function (type, e, opt) {
         return this.each(function () {
+<<<<<<< HEAD
             if (typeof opt != "undefined" && typeof opt.trigger != "undefined") {
+=======
+            if (
+                typeof opt != "undefined" &&
+                typeof opt.trigger != "undefined"
+            ) {
+>>>>>>> base_v3
                 return;
             }
 
@@ -70,6 +122,7 @@ jQuery.fn.extend({
             var from = $(this).attr("data-" + type + "-from");
             var from_val = 0;
 
+<<<<<<< HEAD
             console.log("data-" + type + "-from" + " : " + from + " : "  + typeof from);
 
             if (from)
@@ -82,13 +135,31 @@ jQuery.fn.extend({
                 {
                     if ($(from).length == 0)
                     {
+=======
+            console.log(
+                "data-" + type + "-from" + " : " + from + " : " + typeof from
+            );
+
+            if (from) {
+                if ($.isNumeric(from)) {
+                    from_val = parseFloat(from);
+                } else {
+                    if ($(from).length == 0) {
+>>>>>>> base_v3
                         console.error("from : " + from + " : not found");
                         return;
                     }
 
+<<<<<<< HEAD
                     if ($(from).length > 1)
                     {
                         console.error("from : " + from + " : more than 1 found");
+=======
+                    if ($(from).length > 1) {
+                        console.error(
+                            "from : " + from + " : more than 1 found"
+                        );
+>>>>>>> base_v3
                         return;
                     }
 
@@ -106,7 +177,10 @@ jQuery.fn.extend({
                     break;
 
                 case "int":
+<<<<<<< HEAD
 
+=======
+>>>>>>> base_v3
                     if (!msg) {
                         msg = "Number only";
                     }
@@ -196,7 +270,10 @@ jQuery.fn.extend({
                     break;
             }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> base_v3
             if (result === false && typeof regex[type] != "undefined") {
                 console.log(v);
                 var v_list = v.match(regex[type]["partial"]);
@@ -208,11 +285,29 @@ jQuery.fn.extend({
                 }
             }
 
+<<<<<<< HEAD
             var $span = $(this).parent().find("." + type + "-error-message");
 
             if ($span.length == 0) {
                 $(this).parent().append('<span class="' + type + '-error-message error-message"></span>');
                 $span = $(this).parent().find("." + type + "-error-message");
+=======
+            var $span = $(this)
+                .parent()
+                .find("." + type + "-error-message");
+
+            if ($span.length == 0) {
+                $(this)
+                    .parent()
+                    .append(
+                        '<span class="' +
+                            type +
+                            '-error-message error-message"></span>'
+                    );
+                $span = $(this)
+                    .parent()
+                    .find("." + type + "-error-message");
+>>>>>>> base_v3
             }
 
             console.log(type + " " + result);
@@ -222,12 +317,18 @@ jQuery.fn.extend({
             } else {
                 $span.html("&#9679 " + msg).show();
             }
+<<<<<<< HEAD
 
+=======
+>>>>>>> base_v3
         });
     },
 });
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> base_v3
 function validateInputValue(v, type, opt) {
     if (!v) {
         v = "";
@@ -238,6 +339,7 @@ function validateInputValue(v, type, opt) {
     }
 
     switch (type) {
+<<<<<<< HEAD
         default: 
             var v_list = v.match(regex[type]["exact"]);
             return v_list !== null;
@@ -249,6 +351,18 @@ function validateInputValue(v, type, opt) {
             {
                 return true;
             }			
+=======
+        default:
+            var v_list = v.match(regex[type]["exact"]);
+            return v_list !== null;
+            break;
+
+        case "int":
+        case "float":
+            if (v == "-") {
+                return true;
+            }
+>>>>>>> base_v3
             var v_list = v.match(regex[type]["exact"]);
             return v_list !== null;
             break;
@@ -265,8 +379,15 @@ function validateInputValue(v, type, opt) {
         case "less-than-equal":
         case "more-than":
         case "more-than-equal":
+<<<<<<< HEAD
 
             if (typeof opt == "undefined" || typeof opt["from"] == "undefined") {
+=======
+            if (
+                typeof opt == "undefined" ||
+                typeof opt["from"] == "undefined"
+            ) {
+>>>>>>> base_v3
                 console.error("from not found in opt");
             }
 
@@ -342,7 +463,15 @@ $(document).ready(function () {
     }
 
     for (var cls in validate_rules.keyup) {
+<<<<<<< HEAD
         event_apply("input propertychange paste", validate_rules.keyup[cls], "input." + cls);
+=======
+        event_apply(
+            "input propertychange paste",
+            validate_rules.keyup[cls],
+            "input." + cls
+        );
+>>>>>>> base_v3
     }
 
     for (var cls in validate_rules.change) {
@@ -350,17 +479,24 @@ $(document).ready(function () {
     }
 });
 
+<<<<<<< HEAD
 $(document).on("submit", "form.i-validate", function () {
     var _form = $(this);
 
     var result = true;
 
+=======
+$(document).on("submit", "form.i-validate", function (e) {
+    var _form = $(this);
+
+>>>>>>> base_v3
     _form.find(".error-message").remove();
 
     for (var group in validate_rules) {
         var rules = validate_rules[group];
         for (var cls in rules) {
             var type = rules[cls];
+<<<<<<< HEAD
             var selector = "input." + cls;
 
             if (group == "change") {
@@ -394,6 +530,37 @@ $(document).on("submit", "form.i-validate", function () {
 
         return result;
     }
+=======
+            var selector = "." + cls;
+
+            console.log(group, cls, selector, $(this).find(selector).length);
+
+            $(this)
+                .find(selector)
+                .each(function () {
+                    $(this).iValidate(type);
+                });
+        }
+    }
+
+    var result = true;
+
+    if (_form.find(".error-message").is(":visible").length > 0) {
+        var error = _form.find(".error-message:first");
+        result = false;
+
+        if (error.length > 0) {
+            $("html,body").animate(
+                {
+                    scrollTop: error.top,
+                },
+                "slow"
+            );
+        }
+    }
+
+    return result;
+>>>>>>> base_v3
 });
 
 function validate_required_group(inputs) {
@@ -405,4 +572,8 @@ function validate_required_group(inputs) {
     });
 
     return result;
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> base_v3

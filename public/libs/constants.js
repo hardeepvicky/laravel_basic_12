@@ -17,5 +17,12 @@ const constants = {
             search : 'fas fa-search',
             cross : 'fas fa-times-circle'
         }
+<<<<<<< HEAD
     }
+=======
+    },
+    dateFormat : 'd-M-Y',
+    dateTimeFormat : 'd-M-Y H:i',
+    timeFormat : 'H:i',
+>>>>>>> base_v3
 };

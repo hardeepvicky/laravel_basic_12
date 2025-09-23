@@ -123,4 +123,16 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+<<<<<<< HEAD
+=======
+    'ACL_IS_SYSTEM_ADMIN_ALLOW_ALL_ROUTES' => env("ACL_IS_SYSTEM_ADMIN_ALLOW_ALL_ROUTES", false),
+    'EMAIL_API_PLATFORM' => env("EMAIL_API_PLATFORM", false),
+    'WHATSAPP_API_PLATFORM' => env("WHATSAPP_API_PLATFORM", false),
+    'SMS_API_PLATFORM' => env("SMS_API_PLATFORM", false),
+    'EMAIL_FROM' => env("EMAIL_FROM", false),
+    'EMAIL_NAME' => env("EMAIL_NAME", false),
+    'DEVELOPER_TEAM_EMAIL' => env("DEVELOPER_TEAM_EMAIL", false),
+
+    'ASTERISK_SERVER_URL' => env('ASTERISK_SERVER_URL', 'http://localhost/asterisk_file_download/get_audio_file.php'),
+>>>>>>> base_v3
 ];

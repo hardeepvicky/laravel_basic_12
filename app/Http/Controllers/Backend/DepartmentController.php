@@ -2,7 +2,14 @@
 
 namespace App\Http\Controllers\Backend;
 
+<<<<<<< HEAD
 use App\Models\Department;
+=======
+use App\Helpers\LaravelExtend;
+use App\Models\Department;
+use App\Models\FieldSetting;
+use App\Models\User;
+>>>>>>> base_v3
 use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Support\Facades\DB;
@@ -14,6 +21,11 @@ class DepartmentController extends BackendController
 
     protected $modelClass = Department::class;
 
+<<<<<<< HEAD
+=======
+    protected Department | null $model = null;
+
+>>>>>>> base_v3
     public function index()
     {
         $cache_key_prefix = Route::currentRouteName();
@@ -22,6 +34,11 @@ class DepartmentController extends BackendController
 
         $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
 
+<<<<<<< HEAD
+=======
+        // d(LaravelExtend::getQueryLog("", -3));
+
+>>>>>>> base_v3
         $this->setForView(compact("records"));
 
         return $this->viewIndex(__FUNCTION__);
@@ -32,29 +49,74 @@ class DepartmentController extends BackendController
         $cache_key = $cache_key_prefix . "-index";
 
         $conditions = $this->getConditions($cache_key, [
+<<<<<<< HEAD
             ["field" => "name", "type" => "string", "view_field" => "name"],
             ["field" => "is_active", "type" => "", "view_field" => "is_active"],
+=======
+            ["field" => "id", "type" => "int", "cache" => false],
+            ["field" => "name", "type" => "string"],
+            ["field" => "short_name", "type" => "string"],
+            ["field" => "is_active", "type" => "int"],
+>>>>>>> base_v3
         ]);
 
         $builder = $this->modelClass::where($conditions);
 
+<<<<<<< HEAD
+=======
+        $builder->with(["headUser"]);
+
+>>>>>>> base_v3
         if ($apply_sort)
         {
             $cache_key_for_sort = $cache_key_prefix . "-index-extra-params";
 
             $clear_cache = request('is_sort_clear', false);
 
+<<<<<<< HEAD
             $sort_params = $this->getRequestData($cache_key_for_sort, [
                 ["key" => "sort_by", "default" => "id"],
                 ["key" => "sort_dir", "default" => "DESC"],
             ], $clear_cache);
 
             $builder->orderBy($sort_params['sort_by'], $sort_params['sort_dir']);
+=======
+            $this->model = new $this->modelClass;
+
+            $sort = $this->getSortBy($this->model, $cache_key_for_sort, [
+                ["key" => "sort_by", "default" => "list_display_order"],
+                ["key" => "sort_dir", "default" => "ASC"],
+            ], $clear_cache);
+
+            $builder->orderBy($sort['sort_by'], $sort['sort_dir']);
+>>>>>>> base_v3
         }
 
         return $builder;
     }
 
+<<<<<<< HEAD
+=======
+    protected function beforeViewRender()
+    {
+        if (is_null($this->model)) {
+            $this->model = new $this->modelClass();
+        }
+
+        $user_conditions = [
+            "type" => User::TYPE_INTERNAL,
+        ];
+
+        $user_list = User::getList("id", "display_name", $user_conditions);
+
+        $field_labels = FieldSetting::getDynamicFields($this->modelClass);
+
+        $this->setForView(compact("user_list", "field_labels"));
+
+        return parent::beforeViewRender();
+    }
+
+>>>>>>> base_v3
     public function create()
     {
         $this->beforeCreate();
@@ -74,6 +136,13 @@ class DepartmentController extends BackendController
     private function _common_validation_rules()
     {
         return [
+<<<<<<< HEAD
+=======
+            "name" => ["required"],
+            "short_name" => ["required"],
+            "dept_head_user_id" => ["nullable"],
+            "list_display_order" => "",
+>>>>>>> base_v3
             "is_active" => ""
         ];
     }
@@ -81,17 +150,28 @@ class DepartmentController extends BackendController
     private function _common_validation_messages()
     {
         return [
+<<<<<<< HEAD
             "name.required" => "Departname name is required",
             "name.unique" => "Departname name already exist",
+=======
+            "name.required" => "Department name is required",
+            "name.unique" => "Department name already exist",
+>>>>>>> base_v3
         ];
     }
 
     public function store(Request $request)
     {
+<<<<<<< HEAD
+=======
+        $this->model = new $this->modelClass();
+
+>>>>>>> base_v3
         $this->beforeCreate();
 
         $rules = $this->_common_validation_rules();
 
+<<<<<<< HEAD
         $messages = $this->_common_validation_messages();
 
         $rules = array_merge($rules, [
@@ -102,6 +182,12 @@ class DepartmentController extends BackendController
 
         ]);
 
+=======
+        $rules = LaravelExtend::merge_validation_rules($rules, $this->model->getUniqueValidationRules($request));
+
+        $messages = $this->_common_validation_messages();
+
+>>>>>>> base_v3
         $validatedData = $request->validate($rules, $messages);
 
         DB::beginTransaction();
@@ -109,13 +195,23 @@ class DepartmentController extends BackendController
         try
         {
             $model = $this->modelClass::create($validatedData);
+<<<<<<< HEAD
+=======
+
+            if ($this->custom_errors) { 
+                throw new Exception("Fail to Save");
+            }
+>>>>>>> base_v3
             
             $this->updateUserInfoAfterSave($model);
             
             DB::commit();
 
+<<<<<<< HEAD
             $this->saveSqlLog();
 
+=======
+>>>>>>> base_v3
             return $this->afterSave($model);
         }
         catch(Exception $ex)
@@ -124,13 +220,21 @@ class DepartmentController extends BackendController
             
             $this->saveSqlLog();
 
+<<<<<<< HEAD
             return back()->withInput()->with('fail', $ex->getMessage());
+=======
+            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", LaravelExtend::$errors);
+>>>>>>> base_v3
         }
     }
 
     public function edit($id)
     {
+<<<<<<< HEAD
         $model = $this->modelClass::findOrFail($id);
+=======
+        $model = $this->model = $this->modelClass::findOrFail($id);
+>>>>>>> base_v3
 
         $this->beforeEdit($model);
 
@@ -146,12 +250,17 @@ class DepartmentController extends BackendController
 
     public function update($id, Request $request)
     {
+<<<<<<< HEAD
         $model = $this->modelClass::findOrFail($id);
+=======
+        $model = $this->model = $this->modelClass::findOrFail($id);
+>>>>>>> base_v3
 
         $this->beforeEdit($model);
 
         $rules = $this->_common_validation_rules();
 
+<<<<<<< HEAD
         $messages = $this->_common_validation_messages();
 
         $messages = array_merge($messages, [
@@ -164,10 +273,17 @@ class DepartmentController extends BackendController
             'name' => "required|min:3|unique:$table_name,name,$model->id",
         ]);
 
+=======
+        $rules = LaravelExtend::merge_validation_rules($rules, $this->model->getUniqueValidationRules($request));
+
+        $messages = $this->_common_validation_messages();
+
+>>>>>>> base_v3
         $validatedData = $request->validate($rules, $messages);
 
         DB::beginTransaction();
 
+<<<<<<< HEAD
         try
         {
             $model = $this->modelClass::findOrFail($id);
@@ -186,11 +302,34 @@ class DepartmentController extends BackendController
         }
         catch(Exception $ex)
         {
+=======
+        try {
+            $save_data = $validatedData;
+
+            $this->model->fill($save_data);
+
+            $this->model->save();
+
+            if ($this->custom_errors) { 
+                throw new Exception("Fail to Save");
+            }
+
+            $this->updateUserInfoAfterSave($this->model);
+
+            DB::commit();
+
+            return $this->afterSave($this->model);
+        } catch (Exception $ex) {
+>>>>>>> base_v3
             DB::rollBack();
 
             $this->saveSqlLog();
 
+<<<<<<< HEAD
             return back()->withInput()->with('fail', $ex->getMessage());
+=======
+            return back()->withInput()->with('fail', $ex->getMessage())->with("custom_errors", LaravelExtend::$errors);
+>>>>>>> base_v3
         }
     }
 }

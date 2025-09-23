@@ -21,4 +21,16 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+<<<<<<< HEAD
 /public/files
+=======
+
+/public/user_files
+/public/logs
+
+/storage/app/public/logs
+/storage/app/public/user_files
+/storage/app/public/files/backup
+
+*.log
+>>>>>>> base_v3

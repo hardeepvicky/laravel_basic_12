@@ -10,6 +10,7 @@
     <meta name="keywords"
         content="admin template, Admiro admin template, best javascript admin, dashboard template, bootstrap admin template, responsive admin template, web app">
     <meta name="author" content="pixelstrap">
+<<<<<<< HEAD
     <title>Admiro - Premium Admin Template</title>
     <!-- Favicon icon-->
     <link rel="icon" href="../assets/images/favicon.png" type="image/x-icon">
@@ -38,31 +39,55 @@
     <link rel="stylesheet" type="text/css" href="/css/backend.css?<?= BACKEND_CSS_VERSION ?>" />
 
     <script src="/assets/js/vendors/jquery/jquery.min.js"></script>
+=======
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
+    <title>
+        {{ $page_title ?? config('app.name') }}
+    </title>
+
+    @include("partials.common_css_links");
+    
+    <link rel="stylesheet" type="text/css" href="/css/backend.css?<?= CSS_VERSION ?>" />    
+    <script async src="https://www.google.com/recaptcha/api.js"></script>
+>>>>>>> base_v3
 </head>
 
 <body>
     <!-- tap on top starts-->
     <div class="tap-top"><i class="iconly-Arrow-Up icli"></i></div>
+<<<<<<< HEAD
     <!-- tap on tap ends-->
     <!-- loader-->
     <div class="loader-wrapper">
         <div class="loader"><span></span><span></span><span></span><span></span><span></span></div>
     </div>
+=======
+    <!-- tap on tap ends-->    
+>>>>>>> base_v3
     <!-- login page start-->
     <div class="container-fluid p-0">
         <div class="row m-0">
             <div class="col-12 p-0">
                 <div class="login-card login-dark">
                     <div>
+<<<<<<< HEAD
                         <div><a class="logo" href="{{ route('home') }}"><img class="img-fluid for-light m-auto"
                                     src="../assets/images/logo/logo1.png" alt="looginpage"><img
                                     class="img-fluid for-dark" src="../assets/images/logo/logo-dark.png" alt="logo"></a>
+=======
+                        <div>
+                            <a class="logo" href="{{ route('home') }}">
+                                <img class="img-fluid for-light m-auto" src="/assets/images/logo/logo.png"
+                                    alt="looginpage">
+                                <img class="img-fluid for-dark" src="/assets/images/logo/logo.png" alt="logo"></a>
+>>>>>>> base_v3
                         </div>
                         @yield('content')
                     </div>
                 </div>
             </div>
         </div>
+<<<<<<< HEAD
         <!-- jquery-->
         <!-- bootstrap js-->
         <script src="/assets/js/vendors/bootstrap/dist/js/bootstrap.bundle.min.js" defer=""></script>
@@ -73,6 +98,13 @@
         <script src="/assets/js/password.js"></script>
         <!-- custom script -->
         <script src="/assets/js/script.js"></script>
+=======
+
+        @include("partials.common_script_links");
+
+        <script src="{{ get_asset_url('assets/js/password.js') }}"></script>
+        <script src="{{ get_asset_url('js/backend/login_non_ajax.js') }}"></script>
+>>>>>>> base_v3
     </div>
 </body>
 

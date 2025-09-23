@@ -14,17 +14,37 @@ $page_header_links = [
 <div class="card">
     <div class="card-body">
         <form method="GET" class="summary_search" action="{{ route($routePrefix . '.index') }}">
+<<<<<<< HEAD
             <input type="hidden" name="is_sort_clear" value="1"/>
+=======
+            <input type="hidden" name="is_sort_clear" value="1" />
+>>>>>>> base_v3
             <div class="row mb-4">
                 <div class="col-md-3">
                     <x-Inputs.text-field name="name" label="Name" :value="$search['name']" autocomplete="off" />
                 </div>
+<<<<<<< HEAD
                
                 <div class="col-md-3">
                     <x-Inputs.drop-down name="is_active" label="Active"
                         :value="$search['is_active']"
                         :list="$yes_no_list"
                         class="select2" />
+=======
+
+                <div class="col-md-3 mb-2">
+                    <x-Inputs.drop-down name="department_id" label="Department" :list="$department_list"
+                        :value="$search['department_id']" class="select2" />
+                </div>
+                <div class="col-md-3 mb-2">
+                    <x-Inputs.drop-down name="designation_id" label="Designation" :list="$designation_list"
+                        :value="$search['designation_id']" class="select2" />
+                </div>
+
+                <div class="col-md-3 mb-2">
+                    <x-Inputs.drop-down name="is_active" label="Active" :list="$yes_no_list"
+                        :value="$search['is_active']" class="select2" />
+>>>>>>> base_v3
                 </div>
             </div>
             <x-Backend.summary-search-form-footer :selectedPaginationLimit="$pagination_limit" />

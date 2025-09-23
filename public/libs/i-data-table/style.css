@@ -39,9 +39,17 @@
     visibility: hidden;
 }
 
+<<<<<<< HEAD
 .i-data-table-applied th
 {
     position: relative;
+=======
+.i-data-table-applied th[data-search],
+.i-data-table-applied th[data-sort]
+{
+    position: relative;
+    min-width: 180px;
+>>>>>>> base_v3
 }
 
 .i-data-table-applied .search-block
@@ -75,7 +83,12 @@
 
 .i-data-table-applied .search-block .search-right-icons
 {
+<<<<<<< HEAD
     display: flex;    
+=======
+    display: flex;   
+    justify-content: flex-end; 
+>>>>>>> base_v3
     width: 60px;
     margin-left: 4px;
 }

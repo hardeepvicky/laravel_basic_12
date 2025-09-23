@@ -7,6 +7,7 @@
         <div class="table-responsive">
             <table class="table table-striped table-bordered table-hover">
                 <thead>
+<<<<<<< HEAD
                     <tr class="border-bottom-primary">
                         <th><?= sortable_anchor('id', 'ID') ?></th>
                         <th><?= sortable_anchor('name', 'Name') ?></th>
@@ -14,11 +15,42 @@
                         <th>Info</th>
                         <th>Actions</th>
                         
+=======
+                    <tr>
+                        <th style="width:10%">
+                            <span class="btn btn-light text-dark border-primary clear_search_conditions mb-1">Clear</span>
+                            <?php
+                            $field = "name";
+                            ?>
+                            <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]"/>
+                        </th>                        
+                        <th style="width:10%">
+                            <?php
+                            $field = "short_name";
+                            ?>
+                            <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]"/>
+                        </th>                         
+                    </tr>
+                    <tr class="border-bottom-primary">
+                        <th>
+                            <?= sortable_anchor('id', get_value_from_list($field_labels, 'id', 'id')) ?>
+                            | <?= sortable_anchor('name', get_value_from_list($field_labels, 'name', 'name')) ?>
+                        </th>
+                        <th><?= sortable_anchor('short_name', get_value_from_list($field_labels, 'short_name', 'short_name')) ?></th>
+                        <th style="width:8%"><?= sortable_anchor('level', get_value_from_list($field_labels, 'level', 'level')) ?></th>
+                        <th style="width:8%"><?= sortable_anchor('is_active', 'Activate / De-Active') ?></th>
+                        <th style="width:8%"><?= sortable_anchor('list_display_order', get_value_from_list($field_labels, 'list_display_order', 'list_display_order')) ?></th>
+                        <th style="width:10%"><?= sortable_anchor('created_at', get_value_from_list($field_labels, 'created_at', 'created_at')) ?></th>
+                        <th style="width:10%"><?= sortable_anchor('created_by', get_value_from_list($field_labels, 'created_by', 'created_by')) ?></th>
+                        <th style="width:10%"><?= sortable_anchor('updated_at', get_value_from_list($field_labels, 'updated_at', 'updated_at')) ?></th>
+                        <th style="width:10%"><?= sortable_anchor('updated_by', get_value_from_list($field_labels, 'updated_by', 'updated_by')) ?></th>
+>>>>>>> base_v3
                     </tr>
                 </thead>
                 <tbody>
                     @foreach ($records as $record)
                         <tr>
+<<<<<<< HEAD
                             <th scope="row">{{ $record->id }}</th>
                             <td>{{ $record->name }}</td>
 
@@ -31,6 +63,43 @@
                             </td>
                             <td>
                                 <x-Backend.summary-comman-actions :id="$record->id" :routePrefix="$routePrefix" />
+=======
+                            <th scope="row">
+                                <x-Backend.celec-summary-table-first-column :record="$record" :routePrefix="$routePrefix" buttons="edit,delete">
+                                    <div class="label">
+                                        {{ $record->id . " | " . $record->name }}
+                                    </div>
+                                </x-Backend.celec-summary-table-first-column>
+                            </th>
+                            <td>{{ $record->short_name }}</td>
+                            <td>{{ $record->level }}</td>
+                            <td>
+                                <a class="x-editable" href="javascript:void();"id="list_display_order" 
+                                    data-name="list_display_order"
+                                    data-type="number" 
+                                    data-pk="{{ $record->id }}" 
+                                    data-url="{{ route($routePrefix . ".ajax_update_field") }}" 
+                                    data-title="Enter Display Order"
+                                >
+                                    {{ $record->list_display_order }}
+                                </a>
+                            </td>
+                            
+                            <td>
+                                <x-Backend.active_deactive :isActive="$record->is_active" :id="$record->id" :routePrefix="$routePrefix" />
+                            </td>
+                            <td>
+                                <x-Backend.celec-date-time :value="$record->created_at" />
+                            </td>
+                            <td>
+                                {{ get_value_from_list($userListCache, $record->created_by) }}
+                            </td>
+                            <td>
+                                <x-Backend.celec-date-time :value="$record->updated_at" :userId="$record->updated_by" />
+                            </td>
+                            <td>
+                                {{ get_value_from_list($userListCache, $record->updated_by) }}
+>>>>>>> base_v3
                             </td>
                         </tr>
                     @endforeach

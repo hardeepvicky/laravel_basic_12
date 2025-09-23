@@ -1,0 +1,100 @@
+<?php
+
+use App\Helpers\Util;
+
+?>
+<div class="card" id="page-summary">
+    <div class="card-header border-t-info">
+        <x-Backend.pagination-links :records="$records" />
+    </div>
+
+    <div class="card-body p-1">
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered table-hover">
+                <thead>
+                    <tr class="border-bottom-primary">
+                        <th style="width: 20%">                  
+                            <?= sortable_anchor('route_name', 'Route Name') ?>
+                            | <?= sortable_anchor('request_method', 'Request Method') ?>
+                        </th>
+                        <th><?= sortable_anchor('exec_time', 'Time Taken (Seconds)') ?></th>
+                        <th>Request</th>
+                        <th style="width:25%">Response</th>
+                        <th>
+                            <?= sortable_anchor('created_at', 'Created') ?>
+                            | <?= sortable_anchor('updated_at', 'Updated') ?>
+                        </th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($records as $record)
+                    <tr>
+                        <td>
+                            {{ $record->route_name }}
+
+                            <label class="info">
+                                Request Method : <span>{{ $record->request_method }}</span>
+                            </label>
+
+                            <div id="url-{{ $record->id }}" class="mx-h-200 w-300">
+                                <label class="info">
+                                    Url : <span>{{ str_short_with_dot($record->url, 180) }}</span>
+                                </label>
+                            </div>
+
+                            <span class="btn btn-info btn-sm css-toggler mt-1 mb-1"
+                                data-sr-css-class-toggle-target="#url-{{ $record->id }}"
+                                data-sr-css-class-toggle-class="mx-h-200" data-sr-css-class-toggle-applied-text="More"
+                                data-sr-css-class-toggle-not-applied-text="Less">
+                                More
+                            </span>
+                        </td>
+                        <td>{{ Util::niceTime($record->exec_time) }}</td>
+                        <td>
+                            <div id="request-{{ $record->id }}" class="mx-h-200 w-300">
+                                {!! array_print($record->request, 100) !!}
+                            </div>
+
+                            <span class="btn btn-info btn-sm css-toggler mt-1 mb-1"
+                                data-sr-css-class-toggle-target="#request-{{ $record->id }}"
+                                data-sr-css-class-toggle-class="mx-h-200" data-sr-css-class-toggle-applied-text="More"
+                                data-sr-css-class-toggle-not-applied-text="Less">
+                                More
+                            </span>
+                        </td>
+                        <td>
+                            <div id="response-{{ $record->id }}" class="mx-h-200 w-300">
+                                {!! array_print($record->response, 100) !!}
+                            </div>
+
+                            <span class="btn btn-info btn-sm css-toggler mt-1 mb-1"
+                                data-sr-css-class-toggle-target="#response-{{ $record->id }}"
+                                data-sr-css-class-toggle-class="mx-h-200" data-sr-css-class-toggle-applied-text="More"
+                                data-sr-css-class-toggle-not-applied-text="Less">
+                                More
+                            </span>
+                        </td>
+                        <td>
+                            <x-Backend.index-table-info :record="$record" :userList="$userListCache"
+                                :options="$index_table_info_options" />
+                        </td>
+                        <td>
+                            @if($record->sql_log_id)
+                            <div class="mt-2 mb-2">
+                                <a href="{{ route('developer.sql_logs', ['id' => $record->sql_log_id ])  }}">
+                                    Open SQL Log Link
+                                </a>
+                            </div>
+                            @endif
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer">
+        <x-Backend.pagination-links :records="$records" />
+    </div>
+</div>

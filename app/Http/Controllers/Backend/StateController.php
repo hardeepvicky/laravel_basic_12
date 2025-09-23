@@ -2,6 +2,12 @@
 
 namespace App\Http\Controllers\Backend;
 
+<<<<<<< HEAD
+=======
+use App\Exceptions\UserException;
+use App\Models\Country;
+use App\Models\FieldSetting;
+>>>>>>> base_v3
 use App\Models\State;
 use Illuminate\Http\Request;
 use Exception;
@@ -32,14 +38,26 @@ class StateController extends BackendController
         $cache_key = $cache_key_prefix . "-index";
 
         $conditions = $this->getConditions($cache_key, [
+<<<<<<< HEAD
             ["field" => "name", "type" => "string", "view_field" => "name"],
             ["field" => "is_active", "type" => "", "view_field" => "is_active"],
+=======
+            ["field" => "id", "type" => "int", "cache" => false],
+            ["field" => "name", "type" => "string"],
+            ["field" => "short_name", "type" => "string"],
+            ["field" => "country_id", "type" => "int"],
+            ["field" => "is_active", "type" => "int"],
+>>>>>>> base_v3
         ]);
 
         $builder = $this->modelClass::where($conditions);
 
+<<<<<<< HEAD
         if ($apply_sort)
         {
+=======
+        if ($apply_sort) {
+>>>>>>> base_v3
             $cache_key_for_sort = $cache_key_prefix . "-index-extra-params";
 
             $clear_cache = request('is_sort_clear', false);
@@ -55,6 +73,27 @@ class StateController extends BackendController
         return $builder;
     }
 
+<<<<<<< HEAD
+=======
+    protected function beforeViewRender()
+    {
+        $country_list = Country::getListCache();
+
+        $my_country = Country::getMyCountry();
+
+        if (!$my_country)
+        {
+            throw new UserException("Country India not found");
+        }
+
+        $field_labels = FieldSetting::getDynamicFields($this->modelClass);
+
+        $this->setForView(compact("country_list", "my_country", "field_labels"));
+
+        return parent::beforeViewRender();
+    }
+
+>>>>>>> base_v3
     public function create()
     {
         $this->beforeCreate();
@@ -74,15 +113,27 @@ class StateController extends BackendController
     private function _common_validation_rules()
     {
         return [
+<<<<<<< HEAD
            
+=======
+            "country_id" => ["required"],
+            "name" => ["required"],
+            "short_name" => ["nullable"],
+            "is_active" => [""],
+>>>>>>> base_v3
         ];
     }
 
     private function _common_validation_messages()
     {
         return [
+<<<<<<< HEAD
             "name.required" => "Departname name is required",
             "name.unique" => "Departname name already exist",
+=======
+            "name.required" => "State is required",
+            "name.unique" => "State already exist",
+>>>>>>> base_v3
         ];
     }
 
@@ -90,6 +141,7 @@ class StateController extends BackendController
     {
         $this->beforeCreate();
 
+<<<<<<< HEAD
         $rules = $this->_common_validation_rules();
 
         $messages = $this->_common_validation_messages();
@@ -102,11 +154,23 @@ class StateController extends BackendController
         $messages = array_merge($messages, [
 
         ]);
+=======
+        $model = new $this->modelClass();
+
+        $rules = $this->_common_validation_rules();
+
+        $rules = array_merge_recursive($rules, $model->getUniqueValidationRules($request));
+
+        $messages = $this->_common_validation_messages();
+
+        $messages = array_merge($messages, []);
+>>>>>>> base_v3
 
         $validatedData = $request->validate($rules, $messages);
 
         DB::beginTransaction();
 
+<<<<<<< HEAD
         try
         {
             $model = $this->modelClass::create($validatedData);
@@ -123,6 +187,19 @@ class StateController extends BackendController
         {
             DB::rollBack();
             
+=======
+        try {
+            $model = $this->modelClass::create($validatedData);
+
+            $this->updateUserInfoAfterSave($model);
+
+            DB::commit();
+
+            return $this->afterSave($model);
+        } catch (Exception $ex) {
+            DB::rollBack();
+
+>>>>>>> base_v3
             $this->saveSqlLog();
 
             return back()->withInput()->with('fail', $ex->getMessage());
@@ -153,6 +230,7 @@ class StateController extends BackendController
 
         $rules = $this->_common_validation_rules();
 
+<<<<<<< HEAD
         $messages = $this->_common_validation_messages();
 
         $messages = array_merge($messages, [
@@ -165,13 +243,24 @@ class StateController extends BackendController
             'name' => "required|min:3|unique:$table_name,name,$model->id",
             'code' => "required|min:1|unique:$table_name,code,$model->id",
         ]);
+=======
+        $rules = array_merge_recursive($rules, $model->getUniqueValidationRules($request));
+
+        $messages = $this->_common_validation_messages();
+
+        $messages = array_merge($messages, []);
+>>>>>>> base_v3
 
         $validatedData = $request->validate($rules, $messages);
 
         DB::beginTransaction();
 
+<<<<<<< HEAD
         try
         {
+=======
+        try {
+>>>>>>> base_v3
             $model = $this->modelClass::findOrFail($id);
 
             $model->fill($validatedData);
@@ -182,12 +271,17 @@ class StateController extends BackendController
 
             DB::commit();
 
+<<<<<<< HEAD
             $this->saveSqlLog();
 
             return $this->afterSave($model);
         }
         catch(Exception $ex)
         {
+=======
+            return $this->afterSave($model);
+        } catch (Exception $ex) {
+>>>>>>> base_v3
             DB::rollBack();
 
             $this->saveSqlLog();
@@ -195,4 +289,31 @@ class StateController extends BackendController
             return back()->withInput()->with('fail', $ex->getMessage());
         }
     }
+<<<<<<< HEAD
+=======
+
+    
+    public function ajax_get_list($country_id)
+    {
+        $response = ["status" => 1];
+
+        $conditions = [
+            "country_id" => $country_id
+        ];
+
+        $list = $this->modelClass::getList("id", "display_name", $conditions, "name");
+
+        $response['data'] = [];
+
+        foreach($list as $k => $v)
+        {
+            $response['data'][] = [
+                'id' => $k,
+                'name' => $v,
+            ];
+        }
+
+        return $this->responseJson($response);
+    }
+>>>>>>> base_v3
 }

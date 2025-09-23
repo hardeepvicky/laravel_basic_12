@@ -6,11 +6,26 @@
         "dev": "vite"
     },
     "devDependencies": {
+<<<<<<< HEAD
         "@tailwindcss/vite": "^4.0.0",
         "axios": "^1.7.4",
         "concurrently": "^9.0.1",
         "laravel-vite-plugin": "^1.2.0",
         "tailwindcss": "^4.0.0",
         "vite": "^6.0.11"
+=======
+        "axios": "^1.7.4",
+        "concurrently": "^9.0.1",
+        "laravel-echo": "^2.2.0",
+        "laravel-vite-plugin": "^1.2.0",
+        "pusher-js": "^8.4.0",
+        "vite": "^6.0.11"
+    },
+    "dependencies": {
+        "choice": "^2.0.2",
+        "choices.js": "^11.1.0",
+        "dark-editable": "^2.1.6",
+        "moment": "^2.30.1"
+>>>>>>> base_v3
     }
 }

@@ -13,11 +13,39 @@ class Util
         $str = "";
 
         $alpha = [
+<<<<<<< HEAD
             'A', 'B', 'C', 'D', 'E',
             'F', 'G', 'H', 'I', 'J',
             'K', 'L', 'M', 'N', 'O',
             'P', 'Q', 'R', 'S', 'T',
             'U', 'V', 'W', 'X', 'Y',
+=======
+            'A',
+            'B',
+            'C',
+            'D',
+            'E',
+            'F',
+            'G',
+            'H',
+            'I',
+            'J',
+            'K',
+            'L',
+            'M',
+            'N',
+            'O',
+            'P',
+            'Q',
+            'R',
+            'S',
+            'T',
+            'U',
+            'V',
+            'W',
+            'X',
+            'Y',
+>>>>>>> base_v3
             'Z'
         ];
 
@@ -183,12 +211,17 @@ class Util
     }
 
 
+<<<<<<< HEAD
     public static function getTreeArray(array $records, $parent_field, $parentId = 0)
+=======
+    public static function getTreeArray(array $records, $parent_field, $parentId = 0, $max_depth = 20, $current_depth = 0)
+>>>>>>> base_v3
     {
         $data = array();
 
         foreach ($records as $element) {
             if ($element[$parent_field] == $parentId) {
+<<<<<<< HEAD
                 $children = self::getTreeArray($records, $parent_field, $element['id']);
 
                 if ($children) {
@@ -196,6 +229,18 @@ class Util
                 }
 
                 $data[] = $element;
+=======
+                if ($current_depth < $max_depth)
+                {
+                    $children = self::getTreeArray($records, $parent_field, $element['id'], $max_depth, $current_depth + 1);
+
+                    if ($children) {
+                        $element['children'] = $children;
+                    }
+
+                    $data[] = $element;
+                }
+>>>>>>> base_v3
             }
         }
 
@@ -243,8 +288,22 @@ class Util
 
     public static function niceTime($time)
     {
+<<<<<<< HEAD
         if ($time < 60) {
             return $time . " s";
+=======
+        $time = round($time, 1);
+
+        $prefix = "";
+        if ($time < 0)
+        {
+            $prefix = "-";
+            $time = abs($time);
+        }
+
+        if ($time < 60) {
+            return $prefix . $time . " s";
+>>>>>>> base_v3
         }
 
         $min = floor($time / 60);
@@ -255,7 +314,11 @@ class Util
                 return $min . " m $seconds s";
             }
 
+<<<<<<< HEAD
             return $min . " m ";
+=======
+            return $prefix . $min . " m ";
+>>>>>>> base_v3
         }
 
         $hour = floor($min / 60);
@@ -263,20 +326,34 @@ class Util
 
         if ($hour < 24) {
             if ($min) {
+<<<<<<< HEAD
                 return $hour . " h $min m";
             }
 
             return $hour . " h ";
+=======
+                return $prefix . $hour . " h $min m";
+            }
+
+            return $prefix . $hour . " h ";
+>>>>>>> base_v3
         }
 
         $days = floor($hour / 24);
         $hour = $hour % 24;
 
         if ($hour) {
+<<<<<<< HEAD
             return $days . " d $hour h $min m";
         }
 
         return $days . " d";
+=======
+            return $prefix . $days . " d $hour h $min m";
+        }
+
+        return $prefix . $days . " d";
+>>>>>>> base_v3
     }
 
     public static function niceNumber($number, $count = 0)
@@ -409,4 +486,38 @@ class Util
 
         return $res;
     }
+<<<<<<< HEAD
+=======
+
+    public static function getNextTab($tabs, $tab, &$is_last_tab)
+    {
+        $keys = array_keys($tabs);
+        
+        if (!$tab)
+        {
+            return 0;
+        }
+        
+        $next_index = $current_index = 0;
+        for ($i = 0; $i < count($keys); $i++)
+        {
+            if ($keys[$i] == $tab)
+            {
+                $current_index = $i;
+                if ($i < count($keys) - 1)
+                {
+                    $next_index = $i + 1;
+                }
+                else
+                {
+                    $next_index = $i;
+                }
+            }
+        }
+        
+        $is_last_tab = $current_index == (count($keys) - 1);
+        
+        return $keys[$next_index];
+	}
+>>>>>>> base_v3
 }

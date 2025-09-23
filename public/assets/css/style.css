@@ -13386,7 +13386,11 @@ body {
   background-color: transparent !important;
   color: var(--body-font-color);
   font-family: Nunito Sans, sans-serif;
+<<<<<<< HEAD
   font-size: 14px;
+=======
+  font-size: 15px;
+>>>>>>> base_v3
   overflow-x: hidden
 }
 
@@ -13436,14 +13440,22 @@ body, html {
 }
 
 .h6, h6 {
+<<<<<<< HEAD
   font-size: 14px;
+=======
+  font-size: 15px;
+>>>>>>> base_v3
   font-weight: 400;
   letter-spacing: .5px;
   line-height: 1
 }
 
 a {
+<<<<<<< HEAD
   font-size: 14px;
+=======
+  font-size: 15px;
+>>>>>>> base_v3
   text-decoration: none
 }
 
@@ -17733,9 +17745,15 @@ tbody, td, tfoot, th, thead, tr {
   border-bottom-color: var(--light-gray)
 }
 
+<<<<<<< HEAD
 .table td, .table th {
   padding: .75rem
 }
+=======
+/* .table td, .table th {
+  padding: .75rem
+} */
+>>>>>>> base_v3
 
 .table thead.bg-primary tr th {
   color: var(--white)
@@ -30720,7 +30738,11 @@ header .header-right svg {
 }
 
 header .header-right a {
+<<<<<<< HEAD
   color: var(--body-font-color)
+=======
+  /* color: var(--body-font-color) */
+>>>>>>> base_v3
 }
 
 header .btn-activity-primary {
@@ -50662,8 +50684,12 @@ label {
 
 .dark-only .new-btn-showcase .text-dark {
   color: var(--black) !important;
+<<<<<<< HEAD
 }
 
 
 
 */
+=======
+}
+>>>>>>> base_v3

@@ -73,6 +73,16 @@ return [
             'replace_placeholders' => true,
         ],
 
+<<<<<<< HEAD
+=======
+        'hooks' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/hooks.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => env('LOG_DAILY_DAYS', 14),
+        ],
+
+>>>>>>> base_v3
         'slack' => [
             'driver' => 'slack',
             'url' => env('LOG_SLACK_WEBHOOK_URL'),

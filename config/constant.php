@@ -2,8 +2,12 @@
 
 return [
     'path' => [
+<<<<<<< HEAD
         'temp' => 'files/temp/',
         'user' => 'files/users/',
+=======
+        'temp' => 'user_files/temp/',
+>>>>>>> base_v3
     ],
 
     'font_awesome_icon' => [
@@ -22,8 +26,28 @@ return [
     ],
 
     "cache_time" => [
+<<<<<<< HEAD
+=======
+        "permission" => 60 * 24 * 365,
+>>>>>>> base_v3
         "menu" => 60 * 24 * 365,
         "model" => 60 * 24,
         "summary_search" => 60 * 24 * 30
     ],
+<<<<<<< HEAD
 ];
+=======
+
+    'msg_type' => [
+        'otp' => 'otp',
+        'registration' => 'registration',
+        'forgot_password' => 'forgot_password',
+
+        'list' => [
+            'otp' => 'OTP',
+            'registration' => 'User Registration',
+            'forgot_password' => 'Forgot Password',
+        ]
+    ],
+];
+>>>>>>> base_v3

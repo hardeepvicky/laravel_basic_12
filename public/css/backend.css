@@ -1,3 +1,4 @@
+<<<<<<< HEAD
     .child-menu-icon {
         font-size: 1em !important;
     }
@@ -248,3 +249,368 @@
         font-size: .875em;
         margin-top: .25rem;
     }
+=======
+.page-header .logo-wrapper {
+    padding: 0px 16px;
+}
+
+.child-menu-icon {
+    font-size: 1em !important;
+}
+
+.summary-delete-form {
+    display: inline-block;
+}
+
+.text-right {
+    text-align: right;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.form-buttons {    
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;    
+    -webkit-box-pack: start;
+    -ms-flex-pack: start;
+    justify-content: start;    
+}
+
+.form-buttons button {
+    margin-right: 0.5rem;
+}
+
+.black_drop_container {
+    background-color: rgba(0, 0, 0, 0.4);
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 3;
+}
+
+body > .black_drop_container {
+    width: 100%;
+    height: 100vh;
+}
+
+.form-check {
+    display: inline-block;
+    margin-right: 10px;
+}
+
+.custom-check {
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    margin-right: 1rem;
+}
+
+.custom-check .form-check-input {
+    width: 1.3em;
+    height: 1.3em;
+}
+
+.custom-check .form-check-label {
+    font-size: 1.1em;
+    margin-left: 5px;
+    cursor: pointer;
+    margin-bottom: 0;
+    margin-top: 5px;
+}
+
+.full-width-model .modal-dialog {
+    width: 95vw;
+    height: 80vw;
+    margin: 1vw auto;
+    max-width: 96vw;
+}
+
+table.sub-table th {
+    background-color: #eee;
+    border-color: #bbb;
+}
+
+table.sub-table td {
+    border-color: #ccc;
+}
+
+tr.center td,
+tr.center th {
+    text-align: center;
+    vertical-align: middle;
+}
+
+.masonary {
+    background-color: #333;
+    width: 100%;
+    padding: 20px;
+}
+
+.masonary .box {
+    position: relative;
+    width: 150px;
+    float: left;
+    margin-left: 10px;
+    margin-bottom: 20px;
+    background-color: #fff;
+    color: #333;
+    padding: 6px;
+}
+
+.masonary .box.selected {
+    background-color: #578ebe;
+    color: #fff;
+}
+
+.masonary .main-img {
+    max-width: 100%;
+}
+
+.masonary .title {
+    display: block;
+    margin: 8px 0;
+    padding: 0;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.masonary .details {
+    display: inline-block;
+    font-size: 12px;
+}
+
+.masonary .box-icon {
+    display: inline-block;
+    font-size: 16px;
+    background-color: #fff;
+    border-radius: 50% !important;
+    padding: 4px 8px;
+}
+
+.masonary .btn-delete {
+    position: absolute;
+    top: -10px;
+    right: -6px;
+    color: var(--bs-red);
+}
+
+.validate-barcode:focus {
+    background-color: lightpink;
+}
+
+.info {
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.info span {
+    font-weight: bold;
+}
+
+label.form-label {
+    font-size: 1rem;
+}
+
+.pristine-error {
+    margin-top: 2px;
+    color: #fd625e;
+}
+
+.has-danger .form-control {
+    border-color: #fd625e;
+}
+
+.collapsing {
+    position: relative;
+    height: 0;
+    overflow: hidden;
+    -webkit-transition-property: height, visibility;
+    transition-property: height, visibility;
+    -webkit-transition-duration: 0.35s;
+    transition-duration: 0.35s;
+    -webkit-transition-timing-function: ease;
+    transition-timing-function: ease;
+}
+
+.collapsing.width {
+    -webkit-transition-property: width, visibility;
+    transition-property: width, visibility;
+    width: 0;
+    height: auto;
+}
+
+.summary-action-button {
+    margin-right: 3px;
+    padding: 0px 4px;
+}
+
+.pagination-info {
+    margin-bottom: 0.2rem;
+}
+
+.summary-card {
+    margin-top: 1em;
+}
+
+.summary-card .card-body {
+    padding: 0.5em;
+}
+
+.summary-card .action-buttons {
+    margin-bottom: 0.5em;
+}
+
+.input-error {
+    color: var(--danger-color);
+    display: block;
+    font-size: 0.875em;
+    margin-top: 0.25rem;
+}
+
+.btn-have-icon {
+    background-color: #fff;
+    color: #495057;
+    /* Dark gray text */
+    border: 1px solid #ced4da;
+    transition: all 0.2s ease-in-out;
+    /* Smooth transitions */
+    font-weight: 500;
+}
+
+.btn-have-icon:hover {
+    background-color: #e9ecef;
+    /* Lighter gray on hover */
+    color: #343a40;
+    border-color: #adb5bd;
+    transform: translateY(-2px);
+    /* Slight lift effect */
+}
+
+.btn-have-icon i {
+    font-size: 1.2rem;
+    /* Size of the Google icon */
+    margin-right: 0.5rem;
+}
+
+.form-control:focus {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.custom-checkbox-group {
+    display: flex;
+    justify-content: start;
+    align-items: center;
+}
+
+.custom-checkbox-group > * {
+    margin: 0;
+    padding: 0;
+}
+
+.custom-checkbox-group .form-check-input {
+    width: 1.3em;
+    height: 1.3em;
+}
+
+.custom-checkbox-group .form-check-label {
+    margin-left: 5px;
+    font-size: 1.1em;
+}
+
+.template-table {
+    border: 1px solid var(--light-gray);
+}
+
+.textarea-wrapper {
+    position: relative;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.suggestion-box {
+    position: absolute;
+    /* Position relative to .textarea-wrapper */
+    z-index: 1000;
+    background-color: white;
+    border: 1px solid var(--light-gray);
+    max-height: 200px;
+    overflow-y: auto;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    /* Match textarea width */
+    margin-top: 4px;
+    /* Small gap below textarea */
+    border-radius: 0.25rem;
+    /* Tailwind-like rounded corners */
+}
+
+.suggestion-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--light-gray);
+    font-size: 0.9rem;
+    color: #333;
+}
+
+.suggestion-item:last-child {
+    border-bottom: none;
+}
+
+.suggestion-item:hover,
+.suggestion-item.selected {
+    background-color: #f0f0f0;
+    color: #2563eb;
+    /* Blue from Tailwind */
+}
+
+.indicator-loading-overlay {
+    background-color: rgba(48, 142, 135, 0.2);
+    border-bottom: none;
+    color: var(--theme-default);
+}
+
+.chart-block{
+    width: 100%;
+    max-height: 80vh;
+}
+
+.select2-container .select2-selection--single
+{
+    height: 40px;
+}
+
+.summary_table_with_search .select2{
+    height: 32px;
+}
+
+.summary_table_with_search .select2-container .select2-selection--single
+{
+    height: 30px;
+}
+
+
+.select2-small .select2-container .select2-selection--single
+{
+    height: 30px;
+}
+
+.select2-small .select2{
+    height: 32px;
+}
+
+.select2-small .select2-container .select2-selection--single
+{
+    height: 30px;
+}
+
+.big_amount{
+    font-size: 20px;
+    font-weight: bold;
+}
+>>>>>>> base_v3

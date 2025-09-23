@@ -1,6 +1,7 @@
 @extends($layout)
 
 @section('content')
+<<<<<<< HEAD
 
 <h1>Welcome To Default Screen</h1>
 
@@ -15,3 +16,11 @@
 </div>
 
 @endsection
+=======
+    <div class="container-fluid">
+        @include($partial_path . '.page_header')
+
+        <h3>Coming Soon</h3>
+    </div>
+@endsection
+>>>>>>> base_v3

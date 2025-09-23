@@ -3,24 +3,37 @@
 namespace App\Helpers;
 
 use App\Acl\AccessControl;
+<<<<<<< HEAD
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+=======
+use App\Models\AppMenu;
+use App\Models\User;
+use Illuminate\Support\Facades\Route;
+>>>>>>> base_v3
 
 class Menu
 {
     private static $menus = [];
     private static $current_route_name = "";
+<<<<<<< HEAD
 
     public static function setCurrentRouteName(String $current_route_name)
     {
         self::$current_route_name = strtolower(trim($current_route_name));
         BaseMenu::setCurrentRouteName(self::$current_route_name);
     }
+=======
+    private static $dynamic_menu_need_to_insert_in_static = [];
+
+    
+>>>>>>> base_v3
 
     public static function get($auth_user_id)
     {
         self::$menus = [];
 
+<<<<<<< HEAD
         // if ( Config::get('app.will_menu_cache') )
         // {
         //     $acccessControl = AccessControl::init();
@@ -54,6 +67,162 @@ class Menu
         }
 
         return self::checkForActive(self::$menus);;
+=======
+        self::$menus = AccessControl::getCacheMenu($auth_user_id);
+
+        // d(self::$menus);
+        if (!empty(self::$menus)) {
+            return self::checkForActive(self::$menus);
+        }
+
+        $app_menus = AppMenu::getTreeRecordsWithRelation([
+            ["is_active", 1]
+        ]);
+
+        // d($app_menus, true);
+        $app_menus = self::getDynamicMenus($app_menus);
+
+        $home_menu = (new HomeMenu)->get();
+
+        if (isset(self::$dynamic_menu_need_to_insert_in_static['Home']))
+        {
+            $home_menu['links'] = array_merge($home_menu['links'], self::$dynamic_menu_need_to_insert_in_static['Home']);
+        }
+
+        self::$menus[] = $home_menu;
+
+        self::$menus = array_merge(self::$menus, $app_menus);
+
+        $admin_menu = (new AdminMenu)->get();
+
+        if (isset(self::$dynamic_menu_need_to_insert_in_static['Admin']))
+        {
+            $admin_menu['links'] = array_merge($admin_menu['links'], self::$dynamic_menu_need_to_insert_in_static['Admin']);
+        }
+
+        self::$menus[] = $admin_menu;
+
+        $developer_menu = (new DeveloperMenu)->get();
+
+        if (isset(self::$dynamic_menu_need_to_insert_in_static['Developer']))
+        {
+            $developer_menu['links'] = array_merge($developer_menu['links'], self::$dynamic_menu_need_to_insert_in_static['Developer']);
+        }
+
+        // d($developer_menu, true);
+        
+        self::$menus[] = $developer_menu;
+
+        $user = User::findOrFail($auth_user_id);
+
+        $role_id_list = [];
+        foreach ($user->userRole->toArray() as $user_role) {
+            $role_id_list[] = $user_role['role_id'];
+        }
+
+        $acccessControl = AccessControl::init();
+        $allowed_route_name_list = $acccessControl->getListOfAllowedRouteNames($role_id_list);
+
+        self::$menus = self::_filterMenuForUser($allowed_route_name_list, self::$menus);
+
+        // d(self::$menus, true);
+
+        AccessControl::addMenuToCache($auth_user_id, self::$menus);
+
+        return self::checkForActive(self::$menus);
+    }
+
+    public static function setCurrentRouteName($current_route_name)
+    {
+        if ($current_route_name && is_string($current_route_name)) {
+            self::$current_route_name = strtolower(trim($current_route_name));
+            BaseMenu::setCurrentRouteName(self::$current_route_name);
+        }
+    }
+
+    public static function getDynamicMenus(array $app_menus, $depth = 0)
+    {
+        $dynamic_menus = [];
+
+        $static_menu_list = self::getStaticMenuList();
+
+        foreach ($app_menus as $app_menu) {
+            $dynamic_menu = [
+                "title" => $app_menu['name'],
+                "css_class" => $app_menu['css_class'],
+                "icon" => $app_menu['icon_css_class'],
+                "related_links" => []
+            ];
+
+            if (isset($app_menu['app_menu_related_link']) && $app_menu['app_menu_related_link']) {
+                foreach ($app_menu['app_menu_related_link'] as $app_menu_related_link) {
+                    if ($app_menu_related_link['route_name_array']) {
+                        foreach ($app_menu_related_link['route_name_array'] as $route_name) {
+                            $related_link = [
+                                "title" => $app_menu_related_link['name'],
+                                "route_name" => $route_name,
+                                "related_links" => []
+                            ];
+
+                            $dynamic_menu['related_links'][] = $related_link;
+                        }
+                    }
+                }
+            }
+
+            if (isset($app_menu['children']) && $app_menu['children']) {
+                $dynamic_menu['links'] = self::getDynamicMenus($app_menu['children'], $depth + 1);
+            } else if ($app_menu['is_link'] && $app_menu['route_name']) {
+                $dynamic_menu['route_name'] = $app_menu['route_name'];
+            }
+
+            if (!$dynamic_menu['icon']) {
+                if ($depth == 0) {
+                    $dynamic_menu['icon'] = "fas fa-layer-group";
+                } else if ($depth > 0) {
+                    $dynamic_menu['icon'] = 'fas fa-cube';
+                }
+            }
+
+            if ($depth > 0 && $app_menu['is_link'] && $app_menu['route_name']) {
+                $dynamic_menu['icon'] .= ' child-menu-icon';
+            }
+
+            if (isset($app_menu['show_in_static_menu']) && $app_menu['show_in_static_menu'])
+            {
+                if (is_string($app_menu['show_in_static_menu']))
+                {
+                    $app_menu['show_in_static_menu'] = [$app_menu['show_in_static_menu']];
+                }
+
+                foreach($app_menu['show_in_static_menu'] as $static_label)
+                {
+                    if (isset($static_menu_list[$static_label]))
+                    {
+                        self::$dynamic_menu_need_to_insert_in_static[$static_label][] = $dynamic_menu;
+                    }
+                }
+            }
+
+            $dynamic_menus[] = $dynamic_menu;
+        }
+
+        return $dynamic_menus;
+    }
+
+    public static function getStaticMenuList()
+    {
+        $list = ["Dashboard", "Admin", "Developer"];
+
+        $ret_list = [];
+
+        foreach($list as $k => $v)
+        {
+            $ret_list[$v] = $v;
+        }
+
+        return $ret_list;
+>>>>>>> base_v3
     }
 
     public static function getBreadcums($menus)
@@ -145,10 +314,25 @@ class Menu
         $list = [];
         foreach ($menus as $menu) {
             if (isset($menu['route_name'])) {
+<<<<<<< HEAD
                 $list[] = [
                     "title" => $prefix . $menu['title'],
                     "url" => route($menu['route_name'])
                 ];
+=======
+
+                $row = [
+                    "title" => $prefix . $menu['title'],
+                    'url' => '#'
+                ];
+
+                if (Route::has($menu['route_name']))
+                {
+                    $row['url'] = route($menu['route_name']);
+                }
+
+                $list[] = $row;
+>>>>>>> base_v3
             } else if (isset($menu["links"])) {
                 $list = array_merge($list, self::getList($menu["links"], $prefix . $menu['title'] . " -> "));
             }
@@ -157,6 +341,7 @@ class Menu
         return $list;
     }
 
+<<<<<<< HEAD
     private static function _filterMenuForUser()
     {
         $role_id_list = [];
@@ -203,6 +388,33 @@ class Menu
                 self::$menus[$k] = $sub_menu;
             }
         }
+=======
+    private static function _filterMenuForUser($allowed_route_name_list, $menus)
+    {
+        foreach($menus as $k => $menu)
+        {
+            if (isset($menu['links']) && is_array($menu['links']))
+            {
+                $menus[$k]['links'] = self::_filterMenuForUser($allowed_route_name_list, $menu['links']);
+            }
+
+            if (isset($menu['route_name']) && strlen($menu['route_name']) > 0)
+            {
+                if (!in_array($menu['route_name'], $allowed_route_name_list)) {
+                    unset($menus[$k]);
+                }
+            }
+            else if (isset($menus[$k]['links']))
+            {
+                if (empty($menus[$k]['links']))
+                {
+                    unset($menus[$k]);
+                }
+            }
+        }
+
+        return $menus;
+>>>>>>> base_v3
     }
 }
 
@@ -210,7 +422,11 @@ class BaseMenu
 {
     const ICON_MENU_ROOT = 'fas fa-layer-group';
     const ICON_MENU_ROOT_CHILD = 'fas fa-cube';
+<<<<<<< HEAD
     const ICON_MENU_SUMMARY = 'fas fa-table';
+=======
+    const ICON_MENU_LIST = 'fas fa-table';
+>>>>>>> base_v3
     const ICON_MENU_CREATE = 'fas fa-plus-circle';
 
     private static $current_route_name = "";
@@ -246,6 +462,7 @@ class BaseMenu
 
     public static function getLink(String $route_name, $title, String $icon, array $related_links = [], String $link_type = "")
     {
+<<<<<<< HEAD
         if (!$title) {
             $title = self::getLinkTitleFromRouteName($route_name, $link_type);
         }
@@ -260,10 +477,36 @@ class BaseMenu
         $link['is_active'] = self::isActiveLink($link);
 
         return $link;
+=======
+        $route_name = trim($route_name);
+
+        if (Route::has($route_name)) {
+            if (!$title) {
+                $title = self::getLinkTitleFromRouteName($route_name, $link_type);
+            }
+
+            $link = [
+                "title" => $title,
+                "icon" => "child-menu-icon " . $icon,
+                "route_name" => $route_name,
+                "related_links" => $related_links
+            ];
+
+            return $link;
+        }
+
+        return [
+            "title" => "Route $route_name Not Exist",
+            "icon" => "",
+            "route_name" => null,
+            "related_links" => []
+        ];
+>>>>>>> base_v3
     }
 
     public static function addRelatedLink(String $route_name, String $title, array $related_links = [])
     {
+<<<<<<< HEAD
         $link = [
             "title" => $title,
             "route_name" => trim($route_name),
@@ -273,6 +516,25 @@ class BaseMenu
         $link['is_active'] = self::isActiveLink($link);
 
         return $link;
+=======
+        $route_name = trim($route_name);
+
+        if (Route::has($route_name)) {
+            $link = [
+                "title" => $title,
+                "route_name" => trim($route_name),
+                "related_links" => $related_links
+            ];
+
+            return $link;
+        }
+
+        return [
+            "title" => "Route $route_name Not Exist",
+            "route_name" => null,
+            "related_links" => []
+        ];
+>>>>>>> base_v3
     }
 
     public static function isActiveLink(array $link)
@@ -298,11 +560,20 @@ class BaseMenu
             "title" => $title,
             "icon" => $icon,
             "links" => [
+<<<<<<< HEAD
                 self::getLink($routePrefix . ".index", "Summary", self::ICON_MENU_SUMMARY, [
                     self::addRelatedLink($routePrefix . ".edit", "Edit"),
                     self::addRelatedLink($routePrefix . ".view", "View"),
                 ]),
                 self::getLink($routePrefix . ".create", "Create", self::ICON_MENU_CREATE),
+=======
+                self::getLink($routePrefix . ".index", "List", self::ICON_MENU_LIST, [
+                    self::addRelatedLink($routePrefix . ".edit", "Edit"),
+                    self::addRelatedLink($routePrefix . ".view", "View"),
+                    self::addRelatedLink($routePrefix . ".copy", "Copy"),
+                ]),
+                self::getLink($routePrefix . ".create", "Add", self::ICON_MENU_CREATE),
+>>>>>>> base_v3
             ],
         ];
 
@@ -341,11 +612,22 @@ class HomeMenu extends BaseMenu
 
         $links[] = self::getLink("dashboard", "Dashboard", 'fa-solid fa-gauge');
 
+<<<<<<< HEAD
         return self::getModule("Home", 'fas fa-home', $links);
     }
 }
 
 class SystemMenu extends BaseMenu
+=======
+        $links[] = self::getLink("notification.my", "My Notification", 'fa-solid fa-bell');
+
+        return self::getModule("Dashboard", 'fas fa-home', $links);
+    }
+}
+
+
+class AdminMenu extends BaseMenu
+>>>>>>> base_v3
 {
     public static function get(): array
     {
@@ -353,7 +635,11 @@ class SystemMenu extends BaseMenu
 
         $links[] = self::permission();
 
+<<<<<<< HEAD
         return self::getModule("System Manager", 'fas fa-cogs', $links);
+=======
+        return self::getModule("Admin", self::ICON_MENU_ROOT, $links);
+>>>>>>> base_v3
     }
 
     public static function permission()
@@ -361,6 +647,7 @@ class SystemMenu extends BaseMenu
         $routePrefix = "permissions";
 
         $links = [
+<<<<<<< HEAD
             self::getLink($routePrefix . ".index", "Summary", self::ICON_MENU_SUMMARY),
             self::getLink($routePrefix . ".assign", "Assign", 'fa-solid fa-gear'),
             // self::getLink($routePrefix . ".assign_to_many", "Assign To Many", 'bx bx-grid-alt'),
@@ -387,12 +674,23 @@ class LogMenu extends BaseMenu
 }
 
 
+=======
+            self::getLink($routePrefix . ".index", "List", self::ICON_MENU_LIST),
+            self::getLink($routePrefix . ".assign", "Assign", 'fa-solid fa-gear'),
+        ];
+
+        return self::getModule("Permission", self::ICON_MENU_ROOT_CHILD, $links);
+    }
+}
+
+>>>>>>> base_v3
 class DeveloperMenu extends BaseMenu
 {
     public static function get(): array
     {
         $links = [];
 
+<<<<<<< HEAD
         $routePrefix = "developer";
 
         $links[] = self::getLink($routePrefix . ".sql_log", null, self::ICON_MENU_SUMMARY, [], self::LINK_TYPE_SUMMARY);
@@ -534,5 +832,65 @@ class Employee extends BaseMenu
         $links = self::getControllerDefaultLinks($routePrefix, "Employee", self::ICON_MENU_ROOT_CHILD);
 
         return $links;
+=======
+        $links[] = self::setting();
+        $links[] = self::app_menu();
+        $links[] = self::logs();
+        $links[] = self::other();
+
+        return self::getModule("Developer", null, $links);
+    }
+
+    public static function setting()
+    {
+        $routePrefix = "setting";
+
+        $links = [
+            self::getLink($routePrefix . ".general", "General", 'fa-solid fa-gear'),
+            self::getLink($routePrefix . ".notification_setting", "Notification Setting", 'fa-solid fa-gear'),
+            self::getLink($routePrefix . ".field_setting", "Field Setting", 'fa-solid fa-gear'),
+        ];
+
+        return self::getModule("Setting", self::ICON_MENU_ROOT_CHILD, $links);
+    }
+
+    private static function app_menu()
+    {
+        $routePrefix = "app-menu";
+
+        $links = self::getControllerDefaultLinks($routePrefix, "Menu", self::ICON_MENU_ROOT_CHILD);
+
+        return $links;
+    }
+
+    public static function logs()
+    {
+        $links = [];
+
+        $routePrefix = "developer";
+
+        $links[] = self::getLink($routePrefix . ".email_logs", null, self::ICON_MENU_LIST, [], self::LINK_TYPE_SUMMARY);
+        $links[] = self::getLink($routePrefix . ".whatsapp_logs", null, self::ICON_MENU_LIST, [], self::LINK_TYPE_SUMMARY);
+        $links[] = self::getLink($routePrefix . ".sms_logs", null, self::ICON_MENU_LIST, [], self::LINK_TYPE_SUMMARY);
+        $links[] = self::getLink($routePrefix . ".permission_change_logs", "Permission Change", self::ICON_MENU_LIST, [], self::LINK_TYPE_SUMMARY);
+        $links[] = self::getLink($routePrefix . ".import_logs", null, self::ICON_MENU_LIST, [], self::LINK_TYPE_SUMMARY);
+        $links[] = self::getLink($routePrefix . ".sql_logs", null, self::ICON_MENU_LIST, [], self::LINK_TYPE_SUMMARY);
+        $links[] = self::getLink($routePrefix . ".ajax_logs", null, self::ICON_MENU_LIST, [], self::LINK_TYPE_SUMMARY);
+        $links[] = self::getLink($routePrefix . ".command_logs", null, self::ICON_MENU_LIST, [], self::LINK_TYPE_SUMMARY);
+        $links[] = self::getLink($routePrefix . ".laravel_logs", null, self::ICON_MENU_LIST, [], self::LINK_TYPE_SUMMARY);
+
+        return self::getModule("Logs", null, $links);
+    }
+    
+    public static function other()
+    {
+        $links = [];
+
+        $routePrefix = "developer";
+
+        $links[] = self::getLink($routePrefix . ".laravel_routes_index", "Laravel Routes", self::ICON_MENU_LIST, [], self::LINK_TYPE_SUMMARY);
+
+        return self::getModule("Other", null, $links);
+>>>>>>> base_v3
     }
 }

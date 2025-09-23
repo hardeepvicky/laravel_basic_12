@@ -97,7 +97,11 @@
     <link rel="stylesheet" href="/assets/css/style.css">
     <link id="color" rel="stylesheet" href="/assets/css/color-1.css" media="screen">
 
+<<<<<<< HEAD
     <link rel="stylesheet" type="text/css" href="/css/backend.css?<?= BACKEND_CSS_VERSION ?>" />
+=======
+    <link rel="stylesheet" type="text/css" href="/css/backend.css?<?= CSS_VERSION ?>" />
+>>>>>>> base_v3
 
     <script src="/assets/js/vendors/jquery/jquery.min.js"></script>
 </head>
@@ -117,13 +121,19 @@
                 <div class="login-card login-dark">
                     <div>
                         <div><a class="logo" href="{{ route('home') }}"><img class="img-fluid for-light m-auto"
+<<<<<<< HEAD
                                     src="/assets/images/logo/logo1.png" alt="looginpage"><img
                                     class="img-fluid for-dark" src="/assets/images/logo/logo-dark.png" alt="logo"></a>
+=======
+                                    src="/assets/images/logo/logo1.png" alt="looginpage"><img class="img-fluid for-dark"
+                                    src="/assets/images/logo/logo-dark.png" alt="logo"></a>
+>>>>>>> base_v3
                         </div>
                         <div class="login-main">
                             <form method="POST" action="{{ route('password.update') }}">
                                 @csrf
                                 <h2 class="text-center">Reset Password</h2>
+<<<<<<< HEAD
         
                                 <input type="hidden" name="token" value="{{ $token }}">
                                 
@@ -133,6 +143,21 @@
                                     <div class="col-md-6">
                                         <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ $email ?? old('email') }}" required autocomplete="email" autofocus>
                                         
+=======
+
+                                <input type="hidden" name="token" value="{{ $token }}">
+
+                                <div class="row mb-3">
+                                    <label for="email"
+                                        class="col-md-4 col-form-label text-md-end">{{ __('Email Address') }}</label>
+
+                                    <div class="col-md-6">
+                                        <input id="email" type="email"
+                                            class="form-control @error('email') is-invalid @enderror" name="email"
+                                            value="{{ $email ?? old('email') }}" required autocomplete="email"
+                                            autofocus>
+
+>>>>>>> base_v3
                                         @error('email')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -140,6 +165,7 @@
                                         @enderror
                                     </div>
                                 </div>
+<<<<<<< HEAD
         
                                 <div class="row mb-3">
                                     <label for="password" class="col-md-4 col-form-label text-md-end">{{ __('Password') }}</label>
@@ -147,6 +173,18 @@
                                     <div class="col-md-6">
                                         <input id="password" type="password" class="form-control @error('password') is-invalid @enderror" name="password" required autocomplete="new-password">
         
+=======
+
+                                <div class="row mb-3">
+                                    <label for="password"
+                                        class="col-md-4 col-form-label text-md-end">{{ __('Password') }}</label>
+
+                                    <div class="col-md-6">
+                                        <input id="password" type="password"
+                                            class="form-control @error('password') is-invalid @enderror" name="password"
+                                            required autocomplete="new-password">
+
+>>>>>>> base_v3
                                         @error('password')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -154,6 +192,7 @@
                                         @enderror
                                     </div>
                                 </div>
+<<<<<<< HEAD
         
                                 <div class="row mb-3">
                                     <label for="password-confirm" class="col-md-4 col-form-label text-md-end">{{ __('Confirm Password') }}</label>
@@ -163,6 +202,19 @@
                                     </div>
                                 </div>
         
+=======
+
+                                <div class="row mb-3">
+                                    <label for="password-confirm"
+                                        class="col-md-4 col-form-label text-md-end">{{ __('Confirm Password') }}</label>
+
+                                    <div class="col-md-6">
+                                        <input id="password-confirm" type="password" class="form-control"
+                                            name="password_confirmation" required autocomplete="new-password">
+                                    </div>
+                                </div>
+
+>>>>>>> base_v3
                                 <div class="row mb-0">
                                     <div class="col-md-6 offset-md-4">
                                         <button type="submit" class="btn btn-primary">
@@ -171,12 +223,16 @@
                                     </div>
                                 </div>
                             </form>
+<<<<<<< HEAD
                             </div>
+=======
+>>>>>>> base_v3
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+<<<<<<< HEAD
         <!-- jquery-->
         <!-- bootstrap js-->
         <script src="/assets/js/vendors/bootstrap/dist/js/bootstrap.bundle.min.js" defer=""></script>
@@ -191,3 +247,20 @@
 </body>
 
 </html>
+=======
+    </div>
+    <!-- jquery-->
+    <!-- bootstrap js-->
+    <script src="/assets/js/vendors/bootstrap/dist/js/bootstrap.bundle.min.js" defer=""></script>
+    <script src="/assets/js/vendors/bootstrap/dist/js/popper.min.js" defer=""></script>
+    <!--fontawesome-->
+    <script src="/assets/js/vendors/font-awesome/fontawesome-min.js"></script>
+    <!-- password_show-->
+    <script src="/assets/js/password.js"></script>
+    <!-- custom script -->
+    <script src="/assets/js/script.js"></script>
+    </div>
+</body>
+
+</html>
+>>>>>>> base_v3

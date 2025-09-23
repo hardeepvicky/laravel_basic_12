@@ -74,7 +74,11 @@ class CsvUtility
         $this->headers[$field] = $data_type;        
     }
     
+<<<<<<< HEAD
     public function find($fields = [], $conditions = [], $orders = null, $limit = null)
+=======
+    public function find(array $fields = [], array $conditions = [], array $orders = [], $limit = null)
+>>>>>>> base_v3
     {
         if (!file_exists($this->file))
         {
@@ -175,10 +179,19 @@ class CsvUtility
                     }
                 }
             }
+<<<<<<< HEAD
             
             $records[$k] = $filter_row;
         }
         
+=======
+
+            $records[$k] = $filter_row;
+        }
+
+        
+
+>>>>>>> base_v3
         return $records;
     }
     
@@ -348,7 +361,11 @@ class CsvUtility
         return true;
     }
     
+<<<<<<< HEAD
     private function applyOrder($records, $orders)
+=======
+    private function applyOrder(array $records, array $orders)
+>>>>>>> base_v3
     {
         foreach($orders as $order_by)
         {

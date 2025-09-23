@@ -2,11 +2,20 @@
 
 namespace App\Http\Controllers\Backend;
 
+<<<<<<< HEAD
+=======
+use App\Exceptions\UserException;
+use App\Models\FieldSetting;
+>>>>>>> base_v3
 use Illuminate\Http\Request;
 use App\Models\Role;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+<<<<<<< HEAD
+=======
+use Symfony\Component\HttpKernel\Exception\HttpException;
+>>>>>>> base_v3
 
 class RoleController extends BackendController
 {
@@ -15,7 +24,11 @@ class RoleController extends BackendController
     protected $modelClass = Role::class;
 
     public function index()
+<<<<<<< HEAD
     {
+=======
+    {   
+>>>>>>> base_v3
         $cache_key_prefix = Route::currentRouteName();
 
         $builder = $this->_getBuildeForIndex($cache_key_prefix);
@@ -34,6 +47,10 @@ class RoleController extends BackendController
         $cache_key = $cache_key_prefix . "-index";
 
         $conditions = $this->getConditions($cache_key, [
+<<<<<<< HEAD
+=======
+            ["field" => "id", "type" => "int", "cache" => false],
+>>>>>>> base_v3
             ["field" => "name", "type" => "string", "view_field" => "name"],
             ["field" => "is_admin", "type" => "", "view_field" => "is_admin"],
             ["field" => "is_active", "type" => "", "view_field" => "is_active"],
@@ -58,6 +75,18 @@ class RoleController extends BackendController
         return $builder;
     }
 
+<<<<<<< HEAD
+=======
+    protected function beforeViewRender()
+    {
+        $field_labels = FieldSetting::getDynamicFields($this->modelClass);
+
+        $this->setForView(compact("field_labels"));
+
+        return parent::beforeViewRender();
+    }
+
+>>>>>>> base_v3
     public function create()
     {
         $this->beforeCreate();
@@ -118,8 +147,11 @@ class RoleController extends BackendController
             
             DB::commit();
 
+<<<<<<< HEAD
             $this->saveSqlLog();
 
+=======
+>>>>>>> base_v3
             return $this->afterSave($model);
         }
         catch(Exception $ex)
@@ -184,8 +216,11 @@ class RoleController extends BackendController
 
             DB::commit();
 
+<<<<<<< HEAD
             $this->saveSqlLog();
 
+=======
+>>>>>>> base_v3
             return $this->afterSave($model);
         }
         catch(Exception $ex)

@@ -2,7 +2,16 @@
 
 namespace App\Http\Controllers;
 
+<<<<<<< HEAD
 use App\Http\Controllers\WebController;
+=======
+use App\Helpers\DateUtility;
+use App\Helpers\LaravelExtend;
+use App\Http\Controllers\WebController;
+use App\Models\ImportLog;
+use Exception;
+use Illuminate\Http\Request;
+>>>>>>> base_v3
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 
@@ -10,6 +19,7 @@ class HomeController extends WebController
 {
     public function index()
     {
+<<<<<<< HEAD
         if (Auth::check())
         {
             return Redirect::route("dashboard");
@@ -17,6 +27,19 @@ class HomeController extends WebController
         else
         {
             return Redirect::route("login");
+=======
+        if (Auth::check()) {
+            return Redirect::route("dashboard");
+        } else {
+
+            $route_name = "login";
+
+            if (!LaravelExtend::isRequestFromLocal()) {
+                $route_name = "sign_in";
+            }
+
+            return Redirect::route($route_name);
+>>>>>>> base_v3
         }
     }
 
@@ -34,4 +57,44 @@ class HomeController extends WebController
     {
         return view("backend.developer_components");
     }
+<<<<<<< HEAD
+=======
+
+    public function import_log_status($import_log_id)
+    {
+        $response = ["status" => 1, "msg" => "", "status_info" => ""];
+
+        try
+        {
+            $model = ImportLog::findOrFail($import_log_id);
+
+            $response['status_info'] = $model->status_info;
+        }
+        catch(Exception $ex)
+        {
+            $response['status'] = 0;
+            $response['msg'] = get_exception_display_message($ex);
+        }
+
+        return $this->responseJson($response);
+    }
+
+    public function get_date_time_for_timezone(Request $request)
+    {
+        $datetime = $request->get("datetime");
+
+        $timezone = $request->get("timezone");
+
+        $dt = DateUtility::getDateObj($datetime, DateUtility::$login_user_time_zone);
+
+        if ($timezone)
+        {
+            $dt->setTimezone(new \DateTimeZone($timezone));
+        }
+
+        $new_datetime = $dt->format(DateUtility::DATETIME_OUT_FORMAT);
+        
+        return $new_datetime;
+    }
+>>>>>>> base_v3
 }

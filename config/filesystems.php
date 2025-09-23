@@ -41,7 +41,20 @@ return [
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
+<<<<<<< HEAD
             'url' => env('APP_URL').'/storage',
+=======
+            'url' => env('APP_URL') . '/storage',
+            'visibility' => 'public',
+            'throw' => false,
+            'report' => false,
+        ],
+
+        'public_external' => [
+            'driver' => 'local',
+            'root' => env('EXTERNAL_STORAGE_PATH', storage_path('app/public')),
+            'url' => env('APP_URL') . '/storage',
+>>>>>>> base_v3
             'visibility' => 'public',
             'throw' => false,
             'report' => false,

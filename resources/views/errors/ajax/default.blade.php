@@ -7,4 +7,9 @@
     <h6>
         Route : {{ $current_route_name }}
     </h6>
+<<<<<<< HEAD
 </div>
+=======
+</div>
+@include ('errors.ajax.footer')
+>>>>>>> base_v3

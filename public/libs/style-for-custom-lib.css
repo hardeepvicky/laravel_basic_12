@@ -123,12 +123,15 @@
         padding: 5px;
     }
 
+<<<<<<< HEAD
     .template-table td,
     .template-table th {
         text-align: center;
         vertical-align: middle;
     }
 
+=======
+>>>>>>> base_v3
     .template-table tr.highlight {
         border: 2px solid rgba(75, 166, 239);
     }

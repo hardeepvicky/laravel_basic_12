@@ -19,10 +19,31 @@ class Authenticate extends Middleware
 
         $user = User::findOrFail($auth_user->id);
 
+<<<<<<< HEAD
         if (! (bool) $user->is_active) {
             Session::flash("fail", 'User is de-activated');
             Auth::logout();
             return redirect("/login");
+=======
+        if (! (bool) $user->is_active) {           
+
+            Session::flash("fail", 'User is de-activated');
+            Auth::logout();
+
+            if (is_ajax_request())
+            {
+                return response("User is de-activated", 401);
+            }
+
+            if (isset($auth_user->type) && $auth_user->type == User::TYPE_INTERNAL)
+            {
+                return redirect('/login');
+            }
+            else
+            {
+                return redirect('/signin');
+            }
+>>>>>>> base_v3
         }
 
         return $result;

@@ -188,6 +188,14 @@ jQuery.fn.extend({
 
                                 var col_index = $(this).data("col-index");
 
+<<<<<<< HEAD
+=======
+                                if ($(this).val().trim() == "")
+                                {
+                                    search_apply(col_index);
+                                }
+
+>>>>>>> base_v3
                                 if (keycode == 13)
                                 {
                                     search_apply(col_index);

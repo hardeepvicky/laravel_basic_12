@@ -2,6 +2,11 @@
 
 namespace App\Providers;
 
+<<<<<<< HEAD
+=======
+use App\Events\ModelInsert;
+use App\Listeners\ModelInsertListener;
+>>>>>>> base_v3
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -29,4 +34,15 @@ class EventServiceProvider extends ServiceProvider
     {
         //
     }
+<<<<<<< HEAD
+=======
+
+    /**
+     * Determine if events and listeners should be automatically discovered.
+     */
+    public function shouldDiscoverEvents(): bool
+    {
+        return true; // Set to true if you want auto-discovery
+    }
+>>>>>>> base_v3
 }
