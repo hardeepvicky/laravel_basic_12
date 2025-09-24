@@ -354,10 +354,6 @@ $false = false;
                     sku = sku.replace("{color}", "");
                 }
 
-                var name = $("#name").val();
-
-                
-
                 var size = $("#size").val();
 
                 if (size)
@@ -381,6 +377,8 @@ $false = false;
                 }
 
                 sku = sku.toLowerCase();
+
+                var name = $("#name").val();
 
                 if (name)
                 {
