@@ -44,14 +44,14 @@ use App\Models\User;
                             <?php
                             $field = "department_id";
                             ?>
-                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$department_list" :value="$search[$field]"
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$dept_list" :value="$search[$field]"
                                 pleaseSelect="All" class="select2 form-select-sm"  />
                         </th>
                         <th style="width:10%">
                             <?php
                             $field = "designation_id";
                             ?>
-                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$designation_list" :value="$search[$field]"
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :value="$search[$field]" :list="$desg_list" :value="$search[$field]"
                                 pleaseSelect="All" class="select2 form-select-sm"  />
                         </th>
                         <th></th>
@@ -138,13 +138,13 @@ use App\Models\User;
                                             <label class="info">
                                                 {{ get_value_from_list($field_labels, 'dob') }} :
                                                 <span>
-                                                    {{ $record->dob }}
+                                                    {{ if_date($record->dob) }}
                                                 </span>
                                             </label>
                                             <label class="info">
                                                 {{ get_value_from_list($field_labels, 'doj') }} :
                                                 <span>
-                                                    {{ $record->doj }}
+                                                    {{ if_date($record->doj) }}
                                                 </span>
                                             </label>
                                             <label class="info">

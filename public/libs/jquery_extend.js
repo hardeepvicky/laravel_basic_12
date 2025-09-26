@@ -1143,7 +1143,7 @@ jQuery.fn.extend({
                                         typeof event_opt.pageLoad != "undefined" &&
                                         event_opt.pageLoad
                                     ) {
-                                        var value = $(this).data("value");
+                                        var value = $(this).attr("data-value");
 
                                         if (value) {
                                             $(this).trigger(events.setValue, [
@@ -1201,7 +1201,7 @@ jQuery.fn.extend({
                                     typeof event_opt.pageLoad != "undefined" &&
                                     event_opt.pageLoad
                                 ) {
-                                    var value = $(this).data("value");
+                                    var value = $(this).attr("data-value");
 
                                     if (value) {
                                         $(this).trigger(events.setValue, [

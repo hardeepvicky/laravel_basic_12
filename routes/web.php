@@ -1120,6 +1120,9 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
         $name = "ajax_get";
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
 
+        $name = "ajax_get_with_parent";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
         $name = "ajax_get_list";
         Route::get($name . "/{category_id}", [$controllerClass, $name])->name($name);
 

@@ -186,8 +186,7 @@ class ExportCustomerController extends BackendController
         }
 
         $status_type_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
-
-        $status_type_list_for_form = array_diff($status_type_list, ["Converted", "Dead", "Fake", "Lost"]);
+        $status_type_list_for_form = array_diff($status_type_list, ["Converted", "Fake"]);
 
         // dd($status_type_list_for_form);
 

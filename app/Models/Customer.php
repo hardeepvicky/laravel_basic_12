@@ -28,6 +28,10 @@ class Customer extends BaseModel
         
     ];
 
+    public const STATUS_HOT = "HOT";
+    public const STATUS_WARM = "WARM";
+    public const STATUS_COLD = "COLD";
+    public const STATUS_COMPLAINT = "COMPLAINT";
     public const STATUS_CONVERTED = "CONVERTED";
     public const STATUS_FAKE = "FAKE";
 
