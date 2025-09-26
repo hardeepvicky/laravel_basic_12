@@ -910,7 +910,6 @@ class ItemController extends BackendController
             "origin",
             "certification",
             "tags",
-            "subDepartment",
             "mainImage",
         ]);
 
