@@ -266,7 +266,7 @@ class ExportCustomerController extends BackendController
     {
         return [
             "name" => ["required"],
-            "mobile" => ["required"],
+            "mobile" => ["nullable"],
             "mobile2" => ["nullable"],
             "email" => ["nullable"],
             "country_id" => ["required"],
