@@ -64,7 +64,7 @@
                         </th>
                         <th style="width:10%">
                             <?php
-                            $field = 'mobile2';
+                            $field = 'email';
                             ?>
                             <x-Inputs.text-field :id="$field" :name="$field" :label="$false"
                                 :value="$search[$field]" class="form-control-sm"/>
@@ -101,7 +101,7 @@
                             <?= sortable_anchor('city.name', get_value_from_list($field_labels, 'city_id', 'city_id')) ?>
                         </th>
                         <th><?= sortable_anchor('mobile', get_value_from_list($field_labels, 'mobile', 'mobile')) ?></th>
-                        <th><?= sortable_anchor('mobile2', get_value_from_list($field_labels, 'mobile2', 'mobile2')) ?></th>
+                        <th><?= sortable_anchor('email', get_value_from_list($field_labels, 'email', 'email')) ?></th>
                         <th><?= sortable_anchor('dealer_id', get_value_from_list($field_labels, 'dealer_id', 'dealer_id')) ?></th>
                         <th><?= sortable_anchor('deal_type', get_value_from_list($field_labels, 'deal_type', 'deal_type')) ?></th>
                         <th style="width:10%">
@@ -134,7 +134,7 @@
                                 >> {{ $record->city?->getDisplayName() }}
                             </td>
                             <td>{{ $record->mobile }}</td>
-                            <td>{{ $record->mobile2 }}</td>
+                            <td>{{ $record->email }}</td>
                             <td>{{ get_value_from_list($dealer_list, $record->dealer_id) }}</td>
                             <td>{{ get_value_from_list($deal_type_list, $record->deal_type) }}</td>
                             <td>
