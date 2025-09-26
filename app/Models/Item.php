@@ -94,9 +94,9 @@ class Item extends BaseModel
         return $this->belongsTo(DropDownValue::class, "certification_id");
     }
 
-    public function subDepartment()
+    public function itemSubDepartment()
     {
-        return $this->belongsToMany(SubDepartment::class, ItemSubDepartment::class);
+        return $this->hasMany(ItemSubDepartment::class);
     }
 
     public function itemFile()

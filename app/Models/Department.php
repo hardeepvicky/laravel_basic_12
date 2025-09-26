@@ -44,6 +44,21 @@ class Department extends BaseModel
         return $this->belongsTo(User::class, "dept_head_user_id");
     }
 
+    public function subDepartment()
+    {
+        return $this->hasMany(SubDepartment::class);
+    }
+
+    public function task()
+    {
+        return $this->hasMany(Task::class);
+    }
+
+    public function recurringTask()
+    {
+        return $this->hasMany(RecurringTask::class);
+    }
+
     protected function getDisplayNameAttribute()
     {
         return $this->getDisplayName();

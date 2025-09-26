@@ -19,6 +19,7 @@ use App\Models\Item;
 use App\Models\ItemBrand;
 use App\Models\ItemCategory;
 use App\Models\ItemFile;
+use App\Models\ItemSubDepartment;
 use App\Models\Setting;
 use App\Models\SubDepartment;
 use App\Models\Tag;
@@ -30,6 +31,7 @@ use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Validator;
 
 class ItemController extends BackendController
 {
@@ -112,7 +114,7 @@ class ItemController extends BackendController
         // d($conditions, true);
 
         $builder = $builder->where($conditions);
-       
+
         $tag_conditions = $this->getConditions($cache_key . "-2", [
             ["field" => "name", "type" => "string", "view_field" => "tag_name"],
         ]);
@@ -151,7 +153,7 @@ class ItemController extends BackendController
 
         $root_item_category_list = ItemCategory::getList("id", "display_name", ["parent_id" => 0], "list_display_order");
 
-        
+
         $origin_list = DropDownValue::getList("id", "display_name", ["type" => DropDownValue::ORIGIN], "list_display_order");
         $certification_list = DropDownValue::getList("id", "display_name", ["type" => DropDownValue::CERTIFICATION], "list_display_order");
 
@@ -175,9 +177,11 @@ class ItemController extends BackendController
 
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
+        $item_sub_department_field_labels = FieldSetting::getDynamicFields(ItemSubDepartment::class);
+
         $this->setForView(compact(
             "root_item_category_list", "dept_list", "origin_list", "certification_list", "sku_pattern", "selected_department_ids",
-            "field_labels"
+            "field_labels", "item_sub_department_field_labels"
         ));
 
         return parent::beforeViewRender();
@@ -204,7 +208,6 @@ class ItemController extends BackendController
         return [
             "name" => ["required"],
             "root_item_category_id" => ["required"],
-            "dept_id" => ["required"],
             "parent_item_category_id" => ["nullable"],
             "child_item_category_id" => ["nullable"],
             "item_brand_id" => ["nullable"],
@@ -219,11 +222,11 @@ class ItemController extends BackendController
             "images" => [],
             "other_files" => [],
             "tag_name" => [],
-            "is_for_all_sub_dept" => ["nullable"],
             "sub_dept_ids" => [],
             "description" => ["nullable"],
             "list_display_order" => "",
             "is_active" => "",
+            "item_sub_departments" => []
         ];
     }
 
@@ -367,14 +370,69 @@ class ItemController extends BackendController
             }
         }
 
-        if (isset($validatedData['sub_dept_ids']) && is_array($validatedData['sub_dept_ids'])) {
-            $leads = SubDepartment::find($validatedData['sub_dept_ids']);
-            $this->model->subDepartment()->sync($leads);
-        }
-        else
+        if (isset($validatedData['item_sub_departments']) )
         {
-            $this->model->subDepartment()->delete();
+            unset($validatedData['item_sub_departments']['(sr-id)']);
+
+            // d($validatedData, true);
+
+            if (isset($validatedData['item_sub_departments'])) {
+                $base_rules = [
+                    "dept_id" => ["required"],
+                    "sub_dept_id" => ["required"],
+                ];
+
+                $child_model = new ItemSubDepartment();
+
+                $existing_id_list = $this->model->itemSubDepartment()->pluck("id", "id")->toArray();
+
+                $validatedData['item_id'] = $this->model->id;
+
+                $display_order = 0;
+
+                foreach ($validatedData['item_sub_departments'] as $item_sub_department) {
+
+                    $validator = Validator::make($item_sub_department, $base_rules);
+
+                    if ($validator->fails()) {
+                        foreach ($validator->errors()->all() as $error_msg) {
+                            LaravelExtend::addError("", $error_msg, "Departments");
+                        }
+                        continue;
+                    }
+
+                    $display_order++;
+                    if ($item_sub_department['id']) {
+                        $child_model = ItemSubDepartment::find($item_sub_department['id']);
+
+                        if (!$child_model) {
+                            $child_model = new ItemSubDepartment();
+                        } else {
+                            unset($existing_id_list[$item_sub_department['id']]);
+                        }
+                    } else {
+                        $child_model = new ItemSubDepartment();
+                    }
+
+                    // dd($item_sub_department);
+
+                    $child_model->fill($item_sub_department);
+
+                    $child_model = $this->model->itemSubDepartment()->save($child_model);
+                }
+
+                if ($existing_id_list) {
+                    $existing_records = $this->model->itemSubDepartment()->where("id", $existing_id_list)->get();
+
+                    foreach ($existing_records as $existing_record) {
+                        if (!$existing_record->safeDelete($existing_record)) {
+                            LaravelExtend::addError($existing_record->name, "Can not delete, bcoz it is asscoicated with other modules.", "Term");
+                        }
+                    }
+                }
+            }
         }
+
     }
 
     public function edit($id)
@@ -849,7 +907,6 @@ class ItemController extends BackendController
             "parentItemCategory",
             "childItemCategory",
             "itemBrand",
-            "department",
             "origin",
             "certification",
             "tags",
@@ -884,14 +941,6 @@ class ItemController extends BackendController
             {
                 $tag_list[] = $tag['display_name'];
             }
-
-            $sd_list = [];
-
-            foreach($record['sub_department'] as $sd)
-            {
-                $sd_list[] = $sd['display_name'];
-            }
-
             $csv_records[] = [
                 'ID' => $record['id'],
                 $field_labels['name'] => $record['name'],
@@ -899,9 +948,6 @@ class ItemController extends BackendController
                 $field_labels['size'] => $record['size'] ?? "",
                 $field_labels['item_brand_id'] => $record['item_brand']['name'] ?? "",
                 $field_labels['sku'] => $record['sku'] ?? "",
-                $field_labels['dept_id'] => $record['department']['name'] ?? "",
-                $field_labels['is_for_all_sub_dept'] => get_value_from_list($yes_no_list, $record['is_for_all_sub_dept']),
-                "Sub Department" => implode(", ", $sd_list),
                 $field_labels['root_item_category_id'] => $record['root_item_category']['name'] ?? "",
                 $field_labels['parent_item_category_id'] => $record['parent_item_category']['name'] ?? "",
                 $field_labels['child_item_category_id'] => $record['child_item_category']['name'] ?? "",

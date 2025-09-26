@@ -56,21 +56,6 @@ $false = false;
                                 placeholder="Enter {{ $label }}" layout="horizontal"  mandatory="true" readonly="readonly" />
 
                             <?php
-                            $field = 'dept_id';
-                            $label = get_value_from_list($field_labels, $field, $field);
-                            $value = $model->{$field} ?? $selected_department_ids[0];
-                            ?>
-                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$dept_list"
-                                :value="$value"
-                                class="select2"
-                                layout="horizontal"
-                                class="select2 cascade-drop-down"
-                                data-sr-cascade-target="#sub_dept_ids"
-                                data-sr-cascade-url="/sub-department/ajax_get_list/{v}"
-                                mandatory="true"
-                                />
-
-                            <?php
                             $field = 'root_item_category_id';
                             $label = get_value_from_list($field_labels, $field, $field);
                             ?>
@@ -152,30 +137,132 @@ $false = false;
                             <x-Inputs.text-field :id="$field" :name="$field" :label="$label" value="{{ $model->{$field} }}"
                                 placeholder="Enter {{ $label }}" layout="horizontal" />
 
-                            <?php
-                            $field = 'is_for_all_sub_dept';
-                            $label = get_value_from_list($field_labels, $field, $field);
-                            ?>
-                            <div class="row">
+                            <div class="row mb-3">
                                 <div class="col-sm-3">
+                                    Departments & Sub Departments
                                 </div>
                                 <div class="col-sm-9">
-                                    <x-Inputs.checkbox :id="$field" :name="$field" :label="$label" :value="$model->{$field}" />
+                                    <table class="table table-bordered order-column template-table" data-sr-table-template-min-row="0">
+                                        <thead>
+                                            <tr>
+                                                <th class="text-center" style="width : 8%;">
+                                                    <span class="sr-table-template-add">
+                                                        <i class="fas fa-plus-circle text-success icon"></i>
+                                                    </span>
+                                                </th>
+                                                <th style="width:30%">
+                                                    {{ get_value_from_list($item_sub_department_field_labels, 'dept_id') }}
+                                                </th>
+                                                <th style="width:60%">
+                                                    {{ get_value_from_list($item_sub_department_field_labels, 'sub_dept_id') }}
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="sr-table-template-row hidden">
+                                                <td>
+                                                    <div class="block">
+                                                        <div class="left-block">
+
+                                                        </div>
+                                                        <div class="right-block">
+                                                            <span class="sr-table-template-delete">
+                                                                <i class=" fas fa-times-circle text-danger icon"></i>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <x-inputs.text-field type="hidden" name="item_sub_departments[(sr-id)][id]" label="" />
+                                                </td>
+                                                <td>
+                                                    <?php
+                                                    $field = 'dept_id';
+                                                    ?>
+                                                    <x-Inputs.drop-down name="item_sub_departments[(sr-id)][{{ $field }}]" :label="$false"
+                                                        :list="$dept_list"
+                                                        class="will-select2 will-required dept_id"
+                                                        data-sr-cascade-target="#sub_dept_id-(sr-id)"
+                                                        data-sr-cascade-url="/sub-department/ajax_get_list/{v}"
+                                                        />
+                                                </td>
+                                                <td>
+                                                    <?php
+                                                    $field = 'sub_dept_id';
+                                                    ?>
+                                                    <x-Inputs.drop-down id="{{ $field }}-(sr-id)"
+                                                        name="item_sub_departments[(sr-id)][{{ $field }}][]"
+                                                        :label="$false"
+                                                        :list="$empty_list"
+                                                        class="will-required will-select2 sub_dept_id"
+                                                        multiple="true"
+                                                        />
+                                                </td>
+                                            </tr>
+                                            @php
+                                                $item_sub_departments = old('item_sub_departments', $model->itemSubDepartment?->toArray() ?? []);
+                                                unset($item_sub_departments['(sr-id)']);
+                                            @endphp
+                                            @if (isset($item_sub_departments))
+                                                @foreach ($item_sub_departments as $k => $child_arr)                                                    
+                                                    <tr class="" sr-id="{{ $child_arr['id'] }}"
+                                                        sr-counter="{{ $k }}">
+                                                        <td>
+                                                            <div class="block">
+                                                                <div class="left-block">
+
+                                                                </div>
+                                                                <div class="right-block">
+                                                                    <span class="sr-table-template-delete">
+                                                                        <i class=" fas fa-times-circle text-danger icon"></i>
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                            <input type="hidden" name="item_sub_departments[{{ $k }}][id]" value="{{ $child_arr['id'] ?? '' }}" />
+                                                        </td>
+                                                        <td>
+                                                            <?php
+                                                            $field = 'dept_id';
+                                                            $value = $child_arr[$field] ?? '';
+                                                            ?>
+                                                            <x-Inputs.drop-down name="item_sub_departments[{{ $k }}][{{ $field }}]" :label="$false"
+                                                                :list="$dept_list"
+                                                                :value="$value"
+                                                                class="select2 dept_id"
+                                                                data-sr-cascade-target="#sub_dept_id-{{ $k }}"
+                                                                data-sr-cascade-url="/sub-department/ajax_get_list/{v}"
+                                                                required="true"
+                                                                />
+                                                        </td>
+                                                        <td>
+                                                            <?php
+                                                            $field = 'sub_dept_id';
+                                                            $value = $child_arr[$field] ?? '';
+                                                            ?>
+                                                            <x-Inputs.drop-down id="{{ $field }}-{{ $k }}"
+                                                                name="item_sub_departments[{{ $k }}][{{ $field }}][]"
+                                                                :label="$false"
+                                                                :list="$empty_list"
+                                                                :value="$value"
+                                                                class="select2 sub_dept_id"
+                                                                required="true"
+                                                                multiple="true"
+                                                                />
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+                                            @endif
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <th class="text-center" style="width : 80px;">
+                                                    <span class="sr-table-template-add">
+                                                        <i class="fas fa-plus-circle text-success icon"></i>
+                                                    </span>
+                                                </th>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
                                 </div>
                             </div>
-
-                            <?php
-                            $field = 'sub_dept_ids';
-                            $label = "Sub Department";
-                            $value = implode(',', $model->subDepartment?->pluck('id')->toArray());
-                            ?>
-                            <x-Inputs.drop-down :id="$field" name="sub_dept_ids[]" :label="$label"
-                                :list="$empty_list"
-                                :value="$value"
-                                layout="horizontal"
-                                class="select2"
-                                multiple="true"
-                            />
 
                             <?php
                             $field = 'weight';
@@ -487,17 +574,6 @@ $false = false;
                 index_table_id : "document_file_others"
             });
 
-            $("#is_for_all_sub_dept").change(function(){
-                if(this.checked)
-                {
-                    $("#sub_dept_ids").attr("disabled", "true");
-                }
-                else
-                {
-                    $("#sub_dept_ids").removeAttr("disabled");
-                }
-            }).trigger("change", {pageLoad : true});
-
             $(".open_parent_category_add_form").click(function(){
                 var cat_id = $("#root_item_category_id").val();
 
@@ -526,10 +602,51 @@ $false = false;
                 window.location.href = "/item-category/create?parent_id=" + cat_id;
             });
 
+            function init_child_dept(_tr, last_id) {
+
+                _tr.find(".dept_id").cascade({
+                    beforeGet: function (src, url) {
+                        $.loader.init().setInfo("Fetching...").show();
+                        return url;
+                    },
+                    afterGet: function (src, dest, response) {
+                        $.loader.init().hide();
+                        return response;
+                    },
+                    beforeValueSet: function (src, dest, val) {                        
+                        var v = val.split(",");
+                        return v;
+                    },
+                });
+            }
+
+            $(".template-table").srTableTemplate({
+                brace_type: "(",
+                afterRowAdd(_table, last_id, _tr) {
+                    _tr.find(".will-select2").select2({
+                        placeHolder: "Please Select",
+                        theme: "bootstrap-5",
+                    });
+
+                    _tr.find(".will-required").attr("required", true);
+
+                    init_child_dept(_tr);
+                }
+            });
+
+            var trs = $(".template-table").find(">tbody>tr").not(".sr-table-template-row");
+            trs.each(function(){
+
+                init_child_dept($(this));
+            });
+            
+
             $.events.execAtLast(function() {
                 $("#name, #size, #specification").on("input keyup", create_sku);
 
-                $("#root_item_category_id, #dept_id").trigger("change", {pageLoad : true});
+                $("#root_item_category_id").trigger("change", {pageLoad : true});
+
+                $(".dept_id").trigger("change", {pageLoad : true});
             });
         })
     </script>

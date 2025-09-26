@@ -4,16 +4,18 @@ namespace App\Models;
 
 class ItemSubDepartment extends BaseModel
 {
-    protected static Array $unique_fields = ["item_id", "sub_dept_id"];   
-    
+    protected $casts = [
+        'sub_dept_id' => 'array',
+    ];
+
     public function item()
     {
         return $this->belongsTo(Item::class);
     }
 
-    public function subDept()
+    public function dept()
     {
-        return $this->belongsTo(SubDepartment::class);
+        return $this->belongsTo(Department::class);
     }
 
     public function getRefDisplayName($field, $value)
@@ -28,9 +30,9 @@ class ItemSubDepartment extends BaseModel
                 ];
                 break;
 
-            case "sub_dept_id":
+            case "dept_id":
                 $ret_array = [
-                    $field => $this->subDept?->getDisplayName()
+                    $field => $this->dept?->getDisplayName()
                 ];
                 break;
         }
