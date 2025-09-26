@@ -208,8 +208,8 @@ class ExportPartyController extends BackendController
         return [
             "type" => ["required"],
             "name" => ["required"],
-            "mobile" => ["required", new MobileNumber],
-            "mobile2" => ["nullable", new MobileNumber],
+            "mobile" => ["required"],
+            "mobile2" => ["nullable"],
             "phone_no" => ["nullable"],
             "company_name" => ["nullable"],
             "gst_no" => ["nullable"],
