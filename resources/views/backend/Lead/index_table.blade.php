@@ -80,13 +80,6 @@
                         </th>
                         <th style="width:10%">
                             <?php
-                            $field = 'source_type';
-                            ?>
-                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false"
-                                :value="$search[$field]" :list="$source_type_list" :value="$search[$field]" pleaseSelect="All" class="select2 form-select-sm" />
-                        </th>
-                        <th style="width:10%">
-                            <?php
                             $field = 'dealer_id';
                             ?>
                             <x-Inputs.drop-down :id="$field" :name="$field" :label="$false"
@@ -119,7 +112,6 @@
                         <th><?= sortable_anchor('mobile', get_value_from_list($field_labels, 'mobile', 'mobile')) ?></th>
                         <th><?= sortable_anchor('mobile2', get_value_from_list($field_labels, 'mobile2', 'mobile2')) ?></th>
                         <th><?= sortable_anchor('source_id', get_value_from_list($field_labels, 'source_id', 'source_id')) ?></th>
-                        <th><?= sortable_anchor('source_type', get_value_from_list($field_labels, 'source_type', 'source_type')) ?></th>
                         <th><?= sortable_anchor('dealer_id', get_value_from_list($field_labels, 'dealer_id', 'dealer_id')) ?></th>
                         <th><?= sortable_anchor('deal_type', get_value_from_list($field_labels, 'deal_type', 'deal_type')) ?></th>
                         <th style="width:10%">
@@ -154,7 +146,6 @@
                             <td>{{ $record->mobile }}</td>
                             <td>{{ $record->mobile2 }}</td>
                             <td>{{ get_value_from_list($source_list, $record->source_id) }}</td>
-                            <td>{{ get_value_from_list($source_type_list, $record->source_type) }}</td>
                             <td>{{ get_value_from_list($dealer_list, $record->dealer_id) }}</td>
                             <td>{{ get_value_from_list($deal_type_list, $record->deal_type) }}</td>
                             <td>
