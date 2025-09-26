@@ -93,6 +93,7 @@ use App\Helpers\DateUtility;
                                 <div class="more-less-text">{{ $history->response }}</div>
                             </td>
                             <td>
+                                @if($history->recording_file_url && $history->recording_file)
                                 <?php
                                     $mime_type = get_mime_type_from_extension(pathinfo($history->recording_file,PATHINFO_EXTENSION));
                                 ?>
@@ -100,6 +101,7 @@ use App\Helpers\DateUtility;
                                     <source src="{{ $history->recording_file_url }}" type="{{ $mime_type }}">
                                     Your browser does not support the audio element.
                                 </audio>
+                                @endif
                             </td>
                             <td>
                                 <div class="more-less-text">{{ $history->remarks }}</div>
