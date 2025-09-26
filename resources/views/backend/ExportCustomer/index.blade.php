@@ -51,7 +51,7 @@
                         <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
 
                         <?php 
-                            $field = "mobile2";
+                            $field = "email";
                         ?>
                         <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
 
