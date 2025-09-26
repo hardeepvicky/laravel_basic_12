@@ -26,6 +26,8 @@ class SectionRoutes
         "city.ajax_get_list_with_district",
 
         "item.ajax_get_child_uom_list",
+        
+        "item-category.ajax_get_with_parent",
 
         "product.gallery",
         "product.preview",

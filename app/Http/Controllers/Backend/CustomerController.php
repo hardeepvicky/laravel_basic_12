@@ -181,7 +181,7 @@ class CustomerController extends BackendController
         $deal_type_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
 
         $type_conditions = [
-            'type' => Type::getType($lead, "status_type")
+            'type' => Type::getType(new Customer(), "status_type")
         ];
 
         if ($this->model->status_type)
@@ -190,7 +190,7 @@ class CustomerController extends BackendController
         }
 
         $status_type_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
-        $status_type_list_for_form = array_diff($status_type_list, ["Converted", "Dead", "Fake", "Lost"]);
+        $status_type_list_for_form = array_diff($status_type_list, ["Converted", "Fake"]);
 
         $type_conditions = [
             'type' => Type::getType($lead, "payment_method_type")
@@ -1096,11 +1096,7 @@ class CustomerController extends BackendController
         $csv_records = [];
         $user_cache_list = User::getListCache();
 
-        $yes_no_list = laravel_constant('yes_no_list');
-
-        $type_group_list = Type::getListOfModel(Lead::class);
-
-        $drop_down_list = DropDownValue::getListCache("id", "display_name");
+        $type_group_list = Type::getListOfModel(Customer::class);
 
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 

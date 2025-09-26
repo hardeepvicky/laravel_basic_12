@@ -55,68 +55,104 @@ $false = false;
                             <x-Inputs.text-field :id="$field" :name="$field" :label="$label" value="{{ $model->{$field} }}"
                                 placeholder="Enter {{ $label }}" layout="horizontal"  mandatory="true" readonly="readonly" />
 
-                            <?php
-                            $field = 'root_item_category_id';
-                            $label = get_value_from_list($field_labels, $field, $field);
-                            ?>
-                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
-                                :list="$root_item_category_list"
-                                :value="$model->{$field}"
-                                layout="horizontal"
-                                class="select2 cascade-drop-down"
-                                data-sr-cascade-target="#parent_item_category_id"
-                                data-sr-cascade-url="/item-category/ajax_get_list/{v}"
-                                mandatory="true"
-                                />
-
-                            <?php
-                            $field = 'parent_item_category_id';
-                            $label = get_value_from_list($field_labels, $field, $field);
-                            ?>
-                            <div class="row mb-3">
-                                <div class="col-sm-3">
-                                    @if (isset($label) && $label)
-                                        <label class="form-label">
-                                            {{ $label }}
-                                        </label>
-                                    @endif
-                                </div>
-                                <div class="col-sm-9">
-                                    <div class="d-flex align-items-start">
-                                        <span class="btn btn-outline-info summary-action-button open_parent_category_add_form" style="padding: 9px 12px;">
-                                            <i class="fa-solid fa-plus"></i>
-                                        </span>
-                                        <div class="flex-grow-1">
-                                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :list="$empty_list"
+                            <div class="modal fade" id="modal-category" tabindex="-1" role="dialog" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h3 class="modal-title fs-5">Category</h3>
+                                            <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body text-center">
+                                            <?php
+                                            $field = 'root_item_category_id';
+                                            $label = get_value_from_list($field_labels, $field, $field);
+                                            ?>
+                                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
+                                                :list="$root_item_category_list"
                                                 :value="$model->{$field}"
-                                                class="select2 cascade-drop-down"
-                                                data-sr-cascade-target="#child_item_category_id"
+                                                layout="horizontal"
+                                                class="cascade-drop-down"
+                                                data-sr-cascade-target="#parent_item_category_id"
                                                 data-sr-cascade-url="/item-category/ajax_get_list/{v}"
+                                                mandatory="true"
                                                 />
+
+                                            <?php
+                                            $field = 'parent_item_category_id';
+                                            $label = get_value_from_list($field_labels, $field, $field);
+                                            ?>
+                                            <div class="row mb-3">
+                                                <div class="col-sm-3">
+                                                    @if (isset($label) && $label)
+                                                        <label class="form-label">
+                                                            {{ $label }}
+                                                        </label>
+                                                    @endif
+                                                </div>
+                                                <div class="col-sm-9">
+                                                    <div class="d-flex align-items-start">
+                                                        <span class="btn btn-outline-info summary-action-button open_parent_category_add_form" style="padding: 9px 12px;">
+                                                            <i class="fa-solid fa-plus"></i>
+                                                        </span>
+                                                        <div class="flex-grow-1">
+                                                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :list="$empty_list"
+                                                                :value="$model->{$field}"
+                                                                class="cascade-drop-down"
+                                                                data-sr-cascade-target="#child_item_category_id"
+                                                                data-sr-cascade-url="/item-category/ajax_get_list/{v}"
+                                                                />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <?php
+                                            $field = 'child_item_category_id';
+                                            $label = get_value_from_list($field_labels, $field, $field);
+                                            ?>
+                                            <div class="row mb-3">
+                                                <div class="col-sm-3">
+                                                    @if (isset($label) && $label)
+                                                        <label class="form-label">
+                                                            {{ $label }}
+                                                        </label>
+                                                    @endif
+                                                </div>
+                                                <div class="col-sm-9">
+                                                    <div class="d-flex align-items-start">
+                                                        <span class="btn btn-outline-info summary-action-button open_child_category_add_form" style="padding: 9px 12px;">
+                                                            <i class="fa-solid fa-plus"></i>
+                                                        </span>
+                                                        <div class="flex-grow-1">
+                                                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :list="$empty_list"
+                                                                :value="$model->{$field}" class="" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary submit">Done</button>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
                             <?php
-                            $field = 'child_item_category_id';
+                            $field = 'child_item_category_id_main';
                             $label = get_value_from_list($field_labels, $field, $field);
                             ?>
                             <div class="row mb-3">
                                 <div class="col-sm-3">
-                                    @if (isset($label) && $label)
-                                        <label class="form-label">
-                                            {{ $label }}
-                                        </label>
-                                    @endif
+                                    Cat.
                                 </div>
                                 <div class="col-sm-9">
                                     <div class="d-flex align-items-start">
-                                        <span class="btn btn-outline-info summary-action-button open_child_category_add_form" style="padding: 9px 12px;">
-                                            <i class="fa-solid fa-plus"></i>
+                                        <span id="modal-category-opener" class="btn btn-outline-info summary-action-button" style="padding: 9px 12px;">
+                                            <i class="fa-solid fa-eye"></i>
                                         </span>
                                         <div class="flex-grow-1">
-                                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :list="$empty_list"
+                                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :list="$item_category_list"
                                                 :value="$model->{$field}" class="select2" />
                                         </div>
                                     </div>
@@ -139,7 +175,7 @@ $false = false;
 
                             <div class="row mb-3">
                                 <div class="col-sm-3">
-                                    Departments & Sub Departments
+                                    Dept
                                 </div>
                                 <div class="col-sm-9">
                                     <table class="table table-bordered order-column template-table" data-sr-table-template-min-row="0">
@@ -251,15 +287,6 @@ $false = false;
                                                 @endforeach
                                             @endif
                                         </tbody>
-                                        <tfoot>
-                                            <tr>
-                                                <th class="text-center" style="width : 80px;">
-                                                    <span class="sr-table-template-add">
-                                                        <i class="fas fa-plus-circle text-success icon"></i>
-                                                    </span>
-                                                </th>
-                                            </tr>
-                                        </tfoot>
                                     </table>
                                 </div>
                             </div>
@@ -405,6 +432,7 @@ $false = false;
         $(function() {
             var screen_name = '<?= $screen_name ?>';
             var sku_pattern = '<?= $sku_pattern ?>';
+            var selected_department_id = '<?= $selected_department_ids[0] ?>';
             var color, brand, category;
 
             function create_sku()
@@ -517,6 +545,7 @@ $false = false;
 
                         if (v) {
                             $(target).val(v).trigger("change");
+                            create_sku();
                         }
                     });
                 }
@@ -543,6 +572,64 @@ $false = false;
                     create_sku();
                 }
             }).trigger("change", {pageLoad : true});
+
+            $("#child_item_category_id_main").change(function(e, opt){
+                var v = $(this).val();
+                category = undefined;
+
+                if (v && (typeof opt == "undefined" || typeof opt.submit == "undefined"))
+                {
+                    ajaxGetJson("/item-category/ajax_get_with_parent/" + v, function(response) {
+                        console.log(response['data']);
+
+                        if (typeof response['data']['parent_category_id'] != "undefined")
+                        {
+                            $("#parent_item_category_id").attr("data-value", response['data']['parent_category_id']);
+                        }
+
+                        if (typeof response['data']['child_category_id'] != "undefined")
+                        {
+                            $("#child_item_category_id").attr("data-value", response['data']['child_category_id']);
+                        }
+                        
+                        if (typeof response['data']['root_category_id'] != "undefined")
+                        {
+                            $("#root_item_category_id").val(response['data']['root_category_id']).trigger("change", {pageLoad : true, eventBubble : true});
+                        }
+                    });
+                }
+                else
+                {
+                    create_sku();
+                }
+            }).trigger("change", {pageLoad : true});
+
+            $("#modal-category .submit").click(function()
+            {
+                var v = $("#child_item_category_id").val();
+                if (v)
+                {
+                    $("#child_item_category_id_main").val(v).trigger("change", {submit : true});
+                    $("#modal-category").modal("hide");
+                    return;
+                }
+
+                var v = $("#parent_item_category_id").val();
+                if (v)
+                {
+                    $("#child_item_category_id_main").val(v).trigger("change", {submit : true});
+                    $("#modal-category").modal("hide");
+                    return;
+                }
+
+                var v = $("#root_item_category_id").val();
+                if (v)
+                {
+                    $("#child_item_category_id_main").val(v).trigger("change", {submit : true});
+                    $("#modal-category").modal("hide");
+                    return;
+                }
+            });
 
             $("#item_brand_id").change(function(){
                 var v = $(this).val();
@@ -631,6 +718,8 @@ $false = false;
                     _tr.find(".will-required").attr("required", true);
 
                     init_child_dept(_tr);
+
+                    _tr.find(".dept_id").val(selected_department_id).trigger("change", {pageLoad : true});
                 }
             });
 
@@ -640,6 +729,10 @@ $false = false;
                 init_child_dept($(this));
             });
             
+
+            $("#modal-category-opener").click(function(){
+                $("#modal-category").modal("show");
+            });
 
             $.events.execAtLast(function() {
                 $("#name, #size, #specification").on("input keyup", create_sku);

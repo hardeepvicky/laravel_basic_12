@@ -307,4 +307,39 @@ class ItemCategoryController extends BackendController
 
         return $this->responseJson($response);
     }
+
+    public function ajax_get_with_parent($id)
+    {
+        $response = ["status" => 1, "data" => []];
+
+        $category = $this->modelClass::findOrFail($id);
+
+        $parent_category = null;
+
+        if ($category->parent_id)
+        {
+            $parent_category = $this->modelClass::findOrFail($category->parent_id);
+        }
+
+        if ($parent_category)
+        {
+            if ($parent_category->parent_id)
+            {
+                $response['data']['root_category_id'] = $parent_category->parent_id;
+                $response['data']['parent_category_id'] = $parent_category->id;
+                $response['data']['child_category_id'] = $category->id;
+            }
+            else
+            {
+                $response['data']['root_category_id'] = $parent_category->id;
+                $response['data']['parent_category_id'] = $category->id;
+            }
+        }
+        else
+        {
+            $response['data']['root_category_id'] = $category->id;
+        }
+
+        return $this->responseJson($response);
+    }
 }

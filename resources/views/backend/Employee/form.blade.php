@@ -287,9 +287,7 @@ use App\Models\User;
                         <div class="col-md-6">
                             <div class="form-group mb-3 text-center">
                                 @if ($model->photo_url)
-                                    <a id="profile_photo_block" class="fancybox"
-                                        data-fancybox="group-{{ $model->id }}"
-                                        href="{{ $model->photo_url }}">
+                                    <a id="profile_photo_block" class="fancybox" data-fancybox="group-{{ $model->id }}" href="{{ $model->photo_url }}">
                                         <img class="img-thumbnail rounded-circle avatar-xl"
                                             src="{{ $model->photo_url }}" />
                                     </a>

@@ -21,7 +21,6 @@ use App\Models\ItemCategory;
 use App\Models\ItemFile;
 use App\Models\ItemSubDepartment;
 use App\Models\Setting;
-use App\Models\SubDepartment;
 use App\Models\Tag;
 use App\Models\Uom;
 use App\Models\User;
@@ -175,12 +174,18 @@ class ItemController extends BackendController
 
         $dept_list = Department::getList("id", "display_name", [], "list_display_order");
 
+        $qb = ItemCategory::where("is_active", 1);
+
+        $item_category_records = ItemCategory::getTreeRecords($qb);
+
+        $item_category_list = Util::getTreeListArray($item_category_records, "id", "name", false, false, "", " >> ");
+
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
         $item_sub_department_field_labels = FieldSetting::getDynamicFields(ItemSubDepartment::class);
 
         $this->setForView(compact(
-            "root_item_category_list", "dept_list", "origin_list", "certification_list", "sku_pattern", "selected_department_ids",
+            "root_item_category_list", "dept_list", "origin_list", "certification_list", "sku_pattern", "selected_department_ids", "item_category_list",
             "field_labels", "item_sub_department_field_labels"
         ));
 
