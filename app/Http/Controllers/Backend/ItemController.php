@@ -448,6 +448,8 @@ class ItemController extends BackendController
 
         $this->beforeEdit($this->model);
 
+        $this->model->child_item_category_id_main = $this->model->child_item_category_id ?? $this->model->parent_item_category_id ?? $this->model->root_item_category_id;
+
         $form = [
             'url' => route($this->routePrefix . '.update', $id),
             'method' => 'PUT',
@@ -523,6 +525,8 @@ class ItemController extends BackendController
         ])->findOrFail($id);
 
         $this->beforeEdit($model);
+
+        $this->model->child_item_category_id_main = $this->model->child_item_category_id ?? $this->model->parent_item_category_id ?? $this->model->root_item_category_id;
 
         $form = [
             'url' => route($this->routePrefix . '.store', $id),
