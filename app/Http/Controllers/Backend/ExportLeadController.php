@@ -270,8 +270,9 @@ class ExportLeadController extends BackendController
     {
         return [
             "name" => ["nullable"],
-            "mobile" => ["required", new MobileNumber],
-            "mobile2" => ["nullable", new MobileNumber],
+            "mobile" => ["required"],
+            "mobile2" => ["nullable"],
+            "email" => ["nullable"],
             "country_id" => ["required"],
             "state_id" => ["nullable"],
             "city_id" => ["nullable"],
