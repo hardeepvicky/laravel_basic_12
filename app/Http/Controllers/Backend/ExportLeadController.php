@@ -454,7 +454,6 @@ class ExportLeadController extends BackendController
         {
             $base_rules = [
                 "product_id" => ["required"],
-                "make_id" => ["required"],
                 "qty" => ["required"],
             ];
 
