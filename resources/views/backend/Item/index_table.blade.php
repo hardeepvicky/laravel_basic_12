@@ -15,17 +15,11 @@
                                 </div>
                                 <div class="col-sm-8">
                                     <?php
-                                    $field = 'name';
+                                    $field = 'sku';
                                     ?>
                                     <x-Inputs.text-field :name="$field" :label="$false" :value="$search[$field]" class="form-control-sm" />
                                 </div>
                             </div>
-                        </th>
-                        <th style="width:10%">
-                            <?php
-                            $field = "root_item_category_id";
-                            ?>
-                            <x-Inputs.drop-down :name="$field" :label="$false" :value="$search[$field]" :list="$root_item_category_list" class="select2" pleaseSelect="All" class="select2 form-select-sm"/>
                         </th>
                         <th style="width:8%"></th>
                         <th style="width:8%">
@@ -34,6 +28,13 @@
                             ?>
                             <x-Inputs.drop-down :name="$field" :label="$false" :value="$search[$field]" :list="$item_brand_list" class="select2" pleaseSelect="All" class="select2 form-select-sm"/>
                         </th>
+                        <th style="width:10%">
+                            <?php
+                            $field = "root_item_category_id";
+                            ?>
+                            <x-Inputs.drop-down :name="$field" :label="$false" :value="$search[$field]" :list="$root_item_category_list" class="select2" pleaseSelect="All" class="select2 form-select-sm"/>
+                        </th>
+                        <th style="width:8%"></th>
                         <th style="width:8%">
                             <?php
                             $field = "size";
@@ -52,12 +53,13 @@
                             <?= sortable_anchor('id', get_value_from_list($field_labels, 'id', 'id')) ?>
                             | <?= sortable_anchor('name', get_value_from_list($field_labels, 'name', 'name')) ?>
                         </th>
+                        <th style="width:10%">{{ get_value_from_list($field_labels, 'main_image_id', 'main_image_id') }}</th>
+                        <th>{{ get_value_from_list($field_labels, 'item_brand_id', 'item_brand_id') }}</th>
                         <th><?= sortable_anchor('rootItemCategory.name', get_value_from_list($field_labels, 'root_item_category_id', 'root_item_category_id')) ?></th>
                         <th><?= sortable_anchor('parentItemCategory.name', get_value_from_list($field_labels, 'parent_item_category_id', 'parent_item_category_id')) ?></th>
-                        <th>{{ get_value_from_list($field_labels, 'item_brand_id', 'item_brand_id') }}</th>
                         <th>{{ get_value_from_list($field_labels, 'size', 'size') }}</th>
                         <th>{{ get_value_from_list($field_labels, 'specification', 'specification') }}</th>
-                        <th style="width:10%">{{ get_value_from_list($field_labels, 'main_image_id', 'main_image_id') }}</th>
+                        
                         <th style="width:8%">
                             <?= sortable_anchor('list_display_order', get_value_from_list($field_labels, 'list_display_order', 'list_display_order')) ?>
                         </th>
@@ -75,13 +77,13 @@
                                 <x-Backend.celec-summary-table-first-column :record="$record" :routePrefix="$routePrefix"
                                     buttons="copy,edit,delete,tr_details">
                                     <div class="label">
-                                        {{ $record->id . ' | ' . $record->name }}
+                                        {{ $record->id . ' | ' . $record->sku }}
                                     </div>
                                 </x-Backend.celec-summary-table-first-column>
                             </th>
+                            <td>{{ $record->itemBrand?->getDisplayName() }}</td>
                             <td>{{ $record->rootItemCategory?->getDisplayName() }}</td>
                             <td>{{ $record->parentItemCategory?->getDisplayName() }}</td>
-                            <td>{{ $record->itemBrand?->getDisplayName() }}</td>
                             <td>{{ $record->size }}</td>
                             <td>{{ $record->specification }}</td>
                             <td id="main_image-{{ $record->id }}">
@@ -100,7 +102,7 @@
                                     {{ $record->list_display_order }}
                                 </a>
                             </td>
-                             <td>
+                            <td>
                                 <x-Backend.active_deactive :isActive="$record->is_active" :id="$record->id" :routePrefix="$routePrefix" />
                             </td>
                             <td>
@@ -129,9 +131,9 @@
                                         </label>
 
                                         <label class="info">
-                                            {{ get_value_from_list($field_labels, 'sku') }} :
+                                            {{ get_value_from_list($field_labels, 'name') }} :
                                             <span>
-                                                {{ $record->sku }}
+                                                {{ $record->name }}
                                             </span>
                                         </label>
 

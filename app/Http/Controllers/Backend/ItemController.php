@@ -87,6 +87,7 @@ class ItemController extends BackendController
             ["field" => "item_brand_id", "type" => "int"],
             ["field" => "size", "type" => "string"],
             ["field" => "specification", "type" => "string"],
+            ["field" => "sku", "type" => "string"],
         ]);
 
         $builder = $this->modelClass::query();
