@@ -34,6 +34,7 @@ class Customer extends BaseModel
     public const STATUS_COMPLAINT = "COMPLAINT";
     public const STATUS_CONVERTED = "CONVERTED";
     public const STATUS_FAKE = "FAKE";
+    public const STATUS_SERVICE = "SERVICE";
 
     public const DEAL_TYPE_DIRECT = "DIRECT";
     public const DEAL_TYPE_THROGH_DEALER = "THROGH_DEALER";
