@@ -131,12 +131,12 @@ if (!isset($partial_path)) {
         <script src="{{ get_asset_url('assets/libs/typeahead.js-0.11.1/dist/typeahead.bundle.min.js') }}"></script>
         <script src="{{ get_asset_url('assets/libs/jquery-file-validator/js/file-validator.js') }}"></script>
         <script src="{{ get_asset_url('assets/libs/summernote/summernote-lite.min.js') }}"></script>
-
         <script src="{{ get_asset_url('assets/libs/amcharts5/index.js') }}"></script>
         <script src="{{ get_asset_url('assets/libs/amcharts5/percent.js') }}"></script>
         <script src="{{ get_asset_url('assets/libs/amcharts5/xy.js') }}"></script>
         <script src="{{ get_asset_url('assets/libs/amcharts5/themes/Animated.js') }}"></script>
         <script src="{{ get_asset_url('assets/libs/amcharts5/themes/Animated.js') }}"></script>
+        <script src="{{ get_asset_url('assets/libs/bootstrap-autocomplete/dist/js/bootstrap-autocomplete.min.js') }}"></script>
 
         <!-- Project Lib -->
         <script src="{{ get_asset_url('libs/constants.js') }}"></script>
