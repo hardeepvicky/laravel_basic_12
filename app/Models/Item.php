@@ -79,11 +79,6 @@ class Item extends BaseModel
         return $this->belongsTo(ItemBrand::class);
     }
 
-    public function department()
-    {
-        return $this->belongsTo(Department::class, "dept_id");
-    }
-
     public function origin()
     {
         return $this->belongsTo(DropDownValue::class, "origin_id");
