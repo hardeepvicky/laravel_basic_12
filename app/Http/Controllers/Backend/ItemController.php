@@ -21,6 +21,7 @@ use App\Models\ItemCategory;
 use App\Models\ItemFile;
 use App\Models\ItemSubDepartment;
 use App\Models\Setting;
+use App\Models\SubDepartment;
 use App\Models\Tag;
 use App\Models\Uom;
 use App\Models\User;
@@ -50,7 +51,6 @@ class ItemController extends BackendController
             "parentItemCategory",
             "childItemCategory",
             "itemBrand",
-            "department",
             "origin",
             "certification",
             "tags",
@@ -127,6 +127,27 @@ class ItemController extends BackendController
             });
         }
 
+        $dept_conditions = $this->getConditions($cache_key . "-3", [
+            ["field" => "dept_id", "type" => "int"],
+            ["field" => "sub_dept_id", "type" => "int"],
+        ], true);
+
+        $sub_dept_conditions = [];
+
+        if ( isset($dept_conditions['dept_id']) && !empty($dept_conditions['dept_id']) )
+        {
+            $builder->whereHas("itemSubDepartment", function($q) use($dept_conditions)
+            {
+                $q->where("dept_id", $dept_conditions['dept_id']['value']);
+            });
+
+            $sub_dept_conditions['department_id'] = $dept_conditions['dept_id']['value'];
+        }
+
+        $sub_dept_list = SubDepartment::getList("id", "display_name", $sub_dept_conditions, "list_display_order");
+
+        $this->setForView(compact("sub_dept_list"));
+
         if ($apply_sort) {
             $cache_key_for_sort = $cache_key_prefix . "-index-extra-params";
 
@@ -142,6 +163,7 @@ class ItemController extends BackendController
             $builder->orderBy($sort['sort_by'], $sort['sort_dir']);
         }
 
+        
         return $builder;
     }
 

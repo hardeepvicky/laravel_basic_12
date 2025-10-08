@@ -44,9 +44,9 @@ class Department extends BaseModel
         return $this->belongsTo(User::class, "dept_head_user_id");
     }
 
-    public function subDepartment()
+    public function department()
     {
-        return $this->hasMany(SubDepartment::class);
+        return $this->hasMany(Department::class);
     }
 
     public function task()
