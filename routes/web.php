@@ -1131,12 +1131,25 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
     });
 
     $route_prefix = "item";
-    $controllerClass = ItemController::class;
-    Route::resource($route_prefix, $controllerClass);
+    $controllerClass = ItemController::class;    
     Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
 
-        $name = "copy";
-        Route::get("{id}/" . $name, [$controllerClass, $name])->name($name);
+        Route::get("/", [$controllerClass, "index"])->name("index");
+
+        $name = "create";
+        Route::get($name, [$controllerClass, $name])->name($name);
+
+        $name = "store";
+        Route::post($name, [$controllerClass, $name])->name($name);
+
+        $name = "edit";
+        Route::get("/{id}/" . $name . "/{tab?}", [$controllerClass, $name])->name($name);
+
+        $name = "update";
+        Route::put("/{id}/{tab?}", [$controllerClass, $name])->name($name);
+
+        $name = "destroy";
+        Route::delete("/{id}", [$controllerClass, $name])->name($name);
 
         $name = "activate";
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
@@ -1147,8 +1160,17 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
         $name = "ajax_get";
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
 
+        $name = "ajax_update_field";
+        Route::post($name, [$controllerClass, $name])->name($name);
+
         $name = "ajax_get_child_uom_list";
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "ajax_get_specifications_of_item";
+        Route::get($name . "/{name?}", [$controllerClass, $name])->name($name);
+
+        $name = "ajax_get_sizes_of_item";
+        Route::get($name . "/{name?}", [$controllerClass, $name])->name($name);
 
         $name = "ajax_update_field";
         Route::post($name, [$controllerClass, $name])->name($name);

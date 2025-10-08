@@ -14,4 +14,8 @@
     @if(in_array("submit", $buttonList))
         <button type="submit" class="btn btn-primary">Submit</button>
     @endif
+
+    @if(in_array("next", $buttonList))
+        <button type="submit" class="btn btn-primary">Save & Next</button>
+    @endif
 </div>
