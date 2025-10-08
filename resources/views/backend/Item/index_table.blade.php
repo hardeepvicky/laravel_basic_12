@@ -60,7 +60,7 @@
                         <tr>
                             <th scope="row">
                                 <x-Backend.celec-summary-table-first-column :record="$record" :routePrefix="$routePrefix"
-                                    buttons="copy,edit,delete,tr_details">
+                                    buttons="edit,delete,tr_details">
                                     <div class="label">
                                         {{ $record->id . ' | ' . $record->sku }}
                                     </div>

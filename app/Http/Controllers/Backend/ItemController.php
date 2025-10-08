@@ -37,6 +37,11 @@ class ItemController extends BackendController
 {
     public String $routePrefix = "item";
 
+    const TABS = [
+        "default" => "Default",
+        "additional" => "Additional Details",
+    ];
+
     protected $modelClass = Item::class;
     protected Item | null $model = null;
 
@@ -226,9 +231,24 @@ class ItemController extends BackendController
             'method' => 'POST',
         ];
 
-        $this->setForView(compact("model", 'form'));
+        $current_tab = $model->tab_name = array_key_first(self::TABS);
 
-        return $this->view("form");
+        $this->setForView(compact("model", 'form', 'current_tab'));
+
+        $this->set_data_for_add_edit($model);
+
+        return $this->view("tabs");
+    }
+
+    private function set_data_for_add_edit($model)
+    {
+        $tabs = self::TABS;
+
+        $name_list = Item::select("name")->distinct()->pluck('name')->toArray();
+
+        $item_list = Item::pluck('sku', 'id')->toArray();
+
+        $this->setForView(compact("tabs", "name_list", "item_list"));
     }
 
     private function _common_validation_rules()
@@ -242,19 +262,9 @@ class ItemController extends BackendController
             "size" => ["nullable"],
             "specification" => ["nullable"],
             "sku" => ["required"],
-            "part_no" => ["nullable"],
-            "weight" => ["nullable"],
-            "minimum_order_qty" => ["nullable"],
-            "origin_id" => ["nullable"],
-            "certification_id" => ["nullable"],
+            "item_sub_departments" => [],
             "images" => [],
-            "other_files" => [],
-            "tag_name" => [],
-            "sub_dept_ids" => [],
-            "description" => ["nullable"],
-            "list_display_order" => "",
-            "is_active" => "",
-            "item_sub_departments" => []
+            "tab_name" => "",            
         ];
     }
 
@@ -318,7 +328,12 @@ class ItemController extends BackendController
 
             DB::commit();
 
-            return $this->afterSave($this->model);
+            $this->saveSqlLog();
+
+            $next_tab = Util::getNextTab(self::TABS, $validatedData['tab_name'], $is_last_tab);
+
+            return redirect()->route($this->routePrefix . ".edit", ["id" => $this->model->id, "tab" => $next_tab])->with('success', 'Record created successfully');
+
         } catch (Exception $ex) {
             DB::rollBack();
 
@@ -463,7 +478,7 @@ class ItemController extends BackendController
 
     }
 
-    public function edit($id)
+    public function edit($id, $current_tab = "default")
     {
         $model = $this->model = $this->modelClass::with([
             "tags", "images", "otherFiles"
@@ -474,24 +489,47 @@ class ItemController extends BackendController
         $this->model->child_item_category_id_main = $this->model->child_item_category_id ?? $this->model->parent_item_category_id ?? $this->model->root_item_category_id;
 
         $form = [
-            'url' => route($this->routePrefix . '.update', $id),
+            'url' => route($this->routePrefix . '.update', [$id, $current_tab]),
             'method' => 'PUT',
         ];
 
-        $this->setForView(compact("model", "form"));
+        $this->setForView(compact("model", "form", "current_tab"));
 
-        return $this->view("form");
+        $this->set_data_for_add_edit($model);
+
+        return $this->view("tabs");
     }
 
-    public function update($id, Request $request)
+    public function update($id, $current_tab, Request $request)
     {
         $this->model = $this->modelClass::findOrFail($id);
 
         $this->beforeEdit($this->model);
 
-        $rules = $this->_common_validation_rules();
+        switch($current_tab)
+        {
+            case "default":
+                $rules = $this->_common_validation_rules();
+                $rules = LaravelExtend::merge_validation_rules($rules, $this->model->getUniqueValidationRules($request));
+                $messages = $this->_common_validation_messages();
+                break;
 
-        $rules = LaravelExtend::merge_validation_rules($rules, $this->model->getUniqueValidationRules($request));
+            case "additional":
+                $rules = [
+                    "part_no" => ["nullable"],
+                    "weight" => ["nullable"],
+                    "minimum_order_qty" => ["nullable"],
+                    "origin_id" => ["nullable"],
+                    "certification_id" => ["nullable"],
+                    "other_files" => [],
+                    "tag_name" => [],
+                    "description" => ["nullable"],
+                    "list_display_order" => "",
+                    "is_active" => "",
+                ];
+                break;
+        }
+
 
         // d($rules);
 
@@ -531,7 +569,20 @@ class ItemController extends BackendController
 
             DB::commit();
 
-            return $this->afterSave($this->model);
+            $this->saveSqlLog();
+
+            $is_last_tab = false;
+            $next_tab = Util::getNextTab(self::TABS, $current_tab, $is_last_tab);
+
+            if ($is_last_tab)
+            {
+                return redirect()->route($this->routePrefix . ".index")->with('success', 'Record updated successfully');
+            }
+            else
+            {
+                return redirect()->route($this->routePrefix . ".edit", ["id" => $this->model->id, "tab" => $next_tab])->with('success', 'Record updated successfully');
+            }
+
         } catch (Exception $ex) {
             DB::rollBack();
 
@@ -1022,4 +1073,21 @@ class ItemController extends BackendController
         download_start($file, "application/octet-stream");
     }
 
+    public function ajax_get_specifications_of_item($name = "")
+    {
+        $response = ["status" => 1, "data" => []];
+
+        $response['data'] = Item::where("name", $name)->select("specification")->distinct()->pluck("specification")->toArray();
+
+        return $this->responseJson($response);
+    }
+
+    public function ajax_get_sizes_of_item($name = "")
+    {
+        $response = ["status" => 1, "data" => []];
+
+        $response['data'] = Item::where("name", $name)->select("size")->distinct()->pluck("size")->toArray();
+
+        return $this->responseJson($response);
+    }
 }
