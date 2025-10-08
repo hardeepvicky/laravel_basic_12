@@ -494,8 +494,6 @@ $false = false;
                     sku = sku.replace("{specification}", "");
                 }
 
-                sku = sku.toLowerCase();
-
                 var name = $("#name").val();
 
                 if (name)
