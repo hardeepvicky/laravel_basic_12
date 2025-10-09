@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Exceptions\UserException;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Unique;
@@ -49,6 +48,10 @@ class Item extends BaseModel
             "preventDelete" => true
         ],
         BomItem::class => [
+            "foreignKey" => ["item_id"],
+            "preventDelete" => true
+        ],
+        PurchaseOrderItem::class => [
             "foreignKey" => ["item_id"],
             "preventDelete" => true
         ],
