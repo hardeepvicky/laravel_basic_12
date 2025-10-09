@@ -261,6 +261,7 @@ class ItemController extends BackendController
             "item_brand_id" => ["nullable"],
             "size" => ["nullable"],
             "specification" => ["nullable"],
+            "part_no" => ["nullable"],
             "sku" => ["required"],
             "item_sub_departments" => [],
             "images" => [],
