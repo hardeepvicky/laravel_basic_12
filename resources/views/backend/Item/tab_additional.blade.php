@@ -174,8 +174,9 @@
                     $("#weight").val(data['weight']);
                     $("#minimum_order_qty").val(data['minimum_order_qty']);
                     $("#description").val(data['description']);
-                    $("#origin_id").val(data['origin_id']);
-                    $("#certification_id").val(data['certification_id']);
+                    
+                    $("#origin_id").val(data['origin_id']).trigger("change", {pageLoad : true});
+                    $("#certification_id").val(data['certification_id']).trigger("change", {pageLoad : true});
                 }); 
                 
                 $("#modal-copy-detail-from-other-item").modal("hide");
