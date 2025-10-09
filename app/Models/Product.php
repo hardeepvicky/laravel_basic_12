@@ -66,6 +66,10 @@ class Product extends BaseModel
             "foreignKey" => ["product_id"],
             "preventDelete" => true
         ],
+        Bom::class => [
+            "foreignKey" => ["product_id"],
+            "preventDelete" => true
+        ],
     ];
 
     public function beforeSave()

@@ -14,26 +14,10 @@ class Bom extends BaseModel
     const TYPE_PRODUCT = "product";
 
     public static array $child_model_class = [
-        ItemFile::class => [
-            "foreignKey" => ["item_id"],
+        BomItem::class => [
+            "foreignKey" => ["bom_id"],
             "preventDelete" => false
-        ],
-        LeadItem::class => [
-            "foreignKey" => "item_id",
-            "preventDelete" => true
-        ],
-        ExpLeadItem::class => [
-            "foreignKey" => "item_id",
-            "preventDelete" => true
-        ],
-        DispatchOrderItem::class => [
-            "foreignKey" => ["item_id"],
-            "preventDelete" => true
-        ],
-        ShipOrderItem::class => [
-            "foreignKey" => ["item_id"],
-            "preventDelete" => true
-        ],
+        ],        
     ];
 
     public function afterFind()
