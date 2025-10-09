@@ -15,6 +15,7 @@ trait ModelListTrait
 
         $cache_key = "list-" . $key_field . "-" . $value_field . "-";
 
+        // dd($conditions);
         foreach($conditions as $k => $v)
         {
             if (is_array($v))

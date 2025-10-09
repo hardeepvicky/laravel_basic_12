@@ -169,6 +169,8 @@ class BaseModel extends Model implements BaseModelInterface
 
         $builder->select($list_fields);
 
+        // dd($list_fields);
+
         $records = $builder->get();
 
         // d($records->toArray());

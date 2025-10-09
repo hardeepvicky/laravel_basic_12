@@ -526,6 +526,7 @@ class ItemController extends BackendController
                     "description" => ["nullable"],
                     "list_display_order" => "",
                     "is_active" => "",
+                    "can_be_use_for_bom" => "",
                 ];
                 break;
         }
@@ -670,6 +671,31 @@ class ItemController extends BackendController
 
                 $response['data'][] = $row;
             }
+        } catch (Exception $ex) {
+            $response['status'] = 0;
+            $response['msg'] = $ex->getMessage();
+        }
+
+        return $this->responseJson($response);
+    }
+
+    public function ajax_get_default_uom($item_id)
+    {
+        $response = ["status" => 1, "data" => []];
+
+        try {
+
+            $model = $this->modelClass::where("id", $item_id)->with(
+                ["category", "category.uom"]
+            )->first();
+
+            if (!$model)
+            {
+                throw new UserException("Invalid Item ID : $item_id");
+            }
+
+            $response['data'] = $model->category->uom->toArray();
+
         } catch (Exception $ex) {
             $response['status'] = 0;
             $response['msg'] = $ex->getMessage();
