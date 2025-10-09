@@ -100,6 +100,13 @@
             <div class="col-sm-3"></div>
             <div class="col-sm-9">
                 <?php
+                $field = 'can_be_use_for_bom';
+                $label = get_value_from_list($field_labels, $field, $field);
+                ?>
+                <x-Inputs.checkbox :name="$field" :label="$label"
+                    value="{{ $model->{$field} }}" />
+                    
+                <?php
                 $field = 'is_active';
                 $label = get_value_from_list($field_labels, $field, $field);
                 ?>

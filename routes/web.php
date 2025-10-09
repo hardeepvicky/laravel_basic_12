@@ -9,6 +9,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Backend\AppMenuController;
 use App\Http\Controllers\Backend\AutoSerialPatternController;
 use App\Http\Controllers\Backend\BinController;
+use App\Http\Controllers\Backend\BomController;
 use App\Http\Controllers\Backend\BranchController;
 use App\Http\Controllers\Backend\CampaignController;
 use App\Http\Controllers\Backend\CityController;
@@ -1166,6 +1167,9 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
         $name = "ajax_get_child_uom_list";
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
 
+        $name = "ajax_get_default_uom";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
         $name = "ajax_get_specifications_of_item";
         Route::get($name . "/{name?}", [$controllerClass, $name])->name($name);
 
@@ -1894,6 +1898,37 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
 
         $name = "completion_destroy";
         Route::delete("{id}/" . $name, [$controllerClass, $name])->name($name);
+
+        $route_prefix = "export";
+        Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+            $name = "csv";
+            Route::get($name, [$controllerClass, "export_" . $name])->name($name);
+        });
+    });
+
+    $route_prefix = "bom";
+    $controllerClass = BomController::class;    
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
+        Route::get("/", [$controllerClass, "index"])->name("index");
+
+        $name = "create";
+        Route::get($name, [$controllerClass, $name])->name($name);
+
+        $name = "store";
+        Route::post($name, [$controllerClass, $name])->name($name);
+
+        $name = "edit";
+        Route::get("/{id}/" . $name . "/{tab?}", [$controllerClass, $name])->name($name);
+
+        $name = "update";
+        Route::put("/{id}/{tab?}", [$controllerClass, $name])->name($name);
+
+        $name = "destroy";
+        Route::delete("/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "ajax_get";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
 
         $route_prefix = "export";
         Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
