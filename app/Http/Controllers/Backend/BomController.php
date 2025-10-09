@@ -387,66 +387,51 @@ class BomController extends BackendController
         $this->beforeCsvExport($builder);
 
         $builder->with([
-            "rootItemCategory",
-            "parentItemCategory",
-            "childItemCategory",
-            "itemBrand",
-            "origin",
-            "certification",
-            "tags",
-            "mainImage",
+            "item",
+            "product",
+            "bomItems",
+            "bomItems.item",
+            "bomItems.item.category",
+            "bomItems.item.category.uom",
         ]);
 
         $records = $builder->get();
 
         $records = $records->toArray();
 
-        d($records, true);
+        // d($records, true);
 
         $csv_records = [];
         $user_cache_list = User::getListCache();
 
         $yes_no_list = laravel_constant('yes_no_list');
 
+        $type_list = Bom::getTypeList();
+
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
         foreach($records as $record)
-        {
-            $tag_list = [];
-
-            foreach($record['tags'] as $tag)
+        {            
+            foreach($record['bom_items'] as $bom_item)
             {
-                $tag_list[] = $tag['display_name'];
+                $csv_records[] = [
+                    'ID' => $record['id'],
+                    $field_labels['type'] => get_value_from_list($type_list, $record['type']),
+                    $field_labels['item_id'] => $record['item']['sku'] ?? "",
+                    $field_labels['product_id'] => $record['product']['display_name'] ?? "",
+                    $field_labels['remarks'] => $record['remarks'] ?? "",
+
+                    'Consume Item' => $bom_item['item']['sku'] ?? "",
+                    'Consume qty' => $bom_item['qty'] ?? "",
+                    'Consume Unit' => $bom_item['item']['category']['uom']['short_name'] ?? "",
+                    
+                    
+                    'Created' => if_date_time($record['created_at']),
+                    'Created By' => $user_cache_list[$record['created_by']] ?? "",
+                    'Updated' => if_date_time($record['updated_at']),
+                    'Updated By' => $user_cache_list[$record['updated_by']] ?? "",
+                ];
             }
-            $csv_records[] = [
-                'ID' => $record['id'],
-                $field_labels['name'] => $record['name'],
-                $field_labels['specification'] => $record['specification'] ?? "",
-                $field_labels['size'] => $record['size'] ?? "",
-                $field_labels['item_brand_id'] => $record['item_brand']['name'] ?? "",
-                $field_labels['sku'] => $record['sku'] ?? "",
-                $field_labels['root_item_category_id'] => $record['root_item_category']['name'] ?? "",
-                $field_labels['parent_item_category_id'] => $record['parent_item_category']['name'] ?? "",
-                $field_labels['child_item_category_id'] => $record['child_item_category']['name'] ?? "",
-                $field_labels['origin_id'] => $record['origin']['name'] ?? "",
-                $field_labels['certification_id'] => $record['certification']['name'] ?? "",
-                $field_labels['part_no'] => $record['part_no'] ?? "",
-                $field_labels['weight'] => $record['weight'] ?? "",
-                $field_labels['minimum_order_qty'] => $record['minimum_order_qty'] ?? "",
-                $field_labels['description'] => $record['description'] ?? "",
-                $field_labels['main_image_id'] => isset($record['main_image']['file_url']) ? url($record['main_image']['file_url']) : "",
-                'Main Image Name' => $record['main_image']['display_name'] ?? "",
-
-                $field_labels['tag_name'] => implode(", ", $tag_list),
-
-                $field_labels['is_active'] => get_value_from_list($yes_no_list, $record['is_active']),
-                $field_labels['list_display_order'] => $record['list_display_order'] ?? "",
-
-                'Created' => if_date_time($record['created_at']),
-                'Created By' => $user_cache_list[$record['created_by']] ?? "",
-                'Updated' => if_date_time($record['updated_at']),
-                'Updated By' => $user_cache_list[$record['updated_by']] ?? "",
-            ];
         }
 
         // d($csv_records, true);
