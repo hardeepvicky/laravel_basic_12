@@ -40,6 +40,14 @@ class Item extends BaseModel
             "foreignKey" => ["item_id"],
             "preventDelete" => true
         ],
+        Bom::class => [
+            "foreignKey" => ["item_id"],
+            "preventDelete" => true
+        ],
+        BomItem::class => [
+            "foreignKey" => ["item_id"],
+            "preventDelete" => true
+        ],
     ];
 
     public function afterFind()
