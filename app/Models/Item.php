@@ -24,6 +24,10 @@ class Item extends BaseModel
             "foreignKey" => ["item_id"],
             "preventDelete" => false
         ],
+        ItemSubDepartment::class => [
+            "foreignKey" => ["item_id"],
+            "preventDelete" => false
+        ],
         LeadItem::class => [
             "foreignKey" => "item_id",
             "preventDelete" => true
