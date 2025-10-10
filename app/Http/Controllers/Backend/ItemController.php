@@ -1183,31 +1183,6 @@ class ItemController extends BackendController
         return $this->responseJson($response);
     }
 
-    public function ajax_get_default_uom($item_id)
-    {
-        $response = ["status" => 1, "data" => []];
-
-        try {
-
-            $model = $this->modelClass::where("id", $item_id)->with(
-                ["category", "category.uom"]
-            )->first();
-
-            if (!$model)
-            {
-                throw new UserException("Invalid Item ID : $item_id");
-            }
-
-            $response['data'] = $model->category->uom->toArray();
-
-        } catch (Exception $ex) {
-            $response['status'] = 0;
-            $response['msg'] = $ex->getMessage();
-        }
-
-        return $this->responseJson($response);
-    }
-
     public function ajax_get_specifications_of_item($name = "")
     {
         $response = ["status" => 1, "data" => []];
