@@ -22,12 +22,6 @@
                             </div>
                         </th>
                         <th style="width:8%"></th>
-                        <th style="width:8%">
-                            <?php
-                            $field = "item_brand_id";
-                            ?>
-                            <x-Inputs.drop-down :name="$field" :label="$false" :value="$search[$field]" :list="$item_brand_list" class="select2" pleaseSelect="All" class="select2 form-select-sm"/>
-                        </th>
                         <th style="width:10%">
                             <?php
                             $field = "root_item_category_id";
@@ -42,7 +36,6 @@
                             | <?= sortable_anchor('name', get_value_from_list($field_labels, 'name', 'name')) ?>
                         </th>
                         <th style="width:10%">{{ get_value_from_list($field_labels, 'main_image_id', 'main_image_id') }}</th>
-                        <th>{{ get_value_from_list($field_labels, 'item_brand_id', 'item_brand_id') }}</th>
                         <th><?= sortable_anchor('rootItemCategory.name', get_value_from_list($field_labels, 'root_item_category_id', 'root_item_category_id')) ?></th>
                         <th><?= sortable_anchor('parentItemCategory.name', get_value_from_list($field_labels, 'parent_item_category_id', 'parent_item_category_id')) ?></th>
                         <th style="width:8%">
@@ -74,7 +67,6 @@
                                     </a>
                                 @endif
                             </td>
-                            <td>{{ $record->itemBrand?->getDisplayName() }}</td>
                             <td>{{ $record->rootItemCategory?->getDisplayName() }}</td>
                             <td>{{ $record->parentItemCategory?->getDisplayName() }}</td>
                             <td class="text-center">
@@ -103,7 +95,7 @@
                         </tr>
                         <tr id="record-{{ $record->id }}" class="hidden">
                             <td style="background-color: var(--body--bs-body-bg)"></td>
-                            <td colspan="11">
+                            <td colspan="10">
                                 <div class="row">
                                     <div class="col-md-12 col-xl-5">
                                         <label class="info">
@@ -124,6 +116,13 @@
                                             {{ get_value_from_list($field_labels, 'weight') }} :
                                             <span>
                                                 {{ $record->weight }} K.g.
+                                            </span>
+                                        </label>
+
+                                        <label class="info">
+                                            {{ get_value_from_list($field_labels, 'reference') }} :
+                                            <span>
+                                                {{ $record->reference }}
                                             </span>
                                         </label>
 
