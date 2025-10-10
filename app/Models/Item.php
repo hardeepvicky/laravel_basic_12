@@ -109,6 +109,11 @@ class Item extends BaseModel
         return $this->hasMany(ItemSubDepartment::class);
     }
 
+    public function itemBrandPart()
+    {
+        return $this->hasMany(ItemBrandPart::class);
+    }
+
     public function itemFile()
     {
         return $this->hasMany(ItemFile::class, 'item_id');

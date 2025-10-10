@@ -191,6 +191,31 @@
                                         </div>
                                         <div class="card">
                                             <div class="card-header border-l-secondary card-no-border">
+                                                <h3>Make</h3>
+                                            </div>
+                                            <div class="card-body">
+                                                <table class="table table-sm summary-table table-bordered">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Sr. No.</th>
+                                                            <th>Make</th>
+                                                            <th>Part No.</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach ($record->itemBrandPart as $i => $itemBrandPart)
+                                                            <tr>
+                                                                <td>{{ $i + 1 }}</td>
+                                                                <td>{{ $itemBrandPart->make?->getDisplayName() }}</td>                                                                
+                                                                <td>{{ $itemBrandPart->part_no }}</td>                                                                
+                                                            </tr>
+                                                        @endforeach
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                        <div class="card">
+                                            <div class="card-header border-l-secondary card-no-border">
                                                 <h3>Images</h3>
                                             </div>
                                             <div class="card-body">

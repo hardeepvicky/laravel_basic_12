@@ -153,20 +153,6 @@
             </div>
         </div>
 
-        <?php
-        $field = 'item_brand_id';
-        $label = get_value_from_list($field_labels, $field, $field);
-        ?>
-        <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$empty_list"
-            :value="$model->{$field}" class="select2" layout="horizontal" />
-
-        <?php
-        $field = 'part_no';
-        $label = get_value_from_list($field_labels, $field, $field);
-        ?>
-        <x-Inputs.text-field :id="$field" :name="$field" :label="$label" value="{{ $model->{$field} }}"
-            placeholder="Enter {{ $label }}" layout="horizontal" />
-
         <div class="row mb-3">
             <div class="col-sm-3">
                 Dept
@@ -275,6 +261,111 @@
                                             class="select2 sub_dept_id"
                                             required="true"
                                             multiple="true"
+                                            />
+                                    </td>
+                                </tr>
+                            @endforeach
+                        @endif
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-sm-3">
+                Make
+            </div>
+            <div class="col-sm-9">
+                <table class="table table-bordered order-column template-table" data-sr-table-template-min-row="0">
+                    <thead>
+                        <tr>
+                            <th class="text-center" style="width : 8%;">
+                                <span class="sr-table-template-add">
+                                    <i class="fas fa-plus-circle text-success icon"></i>
+                                </span>
+                            </th>
+                            <th style="width:30%">
+                                {{ get_value_from_list($item_brand_parts_field_labels, 'make_id') }}
+                            </th>
+                            <th style="width:60%">
+                                {{ get_value_from_list($item_brand_parts_field_labels, 'part_no') }}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="sr-table-template-row hidden">
+                            <td>
+                                <div class="block">
+                                    <div class="left-block">
+
+                                    </div>
+                                    <div class="right-block">
+                                        <span class="sr-table-template-delete">
+                                            <i class=" fas fa-times-circle text-danger icon"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                                <x-inputs.text-field type="hidden" name="item_brand_parts[(sr-id)][id]" label="" />
+                            </td>
+                            <td>
+                                <?php
+                                $field = 'make_id';
+                                ?>
+                                <x-Inputs.drop-down name="item_brand_parts[(sr-id)][{{ $field }}]" :label="$false"
+                                    :list="$empty_list"
+                                    class="will-select2 will-required make_id"
+                                    />
+                            </td>
+                            <td>
+                                <?php
+                                $field = 'part_no';
+                                ?>
+                                <x-Inputs.text-field name="item_brand_parts[(sr-id)][{{ $field }}]" :label="$false"
+                                    class="will-required part_no"
+                                />
+                            </td>
+                        </tr>
+                        @php
+                            $item_brand_parts = old('item_brand_parts', $model->itemBrandPart?->toArray() ?? []);
+                            unset($item_brand_parts['(sr-id)']);
+                        @endphp
+                        @if (isset($item_brand_parts))
+                            @foreach ($item_brand_parts as $k => $child_arr)
+                                <tr class="" sr-id="{{ $child_arr['id'] }}"
+                                    sr-counter="{{ $k }}">
+                                    <td>
+                                        <div class="block">
+                                            <div class="left-block">
+
+                                            </div>
+                                            <div class="right-block">
+                                                <span class="sr-table-template-delete">
+                                                    <i class=" fas fa-times-circle text-danger icon"></i>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <input type="hidden" name="item_brand_parts[{{ $k }}][id]" value="{{ $child_arr['id'] ?? '' }}" />
+                                    </td>
+                                    <td>
+                                        <?php
+                                        $field = 'make_id';
+                                        $value = $child_arr[$field] ?? '';
+                                        ?>
+                                        <x-Inputs.drop-down name="item_brand_parts[{{ $k }}][{{ $field }}]" :label="$false"
+                                            :list="$empty_list"
+                                            :value="$value"
+                                            class="will-select2 will-required make_id"
+                                            required="true"
+                                            />
+                                    </td>
+                                    <td>
+                                        <?php
+                                        $field = 'part_no';
+                                        $value = $child_arr[$field] ?? '';
+                                        ?>
+                                        <x-Inputs.text-field name="item_brand_parts[{{ $k }}][{{ $field }}]" :label="$false"
+                                            :value="$value"
+                                            class="will-required part_no"
                                             />
                                     </td>
                                 </tr>
@@ -420,16 +511,14 @@
                         html += '<option ' + attr + '>' + v + "</option>";
                     }
 
-                    var target = "#item_brand_id";
+                    var target = ".make_id";
 
                     $(target).html(html);
 
-                    var v = $(target).attr("data-value");
-
-                    if (v) {
-                        $(target).val(v).trigger("change");
-                        create_sku();
-                    }
+                    $(target).each(function(){
+                        var v = $(this).attr("data-value");
+                        $(this).val(v).trigger("change");
+                    });
                 });
             }
             else

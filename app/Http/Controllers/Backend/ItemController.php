@@ -17,6 +17,7 @@ use App\Models\FieldSetting;
 use App\Models\ImportLog;
 use App\Models\Item;
 use App\Models\ItemBrand;
+use App\Models\ItemBrandPart;
 use App\Models\ItemCategory;
 use App\Models\ItemFile;
 use App\Models\ItemSubDepartment;
@@ -55,7 +56,8 @@ class ItemController extends BackendController
             "rootItemCategory",
             "parentItemCategory",
             "childItemCategory",
-            "itemBrand",
+            "itemBrandPart",
+            "itemBrandPart.make",
             "origin",
             "certification",
             "tags",
@@ -212,9 +214,11 @@ class ItemController extends BackendController
 
         $item_sub_department_field_labels = FieldSetting::getDynamicFields(ItemSubDepartment::class);
 
+        $item_brand_parts_field_labels = FieldSetting::getDynamicFields(ItemBrandPart::class);
+
         $this->setForView(compact(
             "root_item_category_list", "dept_list", "origin_list", "certification_list", "sku_pattern", "selected_department_ids", "item_category_list",
-            "field_labels", "item_sub_department_field_labels"
+            "field_labels", "item_sub_department_field_labels", "item_brand_parts_field_labels"
         ));
 
         return parent::beforeViewRender();
@@ -260,12 +264,11 @@ class ItemController extends BackendController
             "root_item_category_id" => ["required"],
             "parent_item_category_id" => ["nullable"],
             "child_item_category_id" => ["nullable"],
-            "item_brand_id" => ["nullable"],
             "size" => ["nullable"],
             "specification" => ["nullable"],
-            "part_no" => ["nullable"],
             "sku" => ["required"],
             "item_sub_departments" => [],
+            "item_brand_parts" => [],
             "images" => [],
             "tab_name" => "",            
         ];
@@ -302,7 +305,8 @@ class ItemController extends BackendController
             unset($save_data['tag_name']);
             unset($save_data['images']);
             unset($save_data['other_files']);
-            unset($save_data['sub_dept_ids']);
+            unset($save_data['item_sub_departments']);
+            unset($save_data['item_brand_parts']);
 
             // dd($save_data);
 
@@ -479,6 +483,70 @@ class ItemController extends BackendController
             }
         }
 
+
+        if (isset($validatedData['item_brand_parts']) )
+        {
+            unset($validatedData['item_brand_parts']['(sr-id)']);
+
+            // d($validatedData, true);
+
+            if (isset($validatedData['item_brand_parts'])) {
+                $base_rules = [
+                    "make_id" => ["required"],
+                    "part_no" => ["required"],
+                ];
+
+                $existing_id_list = $this->model->itemBrandPart()->pluck("id", "id")->toArray();
+
+                $validatedData['item_id'] = $this->model->id;
+
+                $display_order = 0;
+
+                foreach ($validatedData['item_brand_parts'] as $item_brand_part) {
+
+                    $item_brand_part['item_id'] = $this->model->id;
+
+                    $display_order++;
+                    if ($item_brand_part['id']) {
+                        $child_model = ItemBrandPart::find($item_brand_part['id']);
+
+                        if (!$child_model) {
+                            $child_model = new ItemBrandPart();
+                        } else {
+                            unset($existing_id_list[$item_brand_part['id']]);
+                        }
+                    } else {
+                        $child_model = new ItemBrandPart();
+                    }
+
+                    $rules = LaravelExtend::merge_validation_rules($base_rules, $child_model->getUniqueValidationRules($item_brand_part));
+                    $validator = Validator::make($item_brand_part, $rules);
+
+                    if ($validator->fails()) {
+                        foreach ($validator->errors()->all() as $error_msg) {
+                            LaravelExtend::addError("", $error_msg, "Departments");
+                        }
+                        continue;
+                    }
+
+                    // dd($item_brand_part);
+
+                    $child_model->fill($item_brand_part);
+
+                    $child_model = $this->model->itemBrandPart()->save($child_model);
+                }
+
+                if ($existing_id_list) {
+                    $existing_records = $this->model->itemBrandPart()->where("id", $existing_id_list)->get();
+
+                    foreach ($existing_records as $existing_record) {
+                        if (!$existing_record->safeDelete($existing_record)) {
+                            LaravelExtend::addError($existing_record->name, "Can not delete, bcoz it is asscoicated with other modules.", "Term");
+                        }
+                    }
+                }
+            }
+        }
     }
 
     public function edit($id, $current_tab = "default")
@@ -543,7 +611,7 @@ class ItemController extends BackendController
 
         $validatedData = $request->validate($rules, $messages);
 
-        // d($validatedData);
+        // dd($validatedData);
 
         DB::beginTransaction();
 
@@ -554,6 +622,8 @@ class ItemController extends BackendController
             unset($save_data['tag_name']);
             unset($save_data['images']);
             unset($save_data['other_files']);
+            unset($save_data['item_sub_departments']);
+            unset($save_data['item_brand_parts']);
 
             // dd($save_data);
 
