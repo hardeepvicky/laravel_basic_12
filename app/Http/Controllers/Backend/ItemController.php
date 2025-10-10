@@ -17,6 +17,7 @@ use App\Models\FieldSetting;
 use App\Models\ImportLog;
 use App\Models\Item;
 use App\Models\ItemBrand;
+use App\Models\ItemBrandPart;
 use App\Models\ItemCategory;
 use App\Models\ItemFile;
 use App\Models\ItemSubDepartment;
@@ -55,7 +56,8 @@ class ItemController extends BackendController
             "rootItemCategory",
             "parentItemCategory",
             "childItemCategory",
-            "itemBrand",
+            "itemBrandPart",
+            "itemBrandPart.make",
             "origin",
             "certification",
             "tags",
@@ -212,9 +214,11 @@ class ItemController extends BackendController
 
         $item_sub_department_field_labels = FieldSetting::getDynamicFields(ItemSubDepartment::class);
 
+        $item_brand_parts_field_labels = FieldSetting::getDynamicFields(ItemBrandPart::class);
+
         $this->setForView(compact(
             "root_item_category_list", "dept_list", "origin_list", "certification_list", "sku_pattern", "selected_department_ids", "item_category_list",
-            "field_labels", "item_sub_department_field_labels"
+            "field_labels", "item_sub_department_field_labels", "item_brand_parts_field_labels"
         ));
 
         return parent::beforeViewRender();
@@ -245,10 +249,12 @@ class ItemController extends BackendController
         $tabs = self::TABS;
 
         $name_list = Item::select("name")->distinct()->pluck('name')->toArray();
+        $specification_list = Item::select("specification")->distinct()->pluck('specification')->toArray();
+        $size_list = Item::select("size")->distinct()->pluck('size')->toArray();
 
         $item_list = Item::pluck('sku', 'id')->toArray();
 
-        $this->setForView(compact("tabs", "name_list", "item_list"));
+        $this->setForView(compact("tabs", "name_list", "item_list", "specification_list", "size_list"));
     }
 
     private function _common_validation_rules()
@@ -258,12 +264,12 @@ class ItemController extends BackendController
             "root_item_category_id" => ["required"],
             "parent_item_category_id" => ["nullable"],
             "child_item_category_id" => ["nullable"],
-            "item_brand_id" => ["nullable"],
             "size" => ["nullable"],
             "specification" => ["nullable"],
             "part_no" => ["nullable"],
             "sku" => ["required"],
             "item_sub_departments" => [],
+            "item_brand_parts" => [],
             "images" => [],
             "tab_name" => "",            
         ];
@@ -300,7 +306,8 @@ class ItemController extends BackendController
             unset($save_data['tag_name']);
             unset($save_data['images']);
             unset($save_data['other_files']);
-            unset($save_data['sub_dept_ids']);
+            unset($save_data['item_sub_departments']);
+            unset($save_data['item_brand_parts']);
 
             // dd($save_data);
 
@@ -477,6 +484,70 @@ class ItemController extends BackendController
             }
         }
 
+
+        if (isset($validatedData['item_brand_parts']) )
+        {
+            unset($validatedData['item_brand_parts']['(sr-id)']);
+
+            // d($validatedData, true);
+
+            if (isset($validatedData['item_brand_parts'])) {
+                $base_rules = [
+                    "make_id" => ["required"],
+                    "part_no" => [],
+                ];
+
+                $existing_id_list = $this->model->itemBrandPart()->pluck("id", "id")->toArray();
+
+                $validatedData['item_id'] = $this->model->id;
+
+                $display_order = 0;
+
+                foreach ($validatedData['item_brand_parts'] as $item_brand_part) {
+
+                    $item_brand_part['item_id'] = $this->model->id;
+
+                    $display_order++;
+                    if ($item_brand_part['id']) {
+                        $child_model = ItemBrandPart::find($item_brand_part['id']);
+
+                        if (!$child_model) {
+                            $child_model = new ItemBrandPart();
+                        } else {
+                            unset($existing_id_list[$item_brand_part['id']]);
+                        }
+                    } else {
+                        $child_model = new ItemBrandPart();
+                    }
+
+                    $rules = LaravelExtend::merge_validation_rules($base_rules, $child_model->getUniqueValidationRules($item_brand_part));
+                    $validator = Validator::make($item_brand_part, $rules);
+
+                    if ($validator->fails()) {
+                        foreach ($validator->errors()->all() as $error_msg) {
+                            LaravelExtend::addError("", $error_msg, "Departments");
+                        }
+                        continue;
+                    }
+
+                    // dd($item_brand_part);
+
+                    $child_model->fill($item_brand_part);
+
+                    $child_model = $this->model->itemBrandPart()->save($child_model);
+                }
+
+                if ($existing_id_list) {
+                    $existing_records = $this->model->itemBrandPart()->where("id", $existing_id_list)->get();
+
+                    foreach ($existing_records as $existing_record) {
+                        if (!$existing_record->safeDelete($existing_record)) {
+                            LaravelExtend::addError($existing_record->name, "Can not delete, bcoz it is asscoicated with other modules.", "Term");
+                        }
+                    }
+                }
+            }
+        }
     }
 
     public function edit($id, $current_tab = "default")
@@ -522,6 +593,7 @@ class ItemController extends BackendController
                     "minimum_order_qty" => ["nullable"],
                     "origin_id" => ["nullable"],
                     "certification_id" => ["nullable"],
+                    "reference" => ["nullable"],
                     "other_files" => [],
                     "tag_name" => [],
                     "description" => ["nullable"],
@@ -541,7 +613,7 @@ class ItemController extends BackendController
 
         $validatedData = $request->validate($rules, $messages);
 
-        // d($validatedData);
+        // dd($validatedData);
 
         DB::beginTransaction();
 
@@ -552,6 +624,8 @@ class ItemController extends BackendController
             unset($save_data['tag_name']);
             unset($save_data['images']);
             unset($save_data['other_files']);
+            unset($save_data['item_sub_departments']);
+            unset($save_data['item_brand_parts']);
 
             // dd($save_data);
 
@@ -614,71 +688,6 @@ class ItemController extends BackendController
         return $this->view("form");
     }
 
-    public function ajax_get_list($category_id)
-    {
-        $response = ["status" => 1];
-
-        try {
-
-            $records = $this->modelClass::where("item_category_id", $category_id)->get();
-
-            $response['data'] = [];
-
-            foreach ($records as $record) {
-                $row = [
-                    "id" => $record->id,
-                    "name" => $record->getDisplayName(),
-                ];
-
-                $response['data'][] = $row;
-            }
-        } catch (Exception $ex) {
-            $response['status'] = 0;
-            $response['msg'] = $ex->getMessage();
-        }
-
-        return $this->responseJson($response);
-    }
-
-    public function ajax_get_child_uom_list($item_id)
-    {
-        $response = ["status" => 1, "data" => []];
-
-        try {
-
-            $model = $this->modelClass::where("id", $item_id)->with(["category"])->first();
-
-            if (!$model)
-            {
-                throw new UserException("Invalid Item ID : $item_id");
-            }
-
-            $records = Uom::where("is_active", 1)
-                        ->where(function($q) use($model) {
-                            $q->where("id", $model->category->base_uom_id)
-                            ->orWhere("parent_id", $model->category->base_uom_id);
-                        })
-                        ->orderBy("list_display_order", "ASC")
-                        ->get();
-
-            $response['data'] = [];
-
-            foreach ($records as $record) {
-                $row = [
-                    "id" => $record->id,
-                    "name" => $record->short_name,
-                    "conversion_factor" => $record->conversion_factor,
-                ];
-
-                $response['data'][] = $row;
-            }
-        } catch (Exception $ex) {
-            $response['status'] = 0;
-            $response['msg'] = $ex->getMessage();
-        }
-
-        return $this->responseJson($response);
-    }
 
     public function ajax_get_default_uom($item_id)
     {
@@ -1100,6 +1109,105 @@ class ItemController extends BackendController
         download_start($file, "application/octet-stream");
     }
 
+
+    public function ajax_get_list($category_id = "")
+    {
+        $response = ["status" => 1];
+
+        try {
+
+            $qb = $this->modelClass::query();
+
+            if ($category_id)
+            {
+                $qb->where("item_category_id", $category_id);
+            }
+
+            $records = $qb->get();
+
+            $response['data'] = [];
+
+            foreach ($records as $record) {
+                $row = [
+                    "id" => $record->id,
+                    "name" => $record->getDisplayName(),
+                ];
+
+                $response['data'][] = $row;
+            }
+        } catch (Exception $ex) {
+            $response['status'] = 0;
+            $response['msg'] = $ex->getMessage();
+        }
+
+        return $this->responseJson($response);
+    }
+
+    public function ajax_get_child_uom_list($item_id)
+    {
+        $response = ["status" => 1, "data" => []];
+
+        try {
+
+            $model = $this->modelClass::where("id", $item_id)->with(["category"])->first();
+
+            if (!$model)
+            {
+                throw new UserException("Invalid Item ID : $item_id");
+            }
+
+            $records = Uom::where("is_active", 1)
+                        ->where(function($q) use($model) {
+                            $q->where("id", $model->category->base_uom_id)
+                            ->orWhere("parent_id", $model->category->base_uom_id);
+                        })
+                        ->orderBy("list_display_order", "ASC")
+                        ->get();
+
+            $response['data'] = [];
+
+            foreach ($records as $record) {
+                $row = [
+                    "id" => $record->id,
+                    "name" => $record->short_name,
+                    "conversion_factor" => $record->conversion_factor,
+                ];
+
+                $response['data'][] = $row;
+            }
+        } catch (Exception $ex) {
+            $response['status'] = 0;
+            $response['msg'] = $ex->getMessage();
+        }
+
+        return $this->responseJson($response);
+    }
+
+    public function ajax_get_default_uom($item_id)
+    {
+        $response = ["status" => 1, "data" => []];
+
+        try {
+
+            $model = $this->modelClass::where("id", $item_id)->with(
+                ["category", "category.uom"]
+            )->first();
+
+            if (!$model)
+            {
+                throw new UserException("Invalid Item ID : $item_id");
+            }
+
+            $response['data'] = $model->category->uom->toArray();
+
+        } catch (Exception $ex) {
+            $response['status'] = 0;
+            $response['msg'] = $ex->getMessage();
+        }
+
+        return $this->responseJson($response);
+    }
+
     public function ajax_get_specifications_of_item($name = "")
     {
         $response = ["status" => 1, "data" => []];
@@ -1116,5 +1224,173 @@ class ItemController extends BackendController
         $response['data'] = Item::where("name", $name)->select("size")->distinct()->pluck("size")->toArray();
 
         return $this->responseJson($response);
+    }
+
+    public function ajax_get_brand_list($item_id)
+    {
+        $response = ["status" => 1, "data" => []];
+
+        try {
+
+            $model = $this->modelClass::where("id", $item_id)->with(["itemBrandPart.make"])->first();
+
+            if (!$model)
+            {
+                throw new UserException("Invalid Item ID : $item_id");
+            }
+
+            $response['data'] = [];
+
+            foreach ($model->itemBrandPart as $record) {
+                $row = [
+                    "id" => $record->make_id,
+                    "name" => $record->make->getDisplayName(),
+                ];
+
+                $response['data'][] = $row;
+            }
+        } catch (Exception $ex) {
+            $response['status'] = 0;
+            $response['msg'] = $ex->getMessage();
+        }
+
+        return $this->responseJson($response);
+    }
+
+    public function gallery()
+    {
+        $cache_key_prefix = Route::currentRouteName();
+
+        $conditions = $this->getConditions($cache_key_prefix, [
+            ["field" => "root_item_category_id", "type" => "int"],
+            ["field" => "name", "type" => "string"],
+        ]);
+
+        $builder = $this->modelClass::query();
+
+        $conditions[] = ["is_active", 1];
+
+        $builder->where($conditions);
+
+        $builder->with([
+            "mainImage",
+        ]);
+
+        $this->model = new $this->modelClass;
+
+        $cache_key_for_sort = $cache_key_prefix . "-index-extra-params";
+
+        $sort_by_list = [
+            "id" => "ID",
+            "name" => "Name",            
+            "created_at" => "Created",
+            "updated_at" => "Updated",
+            "created_by" => "Created By",
+            "updated_by" => "Updated By",
+        ];
+
+        $sort_dir_list = [
+            "ASC" => "Ascending",
+            "DESC" => "Descending"
+        ];
+
+        $this->setForView(compact("sort_by_list", "sort_dir_list"));
+
+        $clear_cache = request('is_sort_clear', false);
+        $value = request('value', false);
+
+        if ($value) {
+            $builder->orderByRaw('FIELD(id,' . $value . ') DESC');
+            $builder->orderBy("id", "DESC");
+
+            $this->setForView([
+                "selected_value" => $value,
+                "selected_id_list" => explode(",", $value)
+            ]);
+
+            $sort = [
+                'sort_by' => 'id',
+                'sort_dir' => 'DESC'
+            ];
+
+        } else {
+            $sort = $this->getSortBy($this->model, $cache_key_for_sort, [
+                ["key" => "sort_by", "default" => "id"],
+                ["key" => "sort_dir", "default" => "DESC"],
+            ], $clear_cache);
+
+            $builder->orderBy($sort['sort_by'], $sort['sort_dir']);
+        }
+
+        $this->setForView($sort);
+
+        $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
+
+        // d($records->toArray(), true);
+
+        foreach($records as $record)
+        {
+            if ($record->mainImage?->id)
+            {
+                $record->mainImage->afterFind();
+            }
+        }
+
+        $root_category_list = ItemCategory::getList("id", "display_name", ["parent_id" => 0], "list_display_order");
+        
+        $index_table_id = request("index_table_id", "index_table");
+        $modal_id = request("modal_id", "");
+        $multiple = request("multiple", 0);
+
+        $this->setForView(compact("records", "root_category_list", "index_table_id", "modal_id", "multiple"));
+
+        return $this->viewIndex(__FUNCTION__);
+    }
+
+    public function preview(Request $request)
+    {
+        $ids = $request->get("ids");
+
+        if ($ids)
+        {
+            $id_list = explode(",", $ids);
+
+            $builder = $this->modelClass::whereIn("id", $id_list);
+            $builder->with([
+                "mainImage",
+            ]);
+
+            $records = $builder->get();
+
+            foreach($records as $record)
+            {
+                if ($record->mainImage?->id)
+                {
+                    $record->mainImage->afterFind();
+                }
+            }
+
+            $this->setForView(compact("records"));
+
+            return $this->viewIndex(__FUNCTION__);
+        }
+    }
+
+    public function preview_small(Request $request)
+    {
+        $ids = $request->get("ids");
+
+        if ($ids)
+        {
+            $id_list = explode(",", $ids);
+
+            $builder = $this->modelClass::whereIn("id", $id_list);
+
+            $records = $builder->get();
+
+            $this->setForView(compact("records"));
+
+            return $this->viewIndex(__FUNCTION__);
+        }
     }
 }

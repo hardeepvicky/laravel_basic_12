@@ -51,11 +51,11 @@
                             $label = get_value_from_list($field_labels, $field, $field);
                             ?>
                             <x-Inputs.text-area layout="horizontal" :id="$field" :name="$field" :label="$label"
-                                :value="$model->{$field}" 
+                                :value="$model->{$field}"
                                 rows="3"
                                 placeholder="Enter {{ $label }}" />
                         </div>
-                            
+
                         <div class="col-md-12">
                             <h4 class="b-b-info">
                                 Products
@@ -72,6 +72,9 @@
                                         <th style="width:20%">
                                             {{ get_value_from_list($purchase_order_item_field_labels, 'item_id') }}
                                         </th>
+                                        <th style="width:15%">
+                                            {{ get_value_from_list($purchase_order_item_field_labels, 'item_brand_id') }}
+                                        </th>
                                         <th style="width:8%">
                                             {{ get_value_from_list($purchase_order_item_field_labels, 'qty') }}
                                         </th>
@@ -83,7 +86,7 @@
                                         </th>
                                         <th style="width:8%">
                                             {{ get_value_from_list($purchase_order_item_field_labels, 'amount') }}
-                                        </th>                                        
+                                        </th>
                                         <th>
                                             {{ get_value_from_list($purchase_order_item_field_labels, 'remarks') }}
                                         </th>
@@ -94,7 +97,7 @@
                                         <td>
                                             <div class="block">
                                                 <div class="left-block">
-                                                    
+
                                                 </div>
                                                 <div class="right-block">
                                                     <span class="sr-table-template-delete">
@@ -108,10 +111,18 @@
                                             <?php
                                             $field = 'item_id';
                                             ?>
-                                            <x-Inputs.drop-down name="purchase_order_items[(sr-id)][{{ $field }}]" :label="$false" :list="$item_list" 
+                                            <x-Inputs.drop-down name="purchase_order_items[(sr-id)][{{ $field }}]" :label="$false" :list="$item_list"
                                                 class="will-select2 item_id"
                                                 data-sr-cascade-target="#uom_id-(sr-id)"
                                                 data-sr-cascade-url="/item/ajax_get_child_uom_list/{v}"
+                                            />
+                                        </td>
+                                        <td>
+                                            <?php
+                                            $field = 'item_brand_id';
+                                            ?>
+                                            <x-Inputs.drop-down name="purchase_order_items[(sr-id)][{{ $field }}]" :label="$false" :list="$item_list"
+                                                class="will-select2 item_brand_id"
                                             />
                                         </td>
                                         <td>
@@ -163,7 +174,7 @@
                                                 <td>
                                                     <div class="block">
                                                         <div class="left-block">
-                                                            
+
                                                         </div>
                                                         <div class="right-block">
                                                             <span class="sr-table-template-delete">
@@ -179,9 +190,9 @@
                                                     $field = 'item_id';
                                                     $value = $child_arr[$field] ?? '';
                                                     ?>
-                                                    <x-Inputs.drop-down name="purchase_order_items[{{ $k }}][{{ $field }}]" 
+                                                    <x-Inputs.drop-down name="purchase_order_items[{{ $k }}][{{ $field }}]"
                                                         :label="$false"
-                                                        :list="$item_list"                                                         
+                                                        :list="$item_list"
                                                         :value="$value"
                                                         class="will-select2 item_id"
                                                         data-sr-cascade-target="#uom_id-{{ $k }}"
@@ -190,11 +201,23 @@
                                                 </td>
                                                 <td>
                                                     <?php
+                                                    $field = 'item_brand_id';
+                                                    $value = $child_arr[$field] ?? '';
+                                                    ?>
+                                                    <x-Inputs.drop-down name="purchase_order_items[{{ $k }}][{{ $field }}]"
+                                                        :label="$false"
+                                                        :list="$empty_list"
+                                                        :value="$value"
+                                                        class="will-select2 item_brand_id"
+                                                    />
+                                                </td>
+                                                <td>
+                                                    <?php
                                                     $field = 'qty';
                                                     $value = $child_arr[$field] ?? '';
                                                     ?>
                                                     <x-Inputs.text-field type="number" id="{{ $field }}-{{ $k }}" name="purchase_order_items[{{ $k }}][{{ $field }}]"
-                                                        :label="$false" 
+                                                        :label="$false"
                                                         :value="$value"
                                                         class="will-required validate-int qty" />
                                                 </td>
@@ -204,9 +227,9 @@
                                                     $value = $child_arr[$field] ?? '';
                                                     ?>
                                                     <x-Inputs.drop-down id="{{ $field }}-{{ $k }}"
-                                                        name="purchase_order_items[{{ $k }}][{{ $field }}]" 
-                                                        :list="$empty_list" 
-                                                        :label="$false" 
+                                                        name="purchase_order_items[{{ $k }}][{{ $field }}]"
+                                                        :list="$empty_list"
+                                                        :label="$false"
                                                         :value="$value"
                                                         class="will-required will-select2 uom_id" />
                                                 </td>
@@ -216,7 +239,7 @@
                                                     $value = $child_arr[$field] ?? '';
                                                     ?>
                                                     <x-Inputs.text-field id="{{ $field }}-{{ $k }}" name="purchase_order_items[{{ $k }}][{{ $field }}]"
-                                                        :label="$false" 
+                                                        :label="$false"
                                                         :value="$value"
                                                         class="will-required validate-float rate" />
                                                 </td>
@@ -226,7 +249,7 @@
                                                     $value = $child_arr[$field] ?? '';
                                                     ?>
                                                     <x-Inputs.text-field id="{{ $field }}-{{ $k }}" name="purchase_order_items[{{ $k }}][{{ $field }}]"
-                                                        :label="$false" 
+                                                        :label="$false"
                                                         :value="$value"
                                                         class="will-required validate-float amount" readonly="true"/>
                                                 </td>
@@ -236,7 +259,7 @@
                                                     $value = $child_arr[$field] ?? '';
                                                     ?>
                                                     <x-Inputs.text-field name="purchase_order_items[{{ $k }}][{{ $field }}]" class="{{ $field }}"
-                                                        :label="$false" 
+                                                        :label="$false"
                                                         :value="$value"
                                                         />
                                                 </td>
@@ -255,7 +278,7 @@
                                 </tfoot>
                             </table>
                         </div>
-                        
+
                         <div class="col-md-12 col-xxl-6 mt-3">
                             <?php
                                 $field = 'total_amount';
@@ -268,7 +291,7 @@
                                             {{ $label }}
                                         </label>
                                     @endif
-                                </div>                                
+                                </div>
                                 <div class="col-sm-3">
                                     <input type="hidden" name="{{ $field }}" value="{{ $model->{$field} }}" class="{{ $field }}"/>
                                     <span class="{{ $field }} big_amount">{{ $model->{$field} }}</span>
@@ -280,11 +303,11 @@
                             $label = get_value_from_list($field_labels, $field, $field);
                             ?>
                             <x-Inputs.text-field layout="horizontal" :id="$field" :name="$field" :label="$label"
-                                :value="$model->{$field}" 
+                                :value="$model->{$field}"
                                 class="validate-float"
                                 horizontalSecondColumnLength="3"
                                 placeholder="Enter {{ $label }}"
-                                mandatory="true" 
+                                mandatory="true"
                             />
 
                             <?php
@@ -298,7 +321,7 @@
                                             {{ $label }}
                                         </label>
                                     @endif
-                                </div>                                
+                                </div>
                                 <div class="col-sm-3">
                                     <input type="hidden" name="{{ $field }}" value="{{ $model->{$field} }}" class="{{ $field }}"/>
                                     <span class="{{ $field }} big_amount">{{ $model->{$field} }}</span>
@@ -317,10 +340,43 @@
     <script>
         $(function() {
             var model_id = '<?= $model->id ?? 0 ?>';
-            var currency_formatter = new Intl.NumberFormat('en-IN', { 
-                style: 'currency', 
+            var currency_formatter = new Intl.NumberFormat('en-IN', {
+                style: 'currency',
                 currency: 'INR',
                 maximumFractionDigits: 0
+            });
+
+            $(document).on("change", ".item_id", function(){
+                var v = $(this).val();
+
+                ajaxGetJson("/item/ajax_get_brand_list/" + v, function(response) {
+                    var html = "";
+                    var html = "<option value=''>Please Select</option>";
+
+                    for (var i in response["data"]) {
+                        var k = response["data"][i]["id"];
+                        var v = response["data"][i]["name"];
+
+                        var attr = 'value="' + k + '"';
+
+                        if (typeof response["data"][i]["auto_select"] != "undefined") {
+                            if (response["data"][i]["auto_select"]) {
+                                attr += ' selected="selected"';
+                            }
+                        }
+
+                        html += '<option ' + attr + '>' + v + "</option>";
+                    }
+
+                    var target = ".item_brand_id";
+
+                    $(target).html(html);
+
+                    $(target).each(function(){
+                        var v = $(this).attr("data-value");
+                        $(this).val(v).trigger("change");
+                    });
+                });
             });
 
             function cascade_item_id(_tr)

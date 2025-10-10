@@ -74,6 +74,14 @@
         </div>
 
         <?php
+        $field = 'reference';
+        $label = get_value_from_list($field_labels, $field, $field);
+        ?>
+        <x-Inputs.text-field :name="$field" :label="$label"
+            value="{{ $model->{$field} }}" placeholder="Enter {{ $label }}"
+            layout="horizontal" />
+
+        <?php
         $field = 'tag_name';
         $label = get_value_from_list($field_labels, $field, 'Tags');
         $value = implode(',', $model->tags?->pluck('name')->toArray()) ?? [];

@@ -3,9 +3,6 @@
 namespace App\Models;
 
 use App\Exceptions\UserException;
-use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\Unique;
 
 class StockProductTransaction extends BaseModel
 {

@@ -247,6 +247,7 @@ class PurchaseOrderController extends BackendController
             if (isset($validatedData['purchase_order_items'])) {
                 $base_rules = [
                     "item_id" => ["required"],
+                    "item_brand_id" => ["required"],
                     "part_no" => ["nullable"],
                     "qty" => ["required"],
                     "uom_id" => ["required"],
@@ -269,7 +270,7 @@ class PurchaseOrderController extends BackendController
 
                     if ($validator->fails()) {
                         foreach ($validator->errors()->all() as $error_msg) {
-                            LaravelExtend::addError("", $error_msg, "Products");
+                            LaravelExtend::addError("", $error_msg, "Items");
                         }
                         continue;
                     }
@@ -299,7 +300,7 @@ class PurchaseOrderController extends BackendController
 
                     foreach ($existing_records as $existing_record) {
                         if (!$existing_record->safeDelete($existing_record)) {
-                            LaravelExtend::addError($existing_record->name, "Can not delete, bcoz it is asscoicated with other modules.", "Term");
+                            LaravelExtend::addError($existing_record->name, "Can not delete, bcoz it is asscoicated with other modules.", "Items");
                         }
                     }
                 }

@@ -172,7 +172,7 @@ $formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, 0);
                                                             <th>Sr. No.</th>
                                                             <th>Category</th>
                                                             <th>{{ get_value_from_list($purchase_order_item_field_labels, 'item_id') }}</th>
-                                                            <th>{{ get_value_from_list($purchase_order_item_field_labels, 'make_id') }}</th>
+                                                            <th>{{ get_value_from_list($purchase_order_item_field_labels, 'item_brand_id') }}</th>
                                                             <th>{{ get_value_from_list($purchase_order_item_field_labels, 'qty') }}</th>
                                                             <th>{{ get_value_from_list($purchase_order_item_field_labels, 'receive_qty') }}</th>
                                                             <th>{{ get_value_from_list($purchase_order_item_field_labels, 'rate') }}</th>
