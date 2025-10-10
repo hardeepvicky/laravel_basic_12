@@ -321,7 +321,7 @@
                                 $field = 'part_no';
                                 ?>
                                 <x-Inputs.text-field name="item_brand_parts[(sr-id)][{{ $field }}]" :label="$false"
-                                    class="will-required part_no"
+                                    class="part_no"
                                 />
                             </td>
                         </tr>
@@ -365,7 +365,7 @@
                                         ?>
                                         <x-Inputs.text-field name="item_brand_parts[{{ $k }}][{{ $field }}]" :label="$false"
                                             :value="$value"
-                                            class="will-required part_no"
+                                            class="part_no"
                                             />
                                     </td>
                                 </tr>

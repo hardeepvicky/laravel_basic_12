@@ -493,7 +493,7 @@ class ItemController extends BackendController
             if (isset($validatedData['item_brand_parts'])) {
                 $base_rules = [
                     "make_id" => ["required"],
-                    "part_no" => ["required"],
+                    "part_no" => [],
                 ];
 
                 $existing_id_list = $this->model->itemBrandPart()->pluck("id", "id")->toArray();
