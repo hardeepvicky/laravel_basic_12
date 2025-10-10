@@ -592,6 +592,7 @@ class ItemController extends BackendController
                     "minimum_order_qty" => ["nullable"],
                     "origin_id" => ["nullable"],
                     "certification_id" => ["nullable"],
+                    "reference" => ["nullable"],
                     "other_files" => [],
                     "tag_name" => [],
                     "description" => ["nullable"],
