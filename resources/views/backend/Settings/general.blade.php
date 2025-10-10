@@ -79,17 +79,7 @@
                             $label = Setting::LABELS[$field]; ?>
                             <x-inputs.text-field name="data[text][{{ $field }}]" :label="$label" :value="$value"
                                 class="form-control validate-int" />
-                        </div>
-                        <div class="form-group mb-3">
-                            <?php $field = 'item_module_department_ids';
-                            $value = get_value($record_list, $field);
-                            $label = Setting::LABELS[$field]; ?>
-                            <x-Inputs.drop-down name="data[array][{{ $field }}][]" :label="$label"
-                                :list="$dept_list" :value="$value"
-                                class="select2"
-                                multiple="true"
-                            />
-                        </div>
+                        </div>                        
                     </div>
                 </div>
             </div>
@@ -101,16 +91,24 @@
                     </div>
                     <div class="card-body">
                         <div class="form-group mb-3">
+                            <?php $field = 'item_module_department_ids';
+                            $value = get_value($record_list, $field);
+                            $label = Setting::LABELS[$field]; ?>
+                            <x-Inputs.drop-down name="data[array][{{ $field }}][]" :label="$label"
+                                :list="$dept_list" :value="$value"
+                                class="select2"
+                                multiple="true"
+                            />
+                        </div>
+                        <div class="form-group mb-3">
                             <?php $field = 'item_sku_pattern';
                             $value = get_value($record_list, $field);
                             $label = Setting::LABELS[$field]; ?>
                             <x-inputs.text-field name="data[text][{{ $field }}]" :label="$label" :value="$value"/>
                             <div class="help-block">
-                                {category}-{name}-{brand}-{size}-{specification}
+                                {name}-{specification}-{size}
                                 <ul class="b-t-dark">
-                                    <li>Category : {category}</li>
                                     <li>Name : {name}</li>
-                                    <li>Brand : {brand}</li>
                                     <li>Size : {size}</li>
                                     <li>Specification : {specification}</li>
                                 </ul>

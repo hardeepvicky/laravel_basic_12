@@ -407,7 +407,7 @@
         var screen_name = '<?= $screen_name ?>';
         var sku_pattern = '<?= $sku_pattern ?>';
         var selected_department_id = '<?= $selected_department_ids[0] ?>';
-        var color, brand, category;
+        var color, category;
 
         function create_sku()
         {
@@ -421,16 +421,6 @@
             else
             {
                 sku = sku.replace("{category}", "");
-            }
-
-            if (brand)
-            {
-                console.log(brand);
-                sku = sku.replace("{brand}", brand['short_name']);
-            }
-            else
-            {
-                sku = sku.replace("{brand}", "");
             }
 
             if (color)
@@ -602,23 +592,6 @@
                 return;
             }
         });
-
-        $("#item_brand_id").change(function(){
-            var v = $(this).val();
-            brand = undefined;
-
-            if (v)
-            {
-                ajaxGetJson("/item-brand/ajax_get/" + v, function(response) {
-                    brand = response['data'];
-                    create_sku();
-                });
-            }
-            else
-            {
-                create_sku();
-            }
-        }).trigger("change", {pageLoad : true});
 
         $("#images").browseGallery({
             opener: "#choose-images",
