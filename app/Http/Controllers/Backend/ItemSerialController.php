@@ -11,6 +11,7 @@ use App\Models\AutoSerialPattern;
 use App\Models\Branch;
 use App\Models\FieldSetting;
 use App\Models\Item;
+use App\Models\ItemBrand;
 use App\Models\ItemSerial;
 use App\Models\StockItem;
 use App\Models\User;
@@ -35,6 +36,7 @@ class ItemSerialController extends BackendController
 
         $builder->with([
             "item",
+            "make",
             "branch"
         ]);
 
@@ -42,7 +44,9 @@ class ItemSerialController extends BackendController
 
         $item_list = Item::getList("id", "display_name", [], "list_display_order");
 
-        $this->setForView(compact("records", "item_list"));
+        $item_brand_list = ItemBrand::getList("id", "display_name", [], "list_display_order");
+
+        $this->setForView(compact("records", "item_list", "item_brand_list"));
 
         return $this->viewIndex(__FUNCTION__);
     }
@@ -54,6 +58,7 @@ class ItemSerialController extends BackendController
         $conditions = $this->getConditions($cache_key, [
             ["field" => "id", "type" => "int", "cache" => false],
             ["field" => "item_id", "type" => "int"],
+            ["field" => "item_brand_id", "type" => "int"],
             ["field" => "branch_id", "type" => "int"],
             ["field" => "serial_no", "type" => "string"],
             ["field" => "is_in", "type" => "int"],
@@ -121,6 +126,7 @@ class ItemSerialController extends BackendController
     {
         return [
             "item_id" => ["required"],
+            "item_brand_id" => ["required"],
             "serial_no" => ["required"],
             "package_qty" => ["required", "numeric", "min:1", "max:10000"],
         ];
@@ -283,6 +289,8 @@ class ItemSerialController extends BackendController
 
             unset($save_data['children']);
 
+            $save_data['serial_no'] = str_replace("-", "", $save_data['serial_no']);
+
             $save_data = $this->model->convertTimeZoneBeforeQueryToDatabase($save_data);
             // d($save_data);
 
@@ -326,6 +334,7 @@ class ItemSerialController extends BackendController
         $builder->with([
             "item",
             "item.rootItemCategory",
+            "make",
             "branch",
             "bin"
         ]);
@@ -353,6 +362,7 @@ class ItemSerialController extends BackendController
                 'ID' => $record['id'],
                 'Category' => $record['item']['root_item_category']['display_name'] ?? "",
                 $field_labels['item_id'] => $record['item']['display_name'] ?? "",
+                $field_labels['item_brand_id'] => $record['make']['display_name'] ?? "",
                 $field_labels['serial_type'] => $record['serial_type'],
                 $field_labels['serial_no'] => "`" . $record['serial_no'],
                 $field_labels['branch_id'] => $record['branch']['display_name'] ?? "",                

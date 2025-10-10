@@ -13,6 +13,7 @@ use App\Models\Bin;
 use App\Models\Branch;
 use App\Models\FieldSetting;
 use App\Models\Item;
+use App\Models\ItemBrand;
 use App\Models\ItemSerial;
 use App\Models\StockItem;
 use App\Models\StockItemTransaction;
@@ -53,6 +54,7 @@ class StockItemController extends BackendController
             ["field" => "branch_id", "type" => "int"],
             ["field" => "bin_id", "type" => "int"],
             ["field" => "item_id", "type" => "int"],
+            ["field" => "brand_id", "type" => "int"],
         ]);
 
         $array_helper =  new ArrayHelper($conditions);
@@ -60,7 +62,7 @@ class StockItemController extends BackendController
 
         $builder = $this->modelClass::where($conditions);
         $builder->with([
-            "branch", "bin", "item"
+            "branch", "bin", "item", "make"
         ]);
 
         if ($apply_sort) {
@@ -99,9 +101,11 @@ class StockItemController extends BackendController
 
         $item_list = Item::getList("id", "display_name", [], "list_display_order");
 
+        $item_brand_list = ItemBrand::getList("id", "display_name", [], "list_display_order");
+
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
-        $this->setForView(compact("item_list", "branch_list", "field_labels"));
+        $this->setForView(compact("item_list", "branch_list", "item_brand_list", "field_labels"));
 
         return parent::beforeViewRender();
     }
@@ -116,6 +120,7 @@ class StockItemController extends BackendController
             ["field" => "branch_id", "type" => "int"],
             ["field" => "bin_id", "type" => "int"],
             ["field" => "item_id", "type" => "int"],
+            ["field" => "brand_id", "type" => "int"],
         ]);
 
         $array_helper =  new ArrayHelper($stock_product_conditions);
@@ -130,6 +135,7 @@ class StockItemController extends BackendController
             "stockItem.branch", 
             "stockItem.bin", 
             "stockItem.item",
+            "stockItem.make",
         ]);
 
         $cache_key_for_sort = $cache_key_prefix . "-index-extra-params";
@@ -184,6 +190,7 @@ class StockItemController extends BackendController
         return [
             "bin_id" => ["required"],
             "item_id" => ["required"],
+            "brand_id" => ["required"],
             "qty" => ["required", "numeric", "min:1", "max:10000"],
         ];
     }
@@ -315,6 +322,11 @@ class StockItemController extends BackendController
                     throw new UserException("Wrong Serial No.", UserException::ERROR_USER_DATA_WRONG);
                 }
 
+                if (!$item_serial_no->item_brand_id)
+                {
+                    throw new UserException("Serial No. have no make", UserException::ERROR_USER_DATA_WRONG);
+                }
+
                 DB::beginTransaction();
 
                 if ($item_serial_no->is_in)
@@ -327,7 +339,7 @@ class StockItemController extends BackendController
                         }
                         else
                         {
-                            StockItem::changeQty($item_serial_no->branch_id, $item_serial_no->bin_id, $item_serial_no->item_id, null, -1 * $item_serial_no->package_qty);
+                            StockItem::changeQty($item_serial_no->branch_id, $item_serial_no->bin_id, $item_serial_no->item_id, $item_serial_no->item_brand_id, -1 * $item_serial_no->package_qty);
                         }
                     }
                     else
@@ -338,18 +350,18 @@ class StockItemController extends BackendController
                         }
                         else
                         {
-                            StockItem::changeQty($item_serial_no->branch_id, null, $item_serial_no->item_id, null, -1 * $item_serial_no->package_qty);
+                            StockItem::changeQty($item_serial_no->branch_id, null, $item_serial_no->item_id, $item_serial_no->item_brand_id, -1 * $item_serial_no->package_qty);
                         }
                     }
                 }
 
                 if (isset($bin))
                 {
-                    StockItem::changeQty($bin->branch_id, $bin->id, $item_serial_no->item_id, null, 1 * $item_serial_no->package_qty);
+                    StockItem::changeQty($bin->branch_id, $bin->id, $item_serial_no->item_id, $item_serial_no->item_brand_id, 1 * $item_serial_no->package_qty);
                 }
                 else
                 {
-                    StockItem::changeQty($branch->id, null, $item_serial_no->item_id, null, 1 * $item_serial_no->package_qty);
+                    StockItem::changeQty($branch->id, null, $item_serial_no->item_id, $item_serial_no->item_brand_id, 1 * $item_serial_no->package_qty);
                 }
 
                 if (isset($bin))
@@ -407,6 +419,11 @@ class StockItemController extends BackendController
                     throw new UserException("Wrong Serial No.", UserException::ERROR_USER_DATA_WRONG);
                 }
 
+                if (!$item_serial_no->item_brand_id)
+                {
+                    throw new UserException("Serial No. have no make", UserException::ERROR_USER_DATA_WRONG);
+                }
+
                 DB::beginTransaction();
 
                 if (!$item_serial_no->is_in)
@@ -414,7 +431,7 @@ class StockItemController extends BackendController
                     throw new UserException("Serial No. is already Out", UserException::ERROR_USER_DATA_WRONG);
                 }
 
-                StockItem::changeQty($item_serial_no->branch_id, $item_serial_no->bin_id, $item_serial_no->item_id, null, -1 * $item_serial_no->package_qty);
+                StockItem::changeQty($item_serial_no->branch_id, $item_serial_no->bin_id, $item_serial_no->item_id, $item_serial_no->item_brand_id, -1 * $item_serial_no->package_qty);
 
                 $item_serial_no->markOut();
 
@@ -446,7 +463,7 @@ class StockItemController extends BackendController
         $this->beforeCsvExport($builder);
 
         $builder->with([
-            "branch", "bin", "item", "item.rootItemCategory"
+            "branch", "bin", "item", "item.rootItemCategory", "make"
         ]);
 
         $records = $builder->get();
@@ -473,6 +490,7 @@ class StockItemController extends BackendController
                 'ID' => $record['id'],
                 'Category' => $record['item']['root_item_category']['display_name'] ?? "",
                 $field_labels['item_id'] => $record['item']['sku'] ?? "",
+                $field_labels['brand_id'] => $record['make']['display_name'] ?? "",
                 $field_labels['branch_id'] => $record['branch']['name'] ?? "",
                 $field_labels['bin_id'] => $record['bin']['name'] ?? "",
                 $field_labels['qty'] => $record['qty'],

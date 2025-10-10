@@ -108,7 +108,12 @@
                                 <div class="col-sm-9">
                                     <div class="row">
                                         <div class="col-sm-8">
-                                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :list="$empty_list" :value="$model->{$field}"  class="select2" mandatory="true" />
+                                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :list="$empty_list" :value="$model->{$field}"  
+                                                class="select2 cascade-drop-down" 
+                                                data-sr-cascade-target="#item_brand_id"
+                                                data-sr-cascade-url="/item/ajax_get_brand_list/{v}" 
+                                                mandatory="true"
+                                                />
                                         </div>
                                         <div class="col-sm-4">
                                             <div class="d-flex align-items-start">
@@ -120,6 +125,18 @@
                                 </div>
                             </div>
 
+                            <?php
+                                $field = 'item_brand_id';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                            ?>
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" 
+                                :list="$empty_list" 
+                                :value="$model->{$field}"  
+                                layout="horizontal" 
+                                class="select2"
+                                mandatory="true"
+                                />
+                                
                             <?php
                                 $field = 'package_qty';
                                 $label = get_value_from_list($field_labels, $field, $field);
@@ -230,7 +247,9 @@
                 var v = $(target).attr("data-value");
 
                 if (v) {
-                    $(target).val(v).trigger("change");
+                    $(target).val(v).trigger("change", {
+                        pageLoad: true
+                    });
                 }
 
             });
@@ -265,6 +284,7 @@
             toggle_type();
 
             load_item_list($("#item_id"));
+
         });
     });
 </script>@endsection

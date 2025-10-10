@@ -493,6 +493,8 @@ class ProductSerialController extends BackendController
 
             unset($save_data['children']);
 
+            $save_data['serial_no'] = str_replace("-", "", $save_data['serial_no']);
+
             $save_data = $this->model->convertTimeZoneBeforeQueryToDatabase($save_data);
             // d($save_data);
 

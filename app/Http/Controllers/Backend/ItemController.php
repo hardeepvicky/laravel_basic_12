@@ -687,103 +687,6 @@ class ItemController extends BackendController
         return $this->view("form");
     }
 
-    public function ajax_get_list($category_id = "")
-    {
-        $response = ["status" => 1];
-
-        try {
-
-            $qb = $this->modelClass::query();
-
-            if ($category_id)
-            {
-                $qb->where("item_category_id", $category_id);
-            }
-
-            $records = $qb->get();
-
-            $response['data'] = [];
-
-            foreach ($records as $record) {
-                $row = [
-                    "id" => $record->id,
-                    "name" => $record->getDisplayName(),
-                ];
-
-                $response['data'][] = $row;
-            }
-        } catch (Exception $ex) {
-            $response['status'] = 0;
-            $response['msg'] = $ex->getMessage();
-        }
-
-        return $this->responseJson($response);
-    }
-
-    public function ajax_get_child_uom_list($item_id)
-    {
-        $response = ["status" => 1, "data" => []];
-
-        try {
-
-            $model = $this->modelClass::where("id", $item_id)->with(["category"])->first();
-
-            if (!$model)
-            {
-                throw new UserException("Invalid Item ID : $item_id");
-            }
-
-            $records = Uom::where("is_active", 1)
-                        ->where(function($q) use($model) {
-                            $q->where("id", $model->category->base_uom_id)
-                            ->orWhere("parent_id", $model->category->base_uom_id);
-                        })
-                        ->orderBy("list_display_order", "ASC")
-                        ->get();
-
-            $response['data'] = [];
-
-            foreach ($records as $record) {
-                $row = [
-                    "id" => $record->id,
-                    "name" => $record->short_name,
-                    "conversion_factor" => $record->conversion_factor,
-                ];
-
-                $response['data'][] = $row;
-            }
-        } catch (Exception $ex) {
-            $response['status'] = 0;
-            $response['msg'] = $ex->getMessage();
-        }
-
-        return $this->responseJson($response);
-    }
-
-    public function ajax_get_default_uom($item_id)
-    {
-        $response = ["status" => 1, "data" => []];
-
-        try {
-
-            $model = $this->modelClass::where("id", $item_id)->with(
-                ["category", "category.uom"]
-            )->first();
-
-            if (!$model)
-            {
-                throw new UserException("Invalid Item ID : $item_id");
-            }
-
-            $response['data'] = $model->category->uom->toArray();
-
-        } catch (Exception $ex) {
-            $response['status'] = 0;
-            $response['msg'] = $ex->getMessage();
-        }
-
-        return $this->responseJson($response);
-    }
 
     public function mark_as_main_image($id, $document_file_id)
     {
@@ -1180,6 +1083,105 @@ class ItemController extends BackendController
         download_start($file, "application/octet-stream");
     }
 
+
+    public function ajax_get_list($category_id = "")
+    {
+        $response = ["status" => 1];
+
+        try {
+
+            $qb = $this->modelClass::query();
+
+            if ($category_id)
+            {
+                $qb->where("item_category_id", $category_id);
+            }
+
+            $records = $qb->get();
+
+            $response['data'] = [];
+
+            foreach ($records as $record) {
+                $row = [
+                    "id" => $record->id,
+                    "name" => $record->getDisplayName(),
+                ];
+
+                $response['data'][] = $row;
+            }
+        } catch (Exception $ex) {
+            $response['status'] = 0;
+            $response['msg'] = $ex->getMessage();
+        }
+
+        return $this->responseJson($response);
+    }
+
+    public function ajax_get_child_uom_list($item_id)
+    {
+        $response = ["status" => 1, "data" => []];
+
+        try {
+
+            $model = $this->modelClass::where("id", $item_id)->with(["category"])->first();
+
+            if (!$model)
+            {
+                throw new UserException("Invalid Item ID : $item_id");
+            }
+
+            $records = Uom::where("is_active", 1)
+                        ->where(function($q) use($model) {
+                            $q->where("id", $model->category->base_uom_id)
+                            ->orWhere("parent_id", $model->category->base_uom_id);
+                        })
+                        ->orderBy("list_display_order", "ASC")
+                        ->get();
+
+            $response['data'] = [];
+
+            foreach ($records as $record) {
+                $row = [
+                    "id" => $record->id,
+                    "name" => $record->short_name,
+                    "conversion_factor" => $record->conversion_factor,
+                ];
+
+                $response['data'][] = $row;
+            }
+        } catch (Exception $ex) {
+            $response['status'] = 0;
+            $response['msg'] = $ex->getMessage();
+        }
+
+        return $this->responseJson($response);
+    }
+
+    public function ajax_get_default_uom($item_id)
+    {
+        $response = ["status" => 1, "data" => []];
+
+        try {
+
+            $model = $this->modelClass::where("id", $item_id)->with(
+                ["category", "category.uom"]
+            )->first();
+
+            if (!$model)
+            {
+                throw new UserException("Invalid Item ID : $item_id");
+            }
+
+            $response['data'] = $model->category->uom->toArray();
+
+        } catch (Exception $ex) {
+            $response['status'] = 0;
+            $response['msg'] = $ex->getMessage();
+        }
+
+        return $this->responseJson($response);
+    }
+
     public function ajax_get_specifications_of_item($name = "")
     {
         $response = ["status" => 1, "data" => []];
@@ -1194,6 +1196,37 @@ class ItemController extends BackendController
         $response = ["status" => 1, "data" => []];
 
         $response['data'] = Item::where("name", $name)->select("size")->distinct()->pluck("size")->toArray();
+
+        return $this->responseJson($response);
+    }
+
+    public function ajax_get_brand_list($item_id)
+    {
+        $response = ["status" => 1, "data" => []];
+
+        try {
+
+            $model = $this->modelClass::where("id", $item_id)->with(["itemBrandPart.make"])->first();
+
+            if (!$model)
+            {
+                throw new UserException("Invalid Item ID : $item_id");
+            }
+
+            $response['data'] = [];
+
+            foreach ($model->itemBrandPart as $record) {
+                $row = [
+                    "id" => $record->make_id,
+                    "name" => $record->make->getDisplayName(),
+                ];
+
+                $response['data'][] = $row;
+            }
+        } catch (Exception $ex) {
+            $response['status'] = 0;
+            $response['msg'] = $ex->getMessage();
+        }
 
         return $this->responseJson($response);
     }

@@ -18,6 +18,13 @@
                             <x-Inputs.drop-down :id="$field" :name="$field" :label="$false"
                                 :value="$search[$field]" :list="$item_list" class="select2 form-select-sm" />
                         </th>
+                        <th style="width:15%">
+                            <?php
+                            $field = 'brand_id';
+                            ?>
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false"
+                                :value="$search[$field]" :list="$item_brand_list" class="select2 form-select-sm" />
+                        </th>
                         <th style="width:10%">
                             <?php
                             $field = 'branch_id';
@@ -36,6 +43,7 @@
                     <tr class="border-bottom-primary">
                         <th>Actions</th>
                         <th><?= get_value_from_list($field_labels, 'item_id', 'item_id') ?></th>
+                        <th><?= get_value_from_list($field_labels, 'brand_id', 'brand_id') ?></th>
                         <th><?= get_value_from_list($field_labels, 'branch_id', 'branch_id') ?></th>
                         <th><?= get_value_from_list($field_labels, 'bin_id', 'bin_id') ?></th>
                         <th style="width:8%">
@@ -57,6 +65,7 @@
                                 </x-Backend.celec-summary-table-first-column>
                             </th>
                             <td>{{ $record->stockItem->item?->getDisplayName() }}</td>
+                            <td>{{ $record->stockItem->make?->getDisplayName() }}</td>
                             <td>{{ $record->stockItem->branch?->getDisplayName() }}</td>
                             <td>{{ $record->stockItem->bin?->getDisplayName() }}</td>
                             <td>{{ $record->qty }}</td>                          

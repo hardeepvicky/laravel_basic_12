@@ -18,6 +18,13 @@
                             <x-Inputs.drop-down :id="$field" :name="$field" :label="$false"
                                 :value="$search[$field]" :list="$item_list" class="select2 form-select-sm" />
                         </th>
+                        <th style="width:15%">
+                            <?php
+                            $field = 'brand_id';
+                            ?>
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false"
+                                :value="$search[$field]" :list="$item_brand_list" class="select2 form-select-sm" />
+                        </th>
                         <th style="width:10%">
                             <?php
                             $field = 'branch_id';
@@ -36,6 +43,7 @@
                     <tr class="border-bottom-primary">
                         <th>Sr.No.</th>
                         <th><?= sortable_anchor('item.name', get_value_from_list($field_labels, 'item_id', 'item_id')) ?></th>
+                        <th><?= sortable_anchor('make.name', get_value_from_list($field_labels, 'brand_id', 'brand_id')) ?></th>
                         <th><?= sortable_anchor('branch.name', get_value_from_list($field_labels, 'branch_id', 'branch_id')) ?></th>
                         <th><?= sortable_anchor('bin.name', get_value_from_list($field_labels, 'bin_id', 'bin_id')) ?></th>
                         <th style="width:8%">
@@ -54,6 +62,7 @@
                         <tr>
                             <th scope="row">{{ $i + 1 }}</th>
                             <td>{{ $record->item?->getDisplayName() }}</td>
+                            <td>{{ $record->make?->getDisplayName() }}</td>
                             <td>{{ $record->branch?->getDisplayName() }}</td>
                             <td>{{ $record->bin?->getDisplayName() }}</td>
                             <td>{{ $record->qty }}</td>

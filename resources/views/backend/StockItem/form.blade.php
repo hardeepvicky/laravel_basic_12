@@ -42,7 +42,12 @@
                                     <div class="row">
                                         <div class="col-sm-8">
                                             <x-Inputs.drop-down :id="$field" :name="$field" :label="$false"
-                                                :list="$item_list" :value="$model->{$field}" class="select2" mandatory="true" />
+                                                :list="$item_list" :value="$model->{$field}" 
+                                                class="select2 cascade-drop-down" 
+                                                data-sr-cascade-target="#item_brand_id"
+                                                data-sr-cascade-url="/item/ajax_get_brand_list/{v}" 
+                                                mandatory="true"
+                                            />
                                         </div>
                                         <div class="col-sm-4">
                                             <div class="d-flex align-items-start">
@@ -55,6 +60,18 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <?php
+                                $field = 'brand_id';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                            ?>
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" 
+                                :list="$empty_list" 
+                                :value="$model->{$field}"  
+                                layout="horizontal" 
+                                class="select2"
+                                mandatory="true"
+                                />
 
                             <?php
                             $field = 'qty';
@@ -116,6 +133,11 @@
                     $("#item_id").attr("data-value", id_list[0]);
                     load_item_list($("#item_id"));
                 }
+            });
+
+            $.events.execAtLast(function() {
+
+                $("#item_id").trigger("change", {pageLoad : true});
             });
         });
     </script>

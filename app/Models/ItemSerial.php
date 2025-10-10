@@ -42,6 +42,11 @@ class ItemSerial extends BaseModel
         return $this->belongsTo(Item::class);
     }
 
+    public function make()
+    {
+        return $this->belongsTo(ItemBrand::class, "item_brand_id");
+    }
+
     public function branch()
     {
         return $this->belongsTo(Branch::class);

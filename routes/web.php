@@ -1178,6 +1178,9 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
         $name = "ajax_get_default_uom";
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
 
+        $name = "ajax_get_brand_list";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
         $name = "ajax_get_specifications_of_item";
         Route::get($name . "/{name?}", [$controllerClass, $name])->name($name);
 

@@ -25,7 +25,7 @@ class PurchaseOrderItem extends BaseModel
 
     public function make()
     {
-        return $this->belongsTo(Maker::class);
+        return $this->belongsTo(ItemBrand::class, "item_brand_id");
     }
 
     public function purchaseOrderReceiveItem()

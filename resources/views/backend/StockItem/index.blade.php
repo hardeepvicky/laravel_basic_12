@@ -24,6 +24,11 @@
                             $field = "item_id";
                         ?>
                         <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
+
+                        <?php 
+                            $field = "brand_id";
+                        ?>
+                        <input type="text" name="{{ $field }}" value="{{ $search[$field] }}" />
                     </form>
                 </div>
             </div>

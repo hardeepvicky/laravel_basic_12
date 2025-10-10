@@ -35,6 +35,10 @@ class StockItem extends BaseModel
         return $this->belongsTo(Item::class);
     }
 
+    public function make()
+    {
+        return $this->belongsTo(ItemBrand::class, "brand_id");
+    }
 
     public static function changeQty($branch_id, $bin_id, $item_id, $make_id, $qty)
     {

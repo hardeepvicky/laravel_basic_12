@@ -21,32 +21,19 @@
                     <div class="row">
                         <div class="col-md-12 col-xxl-6">
                             <?php
-                                $field = 'hierarchy_type';
-                                $label = get_value_from_list($field_labels, $field, $field);
-                            ?>
-                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
-                                :list="$type_list"
-                                :value="$model->{$field}"
-                                :pleaseSelect="$false"
-                                layout="horizontal"
-                                horizontalSecondColumnLength="3"
-                                class="select2"
-                                mandatory="true" />
-
-                            <?php
                                 $field = 'serial_no';
                                 $label = get_value_from_list($field_labels, $field, $field);
                             ?>
                             <x-Inputs.text-field id="manual_serial_no"  :name="$field"
                                 :label="$label" :value="$model->{$field}"
                                 placeholder="Enter {{ $label }}"
-                                layout="horizontal" 
+                                layout="horizontal"
                                 horizontalSecondColumnLength="3"
                                 mandatory="true"
                             />
 
                             <?php
-                                $field = 'product_id';
+                                $field = 'item_id';
                                 $label = get_value_from_list($field_labels, $field, $field);
                             ?>
 
@@ -60,12 +47,17 @@
                                 <div class="col-sm-9">
                                     <div class="row">
                                         <div class="col-sm-8">
-                                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :list="$empty_list" :value="$model->{$field}"  class="select2" mandatory="true" />
+                                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$false" :list="$empty_list" :value="$model->{$field}"
+                                                class="select2 cascade-drop-down"
+                                                data-sr-cascade-target="#item_brand_id"
+                                                data-sr-cascade-url="/item/ajax_get_brand_list/{v}"
+                                                mandatory="true"
+                                            />
                                         </div>
                                         <div class="col-sm-4">
                                             <div class="d-flex align-items-start">
-                                                <span id="opener-product_id" class="btn btn-secondary flex-shrink-0">Choose</span>
-                                                <input type="hidden" id="choose-product_id" value="{{  $model->product_id }}" />
+                                                <span id="opener-item_id" class="btn btn-secondary flex-shrink-0">Choose</span>
+                                                <input type="hidden" id="choose-item_id" value="{{  $model->item_id }}" />
                                             </div>
                                         </div>
                                     </div>
@@ -73,217 +65,25 @@
                             </div>
 
                             <?php
-                                $field = 'make_id';
-                                $label = get_value_from_list($field_labels, $field, $field);
-                                if ($default_maker && !isset($model->{$field}))
-                                {
-                                    $model->{$field} = $default_maker->id;
-                                }
-                            ?>
-                            <x-Inputs.drop-down :id="$field" :name="$field"
-                                :label="$label"
-                                :list="$maker_list"
-                                :value="$model->{$field}"
-                                layout="horizontal"
-                                horizontalSecondColumnLength="3"
-                                class="select2"
-                                mandatory="true"
-                            />
-
-                            <?php
-                                $field = 'order_id';
+                                $field = 'item_brand_id';
                                 $label = get_value_from_list($field_labels, $field, $field);
                             ?>
-                            <x-Inputs.drop-down :id="$field" :name="$field"
-                                :label="$label"
-                                :list="$order_list"
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
+                                :list="$empty_list"
                                 :value="$model->{$field}"
                                 layout="horizontal"
                                 class="select2"
-                            />
+                                mandatory="true"
+                                />
 
                             <?php
-                            $field = 'manufacture_date_time';
-                            $label = get_value_from_list($field_labels, $field, $field);
-                            $value = $model->{$field} ?? "";
-                            if ($value instanceof \Illuminate\Support\Carbon) {
-                                $value = $value->format(DateUtility::DATETIME_OUT_FORMAT);
-                            }
+                                $field = 'package_qty';
+                                $label = get_value_from_list($field_labels, $field, $field);
                             ?>
-                            <x-Inputs.text-field :id="$field" :name="$field"
-                                :label="$label"
-                                :value="$value"
-                                class="custom-date-time-picker"
-                                layout="horizontal"
-                                horizontalSecondColumnLength="3"
-                                placeholder="Enter {{ $label }}"
-                                mandatory="true"
-                            />
-                        </div>
-                        <div class="col-md-12 col-xxl-12">
-                            <div class="hierarchy_type-block hierarchy_type-block_parent">
-                                <h4 class="b-b-info">
-                                    Child Serial No.
-                                </h4>
-                                <table class="table table-bordered order-column template-table"
-                                    data-sr-table-template-min-row="0">
-                                    <thead>
-                                        <tr>
-                                            <th class="text-center" style="width : 8%;">
-                                                <span class="sr-table-template-add">
-                                                    <i class="fas fa-plus-circle text-success icon"></i>
-                                                </span>
-                                            </th>
-                                            <th style="width:50%">
-                                                {{ get_value_from_list($field_labels, 'product_id') }}
-                                            </th>
-                                            <th style="width:20%">
-                                                {{ get_value_from_list($field_labels, 'make_id') }}
-                                            </th>
-                                            <th style="width:20%">
-                                                {{ get_value_from_list($field_labels, 'serial_no') }}
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr class="sr-table-template-row hidden">
-                                            <td>
-                                                <div class="block">
-                                                    <div class="left-block">
-                                                        <div class="sr-table-template-move-up">
-                                                            <i class="fas fa-arrow-circle-up icon"></i>
-                                                        </div>
-                                                        <div class="sr-table-template-move-down">
-                                                            <i class="fas fa-arrow-circle-down icon"></i>
-                                                        </div>
-                                                    </div>
-                                                    <div class="right-block">
-                                                        <span class="sr-table-template-delete">
-                                                            <i class=" fas fa-times-circle text-danger icon"></i>
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                                <x-inputs.text-field type="hidden" name="children[(sr-id)][id]"
-                                                    label="" />
-                                            </td>
-                                            <td>
-                                                <?php
-                                                $field = 'product_id';
-                                                ?>
-
-                                                <div class="row">
-                                                    <div class="col-sm-8">
-                                                        <x-Inputs.drop-down name="children[(sr-id)][{{ $field }}]" :label="$false" :list="$empty_list" class="will-select2 child_product_id"/>
-                                                    </div>
-                                                    <div class="col-sm-4">
-                                                        <div class="d-flex align-items-start">
-                                                            <span id="opener-product_id" class="btn btn-secondary opener-child_product_id flex-shrink-0">Choose</span>
-                                                            <input type="hidden" class="choose-child_product_id" />
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <?php
-                                                $field = 'make_id';
-                                                ?>
-                                                <x-Inputs.drop-down id="{{ $field }}-(sr-id)"
-                                                    name="children[(sr-id)][{{ $field }}]" :label="$false"
-                                                    :list="$maker_list" class="will-required will-select2 make_id" />
-                                            </td>
-                                            <td>
-                                                <?php
-                                                $field = 'serial_no';
-                                                ?>
-                                                <x-Inputs.text-field id="{{ $field }}-(sr-id)"
-                                                    name="children[(sr-id)][{{ $field }}]"
-                                                    :label="$false"
-                                                    class="will-required product_serial_no" />
-                                            </td>
-                                        </tr>
-                                        @php
-                                            $children = old('children', $children ?? []);
-                                            unset($children['(sr-id)']);
-                                        @endphp
-                                        @if (isset($children))
-                                            @foreach ($children as $k => $child_arr)
-                                                <tr class="" sr-id="{{ $child_arr['id'] }}"
-                                                    sr-counter="{{ $k }}">
-                                                    <td>
-                                                        <div class="block">
-                                                            <div class="left-block">
-                                                                <div class="sr-table-template-move-up">
-                                                                    <i class="fas fa-arrow-circle-up icon"></i>
-                                                                </div>
-                                                                <div class="sr-table-template-move-down">
-                                                                    <i class="fas fa-arrow-circle-down icon"></i>
-                                                                </div>
-                                                            </div>
-                                                            <div class="right-block">
-                                                                <span class="sr-table-template-delete">
-                                                                    <i class=" fas fa-times-circle text-danger icon"></i>
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                        <input type="hidden" name="children[{{ $k }}][id]"
-                                                            value="{{ $child_arr['id'] ?? '' }}" />
-                                                    </td>
-                                                    <td>
-                                                        <?php
-                                                        $field = 'product_id';
-                                                        $value = $child_arr[$field] ?? '';
-                                                        ?>
-
-                                                        <div class="row">
-                                                            <div class="col-sm-8">
-                                                                <x-Inputs.drop-down name="children[{{ $k }}][{{ $field }}]" :label="$false" :list="$empty_list" :value="$value" class="will-select2 child_product_id"/>
-                                                            </div>
-                                                            <div class="col-sm-4">
-                                                                <div class="d-flex align-items-start">
-                                                                    <span id="opener-product_id" class="btn btn-secondary opener-child_product_id flex-shrink-0">Choose</span>
-                                                                    <input type="hidden" class="choose-child_product_id" value="{{ $value }}"/>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-
-                                                    <td>
-                                                        <?php
-                                                        $field = 'make_id';
-                                                        $value = $child_arr[$field] ?? '';
-                                                        ?>
-                                                        <x-Inputs.drop-down id="{{ $field }}-{{ $k }}"
-                                                            name="children[{{ $k }}][{{ $field }}]"
-                                                            :label="$false" :list="$maker_list" :value="$value"
-                                                            class="will-required will-select2 make_id" />
-                                                    </td>
-                                                    <td>
-                                                        <?php
-                                                        $field = 'serial_no';
-                                                        $value = $child_arr[$field] ?? '';
-                                                        ?>
-                                                        <x-Inputs.text-field id="{{ $field }}-{{ $k }}"
-                                                            name="children[{{ $k }}][{{ $field }}]"
-                                                            :label="$false"
-                                                            :value="$value"
-                                                            class="will-select2 product_serial_no"
-                                                            mandatory="true" />
-                                                    </td>
-                                                </tr>
-                                            @endforeach
-                                        @endif
-                                    </tbody>
-                                    <tfoot>
-                                        <tr>
-                                            <th class="text-center" style="width : 80px;">
-                                                <span class="sr-table-template-add">
-                                                    <i class="fas fa-plus-circle text-success icon"></i>
-                                                </span>
-                                            </th>
-                                        </tr>
-                                    </tfoot>
-                                </table>
-                            </div>
+                            <x-Inputs.text-field layout="horizontal" horizontalSecondColumnLength="3" type="number" :id="$field" :name="$field"
+                                :label="$label" :value="$model->{$field}"
+                                placeholder="Enter {{ $label }}" mandatory="true" class="validate-int"
+                                min="1" max="10000" />
                         </div>
                     </div>
                 </div>
@@ -301,46 +101,9 @@
 
         var model_id = '<?= $model->id ?? 0 ?>';
 
-        var serialNoSearchEngine = new Bloodhound({
-            datumTokenizer: Bloodhound.tokenizers.whitespace,
-            queryTokenizer: Bloodhound.tokenizers.whitespace,
-            remote: {
-                url: '/product-serial-ajax_get_unlinked_child_list?query=%QUERY',
-                wildcard: '%QUERY',
-                transform: function(response) {
-                    var result = $.map(response['data'], function(item) {
-                        return item;
-                    });
-
-                    return result;
-                }
-            },
-        });
-
-        function toggle_hierarchy_type() {
-
-            var v = $('#hierarchy_type').val();
-
-            var selector = ".hierarchy_type-block";
-
-            $(selector).hide();
-            $(selector).find("input,select").attr("disabled", true);
-
-            if (v)
-            {
-                v = v.toLowerCase().trim();
-                var selector = ".hierarchy_type-block_any, .hierarchy_type-block_" + v;
-
-                if ($(selector).length > 0) {
-                    $(selector).show();
-                    $(selector).find("input,select").removeAttr("disabled");
-                }
-            }
-        }
-
-        function load_product_list(target)
+        function load_item_list(target)
         {
-            ajaxGetJson('{{ route("product.ajax_get_list") }}', function(response){
+            ajaxGetJson('{{ route("item.ajax_get_list") }}', function(response){
 
                 var html = "";
                 var html = "<option value=''>Please Select</option>";
@@ -365,105 +128,30 @@
                 var v = $(target).attr("data-value");
 
                 if (v) {
-                    $(target).val(v).trigger("change");
-                }
-
-            });
-        }
-
-        function init_child_product_id(_tr, last_id) {
-
-            _tr.find(".choose-child_product_id").browseProductGallery({
-                opener: _tr.find(".opener-child_product_id"),
-                postfix: "choose-child_product_id",
-                onSelect: function(id_list) {
-                    _tr.find(".child_product_id").attr("data-value", id_list[0]);
-                    load_product_list(_tr.find(".child_product_id"));
+                    $(target).val(v).trigger("change", {
+                        pageLoad: true
+                    });
                 }
             });
         }
-
-        function init_product_serial_no(_tr, last_id) {
-            _tr.find('.product_serial_no').typeahead({
-                hint: true,
-                highlight: true,
-                minLength: 1
-            }, {
-                display : 'name',
-                source: serialNoSearchEngine,
-                templates: {
-                    suggestion: function(data) {
-                        return `<div>
-                            <span> ${data.display}</span>
-                        </div>
-                    `;
-                    }
-                }
-            });
-        }
-
-        $(".template-table").srTableTemplate({
-            brace_type: "(",
-            afterRowAdd(_table, last_id, _tr) {
-                _tr.find(".will-select2").select2({
-                    placeHolder: "Please Select",
-                    theme: "bootstrap-5",
-                });
-
-                _tr.find(".will-required").attr("required", true);
-
-                load_product_list(_tr.find(".child_product_id"));
-
-                init_child_product_id(_tr);
-
-                init_product_serial_no(_tr, last_id);
-            }
-        });
-
-        var trs = $(".template-table").find(">tbody>tr").not(".sr-table-template-row");
-        trs.each(function(index, _tr) {
-
-            load_product_list($(_tr).find(".child_product_id"));
-
-            init_child_product_id($(_tr));
-
-            init_product_serial_no($(_tr), index);
-        })
 
         manual_serial_no_cleave = new Cleave('#manual_serial_no', {
             blocks: [4, 4],
             delimiter: '-'
         });
 
-        $("#choose-product_id").browseProductGallery({
-            opener: "#opener-product_id",
-            postfix: "choose-product_id",
+        $("#choose-item_id").browseItemGallery({
+            opener: "#opener-item_id",
+            postfix: "choose-item_id",
             onSelect: function(id_list) {
-                $("#product_id").attr("data-value", id_list[0]);
-                load_product_list($("#product_id"));
+                $("#item_id").attr("data-value", id_list[0]);
+                load_item_list($("#item_id"));
             }
         });
-
-        $("#hierarchy_type").change(toggle_hierarchy_type);
-
-        manufacture_date_time = flatpickr("#manufacture_date_time", {
-            enableTime: true,
-            time_24hr: true,
-            dateFormat: constants.dateTimeFormat,
-            onChange: function(selectedDates, dateStr, instance) {
-                const selectedDate = selectedDates[0];
-                if (selectedDate) {
-                }
-            }
-        });
-
-        manufacture_date_time.set("maxDate", new Date());
 
         $.events.execAtLast(function() {
 
-            toggle_hierarchy_type();
-
-            load_product_list($("#product_id"));
+            load_item_list($("#item_id"));
         });
     });
 </script>@endsection
