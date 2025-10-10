@@ -36,6 +36,11 @@ class ProductSerial extends BaseModel
     {
         parent::beforeSave();
     }
+    
+    public function beforeDelete()
+    {
+        StockProduct::changeQty($this->branch_id, $this->bin_id, $this->product_id, $this->make_id, -1);
+    }
 
     public function afterFind()
     {

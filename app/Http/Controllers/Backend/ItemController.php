@@ -245,10 +245,12 @@ class ItemController extends BackendController
         $tabs = self::TABS;
 
         $name_list = Item::select("name")->distinct()->pluck('name')->toArray();
+        $specification_list = Item::select("specification")->distinct()->pluck('specification')->toArray();
+        $size_list = Item::select("size")->distinct()->pluck('size')->toArray();
 
         $item_list = Item::pluck('sku', 'id')->toArray();
 
-        $this->setForView(compact("tabs", "name_list", "item_list"));
+        $this->setForView(compact("tabs", "name_list", "item_list", "specification_list", "size_list"));
     }
 
     private function _common_validation_rules()
@@ -614,13 +616,20 @@ class ItemController extends BackendController
         return $this->view("form");
     }
 
-    public function ajax_get_list($category_id)
+    public function ajax_get_list($category_id = "")
     {
         $response = ["status" => 1];
 
         try {
 
-            $records = $this->modelClass::where("item_category_id", $category_id)->get();
+            $qb = $this->modelClass::query();
+
+            if ($category_id)
+            {
+                $qb->where("item_category_id", $category_id);
+            }
+
+            $records = $qb->get();
 
             $response['data'] = [];
 
@@ -1116,5 +1125,142 @@ class ItemController extends BackendController
         $response['data'] = Item::where("name", $name)->select("size")->distinct()->pluck("size")->toArray();
 
         return $this->responseJson($response);
+    }
+
+    public function gallery()
+    {
+        $cache_key_prefix = Route::currentRouteName();
+
+        $conditions = $this->getConditions($cache_key_prefix, [
+            ["field" => "root_item_category_id", "type" => "int"],
+            ["field" => "name", "type" => "string"],
+        ]);
+
+        $builder = $this->modelClass::query();
+
+        $conditions[] = ["is_active", 1];
+
+        $builder->where($conditions);
+
+        $builder->with([
+            "mainImage",
+        ]);
+
+        $this->model = new $this->modelClass;
+
+        $cache_key_for_sort = $cache_key_prefix . "-index-extra-params";
+
+        $sort_by_list = [
+            "id" => "ID",
+            "name" => "Name",            
+            "created_at" => "Created",
+            "updated_at" => "Updated",
+            "created_by" => "Created By",
+            "updated_by" => "Updated By",
+        ];
+
+        $sort_dir_list = [
+            "ASC" => "Ascending",
+            "DESC" => "Descending"
+        ];
+
+        $this->setForView(compact("sort_by_list", "sort_dir_list"));
+
+        $clear_cache = request('is_sort_clear', false);
+        $value = request('value', false);
+
+        if ($value) {
+            $builder->orderByRaw('FIELD(id,' . $value . ') DESC');
+            $builder->orderBy("id", "DESC");
+
+            $this->setForView([
+                "selected_value" => $value,
+                "selected_id_list" => explode(",", $value)
+            ]);
+
+            $sort = [
+                'sort_by' => 'id',
+                'sort_dir' => 'DESC'
+            ];
+
+        } else {
+            $sort = $this->getSortBy($this->model, $cache_key_for_sort, [
+                ["key" => "sort_by", "default" => "id"],
+                ["key" => "sort_dir", "default" => "DESC"],
+            ], $clear_cache);
+
+            $builder->orderBy($sort['sort_by'], $sort['sort_dir']);
+        }
+
+        $this->setForView($sort);
+
+        $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
+
+        // d($records->toArray(), true);
+
+        foreach($records as $record)
+        {
+            if ($record->mainImage?->id)
+            {
+                $record->mainImage->afterFind();
+            }
+        }
+
+        $root_category_list = ItemCategory::getList("id", "display_name", ["parent_id" => 0], "list_display_order");
+        
+        $index_table_id = request("index_table_id", "index_table");
+        $modal_id = request("modal_id", "");
+        $multiple = request("multiple", 0);
+
+        $this->setForView(compact("records", "root_category_list", "index_table_id", "modal_id", "multiple"));
+
+        return $this->viewIndex(__FUNCTION__);
+    }
+
+    public function preview(Request $request)
+    {
+        $ids = $request->get("ids");
+
+        if ($ids)
+        {
+            $id_list = explode(",", $ids);
+
+            $builder = $this->modelClass::whereIn("id", $id_list);
+            $builder->with([
+                "mainImage",
+            ]);
+
+            $records = $builder->get();
+
+            foreach($records as $record)
+            {
+                if ($record->mainImage?->id)
+                {
+                    $record->mainImage->afterFind();
+                }
+            }
+
+            $this->setForView(compact("records"));
+
+            return $this->viewIndex(__FUNCTION__);
+        }
+    }
+
+    public function preview_small(Request $request)
+    {
+        $ids = $request->get("ids");
+
+        if ($ids)
+        {
+            $id_list = explode(",", $ids);
+
+            $builder = $this->modelClass::whereIn("id", $id_list);
+
+            $records = $builder->get();
+
+            $this->setForView(compact("records"));
+
+            return $this->viewIndex(__FUNCTION__);
+        }
     }
 }

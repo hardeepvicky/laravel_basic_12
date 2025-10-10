@@ -153,6 +153,7 @@ if (!isset($partial_path)) {
         <script src="{{ get_asset_url('js/common_script_for_all_non_ajax_layout.js') }}"></script>
         <script src="{{ get_asset_url('js/backend/file-gallery.js') }}"></script>
         <script src="{{ get_asset_url('js/backend/product-gallery.js') }}"></script>
+        <script src="{{ get_asset_url('js/backend/item-gallery.js') }}"></script>
         <script src="{{ get_asset_url('js/backend/contact-gallery.js') }}"></script>
         <script src="{{ get_asset_url('js/backend/backend_non_ajax.js') }}"></script>
         <script src="{{ get_asset_url('js/common.js') }}"></script>

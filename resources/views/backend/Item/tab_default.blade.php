@@ -23,12 +23,24 @@
         <x-Inputs.text-field :id="$field" :name="$field" :label="$label" value="{{ $model->{$field} }}"
             placeholder="Enter {{ $label }}" layout="horizontal" autocomplete="off"  list="specification-list"/>
 
+        <datalist id="specification-list">
+            @foreach($specification_list as $name)
+                <option>{{ $name }}</option>
+            @endforeach
+        </datalist>
+
         <?php
         $field = 'size';
         $label = get_value_from_list($field_labels, $field, $field);
         ?>
         <x-Inputs.text-field :id="$field" :name="$field" :label="$label" value="{{ $model->{$field} }}"
             placeholder="Enter {{ $label }}" layout="horizontal" autocomplete="off"  list="size-list"/>
+
+        <datalist id="size-list">
+            @foreach($size_list as $name)
+                <option>{{ $name }}</option>
+            @endforeach
+        </datalist>
 
         <?php
         $field = 'sku';
@@ -599,7 +611,7 @@
             $("#modal-category").modal("show");
         });
 
-        $("#name").autocomplete().on('pick.bs.autocomplete', (e) => {
+        $("#name, #size, #specification").autocomplete().on('pick.bs.autocomplete', (e) => {
             create_sku();
         });
 

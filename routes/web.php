@@ -45,6 +45,7 @@ use App\Http\Controllers\Backend\HolidayController;
 use App\Http\Controllers\Backend\ItemBrandController;
 use App\Http\Controllers\Backend\ItemCategoryController;
 use App\Http\Controllers\Backend\ItemController;
+use App\Http\Controllers\Backend\ItemSerialController;
 use App\Http\Controllers\Backend\LeadController;
 use App\Http\Controllers\Backend\MakerController;
 use App\Http\Controllers\Backend\ManufactureOrderController;
@@ -72,6 +73,7 @@ use App\Http\Controllers\Backend\SettingsController;
 use App\Http\Controllers\Backend\ShipOrderController;
 use App\Http\Controllers\Backend\SmsTemplateController;
 use App\Http\Controllers\Backend\StateController;
+use App\Http\Controllers\Backend\StockItemController;
 use App\Http\Controllers\Backend\StockProductController;
 use App\Http\Controllers\Backend\SubDepartmentController;
 use App\Http\Controllers\Backend\TagsController;
@@ -1133,6 +1135,12 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
 
     $route_prefix = "item";
     $controllerClass = ItemController::class;    
+    $name = "gallery";
+    Route::get($route_prefix . "-" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
+    $name = "preview";
+    Route::get($route_prefix . "-" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
+    $name = "preview_small";
+    Route::get($route_prefix . "-" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
     Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
 
         Route::get("/", [$controllerClass, "index"])->name("index");
@@ -1175,6 +1183,9 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
 
         $name = "ajax_get_sizes_of_item";
         Route::get($name . "/{name?}", [$controllerClass, $name])->name($name);
+
+        $name="ajax_get_list";
+        Route::get($name . "/{category_id?}" , [$controllerClass, $name])->name($name);
 
         $name = "ajax_update_field";
         Route::post($name, [$controllerClass, $name])->name($name);
@@ -1899,7 +1910,7 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
         $name = "completion_destroy";
         Route::delete("{id}/" . $name, [$controllerClass, $name])->name($name);
 
-        $route_prefix = "export";
+        $route_prefix = "export"; 
         Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
             $name = "csv";
             Route::get($name, [$controllerClass, "export_" . $name])->name($name);
@@ -1936,6 +1947,35 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
             Route::get($name, [$controllerClass, "export_" . $name])->name($name);
         });
     });
+
+    $route_prefix = "item-serial";
+    $controllerClass = ItemSerialController::class;
+    Route::resource($route_prefix, $controllerClass);    
+    $name="ajax_get_list";
+    Route::get($route_prefix . "-" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
+        $name = "ajax_update_field";
+        Route::post($name, [$controllerClass, $name])->name($name);
+
+        $route_prefix = "export";
+        Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+            $name = "csv";
+            Route::get($name, [$controllerClass, "export_" . $name])->name($name);
+        });
+    });
+
+    $route_prefix = "stock-item";
+    $controllerClass = StockItemController::class;
+    Route::resource($route_prefix, $controllerClass)->except(["show", "edit", "update"]);
+    $name = "export_csv";
+    Route::get($route_prefix . "/export/csv", [$controllerClass, $name])->name($route_prefix . "." . $name);
+    $name = "transactions";
+    Route::get($route_prefix . "/" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
+    $name = "in";
+    Route::any($route_prefix . "/" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
+    $name = "out";
+    Route::any($route_prefix . "/" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
 
     Route::group(['prefix' => 'permissions', 'as' => 'permissions.'], function () {
 

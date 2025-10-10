@@ -32,6 +32,9 @@ class SectionRoutes
         "product.gallery",
         "product.preview",
 
+        "item.gallery",
+        "item.preview",
+
         "contact.chooser",
 
         "product-serial.ajax_get_unlinked_list",
