@@ -7,6 +7,7 @@ use App\Helpers\FileUtility;
 use App\Helpers\ImageUtility;
 use App\Helpers\LaravelExtend;
 use App\Helpers\Util;
+use App\Models\Department;
 use App\Models\DocumentCategory;
 use App\Models\DocumentFile;
 use App\Models\DropDownValue;
@@ -111,6 +112,18 @@ class DocumentFileController extends BackendController
             $builder = $builder->where($conditions);
         }
 
+        $conditions2 = $this->getConditions($cache_key . ".2", [            
+            ["field" => "dept_id", "type" => "int", "default" => LaravelExtend::getAuthUserId()],
+        ], true);
+
+        if (isset($conditions2['dept_id']))
+        {
+            $builder->whereHas("createdBy", function($q) use($conditions2) {
+                $q->where("dept_id", $conditions2['dept_id']['value']);
+            });
+        }
+
+
         if ($apply_sort) {
             $this->model = new $this->modelClass;
 
@@ -162,6 +175,10 @@ class DocumentFileController extends BackendController
 
             $this->setForView($sort);
         }
+
+        $dept_list = Department::getList("id", "display_name", [], "list_display_order");
+
+        $this->setForView(compact("dept_list"));
 
         return $builder;
     }

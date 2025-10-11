@@ -389,11 +389,31 @@
             </div>
             <div class="col-sm-9">
                 <span id="choose-images" class="btn btn-secondary">
-                    <i class="fa-solid fa-camera"></i>
                     Choose Images
                 </span>
                 <x-Inputs.text-field :id="$field" :name="$field" :label="$false"
                     :value="$value" multiple="multiple" />
+            </div>
+        </div>
+        <div class="row mb-3" id="photo-capture-block">
+            <div class="col-sm-3">
+                <label class="form-label">
+                    {{ $label }}
+                </label>
+            </div>
+            <div class="col-sm-3">
+                <video id="video" width="320" height="240" autoplay></video>
+                <span id="capture" class="btn btn-secondary">
+                    <i class="fa-solid fa-camera"></i>
+                    Capture Photo
+                </span>
+                <span id="upload" class="btn btn-info">
+                    Upload Photo
+                </span>
+            </div>
+            <div class="col-sm-3">
+                <canvas id="canvas" width="320" height="240" style="display:none;"></canvas>
+                <img id="preview" src="" alt="Captured image" style="display:none; border: 1px solid #ccc;"/>
             </div>
         </div>
     </div>
@@ -408,6 +428,36 @@
         var sku_pattern = '<?= $sku_pattern ?>';
         var selected_department_id = '<?= $selected_department_ids[0] ?>';
         var color, category;
+
+        navigator.getUserMedia = navigator.getUserMedia ||
+                         navigator.webkitGetUserMedia ||
+                         navigator.mozGetUserMedia;
+
+        if (navigator.getUserMedia)
+        {
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(function (stream) {
+                    $('#video')[0].srcObject = stream;
+                })
+                .catch(function (err) {
+                    $.events.onUserWarning("Camera access denied: " + err);
+                });
+
+            $('#capture').on('click', function () {
+                const canvas = $('#canvas')[0];
+                const context = canvas.getContext('2d');
+                context.drawImage($('#video')[0], 0, 0, canvas.width, canvas.height);
+
+                const dataURL = canvas.toDataURL('image/png');
+                $('#preview').attr('src', dataURL).show();
+            });
+        }
+        else
+        {
+            $.events.onUserWarning("Camera not supported");
+            $("#photo-capture-block").hide();
+        }
+
 
         function create_sku()
         {

@@ -54,6 +54,11 @@ class DocumentFile extends BaseModel
         return $this->belongsTo(DocumentCategory::class);
     }
 
+    public function createdBy()
+    {
+        return $this->belongsTo(User::class, "created_by");
+    }
+
     protected function getDisplayNameAttribute()
     {
         return $this->getDisplayName();
