@@ -49,6 +49,8 @@
                         </div>
                     </div>
                 </div>
+
+                <livewire:widget.stock-inventory />
             </div>
 
         </div>
