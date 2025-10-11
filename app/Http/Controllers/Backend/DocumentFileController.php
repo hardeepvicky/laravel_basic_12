@@ -113,7 +113,7 @@ class DocumentFileController extends BackendController
         }
 
         $conditions2 = $this->getConditions($cache_key . ".2", [            
-            ["field" => "dept_id", "type" => "int", "default" => LaravelExtend::getAuthUserId()],
+            ["field" => "dept_id", "type" => "int"],
         ], true);
 
         if (isset($conditions2['dept_id']))
