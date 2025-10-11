@@ -1,6 +1,18 @@
 @extends($layout)
 
 @section('content')
+    <style>
+        #customFileBtn {
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+    </style>
+
     <x-Backend.form-errors />
 
     <x-Form.start action="{{ $form['url'] }}" method="{{ $form['method'] }}" />
@@ -11,6 +23,18 @@
         <div class="col-md-12 col-xl-12 col-xxl-6">
             <div class="form-group mb-3">
                 <?php
+                $field = 'file_original';
+                $label = get_value_from_list($field_labels, $field, $field);
+                ?>
+                <x-Inputs.file-field :id="$field" :name="$field" :label="$label" :value="$model->{$field}"
+                    placeholder="Enter {{ $label }}" mandatory="true" style="display: none"/>
+
+                <span id="customFileBtn">Choose File OR Capture Photo</span>
+            </div>
+        </div>
+        <div class="col-md-12 col-xl-12 col-xxl-6">
+            <div class="form-group mb-3">
+                <?php
                 $field = 'document_category_id';
                 $label = get_value_from_list($field_labels, $field, $field);
                 ?>
@@ -18,16 +42,7 @@
                     value="{{ $model->{$field} }}" class="modal-select2" mandatory="true" />
             </div>
         </div>
-        <div class="col-md-12 col-xl-12 col-xxl-6">
-            <div class="form-group mb-3">
-                <?php
-                $field = 'file_original';
-                $label = get_value_from_list($field_labels, $field, $field);
-                ?>
-                <x-Inputs.file-field :id="$field" :name="$field" :label="$label" :value="$model->{$field}"
-                    placeholder="Enter {{ $label }}" mandatory="true" />
-            </div>
-        </div>
+        
         <div class="col-md-12 col-xl-12 col-xxl-6">
             <div class="form-group mb-3">
                 <?php
@@ -55,6 +70,10 @@
             }).change(function (){
                 var fileName = $(this).val();
                 $(".document_file_name").val(getFilenameFromPath(fileName));
+            });
+
+            $('#customFileBtn').on('click', function () {
+                $('#file_original').click();
             });
         })
     </script>
