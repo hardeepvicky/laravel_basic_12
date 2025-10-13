@@ -103,6 +103,21 @@ class Task extends BaseModel
         return $this->belongsTo(User::class, "assign_to_user_id");
     }
 
+    public function project()
+    {
+        return $this->belongsTo(Project::class);
+    }
+
+    public function taskProjectTarget()
+    {
+        return $this->hasMany(TaskProjectTarget::class);
+    }
+
+    public function projectTarget()
+    {
+        return $this->belongsToMany(ProjectTarget::class, TaskProjectTarget::class);
+    }
+
     public function tags()
     {
         $class_name = str_class_name_without_namespace($this);

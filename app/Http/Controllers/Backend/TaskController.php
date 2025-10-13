@@ -15,6 +15,8 @@ use App\Models\DropDownValue;
 use App\Models\FieldSetting;
 use App\Models\Lead;
 use App\Models\Party;
+use App\Models\Project;
+use App\Models\ProjectTarget;
 use App\Models\Role;
 use App\Models\SqlLog;
 use App\Models\Tag;
@@ -49,7 +51,9 @@ class TaskController extends BackendController
             "tags",
             "user",
             "documentFile",
-            "taskTodo"
+            "taskTodo",
+            "project",
+            "projectTarget"
         ]);
 
         $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
@@ -367,6 +371,8 @@ class TaskController extends BackendController
 
         $dealer_list = Dealer::getList("id", "display_name", [], "list_display_order");
 
+        $project_list = Project::getList("id", "display_name", [], "list_display_order");
+
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
         $task_todo_field_labels = FieldSetting::getDynamicFields(TaskTodo::class);
@@ -375,7 +381,7 @@ class TaskController extends BackendController
 
         $this->setForView(compact(
             "user_list", "users", "task_type_list", 
-            "status_list", "department_list", "duration_type_list", "party_list", "contact_type_list", "lead_list", "customer_list", "dealer_list",
+            "status_list", "department_list", "duration_type_list", "party_list", "contact_type_list", "lead_list", "customer_list", "dealer_list", "project_list",
             "field_labels", "task_todo_field_labels",
             "default_start_date_time"
         ));
@@ -415,6 +421,7 @@ class TaskController extends BackendController
             "end_date_time" => [],
             "priority" => [],
             "contact_type" => "",
+            "project_id" => "",
             "is_send_notification" => "",
             "tag_name" => [],
             "taskUser" => [],
@@ -423,6 +430,7 @@ class TaskController extends BackendController
             'taskLead' => [],
             'taskCustomer' => [],
             'taskDealer' => [],
+            'taskProjectTarget' => [],
             'task_todo' => [],
         ];
     }
@@ -511,6 +519,11 @@ class TaskController extends BackendController
         if (isset($validatedData['taskUser']) && is_array($validatedData['taskUser'])) {
             $users = User::find($validatedData['taskUser']);
             $this->model->user()->sync($users);
+        }
+
+        if (isset($validatedData['taskProjectTarget']) && is_array($validatedData['taskProjectTarget'])) {
+            $records = ProjectTarget::find($validatedData['taskProjectTarget']);
+            $this->model->projectTarget()->sync($records);
         }
 
         if (isset($validatedData['taskParty']) && is_array($validatedData['taskParty'])) {

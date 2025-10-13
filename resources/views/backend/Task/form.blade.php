@@ -258,6 +258,33 @@ $false = false;
                             </div>
                             <div class="is_draft-block is_draft-block-0">
                                 <?php
+                                $field = 'project_id';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                                ?>
+                                <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$project_list"
+                                    :value="$model->{$field}"
+                                    class="select2 cascade-drop-down"
+                                    layout="horizontal"
+                                    data-sr-cascade-target="#target_id"
+                                    data-sr-cascade-url="/project/ajax_get_target_list/{v}"
+                                />
+                            </div>
+
+                            <div class="form-group mb-3 is_draft-block is_draft-block-0">
+                                <?php
+                                $field = 'target_id';
+                                $label = "Targets";
+                                ?>
+                                <x-Inputs.drop-down :id="$field" name="taskProjectTarget[]" :label="$label"
+                                    data-value="{{ $model->{$field} }}"
+                                    layout="horizontal"
+                                    class="select2"
+                                    multiple="true"
+                                    />
+                            </div>
+
+                            <div class="is_draft-block is_draft-block-0">
+                                <?php
                                 $field = 'tag_name';
                                 $label = get_value_from_list($field_labels, $field, 'Tags');
                                 $value = implode(',', $model->tags?->pluck('name')->toArray() ?? []);
@@ -529,6 +556,10 @@ $false = false;
 
                         _tr.find(".will-required").attr("required", true);
                     }
+                });
+
+                $("#project_id").trigger("sr-cascade.change", {
+                    pageLoad: true
                 });
 
             });

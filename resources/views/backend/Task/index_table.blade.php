@@ -235,33 +235,50 @@ $false = false;
                                                 </label>
                                             @endif
                                         </div>
-
                                     </div>
 
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="card">
+                                                <div class="card-header border-l-primary card-no-border">
+                                                    <h3>Todo</h3>
+                                                </div>
+                                                <div class="card-body">        
+                                                    <ul class="ml-3" style="list-style: circle;">
+                                                        @foreach($record->taskTodo as $taskTodo)                                                
+                                                        <li>
+                                                            @if ($taskTodo->is_completed)
+                                                                <i class="fa-solid fa-check text-success"></i>
+                                                            @endif
+
+                                                            {{ $taskTodo->todo }}                                                    
+                                                        </li>
+                                                        @endforeach
+                                                    </ul>
+                                                </div>
+                                            </div>       
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="info">
+                                                {{ get_value_from_list($field_labels, 'project_id', 'project_id') }}
+                                                :
+                                                <span>{!! $record->project?->getDisplayName() !!}</span>
+                                            </label>
+
+                                            <h5>
+                                                {{ get_value_from_list($field_labels, 'projectTarget', 'Project Targets') }}
+                                            </h5>
+                                            <ol>
+                                                @foreach ($record->projectTarget as $projectTarget)
+                                                <li>{!! $projectTarget->getDisplayName() !!}</li>
+                                                @endforeach
+                                            </ol>
+                                        </div>
+                                    </div>
 
                                     <x-Backend.document-files :records="$record->documentFile" />
                                 </div>
 
-                                <div class="col-sm-12">
-                                    <div class="card">
-                                        <div class="card-header border-l-primary card-no-border">
-                                            <h3>Todo</h3>
-                                        </div>
-                                        <div class="card-body">        
-                                            <ul class="ml-3" style="list-style: circle;">
-                                                @foreach($record->taskTodo as $taskTodo)                                                
-                                                <li>
-                                                    @if ($taskTodo->is_completed)
-                                                        <i class="fa-solid fa-check text-success"></i>
-                                                    @endif
-
-                                                    {{ $taskTodo->todo }}                                                    
-                                                </li>
-                                                @endforeach
-                                            </ul>
-                                        </div>
-                                    </div>                                
-                                </div>
                             </div>
                         </td>
                     </tr>
