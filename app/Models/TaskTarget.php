@@ -2,18 +2,18 @@
 
 namespace App\Models;
 
-class TaskProjectTarget extends BaseModel
+class TaskTarget extends BaseModel
 {
-    protected static Array $unique_fields = ["task_id", "project_target_id"];   
+    protected static Array $unique_fields = ["task_id", "target_id"];   
     
     public function task()
     {
         return $this->belongsTo(Task::class);
     }
 
-    public function projectTarget()
+    public function target()
     {
-        return $this->belongsTo(ProjectTarget::class);
+        return $this->belongsTo(Target::class);
     }
 
     public function getRefDisplayName($field, $value)
@@ -28,9 +28,9 @@ class TaskProjectTarget extends BaseModel
                 ];
                 break;
 
-            case "project_target_id":
+            case "target_id":
                 $ret_array = [
-                    $field => $this->projectTarget?->getDisplayName()
+                    $field => $this->target?->getDisplayName()
                 ];
                 break;
         }

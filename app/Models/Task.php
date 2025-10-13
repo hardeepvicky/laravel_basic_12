@@ -112,14 +112,14 @@ class Task extends BaseModel
         return $this->belongsTo(Project::class);
     }
 
-    public function taskProjectTarget()
+    public function taskTarget()
     {
-        return $this->hasMany(TaskProjectTarget::class);
+        return $this->hasMany(TaskTarget::class);
     }
 
-    public function projectTarget()
+    public function target()
     {
-        return $this->belongsToMany(ProjectTarget::class, TaskProjectTarget::class);
+        return $this->belongsToMany(Target::class, TaskTarget::class);
     }
 
     public function tags()

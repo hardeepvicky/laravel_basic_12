@@ -78,6 +78,7 @@ use App\Http\Controllers\Backend\StockItemController;
 use App\Http\Controllers\Backend\StockProductController;
 use App\Http\Controllers\Backend\SubDepartmentController;
 use App\Http\Controllers\Backend\TagsController;
+use App\Http\Controllers\Backend\TargetController;
 use App\Http\Controllers\Backend\TaskController;
 use App\Http\Controllers\Backend\TypeController;
 use App\Http\Controllers\Backend\UomController;
@@ -1997,9 +1998,22 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
 
         $name = "ajax_update_field";
         Route::post($name, [$controllerClass, $name])->name($name);
+    });
 
-        $name = "ajax_get_target_list";
-        Route::get($name . "/{project_id}", [$controllerClass, $name])->name($name);
+
+    $route_prefix = "target";
+    $controllerClass = TargetController::class;
+    Route::resource($route_prefix, $controllerClass);
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
+        $name = "activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "de_activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "ajax_update_field";
+        Route::post($name, [$controllerClass, $name])->name($name);
     });
 
     Route::group(['prefix' => 'permissions', 'as' => 'permissions.'], function () {

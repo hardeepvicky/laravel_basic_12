@@ -74,40 +74,6 @@
                         <tr id="record-{{ $record->id }}" class="hidden">
                             <td style="background-color: var(--body--bs-body-bg)"></td>
                             <td colspan="7">
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <div class="card">
-                                            <div class="card-header border-l-secondary card-no-border">
-                                                <h3>Targets</h3>
-                                            </div>
-                                            <div class="card-body">
-                                                <table class="table table-sm summary-table table-bordered">
-                                                    <thead>
-                                                        <tr>
-                                                            <th>Sr. No.</th>
-                                                            <th>{{ get_value_from_list($target_field_labels, 'name') }}</th>
-                                                            <th>{{ get_value_from_list($target_field_labels, 'end_date') }}</th>
-                                                            <th>Tasks - Complete / Total</th>
-                                                            <th>Complete Percentage</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        @foreach ($record->projectTarget as $i => $projectTarget)
-                                                        <tr>
-                                                            <td>{{ $i + 1 }}</td>
-                                                            <td>{{ $projectTarget->name }}</td>
-                                                            <td>{{ if_date($projectTarget->end_date) }}</td>
-                                                            <td>{{ $projectTarget->complete_task_count . " / " . $projectTarget->task_count }}</td>
-                                                            <td>{{ $projectTarget->complete_per }} %</td>
-                                                        </tr>
-                                                        @endforeach
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
                                 <x-Backend.document-files :records="$record->documentFile" />
                             </td>
                         </tr>

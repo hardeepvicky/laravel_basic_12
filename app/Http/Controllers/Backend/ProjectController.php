@@ -28,29 +28,10 @@ class ProjectController extends BackendController
         $builder = $this->_getBuildeForIndex($cache_key_prefix);
 
         $builder->with([
-            "projectTarget" => function($q){
-                $q->orderBy("list_display_order");
-            },
-            "projectTarget.task",
             "documentFile"
         ]);
 
         $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
-
-        foreach($records as $record)
-        {            
-            foreach($record->projectTarget as $target)
-            {
-                $target->complete_per = 0;
-                $target->task_count = $target->task->count();
-                $target->complete_task_count = $target->task()->where("is_completed", 1)->count();
-
-                if ($target->task_count > 0 && $target->complete_task_count > 0)
-                {
-                    $target->complete_per = round($target->complete_task_count * 100 / $target->task_count);
-                }
-            }
-        }
 
         $this->setForView(compact("records"));
 
@@ -94,10 +75,8 @@ class ProjectController extends BackendController
 
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
-        $target_field_labels = FieldSetting::getDynamicFields(ProjectTarget::class);
-
         $this->setForView(compact(
-            "field_labels", "target_field_labels", 
+            "field_labels"
         ));
 
         return parent::beforeViewRender();
@@ -126,7 +105,7 @@ class ProjectController extends BackendController
             "description" => ["nullable"],            
             "list_display_order" => ["required"],
             "is_active" => "",
-            "project_target" => []
+            "projectFile" => []
         ];
     }
 
@@ -191,86 +170,11 @@ class ProjectController extends BackendController
 
             $this->model->documentFile()->sync($document_files);
         }
-
-        unset($validatedData['project_target']['(sr-id)']);
-
-        if (isset($validatedData['project_target']))
-        {
-            $rules = [
-                "name" => ["required"],
-                "end_date" => ["required"]
-            ];
-
-            $child_model = new ProjectTarget();
-
-            $existing_id_list = $this->model->projectTarget()->pluck("id", "id")->toArray();
-
-            $validatedData['project_id'] = $this->model->id;
-
-            $display_order = 0;
-
-            foreach($validatedData['project_target'] as $project_target)
-            {
-                $validator = Validator::make($project_target, $rules);
-
-                if ($validator->fails())
-                {
-                    foreach($validator->errors()->all() as $error_msg)
-                    {
-                        LaravelExtend::addError("", $error_msg, "Terms");
-                    }
-                    continue;
-                }
-
-                $display_order++;
-                if ($project_target['id'])
-                {
-                    $child_model = ProjectTarget::find($project_target['id']);
-
-                    if (!$child_model)
-                    {
-                        $child_model = new ProjectTarget();
-                    }
-                    else
-                    {
-                        unset($existing_id_list[$project_target['id']]);
-                    }
-                }
-                else
-                {
-                    $child_model = new ProjectTarget();
-                }
-
-                $project_target['list_display_order'] = $display_order;
-
-                $project_target = $child_model->convertTimeZoneBeforeQueryToDatabase($project_target);
-
-                $child_model->fill($project_target);
-
-                $this->model->projectTarget()->save($child_model);
-            }
-
-            if ($existing_id_list)
-            {
-                $existing_records = $this->model->projectTarget()->where("id", $existing_id_list)->get();
-
-                foreach($existing_records as $existing_record)
-                {
-                    if (!$existing_record->safeDelete($existing_record))
-                    {
-                        LaravelExtend::addError($existing_record->name, "Can not delete, bcoz it is asscoicated with other modules.", "Term");
-                    }
-                }
-            }
-        }
     }
 
     public function edit($id)
     {
         $this->model = $model = $this->modelClass::with([
-            "projectTarget" => function($q){
-                $q->orderBy("list_display_order");
-            },
             "projectFile"
         ])->findOrFail($id);
 
@@ -327,31 +231,5 @@ class ProjectController extends BackendController
 
             return back()->withInput()->with('fail', get_exception_display_message($ex))->with("custom_errors", LaravelExtend::$errors);
         }
-    }
-
-    public function ajax_get_target_list($project_id)
-    {
-        $response = ["status" => 1];
-
-        try {
-
-            $records = ProjectTarget::where("project_id", $project_id)->orderBy("list_display_order")->get();
-
-            $response['data'] = [];
-
-            foreach ($records as $record) {
-                $row = [
-                    "id" => $record->id,
-                    "name" => $record->getDisplayName(),
-                ];
-
-                $response['data'][] = $row;
-            }
-        } catch (Exception $ex) {
-            $response['status'] = 0;
-            $response['msg'] = $ex->getMessage();
-        }
-
-        return $this->responseJson($response);
     }
 }

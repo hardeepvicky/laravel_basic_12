@@ -266,11 +266,11 @@ $false = false;
                                             </label>
 
                                             <h5>
-                                                {{ get_value_from_list($field_labels, 'projectTarget', 'Project Targets') }}
+                                                Targets
                                             </h5>
                                             <ol>
-                                                @foreach ($record->projectTarget as $projectTarget)
-                                                <li>{!! $projectTarget->getDisplayName() !!}</li>
+                                                @foreach ($record->target as $target)
+                                                <li>{!! $target->getDisplayName() !!}</li>
                                                 @endforeach
                                             </ol>
                                         </div>

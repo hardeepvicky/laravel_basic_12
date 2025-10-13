@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Unique;
 
-class ProjectTarget extends BaseModel
+class Target extends BaseModel
 {
     protected $casts = [
         'end_date' => 'date:' . DateUtility::DATE_OUT_FORMAT,
@@ -19,11 +19,11 @@ class ProjectTarget extends BaseModel
 
     protected static array $unique_fields = ["name"];
 
-    protected static array $list_fields = ["id", "project_id", "name"];
+    protected static array $list_fields = ["id", "name"];
 
     public static array $child_model_class = [
-        TaskProjectTarget::class => [
-            "foreignKey" => "project_target_id",
+        TaskTarget::class => [
+            "foreignKey" => "target_id",
             "preventDelete" => true
         ],
     ];
@@ -45,20 +45,15 @@ class ProjectTarget extends BaseModel
         parent::afterFind();
     }
 
-    public function project()
-    {
-        return $this->belongsTo(Project::class);
-    }
-
     public function task()
     {
-        return $this->belongsToMany(Task::class, TaskProjectTarget::class);
+        return $this->belongsToMany(Task::class, TaskTarget::class);
     }
 
     public function getUniqueValidationRules(Request $request)
     {
         $field_rules = [
-            "name" => [Rule::unique($this->connection . "." . $this->getTable(), "name")->where("project_id", $request->get("project_id") ) ],
+            "name" => [Rule::unique($this->connection . "." . $this->getTable(), "name")  ],
         ];
 
         if ($this->id) {

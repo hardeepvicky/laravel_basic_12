@@ -263,10 +263,8 @@ $false = false;
                                 ?>
                                 <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$project_list"
                                     :value="$model->{$field}"
-                                    class="select2 cascade-drop-down"
+                                    class="select2"
                                     layout="horizontal"
-                                    data-sr-cascade-target="#target_id"
-                                    data-sr-cascade-url="/project/ajax_get_target_list/{v}"
                                 />
                             </div>
 
@@ -275,8 +273,9 @@ $false = false;
                                 $field = 'target_id';
                                 $label = "Targets";
                                 ?>
-                                <x-Inputs.drop-down :id="$field" name="taskProjectTarget[]" :label="$label"
-                                    data-value="{{ $model->{$field} }}"
+                                <x-Inputs.drop-down :id="$field" name="taskTarget[]" :label="$label"
+                                    :list="$target_list"
+                                    :value="$model->{$field}"
                                     layout="horizontal"
                                     class="select2"
                                     multiple="true"
@@ -557,11 +556,6 @@ $false = false;
                         _tr.find(".will-required").attr("required", true);
                     }
                 });
-
-                $("#project_id").trigger("sr-cascade.change", {
-                    pageLoad: true
-                });
-
             });
         })
     </script>

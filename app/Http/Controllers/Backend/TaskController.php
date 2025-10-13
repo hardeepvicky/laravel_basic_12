@@ -16,10 +16,10 @@ use App\Models\FieldSetting;
 use App\Models\Lead;
 use App\Models\Party;
 use App\Models\Project;
-use App\Models\ProjectTarget;
 use App\Models\Role;
 use App\Models\SqlLog;
 use App\Models\Tag;
+use App\Models\Target;
 use App\Models\Task;
 use App\Models\TaskTakenAction;
 use App\Models\TaskTodo;
@@ -53,7 +53,7 @@ class TaskController extends BackendController
             "documentFile",
             "taskTodo",
             "project",
-            "projectTarget"
+            "target"
         ]);
 
         $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
@@ -373,6 +373,8 @@ class TaskController extends BackendController
 
         $project_list = Project::getList("id", "display_name", [], "list_display_order");
 
+        $target_list = Target::getList("id", "display_name", [], "list_display_order");
+
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
         $task_todo_field_labels = FieldSetting::getDynamicFields(TaskTodo::class);
@@ -381,7 +383,7 @@ class TaskController extends BackendController
 
         $this->setForView(compact(
             "user_list", "users", "task_type_list", 
-            "status_list", "department_list", "duration_type_list", "party_list", "contact_type_list", "lead_list", "customer_list", "dealer_list", "project_list",
+            "status_list", "department_list", "duration_type_list", "party_list", "contact_type_list", "lead_list", "customer_list", "dealer_list", "project_list", "target_list",
             "field_labels", "task_todo_field_labels",
             "default_start_date_time"
         ));
@@ -430,7 +432,7 @@ class TaskController extends BackendController
             'taskLead' => [],
             'taskCustomer' => [],
             'taskDealer' => [],
-            'taskProjectTarget' => [],
+            'taskTarget' => [],
             'task_todo' => [],
         ];
     }
@@ -521,9 +523,9 @@ class TaskController extends BackendController
             $this->model->user()->sync($users);
         }
 
-        if (isset($validatedData['taskProjectTarget']) && is_array($validatedData['taskProjectTarget'])) {
-            $records = ProjectTarget::find($validatedData['taskProjectTarget']);
-            $this->model->projectTarget()->sync($records);
+        if (isset($validatedData['taskTarget']) && is_array($validatedData['taskTarget'])) {
+            $records = Target::find($validatedData['taskTarget']);
+            $this->model->target()->sync($records);
         }
 
         if (isset($validatedData['taskParty']) && is_array($validatedData['taskParty'])) {
@@ -709,7 +711,7 @@ class TaskController extends BackendController
 
     public function edit($id)
     {
-        $model = $this->model = $this->modelClass::with(["tags", "taskUser", "taskFile", "projectTarget", "taskTodo"])->findOrFail($id);
+        $model = $this->model = $this->modelClass::with(["tags", "taskUser", "taskFile", "target", "taskTodo"])->findOrFail($id);
 
         $model->convertTimeZoneForDisplay();
 
