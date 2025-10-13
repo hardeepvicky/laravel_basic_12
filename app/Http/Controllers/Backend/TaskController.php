@@ -20,6 +20,7 @@ use App\Models\SqlLog;
 use App\Models\Tag;
 use App\Models\Task;
 use App\Models\TaskTakenAction;
+use App\Models\TaskTodo;
 use App\Models\Type;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -27,6 +28,7 @@ use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Validator;
 
 class TaskController extends BackendController
 {
@@ -40,6 +42,15 @@ class TaskController extends BackendController
         $cache_key_prefix = Route::currentRouteName();
 
         $builder = $this->_getBuildeForIndex($cache_key_prefix);
+
+        $builder->with([
+            "department",
+            "assignToUser",
+            "tags",
+            "user",
+            "documentFile",
+            "taskTodo"
+        ]);
 
         $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
 
@@ -70,14 +81,6 @@ class TaskController extends BackendController
         ]);
 
         $builder = $this->modelClass::where($conditions);
-
-        $builder->with([
-            "department",
-            "assignToUser",
-            "tags",
-            "user",
-            "documentFile"
-        ]);
 
         if ($tag_conditions) {
             $builder->wherehas("tags", function ($query) use ($tag_conditions) {
@@ -366,12 +369,15 @@ class TaskController extends BackendController
 
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
+        $task_todo_field_labels = FieldSetting::getDynamicFields(TaskTodo::class);
+
         $default_start_date_time = DateUtility::change(date('d-M-Y 10:00'), 1, DateUtility::DAYS, DateUtility::DATETIME_OUT_FORMAT);
 
         $this->setForView(compact(
             "user_list", "users", "task_type_list", 
             "status_list", "department_list", "duration_type_list", "party_list", "contact_type_list", "lead_list", "customer_list", "dealer_list",
-            "field_labels", "default_start_date_time"
+            "field_labels", "task_todo_field_labels",
+            "default_start_date_time"
         ));
 
         return parent::beforeViewRender();
@@ -390,6 +396,7 @@ class TaskController extends BackendController
 
         $model->priority = 1;
         $model->duration = 1;
+        $model->is_timebound = 1;
         $model->duration_type = Task::DURATION_TYPE_DAY;
 
         $this->setForView(compact("model", 'form'));
@@ -402,7 +409,7 @@ class TaskController extends BackendController
         return [
             "is_draft" => "",
             "name" => ["required"],
-            "description" => ["nullable"],
+            "is_timebound" => ["required"],
             "assign_to_user_id" => [],
             "start_date_time" => [],
             "end_date_time" => [],
@@ -416,6 +423,7 @@ class TaskController extends BackendController
             'taskLead' => [],
             'taskCustomer' => [],
             'taskDealer' => [],
+            'task_todo' => [],
         ];
     }
 
@@ -452,6 +460,7 @@ class TaskController extends BackendController
             unset($save_data['taskUser']);
             unset($save_data['taskFile']);
             unset($save_data['taskParty']);
+            unset($save_data['task_todo']);
 
             $save_data = $this->model->convertTimeZoneBeforeQueryToDatabase($save_data);
 
@@ -574,6 +583,66 @@ class TaskController extends BackendController
                 Tag::createTag($save_data, $this->model, $this->model);
             }
         }
+
+        if (isset($validatedData['task_todo'])) {
+
+            unset($validatedData['task_todo']['(sr-id)']);
+
+            // d($validatedData, true);
+
+            if (isset($validatedData['task_todo'])) {
+                $base_rules = [
+                    "todo" => ["required"],                    
+                ];
+
+                $child_model = new TaskTodo();
+
+                $existing_id_list = $this->model->taskTodo()->pluck("id", "id")->toArray();
+
+                $validatedData['task_id'] = $this->model->id;
+
+                $display_order = 0;
+
+                foreach ($validatedData['task_todo'] as $task_todo) {
+
+                    $validator = Validator::make($task_todo, $base_rules);
+
+                    if ($validator->fails()) {
+                        foreach ($validator->errors()->all() as $error_msg) {
+                            LaravelExtend::addError("", $error_msg, "Todo");
+                        }
+                        continue;
+                    }
+
+                    $display_order++;
+                    if ($task_todo['id']) {
+                        $child_model = TaskTodo::find($task_todo['id']);
+
+                        if (!$child_model) {
+                            $child_model = new TaskTodo();
+                        } else {
+                            unset($existing_id_list[$task_todo['id']]);
+                        }
+                    } else {
+                        $child_model = new TaskTodo();
+                    }
+
+                    $child_model->fill($task_todo);
+
+                    $child_model = $this->model->taskTodo()->save($child_model);
+                }
+
+                if ($existing_id_list) {
+                    $existing_records = $this->model->taskTodo()->where("id", $existing_id_list)->get();
+
+                    foreach ($existing_records as $existing_record) {
+                        if (!$existing_record->safeDelete($existing_record)) {
+                            LaravelExtend::addError($existing_record->name, "Can not delete, bcoz it is asscoicated with other modules.", "Term");
+                        }
+                    }
+                }
+            }
+        }
     }
 
     protected function beforeEdit($model)
@@ -673,6 +742,7 @@ class TaskController extends BackendController
             unset($save_data['tag_name']);
             unset($save_data['taskUser']);
             unset($save_data['taskFile']);
+            unset($save_data['task_todo']);
 
             $save_data = $this->model->convertTimeZoneBeforeQueryToDatabase($save_data);
 
@@ -762,17 +832,74 @@ class TaskController extends BackendController
         }
     }
 
-    public function status_complete($id)
+    public function status_complete($id, Request $request)
     {
         try {
             $this->model = $this->modelClass::findOrFail($id);
 
-            $this->model->changeStatus(Task::STATUS_COMPLETED);
+            $validatedData = $request->validate([
+                "todo" => [],
+                "description" => ["nullable"]
+            ]);
+
+            // d($validatedData, true);
+
+            $is_completed = true;
+
+            if (isset($validatedData['todo']))
+            {
+                foreach($validatedData['todo'] as $todo_id => $value)
+                {
+                    if (!$value)
+                    {
+                        $is_completed = false;
+                    }
+
+                    $todo = TaskTodo::find($todo_id);
+
+                    if ($todo)
+                    {
+                        $todo->is_completed = $value;
+
+                        if ($value)
+                        {
+                            $todo->complete_date_time = date(DateUtility::DATETIME_FORMAT);
+                        }
+                        else
+                        {
+                            $todo->complete_date_time = null;
+                        }
+
+                        $todo->save();
+                    }
+                }
+
+                unset($validatedData["todo"]);
+            }
+
+            $this->model->fill($validatedData);
+            $this->model->save();
+
+            if ($is_completed)
+            {
+                $this->model->changeStatus(Task::STATUS_COMPLETED);
+            }
+
+            $msg = "Data saved and Status changed Successfully";
+
+            if ($request->ajax()) {
+                return $this->responseJson(['status' => 1, 'msg' => $msg]);
+            }
 
             $this->saveSqlLog();
 
-            return back()->with("success", "Status Changed Successfully");
+            return back()->with("success", $msg);
         } catch (Exception $ex) {
+
+            if ($request->ajax()) {
+                return $this->responseJson(['status' => 0, 'msg' => $ex->getMessage()]);
+            }
+
             $this->saveSqlLog();
             throw $ex;
         }
@@ -1002,6 +1129,14 @@ class TaskController extends BackendController
         $builder = $this->_getBuildeForIndex($cache_key_prefix);
 
         $this->beforeCsvExport($builder);
+
+        $builder->with([
+            "department",
+            "assignToUser",
+            "tags",
+            "user",
+            "documentFile",
+        ]);
 
         $records = $builder->get();
 

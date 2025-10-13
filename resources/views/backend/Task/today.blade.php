@@ -90,7 +90,7 @@
                                                     Revert To Previous Status
                                                 </a>
 
-                                                <a class="btn btn-secondary btn-sm mb-2 confirm"
+                                                <a class="btn btn-secondary btn-sm mb-2 status_complete"
                                                     href="{{ route($routePrefix . '.status_complete', ['id' => $record->id]) }}">
                                                     Complete Now
                                                 </a>
@@ -246,9 +246,73 @@
         </div>
     </div>
 
+    <div class="modal fade" id="modal-task-complete" tabindex="-1" style="display: none;" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title fs-5">Task Complete</h3>
+                    <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <x-Form.start action="" method="PUT" />
+
+                    <ul class="ml-3" style="list-style: circle;">
+                        @foreach($record->taskTodo as $taskTodo)                                                
+                        <li>
+                            <?php
+                            $label = $taskTodo->todo;
+                            ?>
+                            <x-Inputs.checkbox name="todo[{{ $taskTodo->id }}]" :label="$label" :value="$taskTodo->is_completed"/>
+                        </li>
+                        @endforeach
+                    </ul>
+                    
+                    <div class="form-group mb-3">
+                        @php
+                        $field = 'description';
+                        $label = get_value_from_list($field_labels, $field, $field);
+                        @endphp
+                        <x-Inputs.text-area :id="$field" :name="$field" :label="$label" :value="$record->description" rows="5" placeholder="Enter {{ $label }}" />
+                    </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Close</button>
+                    <button class="btn btn-primary submit" type="button">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         $(function() {
             $.events.execAtLast(function() {
+                $(document).on("click", "a.status_complete", function(e) {
+
+                    var _tr = $(this).closest("tr");
+
+                    var modal = $('#modal-task-complete');
+
+                    e.preventDefault();
+
+                    modal.modal("show");
+
+                    modal.find("form").attr("action", $(this).attr("href"));
+
+                    var html = "";
+                    if (_tr.find(".assignToUser").length > 0) {
+                        html += _tr.find(".assignToUser").html();
+
+                        html += " -> ";
+                    }
+
+                    html += _tr.find(".name").html();
+
+                    modal.find(".desc").html(html);
+
+                    return false;
+                });
+
                 $(document).on("click", "a.status_verified", function(e) {
 
                     var _tr = $(this).closest("tr");
@@ -318,6 +382,51 @@
 
                 $('#modal-task-verify .submit').click(function() {
                     $('#modal-task-verify form').trigger("submit");
+                });
+
+                $('#modal-task-complete form').ajaxForm({
+                    beforeSubmit: function(arr, $form, options) {
+
+                        $.loader.init().setInfo("Requesting....").show();
+
+                        return true;
+                    },
+                    uploadProgress: function(event, position, total, percentComplete) {},
+                    error: function(xhr, status, errorString) {
+                        $.loader.hide();
+
+                        response = xhr.responseText.trim();
+
+                        if (response.length == 0) {
+                            $.events.onAjaxError("JSON Parse Error", "Empty Response");
+                            return false;
+                        }
+
+                        try {
+                            var responseJson = JSON.parse(response);
+                        } catch (e) {
+                            $.events.onAjaxError("JSON Parse Error", response);
+                            return false;
+                        }
+
+                        var modal = $('#modal-task-verify');
+
+                        form_errors(modal.find('form'), responseJson);
+                    },
+                    success: function(responseText, statusText, xhr) {
+                        ajaxHandleResponse(null, responseText, function(response) {
+                            var modal = $('#modal-task-complete');
+                            modal.modal("hide");
+
+                            $.loader.setInfo("Reloading Page...");
+
+                            location.reload(true);
+                        });
+                    }
+                });
+
+                $('#modal-task-complete .submit').click(function() {
+                    $('#modal-task-complete form').trigger("submit");
                 });
 
                 $("#form_today_other_task").trigger("submit", {pageLoad : true});

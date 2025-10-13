@@ -41,19 +41,95 @@ $false = false;
                             <x-Inputs.text-field :name="$field" :label="$label" value="{{ $model->{$field} }}"
                                 placeholder="Enter {{ $label }}"
                                 layout="horizontal"
-                                mandatory="true" 
+                                mandatory="true"
                                 autocomplete="off" />
 
-                            <div class="textarea-wrapper">
-                                <?php
-                                $field = 'description';
-                                $label = get_value_from_list($field_labels, $field, $field);
-                                ?>
-                                <x-Inputs.text-area :id="$field" :name="$field" :label="$label" rows="3"
-                                    value="{{ $model->{$field} }}" placeholder="Enter {{ $label }}"
-                                    layout="horizontal"
-                                    class="auto-suggesstion-list" />
-                                <div id="{{ $field . '-suggestion-box' }}" class="suggestion-box hidden"></div>
+                            <div class="row mb-3">
+                                <div class="col-sm-3">
+                                    <label class="form-label">
+                                        Todo
+                                    </label>
+                                </div>
+                                <div class="col-sm-9">
+                                    <table class="table table-bordered order-column template-table"
+                                        data-sr-table-template-min-row="0">
+                                        <thead>
+                                            <tr>
+                                                <th class="text-center" style="width : 8%;">
+                                                    <span class="sr-table-template-add">
+                                                        <i class="fas fa-plus-circle text-success icon"></i>
+                                                    </span>
+                                                </th>
+                                                <th style="width:90%">
+                                                    {{ get_value_from_list($task_todo_field_labels, 'todo') }}
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="sr-table-template-row hidden">
+                                                <td>
+                                                    <div class="block">
+                                                        <div class="left-block">
+
+                                                        </div>
+                                                        <div class="right-block">
+                                                            <span class="sr-table-template-delete">
+                                                                <i class=" fas fa-times-circle text-danger icon"></i>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <x-inputs.text-field type="hidden" name="task_todo[(sr-id)][id]"
+                                                        label="" />
+                                                </td>
+                                                <td>
+                                                    <?php
+                                                    $field = 'todo';
+                                                    ?>
+                                                    <x-Inputs.text-field name="task_todo[(sr-id)][{{ $field }}]" :label="$false"  class="will-required"/>
+                                                </td>
+                                            </tr>
+                                            @php
+                                                $task_todo = old('task_todo', $model->taskTodo?->toArray() ?? []);
+                                                unset($task_todo['(sr-id)']);
+                                            @endphp
+                                            @if (isset($task_todo))
+                                                @foreach ($task_todo as $k => $child_arr)
+                                                    <tr class="" sr-id="{{ $child_arr['id'] }}" sr-counter="{{ $k }}">
+                                                        <td>
+                                                            <div class="block">
+                                                                <div class="left-block">
+
+                                                                </div>
+                                                                <div class="right-block">
+                                                                    <span class="sr-table-template-delete">
+                                                                        <i class=" fas fa-times-circle text-danger icon"></i>
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                            <input type="hidden" name="task_todo[{{ $k }}][id]" value="{{ $child_arr['id'] ?? '' }}" />
+                                                        </td>
+                                                        <td>
+                                                            <?php
+                                                            $field = 'todo';
+                                                            $value = $child_arr[$field] ?? '';
+                                                            ?>
+                                                            <x-Inputs.text-field name="task_todo[{{ $k }}][{{ $field }}]" class="{{ $field }}" :label="$false" :value="$value" required="true"/>
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+                                            @endif
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <th class="text-center" style="width : 80px;">
+                                                    <span class="sr-table-template-add">
+                                                        <i class="fas fa-plus-circle text-success icon"></i>
+                                                    </span>
+                                                </th>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
                             </div>
 
                             <div class="is_draft-block is_draft-block-0">
@@ -62,12 +138,12 @@ $false = false;
                                 $label = get_value_from_list($field_labels, $field, $field);
                                 ?>
                                 <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$department_list"
-                                    :value="$model->{$field}" 
-                                    class="select2" 
+                                    :value="$model->{$field}"
+                                    class="select2"
                                     layout="horizontal"
                                     data-sr-cascade-target="#assign_to_user_id"
                                     data-sr-cascade-url="/user/ajax_get_list?dept_id={v}"
-                                    mandatory="true" 
+                                    mandatory="true"
                                 />
                             </div>
 
@@ -77,9 +153,9 @@ $false = false;
                                 $label = get_value_from_list($field_labels, $field, $field);
                                 ?>
                                 <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
-                                    data-value="{{ $model->{$field} }}" 
+                                    data-value="{{ $model->{$field} }}"
                                     layout="horizontal"
-                                    class="select2" 
+                                    class="select2"
                                     mandatory="true" />
                             </div>
 
@@ -96,7 +172,7 @@ $false = false;
                                         </label>
                                     </div>
                                     <div class="col-sm-9">
-                                    
+
                                         <div class="custom-slider mt-4">
                                             <x-Inputs.text-field :id="$field" type="range" :id="$field" :name="$field"
                                                 :label="$false" value="{{ $model->{$field} }}" class="custom-slider-input"
@@ -110,7 +186,21 @@ $false = false;
                                 </div>
                             </div>
 
-                            <div class="is_draft-block is_draft-block-0">
+                            <?php
+                            $field = 'is_timebound';
+                            $label = get_value_from_list($field_labels, $field, $field);
+                            ?>
+                            <div class="row">
+                                <div class="col-sm-3">
+                                    <label class="form-label">
+                                    </label>
+                                </div>
+                                <div class="col-sm-9">
+                                    <x-Inputs.checkbox :id="$field" :name="$field" :label="$label" value="{{ $model->{$field} }}" />
+                                </div>
+                            </div>
+
+                            <div class="is_draft-block is_draft-block-0 is_timebound-block is_timebound-block-1">
                                 <div class="form-group mb-3">
                                     <?php
                                     $field = 'start_date_time';
@@ -140,7 +230,7 @@ $false = false;
                                     </div>
                                 </div>
                             </div>
-                            <div class="row is_draft-block is_draft-block-0">
+                            <div class="row is_draft-block is_draft-block-0 is_timebound-block is_timebound-block-1">
                                 <?php
                                     $field = 'duration';
                                     $label = get_value_from_list($field_labels, $field, $field);
@@ -173,12 +263,12 @@ $false = false;
                                 $value = implode(',', $model->tags?->pluck('name')->toArray() ?? []);
                                 ?>
                                 <x-Inputs.choice :id="$field" :name="$field" :label="$label" :value="$value"
-                                    class="choice" 
+                                    class="choice"
                                     layout="horizontal"
-                                    placeholder="Enter {{ $label }}" 
+                                    placeholder="Enter {{ $label }}"
                                     />
                             </div>
-                            
+
                             <div class="is_draft-block is_draft-block-0 mb-3">
                                 <?php
                                 $field = "taskFile";
@@ -192,8 +282,8 @@ $false = false;
                                             <span class="mandatory">*</span>
                                         </label>
                                     </div>
-                                    <div class="col-sm-9">                                        
-                                        <x-Inputs.text-field :id="$field" :name="$field" :label="$false" :value="$value" multiple="multiple"  />                        
+                                    <div class="col-sm-9">
+                                        <x-Inputs.text-field :id="$field" :name="$field" :label="$false" :value="$value" multiple="multiple"  />
                                         <span id="files-choose" class="btn btn-secondary">Choose Files</span>
                                     </div>
                                 </div>
@@ -219,7 +309,7 @@ $false = false;
                                         value="{{ $model->{$field} }}" />
                                 </div>
                             </div>
-                                                        
+
                             <div class="row is_draft-block is_draft-block-0">
                                 <div class="col-md-6">
                                     <div class="form-group mb-3">
@@ -283,7 +373,7 @@ $false = false;
     </div>
     </form>
 
-    <script>        
+    <script>
         $(function() {
             var screen_name = '<?= $screen_name ?>';
             var users = JSON.parse('<?= json_encode($users) ?>');
@@ -336,9 +426,35 @@ $false = false;
                             $(selector).find("input,select").removeAttr("disabled");
                         }
                     }
+
+                    if (!is_draft)
+                    {
+                        show_hide_timebound_field();
+                    }
+                }
+
+                function show_hide_timebound_field() {
+
+                    var is_draft = $("#is_timebound").prop("checked");
+                    is_draft = is_draft ? 1 : 0;
+
+                    var selector = ".is_timebound-block";
+                    $(selector).hide();
+                    $(selector).find("input,select").attr("disabled", true);
+
+                    console.log("hide", selector);
+
+                    var selector = ".is_timebound-block-any, .is_timebound-block-" + is_draft;
+
+                    if ($(selector).length > 0) {
+                        console.log("show", selector);
+                        $(selector).show();
+                        $(selector).find("input,select").removeAttr("disabled");
+                    }
                 }
 
                 $("#is_draft").change(show_hide_field);
+                $("#is_timebound").change(show_hide_timebound_field);
                 $("#contact_type").change(show_hide_field);
 
                 start_date_picker = flatpickr("#start_date_time", {
@@ -401,6 +517,18 @@ $false = false;
 
                 $("#taskFile").browseGallery({
                     opener : "#files-choose"
+                });
+
+                $(".template-table").srTableTemplate({
+                    brace_type: "(",
+                    afterRowAdd(_table, last_id, _tr) {
+                        _tr.find(".will-select2").select2({
+                            placeHolder: "Please Select",
+                            theme: "bootstrap-5",
+                        });
+
+                        _tr.find(".will-required").attr("required", true);
+                    }
                 });
 
             });

@@ -80,8 +80,26 @@ class TaskCommand extends MyCommand
                 }
             }
 
-            $qb = Task::where("status", Task::STATUS_CREATED)
-                ->where("start_date_time", "<=", $now);
+            $qb = Task::where("status", Task::STATUS_CREATED)->where("is_timebound", 1)->where("start_date_time", "<=", $now);
+
+            SqlLog::addSelectQuery($qb);
+
+            $records = $qb->get();
+
+            $main_counts['task']['found'] += $records->count();
+
+            if ($records && $records->count() > 0)
+            {
+                foreach($records as $record)
+                {
+                    if ($record->changeStatus(Task::STATUS_ASSIGNED))
+                    {
+                        $main_counts['task']['status_change']++;
+                    }
+                }
+            }
+
+            $qb = Task::where("status", Task::STATUS_CREATED)->where("is_timebound", 0);
 
             SqlLog::addSelectQuery($qb);
 

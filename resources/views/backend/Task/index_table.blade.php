@@ -87,11 +87,13 @@ $false = false;
                         <td>{{ $record->priority }}</td>
                         <td>{{ get_value_from_list($status_list, $record->status) }}</td>
                         <td>
-                            <x-Backend.celec-date-time :value="$record->start_date_time"/>
-                            <label class="info">
-                                {{ get_value_from_list($field_labels, 'duration', 'duration') }} :
-                                <span>{{ $record->duration }} {{ get_value_from_list($duration_type_list, $record->duration_type) }}</span>
-                            </label>
+                            @if($record->is_timebound)
+                                <x-Backend.celec-date-time :value="$record->start_date_time"/>
+                                <label class="info">
+                                    {{ get_value_from_list($field_labels, 'duration', 'duration') }} :
+                                    <span>{{ $record->duration }} {{ get_value_from_list($duration_type_list, $record->duration_type) }}</span>
+                                </label>
+                            @endif
                         </td>
                         <td>
                             <x-Backend.celec-date-time :value="$record->created_at" />
@@ -238,6 +240,27 @@ $false = false;
 
 
                                     <x-Backend.document-files :records="$record->documentFile" />
+                                </div>
+
+                                <div class="col-sm-12">
+                                    <div class="card">
+                                        <div class="card-header border-l-primary card-no-border">
+                                            <h3>Todo</h3>
+                                        </div>
+                                        <div class="card-body">        
+                                            <ul class="ml-3" style="list-style: circle;">
+                                                @foreach($record->taskTodo as $taskTodo)                                                
+                                                <li>
+                                                    @if ($taskTodo->is_completed)
+                                                        <i class="fa-solid fa-check text-success"></i>
+                                                    @endif
+
+                                                    {{ $taskTodo->todo }}                                                    
+                                                </li>
+                                                @endforeach
+                                            </ul>
+                                        </div>
+                                    </div>                                
                                 </div>
                             </div>
                         </td>

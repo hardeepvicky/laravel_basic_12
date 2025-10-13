@@ -583,7 +583,7 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
 
         $name = "status_complete";
-        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+        Route::put($name . "/{id}", [$controllerClass, $name])->name($name);
 
         $name = "status_verified";
         Route::put($name . "/{id}", [$controllerClass, $name])->name($name);
