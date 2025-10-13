@@ -41,9 +41,14 @@ class ProjectController extends BackendController
         {            
             foreach($record->projectTarget as $target)
             {
+                $target->complete_per = 0;
                 $target->task_count = $target->task->count();
                 $target->complete_task_count = $target->task()->where("is_completed", 1)->count();
-                $target->complete_per = round($target->complete_task_count * 100 / $target->task_count);
+
+                if ($target->task_count > 0 && $target->complete_task_count > 0)
+                {
+                    $target->complete_per = round($target->complete_task_count * 100 / $target->task_count);
+                }
             }
         }
 
