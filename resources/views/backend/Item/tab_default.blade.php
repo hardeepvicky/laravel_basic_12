@@ -391,7 +391,7 @@
                 <span id="choose-images" class="btn btn-secondary">
                     Choose Images
                 </span>
-                <x-Inputs.text-field :id="$field" :name="$field" :label="$false"
+                <x-Inputs.text-field :id="  $field" :name="$field" :label="$false"
                     :value="$value" multiple="multiple" />
             </div>
         </div>
