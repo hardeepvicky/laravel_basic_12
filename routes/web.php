@@ -575,6 +575,8 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
     Route::get($route_prefix . "-" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
     $name = "today_other_task";
     Route::get($route_prefix . "-" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
+    $name = "ajax_complete_form";
+    Route::get($route_prefix . "-" . $name . "/{id}", [$controllerClass, $name])->name($route_prefix . "." . $name);
     Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
 
         $name = "status_confirm";

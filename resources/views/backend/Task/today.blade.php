@@ -46,7 +46,7 @@
                             </thead>
                             <tbody>
                                 @foreach ($my_tasks as $i => $record)
-                                    <tr>
+                                    <tr data-task_id="{{ $record->id }}">
                                         <th scope="row">{{ $i + 1 }}</th>
                                         <td class="name">{{ $record->name }}</td>
                                         <td>{{ $record->priority }}</td>
@@ -254,27 +254,7 @@
                     <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <x-Form.start action="" method="PUT" />
-
-                    <ul class="ml-3" style="list-style: circle;">
-                        @foreach($record->taskTodo as $taskTodo)                                                
-                        <li>
-                            <?php
-                            $label = $taskTodo->todo;
-                            ?>
-                            <x-Inputs.checkbox name="todo[{{ $taskTodo->id }}]" :label="$label" :value="$taskTodo->is_completed"/>
-                        </li>
-                        @endforeach
-                    </ul>
-                    
-                    <div class="form-group mb-3">
-                        @php
-                        $field = 'description';
-                        $label = get_value_from_list($field_labels, $field, $field);
-                        @endphp
-                        <x-Inputs.text-area :id="$field" :name="$field" :label="$label" :value="$record->description" rows="5" placeholder="Enter {{ $label }}" />
-                    </div>
-                    </form>
+                    Loading....
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Close</button>
@@ -289,26 +269,21 @@
             $.events.execAtLast(function() {
                 $(document).on("click", "a.status_complete", function(e) {
 
+                    e.preventDefault();
+
+                    var _this = $(this);
+
                     var _tr = $(this).closest("tr");
+
+                    var task_id = _tr.attr("data-task_id");
 
                     var modal = $('#modal-task-complete');
 
-                    e.preventDefault();
+                    modal.find(".modal-body").load("/task-ajax_complete_form/" + task_id, function(){
+                        modal.find("form").attr("action", _this.attr("href"));
+                    });
 
                     modal.modal("show");
-
-                    modal.find("form").attr("action", $(this).attr("href"));
-
-                    var html = "";
-                    if (_tr.find(".assignToUser").length > 0) {
-                        html += _tr.find(".assignToUser").html();
-
-                        html += " -> ";
-                    }
-
-                    html += _tr.find(".name").html();
-
-                    modal.find(".desc").html(html);
 
                     return false;
                 });

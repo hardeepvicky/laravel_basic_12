@@ -709,7 +709,7 @@ class TaskController extends BackendController
 
     public function edit($id)
     {
-        $model = $this->model = $this->modelClass::with(["tags", "taskUser", "taskFile"])->findOrFail($id);
+        $model = $this->model = $this->modelClass::with(["tags", "taskUser", "taskFile", "projectTarget", "taskTodo"])->findOrFail($id);
 
         $model->convertTimeZoneForDisplay();
 
@@ -1239,4 +1239,12 @@ class TaskController extends BackendController
         download_start($file, "application/octet-stream");
     }
 
+    public function ajax_complete_form($id)
+    {
+        $model = $this->model = $this->modelClass::with(["taskTodo"])->findOrFail($id);
+
+        $this->setForView(compact("model"));
+
+        return $this->view(__FUNCTION__);
+    }
 }
