@@ -3,15 +3,14 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Helpers\LaravelExtend;
+use App\Models\Department;
 use App\Models\DocumentFile;
 use App\Models\FieldSetting;
 use App\Models\Project;
-use App\Models\ProjectTarget;
 use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Validator;
 
 class ProjectController extends BackendController
 {
@@ -28,6 +27,7 @@ class ProjectController extends BackendController
         $builder = $this->_getBuildeForIndex($cache_key_prefix);
 
         $builder->with([
+            "dept",
             "documentFile"
         ]);
 
@@ -44,7 +44,7 @@ class ProjectController extends BackendController
 
         $conditions = $this->getConditions($cache_key, [
             ["field" => "id", "type" => "int", "cache" => false],
-            ["field" => "name", "type" => "string"],            
+            ["field" => "name", "type" => "string"],
         ]);
 
         $builder = $this->modelClass::where($conditions);
@@ -73,9 +73,12 @@ class ProjectController extends BackendController
             $this->model = new $this->modelClass();
         }
 
+        $dept_list = Department::getList("id", "display_name", [], "list_display_order");
+
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
         $this->setForView(compact(
+            "dept_list",
             "field_labels"
         ));
 
@@ -101,8 +104,9 @@ class ProjectController extends BackendController
     private function _common_validation_rules()
     {
         return [
-            "name" => ["required"],            
-            "description" => ["nullable"],            
+            "name" => ["required"],
+            "dept_id" => ["required"],
+            "description" => ["nullable"],
             "list_display_order" => ["required"],
             "is_active" => "",
             "projectFile" => []
@@ -146,7 +150,7 @@ class ProjectController extends BackendController
             if ($save_and_close)
             {
                 return redirect()->to(get_current_path_url([
-                    'last_insert_id' => $this->model->id,                    
+                    'last_insert_id' => $this->model->id,
                 ]));
             }
 

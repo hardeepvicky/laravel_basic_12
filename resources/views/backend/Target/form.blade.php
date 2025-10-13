@@ -29,6 +29,17 @@
                                 mandatory="true" />
 
                             <?php
+                                $field = 'dept_id';
+                                $label = get_value_from_list($field_labels, $field, $field);
+                            ?>
+                            <x-Inputs.drop-down :id="$field" :name="$field" :label="$label"
+                                :list="$dept_list"
+                                :value="$model->{$field}"
+                                layout="horizontal"
+                                class="select2"
+                                mandatory="true" />
+
+                            <?php
                             $field = 'end_date';
                             $label = get_value_from_list($field_labels, $field, $field);
                             ?>

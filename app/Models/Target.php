@@ -45,6 +45,11 @@ class Target extends BaseModel
         parent::afterFind();
     }
 
+    public function dept()
+    {
+        return $this->belongsTo(Department::class, "dept_id");
+    }
+
     public function task()
     {
         return $this->belongsToMany(Task::class, TaskTarget::class);

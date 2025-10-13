@@ -26,6 +26,7 @@
                             <?= sortable_anchor('id', get_value_from_list($field_labels, 'id', 'id')) ?>
                             | <?= sortable_anchor('name', get_value_from_list($field_labels, 'name', 'name')) ?>
                         </th>
+                        <th style="width:8%"><?= sortable_anchor('dept_id', get_value_from_list($field_labels, 'dept_id', 'dept_id')) ?></th>
                         <th style="width:8%"><?= sortable_anchor('end_date', get_value_from_list($field_labels, 'end_date', 'end_date')) ?></th>
                         <th>Tasks - Complete / Total</th>
                         <th>Complete Percentage</th>
@@ -41,12 +42,13 @@
                     @foreach ($records as $record)
                         <tr>
                             <th scope="row">
-                                <x-Backend.celec-summary-table-first-column :record="$record" :routePrefix="$routePrefix" buttons="edit,delete,tr_details">
+                                <x-Backend.celec-summary-table-first-column :record="$record" :routePrefix="$routePrefix" buttons="edit,delete">
                                     <div class="label">
                                         {{ $record->id . " | " . $record->name }}
                                     </div>
                                 </x-Backend.celec-summary-table-first-column>
                             </th>
+                            <td>{{ $record->dept?->getDisplayName() }}</td>
                             <td>{{ if_date($record->end_date) }}</td>
                             <td>{{ $record->complete_task_count . " / " . $record->task_count }}</td>
                             <td>{{ $record->complete_per }} %</td>

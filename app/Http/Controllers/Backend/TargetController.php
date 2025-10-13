@@ -3,14 +3,13 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Helpers\LaravelExtend;
-use App\Models\DocumentFile;
+use App\Models\Department;
 use App\Models\FieldSetting;
 use App\Models\Target;
 use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Validator;
 
 class TargetController extends BackendController
 {
@@ -25,6 +24,10 @@ class TargetController extends BackendController
         $cache_key_prefix = Route::currentRouteName();
 
         $builder = $this->_getBuildeForIndex($cache_key_prefix);
+
+        $builder->with([
+            "dept",
+        ]);
 
         $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
 
@@ -80,9 +83,12 @@ class TargetController extends BackendController
             $this->model = new $this->modelClass();
         }
 
+        $dept_list = Department::getList("id", "display_name", [], "list_display_order");
+
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
         $this->setForView(compact(
+            "dept_list",
             "field_labels"
         ));
 
@@ -109,6 +115,7 @@ class TargetController extends BackendController
     {
         return [
             "name" => ["required"],
+            "dept_id" => ["required"],
             "end_date" => ["required"],
             "list_display_order" => ["required"],
             "is_active" => "",
@@ -137,7 +144,8 @@ class TargetController extends BackendController
         DB::beginTransaction();
 
         try {
-            $this->model = $this->modelClass::create($validatedData);
+            $save_data = $this->model->convertTimeZoneBeforeQueryToDatabase($validatedData);
+            $this->model = $this->modelClass::create($save_data);
 
             $this->_saveOthers($validatedData);
 
@@ -208,9 +216,9 @@ class TargetController extends BackendController
         DB::beginTransaction();
 
         try {
-            // d($validatedData, true);
+            $save_data = $this->model->convertTimeZoneBeforeQueryToDatabase($validatedData);
 
-            $this->model->fill($validatedData);
+            $this->model->fill($save_data);
 
             $this->model->save();
 

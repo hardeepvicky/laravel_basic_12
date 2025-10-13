@@ -51,11 +51,10 @@ class Project extends BaseModel
         parent::afterFind();
     }
 
-    public function projectTarget()
+    public function dept()
     {
-        return $this->hasMany(ProjectTarget::class);
+        return $this->belongsTo(Department::class, "dept_id");
     }
-
     
     public function documentFile()
     {
