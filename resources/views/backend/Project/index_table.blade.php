@@ -87,6 +87,8 @@
                                                             <th>Sr. No.</th>
                                                             <th>{{ get_value_from_list($target_field_labels, 'name') }}</th>
                                                             <th>{{ get_value_from_list($target_field_labels, 'end_date') }}</th>
+                                                            <th>Tasks - Complete / Total</th>
+                                                            <th>Complete Percentage</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -95,6 +97,8 @@
                                                             <td>{{ $i + 1 }}</td>
                                                             <td>{{ $projectTarget->name }}</td>
                                                             <td>{{ if_date($projectTarget->end_date) }}</td>
+                                                            <td>{{ $projectTarget->complete_task_count . " / " . $projectTarget->task_count }}</td>
+                                                            <td>{{ $projectTarget->complete_per }} %</td>
                                                         </tr>
                                                         @endforeach
                                                     </tbody>

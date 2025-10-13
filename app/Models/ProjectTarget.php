@@ -22,7 +22,10 @@ class ProjectTarget extends BaseModel
     protected static array $list_fields = ["id", "project_id", "name"];
 
     public static array $child_model_class = [
-        
+        TaskProjectTarget::class => [
+            "foreignKey" => "project_target_id",
+            "preventDelete" => true
+        ],
     ];
 
     protected function getDisplayNameAttribute()
@@ -45,6 +48,11 @@ class ProjectTarget extends BaseModel
     public function project()
     {
         return $this->belongsTo(Project::class);
+    }
+
+    public function task()
+    {
+        return $this->belongsToMany(Task::class, TaskProjectTarget::class);
     }
 
     public function getUniqueValidationRules(Request $request)

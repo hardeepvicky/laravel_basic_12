@@ -44,6 +44,10 @@ class Task extends BaseModel
             "foreignKey" => "task_id",
             "preventDelete" => false
         ],
+        TaskProjectTarget::class => [
+            "foreignKey" => "task_id",
+            "preventDelete" => false
+        ],
     ];
 
     public const TASK_TYPE_PROJECT = "PROJECT";

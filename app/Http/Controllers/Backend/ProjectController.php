@@ -31,10 +31,21 @@ class ProjectController extends BackendController
             "projectTarget" => function($q){
                 $q->orderBy("list_display_order");
             },
+            "projectTarget.task",
             "documentFile"
         ]);
 
         $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
+
+        foreach($records as $record)
+        {            
+            foreach($record->projectTarget as $target)
+            {
+                $target->task_count = $target->task->count();
+                $target->complete_task_count = $target->task()->where("is_completed", 1)->count();
+                $target->complete_per = round($target->complete_task_count * 100 / $target->task_count);
+            }
+        }
 
         $this->setForView(compact("records"));
 
