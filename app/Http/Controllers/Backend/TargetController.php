@@ -133,7 +133,7 @@ class TargetController extends BackendController
 
         $rules = $this->_common_validation_rules();
 
-        $model = new $this->modelClass();
+        $this->model = $model = new $this->modelClass();
 
         $rules = LaravelExtend::merge_validation_rules($rules, $model->getUniqueValidationRules($request));
 
