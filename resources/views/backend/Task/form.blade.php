@@ -261,7 +261,7 @@ $false = false;
                                 $field = 'project_id';
                                 $label = get_value_from_list($field_labels, $field, $field);
                                 ?>
-                                <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$project_list"
+                                <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$empty_list"
                                     :value="$model->{$field}"
                                     class="select2"
                                     layout="horizontal"
@@ -274,7 +274,7 @@ $false = false;
                                 $label = "Targets";
                                 ?>
                                 <x-Inputs.drop-down :id="$field" name="taskTarget[]" :label="$label"
-                                    :list="$target_list"
+                                    :list="$empty_list"
                                     :value="$model->{$field}"
                                     layout="horizontal"
                                     class="select2"
@@ -525,6 +525,57 @@ $false = false;
                     pageLoad: true
                 });
 
+                $("#dept_id").change(function(){
+                    var v = $(this).val();
+
+                    if (v)
+                    {
+                        ajaxGetJson("/project/ajax_get_list/" + v, function(response){
+                            var html = '<option value="">Please Select</option>';
+
+                            for(var i in response['data'])
+                            {
+                                var r = response['data'][i];
+                                html += '<option value="' + r['id'] + '">' + r['name'] + '</option>';
+                            }
+
+                            var target = "#project_id";
+
+                            $(target).html(html);
+
+                            var v = $(target).attr("data-value");
+
+                            if (v)
+                            {
+                                $(target).val(v).trigger("change");
+                            }
+                        });
+
+                        ajaxGetJson("/target/ajax_get_list/" + v, function(response){
+                            var html = '';
+
+                            for(var i in response['data'])
+                            {
+                                var r = response['data'][i];
+                                html += '<option value="' + r['id'] + '">' + r['name'] + '</option>';
+                            }
+
+                            var target = "#target_id";
+
+                            $(target).html(html);
+
+                            var v = $(target).attr("data-value");
+
+                            if (v)
+                            {
+                                $(target).val(v).trigger("change");
+                            }
+                        });
+                    }
+                });
+
+                $("#dept_id").trigger("change", {pageLoad : true});
+
                 $("#assign_to_user_id").change(function(){
                     var v = $(this).val();
 
@@ -556,6 +607,8 @@ $false = false;
                         _tr.find(".will-required").attr("required", true);
                     }
                 });
+
+
             });
         })
     </script>

@@ -371,10 +371,6 @@ class TaskController extends BackendController
 
         $dealer_list = Dealer::getList("id", "display_name", [], "list_display_order");
 
-        $project_list = Project::getList("id", "display_name", [], "list_display_order");
-
-        $target_list = Target::getList("id", "display_name", [], "list_display_order");
-
         $field_labels = FieldSetting::getDynamicFields($this->modelClass);
 
         $task_todo_field_labels = FieldSetting::getDynamicFields(TaskTodo::class);
@@ -383,7 +379,7 @@ class TaskController extends BackendController
 
         $this->setForView(compact(
             "user_list", "users", "task_type_list", 
-            "status_list", "department_list", "duration_type_list", "party_list", "contact_type_list", "lead_list", "customer_list", "dealer_list", "project_list", "target_list",
+            "status_list", "department_list", "duration_type_list", "party_list", "contact_type_list", "lead_list", "customer_list", "dealer_list",
             "field_labels", "task_todo_field_labels",
             "default_start_date_time"
         ));

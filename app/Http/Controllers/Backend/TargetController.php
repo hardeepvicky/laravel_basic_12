@@ -239,4 +239,30 @@ class TargetController extends BackendController
             return back()->withInput()->with('fail', get_exception_display_message($ex))->with("custom_errors", LaravelExtend::$errors);
         }
     }
+
+    public function ajax_get_list($department_id)
+    {
+        $response = ["status" => 1];
+
+        try {
+
+            $records = $this->modelClass::where("dept_id", $department_id)->get();
+
+            $response['data'] = [];
+
+            foreach ($records as $record) {
+                $row = [
+                    "id" => $record->id,
+                    "name" => $record->getDisplayName(),
+                ];
+
+                $response['data'][] = $row;
+            }
+        } catch (Exception $ex) {
+            $response['status'] = 0;
+            $response['msg'] = $ex->getMessage();
+        }
+
+        return $this->responseJson($response);
+    }
 }

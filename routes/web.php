@@ -1998,6 +1998,9 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
 
         $name = "ajax_update_field";
         Route::post($name, [$controllerClass, $name])->name($name);
+
+        $name = "ajax_get_list";
+        Route::get($name . "/{dept_id}", [$controllerClass, $name])->name($name);
     });
 
 
@@ -2014,6 +2017,9 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
 
         $name = "ajax_update_field";
         Route::post($name, [$controllerClass, $name])->name($name);
+
+        $name = "ajax_get_list";
+        Route::get($name . "/{dept_id}", [$controllerClass, $name])->name($name);
     });
 
     Route::group(['prefix' => 'permissions', 'as' => 'permissions.'], function () {
