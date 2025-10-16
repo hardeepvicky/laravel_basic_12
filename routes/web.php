@@ -58,6 +58,7 @@ use App\Http\Controllers\Backend\ProductController;
 use App\Http\Controllers\Backend\ProductionTargetController;
 use App\Http\Controllers\Backend\ProductIssueController;
 use App\Http\Controllers\Backend\ProductSerialController;
+use App\Http\Controllers\Backend\ProjectController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Backend\PublicController;
 use App\Http\Controllers\Backend\PurchaseOrderController;
@@ -77,6 +78,7 @@ use App\Http\Controllers\Backend\StockItemController;
 use App\Http\Controllers\Backend\StockProductController;
 use App\Http\Controllers\Backend\SubDepartmentController;
 use App\Http\Controllers\Backend\TagsController;
+use App\Http\Controllers\Backend\TargetController;
 use App\Http\Controllers\Backend\TaskController;
 use App\Http\Controllers\Backend\TypeController;
 use App\Http\Controllers\Backend\UomController;
@@ -574,6 +576,8 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
     Route::get($route_prefix . "-" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
     $name = "today_other_task";
     Route::get($route_prefix . "-" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
+    $name = "ajax_complete_form";
+    Route::get($route_prefix . "-" . $name . "/{id}", [$controllerClass, $name])->name($route_prefix . "." . $name);
     Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
 
         $name = "status_confirm";
@@ -583,7 +587,7 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
 
         $name = "status_complete";
-        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+        Route::put($name . "/{id}", [$controllerClass, $name])->name($name);
 
         $name = "status_verified";
         Route::put($name . "/{id}", [$controllerClass, $name])->name($name);
@@ -1979,6 +1983,44 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission', 'backend
     Route::any($route_prefix . "/" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
     $name = "out";
     Route::any($route_prefix . "/" . $name, [$controllerClass, $name])->name($route_prefix . "." . $name);
+
+
+    $route_prefix = "project";
+    $controllerClass = ProjectController::class;
+    Route::resource($route_prefix, $controllerClass);
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
+        $name = "activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "de_activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "ajax_update_field";
+        Route::post($name, [$controllerClass, $name])->name($name);
+
+        $name = "ajax_get_list";
+        Route::get($name . "/{dept_id}", [$controllerClass, $name])->name($name);
+    });
+
+
+    $route_prefix = "target";
+    $controllerClass = TargetController::class;
+    Route::resource($route_prefix, $controllerClass);
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
+        $name = "activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "de_activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "ajax_update_field";
+        Route::post($name, [$controllerClass, $name])->name($name);
+
+        $name = "ajax_get_list";
+        Route::get($name . "/{dept_id}", [$controllerClass, $name])->name($name);
+    });
 
     Route::group(['prefix' => 'permissions', 'as' => 'permissions.'], function () {
 

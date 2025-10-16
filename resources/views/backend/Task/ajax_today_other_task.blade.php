@@ -34,7 +34,7 @@ $start = ($page * 10) - 10;
                     @php
                         $i++;
                     @endphp
-                        <tr>
+                        <tr data-task_id="{{ $record->id }}">
                             <th scope="row">{{ $i }}</th>
                             <td class="name">{{ $record->name }}</td>
                             <td class="assignToUser">{{ $record->assignToUser?->getDisplayName() }}</td>

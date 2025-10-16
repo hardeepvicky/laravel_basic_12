@@ -70,6 +70,10 @@ class Product extends BaseModel
             "foreignKey" => ["product_id"],
             "preventDelete" => true
         ],
+        StockProduct::class => [
+            "foreignKey" => ["product_id"],
+            "preventDelete" => true
+        ],
     ];
 
     public function beforeSave()
@@ -114,6 +118,11 @@ class Product extends BaseModel
     public function specifications()
     {
         return $this->hasMany(ProductSpecification::class, 'product_id');
+    }
+
+    public function stockProduct()
+    {
+        return $this->hasMany(StockProduct::class, 'product_id');
     }
 
     public function images()

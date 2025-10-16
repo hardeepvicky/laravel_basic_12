@@ -18,6 +18,8 @@ class SectionRoutes
         "user.my-profile",
         "user.change.password",
 
+        "task.ajax_complete_form",
+
         "tags.ajax_get_list_for_header",
         "change-history.ajax_get_model_fields",
 

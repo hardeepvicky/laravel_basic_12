@@ -44,6 +44,10 @@ class Task extends BaseModel
             "foreignKey" => "task_id",
             "preventDelete" => false
         ],
+        TaskProjectTarget::class => [
+            "foreignKey" => "task_id",
+            "preventDelete" => false
+        ],
     ];
 
     public const TASK_TYPE_PROJECT = "PROJECT";
@@ -101,6 +105,21 @@ class Task extends BaseModel
     public function assignToUser()
     {
         return $this->belongsTo(User::class, "assign_to_user_id");
+    }
+
+    public function project()
+    {
+        return $this->belongsTo(Project::class);
+    }
+
+    public function taskTarget()
+    {
+        return $this->hasMany(TaskTarget::class);
+    }
+
+    public function target()
+    {
+        return $this->belongsToMany(Target::class, TaskTarget::class);
     }
 
     public function tags()
@@ -175,6 +194,11 @@ class Task extends BaseModel
         return $this->hasMany(TaskTakenAction::class, 'task_id');
     }
 
+    public function taskTodo()
+    {
+        return $this->hasMany(TaskTodo::class, 'task_id');
+    }
+
     protected function getDisplayNameAttribute()
     {
         return $this->getDisplayName();
@@ -201,9 +225,12 @@ class Task extends BaseModel
             $rules["dept_id"] = ["required"];
             $rules["assign_to_user_id"] = ["required"];
             $rules["priority"] = ["required"];
-            $rules["start_date_time"] = ["required"];
-            $rules["duration_type"] = ["required"];
-            $rules["duration"] = ["required"];
+            
+            if ($request->input("is_timebound", false)) {                
+                $rules["start_date_time"] = ["required"];
+                $rules["duration_type"] = ["required"];
+                $rules["duration"] = ["required"];
+            }
         }
 
         return $rules;

@@ -389,10 +389,9 @@
             </div>
             <div class="col-sm-9">
                 <span id="choose-images" class="btn btn-secondary">
-                    <i class="fa-solid fa-camera"></i>
                     Choose Images
                 </span>
-                <x-Inputs.text-field :id="$field" :name="$field" :label="$false"
+                <x-Inputs.text-field :id="  $field" :name="$field" :label="$false"
                     :value="$value" multiple="multiple" />
             </div>
         </div>

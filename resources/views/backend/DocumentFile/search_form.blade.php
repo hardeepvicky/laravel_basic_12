@@ -32,6 +32,14 @@ $paginationList = [
             <x-Inputs.drop-down :name="$field" :label="$label" :value="$search[$field]" :list="$type_list"
                 class="select2" />
         </div>
+        <div class="col-md-4 col-lg-3 col-xxxl-2 mb-2">
+            <?php
+            $field = 'dept_id';
+            $label = "Dept."
+            ?>
+            <x-Inputs.drop-down :name="$field" :label="$label" :value="$search[$field]" :list="$dept_list"
+                class="select2" />
+        </div>
         <div class="col-md-12 col-lg-6 col-xxxl-3 mb-2">
             <?php
             $field = 'document_category_id';
