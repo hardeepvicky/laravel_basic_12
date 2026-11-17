@@ -20,7 +20,7 @@ use Illuminate\Support\Facades\Route;
 
 class TaskController extends BackendController
 {
-    public String $routePrefix = "task";
+    public String $routePrefix = "admin.task";
 
     protected $modelClass = Task::class;
     protected Task | null $model = null;

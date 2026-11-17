@@ -111,7 +111,7 @@ Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function 
 
 Route::get("import_log_status/{import_log_id}", [HomeController::class, "import_log_status"])->name("import_log_status");
 
-Route::group(['middleware' => ['auth', 'check_auth', 'role_permission']], function () {
+Route::group(['prefix' => 'admin', 'as'=>'admin.', 'middleware' => ['auth', 'check_auth', 'role_permission']], function () {
 
     $route_prefix = "dashboard";
     $controllerClass = DashboardController::class;
@@ -383,6 +383,21 @@ Route::group(['middleware' => ['auth', 'check_auth', 'role_permission']], functi
     });
 
     $route_prefix = "email-template";
+    $controllerClass = EmailTemplateController::class;
+    Route::resource($route_prefix, $controllerClass);
+    Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
+
+        $name = "copy";
+        Route::get("{id}/" . $name, [$controllerClass, $name])->name($name);
+
+        $name = "activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "de_activate";
+        Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+    });
+
+    $route_prefix = "truck-type";
     $controllerClass = EmailTemplateController::class;
     Route::resource($route_prefix, $controllerClass);
     Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {

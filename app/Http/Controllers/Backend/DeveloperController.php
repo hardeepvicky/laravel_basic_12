@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Route;
 
 class DeveloperController extends BackendController
 {
-    public String $routePrefix = "developer";
+    public String $routePrefix = "admin.developer";
 
     public function laravel_routes_index()
     {

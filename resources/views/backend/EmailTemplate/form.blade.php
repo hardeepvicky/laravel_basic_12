@@ -12,7 +12,7 @@ $false = false;
     <?php
     $page_header_links = [['title' => 'Summary', 'url' => route($routePrefix . '.index')]];
     $empty_list = [];
-    $is_disabled = $model->name && !is_developer_role_login();
+    $is_disabled = request()->route()->getName() == "email-template.edit" && !is_developer_role_login();
     ?>
 
     @include($partial_path . '.page_header')

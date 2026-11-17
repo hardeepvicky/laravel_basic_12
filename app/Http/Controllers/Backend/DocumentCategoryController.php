@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Route;
 
 class DocumentCategoryController extends BackendController
 {
-    public String $routePrefix = "document-category";
+    public String $routePrefix = "admin.document-category";
 
     protected $modelClass = DocumentCategory::class;
 
@@ -98,13 +98,11 @@ class DocumentCategoryController extends BackendController
             $this->model = new $this->modelClass();
         }
 
-        $field_labels = FieldSetting::getDynamicFields($this->modelClass);
-
         $qb = $this->modelClass::query()->where("is_last_node", 0);
 
         $tree_list = $this->modelClass::getTreeList($qb);
 
-        $this->setForView(compact("field_labels", "tree_list"));
+        $this->setForView(compact("tree_list"));
 
         return parent::beforeViewRender();
     }

@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Cache;
 
 class DashboardController extends BackendController
 {
-    public String $routePrefix = "dashbaord";
+    public String $routePrefix = "admin.dashbaord";
 
     public function index()
     {

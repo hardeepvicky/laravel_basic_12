@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Route;
 
 class TypeController extends BackendController
 {
-    public String $routePrefix = "type";
+    public String $routePrefix = "admin.type";
 
     protected $modelClass = Type::class;
 

@@ -461,9 +461,9 @@ class HomeMenu extends BaseMenu
     {
         $links = [];
 
-        $links[] = self::getLink("dashboard", "Dashboard", 'fa-solid fa-gauge');
+        $links[] = self::getLink("admin.dashboard", "Dashboard", 'fa-solid fa-gauge');
 
-        $links[] = self::getLink("notification.my", "My Notification", 'fa-solid fa-bell');
+        $links[] = self::getLink("admin.notification.my", "My Notification", 'fa-solid fa-bell');
 
         return self::getModule("Home", 'fas fa-home', $links);
     }
@@ -487,7 +487,7 @@ class AdminMenu extends BaseMenu
 
     private static function user()
     {
-        $routePrefix = "user";
+        $routePrefix = "admin.user";
 
         $links = self::getControllerDefaultLinks($routePrefix, "User", self::ICON_MENU_ROOT_CHILD);
 
@@ -497,7 +497,7 @@ class AdminMenu extends BaseMenu
 
     public static function permission()
     {
-        $routePrefix = "permissions";
+        $routePrefix = "admin.permissions";
 
         $links = [
             self::getLink($routePrefix . ".index", "Summary", self::ICON_MENU_LIST),
@@ -509,7 +509,7 @@ class AdminMenu extends BaseMenu
 
     private static function type()
     {
-        $routePrefix = "type";
+        $routePrefix = "admin.type";
 
         $links = self::getControllerDefaultLinks($routePrefix, "Type", self::ICON_MENU_ROOT_CHILD);
 
@@ -518,7 +518,7 @@ class AdminMenu extends BaseMenu
 
     private static function drop_down_value()
     {
-        $routePrefix = "drop-down-value";
+        $routePrefix = "admin.drop-down-value";
 
         $links = self::getControllerDefaultLinks($routePrefix, "Drop Down Value", self::ICON_MENU_ROOT_CHILD);
 
@@ -527,7 +527,7 @@ class AdminMenu extends BaseMenu
 
     private static function email_template()
     {
-        $routePrefix = "email-template";
+        $routePrefix = "admin.email-template";
 
         $links = self::getControllerDefaultLinks($routePrefix, "Email Template", self::ICON_MENU_ROOT_CHILD);
 
@@ -551,7 +551,7 @@ class DeveloperMenu extends BaseMenu
 
     public static function setting()
     {
-        $routePrefix = "setting";
+        $routePrefix = "admin.setting";
 
         $links = [
             self::getLink($routePrefix . ".general", "General", 'fa-solid fa-gear'),
@@ -563,7 +563,7 @@ class DeveloperMenu extends BaseMenu
 
     private static function app_menu()
     {
-        $routePrefix = "app-menu";
+        $routePrefix = "admin.app-menu";
 
         $links = self::getControllerDefaultLinks($routePrefix, "Menu", self::ICON_MENU_ROOT_CHILD);
 
@@ -574,7 +574,7 @@ class DeveloperMenu extends BaseMenu
     {
         $links = [];
 
-        $routePrefix = "developer";
+        $routePrefix = "admin.developer";
 
         $links[] = self::getLink($routePrefix . ".email_logs", null, self::ICON_MENU_LIST, [], self::LINK_TYPE_SUMMARY);
         $links[] = self::getLink($routePrefix . ".whatsapp_logs", null, self::ICON_MENU_LIST, [], self::LINK_TYPE_SUMMARY);
@@ -592,7 +592,7 @@ class DeveloperMenu extends BaseMenu
     {
         $links = [];
 
-        $routePrefix = "developer";
+        $routePrefix = "admin.developer";
 
         $links[] = self::getLink($routePrefix . ".laravel_routes_index", "Laravel Routes", self::ICON_MENU_LIST, [], self::LINK_TYPE_SUMMARY);
 

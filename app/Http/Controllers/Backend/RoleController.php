@@ -13,7 +13,7 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class RoleController extends BackendController
 {
-    public String $routePrefix = "role";
+    public String $routePrefix = "admin.role";
 
     protected $modelClass = Role::class;
 

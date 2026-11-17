@@ -302,12 +302,12 @@ class SectionRoutes
 
         $section['children'][] = [
             "text" => "Dashboard",
-            "route_list" => ["dashboard"]
+            "route_list" => ["admin.dashboard"]
         ];
 
         $section['children'][] = [
             "text" => "My Notification",
-            "route_list" => ["notification.my"]
+            "route_list" => ["admin.notification.my"]
         ];
 
         return $section;
@@ -315,7 +315,7 @@ class SectionRoutes
 
     private static function developer()
     {
-        $routePrefix = "developer";
+        $routePrefix = "admin.developer";
 
         $section = [
             "text" => "Developer",
@@ -332,7 +332,7 @@ class SectionRoutes
 
     private static function setting()
     {
-        $routePrefix = "setting";
+        $routePrefix = "admin.setting";
 
         $section = [
             "text" => "Setting",
@@ -355,7 +355,7 @@ class SectionRoutes
 
     private static function app_menu()
     {
-        $routePrefix = "app-menu";
+        $routePrefix = "admin.app-menu";
 
         $section = [
             "text" => "Menu",
@@ -374,7 +374,7 @@ class SectionRoutes
 
     private static function logs()
     {
-        $routePrefix = "developer";
+        $routePrefix = "admin.developer";
 
         $section = [
             "text" => "Logs",
@@ -426,7 +426,7 @@ class SectionRoutes
 
     private static function developer_other()
     {
-        $routePrefix = "developer";
+        $routePrefix = "admin.developer";
 
         $section = [
             "text" => "Other",
@@ -443,7 +443,7 @@ class SectionRoutes
 
     private static function type()
     {
-        $routePrefix = "type";
+        $routePrefix = "admin.type";
 
         $section = [
             "text" => "Type",
@@ -460,7 +460,7 @@ class SectionRoutes
 
     private static function drop_down_value()
     {
-        $routePrefix = "drop-down-value";
+        $routePrefix = "admin.drop-down-value";
 
         $section = [
             "text" => "Drop Down Value",
@@ -477,7 +477,7 @@ class SectionRoutes
 
     private static function user()
     {
-        $routePrefix = "user";
+        $routePrefix = "admin.user";
 
         $section = [
             "text" => "User",
@@ -494,7 +494,7 @@ class SectionRoutes
 
     private static function email_template()
     {
-        $routePrefix = "email-template";
+        $routePrefix = "admin.email-template";
 
         $section = [
             "text" => "Email Template",

@@ -48,7 +48,6 @@ class GoogleAuthController extends Controller
                 "email" => $user->getEmail(),
                 "avatar" => $user->getAvatar(),
                 "google_id" => $user->id,
-                "created_via" => User::CREATED_VIA_GOOGLE
             ];
 
             $data['person_last_name'] = "";

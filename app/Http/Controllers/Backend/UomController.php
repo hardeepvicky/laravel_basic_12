@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Route;
 
 class UomController extends BackendController
 {
-    public String $routePrefix = "uom";
+    public String $routePrefix = "admin.uom";
 
     protected $modelClass = Uom::class;
 
@@ -100,13 +100,11 @@ class UomController extends BackendController
             $this->model = new $this->modelClass();
         }
 
-        $field_labels = FieldSetting::getDynamicFields($this->modelClass);
-
         $qb = $this->modelClass::query()->where("is_last_node", 0);
 
         $tree_list = $this->modelClass::getTreeList($qb);
 
-        $this->setForView(compact("field_labels", "tree_list"));
+        $this->setForView(compact("tree_list"));
 
         return parent::beforeViewRender();
     }

@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Session;
 
 class SettingsController extends BackendController
 {
-    public String $routePrefix = "setting";
+    public String $routePrefix = "admin.setting";
 
     protected $modelClass = Setting::class;
 

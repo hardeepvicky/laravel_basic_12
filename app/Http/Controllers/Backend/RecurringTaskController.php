@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\Validator;
 
 class RecurringTaskController extends BackendController
 {
-    public String $routePrefix = "recurring-task";
+    public String $routePrefix = "admin.recurring-task";
 
     protected $modelClass = RecurringTask::class;
     protected RecurringTask | null $model = null;

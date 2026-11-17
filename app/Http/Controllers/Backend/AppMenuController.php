@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Validator;
 
 class AppMenuController extends BackendController
 {
-    public String $routePrefix = "app-menu";
+    public String $routePrefix = "admin.app-menu";
 
     protected $modelClass = AppMenu::class;
 

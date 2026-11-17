@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Route;
 
 class DropDownValueController extends BackendController
 {
-    public String $routePrefix = "drop-down-value";
+    public String $routePrefix = "admin.drop-down-value";
 
     protected $modelClass = DropDownValue::class;
 

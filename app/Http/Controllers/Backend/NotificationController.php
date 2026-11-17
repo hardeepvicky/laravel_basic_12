@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Route;
 
 class NotificationController extends BackendController
 {
-    public String $routePrefix = "notification";
+    public String $routePrefix = "admin.notification";
 
     protected $modelClass = Notification::class;
 

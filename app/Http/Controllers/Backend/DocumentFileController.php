@@ -20,7 +20,7 @@ class DocumentFileController extends BackendController
 {
     protected int $paginationLimit = 10;
     
-    public String $routePrefix = "document-file";
+    public String $routePrefix = "admin.document-file";
 
     protected $modelClass = DocumentFile::class;
 

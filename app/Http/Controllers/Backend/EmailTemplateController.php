@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Route;
 
 class EmailTemplateController extends BackendController
 {
-    public String $routePrefix = "email-template";
+    public String $routePrefix = "admin.email-template";
 
     protected $modelClass = EmailTemplate::class;
 

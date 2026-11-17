@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Route;
 
 class WhatsappTemplateController extends BackendController
 {
-    public String $routePrefix = "whatsapp-template";
+    public String $routePrefix = "admin.whatsapp-template";
 
     protected $modelClass = WhatsappTemplate::class;
 

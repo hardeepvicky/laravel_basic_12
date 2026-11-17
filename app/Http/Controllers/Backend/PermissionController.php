@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\Session;
 
 class PermissionController extends BackendController
 {
-    public String $routePrefix = "permissions";
+    public String $routePrefix = "admin.permissions";
 
     public function index()
     {

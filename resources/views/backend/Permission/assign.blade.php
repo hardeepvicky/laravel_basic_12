@@ -72,7 +72,7 @@
                             $("#permission_block").html("");
                             if (v) {
                                 $.loader.show();
-                                $("#permission_block").load("/permissions/ajax_get_permissions", {role_ids : v}, function(){
+                                $("#permission_block").load("/admin/permissions/ajax_get_permissions", {role_ids : v}, function(){
                                     $.loader.hide();
                                 });
                             }
@@ -82,7 +82,7 @@
                     $("#permission_block").html("");
                     if (v) {
                         $.loader.show();
-                        $("#permission_block").load("/permissions/ajax_get_permissions", {role_ids : v}, function(){
+                        $("#permission_block").load("/admin/permissions/ajax_get_permissions", {role_ids : v}, function(){
                             $.loader.hide();
                         });
                     }

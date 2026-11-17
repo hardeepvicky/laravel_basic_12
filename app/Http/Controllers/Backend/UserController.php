@@ -20,7 +20,7 @@ use Illuminate\Support\Facades\Validator;
 
 class UserController extends BackendController
 {
-    public String $routePrefix = "user";
+    public String $routePrefix = "admin.user";
 
     protected $modelClass = User::class;
 

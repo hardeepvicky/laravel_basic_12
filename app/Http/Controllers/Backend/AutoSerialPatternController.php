@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Route;
 
 class AutoSerialPatternController extends BackendController
 {
-    public String $routePrefix = "auto-serial-pattern";
+    public String $routePrefix = "admin.auto-serial-pattern";
 
     protected $modelClass = AutoSerialPattern::class;
 

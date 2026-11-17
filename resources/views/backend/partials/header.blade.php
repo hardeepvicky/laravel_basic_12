@@ -51,7 +51,7 @@ use App\Models\Notification;
 
                     <div class="custom-menu notification-dropdown py-0 overflow-hidden">
                         <h3 class="title bg-primary-light dropdown-title">Notification
-                            <a class="font-primary" href="{{ route('notification.my') }}">
+                            <a class="font-primary" href="{{ route('admin.notification.my') }}">
                                 View all
                             </a>
                         </h3>
