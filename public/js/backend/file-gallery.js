@@ -123,7 +123,7 @@ jQuery.fn.extend({
 
                 var query_params = get_array_to_url(request_data);
 
-                var url = "/document-file?" + query_params;
+                var url = "/admin/document-file?" + query_params;
 
                 console.log(url);
 

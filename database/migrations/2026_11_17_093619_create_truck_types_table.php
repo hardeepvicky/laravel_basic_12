@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('truck_types', function (Blueprint $table) {
             $table->id();
             $table->string("name");
-            $table->string("image")->nullable();
+            $table->foreignId("document_file_id")->constrained("document_files")->onDelete('restrict');
             $table->boolean("is_active")->default(1);
             $table->integer("list_display_order")->default(0);
             $table->timestamps();

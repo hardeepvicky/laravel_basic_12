@@ -121,8 +121,6 @@ class TypeController extends BackendController
         try {
             $model = $this->modelClass::create($validatedData);
 
-            $this->updateUserInfoAfterSave($model);
-
             DB::commit();
 
             return $this->afterSave($model);
@@ -175,8 +173,6 @@ class TypeController extends BackendController
             $model->fill($validatedData);
 
             $model->save();
-
-            $this->updateUserInfoAfterSave($model);
 
             DB::commit();
 

@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Backend;
 
 use App\Exceptions\UserException;
 use App\Helpers\LaravelExtend;
-use App\Models\Type;
+use App\Models\TruckType;
 use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Support\Facades\DB;
@@ -14,7 +14,7 @@ class TruckTypeController extends BackendController
 {
     public String $routePrefix = "admin.truck-type";
 
-    protected $modelClass = Type::class;
+    protected $modelClass = TruckType::class;
 
     public function index()
     {
@@ -22,7 +22,17 @@ class TruckTypeController extends BackendController
 
         $builder = $this->_getBuildeForIndex($cache_key_prefix);
 
+        $builder->with(["mainImage"]);
+
         $records = $this->getPaginagteRecords($builder, $cache_key_prefix);
+
+        foreach($records as $record)
+        {
+            if ($record->mainImage?->id)
+            {
+                $record->mainImage->afterFind();
+            }
+        }
 
         $this->setForView(compact("records"));
 
@@ -36,9 +46,6 @@ class TruckTypeController extends BackendController
         $conditions = $this->getConditions($cache_key, [
             ["field" => "id", "type" => "int", "cache" => false],
             ["field" => "name", "type" => "string", "view_field" => "name"],
-            ["field" => "code", "type" => "string", "view_field" => "code"],
-            ["field" => "type", "type" => "string", "view_field" => "type"],
-            ["field" => "short_name", "type" => "string", "view_field" => "short_name"],
             ["field" => "is_active", "type" => "", "view_field" => "is_active"],
         ]);
 
@@ -62,10 +69,6 @@ class TruckTypeController extends BackendController
 
     protected function beforeViewRender()
     {
-        $type_list = Type::getTypeList();
-
-        $this->setForView(compact("type_list"));
-
         return parent::beforeViewRender();
     }
 
@@ -88,11 +91,9 @@ class TruckTypeController extends BackendController
     private function _common_validation_rules()
     {
         return [
-            "type" => ["required"],
             "name" => ["required"],
-            "code" => ["required"],
+            "document_file_id" => ["required"],
             "list_display_order" => ["nullable"],
-            "short_name" => ["nullable"],
             "is_active" => ""
         ];
     }
@@ -120,8 +121,6 @@ class TruckTypeController extends BackendController
 
         try {
             $model = $this->modelClass::create($validatedData);
-
-            $this->updateUserInfoAfterSave($model);
 
             DB::commit();
 
@@ -176,8 +175,6 @@ class TruckTypeController extends BackendController
 
             $model->save();
 
-            $this->updateUserInfoAfterSave($model);
-
             DB::commit();
 
             return $this->afterSave($model);
@@ -188,74 +185,5 @@ class TruckTypeController extends BackendController
 
             return back()->withInput()->with('fail', $ex->getMessage());
         }
-    }
-
-    public function copy($id)
-    {
-        $model = $this->modelClass::findOrFail($id);
-
-        $this->beforeEdit($model);
-
-        $form = [
-            'url' => route($this->routePrefix . '.store', $id),
-            'method' => 'POST',
-        ];
-
-        $this->setForView(compact("model", "form"));
-
-        return $this->view("form");
-    }
-
-    public function ajax_get_code_list($type)
-    {
-        $response = ["status" => 1, "data" => []];
-
-        try {
-
-            $codes = Type::getCodes($type);
-
-            if (!isset($codes['code_list']))
-            {
-                throw new UserException("code_list key is not found in codes varibale");
-            }
-
-            foreach ($codes['code_list'] as $code) {
-                $response['data'][] = [
-                    'id' => $code,
-                    'name' => $code,
-                ];
-            }
-        } catch (Exception $ex) {
-            $response['status'] = 0;
-            $response['msg'] = $ex->getMessage();
-        }
-
-        return $this->responseJson($response);
-    }
-
-    public function ajax_get_list($type)
-    {
-        $response = ["status" => 1];
-
-        try {
-
-            $records = $this->modelClass::where("type", $type)->get();
-
-            $response['data'] = [];
-
-            foreach ($records as $record) {
-                $row = [
-                    "id" => $record->id,
-                    "name" => $record->getDisplayName(),
-                ];
-
-                $response['data'][] = $row;
-            }
-        } catch (Exception $ex) {
-            $response['status'] = 0;
-            $response['msg'] = $ex->getMessage();
-        }
-
-        return $this->responseJson($response);
     }
 }

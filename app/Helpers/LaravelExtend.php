@@ -216,6 +216,11 @@ class LaravelExtend
                     $length = abs($length);
                     $start = $total_count - $length;
 
+                    if ($start < 0)
+                    {
+                        $start = 0;
+                    }
+
                     for($i = $start; $i < $total_count; $i++)
                     {
                         $db_logs[] = $temp[$i];

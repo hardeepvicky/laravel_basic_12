@@ -22,6 +22,7 @@ use App\Http\Controllers\Backend\RoleController;
 use App\Http\Controllers\Backend\SampleController;
 use App\Http\Controllers\Backend\SettingsController;
 use App\Http\Controllers\Backend\TaskController;
+use App\Http\Controllers\Backend\TruckTypeController;
 use App\Http\Controllers\Backend\TypeController;
 use App\Http\Controllers\Backend\UomController;
 use App\Http\Controllers\Backend\UserController;
@@ -222,12 +223,6 @@ Route::group(['prefix' => 'admin', 'as'=>'admin.', 'middleware' => ['auth', 'che
         $name = "status_verified";
         Route::put($name . "/{id}", [$controllerClass, $name])->name($name);
 
-        $name = "history";
-        Route::any($name . "/{id}", [$controllerClass, $name])->name($name);
-
-        $name = "history_destroy";
-        Route::delete($name . "/{id}", [$controllerClass, $name])->name($name);
-
         $name = "change_files";
         Route::post($name . "/{task_id}", [$controllerClass, $name])->name($name);
 
@@ -398,18 +393,18 @@ Route::group(['prefix' => 'admin', 'as'=>'admin.', 'middleware' => ['auth', 'che
     });
 
     $route_prefix = "truck-type";
-    $controllerClass = EmailTemplateController::class;
+    $controllerClass = TruckTypeController::class;
     Route::resource($route_prefix, $controllerClass);
     Route::group(['prefix' => $route_prefix, 'as' => $route_prefix . '.'], function () use ($controllerClass) {
-
-        $name = "copy";
-        Route::get("{id}/" . $name, [$controllerClass, $name])->name($name);
 
         $name = "activate";
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
 
         $name = "de_activate";
         Route::get($name . "/{id}", [$controllerClass, $name])->name($name);
+
+        $name = "ajax_update_field";
+        Route::post($name, [$controllerClass, $name])->name($name);
     });
 
     $route_prefix = "auto-serial-pattern";
