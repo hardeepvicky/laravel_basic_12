@@ -10,7 +10,7 @@ $false = false;
 
 @section('content')
     <?php
-    $page_header_links = [['title' => 'List', 'url' => route($routePrefix . '.index')]];
+    $page_header_links = [['title' => 'Summary', 'url' => route($routePrefix . '.index')]];
     $empty_list = [];
     $is_disabled = $model->name && !is_developer_role_login();
     ?>
@@ -25,31 +25,31 @@ $false = false;
         </div>
         <div class="card-body">
             <div class="row">
-                <div class="col-md-12 col-xxl-6">
+                <div class="col-md-6 col-lg-4">
                     <div class="form-group mb-3">
                         <?php
                         $field = 'name';
-                        $label = get_value_from_list($field_labels, $field, $field);
+                        $label = 'Name';
                         ?>
                         <x-Inputs.text-field :name="$field" :label="$label" value="{{ $model->{$field} }}" :isDisabled="$is_disabled"
                             placeholder="Enter {{ $label }}" mandatory="true" autocomplete="off" />
                     </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
                     <div class="form-group mb-3">
                         <?php
                         $field = 'subject';
-                        $label = get_value_from_list($field_labels, $field, $field);
+                        $label = 'Subject';
                         ?>
                         <x-Inputs.text-field :id="$field" :name="$field" :label="$label" :value="$model->{$field}"
                             mandatory="true" />
                     </div>
                 </div>
-            </div>
-             <div class="row">
                 <div class="col-sm-12">
                     <div class="form-group mb-3">
                         <?php
                         $field = 'placeholders';
-                        $label = get_value_from_list($field_labels, $field);
+                        $label = 'Placeholders';
                         $value = is_array($model->placeholders) ? implode(',', $model->placeholders) : "";
                         ?>
                         <x-Inputs.choice :id="$field" :name="$field" :label="$label" :value="$value" :isDisabled="$is_disabled"
@@ -58,14 +58,14 @@ $false = false;
                     <div class="form-group mb-3">
                         <?php
                         $field = 'body';
-                        $label = get_value_from_list($field_labels, $field, $field);
+                        $label = 'Body';
                         ?>
                         <x-Inputs.text-area :id="$field" :name="$field" :label="$label" :value="$model->{$field}" />
                     </div>
                     <div class="form-group mb-3">
                         <?php
                         $field = 'emailTemplateFile';
-                        $label = get_value_from_list($field_labels, $field, $field);
+                        $label = 'Files';
                         $value = $model->emailTemplateFile ? implode(',', $model->emailTemplateFile?->pluck('document_file_id')->toArray()) : "";
                         ?>
                         <x-Inputs.text-field :id="$field" :name="$field" :label="$label" :value="$value"

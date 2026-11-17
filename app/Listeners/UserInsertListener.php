@@ -34,12 +34,12 @@ class UserInsertListener
             $success_msgs[] = "OTP sent on email";
         }
 
-        if ($event->user->mobile)
-        {
-            LaravelExtend::send_whatsapp_user_otp($event->user);
+        // if ($event->user->mobile)
+        // {
+        //     LaravelExtend::send_whatsapp_user_otp($event->user);
 
-            $success_msgs[] = "OTP sent on whatsapp";
-        }
+        //     $success_msgs[] = "OTP sent on whatsapp";
+        // }
 
         Session::flash("success", $success_msgs);
     }

@@ -52,6 +52,7 @@ class SectionRoutes
 
         $sections[] = self::type();
         $sections[] = self::drop_down_value();
+        $sections[] = self::email_template();
         $sections[] = self::user();
         $sections[] = self::developer();
 
@@ -481,6 +482,28 @@ class SectionRoutes
         $section = [
             "text" => "User",
             "children" => self::commonRoutes($routePrefix)
+        ];
+
+        $section['children'][] = [
+            "text" => "Activate or Deactivate",
+            "route_list" => [$routePrefix . ".activate", $routePrefix . ".de_activate"]
+        ];
+
+        return $section;
+    }
+
+    private static function email_template()
+    {
+        $routePrefix = "email-template";
+
+        $section = [
+            "text" => "Email Template",
+            "children" => self::commonRoutes($routePrefix)
+        ];
+
+        $section['children'][] = [
+            "text" => "Copy",
+            "route_list" => [$routePrefix . ".copy"]
         ];
 
         $section['children'][] = [

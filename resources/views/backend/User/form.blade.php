@@ -58,7 +58,6 @@ use App\Models\User;
                             ?>
                             <x-Inputs.text-field :id="$field" :name="$field" :label="$label"
                                 :value="$model->{$field}" mandatory="true" placeholder="Enter {{ $label }}" />
-                            <div class="help-block">This will use as login id</div>
                         </div>
                     </div>
                     <div class="col-md-6 col-lg-4">

@@ -54,12 +54,7 @@ class RegisterController extends WebController
     {
         $rules = [
             'type' => ['required', 'string', 'max:255'],
-            'sub_type' => ['required', 'string', 'max:255'],
-            'country_id' => ['required'],
-            'person_name' => ['required', 'string', 'max:255'],
-            'person_last_name' => ['required', 'string', 'max:255'],
             'mobile' => ['required', new MobileNumber],
-            'whatsapp_mobile' => ['required', new MobileNumber],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:6', 'confirmed'],
             "g-recaptcha-response" => ['required', new ReCaptcha]
@@ -78,25 +73,9 @@ class RegisterController extends WebController
 
     public function signup_form()
     {
-        $type_conditions = [
-            "type" => Type::getType(new User(), "sub_type_for_signup_form")
-        ];
-
-        $sub_type_list = Type::getList("code", "display_name", $type_conditions, "list_display_order");
-
-        $country_list = Country::getListCache();
-
-        $my_country = Country::getMyCountry();
-
         $model = new User();
-        if ($my_country)
-        {
-            $model->country_id = $my_country->id;
-        }
 
-        $field_labels = FieldSetting::getDynamicFields(User::class);
-
-        $this->setForView(compact("sub_type_list", "country_list", "my_country", "model", "field_labels"));
+        $this->setForView(compact("model"));
 
         return $this->view(__FUNCTION__);
     }
@@ -124,8 +103,6 @@ class RegisterController extends WebController
             $validateData['name'] = $user->getNextId();
 
             $validateData['password'] = Hash::make($validateData['password']);
-
-            $validateData["created_via"] = User::CREATED_VIA_REGISTRATION;
 
             $user = User::create($validateData);
 

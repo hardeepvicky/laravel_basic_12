@@ -6,7 +6,6 @@ use App\Exceptions\UserException;
 use App\Helpers\LaravelExtend;
 use App\Models\DocumentFile;
 use App\Models\EmailTemplate;
-use App\Models\FieldSetting;
 use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Support\Facades\DB;
@@ -69,10 +68,6 @@ class EmailTemplateController extends BackendController
 
     protected function beforeViewRender()
     {
-        $field_labels = FieldSetting::getDynamicFields($this->modelClass);
-        
-        $this->setForView(compact("field_labels"));
-
         return parent::beforeViewRender();
     }
 

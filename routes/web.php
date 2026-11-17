@@ -31,6 +31,7 @@ use App\Models\EmailLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Mailjet\Resources;
+use App\Http\Controllers\Frontend\PublicController as FrontendPublicController;
 
 
 Route::get("/", function () {
@@ -95,6 +96,8 @@ Route::group(['prefix' => 'public', 'as' => 'public.'], function () {
     Route::post('ajax_upload', [PublicController::class, 'ajax_upload']);
     Route::post('ajax_upload_base64', [PublicController::class, 'ajax_upload_base64']);
 });
+
+Route::any('unsubscribe_email/{uid}', [FrontendPublicController::class, 'unsubscribe_user_email'])->name("unsubscribe_email");
 
 Route::get("/get_file_url", [PublicController::class, "get_file_url"])->name("get_file_url");
 

@@ -480,6 +480,7 @@ class AdminMenu extends BaseMenu
         $links[] = self::permission();
         $links[] = self::type();
         $links[] = self::drop_down_value();
+        $links[] = self::email_template();
 
         return self::getModule("Admin", self::ICON_MENU_ROOT, $links);
     }
@@ -520,6 +521,15 @@ class AdminMenu extends BaseMenu
         $routePrefix = "drop-down-value";
 
         $links = self::getControllerDefaultLinks($routePrefix, "Drop Down Value", self::ICON_MENU_ROOT_CHILD);
+
+        return $links;
+    }
+
+    private static function email_template()
+    {
+        $routePrefix = "email-template";
+
+        $links = self::getControllerDefaultLinks($routePrefix, "Email Template", self::ICON_MENU_ROOT_CHILD);
 
         return $links;
     }

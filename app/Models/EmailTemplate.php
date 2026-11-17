@@ -120,16 +120,11 @@ class EmailTemplate extends BaseModel
 
         $placeholder_data['unsubscribe_link'] = route("unsubscribe_email", ["uid" => $user->uid]);
 
-        $placeholder_data['user.name'] = $user->full_name;
+        $placeholder_data['user.name'] = $user->name;
         $placeholder_data['user.email'] = $user->email;
         $placeholder_data['user.mobile'] = $user->mobile ?? "";
-        $placeholder_data['user.whatsapp_mobile'] = $user->whatsapp_mobile ?? "";
         $placeholder_data['user.otp'] = $user->otp ?? "";
-        $placeholder_data['user.country'] = $user->country->getDisplayName();
-        $placeholder_data['user.country.phone_code'] = $user->country->phonecode ?? "";
-        $placeholder_data['user.country.short_name'] = $user->country->short_name ?? "";
-        $placeholder_data['user.country.iso'] = $user->country->iso3 ?? "";
-
+        
         return $placeholder_data;
     }
 
@@ -152,7 +147,7 @@ class EmailTemplate extends BaseModel
         $placeholders['company.address'] = $setting_list['company_address'];
         $placeholders['company.gst_no'] = $setting_list['company_gst_no'];
 
-        $placeholders['company.logo'] = url("/assets/images/logo/logo.png");
+        $placeholders['company.logo'] = url("/assets/images/logo/logo.jpeg");
 
         return $placeholders;
     }
