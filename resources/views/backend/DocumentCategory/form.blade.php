@@ -26,7 +26,7 @@ use App\Models\ProductCategoryAttribute;
                             <div class="form-group mb-3">
                                 <?php
                                 $field = 'parent_id';
-                                $label = get_value_from_list($field_labels, $field, $field);
+                                $label = "Parent";
                                 ?>
                                 <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$tree_list"
                                     value="{{ $model->{$field} }}" class="select2" pleaseSelect="-" />
@@ -34,7 +34,7 @@ use App\Models\ProductCategoryAttribute;
                             <div class="form-group mb-3">
                                 <?php
                                 $field = 'name';
-                                $label = get_value_from_list($field_labels, $field, $field);
+                                $label = "Name";
                                 ?>
                                 <x-Inputs.text-field :name="$field" :label="$label" :value="$model->{$field}"
                                     placeholder="Enter {{ $label }}" mandatory="true" />
@@ -42,7 +42,7 @@ use App\Models\ProductCategoryAttribute;
                             <div class="form-group mb-3">
                                 <?php
                                 $field = 'short_name';
-                                $label = get_value_from_list($field_labels, $field, $field);
+                                $label = "Short Name";
                                 ?>
                                 <x-Inputs.text-field :name="$field" :label="$label" :value="$model->{$field}"
                                     placeholder="Enter {{ $label }}" />
@@ -50,7 +50,7 @@ use App\Models\ProductCategoryAttribute;
                             <div class="form-group mb-3">
                                 <?php
                                 $field = 'list_display_order';
-                                $label = get_value_from_list($field_labels, $field, $field);
+                                $label = "List Display Order";
                                 ?>
                                 <x-Inputs.text-field type="number" :name="$field" :label="$label"
                                     value="{{ $model->{$field} }}" placeholder="Enter {{ $label }}" mandatory="true"
@@ -59,7 +59,7 @@ use App\Models\ProductCategoryAttribute;
                             <div class="form-group mb-3">
                                 <?php
                                 $field = 'is_last_node';
-                                $label = get_value_from_list($field_labels, $field, $field);
+                                $label = "Last Node";
                                 ?>
                                 <x-Inputs.checkbox :id="$field" :name="$field" :label="$label" value="{{ $model->{$field} }}" />
                             </div>
@@ -70,7 +70,7 @@ use App\Models\ProductCategoryAttribute;
                             <div class="form-group mb-3">
                                 <?php
                                 $field = 'is_active';
-                                $label = get_value_from_list($field_labels, $field, $field);
+                                $label = "Active";
                                 ?>
                                 <x-Inputs.checkbox :name="$field" :label="$label" value="{{ $model->{$field} }}" />
                             </div>

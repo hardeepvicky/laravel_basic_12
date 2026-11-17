@@ -265,7 +265,7 @@ if (!isset($partial_path)) {
 
             $('#modal-add-via-upload').on('show.bs.modal', function(event) {
 
-                var form_url = "/document-file/create?add_via=upload";
+                var form_url = "/admin/document-file/create?add_via=upload";
 
                 $('#modal-add-via-upload').find(".modal-body").html("Loading....");
 
@@ -284,7 +284,7 @@ if (!isset($partial_path)) {
 
             $('#modal-add-via-url').on('show.bs.modal', function(event) {
 
-                var form_url = "/document-file/create?add_via=url";
+                var form_url = "/admin/document-file/create?add_via=url";
 
                 $('#modal-add-via-url').find(".modal-body").html("Loading....");
 

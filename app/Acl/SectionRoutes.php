@@ -52,6 +52,7 @@ class SectionRoutes
 
         $sections[] = self::type();
         $sections[] = self::drop_down_value();
+        $sections[] = self::document_category();
         $sections[] = self::email_template();
         $sections[] = self::user();
         $sections[] = self::developer();
@@ -310,6 +311,8 @@ class SectionRoutes
             "route_list" => ["admin.notification.my"]
         ];
 
+         $section['children'][] = self::document_file();
+
         return $section;
     }
 
@@ -509,6 +512,55 @@ class SectionRoutes
         $section['children'][] = [
             "text" => "Activate or Deactivate",
             "route_list" => [$routePrefix . ".activate", $routePrefix . ".de_activate"]
+        ];
+
+        return $section;
+    }
+
+    private static function document_category()
+    {
+        $routePrefix = "admin.document-category";
+
+        $section = [
+            "text" => "Document Category",
+            "children" => self::commonRoutes($routePrefix)
+        ];
+
+        $section['children'][] = [
+            "text" => "Activate or Deactivate",
+            "route_list" => [$routePrefix . ".activate", $routePrefix . ".de_activate"]
+        ];
+
+        return $section;
+    }
+
+    private static function document_file()
+    {
+        $routePrefix = "admin.document-file";
+
+        $section = [
+            "text" => "Document File",
+            "children" => self::commonRoutes($routePrefix)
+        ];
+        
+        $section['children'][] = [
+            "text" => "Add Via Upload",
+            "route_list" => [$routePrefix . ".add_via_upload"]
+        ];
+
+        $section['children'][] = [
+            "text" => "Archive Summary",
+            "route_list" => [$routePrefix . "-archive_index"]
+        ];
+
+        $section['children'][] = [
+            "text" => "Archive",
+            "route_list" => [$routePrefix . ".archive"]
+        ];
+
+        $section['children'][] = [
+            "text" => "Un-Archive",
+            "route_list" => [$routePrefix . ".unarchive"]
         ];
 
         return $section;

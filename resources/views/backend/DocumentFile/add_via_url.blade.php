@@ -12,7 +12,7 @@
             <div class="form-group mb-3">
                 <?php
                 $field = 'document_category_id';
-                $label = get_value_from_list($field_labels, $field, $field);
+                $label = "Category";
                 ?>
                 <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$document_category_list"
                     value="{{ $model->{$field} }}" class="modal-select2" mandatory="true" />
@@ -22,7 +22,7 @@
             <div class="form-group mb-3">
                 <?php
                 $field = 'url';
-                $label = get_value_from_list($field_labels, $field, $field);
+                $label = "URL";
                 ?>
                 <x-Inputs.text-field :id="$field" :name="$field" :label="$label" :value="$model->{$field}"
                     placeholder="Enter {{ $label }}" mandatory="true" />
@@ -32,7 +32,7 @@
             <div class="form-group mb-3">
                 <?php
                 $field = 'name';
-                $label = get_value_from_list($field_labels, $field, $field);
+                $label = "Name";
                 ?>
                 <x-Inputs.text-field :id="$field" :name="$field" :label="$label" :value="$model->{$field}"
                     placeholder="Enter {{ $label }}" mandatory="true" />
@@ -42,7 +42,7 @@
             <div class="form-group mb-3">
                 <?php
                 $field = 'file_ext';
-                $label = get_value_from_list($field_labels, $field, $field);
+                $label = "File Extension";
                 ?>
                 <x-Inputs.drop-down :id="$field" :name="$field" :label="$label" :list="$ext_list"
                     value="{{ $model->{$field} }}" class="modal-select2" mandatory="true" />

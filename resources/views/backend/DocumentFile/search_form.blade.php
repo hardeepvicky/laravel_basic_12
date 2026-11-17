@@ -27,7 +27,7 @@ $paginationList = [
         <div class="col-md-4 col-lg-3 col-xxxl-2 mb-2">
             <?php
             $field = 'type';
-            $label = get_value_from_list($field_labels, $field, $field);
+            $label = "Type";
             ?>
             <x-Inputs.drop-down :name="$field" :label="$label" :value="$search[$field]" :list="$type_list"
                 class="select2" />
@@ -35,7 +35,7 @@ $paginationList = [
         <div class="col-md-12 col-lg-6 col-xxxl-3 mb-2">
             <?php
             $field = 'document_category_id';
-            $label = get_value_from_list($field_labels, $field, $field);
+            $label = "Category";
             $category_list = [0 => '-'] + $category_list;
             ?>
             <x-Inputs.drop-down :name="$field" :label="$label" :value="$search[$field]" :list="$category_list"
@@ -49,7 +49,7 @@ $paginationList = [
         <div class="col-md-6 col-lg-3 col-xxxl-2 mb-2">
             <?php
             $field = 'name';
-            $label = get_value_from_list($field_labels, $field, $field);
+            $label = "Name";
             ?>
             <x-Inputs.text-field :name="$field" :label="$label" :value="$search[$field]" />
         </div>
@@ -58,13 +58,13 @@ $paginationList = [
             <div class="d-flex">
                 <?php
                 $field = 'sort_by';
-                $label = get_value_from_list($field_labels, $field, $field);
+                $label = "Sort By";
                 ?>
                 <x-Inputs.drop-down :name="$field" :label="$false" :value="$sort_by" :list="$sort_by_list"
                     class="input-inline" />
                 <?php
                 $field = 'sort_dir';
-                $label = get_value_from_list($field_labels, $field, $field);
+                $label = "Sort Dir";
                 ?>
                 <x-Inputs.drop-down :name="$field" :label="$false" :value="$sort_dir" :list="$sort_dir_list"
                     class="input-inline" :pleaseSelect="$false" />

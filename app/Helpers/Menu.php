@@ -465,7 +465,21 @@ class HomeMenu extends BaseMenu
 
         $links[] = self::getLink("admin.notification.my", "My Notification", 'fa-solid fa-bell');
 
+        $links[] = self::document_files();
+
         return self::getModule("Home", 'fas fa-home', $links);
+    }
+
+    private static function document_files()
+    {
+        $routePrefix = "admin.document-file";
+
+        $links = [
+            self::getLink($routePrefix . ".index", "Summary", self::ICON_MENU_LIST),
+            self::getLink($routePrefix . ".archive_index", "Archive", self::ICON_MENU_LIST),
+        ];
+
+        return self::getModule("Media", self::ICON_MENU_ROOT_CHILD, $links);
     }
 }
 
@@ -481,6 +495,7 @@ class AdminMenu extends BaseMenu
         $links[] = self::type();
         $links[] = self::drop_down_value();
         $links[] = self::email_template();
+        $links[] = self::document_category();
 
         return self::getModule("Admin", self::ICON_MENU_ROOT, $links);
     }
@@ -530,6 +545,15 @@ class AdminMenu extends BaseMenu
         $routePrefix = "admin.email-template";
 
         $links = self::getControllerDefaultLinks($routePrefix, "Email Template", self::ICON_MENU_ROOT_CHILD);
+
+        return $links;
+    }
+
+    private static function document_category()
+    {
+        $routePrefix = "admin.document-category";
+
+        $links = self::getControllerDefaultLinks($routePrefix, "Document Category", self::ICON_MENU_ROOT_CHILD);
 
         return $links;
     }
