@@ -1,0 +1,62 @@
+<?php
+
+namespace App\Models;
+
+class Setting extends BaseMongoModel
+{
+    public const LABELS = [
+        "company_name" => "Company Name",
+        "company_tag_line" => "Company Tag Line",
+        "company_email" => "Company Email",
+        "company_address" => "Company Address",
+        "company_gst_no" => "Company GST No.",
+        "export_csv_max_record_count" => "Export CSV Max Record Count",
+        "item_sku_pattern" => "Item SKU Pattern",
+    ];
+
+    /**
+     * name of table fields which uniquly identify the record
+     */
+    protected static array $unique_fields = ["name"];
+
+    /**
+     * set extra relationship array to overcome problem of accidential delete
+     * this variable used in Controller.php -> delete()
+     */
+    public static function getValue($name)
+    {
+        $record = self::where("name", $name)->first();
+
+        if ($record && strlen($record->value) > 0) {
+            return $record->value;
+        }
+
+        return null;
+    }
+
+    public static function getValueOrFail($name): string
+    {
+        $value = self::getValue($name);
+
+        if (is_null($value)) {
+            $label = self::LABELS[$name] ?? $name;
+            abort(ACTION_NOT_PROCEED, "Setting : $label is not set yet");
+        }
+
+        return $value;
+    }
+
+    public static function getValueOfList(array $names)
+    {
+        $list = self::whereIn("name", $names)->pluck("value", "name")->toArray();
+
+        foreach ($names as $name) {
+            if (!isset($list[$name])) {
+                $label = self::LABELS[$name] ?? $name;
+                abort(ACTION_NOT_PROCEED, "Setting : $label is not set yet");
+            }
+        }
+
+        return $list;
+    }
+}

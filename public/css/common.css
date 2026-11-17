@@ -1,0 +1,570 @@
+.error-card {
+    border-radius: 1.5rem;
+    /* More rounded corners */
+    padding: 3rem;
+    /* More padding */
+    max-width: 650px;
+    width: 100%;
+    transition: transform 0.3s ease-in-out;
+    /* Add subtle hover effect */
+}
+
+.error-card:hover {
+    transform: scale(1.02);
+    /* Slightly enlarge on hover */
+}
+
+.error-code {
+    font-size: 4rem;
+    /* Large font size */
+    font-weight: 800;
+    /* Extra bold */
+    margin-bottom: 1rem;
+    animation: pulse 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+    /* Subtle pulse animation */
+    text-align: center;
+}
+
+.error-title {
+    font-size: 2.5rem;
+    /* H1 size */
+    font-weight: 700;
+    /* Bold */
+    margin-bottom: 1rem;
+    line-height: 1.2;
+    text-align: center;
+}
+
+.error-description {
+    font-size: 1.25rem;
+    /* Larger paragraph text */
+    margin-bottom: 2rem;
+}
+
+.info-for-developer {
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1;
+    margin-top: 0.5rem;
+    border: 1px solid;
+    padding: 0.5rem;
+}
+
+.list-container {
+    background-color: #ffffff;
+    border-radius: 1.5rem;
+    /* More pronounced rounded corners */
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15), 0 5px 10px rgba(0, 0, 0, 0.1);
+    /* Deeper shadow */
+    padding: 2.5rem;
+    /* Generous internal padding */
+    max-width: 600px;
+    width: 100%;
+}
+
+.list-title {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #343a40;
+    margin-bottom: 1.8rem;
+    text-align: center;
+    position: relative;
+    padding-bottom: 0.8rem;
+}
+
+.list-title::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 4px;
+    background: linear-gradient(to right, #6a11cb, #2575fc);
+    /* Underline matching background gradient */
+    border-radius: 2px;
+}
+
+.custom-list-group {
+    list-style: none;
+    /* Remove default bullet points */
+    padding: 0;
+    margin: 0;
+}
+
+.custom-list-group-item {
+    background-color: #f8f9fa;
+    /* Light background for items */
+    color: #495057;
+    border: none;
+    /* Remove default Bootstrap list-group-item border */
+    border-radius: 0.8rem;
+    /* Rounded corners for each item */
+    margin-bottom: 1rem;
+    /* Space between items */
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.3s ease-in-out;
+    /* Smooth transitions for hover effects */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    /* Subtle shadow for items */
+}
+
+.custom-list-group-item.selected {
+    background-color: var(--theme-default);
+    color: #fff;
+}
+
+.custom-list-group-item:last-child {
+    margin-bottom: 0;
+    /* No margin after the last item */
+}
+
+.custom-list-group-item:hover {
+    transform: translateY(-3px);
+    /* Lift effect on hover */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    /* More pronounced shadow on hover */
+    cursor: pointer;
+}
+
+.item-text {
+    font-size: 1.1rem;
+    font-weight: 500;
+    flex-grow: 1;
+    /* Allow text to take up available space */
+}
+
+.item-icon {
+    color: var(--theme-default);
+    /* Icon color matching gradient */
+    font-size: 1.3rem;
+    margin-left: 1rem;
+}
+
+.selected .item-icon {
+    color: #fff;
+}
+
+/* Icon styling (Font Awesome - example) */
+.fa-check-circle {
+    color: #28a745;
+}
+
+/* Green for completed tasks */
+.fa-clock {
+    color: #ffc107;
+}
+
+/* Amber for pending tasks */
+.fa-star {
+    color: #dc3545;
+}
+
+/* Red for important items */
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 576px) {
+    .list-container {
+        padding: 1.5rem;
+        border-radius: 1rem;
+    }
+
+    .list-title {
+        font-size: 1.8rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .item-text {
+        font-size: 1rem;
+    }
+
+    .custom-list-group-item {
+        padding: 1rem 1.2rem;
+    }
+}
+
+.small-img {
+    width: 100%;
+    max-width: 100px;
+    height: auto;
+    border: 2px solid #ccc;
+    border-radius: 10px;
+    padding: 3px;
+}
+
+
+label.info {
+    display: block;
+    overflow-wrap: break-word;
+}
+
+.pointer {
+    cursor: pointer;
+}
+
+.hidden {
+    display: none;
+}
+
+.error-message {
+    color: #e74b2b;
+    display: block;
+}
+
+.warning-message{
+    color: #ea9200;
+    display: block;
+}
+
+.info-message{
+    color: #02a2b9;
+    display: block;;
+}
+
+.mandatory {
+    color: red;
+    font-size: 1rem;
+}
+
+.celec_info {
+    margin: 0 5px 2px 0;    
+    min-width: 100px;
+    display: inline-block;
+    font-size: 14px;
+
+    background: linear-gradient(to bottom right, #FFF 0%, #EEE 100%);
+    box-shadow: 2px 2px 2px -2px black !important;
+    border: 1px solid #888;
+    border-radius: 5px;
+    vertical-align: top;
+}
+
+.dark-only .celec_info {
+    background: var(--body--bs-body-bg);
+}
+
+.celec_info .label-header {
+    background-color: rgba(48, 142, 135, 0.2);
+}
+
+.celec_info_inline {
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    max-width: 200px;
+    display: inline-block;
+    font-size: 12px;
+}
+
+.celec_info .label,
+.celec_info_inline .label {
+    padding: 2px;
+}
+
+.celec_info .divider,
+.celec_info_inline .divider {
+    border-top: 1px solid #ced4da;
+}
+
+.summary-table > tbody > tr > * {
+    background-color: var(--bs-table-hover-bg);
+    color: var(--body-font-color);
+}
+
+.summary-table .card-header {
+    padding: 10px;
+}
+
+.summary-table .card-body {
+    padding: 10px;
+}
+
+.array_print .array_print {
+    margin-left: 1em;
+}
+
+.swal_error .swal2-html-container {
+    text-align: left;
+}
+
+.common-list {
+    margin-left: 1em;
+}
+
+.common-list li {
+    list-style: initial;
+}
+
+.custom-slider {
+    display: flex;
+    justify-content: start;
+    align-items: center;
+}
+
+.custom-slider .form-label {
+    margin: 0;
+}
+
+.custom-slider .custom-slider-input {
+    margin: 0 10px 0 10px;
+}
+
+.custom-slider output {
+    font-size: 1em;
+}
+.inline {
+    display: inline-block;
+    width: auto;
+}
+
+.ml-1 {
+    margin-left: 5px;
+}
+
+.ml-2 {
+    margin-left: 10px;
+}
+
+.ml-3 {
+    margin-left: 15px;
+}
+
+.ml-4 {
+    margin-left: 20px;
+}
+
+.ml-50 {
+    margin-left: 50px;
+}
+
+/* Optional: Style for the toast container to place it nicely */
+.toast-container {
+    position: fixed;
+    bottom: 20px; /* Adjust as needed */
+    right: 20px; /* Adjust as needed */
+    z-index: 1080; /* Ensure it's above other elements like modals */
+}
+/* Optional: Custom width for the toast if default is too small */
+.progress-toast {
+    min-width: 300px; /* Or a fixed width */
+}
+
+.file-block {
+    border: 2px solid #e5e5e5;
+    border-radius: 10px;
+    width: 250px;
+    position: relative;
+}
+
+.check-icon {
+    position: absolute;
+    top: 1px;
+    right: 1px;
+    color: green;
+    font-size: 20px;
+    display: none;
+    background-color: #fff;
+    z-index: 5;
+    border: 1px solid green;
+}
+
+.file-block:hover {
+    border-color: var(--theme-default);
+}
+
+.file-block.active {
+    border-color: var(--theme-default);
+}
+
+.file-block.active .check-icon {
+    display: block;
+}
+
+.file-block .card-header {
+    padding: 5px;
+    height: 200px;
+}
+
+.file-block .card-body {
+    padding: 5px;
+}
+
+.full-img {
+    width: 100%;
+    height: 100%;
+    max-height: 190px;
+    display: block;
+    object-fit: contain;
+}
+
+.full-audio {
+    width: 100%;
+    max-width: 240px;
+    max-height: 190px;
+    height: auto;
+}
+
+.full-video {
+    width: 100%;
+    max-width: 240px;
+    max-height: 190px;
+    height: auto;
+}
+
+
+.image-container {
+    position: relative; /* Essential for positioning the loader over the image */
+    width: 100%;
+    height: 100%;
+    max-height: 190px;
+    background-color: #f0f0f0; /* Placeholder background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden; /* Ensure loader doesn't spill out if larger */
+}
+
+.image-container img {
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+/* Loader styles */
+.image-loader {
+    border: 4px solid #f3f3f3; /* Light grey */
+    border-top: 4px solid #3498db; /* Blue */
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite; /* Animation for spinning */
+    position: absolute; /* Position over the container */
+    z-index: 10; /* Ensure it's above the image */
+}
+
+/* Keyframe animation for the spinner */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* When image is loaded, hide loader and show image */
+.image-container.loaded .image-loader {
+    display: none;
+}
+
+.image-container.loaded img {
+    opacity: 1; /* Make image visible */
+}
+
+.image-container .error-icon {
+    position: absolute;
+    top: 50%; /* Center vertically */
+    left: 50%; /* Center horizontally */
+    transform: translate(-50%, -50%); /* Adjust for icon's own size */
+    font-size: 3em; /* Adjust icon size */
+    color: #dc3545; /* Red color for error */
+    padding: 10px;
+    border-radius: 50%; /* Make it circular */
+    display: none; /* Initially hidden */
+    z-index: 10; /* Ensure it's above the image */
+}
+
+/* Class added by JavaScript when image fails to load */
+.image-container.error img {
+    display: none;
+}
+
+.image-container.error .error-icon {
+    display: block; /* Show the error icon */
+}
+
+.input-inline{
+    display: inline-block;
+    width: auto;
+}
+
+.small-widget{
+    width : 230px;
+    display: inline-block;
+    margin-left: 10px;
+    margin-bottom: 10px;
+}
+
+.h-100 {
+    height: 200px;
+    overflow-y: auto;
+}
+
+.h-200 {
+    height: 200px;
+    overflow-y: auto;
+}
+
+.h-300 {
+    height: 200px;
+    overflow-y: auto;
+}
+
+.h-400 {
+    height: 200px;
+    overflow-y: auto;
+}
+
+.h-500 {
+    height: 200px;
+    overflow-y: auto;
+}
+
+.w-50 {
+    width: 100px;
+    overflow-x: auto;
+}
+
+.w-100 {
+    width: 100px;
+    overflow-x: auto;
+}
+
+.w-200 {
+    width: 200px;
+    overflow-x: auto;
+}
+
+.w-300 {
+    width: 300px;
+    overflow-x: auto;
+}
+
+.w-400 {
+    width: 400px;
+    overflow-x: auto;
+}
+
+.w-500 {
+    width: 500px;
+    overflow-x: auto;
+}
+
+.mx-h-200 {
+    max-height: 200px;
+    overflow: hidden;
+}
+
+.note-hint-popover{
+    position: absolute;
+}
+
+td.center, th.center{
+    text-align: center;
+    vertical-align: middle;
+}
+
+.force-break-text {
+    white-space: pre-line;
+}
+
+.select2-container--bootstrap-5 + .select2-container--bootstrap-5{
+    z-index: 1050;
+}

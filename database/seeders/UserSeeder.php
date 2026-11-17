@@ -1,0 +1,85 @@
+<?php
+
+namespace Database\Seeders;
+
+use App\Exceptions\UserException;
+use App\Helpers\ConsoleOutput;
+use App\Models\Role;
+use Illuminate\Database\Seeder;
+use App\Models\User;
+use App\Models\UserCategory;
+use App\Models\UserRole;
+use Exception;
+
+class UserSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     *
+     * @return void
+     */
+    public function run()
+    {
+        $role = Role::where("code", "system_admin")->first();
+
+        if (!$role) {
+            throw new UserException("Role Not Found");
+        }
+        
+        $counts = [
+            "total_count" => 0,
+            "insert_count" => 0,
+            "update_count" => 0,
+            "delete_count" => 0,
+        ];
+
+        $records = [
+            [
+                'type' => User::TYPE_INTERNAL,                
+                'name' => 'admin',
+                'email' => 'admin@gmail.com',
+                'password' => bcrypt('admin@123'),
+                'dont_send_email' => 1,
+                'is_active' => 1,
+                'is_pre_defined' => 0,
+            ],                         
+        ];
+
+        $counts['total_count'] = count($records);
+
+        $model = new User();
+
+        foreach ($records as $record) {
+
+            if (User::where("email", $record['email'])->count())
+            {
+                unset($record['password']);
+            }
+
+            $model = User::insertOrUpdate($record, $is_insert, $is_update);
+
+            if  (!$model)
+            {
+                throw new UserException("Fail To Save", UserException::ERROR_LARAVEL_FAIL);
+            }
+
+            $model->assignRoles([$role->id]);
+
+            if ($is_insert) {
+                $counts['insert_count']++;
+            }
+
+            if ($is_update) {
+                $counts['update_count']++;
+            }
+        }
+
+        $output = new ConsoleOutput();
+
+        $counts = array_human_keys($counts);
+
+        $output->addLog($counts);
+
+        $output->writeLogToConsole();
+    }
+}
